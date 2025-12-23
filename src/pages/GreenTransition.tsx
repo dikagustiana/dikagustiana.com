@@ -6,7 +6,7 @@ export default function GreenTransition() {
   return (
     <Layout>
       <div className="py-8 section-container">
-        <Breadcrumb />
+        <Breadcrumb items={[{ label: 'Home', path: '/' }, { label: 'Green Transition' }]} />
         <h1 className="text-3xl font-display font-bold mb-4">Green Transition</h1>
         <p className="text-muted-foreground max-w-3xl mb-12">
           Explore sustainable finance, environmental initiatives, and the transition to a greener economy.

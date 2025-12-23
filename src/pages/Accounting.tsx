@@ -6,7 +6,7 @@ export default function Accounting() {
   return (
     <Layout>
       <div className="py-8 section-container">
-        <Breadcrumb />
+        <Breadcrumb items={[{ label: 'Home', path: '/' }, { label: 'Accounting' }]} />
         <h1 className="text-3xl font-display font-bold mb-4">Accounting</h1>
         <p className="text-muted-foreground max-w-3xl mb-12">
           Master professional accounting with comprehensive modules covering financial statement analysis, consolidation procedures, and regulatory compliance requirements for modern business practice.

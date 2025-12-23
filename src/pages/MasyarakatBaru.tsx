@@ -6,7 +6,7 @@ export default function MasyarakatBaru() {
   return (
     <Layout>
       <div className="py-8 section-container">
-        <Breadcrumb />
+        <Breadcrumb items={[{ label: 'Home', path: '/' }, { label: 'Masyarakat Baru' }]} />
         <h1 className="text-3xl font-display font-bold mb-4">Masyarakat Baru</h1>
         <p className="text-muted-foreground max-w-3xl mb-12">
           A collection of resources for building knowledge in language, academia, and critical thinking - essential skills for the modern learner.
