@@ -6,7 +6,7 @@ export default function Finance101() {
   return (
     <Layout>
       <div className="py-8 section-container">
-        <Breadcrumb />
+        <Breadcrumb items={[{ label: 'Home', path: '/' }, { label: 'Finance' }]} />
         <h1 className="text-3xl font-display font-bold mb-4">Finance</h1>
         <p className="text-muted-foreground max-w-3xl mb-12">
           Master essential financial concepts and analytical skills through comprehensive modules covering financial analysis, planning, budgeting, and professional certification preparation.
