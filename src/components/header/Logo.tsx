@@ -1,0 +1,79 @@
+import { Link } from 'react-router-dom';
+import { useState, useRef, useEffect } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+
+export function Logo() {
+  const { user, isAdmin, signOut } = useAuth();
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowDropdown(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  return (
+    <div 
+      className="relative flex items-center gap-3"
+      ref={dropdownRef}
+      onMouseEnter={() => setShowDropdown(true)}
+      onMouseLeave={() => setShowDropdown(false)}
+    >
+      <Link to="/" className="flex items-center gap-3 group">
+        <img 
+          src="/logo.png" 
+          alt="Your Friendly Learning Buddy Logo"
+          className="h-8 w-8 object-contain"
+        />
+        <span className="hidden sm:block text-lg font-semibold text-primary-foreground group-hover:text-primary transition-colors">
+          Your Friendly Learning Buddy
+        </span>
+      </Link>
+
+      {user && (
+        <Badge 
+          variant="outline" 
+          className={`ml-2 ${isAdmin ? 'bg-accent text-accent-foreground border-accent' : 'bg-muted text-muted-foreground border-muted'}`}
+        >
+          {isAdmin ? 'Admin' : 'Viewer'}
+        </Badge>
+      )}
+
+      {/* Auth Dropdown */}
+      {showDropdown && (
+        <div className="absolute top-full left-0 mt-2 w-48 bg-card border border-border rounded-lg shadow-lg z-50 py-2">
+          {user ? (
+            <>
+              <div className="px-4 py-2 text-sm text-muted-foreground border-b border-border">
+                {user.email}
+              </div>
+              <Button 
+                variant="ghost" 
+                className="w-full justify-start px-4 py-2 text-sm hover:bg-secondary"
+                onClick={() => signOut()}
+              >
+                Sign Out
+              </Button>
+            </>
+          ) : (
+            <Link to="/auth">
+              <Button 
+                variant="ghost" 
+                className="w-full justify-start px-4 py-2 text-sm hover:bg-secondary"
+              >
+                Sign In
+              </Button>
+            </Link>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}

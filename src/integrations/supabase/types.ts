@@ -14,6 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      books_uploads: {
+        Row: {
+          author: string | null
+          category: string
+          cover_path: string | null
+          deleted_at: string | null
+          filename: string
+          filepath: string
+          id: string
+          mime_type: string | null
+          size_bytes: number | null
+          title: string | null
+          uploaded_at: string
+          uploaded_by: string | null
+          year: number | null
+        }
+        Insert: {
+          author?: string | null
+          category: string
+          cover_path?: string | null
+          deleted_at?: string | null
+          filename: string
+          filepath: string
+          id?: string
+          mime_type?: string | null
+          size_bytes?: number | null
+          title?: string | null
+          uploaded_at?: string
+          uploaded_by?: string | null
+          year?: number | null
+        }
+        Update: {
+          author?: string | null
+          category?: string
+          cover_path?: string | null
+          deleted_at?: string | null
+          filename?: string
+          filepath?: string
+          id?: string
+          mime_type?: string | null
+          size_bytes?: number | null
+          title?: string | null
+          uploaded_at?: string
+          uploaded_by?: string | null
+          year?: number | null
+        }
+        Relationships: []
+      }
       category_cards: {
         Row: {
           created_at: string
@@ -81,6 +129,174 @@ export type Database = {
           created_at?: string
           id?: string
           page_slug?: string
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      embeds: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          embed_type: string
+          height: number | null
+          id: string
+          page_slug: string
+          scrollable: boolean | null
+          sort_order: number | null
+          src: string
+          title: string | null
+          width: number | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          embed_type: string
+          height?: number | null
+          id?: string
+          page_slug: string
+          scrollable?: boolean | null
+          sort_order?: number | null
+          src: string
+          title?: string | null
+          width?: number | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          embed_type?: string
+          height?: number | null
+          id?: string
+          page_slug?: string
+          scrollable?: boolean | null
+          sort_order?: number | null
+          src?: string
+          title?: string | null
+          width?: number | null
+        }
+        Relationships: []
+      }
+      essays: {
+        Row: {
+          author: string | null
+          content: string | null
+          created_at: string
+          date: string | null
+          id: string
+          phase: string | null
+          published: boolean | null
+          read_time: string | null
+          section: string
+          slug: string
+          snippet: string | null
+          sort_order: number | null
+          thumbnail_url: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          author?: string | null
+          content?: string | null
+          created_at?: string
+          date?: string | null
+          id?: string
+          phase?: string | null
+          published?: boolean | null
+          read_time?: string | null
+          section: string
+          slug: string
+          snippet?: string | null
+          sort_order?: number | null
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          author?: string | null
+          content?: string | null
+          created_at?: string
+          date?: string | null
+          id?: string
+          phase?: string | null
+          published?: boolean | null
+          read_time?: string | null
+          section?: string
+          slug?: string
+          snippet?: string | null
+          sort_order?: number | null
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      fsli_pages: {
+        Row: {
+          category: string | null
+          created_at: string
+          dec_2023: string | null
+          dec_2024: string | null
+          id: string
+          notes_ref: string | null
+          slug: string
+          sort_order: number | null
+          subtitle: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          dec_2023?: string | null
+          dec_2024?: string | null
+          id?: string
+          notes_ref?: string | null
+          slug: string
+          sort_order?: number | null
+          subtitle?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          dec_2023?: string | null
+          dec_2024?: string | null
+          id?: string
+          notes_ref?: string | null
+          slug?: string
+          sort_order?: number | null
+          subtitle?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      fsli_sections: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          page_slug: string
+          section_key: string
+          sort_order: number | null
+          updated_at: string
+        }
+        Insert: {
+          content?: string
+          created_at?: string
+          id?: string
+          page_slug: string
+          section_key: string
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          page_slug?: string
+          section_key?: string
           sort_order?: number | null
           updated_at?: string
         }
