@@ -69,7 +69,9 @@ export function FsliContentSection({
       setContent(editValue);
       toast({ title: 'Section saved successfully' });
     } catch (error) {
-      console.error('Failed to save:', error);
+      if (import.meta.env.DEV) {
+        console.error('Failed to save:', error);
+      }
       toast({ title: 'Failed to save', variant: 'destructive' });
     } finally {
       setIsSaving(false);
