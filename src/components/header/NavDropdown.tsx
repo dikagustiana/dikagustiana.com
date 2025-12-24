@@ -46,7 +46,7 @@ export function NavDropdown({ label, items, width = 'w-56', basePath }: NavDropd
       {isOpen && (
         <div 
           className={cn(
-            "absolute top-full left-0 mt-1 bg-primary border border-border rounded-lg shadow-xl z-50 py-2",
+            "absolute top-full left-0 mt-1 bg-header border border-header/50 rounded-lg shadow-xl z-50 py-2",
             width
           )}
         >
@@ -55,8 +55,8 @@ export function NavDropdown({ label, items, width = 'w-56', basePath }: NavDropd
               key={item.path}
               to={item.path}
               className={cn(
-                "block px-4 py-2 text-sm text-primary-foreground hover:bg-secondary hover:text-secondary-foreground transition-colors",
-                location.pathname === item.path && "bg-secondary text-secondary-foreground"
+                "block px-4 py-2 text-sm text-header-foreground/90 hover:bg-white/10 hover:text-header-foreground transition-colors",
+                location.pathname === item.path && "bg-white/10 text-header-foreground"
               )}
             >
               {item.label}
