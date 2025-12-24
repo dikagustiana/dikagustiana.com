@@ -23,19 +23,21 @@ export function Logo() {
     <div 
       className="relative flex items-center gap-3"
       ref={dropdownRef}
-      onMouseEnter={() => setShowDropdown(true)}
-      onMouseLeave={() => setShowDropdown(false)}
     >
-      <Link to="/" className="flex items-center gap-3 group">
+      <button
+        type="button"
+        onClick={() => setShowDropdown(!showDropdown)}
+        className="flex items-center gap-3 group cursor-pointer"
+      >
         <img 
           src="/logo.png" 
           alt="Your Friendly Learning Buddy Logo"
           className="h-8 w-8 object-contain"
         />
-        <span className="hidden sm:block text-lg font-semibold text-primary-foreground group-hover:text-primary transition-colors">
+        <span className="hidden sm:block text-lg font-semibold text-primary-foreground group-hover:opacity-80 transition-opacity">
           Your Friendly Learning Buddy
         </span>
-      </Link>
+      </button>
 
       {user && (
         <Badge 
@@ -57,13 +59,20 @@ export function Logo() {
               <Button 
                 variant="ghost" 
                 className="w-full justify-start px-4 py-2 text-sm hover:bg-secondary"
-                onClick={() => signOut()}
+                onClick={() => {
+                  signOut();
+                  setShowDropdown(false);
+                }}
               >
                 Sign Out
               </Button>
             </>
           ) : (
-            <Link to="/auth">
+            <Link 
+              to="/auth" 
+              onClick={() => setShowDropdown(false)}
+              className="block"
+            >
               <Button 
                 variant="ghost" 
                 className="w-full justify-start px-4 py-2 text-sm hover:bg-secondary"
