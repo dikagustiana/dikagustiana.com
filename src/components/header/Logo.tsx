@@ -34,15 +34,14 @@ export function Logo() {
           alt="Your Friendly Learning Buddy Logo"
           className="h-8 w-8 object-contain"
         />
-        <span className="hidden sm:block text-lg font-semibold text-primary-foreground group-hover:opacity-80 transition-opacity">
+        <span className="hidden sm:block text-lg font-semibold text-header-foreground group-hover:opacity-80 transition-opacity">
           Your Friendly Learning Buddy
         </span>
       </button>
 
       {user && (
         <Badge 
-          variant="outline" 
-          className={`ml-2 ${isAdmin ? 'bg-accent text-accent-foreground border-accent' : 'bg-muted text-muted-foreground border-muted'}`}
+          className={`ml-2 text-xs font-bold uppercase tracking-wide ${isAdmin ? 'bg-accent text-accent-foreground' : 'bg-muted/50 text-muted-foreground'}`}
         >
           {isAdmin ? 'Admin' : 'Viewer'}
         </Badge>

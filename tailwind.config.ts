@@ -53,6 +53,14 @@ export default {
           light: "hsl(var(--card-light))",
           "light-foreground": "hsl(var(--card-light-foreground))",
         },
+        header: {
+          DEFAULT: "hsl(var(--header-bg))",
+          foreground: "hsl(var(--header-foreground))",
+        },
+        "button-dark": {
+          DEFAULT: "hsl(var(--button-dark))",
+          foreground: "hsl(var(--button-dark-foreground))",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
