@@ -63,7 +63,9 @@ export function EditableText({
       onUpdate?.(editValue);
       toast({ title: 'Content updated successfully' });
     } catch (error) {
-      console.error('Failed to save:', error);
+      if (import.meta.env.DEV) {
+        console.error('Failed to save:', error);
+      }
       toast({ title: 'Failed to save', variant: 'destructive' });
       setEditValue(content);
     } finally {
