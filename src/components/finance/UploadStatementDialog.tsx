@@ -58,6 +58,7 @@ export function UploadStatementDialog({ open, onOpenChange, onSuccess }: UploadS
   const [step, setStep] = useState<'upload' | 'parsing' | 'review' | 'saving'>('upload');
   const [bankName, setBankName] = useState('');
   const [statementText, setStatementText] = useState('');
+  const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [parsedData, setParsedData] = useState<ParsedData | null>(null);
   const [selectedTransactions, setSelectedTransactions] = useState<Set<number>>(new Set());
   const [progress, setProgress] = useState(0);
@@ -67,6 +68,7 @@ export function UploadStatementDialog({ open, onOpenChange, onSuccess }: UploadS
     setStep('upload');
     setBankName('');
     setStatementText('');
+    setPdfFile(null);
     setParsedData(null);
     setSelectedTransactions(new Set());
     setProgress(0);
@@ -82,22 +84,45 @@ export function UploadStatementDialog({ open, onOpenChange, onSuccess }: UploadS
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // For now, only accept text files (CSV, TXT)
-    // PDF parsing would require a more complex solution
+    // Handle PDF files
+    if (file.type === 'application/pdf' || file.name.endsWith('.pdf')) {
+      setPdfFile(file);
+      setStatementText(''); // Clear text if PDF is uploaded
+      toast({
+        title: 'PDF uploaded',
+        description: 'PDF file will be processed with AI vision.',
+      });
+      return;
+    }
+
+    // Handle text/CSV files
     if (file.type === 'text/csv' || file.type === 'text/plain' || file.name.endsWith('.csv') || file.name.endsWith('.txt')) {
       const text = await file.text();
       setStatementText(text);
-    } else {
-      toast({
-        title: 'Unsupported file type',
-        description: 'Please upload a CSV or TXT file. For PDF statements, copy and paste the text content below.',
-        variant: 'destructive',
-      });
+      setPdfFile(null);
+      return;
     }
+
+    // Handle image files (screenshots of statements)
+    if (file.type.startsWith('image/')) {
+      setPdfFile(file); // Treat images like PDFs for AI processing
+      setStatementText('');
+      toast({
+        title: 'Image uploaded',
+        description: 'Image will be processed with AI vision.',
+      });
+      return;
+    }
+
+    toast({
+      title: 'Unsupported file type',
+      description: 'Please upload PDF, CSV, TXT, or image files.',
+      variant: 'destructive',
+    });
   };
 
   const parseStatement = async () => {
-    if (!statementText.trim()) {
+    if (!statementText.trim() && !pdfFile) {
       toast({
         title: 'No content',
         description: 'Please paste your bank statement text or upload a file.',
@@ -113,12 +138,29 @@ export function UploadStatementDialog({ open, onOpenChange, onSuccess }: UploadS
     try {
       setProgress(40);
       
-      const response = await supabase.functions.invoke('parse-bank-statement', {
-        body: { 
-          statementText: statementText.slice(0, 50000), // Limit text size
-          bankName: banks.find(b => b.value === bankName)?.label || bankName 
-        },
-      });
+      let response;
+      
+      if (pdfFile) {
+        // Convert file to base64 for AI vision processing
+        const arrayBuffer = await pdfFile.arrayBuffer();
+        const base64 = btoa(
+          new Uint8Array(arrayBuffer).reduce((data, byte) => data + String.fromCharCode(byte), '')
+        );
+        
+        response = await supabase.functions.invoke('parse-pdf-statement', {
+          body: { 
+            pdfBase64: base64,
+            bankName: banks.find(b => b.value === bankName)?.label || bankName 
+          },
+        });
+      } else {
+        response = await supabase.functions.invoke('parse-bank-statement', {
+          body: { 
+            statementText: statementText.slice(0, 50000),
+            bankName: banks.find(b => b.value === bankName)?.label || bankName 
+          },
+        });
+      }
 
       setProgress(80);
 
@@ -312,23 +354,37 @@ export function UploadStatementDialog({ open, onOpenChange, onSuccess }: UploadS
             </div>
 
             <div className="space-y-2">
-              <Label>Upload File (CSV/TXT)</Label>
-              <div className="border-2 border-dashed rounded-lg p-6 text-center hover:border-primary/50 transition-colors">
+              <Label>Upload File (PDF, CSV, TXT, Image)</Label>
+              <div className={`border-2 border-dashed rounded-lg p-6 text-center hover:border-primary/50 transition-colors ${pdfFile ? 'border-primary bg-primary/5' : ''}`}>
                 <input
                   type="file"
-                  accept=".csv,.txt"
+                  accept=".pdf,.csv,.txt,.png,.jpg,.jpeg,.webp"
                   onChange={handleFileChange}
                   className="hidden"
                   id="statement-file"
                 />
                 <label htmlFor="statement-file" className="cursor-pointer">
-                  <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
-                  <p className="text-sm text-muted-foreground">
-                    Click to upload or drag and drop
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    CSV or TXT files
-                  </p>
+                  {pdfFile ? (
+                    <>
+                      <FileText className="h-8 w-8 mx-auto text-primary mb-2" />
+                      <p className="text-sm font-medium text-primary">
+                        {pdfFile.name}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Click to change file
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+                      <p className="text-sm text-muted-foreground">
+                        Click to upload or drag and drop
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        PDF, CSV, TXT, or image files
+                      </p>
+                    </>
+                  )}
                 </label>
               </div>
             </div>

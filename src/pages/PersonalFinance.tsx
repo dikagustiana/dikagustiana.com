@@ -30,6 +30,8 @@ import { useToast } from '@/hooks/use-toast';
 import { AddAccountDialog } from '@/components/finance/AddAccountDialog';
 import { AddTransactionDialog } from '@/components/finance/AddTransactionDialog';
 import { UploadStatementDialog } from '@/components/finance/UploadStatementDialog';
+import { SpendingInsights } from '@/components/finance/SpendingInsights';
+import { RecurringTransactions } from '@/components/finance/RecurringTransactions';
 import { formatCurrency } from '@/lib/financeUtils';
 
 interface Account {
@@ -230,9 +232,11 @@ export default function PersonalFinance() {
         </div>
 
         <Tabs defaultValue="accounts" className="space-y-6">
-          <TabsList>
+          <TabsList className="flex-wrap">
             <TabsTrigger value="accounts">Accounts</TabsTrigger>
-            <TabsTrigger value="transactions">Recent Transactions</TabsTrigger>
+            <TabsTrigger value="transactions">Transactions</TabsTrigger>
+            <TabsTrigger value="recurring">Recurring</TabsTrigger>
+            <TabsTrigger value="insights">AI Insights</TabsTrigger>
           </TabsList>
 
           <TabsContent value="accounts" className="space-y-4">
@@ -368,6 +372,14 @@ export default function PersonalFinance() {
                 </CardContent>
               </Card>
             )}
+          </TabsContent>
+
+          <TabsContent value="recurring">
+            <RecurringTransactions />
+          </TabsContent>
+
+          <TabsContent value="insights">
+            <SpendingInsights />
           </TabsContent>
         </Tabs>
 
