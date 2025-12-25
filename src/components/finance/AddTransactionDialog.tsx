@@ -96,14 +96,14 @@ export function AddTransactionDialog({ open, onOpenChange, accounts, onSuccess }
       const { error } = await supabase.from('finance_transactions').insert({
         user_id: user.id,
         account_id: formData.account_id,
-        transaction_type: formData.transaction_type as any,
+        transaction_type: formData.transaction_type as 'income' | 'expense' | 'transfer',
         amount: amount,
         description: formData.description || null,
         merchant: formData.merchant || null,
         category_id: formData.category_id || null,
         date: formData.date,
         notes: formData.notes || null,
-      } as any);
+      });
 
       if (error) throw error;
 

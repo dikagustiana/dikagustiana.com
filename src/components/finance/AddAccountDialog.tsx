@@ -49,12 +49,12 @@ export function AddAccountDialog({ open, onOpenChange, onSuccess }: AddAccountDi
       const { error } = await supabase.from('finance_accounts').insert({
         user_id: user.id,
         name: formData.name,
-        account_type: formData.account_type as any,
+        account_type: formData.account_type as 'checking' | 'savings' | 'credit_card' | 'investment' | 'loan' | 'property' | 'vehicle' | 'crypto' | 'other',
         balance: parseFloat(formData.balance) || 0,
         currency: formData.currency,
         institution: formData.institution || null,
         notes: formData.notes || null,
-      } as any);
+      });
 
       if (error) throw error;
 
