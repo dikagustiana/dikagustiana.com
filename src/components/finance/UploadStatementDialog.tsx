@@ -404,7 +404,10 @@ export function UploadStatementDialog({ open, onOpenChange, onSuccess }: UploadS
               <Button variant="outline" onClick={handleClose}>
                 Cancel
               </Button>
-              <Button onClick={parseStatement} disabled={!statementText.trim()}>
+              <Button 
+                onClick={parseStatement} 
+                disabled={!statementText.trim() && !pdfFile}
+              >
                 <FileText className="h-4 w-4 mr-2" />
                 Parse Statement
               </Button>
