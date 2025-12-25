@@ -21,13 +21,15 @@ import {
   Bitcoin,
   MoreHorizontal,
   ArrowLeftRight,
-  RefreshCw
+  RefreshCw,
+  Upload
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { AddAccountDialog } from '@/components/finance/AddAccountDialog';
 import { AddTransactionDialog } from '@/components/finance/AddTransactionDialog';
+import { UploadStatementDialog } from '@/components/finance/UploadStatementDialog';
 import { formatCurrency } from '@/lib/financeUtils';
 
 interface Account {
@@ -71,6 +73,7 @@ export default function PersonalFinance() {
   const [loading, setLoading] = useState(true);
   const [showAddAccount, setShowAddAccount] = useState(false);
   const [showAddTransaction, setShowAddTransaction] = useState(false);
+  const [showUploadStatement, setShowUploadStatement] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -167,10 +170,14 @@ export default function PersonalFinance() {
               Track your assets, cash flow, and personal balance sheet.
             </p>
           </div>
-          <div className="flex gap-2 mt-4 md:mt-0">
+          <div className="flex flex-wrap gap-2 mt-4 md:mt-0">
             <Button variant="outline" size="sm" onClick={fetchData}>
               <RefreshCw className="h-4 w-4 mr-2" />
               Refresh
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => setShowUploadStatement(true)}>
+              <Upload className="h-4 w-4 mr-2" />
+              Upload Statement
             </Button>
             <Button size="sm" onClick={() => setShowAddTransaction(true)}>
               <Plus className="h-4 w-4 mr-2" />
@@ -395,6 +402,12 @@ export default function PersonalFinance() {
         open={showAddTransaction}
         onOpenChange={setShowAddTransaction}
         accounts={accounts}
+        onSuccess={fetchData}
+      />
+
+      <UploadStatementDialog
+        open={showUploadStatement}
+        onOpenChange={setShowUploadStatement}
         onSuccess={fetchData}
       />
     </div>
