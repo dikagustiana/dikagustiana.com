@@ -53,6 +53,7 @@ import EnglishIelts from "./pages/EnglishIelts";
 
 // Admin/Tools
 import DikasTools from "./pages/DikasTools";
+import PersonalFinance from "./pages/PersonalFinance";
 import ModelPlatform from "./pages/ModelPlatform";
 import ModelTest from "./pages/ModelTest";
 import Settings from "./pages/Settings";
@@ -128,6 +129,7 @@ const App = () => (
             
             {/* Admin/Tools */}
             <Route path="/dikas-tools" element={<DikasTools />} />
+            <Route path="/personal-finance" element={<PersonalFinance />} />
             <Route path="/model" element={<ModelPlatform />} />
             <Route path="/model/test" element={<ModelTest />} />
             <Route path="/settings" element={<Settings />} />

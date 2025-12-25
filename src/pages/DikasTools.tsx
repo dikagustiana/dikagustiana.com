@@ -4,7 +4,7 @@ import { Breadcrumb } from '@/components/Breadcrumb';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { BarChart3, TestTube, Lock, Clock } from 'lucide-react';
+import { BarChart3, TestTube, Lock, Clock, Wallet } from 'lucide-react';
 
 export default function DikasTools() {
   return (
@@ -33,6 +33,27 @@ export default function DikasTools() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+          {/* Personal Finance - Active */}
+          <Card className="border-primary/50">
+            <CardHeader>
+              <div className="flex items-center justify-between mb-2">
+                <Wallet className="h-10 w-10 text-primary" />
+                <span className="text-xs bg-accent text-accent-foreground px-2 py-1 rounded">Active</span>
+              </div>
+              <CardTitle>Personal Finance</CardTitle>
+              <CardDescription>
+                Track assets, cash flow, and personal balance sheet.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Link to="/personal-finance">
+                <Button className="w-full">
+                  Open Dashboard
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+
           {/* Tool 1 - Active */}
           <Card className="border-primary/50">
             <CardHeader>
