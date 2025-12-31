@@ -1,1 +1,22 @@
 project_id = "rhwzvgklasvitocbbhvi"
+
+[functions.parse-bank-statement]
+verify_jwt = true
+
+[functions.parse-pdf-statement]
+verify_jwt = true
+
+[functions.detect-recurring]
+verify_jwt = true
+
+[functions.spending-insights]
+verify_jwt = true
+
+[functions.remora-ingest]
+verify_jwt = false
+
+[functions.remora-signals]
+verify_jwt = false
+
+[functions.remora-health]
+verify_jwt = false
