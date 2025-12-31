@@ -604,6 +604,392 @@ export type Database = {
         }
         Relationships: []
       }
+      remora_corporate_actions: {
+        Row: {
+          action_type: string
+          created_at: string
+          data_source: string | null
+          dividend_amount: number | null
+          ex_date: string | null
+          id: string
+          ingested_at: string
+          notes: string | null
+          payment_date: string | null
+          ratio_new: number | null
+          ratio_old: number | null
+          record_date: string | null
+          stock_id: string
+        }
+        Insert: {
+          action_type: string
+          created_at?: string
+          data_source?: string | null
+          dividend_amount?: number | null
+          ex_date?: string | null
+          id?: string
+          ingested_at?: string
+          notes?: string | null
+          payment_date?: string | null
+          ratio_new?: number | null
+          ratio_old?: number | null
+          record_date?: string | null
+          stock_id: string
+        }
+        Update: {
+          action_type?: string
+          created_at?: string
+          data_source?: string | null
+          dividend_amount?: number | null
+          ex_date?: string | null
+          id?: string
+          ingested_at?: string
+          notes?: string | null
+          payment_date?: string | null
+          ratio_new?: number | null
+          ratio_old?: number | null
+          record_date?: string | null
+          stock_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "remora_corporate_actions_stock_id_fkey"
+            columns: ["stock_id"]
+            isOneToOne: false
+            referencedRelation: "remora_stocks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      remora_data_freshness: {
+        Row: {
+          dataset_type: string
+          expected_update_frequency: string
+          id: string
+          is_stale: boolean
+          last_update: string | null
+          record_count: number | null
+          source_name: string | null
+          source_url: string | null
+          staleness_threshold_minutes: number
+          updated_at: string
+        }
+        Insert: {
+          dataset_type: string
+          expected_update_frequency: string
+          id?: string
+          is_stale?: boolean
+          last_update?: string | null
+          record_count?: number | null
+          source_name?: string | null
+          source_url?: string | null
+          staleness_threshold_minutes?: number
+          updated_at?: string
+        }
+        Update: {
+          dataset_type?: string
+          expected_update_frequency?: string
+          id?: string
+          is_stale?: boolean
+          last_update?: string | null
+          record_count?: number | null
+          source_name?: string | null
+          source_url?: string | null
+          staleness_threshold_minutes?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      remora_ingestion_logs: {
+        Row: {
+          completed_at: string | null
+          dataset_type: string
+          error_message: string | null
+          id: string
+          metadata: Json | null
+          records_invalid: number
+          records_processed: number
+          records_valid: number
+          source_name: string
+          source_url: string | null
+          started_at: string
+          status: string
+        }
+        Insert: {
+          completed_at?: string | null
+          dataset_type: string
+          error_message?: string | null
+          id?: string
+          metadata?: Json | null
+          records_invalid?: number
+          records_processed?: number
+          records_valid?: number
+          source_name: string
+          source_url?: string | null
+          started_at?: string
+          status: string
+        }
+        Update: {
+          completed_at?: string | null
+          dataset_type?: string
+          error_message?: string | null
+          id?: string
+          metadata?: Json | null
+          records_invalid?: number
+          records_processed?: number
+          records_valid?: number
+          source_name?: string
+          source_url?: string | null
+          started_at?: string
+          status?: string
+        }
+        Relationships: []
+      }
+      remora_ohlcv_daily: {
+        Row: {
+          close_price: number
+          data_source: string | null
+          date: string
+          foreign_buy: number | null
+          foreign_sell: number | null
+          frequency: number | null
+          high_price: number
+          id: string
+          ingested_at: string
+          is_valid: boolean
+          low_price: number
+          open_price: number
+          stock_id: string
+          validation_errors: string[] | null
+          value: number | null
+          volume: number
+        }
+        Insert: {
+          close_price: number
+          data_source?: string | null
+          date: string
+          foreign_buy?: number | null
+          foreign_sell?: number | null
+          frequency?: number | null
+          high_price: number
+          id?: string
+          ingested_at?: string
+          is_valid?: boolean
+          low_price: number
+          open_price: number
+          stock_id: string
+          validation_errors?: string[] | null
+          value?: number | null
+          volume: number
+        }
+        Update: {
+          close_price?: number
+          data_source?: string | null
+          date?: string
+          foreign_buy?: number | null
+          foreign_sell?: number | null
+          frequency?: number | null
+          high_price?: number
+          id?: string
+          ingested_at?: string
+          is_valid?: boolean
+          low_price?: number
+          open_price?: number
+          stock_id?: string
+          validation_errors?: string[] | null
+          value?: number | null
+          volume?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "remora_ohlcv_daily_stock_id_fkey"
+            columns: ["stock_id"]
+            isOneToOne: false
+            referencedRelation: "remora_stocks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      remora_signals: {
+        Row: {
+          confidence: string
+          created_at: string
+          direction: string
+          id: string
+          input_data_timestamp: string
+          is_stale: boolean
+          price_at_signal: number
+          reasoning: Json | null
+          signal_date: string
+          signal_type: string
+          stock_id: string
+          stop_loss: number | null
+          strength: number
+          target_price: number | null
+        }
+        Insert: {
+          confidence: string
+          created_at?: string
+          direction: string
+          id?: string
+          input_data_timestamp: string
+          is_stale?: boolean
+          price_at_signal: number
+          reasoning?: Json | null
+          signal_date: string
+          signal_type: string
+          stock_id: string
+          stop_loss?: number | null
+          strength: number
+          target_price?: number | null
+        }
+        Update: {
+          confidence?: string
+          created_at?: string
+          direction?: string
+          id?: string
+          input_data_timestamp?: string
+          is_stale?: boolean
+          price_at_signal?: number
+          reasoning?: Json | null
+          signal_date?: string
+          signal_type?: string
+          stock_id?: string
+          stop_loss?: number | null
+          strength?: number
+          target_price?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "remora_signals_stock_id_fkey"
+            columns: ["stock_id"]
+            isOneToOne: false
+            referencedRelation: "remora_stocks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      remora_stocks: {
+        Row: {
+          created_at: string
+          data_source: string | null
+          free_float_shares: number | null
+          id: string
+          is_active: boolean
+          last_updated: string
+          listing_date: string | null
+          market_cap: number | null
+          name: string
+          sector: string | null
+          subsector: string | null
+          symbol: string
+          total_shares: number | null
+        }
+        Insert: {
+          created_at?: string
+          data_source?: string | null
+          free_float_shares?: number | null
+          id?: string
+          is_active?: boolean
+          last_updated?: string
+          listing_date?: string | null
+          market_cap?: number | null
+          name: string
+          sector?: string | null
+          subsector?: string | null
+          symbol: string
+          total_shares?: number | null
+        }
+        Update: {
+          created_at?: string
+          data_source?: string | null
+          free_float_shares?: number | null
+          id?: string
+          is_active?: boolean
+          last_updated?: string
+          listing_date?: string | null
+          market_cap?: number | null
+          name?: string
+          sector?: string | null
+          subsector?: string | null
+          symbol?: string
+          total_shares?: number | null
+        }
+        Relationships: []
+      }
+      remora_system_health: {
+        Row: {
+          error_count: number
+          execution_time_ms: number | null
+          id: string
+          last_error: string | null
+          last_run_at: string | null
+          last_success_at: string | null
+          metadata: Json | null
+          module_name: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          error_count?: number
+          execution_time_ms?: number | null
+          id?: string
+          last_error?: string | null
+          last_run_at?: string | null
+          last_success_at?: string | null
+          metadata?: Json | null
+          module_name: string
+          status: string
+          updated_at?: string
+        }
+        Update: {
+          error_count?: number
+          execution_time_ms?: number | null
+          id?: string
+          last_error?: string | null
+          last_run_at?: string | null
+          last_success_at?: string | null
+          metadata?: Json | null
+          module_name?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      remora_watchlist: {
+        Row: {
+          alert_on_signal: boolean
+          created_at: string
+          id: string
+          notes: string | null
+          stock_id: string
+          user_id: string
+        }
+        Insert: {
+          alert_on_signal?: boolean
+          created_at?: string
+          id?: string
+          notes?: string | null
+          stock_id: string
+          user_id: string
+        }
+        Update: {
+          alert_on_signal?: boolean
+          created_at?: string
+          id?: string
+          notes?: string | null
+          stock_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "remora_watchlist_stock_id_fkey"
+            columns: ["stock_id"]
+            isOneToOne: false
+            referencedRelation: "remora_stocks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
