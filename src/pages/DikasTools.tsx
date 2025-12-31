@@ -4,7 +4,7 @@ import { Breadcrumb } from '@/components/Breadcrumb';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { BarChart3, TestTube, Lock, Clock, Wallet } from 'lucide-react';
+import { BarChart3, TestTube, Lock, Clock, Wallet, TrendingUp } from 'lucide-react';
 
 export default function DikasTools() {
   return (
@@ -81,25 +81,24 @@ export default function DikasTools() {
             </CardContent>
           </Card>
 
-          {/* Tool 2 - Coming Soon */}
-          <Card className="opacity-60">
+          {/* Remora Trading - Active */}
+          <Card className="border-primary/50">
             <CardHeader>
               <div className="flex items-center justify-between mb-2">
-                <Lock className="h-10 w-10 text-muted-foreground" />
-                <span className="text-xs bg-muted text-muted-foreground px-2 py-1 rounded flex items-center gap-1">
-                  <Clock className="h-3 w-3" />
-                  Coming Soon
-                </span>
+                <TrendingUp className="h-10 w-10 text-primary" />
+                <span className="text-xs bg-accent text-accent-foreground px-2 py-1 rounded">Active</span>
               </div>
-              <CardTitle className="text-muted-foreground">Automation Engine</CardTitle>
+              <CardTitle>Remora Trading</CardTitle>
               <CardDescription>
-                Automate repetitive financial tasks and workflows.
+                Semi-automated trading signals for Indonesian equity markets using IDX data.
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button disabled className="w-full">
-                Coming Soon
-              </Button>
+              <Link to="/dikas-tools/remora-trading">
+                <Button className="w-full">
+                  Open Dashboard
+                </Button>
+              </Link>
             </CardContent>
           </Card>
 
