@@ -20,3 +20,18 @@ verify_jwt = false
 
 [functions.remora-health]
 verify_jwt = false
+
+[functions.quant-data-fetch]
+verify_jwt = false
+
+[functions.quant-features]
+verify_jwt = false
+
+[functions.quant-regime]
+verify_jwt = false
+
+[functions.quant-signals]
+verify_jwt = false
+
+[functions.quant-backtest]
+verify_jwt = false

@@ -60,6 +60,7 @@ import Settings from "./pages/Settings";
 import DebugAuth from "./pages/DebugAuth";
 import AdminHealth from "./pages/AdminHealth";
 import RemoraTrading from "./pages/RemoraTrading";
+import DikaQuantEngine from "./pages/DikaQuantEngine";
 
 const queryClient = new QueryClient();
 
@@ -131,6 +132,7 @@ const App = () => (
             {/* Admin/Tools */}
             <Route path="/dikas-tools" element={<DikasTools />} />
             <Route path="/dikas-tools/remora-trading" element={<RemoraTrading />} />
+            <Route path="/dikas-tools/quant-engine" element={<DikaQuantEngine />} />
             <Route path="/personal-finance" element={<PersonalFinance />} />
             <Route path="/model" element={<ModelPlatform />} />
             <Route path="/model/test" element={<ModelTest />} />
