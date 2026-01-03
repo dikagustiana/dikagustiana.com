@@ -134,12 +134,44 @@ serve(async (req) => {
     let stocksToFetch: { id: string; symbol: string }[] = [];
     
     if (symbols && symbols.length > 0) {
-      const { data: stocks } = await supabase
+      // First, check which stocks exist
+      const { data: existingStocks } = await supabase
         .from('remora_stocks')
         .select('id, symbol')
         .in('symbol', symbols)
         .eq('is_active', true);
-      stocksToFetch = stocks || [];
+      
+      const existingSymbols = new Set((existingStocks || []).map(s => s.symbol));
+      stocksToFetch = existingStocks || [];
+      
+      // Auto-create new stocks that don't exist
+      const newSymbols = symbols.filter((s: string) => !existingSymbols.has(s));
+      
+      for (const newSymbol of newSymbols) {
+        console.log(`Creating new stock entry for ${newSymbol}...`);
+        
+        // Insert new stock
+        const { data: newStock, error: insertError } = await supabase
+          .from('remora_stocks')
+          .insert({
+            symbol: newSymbol,
+            name: `${newSymbol} (Auto-created)`,
+            is_active: true,
+            data_source: 'yahoo_finance'
+          })
+          .select('id, symbol')
+          .single();
+        
+        if (insertError) {
+          console.error(`Failed to create stock ${newSymbol}:`, insertError);
+          continue;
+        }
+        
+        if (newStock) {
+          stocksToFetch.push(newStock);
+          console.log(`Created stock ${newSymbol} with ID ${newStock.id}`);
+        }
+      }
     } else {
       const { data: stocks } = await supabase
         .from('remora_stocks')
