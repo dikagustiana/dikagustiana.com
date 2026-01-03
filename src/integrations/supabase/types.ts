@@ -604,6 +604,367 @@ export type Database = {
         }
         Relationships: []
       }
+      quant_backtest_results: {
+        Row: {
+          avg_trade_return: number | null
+          backtest_id: string | null
+          cagr: number | null
+          created_at: string
+          drawdown_curve: Json | null
+          equity_curve: Json | null
+          id: string
+          max_drawdown: number | null
+          max_drawdown_duration: number | null
+          profit_factor: number | null
+          regime_metrics: Json | null
+          sharpe_ratio: number | null
+          sortino_ratio: number | null
+          total_trades: number | null
+          trade_log: Json | null
+          win_rate: number | null
+        }
+        Insert: {
+          avg_trade_return?: number | null
+          backtest_id?: string | null
+          cagr?: number | null
+          created_at?: string
+          drawdown_curve?: Json | null
+          equity_curve?: Json | null
+          id?: string
+          max_drawdown?: number | null
+          max_drawdown_duration?: number | null
+          profit_factor?: number | null
+          regime_metrics?: Json | null
+          sharpe_ratio?: number | null
+          sortino_ratio?: number | null
+          total_trades?: number | null
+          trade_log?: Json | null
+          win_rate?: number | null
+        }
+        Update: {
+          avg_trade_return?: number | null
+          backtest_id?: string | null
+          cagr?: number | null
+          created_at?: string
+          drawdown_curve?: Json | null
+          equity_curve?: Json | null
+          id?: string
+          max_drawdown?: number | null
+          max_drawdown_duration?: number | null
+          profit_factor?: number | null
+          regime_metrics?: Json | null
+          sharpe_ratio?: number | null
+          sortino_ratio?: number | null
+          total_trades?: number | null
+          trade_log?: Json | null
+          win_rate?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quant_backtest_results_backtest_id_fkey"
+            columns: ["backtest_id"]
+            isOneToOne: false
+            referencedRelation: "quant_backtests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quant_backtests: {
+        Row: {
+          completed_at: string | null
+          config: Json
+          created_at: string
+          description: string | null
+          end_date: string
+          id: string
+          name: string
+          rebalance_frequency: string
+          start_date: string
+          status: string
+          training_window_days: number
+          universe: Json
+          user_id: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          config: Json
+          created_at?: string
+          description?: string | null
+          end_date: string
+          id?: string
+          name: string
+          rebalance_frequency?: string
+          start_date: string
+          status?: string
+          training_window_days?: number
+          universe: Json
+          user_id?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          config?: Json
+          created_at?: string
+          description?: string | null
+          end_date?: string
+          id?: string
+          name?: string
+          rebalance_frequency?: string
+          start_date?: string
+          status?: string
+          training_window_days?: number
+          universe?: Json
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      quant_data_quality: {
+        Row: {
+          check_date: string
+          check_type: string
+          created_at: string
+          details: Json | null
+          id: string
+          is_resolved: boolean
+          severity: string
+          stock_id: string | null
+        }
+        Insert: {
+          check_date: string
+          check_type: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          is_resolved?: boolean
+          severity: string
+          stock_id?: string | null
+        }
+        Update: {
+          check_date?: string
+          check_type?: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          is_resolved?: boolean
+          severity?: string
+          stock_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quant_data_quality_stock_id_fkey"
+            columns: ["stock_id"]
+            isOneToOne: false
+            referencedRelation: "remora_stocks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quant_features: {
+        Row: {
+          created_at: string
+          feature_date: string
+          id: string
+          log_return: number | null
+          mean_reversion_signal: number | null
+          momentum_10d: number | null
+          price_zscore_20d: number | null
+          rolling_vol_20d: number | null
+          rolling_vol_5d: number | null
+          rsi_14: number | null
+          sma_cross_signal: number | null
+          stock_id: string | null
+          trend_signal: number | null
+          volume_zscore: number | null
+        }
+        Insert: {
+          created_at?: string
+          feature_date: string
+          id?: string
+          log_return?: number | null
+          mean_reversion_signal?: number | null
+          momentum_10d?: number | null
+          price_zscore_20d?: number | null
+          rolling_vol_20d?: number | null
+          rolling_vol_5d?: number | null
+          rsi_14?: number | null
+          sma_cross_signal?: number | null
+          stock_id?: string | null
+          trend_signal?: number | null
+          volume_zscore?: number | null
+        }
+        Update: {
+          created_at?: string
+          feature_date?: string
+          id?: string
+          log_return?: number | null
+          mean_reversion_signal?: number | null
+          momentum_10d?: number | null
+          price_zscore_20d?: number | null
+          rolling_vol_20d?: number | null
+          rolling_vol_5d?: number | null
+          rsi_14?: number | null
+          sma_cross_signal?: number | null
+          stock_id?: string | null
+          trend_signal?: number | null
+          volume_zscore?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quant_features_stock_id_fkey"
+            columns: ["stock_id"]
+            isOneToOne: false
+            referencedRelation: "remora_stocks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quant_positions: {
+        Row: {
+          calculation_date: string
+          created_at: string
+          current_exposure: number | null
+          execution_feasibility: string | null
+          expected_shortfall: number | null
+          half_kelly_size: number | null
+          id: string
+          kelly_fraction: number | null
+          liquidity_score: number | null
+          max_position_pct: number | null
+          stock_id: string | null
+          var_1d: number | null
+        }
+        Insert: {
+          calculation_date: string
+          created_at?: string
+          current_exposure?: number | null
+          execution_feasibility?: string | null
+          expected_shortfall?: number | null
+          half_kelly_size?: number | null
+          id?: string
+          kelly_fraction?: number | null
+          liquidity_score?: number | null
+          max_position_pct?: number | null
+          stock_id?: string | null
+          var_1d?: number | null
+        }
+        Update: {
+          calculation_date?: string
+          created_at?: string
+          current_exposure?: number | null
+          execution_feasibility?: string | null
+          expected_shortfall?: number | null
+          half_kelly_size?: number | null
+          id?: string
+          kelly_fraction?: number | null
+          liquidity_score?: number | null
+          max_position_pct?: number | null
+          stock_id?: string | null
+          var_1d?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quant_positions_stock_id_fkey"
+            columns: ["stock_id"]
+            isOneToOne: false
+            referencedRelation: "remora_stocks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quant_regimes: {
+        Row: {
+          created_at: string
+          id: string
+          probability: number
+          regime_date: string
+          regime_id: number
+          regime_label: string
+          regime_probabilities: Json
+          symbol: string
+          trend_state: string | null
+          volatility_state: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          probability: number
+          regime_date: string
+          regime_id: number
+          regime_label: string
+          regime_probabilities: Json
+          symbol: string
+          trend_state?: string | null
+          volatility_state?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          probability?: number
+          regime_date?: string
+          regime_id?: number
+          regime_label?: string
+          regime_probabilities?: Json
+          symbol?: string
+          trend_state?: string | null
+          volatility_state?: string | null
+        }
+        Relationships: []
+      }
+      quant_signals: {
+        Row: {
+          created_at: string
+          direction: string
+          expected_return: number | null
+          expected_vol: number | null
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          probability: number
+          raw_score: number | null
+          regime_context: Json | null
+          signal_date: string
+          signal_type: string
+          stock_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          direction: string
+          expected_return?: number | null
+          expected_vol?: number | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          probability: number
+          raw_score?: number | null
+          regime_context?: Json | null
+          signal_date: string
+          signal_type: string
+          stock_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          direction?: string
+          expected_return?: number | null
+          expected_vol?: number | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          probability?: number
+          raw_score?: number | null
+          regime_context?: Json | null
+          signal_date?: string
+          signal_type?: string
+          stock_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quant_signals_stock_id_fkey"
+            columns: ["stock_id"]
+            isOneToOne: false
+            referencedRelation: "remora_stocks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       remora_corporate_actions: {
         Row: {
           action_type: string
