@@ -1,7 +1,6 @@
 import { Layout } from '@/components/Layout';
 import { Breadcrumb } from '@/components/Breadcrumb';
 import { EssayModule } from '@/components/next-big-thing/EssayModule';
-import { ArrowRight } from 'lucide-react';
 
 export default function TheNextBigThing() {
   return (
@@ -40,29 +39,20 @@ export default function TheNextBigThing() {
       </div>
 
       {/* Main Content */}
-      <div className="container py-12">
+      <main className="container py-12">
         {/* Section Header */}
-        <div className="mb-8 flex items-end justify-between">
-          <div>
-            <h2 className="text-2xl font-display font-semibold text-foreground">
-              Essays & Analysis
-            </h2>
-            <p className="text-muted-foreground mt-1">
-              Deep dives into the ideas and trends defining our future
-            </p>
-          </div>
-          <a 
-            href="#all-essays" 
-            className="text-accent font-medium inline-flex items-center gap-1 hover:opacity-80 transition-opacity"
-          >
-            View all
-            <ArrowRight className="h-4 w-4" />
-          </a>
+        <div className="mb-8">
+          <h2 className="text-2xl md:text-3xl font-display font-semibold text-foreground mb-2">
+            Essays & Analysis
+          </h2>
+          <p className="text-muted-foreground max-w-2xl">
+            Deep dives into the ideas and trends defining our future
+          </p>
         </div>
 
         {/* Essay Module */}
         <EssayModule />
-      </div>
+      </main>
     </Layout>
   );
 }
