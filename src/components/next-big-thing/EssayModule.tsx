@@ -109,9 +109,6 @@ export function EssayModule() {
     ? ESSAYS
     : ESSAYS.filter((e) => e.category === selectedCategory);
 
-  const featuredEssays = filteredEssays.filter((e) => e.featured);
-  const regularEssays = filteredEssays.filter((e) => !e.featured);
-
   return (
     <div id="all-essays" className="space-y-8">
       {/* Category Filter */}
@@ -132,111 +129,63 @@ export function EssayModule() {
         ))}
       </div>
 
-      {/* Featured Essays */}
-      {featuredEssays.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {featuredEssays.map((essay) => (
-            <Card 
-              key={essay.id} 
-              className="group hover:shadow-lg transition-all hover:-translate-y-1 cursor-pointer bg-card border-border overflow-hidden"
-            >
-              <CardContent className="p-6">
-                <div className="flex items-center gap-2 mb-3">
-                  <Badge variant="secondary" className="text-xs capitalize">
-                    {essay.category}
-                  </Badge>
+      {/* Essays Grid - All Consistent Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filteredEssays.map((essay) => (
+          <Card 
+            key={essay.id} 
+            className="group hover:shadow-lg transition-all hover:-translate-y-1 cursor-pointer bg-card border-border overflow-hidden flex flex-col"
+          >
+            <CardContent className="p-6 flex flex-col flex-1">
+              {/* Badges */}
+              <div className="flex items-center gap-2 mb-3">
+                <Badge variant="secondary" className="text-xs capitalize">
+                  {essay.category}
+                </Badge>
+                {essay.featured && (
                   <Badge className="bg-accent text-accent-foreground text-xs">
                     Featured
                   </Badge>
-                </div>
-                
-                <h3 className="text-lg font-semibold text-foreground mb-2 group-hover:text-accent transition-colors">
-                  {essay.title}
-                </h3>
-                
-                <p className="text-sm text-muted-foreground mb-4 leading-relaxed line-clamp-3">
-                  {essay.snippet}
-                </p>
-
-                <div className="flex items-center gap-4 text-xs text-muted-foreground mb-4">
-                  <span className="flex items-center gap-1">
-                    <Clock className="h-3 w-3" />
-                    {essay.readTime}
-                  </span>
-                  <span>{essay.date}</span>
-                </div>
-
-                <div className="flex flex-wrap gap-1 mb-4">
-                  {essay.tags.slice(0, 3).map((tag) => (
-                    <span 
-                      key={tag} 
-                      className="inline-flex items-center gap-1 text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded"
-                    >
-                      <Tag className="h-2.5 w-2.5" />
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-                
-                <span className="text-sm text-accent font-medium inline-flex items-center gap-1 group-hover:gap-2 transition-all">
-                  Read Essay
-                  <ArrowRight className="h-4 w-4" />
-                </span>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
-
-      {/* Regular Essays List */}
-      <div className="space-y-4">
-        {regularEssays.map((essay) => (
-          <Card 
-            key={essay.id}
-            className="group hover:shadow-md transition-all cursor-pointer bg-card border-border"
-          >
-            <CardContent className="p-6">
-              <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Badge variant="secondary" className="text-xs capitalize">
-                      {essay.category}
-                    </Badge>
-                    <span className="text-xs text-muted-foreground">{essay.date}</span>
-                  </div>
-                  
-                  <h3 className="text-lg font-semibold text-foreground mb-2 group-hover:text-accent transition-colors">
-                    {essay.title}
-                  </h3>
-                  
-                  <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2">
-                    {essay.snippet}
-                  </p>
-
-                  <div className="flex flex-wrap gap-1 mt-3">
-                    {essay.tags.map((tag) => (
-                      <span 
-                        key={tag} 
-                        className="inline-flex items-center gap-1 text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded"
-                      >
-                        <Tag className="h-2.5 w-2.5" />
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-4 md:flex-col md:items-end md:gap-2">
-                  <span className="text-xs text-muted-foreground flex items-center gap-1">
-                    <Clock className="h-3 w-3" />
-                    {essay.readTime}
-                  </span>
-                  <span className="text-sm text-accent font-medium inline-flex items-center gap-1 group-hover:gap-2 transition-all">
-                    Read
-                    <ArrowRight className="h-4 w-4" />
-                  </span>
-                </div>
+                )}
               </div>
+              
+              {/* Title */}
+              <h3 className="text-lg font-semibold text-foreground mb-2 group-hover:text-accent transition-colors">
+                {essay.title}
+              </h3>
+              
+              {/* Snippet */}
+              <p className="text-sm text-muted-foreground mb-4 leading-relaxed line-clamp-3 flex-1">
+                {essay.snippet}
+              </p>
+
+              {/* Meta Info */}
+              <div className="flex items-center gap-4 text-xs text-muted-foreground mb-4">
+                <span className="flex items-center gap-1">
+                  <Clock className="h-3 w-3" />
+                  {essay.readTime}
+                </span>
+                <span>{essay.date}</span>
+              </div>
+
+              {/* Tags */}
+              <div className="flex flex-wrap gap-1 mb-4">
+                {essay.tags.slice(0, 3).map((tag) => (
+                  <span 
+                    key={tag} 
+                    className="inline-flex items-center gap-1 text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded"
+                  >
+                    <Tag className="h-2.5 w-2.5" />
+                    {tag}
+                  </span>
+                ))}
+              </div>
+              
+              {/* Read Link */}
+              <span className="text-sm text-accent font-medium inline-flex items-center gap-1 group-hover:gap-2 transition-all mt-auto">
+                Read Essay
+                <ArrowRight className="h-4 w-4" />
+              </span>
             </CardContent>
           </Card>
         ))}
