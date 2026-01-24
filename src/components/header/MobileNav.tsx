@@ -47,6 +47,7 @@ const navSections: NavSection[] = [
       { label: 'Pathways Forward', path: '/green-transition/future' },
     ]
   },
+  { label: 'The Next Big Thing', path: '/the-next-big-thing' },
 ];
 
 export function MobileNav() {
