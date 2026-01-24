@@ -89,6 +89,13 @@ export function MainNav() {
         width="w-56"
         basePath="/green-transition"
       />
+
+      <Link 
+        to="/the-next-big-thing" 
+        className={cn("nav-link", isActive('/the-next-big-thing') && "nav-link-active")}
+      >
+        The Next Big Thing
+      </Link>
     </nav>
   );
 }
