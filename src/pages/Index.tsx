@@ -1,8 +1,22 @@
+import { useState, useEffect } from 'react';
 import { Layout } from '@/components/Layout';
 import { HeroSection } from '@/components/HeroSection';
 import { Card, CardContent } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
-import { ArrowRight, BarChart3, BookOpen, Leaf, Lightbulb } from 'lucide-react';
+import { ArrowRight, BarChart3, BookOpen, Leaf, Lightbulb, Clock, User } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { Badge } from '@/components/ui/badge';
+
+interface FeaturedEssay {
+  id: string;
+  slug: string;
+  title: string;
+  snippet: string | null;
+  section: string;
+  phase: string | null;
+  author: string | null;
+  read_time: string | null;
+}
 
 const learningPaths = [
   {
@@ -35,7 +49,47 @@ const learningPaths = [
   },
 ];
 
+const getSectionLabel = (section: string, phase: string | null) => {
+  if (section === 'green-transition') return 'Green Transition';
+  if (section === 'next-big-thing') return 'Next Big Thing';
+  return section;
+};
+
+const getEssayLink = (essay: FeaturedEssay) => {
+  if (essay.section === 'green-transition' && essay.phase) {
+    return `/green-transition/${essay.phase}/${essay.slug}`;
+  }
+  if (essay.section === 'next-big-thing') {
+    return `/the-next-big-thing/${essay.slug}`;
+  }
+  return `/essays/${essay.slug}`;
+};
+
 const Index = () => {
+  const [featuredEssays, setFeaturedEssays] = useState<FeaturedEssay[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadFeaturedEssays = async () => {
+      try {
+        const { data } = await supabase
+          .from('essays')
+          .select('id, slug, title, snippet, section, phase, author, read_time')
+          .eq('published', true)
+          .order('created_at', { ascending: false })
+          .limit(4);
+        
+        setFeaturedEssays(data || []);
+      } catch (error) {
+        console.error('Error loading featured essays:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadFeaturedEssays();
+  }, []);
+
   return (
     <Layout>
       <HeroSection 
@@ -44,6 +98,58 @@ const Index = () => {
         ctaText="Start Learning"
       />
       
+      {/* Featured Analysis Section */}
+      {!loading && featuredEssays.length > 0 && (
+        <div className="py-16 bg-card border-y border-border">
+          <div className="section-container">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h2 className="text-xl md:text-2xl font-display font-semibold text-foreground mb-2">
+                  Featured Analysis
+                </h2>
+                <p className="text-muted-foreground text-sm">
+                  Recent essays demonstrating how we think about finance, accounting, and transition economics.
+                </p>
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {featuredEssays.map((essay) => (
+                <Link key={essay.id} to={getEssayLink(essay)}>
+                  <Card className="h-full hover:shadow-lg transition-all hover:-translate-y-1 cursor-pointer group">
+                    <CardContent className="p-5">
+                      <Badge variant="secondary" className="mb-3 text-xs">
+                        {getSectionLabel(essay.section, essay.phase)}
+                      </Badge>
+                      <h3 className="font-semibold text-foreground mb-2 line-clamp-2 group-hover:text-accent transition-colors">
+                        {essay.title}
+                      </h3>
+                      <p className="text-sm text-muted-foreground mb-4 line-clamp-3">
+                        {essay.snippet}
+                      </p>
+                      <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                        {essay.author && (
+                          <span className="flex items-center gap-1">
+                            <User className="h-3 w-3" />
+                            {essay.author}
+                          </span>
+                        )}
+                        {essay.read_time && (
+                          <span className="flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            {essay.read_time}
+                          </span>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Learning Paths Section */}
       <div id="main-content" className="py-16 section-container">
         <div className="max-w-4xl mx-auto mb-12">

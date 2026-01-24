@@ -62,6 +62,7 @@ import AdminHealth from "./pages/AdminHealth";
 import RemoraTrading from "./pages/RemoraTrading";
 import DikaQuantEngine from "./pages/DikaQuantEngine";
 import TheNextBigThing from "./pages/TheNextBigThing";
+import NextBigThingEssay from "./pages/NextBigThingEssay";
 
 const queryClient = new QueryClient();
 
@@ -141,6 +142,7 @@ const App = () => (
             <Route path="/debug/auth" element={<DebugAuth />} />
             <Route path="/admin/health" element={<AdminHealth />} />
             <Route path="/the-next-big-thing" element={<TheNextBigThing />} />
+            <Route path="/the-next-big-thing/:slug" element={<NextBigThingEssay />} />
             
             {/* Not Found */}
             <Route path="*" element={<NotFound />} />
