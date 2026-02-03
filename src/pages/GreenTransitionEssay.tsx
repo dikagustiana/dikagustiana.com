@@ -6,6 +6,7 @@ import { FsliOnThisPage } from '@/components/fsli/FsliOnThisPage';
 import { FsliHeroSection } from '@/components/fsli/FsliHeroSection';
 import { FsliContentSection } from '@/components/fsli/FsliContentSection';
 import { RelatedContent } from '@/components/RelatedContent';
+import { InlineEssayEditor, AdminEditBanner } from '@/components/admin';
 import { supabase } from '@/integrations/supabase/client';
 import { LoadingState } from '@/components/states';
 import { RefreshCw, Clock } from 'lucide-react';
@@ -183,16 +184,27 @@ export default function GreenTransitionEssay() {
 
           {/* Main Content */}
           <div className="flex-1 min-w-0">
+            {/* Admin Edit Banner */}
+            <AdminEditBanner essayId={essay.id} essaySlug={essay.slug} />
+
             {/* Header Section */}
             <div className="mb-6">
-              <h1 className="text-2xl md:text-3xl font-display font-bold text-primary mb-2">
-                {essay.title}
-              </h1>
-              {essay.snippet && (
-                <p className="text-lg text-muted-foreground mb-3">
-                  {essay.snippet}
-                </p>
-              )}
+              <InlineEssayEditor
+                essayId={essay.id}
+                field="title"
+                value={essay.title}
+                as="h1"
+                className="text-2xl md:text-3xl font-display font-bold text-primary mb-2"
+                onUpdate={(newValue) => setEssay({ ...essay, title: newValue })}
+              />
+              <InlineEssayEditor
+                essayId={essay.id}
+                field="snippet"
+                value={essay.snippet || ''}
+                as="p"
+                className="text-lg text-muted-foreground mb-3"
+                onUpdate={(newValue) => setEssay({ ...essay, snippet: newValue })}
+              />
               <div className="flex items-center gap-4 text-sm text-muted-foreground">
                 <span className="flex items-center gap-1.5">
                   <RefreshCw className="h-4 w-4" />

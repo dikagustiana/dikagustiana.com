@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { PageLayout } from '@/components/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
 import { useAuth } from '@/contexts/AuthContext';
@@ -43,6 +43,7 @@ import {
   XCircle,
   FileText,
   RefreshCw,
+  Plus,
 } from 'lucide-react';
 
 interface ContentHealth {
@@ -237,10 +238,18 @@ export default function AdminContent() {
               Manage essays, check content health, publish/unpublish in bulk.
             </p>
           </div>
-          <Button variant="outline" onClick={() => refetch()} className="mt-4 md:mt-0">
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Refresh
-          </Button>
+          <div className="flex gap-2 mt-4 md:mt-0">
+            <Button asChild>
+              <Link to="/admin/content/new">
+                <Plus className="h-4 w-4 mr-2" />
+                New Essay
+              </Link>
+            </Button>
+            <Button variant="outline" onClick={() => refetch()}>
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Refresh
+            </Button>
+          </div>
         </div>
 
         {/* Stats Cards */}
