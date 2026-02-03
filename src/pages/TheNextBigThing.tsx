@@ -1,13 +1,26 @@
-import { Layout } from '@/components/Layout';
-import { Breadcrumb } from '@/components/Breadcrumb';
+import { PageLayout } from '@/components/layouts/PageLayout';
+import { SEO } from '@/components/SEO';
 import { EssayModule } from '@/components/next-big-thing/EssayModule';
 
 export default function TheNextBigThing() {
   return (
-    <Layout>
+    <PageLayout
+      role="economist"
+      breadcrumbs={[
+        { label: 'Home', path: '/' },
+        { label: 'The Next Big Thing' },
+      ]}
+      showManifesto
+      manifesto="Rigorous speculation about structural economic change."
+    >
+      <SEO
+        title="The Next Big Thing"
+        description="Speculative but reasoned essays on emerging forces in industry, finance, and policy. Critical questions, not predictions. Winners, losers, and second-order effects."
+      />
+
       {/* Hero Section */}
       <div 
-        className="relative h-[50vh] min-h-[350px] flex items-center justify-center bg-cover bg-center"
+        className="relative h-[45vh] min-h-[300px] flex items-center justify-center bg-cover bg-center"
         style={{
           backgroundImage: 'url(https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1920&q=80)',
         }}
@@ -24,20 +37,28 @@ export default function TheNextBigThing() {
         </div>
       </div>
 
-      {/* Breadcrumb */}
-      <div className="bg-secondary border-b border-border">
-        <div className="container py-3">
-          <Breadcrumb
-            items={[
-              { label: 'Home', path: '/' },
-              { label: 'The Next Big Thing' },
-            ]}
-          />
+      {/* Economist Frame */}
+      <div className="bg-amber-500/5 border-y border-amber-500/20 py-6">
+        <div className="container max-w-4xl">
+          <div className="grid md:grid-cols-3 gap-6 text-sm">
+            <div>
+              <p className="text-xs font-medium text-amber-600 dark:text-amber-400 uppercase mb-2">The Core Question</p>
+              <p className="text-foreground">Which structural shifts will create new winners and losers in the next decade?</p>
+            </div>
+            <div>
+              <p className="text-xs font-medium text-green-600 dark:text-green-400 uppercase mb-2">Who Benefits</p>
+              <p className="text-muted-foreground">Those who identify shifts early, position capital accordingly, and build optionality</p>
+            </div>
+            <div>
+              <p className="text-xs font-medium text-red-600 dark:text-red-400 uppercase mb-2">Who Loses</p>
+              <p className="text-muted-foreground">Incumbents who dismiss disruption, late movers, and those betting on stability</p>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Philosophy Section */}
-      <div className="bg-secondary/30 py-8">
+      <div className="bg-muted/30 py-8">
         <div className="container max-w-3xl">
           <p className="text-muted-foreground text-center">
             This is an ideas laboratory—not a blog, not a prediction service. The goal is to think 
@@ -61,6 +82,6 @@ export default function TheNextBigThing() {
 
         <EssayModule />
       </main>
-    </Layout>
+    </PageLayout>
   );
 }
