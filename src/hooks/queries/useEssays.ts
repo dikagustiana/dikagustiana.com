@@ -61,9 +61,13 @@ export const useEssays = (params: UseEssaysParams = {}) => {
   });
 };
 
-export const useEssay = (slug: string) => {
+interface UseEssayOptions {
+  enabled?: boolean;
+}
+
+export const useEssay = (slug: string, options: UseEssayOptions = {}) => {
   return useQuery({
-    queryKey: ['essays', 'single', slug],
+    queryKey: ['essay', slug],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('essays')
@@ -74,7 +78,7 @@ export const useEssay = (slug: string) => {
       if (error) throw error;
       return data as Essay;
     },
-    enabled: !!slug,
+    enabled: options.enabled !== undefined ? options.enabled : !!slug,
   });
 };
 

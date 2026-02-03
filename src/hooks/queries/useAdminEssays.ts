@@ -95,6 +95,44 @@ export function useUpdateEssay() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-essays'] });
       queryClient.invalidateQueries({ queryKey: ['essays'] });
+      queryClient.invalidateQueries({ queryKey: ['essay'] });
+    },
+  });
+}
+
+interface CreateEssayData {
+  title: string;
+  slug: string;
+  section: string;
+  phase?: string | null;
+  voice_role?: string | null;
+  published?: boolean;
+  author?: string | null;
+  date?: string | null;
+  read_time?: string | null;
+  snippet?: string | null;
+  content?: string | null;
+  prerequisites?: string[] | null;
+  learning_outcomes?: string[] | null;
+}
+
+export function useCreateEssay() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: CreateEssayData) => {
+      const { data: result, error } = await supabase
+        .from('essays')
+        .insert(data)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return result;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-essays'] });
+      queryClient.invalidateQueries({ queryKey: ['essays'] });
     },
   });
 }
