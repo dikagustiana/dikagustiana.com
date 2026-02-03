@@ -12,23 +12,23 @@ export function Footer() {
                 <span className="text-primary-foreground font-bold text-sm">D</span>
               </div>
               <span className="font-display text-lg font-semibold text-foreground">
-                Your Friendly Learning Buddy
+                Dika's Digital Studio
               </span>
             </Link>
             <p className="text-muted-foreground text-sm max-w-md">
-              Empowering learners with comprehensive resources in accounting, finance, 
-              and critical thinking for personal and professional growth.
+              Technical education in finance, accounting, and economics. 
+              Opinionated content for professionals who do the work.
             </p>
           </div>
 
           {/* Quick Links */}
           <div>
-            <h4 className="font-semibold text-foreground mb-4">Quick Links</h4>
+            <h4 className="font-semibold text-foreground mb-4">Sections</h4>
             <ul className="space-y-2 text-sm">
               <li><Link to="/accounting" className="text-muted-foreground hover:text-foreground transition-colors">Accounting</Link></li>
-              <li><Link to="/finance-101" className="text-muted-foreground hover:text-foreground transition-colors">Finance 101</Link></li>
-              <li><Link to="/masyarakat-baru" className="text-muted-foreground hover:text-foreground transition-colors">Masyarakat Baru</Link></li>
+              <li><Link to="/finance-101" className="text-muted-foreground hover:text-foreground transition-colors">Finance</Link></li>
               <li><Link to="/green-transition" className="text-muted-foreground hover:text-foreground transition-colors">Green Transition</Link></li>
+              <li><Link to="/the-next-big-thing" className="text-muted-foreground hover:text-foreground transition-colors">The Next Big Thing</Link></li>
             </ul>
           </div>
 
@@ -36,9 +36,9 @@ export function Footer() {
           <div>
             <h4 className="font-semibold text-foreground mb-4">Resources</h4>
             <ul className="space-y-2 text-sm">
-              <li><Link to="/masyarakat-baru/english-ielts" className="text-muted-foreground hover:text-foreground transition-colors">English IELTS</Link></li>
-              <li><Link to="/masyarakat-baru/books-academia" className="text-muted-foreground hover:text-foreground transition-colors">Books & Academia</Link></li>
-              <li><Link to="/masyarakat-baru/critical-thinking-research" className="text-muted-foreground hover:text-foreground transition-colors">Critical Thinking</Link></li>
+              <li><Link to="/english-ielts" className="text-muted-foreground hover:text-foreground transition-colors">IELTS Preparation</Link></li>
+              <li><Link to="/books-academia" className="text-muted-foreground hover:text-foreground transition-colors">Books</Link></li>
+              <li><Link to="/masyarakat-baru" className="text-muted-foreground hover:text-foreground transition-colors">Masyarakat Baru</Link></li>
             </ul>
           </div>
         </div>

@@ -62,6 +62,54 @@ export type Database = {
         }
         Relationships: []
       }
+      categories: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          parent_id: string | null
+          section_id: string | null
+          slug: string
+          sort_order: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          parent_id?: string | null
+          section_id?: string | null
+          slug: string
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          parent_id?: string | null
+          section_id?: string | null
+          slug?: string
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "categories_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "categories_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "sections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       category_cards: {
         Row: {
           created_at: string
@@ -179,11 +227,14 @@ export type Database = {
       essays: {
         Row: {
           author: string | null
+          category_id: string | null
           content: string | null
           created_at: string
           date: string | null
           id: string
+          learning_outcomes: string[] | null
           phase: string | null
+          prerequisites: string[] | null
           published: boolean | null
           read_time: string | null
           section: string
@@ -193,14 +244,18 @@ export type Database = {
           thumbnail_url: string | null
           title: string
           updated_at: string
+          voice_role: string | null
         }
         Insert: {
           author?: string | null
+          category_id?: string | null
           content?: string | null
           created_at?: string
           date?: string | null
           id?: string
+          learning_outcomes?: string[] | null
           phase?: string | null
+          prerequisites?: string[] | null
           published?: boolean | null
           read_time?: string | null
           section: string
@@ -210,14 +265,18 @@ export type Database = {
           thumbnail_url?: string | null
           title: string
           updated_at?: string
+          voice_role?: string | null
         }
         Update: {
           author?: string | null
+          category_id?: string | null
           content?: string | null
           created_at?: string
           date?: string | null
           id?: string
+          learning_outcomes?: string[] | null
           phase?: string | null
+          prerequisites?: string[] | null
           published?: boolean | null
           read_time?: string | null
           section?: string
@@ -227,8 +286,17 @@ export type Database = {
           thumbnail_url?: string | null
           title?: string
           updated_at?: string
+          voice_role?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "essays_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       finance_accounts: {
         Row: {
@@ -1350,6 +1418,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      sections: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean | null
+          manifesto: string | null
+          name: string
+          slug: string
+          sort_order: number | null
+          updated_at: string
+          voice_role: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          manifesto?: string | null
+          name: string
+          slug: string
+          sort_order?: number | null
+          updated_at?: string
+          voice_role: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          manifesto?: string | null
+          name?: string
+          slug?: string
+          sort_order?: number | null
+          updated_at?: string
+          voice_role?: string
+        }
+        Relationships: []
       }
       user_roles: {
         Row: {
