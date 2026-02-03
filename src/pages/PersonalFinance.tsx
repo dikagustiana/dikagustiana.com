@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Header } from '@/components/Header';
-import { Footer } from '@/components/Footer';
-import { Breadcrumb } from '@/components/Breadcrumb';
+import { PageLayout } from '@/components/layouts/PageLayout';
+import { SEO } from '@/components/SEO';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -146,31 +145,33 @@ export default function PersonalFinance() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <Header />
+    <PageLayout
+      variant="tool"
+      role="manager"
+      breadcrumbs={[
+        { label: 'Home', path: '/' },
+        { label: "Dika's Tools", path: '/dikas-tools' },
+        { label: 'Personal Finance' }
+      ]}
+      showManifesto
+      manifesto="Track what you own. Track what you owe. The difference is your net worth. Update weekly."
+    >
+      <SEO
+        title="Personal Finance"
+        description="Track assets, liabilities, cash flow, and personal balance sheet. Calculate net worth and monitor spending."
+      />
       
-      <div className="bg-muted/30 border-b border-border py-3">
-        <div className="container">
-          <Breadcrumb 
-            items={[
-              { label: 'Home', path: '/' },
-              { label: "Dika's Tools", path: '/dikas-tools' },
-              { label: 'Personal Finance' }
-            ]}
-          />
-        </div>
-      </div>
-
-      <main className="flex-1 container py-8">
+      <div className="container py-8">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
           <div>
             <h1 className="text-3xl md:text-4xl font-display font-bold mb-2">
               Personal Finance
             </h1>
-            <p className="text-muted-foreground">
-              Track your assets, cash flow, and personal balance sheet.
-            </p>
+            <div className="text-sm text-muted-foreground space-y-1">
+              <p><strong>What to Track:</strong> All accounts with balances. All recurring transactions.</p>
+              <p><strong>Decision Supported:</strong> Is net worth growing? Is cash flow positive?</p>
+            </div>
           </div>
           <div className="flex flex-wrap gap-2 mt-4 md:mt-0">
             <Button variant="outline" size="sm" onClick={fetchData}>
@@ -396,13 +397,11 @@ export default function PersonalFinance() {
               >
                 Sure open-source project
               </a>
-              . Built with ❤️ as part of Dika's Tools. Not affiliated with Maybe Finance Inc.
+              . Built with ❤️ as part of Dika's Tools.
             </p>
           </CardContent>
         </Card>
-      </main>
-
-      <Footer />
+      </div>
 
       <AddAccountDialog 
         open={showAddAccount} 
@@ -422,6 +421,6 @@ export default function PersonalFinance() {
         onOpenChange={setShowUploadStatement}
         onSuccess={fetchData}
       />
-    </div>
+    </PageLayout>
   );
 }
