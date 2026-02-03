@@ -93,9 +93,9 @@ const Index = () => {
   return (
     <Layout>
       <HeroSection 
-        title="Finance and accounting explained clearly. The green transition analyzed honestly."
-        subtitle="Built by someone who does the work—not just writes about it."
-        ctaText="Start Learning"
+        title="Every Great Story Begins with Someone Who Was Scared but Did It Anyway"
+        subtitle="Just begin. Messy, nervous, unsure. That's how the best stories start."
+        ctaText="Choose Your Path"
       />
       
       {/* Featured Analysis Section */}
