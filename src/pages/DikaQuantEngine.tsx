@@ -1,7 +1,7 @@
-import { Header } from '@/components/Header';
-import { Footer } from '@/components/Footer';
-import { Breadcrumb } from '@/components/Breadcrumb';
+import { PageLayout } from '@/components/layouts/PageLayout';
+import { SEO } from '@/components/SEO';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent } from '@/components/ui/card';
 import { QuantDataEngine } from '@/components/quant/QuantDataEngine';
 import { QuantSignalsList } from '@/components/quant/QuantSignalsList';
 import { QuantRegimeDisplay } from '@/components/quant/QuantRegimeDisplay';
@@ -18,40 +18,48 @@ import {
 } from 'lucide-react';
 
 const DikaQuantEngine = () => {
-  const breadcrumbItems = [
-    { label: "Home", href: "/" },
-    { label: "Dika's Tools", href: "/dikas-tools" },
-    { label: "Dika Quant Engine" }
-  ];
-
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <Header />
+    <PageLayout
+      variant="tool"
+      role="manager"
+      breadcrumbs={[
+        { label: 'Home', path: '/' },
+        { label: "Dika's Tools", path: '/dikas-tools' },
+        { label: 'Dika Quant Engine' }
+      ]}
+      showManifesto
+      manifesto="Probabilistic signals only. No single-indicator reliance. Half-Kelly sizing. Walk-forward validation."
+    >
+      <SEO
+        title="Dika Quant Engine"
+        description="Regime-aware probabilistic trading signals for Indonesian equity markets with walk-forward backtesting."
+      />
       
-      <main className="flex-grow container mx-auto px-4 py-8">
-        <Breadcrumb items={breadcrumbItems} />
-        
-        <div className="mt-6 mb-8">
+      <div className="container py-8">
+        <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">Dika Quant Engine</h1>
-          <p className="text-muted-foreground">
-            Regime-aware probabilistic trading signals for Indonesian equity markets. No narratives. Data driven.
-          </p>
-        </div>
-
-        <div className="mb-6 p-4 bg-primary/5 rounded-lg border border-primary/20">
-          <div className="flex items-start gap-3">
-            <Shield className="h-5 w-5 text-primary mt-0.5" />
-            <div>
-              <h3 className="font-medium text-primary">Quantitative Philosophy</h3>
-              <ul className="text-sm text-muted-foreground mt-1 space-y-1">
-                <li>• Many weak signals combined. No single indicator reliance.</li>
-                <li>• Regime-aware allocation. Strategy weights shift with market state.</li>
-                <li>• Half-Kelly sizing. Conservative position management.</li>
-                <li>• Walk-forward backtesting only. No in-sample optimization.</li>
-              </ul>
-            </div>
+          <div className="text-sm text-muted-foreground space-y-1">
+            <p><strong>What to Check:</strong> Regime state, signal probability, backtest metrics, position risk.</p>
+            <p><strong>Decision Supported:</strong> Is current regime favorable? What edge exists? What position size?</p>
           </div>
         </div>
+
+        <Card className="mb-6 bg-primary/5 border-primary/20">
+          <CardContent className="py-4">
+            <div className="flex items-start gap-3">
+              <Shield className="h-5 w-5 text-primary mt-0.5" />
+              <div>
+                <h3 className="font-medium text-primary">Quantitative Philosophy</h3>
+                <ul className="text-sm text-muted-foreground mt-1 space-y-1">
+                  <li>• Many weak signals combined. No single indicator reliance.</li>
+                  <li>• Regime-aware allocation. Strategy weights shift with market state.</li>
+                  <li>• Half-Kelly sizing. Conservative position management.</li>
+                  <li>• Walk-forward backtesting only. No in-sample optimization.</li>
+                </ul>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         <Tabs defaultValue="signals" className="space-y-6">
           <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 lg:w-auto">
@@ -112,10 +120,8 @@ const DikaQuantEngine = () => {
             <QuantSystemHealth />
           </TabsContent>
         </Tabs>
-      </main>
-
-      <Footer />
-    </div>
+      </div>
+    </PageLayout>
   );
 };
 

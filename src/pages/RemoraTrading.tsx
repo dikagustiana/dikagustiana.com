@@ -1,7 +1,7 @@
-import { Header } from '@/components/Header';
-import { Footer } from '@/components/Footer';
-import { Breadcrumb } from '@/components/Breadcrumb';
+import { PageLayout } from '@/components/layouts/PageLayout';
+import { SEO } from '@/components/SEO';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent } from '@/components/ui/card';
 import { RemoraHealthStatus } from '@/components/remora/RemoraHealthStatus';
 import { RemoraSignalsList } from '@/components/remora/RemoraSignalsList';
 import { RemoraDataIngestion } from '@/components/remora/RemoraDataIngestion';
@@ -16,41 +16,49 @@ import {
 } from 'lucide-react';
 
 const RemoraTrading = () => {
-  const breadcrumbItems = [
-    { label: "Home", href: "/" },
-    { label: "Dika's Tools", href: "/dikas-tools" },
-    { label: "Remora Trading" }
-  ];
-
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <Header />
+    <PageLayout
+      variant="tool"
+      role="manager"
+      breadcrumbs={[
+        { label: 'Home', path: '/' },
+        { label: "Dika's Tools", path: '/dikas-tools' },
+        { label: 'Remora Trading' }
+      ]}
+      showManifesto
+      manifesto="Signals are hypotheses, not instructions. Check data freshness. Verify before acting."
+    >
+      <SEO
+        title="Remora Trading"
+        description="Semi-automated trading signals for Indonesian equity markets using IDX data. Data-driven decision support."
+      />
       
-      <main className="flex-grow container mx-auto px-4 py-8">
-        <Breadcrumb items={breadcrumbItems} />
-        
-        <div className="mt-6 mb-8">
+      <div className="container py-8">
+        <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">Remora Trading Decision System</h1>
-          <p className="text-muted-foreground">
-            Semi-automated trading signals for Indonesian equity markets using IDX data.
-          </p>
+          <div className="text-sm text-muted-foreground space-y-1">
+            <p><strong>What to Check:</strong> Signal freshness, data quality, position sizing, regime state.</p>
+            <p><strong>Decision Supported:</strong> Which signals to act on? What size per position?</p>
+          </div>
         </div>
 
         {/* Data Integrity Notice */}
-        <div className="mb-6 p-4 bg-primary/5 rounded-lg border border-primary/20">
-          <div className="flex items-start gap-3">
-            <Shield className="h-5 w-5 text-primary mt-0.5" />
-            <div>
-              <h3 className="font-medium text-primary">Data Integrity Policy</h3>
-              <ul className="text-sm text-muted-foreground mt-1 space-y-1">
-                <li>• Only verified IDX and IDX-derived free public data sources allowed</li>
-                <li>• All data is validated before storage (OHLC logic, volume, price ranges)</li>
-                <li>• Signals are blocked or downgraded when data is stale or corrupted</li>
-                <li>• Every output shows the last successful data update timestamp</li>
-              </ul>
+        <Card className="mb-6 bg-primary/5 border-primary/20">
+          <CardContent className="py-4">
+            <div className="flex items-start gap-3">
+              <Shield className="h-5 w-5 text-primary mt-0.5" />
+              <div>
+                <h3 className="font-medium text-primary">Data Integrity Policy</h3>
+                <ul className="text-sm text-muted-foreground mt-1 space-y-1">
+                  <li>• Only verified IDX and IDX-derived free public data sources</li>
+                  <li>• All data validated before storage (OHLC logic, volume, price ranges)</li>
+                  <li>• Signals blocked or downgraded when data is stale or corrupted</li>
+                  <li>• Every output shows last successful data update timestamp</li>
+                </ul>
+              </div>
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
         <Tabs defaultValue="dashboard" className="space-y-6">
           <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:inline-grid">
@@ -101,25 +109,24 @@ const RemoraTrading = () => {
         </Tabs>
 
         {/* Disclaimer */}
-        <div className="mt-8 p-4 bg-yellow-500/10 rounded-lg border border-yellow-500/20">
-          <div className="flex items-start gap-3">
-            <AlertTriangle className="h-5 w-5 text-yellow-600 mt-0.5" />
-            <div>
-              <h3 className="font-medium text-yellow-700">Trading Disclaimer</h3>
-              <p className="text-sm text-yellow-600 mt-1">
-                This is a decision support system, not financial advice. All signals are based on 
-                technical analysis and historical data. Past performance does not guarantee future 
-                results. Always conduct your own research and consult with a qualified financial 
-                advisor before making investment decisions. The system will clearly indicate when 
-                data is stale or confidence is low.
-              </p>
+        <Card className="mt-8 bg-amber-500/10 border-amber-500/20">
+          <CardContent className="py-4">
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="h-5 w-5 text-amber-600 mt-0.5" />
+              <div>
+                <h3 className="font-medium text-amber-700">Trading Disclaimer</h3>
+                <p className="text-sm text-amber-600 mt-1">
+                  This is a decision support system, not financial advice. All signals are based on 
+                  technical analysis and historical data. Past performance does not guarantee future 
+                  results. Always conduct your own research. The system indicates when data is stale 
+                  or confidence is low.
+                </p>
+              </div>
             </div>
-          </div>
-        </div>
-      </main>
-
-      <Footer />
-    </div>
+          </CardContent>
+        </Card>
+      </div>
+    </PageLayout>
   );
 };
 
