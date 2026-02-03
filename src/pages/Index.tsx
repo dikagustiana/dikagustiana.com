@@ -1,51 +1,47 @@
-import { useState, useEffect } from 'react';
-import { Layout } from '@/components/Layout';
-import { HeroSection } from '@/components/HeroSection';
+import { PageLayout } from '@/components/layouts/PageLayout';
+import { SEO } from '@/components/SEO';
 import { Card, CardContent } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
-import { ArrowRight, BarChart3, BookOpen, Leaf, Lightbulb, Clock, User } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { ArrowRight, BarChart3, BookOpen, Leaf, Lightbulb, Clock, User, GraduationCap } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { useFeaturedEssays } from '@/hooks/queries/useEssays';
+import { LoadingState } from '@/components/states/LoadingState';
 
-interface FeaturedEssay {
-  id: string;
-  slug: string;
-  title: string;
-  snippet: string | null;
-  section: string;
-  phase: string | null;
-  author: string | null;
-  read_time: string | null;
-}
-
-const learningPaths = [
+const sections = [
   {
     icon: BarChart3,
     title: 'Finance',
-    description: 'How financial models support decisions. Scenario analysis, capital allocation, and the real economics of asset-heavy businesses.',
+    description: 'How to calculate, analyze, and support decisions. Not theory—procedure.',
     path: '/finance-101',
     accent: 'text-blue-500',
   },
   {
     icon: BookOpen,
     title: 'Accounting',
-    description: 'Why consolidation matters, how accounting policy shapes economics, and the reality of group structures under PSAK.',
+    description: 'Consolidation, policy choices, PSAK application. What you check, what you calculate.',
     path: '/accounting',
     accent: 'text-purple-500',
   },
   {
     icon: Leaf,
     title: 'Green Transition',
-    description: 'The energy transition as a financial and economic problem—costs, incentives, constraints, and who bears the burden.',
+    description: 'The economics of decarbonization. Who pays, who benefits, what trade-offs exist.',
     path: '/green-transition',
     accent: 'text-accent',
   },
   {
     icon: Lightbulb,
     title: 'The Next Big Thing',
-    description: 'Speculative but reasoned essays on the forces shaping industry, finance, and policy. Critical questions, not predictions.',
+    description: 'Rigorous speculation about structural shifts. Winners, losers, second-order effects.',
     path: '/the-next-big-thing',
     accent: 'text-amber-500',
+  },
+  {
+    icon: GraduationCap,
+    title: 'IELTS Preparation',
+    description: 'Band 7+ methodology. Time limits, task protocols, scoring criteria.',
+    path: '/english-ielts',
+    accent: 'text-green-500',
   },
 ];
 
@@ -55,7 +51,7 @@ const getSectionLabel = (section: string, phase: string | null) => {
   return section;
 };
 
-const getEssayLink = (essay: FeaturedEssay) => {
+const getEssayLink = (essay: { section: string; phase: string | null; slug: string }) => {
   if (essay.section === 'green-transition' && essay.phase) {
     return `/green-transition/${essay.phase}/${essay.slug}`;
   }
@@ -66,51 +62,67 @@ const getEssayLink = (essay: FeaturedEssay) => {
 };
 
 const Index = () => {
-  const [featuredEssays, setFeaturedEssays] = useState<FeaturedEssay[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const loadFeaturedEssays = async () => {
-      try {
-        const { data } = await supabase
-          .from('essays')
-          .select('id, slug, title, snippet, section, phase, author, read_time')
-          .eq('published', true)
-          .order('created_at', { ascending: false })
-          .limit(4);
-        
-        setFeaturedEssays(data || []);
-      } catch (error) {
-        console.error('Error loading featured essays:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadFeaturedEssays();
-  }, []);
+  const { data: featuredEssays, isLoading } = useFeaturedEssays(4);
 
   return (
-    <Layout>
-      <HeroSection 
-        title="Every Great Story Begins with Someone Who Was Scared but Did It Anyway"
-        subtitle="Just begin. Messy, nervous, unsure. That's how the best stories start."
-        ctaText="Choose Your Path"
+    <PageLayout role="hybrid">
+      <SEO 
+        title="Technical Education Site"
+        description="Finance, accounting, green transition economics, and IELTS preparation. Opinionated and practical content for professionals."
       />
-      
-      {/* Featured Analysis Section */}
-      {!loading && featuredEssays.length > 0 && (
-        <div className="py-16 bg-card border-y border-border">
-          <div className="section-container">
-            <div className="flex items-center justify-between mb-8">
-              <div>
-                <h2 className="text-xl md:text-2xl font-display font-semibold text-foreground mb-2">
-                  Featured Analysis
-                </h2>
-                <p className="text-muted-foreground text-sm">
-                  Recent essays demonstrating how we think about finance, accounting, and transition economics.
-                </p>
-              </div>
+
+      {/* Hero - Hybrid Voice */}
+      <section className="py-16 md:py-24 bg-gradient-to-b from-background to-muted/30">
+        <div className="container max-w-4xl text-center">
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-display font-bold text-foreground mb-6">
+            This is a technical education site.
+          </h1>
+          
+          <div className="text-left max-w-2xl mx-auto space-y-4 text-muted-foreground">
+            <p className="text-lg">It covers:</p>
+            <ul className="space-y-2 text-base">
+              <li className="flex items-start gap-2">
+                <span className="text-blue-500 font-semibold">Finance & Accounting:</span>
+                <span>How to do the job correctly</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-accent font-semibold">Green Transition:</span>
+                <span>Economic analysis of decarbonization</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-amber-500 font-semibold">Essays:</span>
+                <span>Rigorous thinking about industry shifts</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-purple-500 font-semibold">Books:</span>
+                <span>Readings that build capability</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-green-500 font-semibold">IELTS:</span>
+                <span>Structured exam preparation</span>
+              </li>
+            </ul>
+            <p className="text-base pt-4 border-t border-border mt-6">
+              The material is opinionated and practical.
+            </p>
+            <p className="text-foreground font-medium">
+              Pick a section. Do the work.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Featured Analysis */}
+      {!isLoading && featuredEssays && featuredEssays.length > 0 && (
+        <section className="py-12 bg-card border-y border-border">
+          <div className="container">
+            <div className="mb-8">
+              <h2 className="text-xl font-display font-semibold text-foreground mb-2">
+                Recent Analysis
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                Latest essays across sections.
+              </p>
             </div>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -147,39 +159,43 @@ const Index = () => {
               ))}
             </div>
           </div>
-        </div>
+        </section>
       )}
 
-      {/* Learning Paths Section */}
-      <div id="main-content" className="py-16 section-container">
+      {isLoading && (
+        <section className="py-12 bg-card border-y border-border">
+          <div className="container">
+            <LoadingState variant="cards" count={4} />
+          </div>
+        </section>
+      )}
+
+      {/* Sections Grid */}
+      <section id="main-content" className="py-16 container">
         <div className="max-w-4xl mx-auto mb-12">
-          <h2 className="text-2xl md:text-3xl font-display font-semibold text-foreground mb-4 text-center">
-            What You'll Find Here
+          <h2 className="text-2xl font-display font-semibold text-foreground mb-4 text-center">
+            Sections
           </h2>
-          <p className="text-muted-foreground text-center max-w-2xl mx-auto">
-            Practical knowledge from real experience. No textbook definitions. No corporate jargon. 
-            Just clear explanations of how things actually work.
-          </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
-          {learningPaths.map((path) => (
-            <Link key={path.path} to={path.path}>
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+          {sections.map((section) => (
+            <Link key={section.path} to={section.path}>
               <Card className="h-full hover:shadow-lg transition-all hover:-translate-y-1 cursor-pointer group">
                 <CardContent className="p-6">
                   <div className="flex items-start gap-4">
-                    <div className={`p-3 rounded-lg bg-secondary ${path.accent}`}>
-                      <path.icon className="h-6 w-6" />
+                    <div className={`p-3 rounded-lg bg-secondary ${section.accent}`}>
+                      <section.icon className="h-5 w-5" />
                     </div>
                     <div className="flex-1">
                       <h3 className="text-lg font-semibold text-foreground mb-2 group-hover:text-accent transition-colors">
-                        {path.title}
+                        {section.title}
                       </h3>
                       <p className="text-sm text-muted-foreground leading-relaxed mb-3">
-                        {path.description}
+                        {section.description}
                       </p>
                       <span className="text-sm font-medium text-accent inline-flex items-center gap-1 group-hover:gap-2 transition-all">
-                        Explore
+                        Enter
                         <ArrowRight className="h-4 w-4" />
                       </span>
                     </div>
@@ -189,34 +205,8 @@ const Index = () => {
             </Link>
           ))}
         </div>
-      </div>
-
-      {/* Philosophy Section */}
-      <div className="bg-secondary/50 py-16">
-        <div className="section-container">
-          <div className="max-w-3xl mx-auto">
-            <h2 className="text-xl md:text-2xl font-display font-semibold text-foreground mb-6 text-center">
-              Why This Exists
-            </h2>
-            <div className="space-y-4 text-muted-foreground">
-              <p>
-                Most finance and accounting content falls into two camps: oversimplified "explainers" 
-                that miss the nuance, or dense textbooks that bury the insight under formality.
-              </p>
-              <p>
-                This site is different. It's built by someone who prepares consolidated financial statements, 
-                builds financial models for real decisions, and thinks seriously about what the energy 
-                transition means for businesses and economies.
-              </p>
-              <p>
-                The goal is simple: explain complex ideas clearly, highlight the trade-offs that actually 
-                matter, and help you think through problems—not just memorize definitions.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </Layout>
+      </section>
+    </PageLayout>
   );
 };
 
