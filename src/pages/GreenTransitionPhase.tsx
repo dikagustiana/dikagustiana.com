@@ -1,4 +1,4 @@
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { PageLayout } from '@/components/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { LoadingState, EmptyState } from '@/components/states';
-import { Plus, ArrowLeft, ArrowRight, User, Clock, Calendar } from 'lucide-react';
+import { Plus, ArrowLeft, ArrowRight, User, Clock } from 'lucide-react';
 
 const phaseDetails: Record<string, { title: string; coreQuestion: string; section: string }> = {
   'where-we-are-now': { 
@@ -42,6 +42,7 @@ interface Essay {
 export default function GreenTransitionPhase() {
   const { phase } = useParams<{ phase: string }>();
   const { isAdmin } = useAuth();
+  const navigate = useNavigate();
   const [essays, setEssays] = useState<Essay[]>([]);
   const [sortBy, setSortBy] = useState('latest');
   const [loading, setLoading] = useState(true);
@@ -84,6 +85,11 @@ export default function GreenTransitionPhase() {
 
   const defaultThumbnail = 'https://images.unsplash.com/photo-1466611653911-95081537e5b7?w=600&q=80';
 
+  const handleAddEssay = () => {
+    // Navigate to admin content editor with pre-filled section and phase
+    navigate(`/admin/content/new?section=green-transition&phase=${details?.section || ''}`);
+  };
+
   return (
     <PageLayout
       variant="content"
@@ -123,7 +129,7 @@ export default function GreenTransitionPhase() {
           </div>
 
           {isAdmin && (
-            <Button>
+            <Button onClick={handleAddEssay}>
               <Plus className="h-4 w-4 mr-2" />
               Add Essay
             </Button>
