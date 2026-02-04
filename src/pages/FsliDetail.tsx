@@ -10,6 +10,7 @@ import { FsliMobileSidebar } from '@/components/fsli/FsliMobileSidebar';
 import { getFsliItemBySlug } from '@/data/fsliData';
 import { useAuth } from '@/contexts/AuthContext';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { RefreshCw, Clock, ChevronRight, Pencil } from 'lucide-react';
 
 // Content sections configuration
@@ -148,12 +149,20 @@ export default function FsliDetail() {
 
               {/* Admin Banner */}
               {!authLoading && isAdmin && (
-                <div className="bg-primary/10 border border-primary/20 rounded-lg p-3 mb-6 flex items-center gap-3">
+                <div className="bg-primary/10 border border-primary/20 rounded-lg p-3 mb-6 flex flex-col md:flex-row md:items-center gap-3">
                   <Badge variant="outline" className="bg-primary/20">Admin</Badge>
-                  <span className="text-sm text-muted-foreground flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground flex items-center gap-2 flex-1">
                     <Pencil className="h-4 w-4" />
-                    Klik pada bagian konten mana saja untuk mengedit langsung
+                    Scroll ke section di bawah (Definition, Recognition, dst.) lalu klik ikon pensil atau teksnya untuk edit. (Judul & Key points belum editable.)
                   </span>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => document.getElementById('definition')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+                  >
+                    Ke Definition
+                  </Button>
                 </div>
               )}
 
