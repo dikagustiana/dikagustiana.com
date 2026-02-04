@@ -228,11 +228,15 @@ export type Database = {
         Row: {
           author: string | null
           category_id: string | null
+          coach_fields: Json | null
           content: string | null
           created_at: string
           date: string | null
+          economist_fields: Json | null
+          educator_fields: Json | null
           id: string
           learning_outcomes: string[] | null
+          manager_fields: Json | null
           phase: string | null
           prerequisites: string[] | null
           published: boolean | null
@@ -241,19 +245,25 @@ export type Database = {
           slug: string
           snippet: string | null
           sort_order: number | null
+          status: Database["public"]["Enums"]["content_status_enum"] | null
           thumbnail_url: string | null
           title: string
           updated_at: string
           voice_role: string | null
+          voice_validated_at: string | null
         }
         Insert: {
           author?: string | null
           category_id?: string | null
+          coach_fields?: Json | null
           content?: string | null
           created_at?: string
           date?: string | null
+          economist_fields?: Json | null
+          educator_fields?: Json | null
           id?: string
           learning_outcomes?: string[] | null
+          manager_fields?: Json | null
           phase?: string | null
           prerequisites?: string[] | null
           published?: boolean | null
@@ -262,19 +272,25 @@ export type Database = {
           slug: string
           snippet?: string | null
           sort_order?: number | null
+          status?: Database["public"]["Enums"]["content_status_enum"] | null
           thumbnail_url?: string | null
           title: string
           updated_at?: string
           voice_role?: string | null
+          voice_validated_at?: string | null
         }
         Update: {
           author?: string | null
           category_id?: string | null
+          coach_fields?: Json | null
           content?: string | null
           created_at?: string
           date?: string | null
+          economist_fields?: Json | null
+          educator_fields?: Json | null
           id?: string
           learning_outcomes?: string[] | null
+          manager_fields?: Json | null
           phase?: string | null
           prerequisites?: string[] | null
           published?: boolean | null
@@ -283,10 +299,12 @@ export type Database = {
           slug?: string
           snippet?: string | null
           sort_order?: number | null
+          status?: Database["public"]["Enums"]["content_status_enum"] | null
           thumbnail_url?: string | null
           title?: string
           updated_at?: string
           voice_role?: string | null
+          voice_validated_at?: string | null
         }
         Relationships: [
           {
@@ -1501,7 +1519,9 @@ export type Database = {
         | "crypto"
         | "other"
       app_role: "admin" | "user"
+      content_status_enum: "draft" | "tone_pending" | "published" | "archived"
       transaction_type: "income" | "expense" | "transfer"
+      voice_role_enum: "manager" | "economist" | "educator" | "coach" | "hybrid"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1641,7 +1661,9 @@ export const Constants = {
         "other",
       ],
       app_role: ["admin", "user"],
+      content_status_enum: ["draft", "tone_pending", "published", "archived"],
       transaction_type: ["income", "expense", "transfer"],
+      voice_role_enum: ["manager", "economist", "educator", "coach", "hybrid"],
     },
   },
 } as const

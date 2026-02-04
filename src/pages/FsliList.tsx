@@ -6,45 +6,47 @@ import { Footer } from '@/components/Footer';
 import { Breadcrumb } from '@/components/Breadcrumb';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { fsliItems, FsliItem } from '@/data/fsliData';
+import { useFsliPages, FsliPage } from '@/hooks/queries/useFsliPages';
+import { LoadingState } from '@/components/states';
 
 export default function FsliList() {
   const [searchTerm, setSearchTerm] = useState('');
+  const { data: fsliPages = [], isLoading } = useFsliPages();
 
-  const filteredItems = fsliItems.filter(item =>
-    item.english.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.indonesian.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredItems = fsliPages.filter(item =>
+    item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (item.subtitle && item.subtitle.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   const currentAssets = filteredItems.filter(item => item.category === 'current_assets');
   const nonCurrentAssets = filteredItems.filter(item => item.category === 'non_current_assets');
 
   // Calculate totals
-  const parseNumber = (str: string) => parseFloat(str.replace(/,/g, '')) || 0;
+  const parseNumber = (str: string | null) => str ? parseFloat(str.replace(/,/g, '')) || 0 : 0;
   const formatNumber = (num: number) => num.toLocaleString('en-US');
   
-  const totalCurrentAssets2024 = currentAssets.reduce((sum, item) => sum + parseNumber(item.dec2024), 0);
-  const totalCurrentAssets2023 = currentAssets.reduce((sum, item) => sum + parseNumber(item.dec2023), 0);
-  const totalNonCurrentAssets2024 = nonCurrentAssets.reduce((sum, item) => sum + parseNumber(item.dec2024), 0);
-  const totalNonCurrentAssets2023 = nonCurrentAssets.reduce((sum, item) => sum + parseNumber(item.dec2023), 0);
+  const totalCurrentAssets2024 = currentAssets.reduce((sum, item) => sum + parseNumber(item.dec_2024), 0);
+  const totalCurrentAssets2023 = currentAssets.reduce((sum, item) => sum + parseNumber(item.dec_2023), 0);
+  const totalNonCurrentAssets2024 = nonCurrentAssets.reduce((sum, item) => sum + parseNumber(item.dec_2024), 0);
+  const totalNonCurrentAssets2023 = nonCurrentAssets.reduce((sum, item) => sum + parseNumber(item.dec_2023), 0);
   const totalAssets2024 = totalCurrentAssets2024 + totalNonCurrentAssets2024;
   const totalAssets2023 = totalCurrentAssets2023 + totalNonCurrentAssets2023;
 
-  const renderRow = (item: FsliItem, isIndented = false) => (
+  const renderRow = (item: FsliPage, isIndented = false) => (
     <tr key={item.slug} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
       <td className="py-3 px-4">
         <Link to={`/accounting/fsli/${item.slug}`} className="hover:text-accent transition-colors">
-          <span className={isIndented ? 'pl-4' : ''}>{item.indonesian}</span>
+          <span className={isIndented ? 'pl-4' : ''}>{item.subtitle || item.title}</span>
         </Link>
-        {item.notes && (
-          <div className="text-xs text-muted-foreground">{item.notes}</div>
+        {item.notes_ref && (
+          <div className="text-xs text-muted-foreground">{item.notes_ref}</div>
         )}
       </td>
-      <td className="py-3 px-4 text-right font-mono text-sm">{item.dec2024}</td>
-      <td className="py-3 px-4 text-right font-mono text-sm text-muted-foreground">{item.dec2023}</td>
+      <td className="py-3 px-4 text-right font-mono text-sm">{item.dec_2024}</td>
+      <td className="py-3 px-4 text-right font-mono text-sm text-muted-foreground">{item.dec_2023}</td>
       <td className="py-3 px-4 text-right text-muted-foreground text-sm">
         <Link to={`/accounting/fsli/${item.slug}`} className="hover:text-accent transition-colors">
-          {item.english}
+          {item.title}
         </Link>
       </td>
     </tr>
@@ -70,6 +72,18 @@ export default function FsliList() {
       </td>
     </tr>
   );
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex flex-col bg-background">
+        <Header />
+        <main className="flex-1 container py-8">
+          <LoadingState />
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-background">

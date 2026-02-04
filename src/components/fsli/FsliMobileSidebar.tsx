@@ -2,23 +2,24 @@ import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { fsliItems } from '@/data/fsliData';
+import { useFsliPages } from '@/hooks/queries/useFsliPages';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 export function FsliMobileSidebar() {
   const { slug } = useParams();
   const [isOpen, setIsOpen] = useState(false);
+  const { data: fsliPages = [] } = useFsliPages();
 
-  const currentItem = fsliItems.find(item => item.slug === slug);
-  const currentAssets = fsliItems.filter(item => item.category === 'current_assets');
-  const nonCurrentAssets = fsliItems.filter(item => item.category === 'non_current_assets');
+  const currentItem = fsliPages.find(item => item.slug === slug);
+  const currentAssets = fsliPages.filter(item => item.category === 'current_assets');
+  const nonCurrentAssets = fsliPages.filter(item => item.category === 'non_current_assets');
 
   return (
     <div className="lg:hidden mb-6">
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <CollapsibleTrigger className="flex items-center justify-between w-full py-3 px-4 bg-card rounded-lg border border-border">
           <span className="font-medium text-sm">
-            {currentItem?.english || 'Select FSLI Item'}
+            {currentItem?.title || 'Select FSLI Item'}
           </span>
           <ChevronDown className={cn(
             "h-4 w-4 transition-transform",
@@ -43,7 +44,7 @@ export function FsliMobileSidebar() {
                       : "hover:bg-secondary"
                   )}
                 >
-                  {item.english}
+                  {item.title}
                 </Link>
               ))}
             </div>
@@ -63,7 +64,7 @@ export function FsliMobileSidebar() {
                       : "hover:bg-secondary"
                   )}
                 >
-                  {item.english}
+                  {item.title}
                 </Link>
               ))}
             </div>

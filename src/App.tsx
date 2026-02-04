@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { AuthProvider } from "@/contexts/AuthContext";
 
@@ -11,7 +11,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Accounting from "./pages/Accounting";
 import Finance101 from "./pages/Finance101";
-import MasyarakatBaru from "./pages/MasyarakatBaru";
+// MasyarakatBaru removed - sections flattened to direct access
 import GreenTransition from "./pages/GreenTransition";
 import NotFound from "./pages/NotFound";
 
@@ -115,11 +115,11 @@ const App = () => (
             <Route path="/green-transition/:phase" element={<GreenTransitionPhase />} />
             <Route path="/green-transition/:phase/:slug" element={<GreenTransitionEssay />} />
             
-            {/* Masyarakat Baru */}
-            <Route path="/masyarakat-baru" element={<MasyarakatBaru />} />
-            <Route path="/masyarakat-baru/english-ielts" element={<EnglishIelts />} />
-            <Route path="/masyarakat-baru/books-academia" element={<BooksAcademia />} />
-            <Route path="/masyarakat-baru/critical-thinking-research" element={<CriticalThinkingResearch />} />
+            {/* Legacy Masyarakat Baru routes - redirect to flattened sections */}
+            <Route path="/masyarakat-baru" element={<Navigate to="/critical-thinking-research" replace />} />
+            <Route path="/masyarakat-baru/english-ielts" element={<Navigate to="/english-ielts" replace />} />
+            <Route path="/masyarakat-baru/books-academia" element={<Navigate to="/books-academia" replace />} />
+            <Route path="/masyarakat-baru/critical-thinking-research" element={<Navigate to="/critical-thinking-research" replace />} />
             
             {/* Critical Thinking */}
             <Route path="/critical-thinking-research" element={<CriticalThinkingResearch />} />

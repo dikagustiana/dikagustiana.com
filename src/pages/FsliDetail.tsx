@@ -7,10 +7,11 @@ import { FsliOnThisPage } from '@/components/fsli/FsliOnThisPage';
 import { FsliHeroSection } from '@/components/fsli/FsliHeroSection';
 import { FsliContentSection } from '@/components/fsli/FsliContentSection';
 import { FsliMobileSidebar } from '@/components/fsli/FsliMobileSidebar';
-import { getFsliItemBySlug } from '@/data/fsliData';
+import { useFsliPage } from '@/hooks/queries/useFsliPages';
 import { useAuth } from '@/contexts/AuthContext';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { LoadingState } from '@/components/states';
 import { RefreshCw, Clock, ChevronRight, Pencil } from 'lucide-react';
 
 // Content sections configuration
@@ -72,22 +73,19 @@ const buildTocSections = () => [
 ];
 
 // Generate key points based on item
-const getKeyPoints = (itemSlug: string) => {
-  const defaultPoints = [
+const getKeyPoints = () => {
+  return [
     'Include currency, bank deposits, and highly liquid investments with original maturities of three months or less',
     'Recognition requires the asset to be readily convertible to cash and subject to insignificant risk of value changes',
     'Proper presentation and disclosure are essential for transparency in financial reporting'
   ];
-  
-  // Could be enhanced to return item-specific key points from database
-  return defaultPoints;
 };
 
 export default function FsliDetail() {
   const { slug } = useParams<{ slug: string }>();
   const [activeSection, setActiveSection] = useState<string>('definition');
   const { isAdmin, isLoading: authLoading } = useAuth();
-  const item = slug ? getFsliItemBySlug(slug) : null;
+  const { data: item, isLoading, error } = useFsliPage(slug || '');
 
   // Track active section on scroll
   useEffect(() => {
@@ -110,13 +108,25 @@ export default function FsliDetail() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  if (!item) {
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex flex-col bg-background">
+        <Header />
+        <main className="flex-1 container py-8">
+          <LoadingState />
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (!item || error) {
     return <Navigate to="/accounting/fsli" replace />;
   }
 
   const tocSections = buildTocSections();
-  const keyPoints = getKeyPoints(slug!);
-  const heroDescription = `${item.english} represent important components on a company's balance sheet`;
+  const keyPoints = getKeyPoints();
+  const heroDescription = `${item.title} represent important components on a company's balance sheet`;
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -134,7 +144,7 @@ export default function FsliDetail() {
               FSLI
             </Link>
             <ChevronRight className="h-4 w-4" />
-            <span className="text-foreground">{item.english}</span>
+            <span className="text-foreground">{item.title}</span>
           </nav>
 
           {/* Three Column Layout */}
@@ -169,7 +179,7 @@ export default function FsliDetail() {
               {/* Title Section */}
               <div className="mb-6">
                 <h1 className="text-2xl md:text-3xl font-display font-bold text-primary mb-3">
-                  {item.english}
+                  {item.title}
                 </h1>
                 <div className="flex items-center gap-4 text-sm text-muted-foreground">
                   <span className="flex items-center gap-1.5">
@@ -185,7 +195,7 @@ export default function FsliDetail() {
 
               {/* Hero Section */}
               <FsliHeroSection
-                title={item.english}
+                title={item.title}
                 description={heroDescription}
                 keyPoints={keyPoints}
               />
