@@ -8,7 +8,9 @@ import { FsliHeroSection } from '@/components/fsli/FsliHeroSection';
 import { FsliContentSection } from '@/components/fsli/FsliContentSection';
 import { FsliMobileSidebar } from '@/components/fsli/FsliMobileSidebar';
 import { getFsliItemBySlug } from '@/data/fsliData';
-import { RefreshCw, Clock, ChevronRight } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { Badge } from '@/components/ui/badge';
+import { RefreshCw, Clock, ChevronRight, Pencil } from 'lucide-react';
 
 // Content sections configuration
 const contentSections = [
@@ -83,6 +85,7 @@ const getKeyPoints = (itemSlug: string) => {
 export default function FsliDetail() {
   const { slug } = useParams<{ slug: string }>();
   const [activeSection, setActiveSection] = useState<string>('definition');
+  const { isAdmin, isLoading: authLoading } = useAuth();
   const item = slug ? getFsliItemBySlug(slug) : null;
 
   // Track active section on scroll
@@ -142,6 +145,17 @@ export default function FsliDetail() {
             <div className="flex-1 min-w-0">
               {/* Mobile Sidebar */}
               <FsliMobileSidebar />
+
+              {/* Admin Banner */}
+              {!authLoading && isAdmin && (
+                <div className="bg-primary/10 border border-primary/20 rounded-lg p-3 mb-6 flex items-center gap-3">
+                  <Badge variant="outline" className="bg-primary/20">Admin</Badge>
+                  <span className="text-sm text-muted-foreground flex items-center gap-2">
+                    <Pencil className="h-4 w-4" />
+                    Klik pada bagian konten mana saja untuk mengedit langsung
+                  </span>
+                </div>
+              )}
 
               {/* Title Section */}
               <div className="mb-6">
