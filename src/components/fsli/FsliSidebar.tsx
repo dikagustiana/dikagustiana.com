@@ -1,12 +1,13 @@
 import { Link, useParams } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { fsliItems } from '@/data/fsliData';
+import { useFsliPages } from '@/hooks/queries/useFsliPages';
 
 export function FsliSidebar() {
   const { slug } = useParams();
+  const { data: fsliPages = [] } = useFsliPages();
 
-  const currentAssets = fsliItems.filter(item => item.category === 'current_assets');
-  const nonCurrentAssets = fsliItems.filter(item => item.category === 'non_current_assets');
+  const currentAssets = fsliPages.filter(item => item.category === 'current_assets');
+  const nonCurrentAssets = fsliPages.filter(item => item.category === 'non_current_assets');
 
   return (
     <aside className="w-64 flex-shrink-0 hidden lg:block">
@@ -31,7 +32,7 @@ export function FsliSidebar() {
                         : "text-muted-foreground hover:text-foreground hover:bg-secondary/50 border-transparent"
                     )}
                   >
-                    {item.english}
+                    {item.title}
                   </Link>
                 </li>
               ))}
@@ -55,7 +56,7 @@ export function FsliSidebar() {
                         : "text-muted-foreground hover:text-foreground hover:bg-secondary/50 border-transparent"
                     )}
                   >
-                    {item.english}
+                    {item.title}
                   </Link>
                 </li>
               ))}

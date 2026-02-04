@@ -15,14 +15,6 @@ const navSections: NavSection[] = [
   { label: 'Home', path: '/' },
   { label: 'Finance Workspace', path: '/finance-workspace' },
   { 
-    label: 'Masyarakat Baru',
-    items: [
-      { label: 'Critical Thinking and Research', path: '/critical-thinking-research' },
-      { label: 'Books and Academia', path: '/books-academia' },
-      { label: 'English - IELTS', path: '/english-ielts' },
-    ]
-  },
-  { 
     label: 'Accounting',
     items: [
       { label: 'FSLI Detail', path: '/accounting/fsli' },
@@ -48,6 +40,10 @@ const navSections: NavSection[] = [
     ]
   },
   { label: 'The Next Big Thing', path: '/the-next-big-thing' },
+  // Flattened from "Masyarakat Baru" - direct section access
+  { label: 'Critical Thinking', path: '/critical-thinking-research' },
+  { label: 'Books', path: '/books-academia' },
+  { label: 'IELTS', path: '/english-ielts' },
 ];
 
 export function MobileNav() {

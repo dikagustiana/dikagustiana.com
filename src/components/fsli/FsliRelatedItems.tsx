@@ -1,21 +1,15 @@
 import { Link, useParams } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { fsliItems } from '@/data/fsliData';
+import { useFsliPages } from '@/hooks/queries/useFsliPages';
 
 export function FsliRelatedItems() {
   const { slug } = useParams();
+  const { data: fsliPages = [] } = useFsliPages();
 
-  // Show a curated list of related items (not all items)
-  const relatedItems = [
-    { slug: 'trade-receivables-net', english: 'Trade and Other Receivables' },
-    { slug: 'cash-and-cash-equivalents', english: 'Cash and Cash Equivalents' },
-    { slug: 'inventories-net', english: 'Inventories' },
-    { slug: 'fixed-assets-net', english: 'Property, Plant and Equipment' },
-    { slug: 'investment-properties', english: 'Investment Properties' },
-    { slug: 'deferred-tax-assets', english: 'Intangible Assets' },
-    { slug: 'long-term-investments', english: 'Financial Assets' },
-    { slug: 'other-non-current-assets-final', english: 'Trade and Other Payables' },
-  ];
+  // Show a curated list of related items - first 8 items that aren't the current one
+  const relatedItems = fsliPages
+    .filter(item => item.slug !== slug)
+    .slice(0, 8);
 
   return (
     <aside className="w-56 flex-shrink-0 hidden lg:block">
@@ -37,7 +31,7 @@ export function FsliRelatedItems() {
                     : "text-muted-foreground hover:text-foreground hover:bg-muted/50 border-transparent"
                 )}
               >
-                {item.english}
+                {item.title}
               </Link>
             ))}
           </nav>

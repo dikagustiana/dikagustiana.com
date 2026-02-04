@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { PageLayout, VoiceRole } from '@/components/layouts/PageLayout';
+import { PageLayout } from '@/components/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
 import { useAuth } from '@/contexts/AuthContext';
 import { useEssay } from '@/hooks/queries/useEssays';
 import { useSections } from '@/hooks/queries/useSections';
 import { useUpdateEssay, useCreateEssay } from '@/hooks/queries/useAdminEssays';
 import { LoadingState, ErrorState } from '@/components/states';
-import { EssayTemplateForm } from '@/components/admin/EssayTemplateForm';
+import { ToneFieldsEditor } from '@/components/admin/ToneFieldsEditor';
 import { ContentHealthIndicator } from '@/components/admin/ContentHealthIndicator';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -15,8 +15,19 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Save, XCircle } from 'lucide-react';
+import { ArrowLeft, Save, XCircle, AlertTriangle, CheckCircle } from 'lucide-react';
+import { 
+  VoiceRole, 
+  ContentStatus,
+  ManagerFields, 
+  EconomistFields, 
+  EducatorFields, 
+  CoachFields,
+  validateToneFields 
+} from '@/lib/types/toneFields';
 
 export default function AdminContentEditor() {
   const { id } = useParams<{ id: string }>();
@@ -39,13 +50,27 @@ export default function AdminContentEditor() {
   const [section, setSection] = useState('');
   const [phase, setPhase] = useState('');
   const [voiceRole, setVoiceRole] = useState<VoiceRole>('hybrid');
-  const [published, setPublished] = useState(false);
+  const [status, setStatus] = useState<ContentStatus>('draft');
   const [author, setAuthor] = useState('Dika Gustiana');
   const [date, setDate] = useState('');
   const [readTime, setReadTime] = useState('');
-  const [templateValues, setTemplateValues] = useState<Record<string, string | string[]>>({});
-  const [isValid, setIsValid] = useState(true);
-  const [violations, setViolations] = useState<string[]>([]);
+  const [snippet, setSnippet] = useState('');
+  const [content, setContent] = useState('');
+
+  // Tone fields
+  const [managerFields, setManagerFields] = useState<Partial<ManagerFields>>({});
+  const [economistFields, setEconomistFields] = useState<Partial<EconomistFields>>({});
+  const [educatorFields, setEducatorFields] = useState<Partial<EducatorFields>>({});
+  const [coachFields, setCoachFields] = useState<Partial<CoachFields>>({});
+
+  // Validation state
+  const [toneValidation, setToneValidation] = useState<{ valid: boolean; missing: string[] }>({ valid: true, missing: [] });
+
+  // Validate tone fields whenever they change
+  useEffect(() => {
+    const validation = validateToneFields(voiceRole, managerFields, economistFields, educatorFields, coachFields);
+    setToneValidation(validation);
+  }, [voiceRole, managerFields, economistFields, educatorFields, coachFields]);
 
   // Load essay data when editing
   useEffect(() => {
@@ -55,18 +80,14 @@ export default function AdminContentEditor() {
       setSection(essay.section || '');
       setPhase(essay.phase || '');
       setVoiceRole((essay.voice_role as VoiceRole) || 'hybrid');
-      setPublished(essay.published || false);
       setAuthor(essay.author || 'Dika Gustiana');
       setDate(essay.date || '');
       setReadTime(essay.read_time || '');
+      setSnippet(essay.snippet || '');
+      setContent(essay.content || '');
       
-      // Parse content into template values
-      setTemplateValues({
-        snippet: essay.snippet || '',
-        content: essay.content || '',
-        prerequisites: essay.prerequisites || [],
-        learning_outcomes: essay.learning_outcomes || [],
-      });
+      // Parse tone fields from JSONB columns (would need to be added to the query)
+      // For now these will be empty until we update the essay type
     }
   }, [essay, isNew]);
 
@@ -93,7 +114,9 @@ export default function AdminContentEditor() {
     }
   }, [section, sections, essay?.voice_role]);
 
-  const handleSave = async () => {
+  const canPublish = toneValidation.valid || voiceRole === 'hybrid';
+
+  const handleSave = async (targetStatus: ContentStatus = status) => {
     if (!title || !slug || !section) {
       toast({
         title: 'Missing required fields',
@@ -103,20 +126,45 @@ export default function AdminContentEditor() {
       return;
     }
 
+    // Block publishing without valid tone fields
+    if (targetStatus === 'published' && !canPublish) {
+      toast({
+        title: 'Cannot publish',
+        description: `Missing required tone fields: ${toneValidation.missing.join(', ')}`,
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Get the appropriate tone fields based on role
+    const getToneFieldsData = () => {
+      switch (voiceRole) {
+        case 'manager':
+          return { manager_fields: managerFields };
+        case 'economist':
+          return { economist_fields: economistFields };
+        case 'educator':
+          return { educator_fields: educatorFields };
+        case 'coach':
+          return { coach_fields: coachFields };
+        default:
+          return {};
+      }
+    };
+
     const essayData = {
       title,
       slug,
       section,
       phase: phase || null,
       voice_role: voiceRole,
-      published,
+      published: targetStatus === 'published',
       author,
       date: date || null,
       read_time: readTime || null,
-      snippet: (templateValues.snippet as string) || null,
-      content: (templateValues.content as string) || null,
-      prerequisites: (templateValues.prerequisites as string[]) || null,
-      learning_outcomes: (templateValues.learning_outcomes as string[]) || null,
+      snippet: snippet || null,
+      content: content || null,
+      ...getToneFieldsData(),
     };
 
     try {
@@ -238,16 +286,47 @@ export default function AdminContentEditor() {
           </div>
           <div className="flex items-center gap-4">
             <ContentHealthIndicator
-              content={templateValues}
-              fullText={`${templateValues.snippet || ''} ${templateValues.content || ''}`}
+              content={{ snippet, content }}
+              fullText={`${snippet || ''} ${content || ''}`}
               role={voiceRole}
             />
-            <Button onClick={handleSave} disabled={updateEssay.isPending || createEssay.isPending}>
+            <Button 
+              variant="outline"
+              onClick={() => handleSave('draft')} 
+              disabled={updateEssay.isPending || createEssay.isPending}
+            >
+              Save Draft
+            </Button>
+            <Button 
+              onClick={() => handleSave('published')} 
+              disabled={updateEssay.isPending || createEssay.isPending || !canPublish}
+            >
               <Save className="h-4 w-4 mr-2" />
-              {isNew ? 'Create' : 'Save'}
+              Publish
             </Button>
           </div>
         </div>
+
+        {/* Tone Validation Warning */}
+        {!toneValidation.valid && voiceRole !== 'hybrid' && (
+          <Alert variant="destructive" className="mb-6">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle>Cannot Publish</AlertTitle>
+            <AlertDescription>
+              The following tone fields are required for {voiceRole} content: {toneValidation.missing.join(', ')}
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {canPublish && voiceRole !== 'hybrid' && (
+          <Alert className="mb-6 border-green-500/50 bg-green-500/10">
+            <CheckCircle className="h-4 w-4 text-green-600" />
+            <AlertTitle className="text-green-700 dark:text-green-400">Ready to Publish</AlertTitle>
+            <AlertDescription className="text-green-600 dark:text-green-300">
+              All required tone fields are complete.
+            </AlertDescription>
+          </Alert>
+        )}
 
         <div className="space-y-6">
           {/* Basic Info */}
@@ -349,42 +428,51 @@ export default function AdminContentEditor() {
                   />
                 </div>
               </div>
+            </CardContent>
+          </Card>
 
-              <div className="flex items-center gap-3 pt-2">
-                <Switch id="published" checked={published} onCheckedChange={setPublished} />
-                <Label htmlFor="published" className="cursor-pointer">
-                  Published
-                </Label>
+          {/* Content */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Content</CardTitle>
+              <CardDescription>The main content of the essay.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="snippet">Snippet (Preview Text)</Label>
+                <Textarea
+                  id="snippet"
+                  value={snippet}
+                  onChange={(e) => setSnippet(e.target.value)}
+                  placeholder="A brief preview of the content..."
+                  rows={3}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="content">Full Content</Label>
+                <Textarea
+                  id="content"
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                  placeholder="The full essay content..."
+                  rows={10}
+                />
               </div>
             </CardContent>
           </Card>
 
-          {/* Voice-Specific Template Form */}
-          <EssayTemplateForm
+          {/* Tone-Specific Fields */}
+          <ToneFieldsEditor
             role={voiceRole}
-            initialValues={templateValues}
-            onValuesChange={setTemplateValues}
-            onContentValidation={(valid, viols) => {
-              setIsValid(valid);
-              setViolations(viols);
-            }}
+            managerFields={managerFields}
+            economistFields={economistFields}
+            educatorFields={educatorFields}
+            coachFields={coachFields}
+            onManagerFieldsChange={setManagerFields}
+            onEconomistFieldsChange={setEconomistFields}
+            onEducatorFieldsChange={setEducatorFields}
+            onCoachFieldsChange={setCoachFields}
           />
-
-          {/* Validation Warnings */}
-          {violations.length > 0 && (
-            <Card className="border-destructive/50 bg-destructive/5">
-              <CardHeader>
-                <CardTitle className="text-destructive text-base">Content Warnings</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
-                  {violations.map((v, i) => (
-                    <li key={i}>{v}</li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-          )}
         </div>
       </div>
     </PageLayout>
