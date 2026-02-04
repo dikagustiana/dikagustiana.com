@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { PageLayout } from '@/components/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
 import { useAuth } from '@/contexts/AuthContext';
@@ -9,11 +9,12 @@ import { useUpdateEssay, useCreateEssay } from '@/hooks/queries/useAdminEssays';
 import { LoadingState, ErrorState } from '@/components/states';
 import { ToneFieldsEditor } from '@/components/admin/ToneFieldsEditor';
 import { ContentHealthIndicator } from '@/components/admin/ContentHealthIndicator';
+import { TemplateSelector } from '@/components/admin/TemplateSelector';
+import { DynamicListEditor } from '@/components/admin/DynamicListEditor';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Textarea } from '@/components/ui/textarea';
@@ -28,9 +29,11 @@ import {
   CoachFields,
   validateToneFields 
 } from '@/lib/types/toneFields';
+import { EssayTemplateType, applyTemplate, essayTemplates } from '@/lib/essayTemplates';
 
 export default function AdminContentEditor() {
   const { id } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
   const isNew = id === 'new';
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -43,6 +46,14 @@ export default function AdminContentEditor() {
   const { data: sections } = useSections();
   const updateEssay = useUpdateEssay();
   const createEssay = useCreateEssay();
+
+  // Template state (only for new essays)
+  const [selectedTemplate, setSelectedTemplate] = useState<EssayTemplateType>('blank');
+  const [templateApplied, setTemplateApplied] = useState(false);
+
+  // Dynamic lists for templates
+  const [keyPoints, setKeyPoints] = useState<string[]>([]);
+  const [steps, setSteps] = useState<string[]>([]);
 
   // Form state
   const [title, setTitle] = useState('');
@@ -66,6 +77,64 @@ export default function AdminContentEditor() {
   // Validation state
   const [toneValidation, setToneValidation] = useState<{ valid: boolean; missing: string[] }>({ valid: true, missing: [] });
 
+  // Initialize from URL params (for Add Essay from section pages)
+  useEffect(() => {
+    if (isNew) {
+      const urlSection = searchParams.get('section');
+      const urlPhase = searchParams.get('phase');
+      if (urlSection) setSection(urlSection);
+      if (urlPhase) setPhase(urlPhase);
+    }
+  }, [isNew, searchParams]);
+
+  // Handle template selection
+  const handleTemplateSelect = (templateId: EssayTemplateType) => {
+    setSelectedTemplate(templateId);
+    
+    if (templateId === 'blank') {
+      // Clear all template-generated content
+      setTitle('');
+      setSnippet('');
+      setContent('');
+      setKeyPoints([]);
+      setSteps([]);
+      setTemplateApplied(false);
+      return;
+    }
+
+    // Get template defaults for key points and steps
+    const template = essayTemplates[templateId];
+    const initialKeyPoints = template.keyPoints || [];
+    const initialSteps = template.steps || [];
+    
+    setKeyPoints(initialKeyPoints);
+    setSteps(initialSteps);
+
+    // Apply template with initial values
+    const { title: tTitle, snippet: tSnippet, content: tContent } = applyTemplate(
+      templateId,
+      initialKeyPoints,
+      initialSteps
+    );
+    
+    setTitle(tTitle);
+    setSnippet(tSnippet);
+    setContent(tContent);
+    setTemplateApplied(true);
+  };
+
+  // Update content when key points or steps change (only if template is applied)
+  useEffect(() => {
+    if (!templateApplied || selectedTemplate === 'blank') return;
+
+    const { content: updatedContent } = applyTemplate(
+      selectedTemplate,
+      keyPoints,
+      steps
+    );
+    setContent(updatedContent);
+  }, [keyPoints, steps, selectedTemplate, templateApplied]);
+
   // Validate tone fields whenever they change
   useEffect(() => {
     const validation = validateToneFields(voiceRole, managerFields, economistFields, educatorFields, coachFields);
@@ -85,9 +154,6 @@ export default function AdminContentEditor() {
       setReadTime(essay.read_time || '');
       setSnippet(essay.snippet || '');
       setContent(essay.content || '');
-      
-      // Parse tone fields from JSONB columns (would need to be added to the query)
-      // For now these will be empty until we update the essay type
     }
   }, [essay, isNew]);
 
@@ -252,6 +318,10 @@ export default function AdminContentEditor() {
     );
   }
 
+  // Determine if we should show dynamic lists based on template
+  const showKeyPoints = selectedTemplate === 'essay' && isNew;
+  const showSteps = selectedTemplate === 'tutorial' && isNew;
+
   return (
     <PageLayout
       variant="dashboard"
@@ -319,16 +389,24 @@ export default function AdminContentEditor() {
         )}
 
         {canPublish && voiceRole !== 'hybrid' && (
-          <Alert className="mb-6 border-green-500/50 bg-green-500/10">
-            <CheckCircle className="h-4 w-4 text-green-600" />
-            <AlertTitle className="text-green-700 dark:text-green-400">Ready to Publish</AlertTitle>
-            <AlertDescription className="text-green-600 dark:text-green-300">
+          <Alert className="mb-6 border-accent/50 bg-accent/10">
+            <CheckCircle className="h-4 w-4 text-accent-foreground" />
+            <AlertTitle className="text-accent-foreground">Ready to Publish</AlertTitle>
+            <AlertDescription className="text-muted-foreground">
               All required tone fields are complete.
             </AlertDescription>
           </Alert>
         )}
 
         <div className="space-y-6">
+          {/* Template Selector - Only for new essays */}
+          {isNew && (
+            <TemplateSelector
+              selectedTemplate={selectedTemplate}
+              onTemplateSelect={handleTemplateSelect}
+            />
+          )}
+
           {/* Basic Info */}
           <Card>
             <CardHeader>
@@ -431,11 +509,42 @@ export default function AdminContentEditor() {
             </CardContent>
           </Card>
 
+          {/* Dynamic Key Points - Only for Essay template */}
+          {showKeyPoints && (
+            <DynamicListEditor
+              title="Key Points"
+              description="Add unlimited key points for your essay. These will be inserted into the content."
+              items={keyPoints}
+              onItemsChange={setKeyPoints}
+              itemLabel="Point"
+              placeholder="Enter a key point..."
+            />
+          )}
+
+          {/* Dynamic Steps - Only for Tutorial template */}
+          {showSteps && (
+            <DynamicListEditor
+              title="Steps"
+              description="Add unlimited steps for your tutorial. These will be inserted into the content."
+              items={steps}
+              onItemsChange={setSteps}
+              itemLabel="Step"
+              placeholder="Enter a step..."
+            />
+          )}
+
           {/* Content */}
           <Card>
             <CardHeader>
               <CardTitle>Content</CardTitle>
-              <CardDescription>The main content of the essay.</CardDescription>
+              <CardDescription>
+                The main content of the essay.
+                {templateApplied && selectedTemplate !== 'blank' && (
+                  <span className="text-primary ml-2">
+                    (Pre-filled from {essayTemplates[selectedTemplate].name} template - you can edit freely)
+                  </span>
+                )}
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
@@ -453,9 +562,16 @@ export default function AdminContentEditor() {
                 <Textarea
                   id="content"
                   value={content}
-                  onChange={(e) => setContent(e.target.value)}
+                  onChange={(e) => {
+                    setContent(e.target.value);
+                    // If user manually edits content, disconnect from template auto-update
+                    if (templateApplied) {
+                      setTemplateApplied(false);
+                    }
+                  }}
                   placeholder="The full essay content..."
-                  rows={10}
+                  rows={12}
+                  className="font-mono text-sm"
                 />
               </div>
             </CardContent>
