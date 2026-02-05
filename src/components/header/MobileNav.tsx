@@ -48,6 +48,16 @@ const navSections: NavSection[] = [
       { label: 'IELTS', path: '/english-ielts' },
     ]
   },
+  { 
+    label: 'Themes',
+    items: [
+      { label: 'Technology', path: '/the-next-big-thing?theme=technology' },
+      { label: 'Economy', path: '/the-next-big-thing?theme=economy' },
+      { label: 'Society', path: '/the-next-big-thing?theme=society' },
+      { label: 'Environment', path: '/the-next-big-thing?theme=environment' },
+      { label: 'Governance', path: '/the-next-big-thing?theme=governance' },
+    ]
+  },
 ];
 
 export function MobileNav() {
