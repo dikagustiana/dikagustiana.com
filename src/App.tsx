@@ -62,6 +62,7 @@ import DebugAuth from "./pages/DebugAuth";
 import AdminHealth from "./pages/AdminHealth";
 import AdminContent from "./pages/AdminContent";
 import AdminContentEditor from "./pages/AdminContentEditor";
+import AdminDashboard from "./pages/AdminDashboard";
 import RemoraTrading from "./pages/RemoraTrading";
 import DikaQuantEngine from "./pages/DikaQuantEngine";
 import TheNextBigThing from "./pages/TheNextBigThing";
@@ -144,6 +145,7 @@ const App = () => (
             <Route path="/model/test" element={<ModelTest />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/debug/auth" element={<DebugAuth />} />
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="/admin/health" element={<AdminHealth />} />
             <Route path="/admin/content" element={<AdminContent />} />
             <Route path="/admin/content/:id" element={<AdminContentEditor />} />
