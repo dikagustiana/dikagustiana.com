@@ -40,10 +40,14 @@ const navSections: NavSection[] = [
     ]
   },
   { label: 'The Next Big Thing', path: '/the-next-big-thing' },
-  // Flattened from "Masyarakat Baru" - direct section access
-  { label: 'Critical Thinking', path: '/critical-thinking-research' },
-  { label: 'Books', path: '/books-academia' },
-  { label: 'IELTS', path: '/english-ielts' },
+  { 
+    label: 'Masyarakat Baru',
+    items: [
+      { label: 'Critical Thinking', path: '/critical-thinking-research' },
+      { label: 'Books', path: '/books-academia' },
+      { label: 'IELTS', path: '/english-ielts' },
+    ]
+  },
 ];
 
 export function MobileNav() {

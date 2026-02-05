@@ -22,6 +22,12 @@ const greenTransitionItems = [
   { label: 'Pathways Forward', path: '/green-transition/future' },
 ];
 
+const masyarakatBaruItems = [
+  { label: 'Critical Thinking', path: '/critical-thinking-research' },
+  { label: 'Books', path: '/books-academia' },
+  { label: 'IELTS', path: '/english-ielts' },
+];
+
 const financeWorkspaceItemsAdmin = [
   { label: "Dika's Tools", path: '/dikas-tools' },
 ];
@@ -85,27 +91,11 @@ export function MainNav() {
         The Next Big Thing
       </Link>
 
-      {/* Direct section access - flattened from "Masyarakat Baru" */}
-      <Link 
-        to="/critical-thinking-research" 
-        className={cn("nav-link", location.pathname.startsWith('/critical-thinking') && "nav-link-active")}
-      >
-        Critical Thinking
-      </Link>
-
-      <Link 
-        to="/books-academia" 
-        className={cn("nav-link", location.pathname.startsWith('/books') && "nav-link-active")}
-      >
-        Books
-      </Link>
-
-      <Link 
-        to="/english-ielts" 
-        className={cn("nav-link", isActive('/english-ielts') && "nav-link-active")}
-      >
-        IELTS
-      </Link>
+      <NavDropdown 
+        label="Masyarakat Baru" 
+        items={masyarakatBaruItems}
+        width="w-48"
+      />
 
       {isAdmin && (
         <Link 
