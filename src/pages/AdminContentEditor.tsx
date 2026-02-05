@@ -11,6 +11,8 @@ import { ToneFieldsEditor } from '@/components/admin/ToneFieldsEditor';
 import { ContentHealthIndicator } from '@/components/admin/ContentHealthIndicator';
 import { TemplateSelector } from '@/components/admin/TemplateSelector';
 import { DynamicListEditor } from '@/components/admin/DynamicListEditor';
+import { RichTextEditor, markdownToHtml, htmlToMarkdown } from '@/components/admin/RichTextEditor';
+import { ContentPreview } from '@/components/admin/ContentPreview';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -18,8 +20,14 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Textarea } from '@/components/ui/textarea';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  ResizablePanelGroup,
+  ResizablePanel,
+  ResizableHandle,
+} from '@/components/ui/resizable';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Save, XCircle, AlertTriangle, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Save, XCircle, AlertTriangle, CheckCircle, Eye, Edit3, Columns } from 'lucide-react';
 import { 
   VoiceRole, 
   ContentStatus,
@@ -73,6 +81,10 @@ export default function AdminContentEditor() {
   const [economistFields, setEconomistFields] = useState<Partial<EconomistFields>>({});
   const [educatorFields, setEducatorFields] = useState<Partial<EducatorFields>>({});
   const [coachFields, setCoachFields] = useState<Partial<CoachFields>>({});
+
+  // Editor mode state
+  const [editorMode, setEditorMode] = useState<'rich' | 'markdown'>('rich');
+  const [showPreview, setShowPreview] = useState(true);
 
   // Validation state
   const [toneValidation, setToneValidation] = useState<{ valid: boolean; missing: string[] }>({ valid: true, missing: [] });
@@ -536,15 +548,50 @@ export default function AdminContentEditor() {
           {/* Content */}
           <Card>
             <CardHeader>
-              <CardTitle>Content</CardTitle>
-              <CardDescription>
-                The main content of the essay.
-                {templateApplied && selectedTemplate !== 'blank' && (
-                  <span className="text-primary ml-2">
-                    (Pre-filled from {essayTemplates[selectedTemplate].name} template - you can edit freely)
-                  </span>
-                )}
-              </CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Content</CardTitle>
+                  <CardDescription>
+                    The main content of the essay.
+                    {templateApplied && selectedTemplate !== 'blank' && (
+                      <span className="text-primary ml-2">
+                        (Pre-filled from {essayTemplates[selectedTemplate].name} template)
+                      </span>
+                    )}
+                  </CardDescription>
+                </div>
+                <div className="flex items-center gap-2">
+                  {/* Editor Mode Toggle */}
+                  <div className="flex items-center border border-border rounded-md overflow-hidden">
+                    <Button
+                      variant={editorMode === 'rich' ? 'secondary' : 'ghost'}
+                      size="sm"
+                      onClick={() => setEditorMode('rich')}
+                      className="rounded-none border-0 gap-1"
+                    >
+                      <Edit3 className="h-3 w-3" />
+                      Rich
+                    </Button>
+                    <Button
+                      variant={editorMode === 'markdown' ? 'secondary' : 'ghost'}
+                      size="sm"
+                      onClick={() => setEditorMode('markdown')}
+                      className="rounded-none border-0 gap-1"
+                    >
+                      Markdown
+                    </Button>
+                  </div>
+                  <Button
+                    variant={showPreview ? 'secondary' : 'outline'}
+                    size="sm"
+                    onClick={() => setShowPreview(!showPreview)}
+                    className="gap-1"
+                  >
+                    <Eye className="h-3 w-3" />
+                    Preview
+                  </Button>
+                </div>
+              </div>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
@@ -554,25 +601,85 @@ export default function AdminContentEditor() {
                   value={snippet}
                   onChange={(e) => setSnippet(e.target.value)}
                   placeholder="A brief preview of the content..."
-                  rows={3}
+                  rows={2}
                 />
               </div>
+              
               <div className="space-y-2">
-                <Label htmlFor="content">Full Content</Label>
-                <Textarea
-                  id="content"
-                  value={content}
-                  onChange={(e) => {
-                    setContent(e.target.value);
-                    // If user manually edits content, disconnect from template auto-update
-                    if (templateApplied) {
-                      setTemplateApplied(false);
-                    }
-                  }}
-                  placeholder="The full essay content..."
-                  rows={12}
-                  className="font-mono text-sm"
-                />
+                <Label>Full Content</Label>
+                
+                {showPreview ? (
+                  <ResizablePanelGroup direction="horizontal" className="min-h-[500px] rounded-lg border border-border">
+                    <ResizablePanel defaultSize={55} minSize={35}>
+                      <div className="h-full">
+                        {editorMode === 'rich' ? (
+                          <RichTextEditor
+                            content={content.startsWith('<') ? content : markdownToHtml(content)}
+                            onChange={(html) => {
+                              setContent(html);
+                              if (templateApplied) setTemplateApplied(false);
+                            }}
+                            placeholder="Start writing your content..."
+                            minHeight="500px"
+                            className="border-0 rounded-none"
+                          />
+                        ) : (
+                          <Textarea
+                            value={content.startsWith('<') ? htmlToMarkdown(content) : content}
+                            onChange={(e) => {
+                              setContent(e.target.value);
+                              if (templateApplied) setTemplateApplied(false);
+                            }}
+                            placeholder="Write in markdown..."
+                            className="h-full min-h-[500px] font-mono text-sm resize-none border-0 rounded-none focus-visible:ring-0"
+                          />
+                        )}
+                      </div>
+                    </ResizablePanel>
+                    
+                    <ResizableHandle withHandle />
+                    
+                    <ResizablePanel defaultSize={45} minSize={30}>
+                      <div className="h-full overflow-y-auto p-6 bg-muted/30">
+                        <div className="text-xs uppercase tracking-wide text-muted-foreground mb-4 font-medium">
+                          Live Preview
+                        </div>
+                        <ContentPreview
+                          title={title}
+                          snippet={snippet}
+                          content={content.startsWith('<') ? content : markdownToHtml(content)}
+                          author={author}
+                          date={date}
+                          readTime={readTime}
+                        />
+                      </div>
+                    </ResizablePanel>
+                  </ResizablePanelGroup>
+                ) : (
+                  <div className="min-h-[500px]">
+                    {editorMode === 'rich' ? (
+                      <RichTextEditor
+                        content={content.startsWith('<') ? content : markdownToHtml(content)}
+                        onChange={(html) => {
+                          setContent(html);
+                          if (templateApplied) setTemplateApplied(false);
+                        }}
+                        placeholder="Start writing your content..."
+                        minHeight="500px"
+                      />
+                    ) : (
+                      <Textarea
+                        value={content.startsWith('<') ? htmlToMarkdown(content) : content}
+                        onChange={(e) => {
+                          setContent(e.target.value);
+                          if (templateApplied) setTemplateApplied(false);
+                        }}
+                        placeholder="Write in markdown..."
+                        className="min-h-[500px] font-mono text-sm"
+                      />
+                    )}
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
