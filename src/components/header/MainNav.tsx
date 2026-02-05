@@ -106,6 +106,15 @@ export function MainNav() {
       >
         IELTS
       </Link>
+
+      {isAdmin && (
+        <Link 
+          to="/admin/dashboard" 
+          className={cn("nav-link text-accent", location.pathname.startsWith('/admin') && "nav-link-active")}
+        >
+          Writer's Studio
+        </Link>
+      )}
     </nav>
   );
 }
