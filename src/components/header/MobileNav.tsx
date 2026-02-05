@@ -39,23 +39,22 @@ const navSections: NavSection[] = [
       { label: 'Pathways Forward', path: '/green-transition/future' },
     ]
   },
-  { label: 'The Next Big Thing', path: '/the-next-big-thing' },
   { 
-    label: 'Masyarakat Baru',
-    items: [
-      { label: 'Critical Thinking', path: '/critical-thinking-research' },
-      { label: 'Books', path: '/books-academia' },
-      { label: 'IELTS', path: '/english-ielts' },
-    ]
-  },
-  { 
-    label: 'Themes',
+    label: 'The Next Big Thing',
     items: [
       { label: 'Technology', path: '/the-next-big-thing?theme=technology' },
       { label: 'Economy', path: '/the-next-big-thing?theme=economy' },
       { label: 'Society', path: '/the-next-big-thing?theme=society' },
       { label: 'Environment', path: '/the-next-big-thing?theme=environment' },
       { label: 'Governance', path: '/the-next-big-thing?theme=governance' },
+    ]
+  },
+  { 
+    label: 'Masyarakat Baru',
+    items: [
+      { label: 'Critical Thinking', path: '/critical-thinking-research' },
+      { label: 'Books', path: '/books-academia' },
+      { label: 'IELTS', path: '/english-ielts' },
     ]
   },
 ];

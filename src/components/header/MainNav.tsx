@@ -28,7 +28,7 @@ const masyarakatBaruItems = [
   { label: 'IELTS', path: '/english-ielts' },
 ];
 
-const themesItems = [
+const nextBigThingItems = [
   { label: 'Technology', path: '/the-next-big-thing?theme=technology' },
   { label: 'Economy', path: '/the-next-big-thing?theme=economy' },
   { label: 'Society', path: '/the-next-big-thing?theme=society' },
@@ -92,23 +92,17 @@ export function MainNav() {
         basePath="/green-transition"
       />
 
-      <Link 
-        to="/the-next-big-thing" 
-        className={cn("nav-link", isActive('/the-next-big-thing') && "nav-link-active")}
-      >
-        The Next Big Thing
-      </Link>
+      <NavDropdown 
+        label="The Next Big Thing" 
+        items={nextBigThingItems}
+        width="w-44"
+        basePath="/the-next-big-thing"
+      />
 
       <NavDropdown 
         label="Masyarakat Baru" 
         items={masyarakatBaruItems}
         width="w-48"
-      />
-
-      <NavDropdown 
-        label="Themes" 
-        items={themesItems}
-        width="w-44"
       />
 
       {isAdmin && (
