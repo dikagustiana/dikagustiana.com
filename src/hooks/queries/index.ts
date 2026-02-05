@@ -4,3 +4,4 @@ export * from './useEssays';
 export * from './useBooks';
 export * from './useContentBlocks';
 export * from './useAdminEssays';
+export * from './useUnifiedContent';
