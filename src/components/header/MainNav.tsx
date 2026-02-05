@@ -28,6 +28,14 @@ const masyarakatBaruItems = [
   { label: 'IELTS', path: '/english-ielts' },
 ];
 
+const themesItems = [
+  { label: 'Technology', path: '/the-next-big-thing?theme=technology' },
+  { label: 'Economy', path: '/the-next-big-thing?theme=economy' },
+  { label: 'Society', path: '/the-next-big-thing?theme=society' },
+  { label: 'Environment', path: '/the-next-big-thing?theme=environment' },
+  { label: 'Governance', path: '/the-next-big-thing?theme=governance' },
+];
+
 const financeWorkspaceItemsAdmin = [
   { label: "Dika's Tools", path: '/dikas-tools' },
 ];
@@ -95,6 +103,12 @@ export function MainNav() {
         label="Masyarakat Baru" 
         items={masyarakatBaruItems}
         width="w-48"
+      />
+
+      <NavDropdown 
+        label="Themes" 
+        items={themesItems}
+        width="w-44"
       />
 
       {isAdmin && (
