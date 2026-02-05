@@ -3,11 +3,9 @@ import { useNavigate, Link } from 'react-router-dom';
 import { PageLayout } from '@/components/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
 import { useAuth } from '@/contexts/AuthContext';
-import { useAdminEssays, useBulkPublish, useDeleteEssay } from '@/hooks/queries/useAdminEssays';
+import { useUnifiedContent, useContentStats, useBulkPublishContent, useDeleteContent, ContentType } from '@/hooks/queries/useUnifiedContent';
 import { useSections } from '@/hooks/queries/useSections';
 import { LoadingState, ErrorState, EmptyState } from '@/components/states';
-import { contentTemplates, validateContentAgainstTemplate } from '@/components/admin/ContentTemplates';
-import { VoiceRole } from '@/components/layouts/PageLayout';
 import {
   Card,
   CardContent,
@@ -38,79 +36,33 @@ import {
   Eye,
   EyeOff,
   Trash2,
-  CheckCircle2,
-  AlertCircle,
-  XCircle,
   FileText,
   RefreshCw,
   Plus,
+  BookOpen,
+  Calculator,
+  ExternalLink,
+  XCircle,
 } from 'lucide-react';
 
-interface ContentHealth {
-  score: number;
-  missingFields: string[];
-  violations: string[];
-}
+// Content type labels and icons
+const contentTypeConfig: Record<ContentType, { label: string; icon: React.ReactNode; color: string }> = {
+  essay: { label: 'Essay', icon: <FileText className="h-3 w-3" />, color: 'bg-primary/10 text-primary border-primary/20' },
+  fsli: { label: 'FSLI', icon: <Calculator className="h-3 w-3" />, color: 'bg-accent/10 text-accent-foreground border-accent/20' },
+};
 
-function calculateContentHealth(
-  essay: { content: string | null; voice_role: string | null; snippet: string | null },
-  sectionVoiceRole: VoiceRole
-): ContentHealth {
-  const role = (essay.voice_role as VoiceRole) || sectionVoiceRole || 'hybrid';
-  const template = contentTemplates[role];
-  const content = essay.content || '';
-  const snippet = essay.snippet || '';
-  const fullText = `${snippet} ${content}`;
-
-  const missingFields: string[] = [];
-  const violations: string[] = [];
-
-  // Check for required field indicators in content
-  template.fields.forEach((field) => {
-    if (field.required) {
-      const fieldLabel = field.label.toLowerCase();
-      if (!fullText.toLowerCase().includes(fieldLabel.split(' ')[0])) {
-        missingFields.push(field.label);
-      }
-    }
-  });
-
-  // Check for forbidden patterns
-  const validation = validateContentAgainstTemplate(fullText, role);
-  violations.push(...validation.violations);
-
-  // Calculate score (0-100)
-  const totalChecks = template.fields.filter((f) => f.required).length + template.forbiddenPatterns.length;
-  const passedChecks = totalChecks - missingFields.length - violations.length;
-  const score = Math.max(0, Math.round((passedChecks / totalChecks) * 100));
-
-  return { score, missingFields, violations };
-}
-
-function getHealthBadge(score: number) {
-  if (score >= 80) {
-    return (
-      <Badge className="bg-green-500/10 text-green-600 border-green-500/20">
-        <CheckCircle2 className="h-3 w-3 mr-1" />
-        {score}%
-      </Badge>
-    );
-  }
-  if (score >= 50) {
-    return (
-      <Badge variant="secondary" className="bg-amber-500/10 text-amber-600 border-amber-500/20">
-        <AlertCircle className="h-3 w-3 mr-1" />
-        {score}%
-      </Badge>
-    );
-  }
-  return (
-    <Badge variant="destructive" className="bg-destructive/10">
-      <XCircle className="h-3 w-3 mr-1" />
-      {score}%
-    </Badge>
-  );
-}
+// Extended sections for filtering (includes accounting for FSLI)
+const allSections = [
+  { slug: 'all', name: 'All Sections' },
+  { slug: 'accounting', name: 'Accounting (FSLI)' },
+  { slug: 'finance', name: 'Finance' },
+  { slug: 'green-transition', name: 'Green Transition' },
+  { slug: 'next-big-thing', name: 'The Next Big Thing' },
+  { slug: 'critical-thinking', name: 'Critical Thinking' },
+  { slug: 'books', name: 'Books' },
+  { slug: 'ielts', name: 'IELTS' },
+  { slug: 'tools', name: 'Tools' },
+];
 
 export default function AdminContent() {
   const { isAdmin, isLoading: authLoading } = useAuth();
@@ -118,12 +70,22 @@ export default function AdminContent() {
   const { toast } = useToast();
 
   const [sectionFilter, setSectionFilter] = useState<string>('all');
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [typeFilter, setTypeFilter] = useState<'all' | ContentType>('all');
+  const [selectedIds, setSelectedIds] = useState<{ id: string; type: ContentType }[]>([]);
 
-  const { data: essays, isLoading, error, refetch } = useAdminEssays(sectionFilter);
   const { data: sections } = useSections();
-  const bulkPublish = useBulkPublish();
-  const deleteEssay = useDeleteEssay();
+  const { data: contentItems, isLoading, error, refetch } = useUnifiedContent({
+    section: sectionFilter,
+    contentType: typeFilter,
+  });
+  const { data: stats, refetch: refetchStats } = useContentStats();
+  const bulkPublish = useBulkPublishContent();
+  const deleteContent = useDeleteContent();
+
+  const handleRefresh = () => {
+    refetch();
+    refetchStats();
+  };
 
   // Redirect non-admins
   if (!authLoading && !isAdmin) {
@@ -153,38 +115,40 @@ export default function AdminContent() {
     );
   }
 
-  const sectionVoiceMap: Record<string, VoiceRole> = {};
-  sections?.forEach((s) => {
-    sectionVoiceMap[s.slug] = s.voice_role as VoiceRole;
-  });
-
   const handleSelectAll = (checked: boolean) => {
-    if (checked && essays) {
-      setSelectedIds(essays.map((e) => e.id));
+    if (checked && contentItems) {
+      setSelectedIds(contentItems.map((item) => ({ id: item.id, type: item.type })));
     } else {
       setSelectedIds([]);
     }
   };
 
-  const handleSelectOne = (id: string, checked: boolean) => {
+  const handleSelectOne = (id: string, type: ContentType, checked: boolean) => {
     if (checked) {
-      setSelectedIds((prev) => [...prev, id]);
+      setSelectedIds((prev) => [...prev, { id, type }]);
     } else {
-      setSelectedIds((prev) => prev.filter((i) => i !== id));
+      setSelectedIds((prev) => prev.filter((i) => i.id !== id));
     }
   };
 
   const handleBulkPublish = async (published: boolean) => {
-    if (selectedIds.length === 0) {
-      toast({ title: 'No items selected', variant: 'destructive' });
+    // Only essays can be published/unpublished
+    const essayIds = selectedIds.filter(item => item.type === 'essay').map(item => item.id);
+    
+    if (essayIds.length === 0) {
+      toast({ 
+        title: 'No essays selected', 
+        description: 'Only essays can be published/unpublished. FSLI pages are always public.',
+        variant: 'destructive' 
+      });
       return;
     }
 
     try {
-      await bulkPublish.mutateAsync({ ids: selectedIds, published });
+      await bulkPublish.mutateAsync({ ids: essayIds, published });
       toast({
         title: published ? 'Published' : 'Unpublished',
-        description: `${selectedIds.length} items updated.`,
+        description: `${essayIds.length} essays updated.`,
       });
       setSelectedIds([]);
     } catch {
@@ -192,29 +156,31 @@ export default function AdminContent() {
     }
   };
 
-  const handleDelete = async (id: string, title: string) => {
-    if (!confirm(`Delete "${title}"? This cannot be undone.`)) return;
+  const handleDelete = async (id: string, type: ContentType, title: string) => {
+    const typeLabel = type === 'fsli' ? 'FSLI page' : 'essay';
+    if (!confirm(`Delete "${title}"? This ${typeLabel} will be permanently removed.`)) return;
 
     try {
-      await deleteEssay.mutateAsync(id);
+      await deleteContent.mutateAsync({ id, type });
       toast({ title: 'Deleted', description: `"${title}" has been deleted.` });
+      refetchStats();
     } catch {
       toast({ title: 'Error', description: 'Failed to delete item.', variant: 'destructive' });
     }
   };
 
-  // Calculate stats
-  const stats = essays
-    ? {
-        total: essays.length,
-        published: essays.filter((e) => e.published).length,
-        draft: essays.filter((e) => !e.published).length,
-        healthy: essays.filter((e) => {
-          const health = calculateContentHealth(e, sectionVoiceMap[e.section] || 'hybrid');
-          return health.score >= 80;
-        }).length,
-      }
-    : { total: 0, published: 0, draft: 0, healthy: 0 };
+  const getEditPath = (item: { id: string; type: ContentType; slug: string }) => {
+    if (item.type === 'fsli') {
+      return `/accounting/${item.slug}`;
+    }
+    return `/admin/content/${item.slug}`;
+  };
+
+  // Merge database sections with static sections for filter
+  const filterSections = allSections.map(s => {
+    const dbSection = sections?.find(sec => sec.slug === s.slug);
+    return dbSection ? { ...s, name: dbSection.name } : s;
+  });
 
   return (
     <PageLayout
@@ -226,7 +192,7 @@ export default function AdminContent() {
         { label: 'Content' },
       ]}
       showManifesto
-      manifesto="Content must match its voice. Check health scores. Fix violations before publishing."
+      manifesto="Unified content management. All essays and FSLI pages in one place."
     >
       <SEO title="Admin Content" description="Content management dashboard for Dika's Digital Studio" />
 
@@ -235,7 +201,7 @@ export default function AdminContent() {
           <div>
             <h1 className="text-3xl font-display font-bold mb-2">Content Dashboard</h1>
             <p className="text-muted-foreground">
-              Manage essays, check content health, publish/unpublish in bulk.
+              Manage all content: essays, FSLI pages, and more.
             </p>
           </div>
           <div className="flex gap-2 mt-4 md:mt-0">
@@ -245,7 +211,7 @@ export default function AdminContent() {
                 New Essay
               </Link>
             </Button>
-            <Button variant="outline" onClick={() => refetch()}>
+            <Button variant="outline" onClick={handleRefresh}>
               <RefreshCw className="h-4 w-4 mr-2" />
               Refresh
             </Button>
@@ -253,29 +219,35 @@ export default function AdminContent() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
           <Card>
             <CardHeader className="pb-2">
               <CardDescription>Total</CardDescription>
-              <CardTitle className="text-2xl">{stats.total}</CardTitle>
+              <CardTitle className="text-2xl">{stats?.total ?? 0}</CardTitle>
+            </CardHeader>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardDescription>Essays</CardDescription>
+              <CardTitle className="text-2xl text-primary">{stats?.essays ?? 0}</CardTitle>
+            </CardHeader>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardDescription>FSLI Pages</CardDescription>
+              <CardTitle className="text-2xl text-accent-foreground">{stats?.fsliPages ?? 0}</CardTitle>
             </CardHeader>
           </Card>
           <Card>
             <CardHeader className="pb-2">
               <CardDescription>Published</CardDescription>
-              <CardTitle className="text-2xl text-green-600">{stats.published}</CardTitle>
+              <CardTitle className="text-2xl text-primary">{stats?.published ?? 0}</CardTitle>
             </CardHeader>
           </Card>
           <Card>
             <CardHeader className="pb-2">
               <CardDescription>Draft</CardDescription>
-              <CardTitle className="text-2xl text-amber-600">{stats.draft}</CardTitle>
-            </CardHeader>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardDescription>Healthy (80%+)</CardDescription>
-              <CardTitle className="text-2xl text-primary">{stats.healthy}</CardTitle>
+              <CardTitle className="text-2xl text-muted-foreground">{stats?.draft ?? 0}</CardTitle>
             </CardHeader>
           </Card>
         </div>
@@ -284,18 +256,28 @@ export default function AdminContent() {
         <Card className="mb-6">
           <CardContent className="py-4">
             <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-4 flex-wrap">
                 <Select value={sectionFilter} onValueChange={setSectionFilter}>
                   <SelectTrigger className="w-48">
                     <SelectValue placeholder="Filter by section" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Sections</SelectItem>
-                    {sections?.map((section) => (
-                      <SelectItem key={section.id} value={section.slug}>
+                    {filterSections.map((section) => (
+                      <SelectItem key={section.slug} value={section.slug}>
                         {section.name}
                       </SelectItem>
                     ))}
+                  </SelectContent>
+                </Select>
+
+                <Select value={typeFilter} onValueChange={(v) => setTypeFilter(v as 'all' | ContentType)}>
+                  <SelectTrigger className="w-40">
+                    <SelectValue placeholder="Content type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Types</SelectItem>
+                    <SelectItem value="essay">Essays Only</SelectItem>
+                    <SelectItem value="fsli">FSLI Only</SelectItem>
                   </SelectContent>
                 </Select>
 
@@ -334,11 +316,11 @@ export default function AdminContent() {
         {isLoading ? (
           <LoadingState variant="table" count={5} />
         ) : error ? (
-          <ErrorState onRetry={() => refetch()} />
-        ) : !essays || essays.length === 0 ? (
+          <ErrorState onRetry={handleRefresh} />
+        ) : !contentItems || contentItems.length === 0 ? (
           <EmptyState
             title="No content found"
-            message="No essays match the current filter."
+            message="No content matches the current filter."
             icon={<FileText className="h-6 w-6 text-muted-foreground" />}
           />
         ) : (
@@ -348,54 +330,59 @@ export default function AdminContent() {
                 <TableRow>
                   <TableHead className="w-12">
                     <Checkbox
-                      checked={selectedIds.length === essays.length}
+                      checked={selectedIds.length === contentItems.length && contentItems.length > 0}
                       onCheckedChange={handleSelectAll}
                     />
                   </TableHead>
                   <TableHead>Title</TableHead>
+                  <TableHead>Type</TableHead>
                   <TableHead>Section</TableHead>
                   <TableHead>Voice</TableHead>
-                  <TableHead>Health</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Updated</TableHead>
-                  <TableHead className="w-12"></TableHead>
+                  <TableHead className="w-24">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {essays.map((essay) => {
-                  const voiceRole = (essay.voice_role as VoiceRole) || sectionVoiceMap[essay.section] || 'hybrid';
-                  const health = calculateContentHealth(essay, voiceRole);
+                {contentItems.map((item) => {
+                  const config = contentTypeConfig[item.type];
+                  const isSelected = selectedIds.some(s => s.id === item.id);
 
                   return (
-                    <TableRow key={essay.id}>
+                    <TableRow key={`${item.type}-${item.id}`}>
                       <TableCell>
                         <Checkbox
-                          checked={selectedIds.includes(essay.id)}
+                          checked={isSelected}
                           onCheckedChange={(checked) =>
-                            handleSelectOne(essay.id, checked as boolean)
+                            handleSelectOne(item.id, item.type, checked as boolean)
                           }
                         />
                       </TableCell>
                       <TableCell>
                         <div>
-                          <div className="font-medium">{essay.title}</div>
-                          <div className="text-xs text-muted-foreground">/{essay.slug}</div>
+                          <div className="font-medium">{item.title}</div>
+                          <div className="text-xs text-muted-foreground">/{item.slug}</div>
                         </div>
                       </TableCell>
                       <TableCell>
+                        <Badge variant="outline" className={config.color}>
+                          {config.icon}
+                          <span className="ml-1">{config.label}</span>
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
                         <Badge variant="outline" className="capitalize">
-                          {essay.section}
+                          {item.section}
                         </Badge>
                       </TableCell>
                       <TableCell>
                         <Badge variant="secondary" className="capitalize">
-                          {voiceRole}
+                          {item.voice_role || 'hybrid'}
                         </Badge>
                       </TableCell>
-                      <TableCell>{getHealthBadge(health.score)}</TableCell>
                       <TableCell>
-                        {essay.published ? (
-                          <Badge className="bg-green-500/10 text-green-600 border-green-500/20">
+                        {item.published ? (
+                          <Badge className="bg-primary/10 text-primary border-primary/20">
                             Published
                           </Badge>
                         ) : (
@@ -403,17 +390,28 @@ export default function AdminContent() {
                         )}
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
-                        {new Date(essay.updated_at).toLocaleDateString()}
+                        {new Date(item.updated_at).toLocaleDateString()}
                       </TableCell>
                       <TableCell>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-destructive hover:text-destructive"
-                          onClick={() => handleDelete(essay.id, essay.title)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        <div className="flex items-center gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            asChild
+                          >
+                            <Link to={getEditPath(item)}>
+                              <ExternalLink className="h-4 w-4" />
+                            </Link>
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-destructive hover:text-destructive"
+                            onClick={() => handleDelete(item.id, item.type, item.title)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   );
