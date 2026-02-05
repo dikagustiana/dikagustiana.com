@@ -121,7 +121,14 @@ export function MobileNav() {
 
             {/* Admin Links */}
             {isAdmin && (
-              <div className="pt-4 border-t border-border">
+              <div className="pt-4 border-t border-border space-y-1">
+                <Link
+                  to="/admin/dashboard"
+                  onClick={() => setIsOpen(false)}
+                  className="block py-3 px-4 font-medium text-accent hover:bg-secondary rounded-lg"
+                >
+                  Writer's Studio
+                </Link>
                 <Link
                   to="/dikas-tools"
                   onClick={() => setIsOpen(false)}
