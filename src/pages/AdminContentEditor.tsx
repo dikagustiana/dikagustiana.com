@@ -20,14 +20,13 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Textarea } from '@/components/ui/textarea';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   ResizablePanelGroup,
   ResizablePanel,
   ResizableHandle,
 } from '@/components/ui/resizable';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Save, XCircle, AlertTriangle, CheckCircle, Eye, Edit3, Columns } from 'lucide-react';
+import { ArrowLeft, Save, XCircle, AlertTriangle, CheckCircle, Eye, Edit3 } from 'lucide-react';
 import { 
   VoiceRole, 
   ContentStatus,
@@ -40,16 +39,21 @@ import {
 import { EssayTemplateType, applyTemplate, essayTemplates } from '@/lib/essayTemplates';
 
 export default function AdminContentEditor() {
-  const { id } = useParams<{ id: string }>();
+  // Route uses slug, we store the database uuid internally
+  const { id: slugParam } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
-  const isNew = id === 'new';
+  const isNew = slugParam === 'new';
   const navigate = useNavigate();
   const { toast } = useToast();
   const { isAdmin, isLoading: authLoading } = useAuth();
 
+  // Internal database UUID - loaded from essay data
+  const [essayId, setEssayId] = useState<string | null>(null);
+
+  // Load essay by slug (not by id)
   const { data: essay, isLoading: essayLoading, error: essayError } = useEssay(
-    isNew ? '' : (id || ''),
-    { enabled: !isNew && !!id }
+    isNew ? '' : (slugParam || ''),
+    { enabled: !isNew && !!slugParam }
   );
   const { data: sections } = useSections();
   const updateEssay = useUpdateEssay();
@@ -76,7 +80,7 @@ export default function AdminContentEditor() {
   const [snippet, setSnippet] = useState('');
   const [content, setContent] = useState('');
 
-  // Tone fields
+  // Tone fields - preserve all fields from database
   const [managerFields, setManagerFields] = useState<Partial<ManagerFields>>({});
   const [economistFields, setEconomistFields] = useState<Partial<EconomistFields>>({});
   const [educatorFields, setEducatorFields] = useState<Partial<EducatorFields>>({});
@@ -108,7 +112,6 @@ export default function AdminContentEditor() {
     setSelectedTemplate(templateId);
     
     if (templateId === 'blank') {
-      // Clear all template-generated content
       setTitle('');
       setSnippet('');
       setContent('');
@@ -118,7 +121,6 @@ export default function AdminContentEditor() {
       return;
     }
 
-    // Get template defaults for key points and steps
     const template = essayTemplates[templateId];
     const initialKeyPoints = template.keyPoints || [];
     const initialSteps = template.steps || [];
@@ -126,7 +128,6 @@ export default function AdminContentEditor() {
     setKeyPoints(initialKeyPoints);
     setSteps(initialSteps);
 
-    // Apply template with initial values
     const { title: tTitle, snippet: tSnippet, content: tContent } = applyTemplate(
       templateId,
       initialKeyPoints,
@@ -139,7 +140,7 @@ export default function AdminContentEditor() {
     setTemplateApplied(true);
   };
 
-  // Update content when key points or steps change (only if template is applied)
+  // Update content when key points or steps change
   useEffect(() => {
     if (!templateApplied || selectedTemplate === 'blank') return;
 
@@ -157,17 +158,20 @@ export default function AdminContentEditor() {
     setToneValidation(validation);
   }, [voiceRole, managerFields, economistFields, educatorFields, coachFields]);
 
-  // Load essay data when editing
+  // Load essay data when editing - store UUID internally
   useEffect(() => {
     if (essay && !isNew) {
-      // Mark as initial load to prevent dirty tracking
       isInitialLoad.current = true;
+      
+      // Store the database UUID for updates
+      setEssayId(essay.id);
       
       setTitle(essay.title || '');
       setSlug(essay.slug || '');
       setSection(essay.section || '');
       setPhase(essay.phase || '');
       setVoiceRole((essay.voice_role as VoiceRole) || 'hybrid');
+      // Use status as source of truth, fallback to published boolean for legacy
       setStatus((essay.status as ContentStatus) || (essay.published ? 'published' : 'draft'));
       setAuthor(essay.author || 'Dika Gustiana');
       setDate(essay.date || '');
@@ -175,21 +179,12 @@ export default function AdminContentEditor() {
       setSnippet(essay.snippet || '');
       setContent(essay.content || '');
       
-      // Load tone fields from database
-      if (essay.manager_fields) {
-        setManagerFields(essay.manager_fields as Partial<ManagerFields>);
-      }
-      if (essay.economist_fields) {
-        setEconomistFields(essay.economist_fields as Partial<EconomistFields>);
-      }
-      if (essay.educator_fields) {
-        setEducatorFields(essay.educator_fields as Partial<EducatorFields>);
-      }
-      if (essay.coach_fields) {
-        setCoachFields(essay.coach_fields as Partial<CoachFields>);
-      }
+      // Load ALL tone fields from database to preserve existing data
+      setManagerFields(essay.manager_fields as Partial<ManagerFields> || {});
+      setEconomistFields(essay.economist_fields as Partial<EconomistFields> || {});
+      setEducatorFields(essay.educator_fields as Partial<EducatorFields> || {});
+      setCoachFields(essay.coach_fields as Partial<CoachFields> || {});
       
-      // Reset dirty state after a short delay to allow state to settle
       setTimeout(() => {
         isInitialLoad.current = false;
         setIsDirty(false);
@@ -217,7 +212,7 @@ export default function AdminContentEditor() {
     return () => window.removeEventListener('beforeunload', handler);
   }, [isDirty]);
 
-  // Auto-generate slug from title
+  // Auto-generate slug from title (only for new essays)
   useEffect(() => {
     if (isNew && title) {
       const generatedSlug = title
@@ -242,6 +237,15 @@ export default function AdminContentEditor() {
 
   const canPublish = toneValidation.valid || voiceRole === 'hybrid';
 
+  // Helper to determine if tone fields have content
+  const hasContent = (fields: Record<string, unknown> | null | undefined): boolean => {
+    if (!fields || typeof fields !== 'object') return false;
+    return Object.values(fields).some(v => 
+      v !== null && v !== undefined && v !== '' && 
+      (Array.isArray(v) ? v.length > 0 : true)
+    );
+  };
+
   const handleSave = async (targetStatus: ContentStatus = status) => {
     if (!title || !slug || !section) {
       toast({
@@ -262,27 +266,22 @@ export default function AdminContentEditor() {
       return;
     }
 
-    // Get the appropriate tone fields based on role (clears other roles)
+    // Build tone fields - only set active role's fields, preserve others if they have content
+    // This prevents wiping existing data when switching roles temporarily
     const getToneFieldsData = () => {
-      const base = {
-        manager_fields: null,
-        economist_fields: null,
-        educator_fields: null,
-        coach_fields: null,
+      // For the current role, always use current state
+      // For inactive roles, preserve existing data if it has content
+      const result: Record<string, unknown> = {
+        manager_fields: voiceRole === 'manager' ? (hasContent(managerFields) ? managerFields : null) : (hasContent(managerFields) ? managerFields : null),
+        economist_fields: voiceRole === 'economist' ? (hasContent(economistFields) ? economistFields : null) : (hasContent(economistFields) ? economistFields : null),
+        educator_fields: voiceRole === 'educator' ? (hasContent(educatorFields) ? educatorFields : null) : (hasContent(educatorFields) ? educatorFields : null),
+        coach_fields: voiceRole === 'coach' ? (hasContent(coachFields) ? coachFields : null) : (hasContent(coachFields) ? coachFields : null),
       };
-      switch (voiceRole) {
-        case 'manager':
-          return { ...base, manager_fields: managerFields };
-        case 'economist':
-          return { ...base, economist_fields: economistFields };
-        case 'educator':
-          return { ...base, educator_fields: educatorFields };
-        case 'coach':
-          return { ...base, coach_fields: coachFields };
-        default:
-          return base;
-      }
+      return result;
     };
+
+    // Calculate published boolean from status (status is source of truth)
+    const isPublished = targetStatus === 'published';
 
     const essayData = {
       title,
@@ -291,7 +290,7 @@ export default function AdminContentEditor() {
       phase: phase || null,
       voice_role: voiceRole,
       status: targetStatus,
-      published: targetStatus === 'published',
+      published: isPublished, // Always sync with status
       author,
       date: date || null,
       read_time: readTime || null,
@@ -304,16 +303,26 @@ export default function AdminContentEditor() {
       if (isNew) {
         await createEssay.mutateAsync(essayData);
         toast({ title: 'Created', description: 'Essay created successfully.' });
-      } else {
-        await updateEssay.mutateAsync({ id: id!, data: essayData });
+      } else if (essayId) {
+        // Use the stored UUID for updates, not the slug from URL
+        await updateEssay.mutateAsync({ id: essayId, data: essayData });
         toast({ title: 'Saved', description: 'Essay updated successfully.' });
+      } else {
+        toast({
+          title: 'Error',
+          description: 'Essay ID not found. Cannot save.',
+          variant: 'destructive',
+        });
+        return;
       }
       setIsDirty(false);
       navigate('/admin/content');
-    } catch (error) {
+    } catch (error: unknown) {
+      // Show exact error message from Supabase/database for validation failures
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       toast({
         title: 'Error',
-        description: `Failed to ${isNew ? 'create' : 'save'} essay.`,
+        description: errorMessage,
         variant: 'destructive',
       });
     }
@@ -386,7 +395,6 @@ export default function AdminContentEditor() {
     );
   }
 
-  // Determine if we should show dynamic lists based on template
   const showKeyPoints = selectedTemplate === 'essay' && isNew;
   const showSteps = selectedTemplate === 'tutorial' && isNew;
 
@@ -436,12 +444,12 @@ export default function AdminContentEditor() {
             />
             <Button 
               variant="outline"
-              onClick={() => handleSave(status)} 
+              onClick={() => handleSave('draft')} 
               disabled={updateEssay.isPending || createEssay.isPending}
             >
               Save Draft
             </Button>
-            <Button 
+            <Button
               onClick={() => handleSave('published')} 
               disabled={updateEssay.isPending || createEssay.isPending || !canPublish}
             >

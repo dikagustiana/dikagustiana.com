@@ -1,4 +1,4 @@
-import { useParams } from 'react-router-dom';
+import { useParams, Navigate } from 'react-router-dom';
 import { PageLayout } from '@/components/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
 import { useEssay } from '@/hooks/queries/useEssays';
@@ -51,6 +51,20 @@ export default function CriticalThinkingEssay() {
         </div>
       </PageLayout>
     );
+  }
+
+  // Check access: non-admins can only see published essays (status='published')
+  if (essay) {
+    const isPublished = essay.status === 'published';
+    if (!isPublished && !isAdmin) {
+      // Draft accessed by non-admin - redirect to phase page
+      return <Navigate to={`/critical-thinking-research/${phase}`} replace />;
+    }
+  }
+
+  // Essay not found
+  if (!essay) {
+    return <Navigate to={`/critical-thinking-research/${phase}`} replace />;
   }
 
   const title = essay?.title || formatTitle(essayId || '');

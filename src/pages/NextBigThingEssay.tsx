@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { ArrowLeft, Clock, User, Calendar } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
@@ -18,6 +19,8 @@ interface Essay {
   content: string | null;
   phase: string | null;
   updated_at: string;
+  status: string | null;
+  published: boolean | null;
 }
 
 const categoryLabels: Record<string, string> = {
@@ -30,28 +33,45 @@ const categoryLabels: Record<string, string> = {
 
 export default function NextBigThingEssay() {
   const { slug } = useParams<{ slug: string }>();
+  const { isAdmin } = useAuth();
   const [essay, setEssay] = useState<Essay | null>(null);
   const [loading, setLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
     if (slug) {
       loadEssay();
     }
-  }, [slug]);
+  }, [slug, isAdmin]);
 
   const loadEssay = async () => {
     setLoading(true);
+    setNotFound(false);
     try {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('essays')
         .select('*')
         .eq('slug', slug)
         .eq('section', 'next-big-thing')
         .maybeSingle();
 
-      setEssay(data);
+      if (error) throw error;
+
+      // Check access: non-admins can only see published essays (status='published')
+      if (data) {
+        const isPublished = data.status === 'published';
+        if (!isPublished && !isAdmin) {
+          setNotFound(true);
+          setEssay(null);
+        } else {
+          setEssay(data);
+        }
+      } else {
+        setNotFound(true);
+      }
     } catch (error) {
       console.error('Failed to load essay:', error);
+      setNotFound(true);
     } finally {
       setLoading(false);
     }
@@ -73,7 +93,8 @@ export default function NextBigThingEssay() {
     );
   }
 
-  if (!essay) {
+  // Non-admin accessing draft or essay not found
+  if (notFound || !essay) {
     return <Navigate to="/the-next-big-thing" replace />;
   }
 
@@ -82,7 +103,6 @@ export default function NextBigThingEssay() {
   // Simple markdown-like rendering for the content
   const renderContent = (content: string) => {
     return content.split('\n\n').map((paragraph, idx) => {
-      // Handle headers
       if (paragraph.startsWith('## ')) {
         return (
           <h2 key={idx} className="text-xl font-display font-semibold text-foreground mt-8 mb-4">
@@ -97,7 +117,6 @@ export default function NextBigThingEssay() {
           </h3>
         );
       }
-      // Handle lists
       if (paragraph.includes('\n- ') || paragraph.startsWith('- ')) {
         const items = paragraph.split('\n').filter(line => line.startsWith('- '));
         return (
@@ -118,7 +137,6 @@ export default function NextBigThingEssay() {
           </ol>
         );
       }
-      // Handle bold text within paragraphs
       const parts = paragraph.split(/(\*\*[^*]+\*\*)/g);
       return (
         <p key={idx} className="text-muted-foreground leading-relaxed mb-4">

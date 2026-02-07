@@ -1,4 +1,4 @@
-import { useParams, Navigate, Link } from 'react-router-dom';
+import { useParams, Navigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { PageLayout } from '@/components/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
@@ -9,6 +9,7 @@ import { RelatedContent } from '@/components/RelatedContent';
 import { InlineEssayEditor, AdminEditBanner } from '@/components/admin';
 import { supabase } from '@/integrations/supabase/client';
 import { LoadingState } from '@/components/states';
+import { useAuth } from '@/contexts/AuthContext';
 import { RefreshCw, Clock } from 'lucide-react';
 
 const phaseLabels: Record<string, string> = {
@@ -60,35 +61,55 @@ interface Essay {
   category_id: string | null;
   prerequisites: string[] | null;
   updated_at: string;
+  status: string | null;
+  published: boolean | null;
 }
 
 export default function GreenTransitionEssay() {
   const { phase, slug } = useParams<{ phase: string; slug: string }>();
+  const { isAdmin } = useAuth();
   const [essay, setEssay] = useState<Essay | null>(null);
   const [loading, setLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
   const [activeSection, setActiveSection] = useState<string>('introduction');
 
   useEffect(() => {
     if (slug) {
       loadEssay();
     }
-  }, [slug]);
+  }, [slug, isAdmin]);
 
   const loadEssay = async () => {
     setLoading(true);
+    setNotFound(false);
     try {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('essays')
         .select('*')
         .eq('slug', slug)
         .eq('section', 'green-transition')
         .maybeSingle();
 
-      setEssay(data);
+      if (error) throw error;
+
+      // Check access: non-admins can only see published essays (status='published')
+      if (data) {
+        const isPublished = data.status === 'published';
+        if (!isPublished && !isAdmin) {
+          // Draft accessed by non-admin - show 404
+          setNotFound(true);
+          setEssay(null);
+        } else {
+          setEssay(data);
+        }
+      } else {
+        setNotFound(true);
+      }
     } catch (error) {
       if (import.meta.env.DEV) {
         console.error('Failed to load essay:', error);
       }
+      setNotFound(true);
     } finally {
       setLoading(false);
     }
@@ -134,7 +155,8 @@ export default function GreenTransitionEssay() {
     );
   }
 
-  if (!essay) {
+  // Non-admin accessing draft or essay not found - redirect to phase page
+  if (notFound || !essay) {
     return <Navigate to={`/green-transition/${phase}`} replace />;
   }
 
