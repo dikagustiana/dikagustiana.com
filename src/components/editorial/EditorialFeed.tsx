@@ -1,119 +1,14 @@
-import { useParams, Link, useNavigate } from 'react-router-dom';
-import { PageLayout } from '@/components/layouts/PageLayout';
-import { SEO } from '@/components/SEO';
-import { Button } from '@/components/ui/button';
-import { useAuth } from '@/contexts/AuthContext';
-import { Plus, ArrowLeft } from 'lucide-react';
-import { EditorialFeed } from '@/components/editorial';
-
-// Map URL slugs to database phase values
-const phaseMapping: Record<string, string> = {
-  'now': 'where-we-are-now',
-  'gaps': 'challenges-ahead',
-  'future': 'pathways-forward',
-  // Also support direct names
-  'where-we-are-now': 'where-we-are-now',
-  'challenges-ahead': 'challenges-ahead',
-  'pathways-forward': 'pathways-forward',
-};
-
-const phaseDetails: Record<string, { title: string; coreQuestion: string }> = {
-  'where-we-are-now': { 
-    title: 'Where We Are Now', 
-    coreQuestion: 'What is the actual state of energy transition in Indonesia—not the press releases?',
-  },
-  'challenges-ahead': { 
-    title: 'Challenges Ahead', 
-    coreQuestion: 'What structural barriers will block progress regardless of political will?',
-  },
-  'pathways-forward': { 
-    title: 'Pathways Forward', 
-    coreQuestion: 'Which interventions create the highest leverage with limited resources?',
-  },
-};
-
-export default function GreenTransitionPhase() {
-  const { phase } = useParams<{ phase: string }>();
-  const { isAdmin } = useAuth();
-  const navigate = useNavigate();
-
-  // Map URL phase to database phase
-  const dbPhase = phase ? phaseMapping[phase] || phase : '';
-  const details = dbPhase ? phaseDetails[dbPhase] : null;
-
-  const handleAddEssay = () => {
-    navigate(`/admin/content/new?section=green-transition&phase=${dbPhase}`);
-  };
-
-  const getEssayUrl = (essay: { slug: string; phase?: string | null }) => {
-    return `/green-transition/${phase}/${essay.slug}`;
-  };
-
-  // Filter essays by the mapped phase
-  const TOPICS = [{ id: dbPhase, label: details?.title || '' }];
-
-  return (
-    <PageLayout
-      variant="content"
-      role="economist"
-      breadcrumbs={[
-        { label: 'Home', path: '/' },
-        { label: 'Green Transition', path: '/green-transition' },
-        { label: details?.title || 'Phase' }
-      ]}
-    >
-      <SEO
-        title={`${details?.title || 'Essays'} - Green Transition`}
-        description={details?.coreQuestion || 'Economic analysis of Indonesia green transition.'}
-      />
-
-      <div className="container max-w-4xl py-8">
-        {/* Back Link */}
-        <Link 
-          to="/green-transition" 
-          className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-8 transition-colors"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to Green Transition
-        </Link>
-
-        {/* Header Section */}
-        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-8">
-          <div>
-            <h1 className="text-3xl md:text-4xl font-display font-bold mb-2">
-              {details?.title || 'Essays'}
-            </h1>
-            <p className="text-muted-foreground max-w-2xl italic">
-              {details?.coreQuestion}
-            </p>
-          </div>
-
-          {isAdmin && (
-            <Button onClick={handleAddEssay}>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Essay
-            </Button>
-          )}
-        </div>
-
-        {/* Editorial Feed - filtered by phase */}
-        <GreenTransitionPhaseFeed 
-          phase={dbPhase}
-          getEssayUrl={getEssayUrl}
-        />
-      </div>
-    </PageLayout>
-  );
-}
-
-// Custom feed component that filters by phase
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Search, Clock, User, Calendar } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { cn } from '@/lib/utils';
 
 interface Essay {
   id: string;
@@ -126,27 +21,30 @@ interface Essay {
   thumbnail_url: string | null;
   phase: string | null;
   status: string | null;
+  published: boolean | null;
 }
 
-interface GreenTransitionPhaseFeedProps {
-  phase: string;
+interface EditorialFeedProps {
+  section: 'next-big-thing' | 'green-transition';
+  topics?: { id: string; label: string }[];
   getEssayUrl: (essay: Essay) => string;
 }
 
-function GreenTransitionPhaseFeed({ phase, getEssayUrl }: GreenTransitionPhaseFeedProps) {
+export function EditorialFeed({ section, topics = [], getEssayUrl }: EditorialFeedProps) {
   const { isAdmin } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedTopic, setSelectedTopic] = useState('all');
   const [sortBy, setSortBy] = useState('newest');
 
   const { data: essays, isLoading } = useQuery({
-    queryKey: ['green-transition-phase', phase],
+    queryKey: ['editorial-feed', section],
     queryFn: async () => {
       let query = supabase
         .from('essays')
-        .select('id, slug, title, snippet, author, date, read_time, thumbnail_url, phase, status')
-        .eq('section', 'green-transition')
-        .eq('phase', phase);
+        .select('id, slug, title, snippet, author, date, read_time, thumbnail_url, phase, status, published')
+        .eq('section', section);
 
+      // Non-admin users only see published essays
       if (!isAdmin) {
         query = query.eq('status', 'published');
       }
@@ -155,14 +53,15 @@ function GreenTransitionPhaseFeed({ phase, getEssayUrl }: GreenTransitionPhaseFe
       if (error) throw error;
       return data as Essay[];
     },
-    enabled: !!phase,
   });
 
+  // Filter and sort essays
   const filteredEssays = useMemo(() => {
     if (!essays) return [];
     
     let result = essays;
 
+    // Search filter
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       result = result.filter(
@@ -172,12 +71,18 @@ function GreenTransitionPhaseFeed({ phase, getEssayUrl }: GreenTransitionPhaseFe
       );
     }
 
+    // Topic filter
+    if (selectedTopic !== 'all') {
+      result = result.filter((e) => e.phase === selectedTopic);
+    }
+
+    // Sort
     if (sortBy === 'oldest') {
       result = [...result].reverse();
     }
 
     return result;
-  }, [essays, searchQuery, sortBy]);
+  }, [essays, searchQuery, selectedTopic, sortBy]);
 
   const formatDate = (dateStr: string) => {
     try {
@@ -213,6 +118,7 @@ function GreenTransitionPhaseFeed({ phase, getEssayUrl }: GreenTransitionPhaseFe
     <div className="space-y-8">
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-4">
+        {/* Search */}
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
@@ -223,24 +129,46 @@ function GreenTransitionPhaseFeed({ phase, getEssayUrl }: GreenTransitionPhaseFe
           />
         </div>
 
-        <Select value={sortBy} onValueChange={setSortBy}>
-          <SelectTrigger className="w-[120px]">
-            <SelectValue placeholder="Sort" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="newest">Newest</SelectItem>
-            <SelectItem value="oldest">Oldest</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="flex gap-2">
+          {/* Topic filter */}
+          {topics.length > 0 && (
+            <Select value={selectedTopic} onValueChange={setSelectedTopic}>
+              <SelectTrigger className="w-[140px]">
+                <SelectValue placeholder="Topic" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Topics</SelectItem>
+                {topics.map((topic) => (
+                  <SelectItem key={topic.id} value={topic.id}>
+                    {topic.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+
+          {/* Sort */}
+          <Select value={sortBy} onValueChange={setSortBy}>
+            <SelectTrigger className="w-[120px]">
+              <SelectValue placeholder="Sort" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="newest">Newest</SelectItem>
+              <SelectItem value="oldest">Oldest</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
+      {/* Essay count */}
       <p className="text-sm text-muted-foreground">
         {filteredEssays.length} {filteredEssays.length === 1 ? 'essay' : 'essays'}
       </p>
 
+      {/* Essay list */}
       {filteredEssays.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-muted-foreground">No essays found in this phase yet.</p>
+          <p className="text-muted-foreground">No essays found</p>
         </div>
       ) : (
         <div className="divide-y divide-border">
@@ -250,6 +178,7 @@ function GreenTransitionPhaseFeed({ phase, getEssayUrl }: GreenTransitionPhaseFe
                 to={getEssayUrl(essay)}
                 className="group flex flex-col sm:flex-row gap-6"
               >
+                {/* Thumbnail */}
                 {essay.thumbnail_url && (
                   <div className="flex-shrink-0 w-full sm:w-48 aspect-[16/10] sm:aspect-[4/3] overflow-hidden rounded-lg bg-muted">
                     <img
@@ -261,17 +190,35 @@ function GreenTransitionPhaseFeed({ phase, getEssayUrl }: GreenTransitionPhaseFe
                   </div>
                 )}
 
+                {/* Content */}
                 <div className="flex-1 min-w-0">
+                  {/* Topic badge + draft indicator */}
+                  <div className="flex items-center gap-2 mb-2">
+                    {essay.phase && (
+                      <Badge variant="secondary" className="text-xs capitalize">
+                        {essay.phase}
+                      </Badge>
+                    )}
+                    {isAdmin && essay.status !== 'published' && (
+                      <Badge variant="outline" className="text-xs">
+                        {essay.status || 'draft'}
+                      </Badge>
+                    )}
+                  </div>
+
+                  {/* Title */}
                   <h2 className="text-xl font-semibold text-foreground group-hover:text-primary transition-colors mb-2 line-clamp-2">
                     {essay.title}
                   </h2>
 
+                  {/* Deck/snippet */}
                   {essay.snippet && (
                     <p className="text-muted-foreground mb-4 line-clamp-2">
                       {essay.snippet}
                     </p>
                   )}
 
+                  {/* Meta */}
                   <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
                     {essay.author && (
                       <span className="flex items-center gap-1">
