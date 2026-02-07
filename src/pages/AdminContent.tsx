@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { PageLayout } from '@/components/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
 import { useAuth } from '@/contexts/AuthContext';
-import { useUnifiedContent, useContentStats, useBulkPublishContent, useDeleteContent, ContentType } from '@/hooks/queries/useUnifiedContent';
+import { useUnifiedContent, useContentStats, useBulkPublishContent, useDeleteContent, useTogglePublishContent, ContentType } from '@/hooks/queries/useUnifiedContent';
 import { useSections } from '@/hooks/queries/useSections';
 import { LoadingState, ErrorState, EmptyState } from '@/components/states';
 import {
@@ -31,6 +31,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import {
   Eye,
@@ -39,10 +40,12 @@ import {
   FileText,
   RefreshCw,
   Plus,
-  BookOpen,
   Calculator,
   ExternalLink,
   XCircle,
+  Search,
+  Copy,
+  Check,
 } from 'lucide-react';
 
 // Content type labels and icons
@@ -51,7 +54,7 @@ const contentTypeConfig: Record<ContentType, { label: string; icon: React.ReactN
   fsli: { label: 'FSLI', icon: <Calculator className="h-3 w-3" />, color: 'bg-accent/10 text-accent-foreground border-accent/20' },
 };
 
-// Extended sections for filtering (includes accounting for FSLI)
+// Extended sections for filtering
 const allSections = [
   { slug: 'all', name: 'All Sections' },
   { slug: 'accounting', name: 'Accounting (FSLI)' },
@@ -64,6 +67,21 @@ const allSections = [
   { slug: 'tools', name: 'Tools' },
 ];
 
+// Get public URL for an essay
+const getPublicUrl = (section: string, slug: string, phase?: string) => {
+  const baseUrl = window.location.origin;
+  switch (section) {
+    case 'green-transition':
+      return `${baseUrl}/green-transition/${phase || 'where-we-are-now'}/${slug}`;
+    case 'next-big-thing':
+      return `${baseUrl}/the-next-big-thing/${slug}`;
+    case 'critical-thinking':
+      return `${baseUrl}/critical-thinking-research/${phase || 'clarify'}/${slug}`;
+    default:
+      return `${baseUrl}/${section}/${slug}`;
+  }
+};
+
 export default function AdminContent() {
   const { isAdmin, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -72,16 +90,20 @@ export default function AdminContent() {
   const [sectionFilter, setSectionFilter] = useState<string>('all');
   const [typeFilter, setTypeFilter] = useState<'all' | ContentType>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState('');
   const [selectedIds, setSelectedIds] = useState<{ id: string; type: ContentType }[]>([]);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const { data: sections } = useSections();
   const { data: contentItems, isLoading, error, refetch } = useUnifiedContent({
     section: sectionFilter,
     contentType: typeFilter,
     status: statusFilter,
+    search: searchQuery,
   });
   const { data: stats, refetch: refetchStats } = useContentStats();
   const bulkPublish = useBulkPublishContent();
+  const togglePublish = useTogglePublishContent();
   const deleteContent = useDeleteContent();
 
   const handleRefresh = () => {
@@ -134,7 +156,6 @@ export default function AdminContent() {
   };
 
   const handleBulkPublish = async (published: boolean) => {
-    // Only essays can be published/unpublished
     const essayIds = selectedIds.filter(item => item.type === 'essay').map(item => item.id);
     
     if (essayIds.length === 0) {
@@ -150,11 +171,40 @@ export default function AdminContent() {
       await bulkPublish.mutateAsync({ ids: essayIds, published });
       toast({
         title: published ? 'Published' : 'Unpublished',
-        description: `${essayIds.length} essays updated.`,
+        description: `${essayIds.length} essays updated. Status synced.`,
       });
       setSelectedIds([]);
     } catch {
       toast({ title: 'Error', description: 'Failed to update items.', variant: 'destructive' });
+    }
+  };
+
+  const handleTogglePublish = async (id: string, currentlyPublished: boolean, type: ContentType, title: string) => {
+    if (type !== 'essay') {
+      toast({ title: 'Cannot toggle', description: 'FSLI pages are always public.', variant: 'destructive' });
+      return;
+    }
+
+    try {
+      const result = await togglePublish.mutateAsync({ id, currentlyPublished });
+      toast({
+        title: result.published ? 'Published' : 'Unpublished',
+        description: `"${title}" is now ${result.status}.`,
+      });
+    } catch {
+      toast({ title: 'Error', description: 'Failed to toggle publish status.', variant: 'destructive' });
+    }
+  };
+
+  const handleCopyUrl = async (section: string, slug: string) => {
+    const url = getPublicUrl(section, slug);
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopiedId(slug);
+      setTimeout(() => setCopiedId(null), 2000);
+      toast({ title: 'Copied', description: 'Public URL copied to clipboard.' });
+    } catch {
+      toast({ title: 'Error', description: 'Failed to copy URL.', variant: 'destructive' });
     }
   };
 
@@ -265,6 +315,17 @@ export default function AdminContent() {
           <CardContent className="py-4">
             <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
               <div className="flex items-center gap-4 flex-wrap">
+                {/* Search */}
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search title or slug..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-9 w-64"
+                  />
+                </div>
+
                 <Select value={sectionFilter} onValueChange={setSectionFilter}>
                   <SelectTrigger className="w-48">
                     <SelectValue placeholder="Filter by section" />
@@ -341,7 +402,7 @@ export default function AdminContent() {
         ) : !contentItems || contentItems.length === 0 ? (
           <EmptyState
             title="No content found"
-            message="No content matches the current filter."
+            message={searchQuery ? `No results for "${searchQuery}"` : "No content matches the current filter."}
             icon={<FileText className="h-6 w-6 text-muted-foreground" />}
           />
         ) : (
@@ -361,7 +422,7 @@ export default function AdminContent() {
                   <TableHead>Voice</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Updated</TableHead>
-                  <TableHead className="w-24">Actions</TableHead>
+                  <TableHead className="w-32">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -423,6 +484,34 @@ export default function AdminContent() {
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1">
+                          {/* Toggle Publish */}
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleTogglePublish(item.id, item.published, item.type, item.title)}
+                            title={item.published ? 'Unpublish' : 'Publish'}
+                            disabled={item.type !== 'essay'}
+                          >
+                            {item.published ? (
+                              <EyeOff className="h-4 w-4" />
+                            ) : (
+                              <Eye className="h-4 w-4" />
+                            )}
+                          </Button>
+                          {/* Copy URL */}
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleCopyUrl(item.section, item.slug)}
+                            title="Copy public URL"
+                          >
+                            {copiedId === item.slug ? (
+                              <Check className="h-4 w-4 text-primary" />
+                            ) : (
+                              <Copy className="h-4 w-4" />
+                            )}
+                          </Button>
+                          {/* Edit */}
                           <Button
                             variant="ghost"
                             size="icon"
@@ -432,6 +521,7 @@ export default function AdminContent() {
                               <ExternalLink className="h-4 w-4" />
                             </Link>
                           </Button>
+                          {/* Delete */}
                           <Button
                             variant="ghost"
                             size="icon"

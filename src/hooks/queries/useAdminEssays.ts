@@ -47,9 +47,16 @@ export function useBulkPublish() {
 
   return useMutation({
     mutationFn: async ({ ids, published }: { ids: string[]; published: boolean }) => {
+      // Sync status with published boolean - status is source of truth
+      const newStatus = published ? 'published' : 'draft';
+      
       const { error } = await supabase
         .from('essays')
-        .update({ published, updated_at: new Date().toISOString() })
+        .update({ 
+          published, 
+          status: newStatus,
+          updated_at: new Date().toISOString() 
+        })
         .in('id', ids);
 
       if (error) throw error;

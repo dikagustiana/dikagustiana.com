@@ -23,6 +23,7 @@ export interface ContentFilter {
   section?: string;
   status?: string;
   published?: boolean;
+  search?: string;
 }
 
 export function useUnifiedContent(filter: ContentFilter = {}) {
@@ -44,23 +45,23 @@ export function useUnifiedContent(filter: ContentFilter = {}) {
         if (filter.published !== undefined) {
           essayQuery = essayQuery.eq('published', filter.published);
         }
-        // Status filter
+        // Status filter - use status as source of truth
         if (filter.status && filter.status !== 'all') {
-          if (filter.status === 'published') {
-            essayQuery = essayQuery.eq('published', true);
-          } else if (filter.status === 'draft') {
-            essayQuery = essayQuery.eq('published', false).or('status.is.null,status.eq.draft');
-          } else if (filter.status === 'tone_pending') {
-            essayQuery = essayQuery.eq('status', 'tone_pending' as const);
-          } else if (filter.status === 'archived') {
-            essayQuery = essayQuery.eq('status', 'archived' as const);
-          }
+          essayQuery = essayQuery.eq('status', filter.status as 'draft' | 'tone_pending' | 'published' | 'archived');
         }
 
         const { data: essays, error: essayError } = await essayQuery;
         if (essayError) throw essayError;
 
         essays?.forEach((essay) => {
+          // Apply search filter client-side
+          if (filter.search) {
+            const searchLower = filter.search.toLowerCase();
+            const matchesTitle = essay.title.toLowerCase().includes(searchLower);
+            const matchesSlug = essay.slug.toLowerCase().includes(searchLower);
+            if (!matchesTitle && !matchesSlug) return;
+          }
+
           items.push({
             id: essay.id,
             type: 'essay',
@@ -79,7 +80,6 @@ export function useUnifiedContent(filter: ContentFilter = {}) {
 
       // Fetch FSLI pages if not filtering by essays only
       if (filter.contentType !== 'essay') {
-        // Only include FSLI if section filter is 'all', 'accounting', or not set
         const shouldIncludeFsli = !filter.section || 
           filter.section === 'all' || 
           filter.section === 'accounting';
@@ -93,6 +93,14 @@ export function useUnifiedContent(filter: ContentFilter = {}) {
           if (fsliError) throw fsliError;
 
           fsliPages?.forEach((page) => {
+            // Apply search filter client-side
+            if (filter.search) {
+              const searchLower = filter.search.toLowerCase();
+              const matchesTitle = page.title.toLowerCase().includes(searchLower);
+              const matchesSlug = page.slug.toLowerCase().includes(searchLower);
+              if (!matchesTitle && !matchesSlug) return;
+            }
+
             items.push({
               id: page.id,
               type: 'fsli',
@@ -123,22 +131,20 @@ export function useContentStats() {
   return useQuery({
     queryKey: ['content-stats'],
     queryFn: async () => {
-      // Get essay counts with status
       const { data: essays } = await supabase
         .from('essays')
         .select('id, published, section, status');
 
-      // Get FSLI page count
       const { count: fsliCount } = await supabase
         .from('fsli_pages')
         .select('*', { count: 'exact', head: true });
 
       const essayList = essays || [];
       
-      // Status-based counts
-      const publishedEssays = essayList.filter(e => e.status === 'published' || (e.published && !e.status)).length;
+      // Status-based counts (status is source of truth)
+      const publishedEssays = essayList.filter(e => e.status === 'published').length;
       const tonePendingEssays = essayList.filter(e => e.status === 'tone_pending').length;
-      const draftEssays = essayList.filter(e => !e.published && (!e.status || e.status === 'draft')).length;
+      const draftEssays = essayList.filter(e => e.status === 'draft' || (!e.status && !e.published)).length;
       const archivedEssays = essayList.filter(e => e.status === 'archived').length;
 
       // Section breakdown
@@ -152,7 +158,7 @@ export function useContentStats() {
         total: essayList.length + (fsliCount || 0),
         essays: essayList.length,
         fsliPages: fsliCount || 0,
-        published: publishedEssays + (fsliCount || 0), // FSLI pages are always public
+        published: publishedEssays + (fsliCount || 0),
         tonePending: tonePendingEssays,
         draft: draftEssays,
         archived: archivedEssays,
@@ -167,12 +173,47 @@ export function useBulkPublishContent() {
 
   return useMutation({
     mutationFn: async ({ ids, published }: { ids: string[]; published: boolean }) => {
+      // Sync status with published boolean - status is source of truth
+      const newStatus = published ? 'published' : 'draft';
+      
       const { error } = await supabase
         .from('essays')
-        .update({ published, updated_at: new Date().toISOString() })
+        .update({ 
+          published, 
+          status: newStatus,
+          updated_at: new Date().toISOString() 
+        })
         .in('id', ids);
 
       if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['unified-content'] });
+      queryClient.invalidateQueries({ queryKey: ['content-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['essays'] });
+    },
+  });
+}
+
+export function useTogglePublishContent() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, currentlyPublished }: { id: string; currentlyPublished: boolean }) => {
+      const newPublished = !currentlyPublished;
+      const newStatus = newPublished ? 'published' : 'draft';
+      
+      const { error } = await supabase
+        .from('essays')
+        .update({ 
+          published: newPublished, 
+          status: newStatus,
+          updated_at: new Date().toISOString() 
+        })
+        .eq('id', id);
+
+      if (error) throw error;
+      return { published: newPublished, status: newStatus };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['unified-content'] });
