@@ -9,6 +9,11 @@ export { AuthorBox } from './AuthorBox';
 export { RelatedEssays } from './RelatedEssays';
 export { EditorialFeed } from './EditorialFeed';
 export { ArticleLayout } from './ArticleLayout';
+// Legacy image block exports (deprecated - use FigureBlock instead)
 export { ImageBlock, parseImageBlock, serializeImageBlock } from './ImageBlock';
-export { ImageUploader } from './ImageUploader';
 export type { ImageBlockData } from './ImageBlock';
+// New FigureBlock system
+export { FigureBlock, serializeFigureBlock, parseFigureBlock } from './FigureBlock';
+export { FigureUploader } from './FigureUploader';
+export { EssayEditor, getPlainTextFromHtml } from './EssayEditor';
+export type { FigureBlockData } from './FigureBlock';

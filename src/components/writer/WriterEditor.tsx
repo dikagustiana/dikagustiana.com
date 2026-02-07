@@ -3,11 +3,11 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { RichTextEditor, htmlToMarkdown, markdownToHtml, getPlainTextFromHtml } from '@/components/admin/RichTextEditor';
+import { getPlainTextFromHtml } from '@/components/admin/RichTextEditor';
+import { EssayEditor } from '@/components/editorial/EssayEditor';
 import { WriterPreview } from './WriterPreview';
 import { WriterValidation, ValidationResult, validateEssay } from './WriterValidation';
 import { WriterMetadata } from './WriterMetadata';
-import { EssayBodyEditor } from './EssayBodyEditor';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -482,14 +482,20 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
                   isNew={isNew}
                 />
 
-                {/* Body Editor with Image Support */}
-                <EssayBodyEditor
-                  content={content}
-                  onChange={setContent}
-                  section={section}
-                  distractionFree={false}
-                  minHeight="400px"
-                />
+                {/* Body Editor with Figure Support */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Body Content</label>
+                  <EssayEditor
+                    content={content}
+                    onChange={setContent}
+                    section={section}
+                    distractionFree={false}
+                    minHeight="400px"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Use H2 and H3 for headings. Click the image button to insert figures.
+                  </p>
+                </div>
 
                 {/* Validation Checklist */}
                 <WriterValidation validation={validation} />
@@ -544,8 +550,8 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
                 className="text-xl text-muted-foreground border-0 border-b rounded-none px-0 focus-visible:ring-0 resize-none min-h-[60px]"
               />
 
-              {/* Body with Image Support */}
-              <EssayBodyEditor
+              {/* Body with Figure Support */}
+              <EssayEditor
                 content={content}
                 onChange={setContent}
                 section={section}
