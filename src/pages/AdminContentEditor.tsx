@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { PageLayout } from '@/components/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
@@ -89,6 +89,10 @@ export default function AdminContentEditor() {
   // Validation state
   const [toneValidation, setToneValidation] = useState<{ valid: boolean; missing: string[] }>({ valid: true, missing: [] });
 
+  // Dirty state tracking
+  const [isDirty, setIsDirty] = useState(false);
+  const isInitialLoad = useRef(true);
+
   // Initialize from URL params (for Add Essay from section pages)
   useEffect(() => {
     if (isNew) {
@@ -156,6 +160,9 @@ export default function AdminContentEditor() {
   // Load essay data when editing
   useEffect(() => {
     if (essay && !isNew) {
+      // Mark as initial load to prevent dirty tracking
+      isInitialLoad.current = true;
+      
       setTitle(essay.title || '');
       setSlug(essay.slug || '');
       setSection(essay.section || '');
@@ -181,8 +188,34 @@ export default function AdminContentEditor() {
       if (essay.coach_fields) {
         setCoachFields(essay.coach_fields as Partial<CoachFields>);
       }
+      
+      // Reset dirty state after a short delay to allow state to settle
+      setTimeout(() => {
+        isInitialLoad.current = false;
+        setIsDirty(false);
+      }, 100);
     }
   }, [essay, isNew]);
+
+  // Track dirty state when form fields change
+  useEffect(() => {
+    if (isInitialLoad.current) {
+      return;
+    }
+    setIsDirty(true);
+  }, [title, slug, section, phase, voiceRole, status, author, date, readTime, snippet, content, managerFields, economistFields, educatorFields, coachFields]);
+
+  // Beforeunload guard
+  useEffect(() => {
+    const handler = (e: BeforeUnloadEvent) => {
+      if (isDirty) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+    window.addEventListener('beforeunload', handler);
+    return () => window.removeEventListener('beforeunload', handler);
+  }, [isDirty]);
 
   // Auto-generate slug from title
   useEffect(() => {
@@ -275,6 +308,7 @@ export default function AdminContentEditor() {
         await updateEssay.mutateAsync({ id: id!, data: essayData });
         toast({ title: 'Saved', description: 'Essay updated successfully.' });
       }
+      setIsDirty(false);
       navigate('/admin/content');
     } catch (error) {
       toast({
@@ -389,6 +423,12 @@ export default function AdminContentEditor() {
             </div>
           </div>
           <div className="flex items-center gap-4">
+            {isDirty && (
+              <span className="text-sm text-amber-600 flex items-center gap-1">
+                <span className="h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
+                Unsaved
+              </span>
+            )}
             <ContentHealthIndicator
               content={{ snippet, content }}
               fullText={`${snippet || ''} ${content || ''}`}
@@ -396,7 +436,7 @@ export default function AdminContentEditor() {
             />
             <Button 
               variant="outline"
-              onClick={() => handleSave('draft')} 
+              onClick={() => handleSave(status)} 
               disabled={updateEssay.isPending || createEssay.isPending}
             >
               Save Draft
