@@ -40,7 +40,7 @@ import ForecastingOutput from "./pages/ForecastingOutput";
 
 // Green Transition
 import GreenTransitionPhase from "./pages/GreenTransitionPhase";
-import GreenTransitionEssay from "./pages/GreenTransitionEssay";
+import GreenTransitionEssayPage from "./pages/GreenTransitionEssayPage";
 
 // Masyarakat Baru children
 import CriticalThinkingResearch from "./pages/CriticalThinkingResearch";
@@ -66,7 +66,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import RemoraTrading from "./pages/RemoraTrading";
 import DikaQuantEngine from "./pages/DikaQuantEngine";
 import TheNextBigThing from "./pages/TheNextBigThing";
-import NextBigThingEssay from "./pages/NextBigThingEssay";
+import NextBigThingEssayPage from "./pages/NextBigThingEssayPage";
 
 const queryClient = new QueryClient();
 
@@ -114,7 +114,7 @@ const App = () => (
             <Route path="/green-transition/gaps" element={<GreenTransitionPhase />} />
             <Route path="/green-transition/future" element={<GreenTransitionPhase />} />
             <Route path="/green-transition/:phase" element={<GreenTransitionPhase />} />
-            <Route path="/green-transition/:phase/:slug" element={<GreenTransitionEssay />} />
+            <Route path="/green-transition/:phase/:slug" element={<GreenTransitionEssayPage />} />
             
             {/* Legacy Masyarakat Baru routes - redirect to flattened sections */}
             <Route path="/masyarakat-baru" element={<Navigate to="/critical-thinking-research" replace />} />
@@ -150,7 +150,7 @@ const App = () => (
             <Route path="/admin/content" element={<AdminContent />} />
             <Route path="/admin/content/:id" element={<AdminContentEditor />} />
             <Route path="/the-next-big-thing" element={<TheNextBigThing />} />
-            <Route path="/the-next-big-thing/:slug" element={<NextBigThingEssay />} />
+            <Route path="/the-next-big-thing/:slug" element={<NextBigThingEssayPage />} />
             
             {/* Not Found */}
             <Route path="*" element={<NotFound />} />
