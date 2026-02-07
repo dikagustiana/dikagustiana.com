@@ -71,12 +71,14 @@ export default function AdminContent() {
 
   const [sectionFilter, setSectionFilter] = useState<string>('all');
   const [typeFilter, setTypeFilter] = useState<'all' | ContentType>('all');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
   const [selectedIds, setSelectedIds] = useState<{ id: string; type: ContentType }[]>([]);
 
   const { data: sections } = useSections();
   const { data: contentItems, isLoading, error, refetch } = useUnifiedContent({
     section: sectionFilter,
     contentType: typeFilter,
+    status: statusFilter,
   });
   const { data: stats, refetch: refetchStats } = useContentStats();
   const bulkPublish = useBulkPublishContent();
@@ -219,23 +221,11 @@ export default function AdminContent() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-8">
           <Card>
             <CardHeader className="pb-2">
               <CardDescription>Total</CardDescription>
               <CardTitle className="text-2xl">{stats?.total ?? 0}</CardTitle>
-            </CardHeader>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardDescription>Essays</CardDescription>
-              <CardTitle className="text-2xl text-primary">{stats?.essays ?? 0}</CardTitle>
-            </CardHeader>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardDescription>FSLI Pages</CardDescription>
-              <CardTitle className="text-2xl text-accent-foreground">{stats?.fsliPages ?? 0}</CardTitle>
             </CardHeader>
           </Card>
           <Card>
@@ -246,8 +236,26 @@ export default function AdminContent() {
           </Card>
           <Card>
             <CardHeader className="pb-2">
+              <CardDescription>Tone Pending</CardDescription>
+              <CardTitle className="text-2xl text-amber-600">{stats?.tonePending ?? 0}</CardTitle>
+            </CardHeader>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2">
               <CardDescription>Draft</CardDescription>
               <CardTitle className="text-2xl text-muted-foreground">{stats?.draft ?? 0}</CardTitle>
+            </CardHeader>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardDescription>Essays</CardDescription>
+              <CardTitle className="text-2xl">{stats?.essays ?? 0}</CardTitle>
+            </CardHeader>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardDescription>FSLI Pages</CardDescription>
+              <CardTitle className="text-2xl">{stats?.fsliPages ?? 0}</CardTitle>
             </CardHeader>
           </Card>
         </div>
@@ -278,6 +286,19 @@ export default function AdminContent() {
                     <SelectItem value="all">All Types</SelectItem>
                     <SelectItem value="essay">Essays Only</SelectItem>
                     <SelectItem value="fsli">FSLI Only</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger className="w-40">
+                    <SelectValue placeholder="Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Status</SelectItem>
+                    <SelectItem value="draft">Draft</SelectItem>
+                    <SelectItem value="tone_pending">Tone Pending</SelectItem>
+                    <SelectItem value="published">Published</SelectItem>
+                    <SelectItem value="archived">Archived</SelectItem>
                   </SelectContent>
                 </Select>
 
@@ -381,9 +402,17 @@ export default function AdminContent() {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        {item.published ? (
+                        {item.status === 'published' ? (
                           <Badge className="bg-primary/10 text-primary border-primary/20">
                             Published
+                          </Badge>
+                        ) : item.status === 'tone_pending' ? (
+                          <Badge className="bg-amber-500/10 text-amber-600 border-amber-500/20">
+                            Tone Pending
+                          </Badge>
+                        ) : item.status === 'archived' ? (
+                          <Badge variant="secondary" className="text-muted-foreground">
+                            Archived
                           </Badge>
                         ) : (
                           <Badge variant="secondary">Draft</Badge>
