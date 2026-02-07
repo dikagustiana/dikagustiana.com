@@ -29,6 +29,8 @@ interface Essay {
   phase: string | null;
   status: string | null;
   published: boolean | null;
+  created_at: string;
+  updated_at: string;
   economist_fields: {
     deck?: string;
     key_takeaways?: string[];
@@ -142,6 +144,8 @@ export default function GreenTransitionEssayPage() {
         deck={deck}
         author={essay.author}
         publishedAt={essay.date}
+        updatedAt={essay.updated_at}
+        createdAt={essay.created_at}
         readTime={essay.read_time}
         topic={phaseLabel}
         heroImage={essay.thumbnail_url}
