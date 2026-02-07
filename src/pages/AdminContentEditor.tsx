@@ -161,11 +161,26 @@ export default function AdminContentEditor() {
       setSection(essay.section || '');
       setPhase(essay.phase || '');
       setVoiceRole((essay.voice_role as VoiceRole) || 'hybrid');
+      setStatus((essay.status as ContentStatus) || (essay.published ? 'published' : 'draft'));
       setAuthor(essay.author || 'Dika Gustiana');
       setDate(essay.date || '');
       setReadTime(essay.read_time || '');
       setSnippet(essay.snippet || '');
       setContent(essay.content || '');
+      
+      // Load tone fields from database
+      if (essay.manager_fields) {
+        setManagerFields(essay.manager_fields as Partial<ManagerFields>);
+      }
+      if (essay.economist_fields) {
+        setEconomistFields(essay.economist_fields as Partial<EconomistFields>);
+      }
+      if (essay.educator_fields) {
+        setEducatorFields(essay.educator_fields as Partial<EducatorFields>);
+      }
+      if (essay.coach_fields) {
+        setCoachFields(essay.coach_fields as Partial<CoachFields>);
+      }
     }
   }, [essay, isNew]);
 
@@ -214,19 +229,25 @@ export default function AdminContentEditor() {
       return;
     }
 
-    // Get the appropriate tone fields based on role
+    // Get the appropriate tone fields based on role (clears other roles)
     const getToneFieldsData = () => {
+      const base = {
+        manager_fields: null,
+        economist_fields: null,
+        educator_fields: null,
+        coach_fields: null,
+      };
       switch (voiceRole) {
         case 'manager':
-          return { manager_fields: managerFields };
+          return { ...base, manager_fields: managerFields };
         case 'economist':
-          return { economist_fields: economistFields };
+          return { ...base, economist_fields: economistFields };
         case 'educator':
-          return { educator_fields: educatorFields };
+          return { ...base, educator_fields: educatorFields };
         case 'coach':
-          return { coach_fields: coachFields };
+          return { ...base, coach_fields: coachFields };
         default:
-          return {};
+          return base;
       }
     };
 
@@ -236,6 +257,7 @@ export default function AdminContentEditor() {
       section,
       phase: phase || null,
       voice_role: voiceRole,
+      status: targetStatus,
       published: targetStatus === 'published',
       author,
       date: date || null,
