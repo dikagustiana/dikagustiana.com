@@ -3,4 +3,5 @@ export { WriterMetadata } from './WriterMetadata';
 export { WriterPreview } from './WriterPreview';
 export { WriterValidation, validateEssay } from './WriterValidation';
 export { WriterList } from './WriterList';
+export { EssayBodyEditor } from './EssayBodyEditor';
 export type { ValidationResult } from './WriterValidation';

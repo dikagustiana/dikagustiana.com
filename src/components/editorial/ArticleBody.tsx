@@ -1,5 +1,6 @@
 import { ReactNode, useMemo } from 'react';
 import { LinkableHeading } from './LinkableHeading';
+import { ImageBlock, parseImageBlock } from './ImageBlock';
 import { cn } from '@/lib/utils';
 
 interface ArticleBodyProps {
@@ -17,6 +18,23 @@ export function ArticleBody({ content, fontSizeClass, className }: ArticleBodyPr
     let headingCounter = 0;
     
     return paragraphs.map((paragraph, idx) => {
+      // Check for JSON image block marker from editor (HTML format)
+      const jsonImageMatch = paragraph.match(/data-image='([^']+)'/);
+      if (jsonImageMatch) {
+        try {
+          const imageData = JSON.parse(jsonImageMatch[1]);
+          return <ImageBlock key={idx} data={imageData} />;
+        } catch (e) {
+          // If JSON parse fails, continue with normal parsing
+        }
+      }
+
+      // Image blocks: ![alt](src){attrs}
+      const imageData = parseImageBlock(paragraph);
+      if (imageData) {
+        return <ImageBlock key={idx} data={imageData} />;
+      }
+
       // H2 headings
       if (paragraph.startsWith('## ')) {
         headingCounter++;
