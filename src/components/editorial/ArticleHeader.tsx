@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { User, Calendar, Clock, Tag } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -7,6 +8,8 @@ interface ArticleHeaderProps {
   deck?: string | null;
   author?: string | null;
   publishedAt?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
   readTime?: string | null;
   topic?: string | null;
   heroImage?: string | null;
@@ -19,12 +22,22 @@ export function ArticleHeader({
   deck,
   author,
   publishedAt,
+  updatedAt,
+  createdAt,
   readTime,
   topic,
   heroImage,
   heroCaption,
   className,
 }: ArticleHeaderProps) {
+  // Check if we should show "Updated on" (7+ days after creation)
+  const showUpdated = useMemo(() => {
+    if (!updatedAt || !createdAt) return false;
+    const created = new Date(createdAt);
+    const updated = new Date(updatedAt);
+    const diffDays = (updated.getTime() - created.getTime()) / (1000 * 60 * 60 * 24);
+    return diffDays >= 7;
+  }, [updatedAt, createdAt]);
   const formatDate = (dateStr: string) => {
     try {
       const date = new Date(dateStr);
@@ -80,6 +93,11 @@ export function ArticleHeader({
           <span className="flex items-center gap-1.5">
             <Clock className="h-4 w-4" />
             {readTime}
+          </span>
+        )}
+        {showUpdated && updatedAt && (
+          <span className="text-xs italic">
+            Updated {formatDate(updatedAt)}
           </span>
         )}
       </div>
