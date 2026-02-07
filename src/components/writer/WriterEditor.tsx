@@ -7,6 +7,7 @@ import { RichTextEditor, htmlToMarkdown, markdownToHtml, getPlainTextFromHtml } 
 import { WriterPreview } from './WriterPreview';
 import { WriterValidation, ValidationResult, validateEssay } from './WriterValidation';
 import { WriterMetadata } from './WriterMetadata';
+import { EssayBodyEditor } from './EssayBodyEditor';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -243,8 +244,9 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
       wordCount,
       references: references.filter(r => r.label.trim()),
       section,
+      content,
     });
-  }, [title, deck, keyTakeaways, wordCount, references, section]);
+  }, [title, deck, keyTakeaways, wordCount, references, section, content]);
 
   const handleSave = async (targetStatus: 'draft' | 'published' = status) => {
     // Block publishing if validation fails
@@ -480,17 +482,14 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
                   isNew={isNew}
                 />
 
-                {/* Body Editor */}
-                <div className="space-y-2">
-                  <Label>Body Content</Label>
-                  <RichTextEditor
-                    content={content}
-                    onChange={setContent}
-                    placeholder="Start writing your essay..."
-                    minHeight="400px"
-                    distractionFree={false}
-                  />
-                </div>
+                {/* Body Editor with Image Support */}
+                <EssayBodyEditor
+                  content={content}
+                  onChange={setContent}
+                  section={section}
+                  distractionFree={false}
+                  minHeight="400px"
+                />
 
                 {/* Validation Checklist */}
                 <WriterValidation validation={validation} />
@@ -545,13 +544,13 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
                 className="text-xl text-muted-foreground border-0 border-b rounded-none px-0 focus-visible:ring-0 resize-none min-h-[60px]"
               />
 
-              {/* Body */}
-              <RichTextEditor
+              {/* Body with Image Support */}
+              <EssayBodyEditor
                 content={content}
                 onChange={setContent}
-                placeholder="Start writing your essay..."
-                minHeight="500px"
+                section={section}
                 distractionFree={true}
+                minHeight="500px"
               />
 
               {/* Quick validation indicator */}

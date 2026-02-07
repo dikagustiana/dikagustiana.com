@@ -9,3 +9,6 @@ export { AuthorBox } from './AuthorBox';
 export { RelatedEssays } from './RelatedEssays';
 export { EditorialFeed } from './EditorialFeed';
 export { ArticleLayout } from './ArticleLayout';
+export { ImageBlock, parseImageBlock, serializeImageBlock } from './ImageBlock';
+export { ImageUploader } from './ImageUploader';
+export type { ImageBlockData } from './ImageBlock';

@@ -1,11 +1,13 @@
-import { CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
+import { CheckCircle, XCircle, AlertTriangle, Image as ImageIcon } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
+import { validateImages, countImages } from '@/lib/imageValidation';
 
 export interface ValidationResult {
   canPublish: boolean;
   errors: { field: string; message: string }[];
   warnings: { field: string; message: string }[];
+  imageCount: number;
 }
 
 interface ValidateParams {
@@ -15,6 +17,7 @@ interface ValidateParams {
   wordCount: number;
   references: { label: string; url?: string }[];
   section: string;
+  content: string;
 }
 
 const MIN_WORD_COUNT = 500;
@@ -27,6 +30,7 @@ export function validateEssay({
   wordCount,
   references,
   section,
+  content,
 }: ValidateParams): ValidationResult {
   const errors: { field: string; message: string }[] = [];
   const warnings: { field: string; message: string }[] = [];
@@ -58,6 +62,12 @@ export function validateEssay({
     });
   }
 
+  // Validate images
+  const sectionType = section === 'green-transition' ? 'green-transition' : 'next-big-thing';
+  const imageValidation = validateImages(content || '', sectionType);
+  errors.push(...imageValidation.errors);
+  warnings.push(...imageValidation.warnings);
+
   // Warning: No references on Green Transition posts
   if (section === 'green-transition' && references.length === 0) {
     warnings.push({ 
@@ -70,6 +80,7 @@ export function validateEssay({
     canPublish: errors.length === 0,
     errors,
     warnings,
+    imageCount: imageValidation.images.length,
   };
 }
 
@@ -78,7 +89,7 @@ interface WriterValidationProps {
 }
 
 export function WriterValidation({ validation }: WriterValidationProps) {
-  const { canPublish, errors, warnings } = validation;
+  const { canPublish, errors, warnings, imageCount } = validation;
 
   return (
     <Card className={cn(
@@ -143,6 +154,10 @@ export function WriterValidation({ validation }: WriterValidationProps) {
             <div className="flex items-center gap-2">
               <CheckCircle className="h-4 w-4 text-primary" />
               <span>500+ words</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <ImageIcon className="h-4 w-4 text-primary" />
+              <span>{imageCount} images</span>
             </div>
           </div>
         )}
