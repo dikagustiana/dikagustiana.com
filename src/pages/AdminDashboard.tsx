@@ -222,7 +222,7 @@ export default function AdminDashboard() {
                   {recentDrafts.map((draft) => (
                     <li key={draft.id}>
                       <Link
-                        to={`/admin/content/${draft.id}`}
+                        to={`/admin/content/${draft.slug}`}
                         className="flex items-center justify-between p-3 rounded-lg hover:bg-muted/50 transition-colors group"
                       >
                         <div className="flex-1 min-w-0">
@@ -275,7 +275,7 @@ export default function AdminDashboard() {
                   {recentPublished.map((essay) => (
                     <li key={essay.id}>
                       <Link
-                        to={`/admin/content/${essay.id}`}
+                        to={`/admin/content/${essay.slug}`}
                         className="flex items-center justify-between p-3 rounded-lg hover:bg-muted/50 transition-colors group"
                       >
                         <div className="flex-1 min-w-0">

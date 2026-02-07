@@ -14,11 +14,16 @@ export interface Essay {
   thumbnail_url: string | null;
   content: string | null;
   published: boolean;
+  status: string | null;
   sort_order: number;
   category_id: string | null;
   voice_role: string | null;
   prerequisites: string[] | null;
   learning_outcomes: string[] | null;
+  manager_fields: Record<string, unknown> | null;
+  economist_fields: Record<string, unknown> | null;
+  educator_fields: Record<string, unknown> | null;
+  coach_fields: Record<string, unknown> | null;
   created_at: string;
   updated_at: string;
 }
