@@ -53,19 +53,20 @@ export default function AdminDashboard() {
     );
   }
 
-  // Calculate stats
+  // Calculate stats with status
   const stats = essays
     ? {
         total: essays.length,
-        published: essays.filter((e) => e.published).length,
-        drafts: essays.filter((e) => !e.published).length,
+        published: essays.filter((e) => e.status === 'published' || (e.published && !e.status)).length,
+        tonePending: essays.filter((e) => e.status === 'tone_pending').length,
+        drafts: essays.filter((e) => !e.published && (!e.status || e.status === 'draft')).length,
         thisWeek: essays.filter((e) => {
           const weekAgo = new Date();
           weekAgo.setDate(weekAgo.getDate() - 7);
           return new Date(e.updated_at) > weekAgo;
         }).length,
       }
-    : { total: 0, published: 0, drafts: 0, thisWeek: 0 };
+    : { total: 0, published: 0, tonePending: 0, drafts: 0, thisWeek: 0 };
 
   // Recent drafts (last 5 unpublished, sorted by updated_at)
   const recentDrafts = essays
@@ -161,10 +162,10 @@ export default function AdminDashboard() {
           <Card>
             <CardHeader className="pb-2">
               <CardDescription className="flex items-center gap-2">
-                <Eye className="h-4 w-4 text-green-600" />
+                <Eye className="h-4 w-4 text-primary" />
                 Published
               </CardDescription>
-              <CardTitle className="text-3xl text-green-600">
+              <CardTitle className="text-3xl text-primary">
                 {essaysLoading ? '...' : stats.published}
               </CardTitle>
             </CardHeader>
@@ -172,10 +173,21 @@ export default function AdminDashboard() {
           <Card>
             <CardHeader className="pb-2">
               <CardDescription className="flex items-center gap-2">
-                <Edit3 className="h-4 w-4 text-amber-600" />
-                Drafts
+                <Clock className="h-4 w-4 text-amber-600" />
+                Tone Pending
               </CardDescription>
               <CardTitle className="text-3xl text-amber-600">
+                {essaysLoading ? '...' : stats.tonePending}
+              </CardTitle>
+            </CardHeader>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardDescription className="flex items-center gap-2">
+                <Edit3 className="h-4 w-4 text-muted-foreground" />
+                Drafts
+              </CardDescription>
+              <CardTitle className="text-3xl text-muted-foreground">
                 {essaysLoading ? '...' : stats.drafts}
               </CardTitle>
             </CardHeader>
