@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { PageLayout } from '@/components/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
 import { useAuth } from '@/contexts/AuthContext';
@@ -50,7 +50,7 @@ export default function AdminContentEditor() {
   const [searchParams] = useSearchParams();
   const isNew = slugParam === 'new';
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const location = useLocation(); const { toast } = useToast();
   const { isAdmin, isLoading: authLoading } = useAuth();
 
   // Internal database UUID - loaded from essay data
@@ -242,7 +242,7 @@ export default function AdminContentEditor() {
   }, [section, sections, essay?.voice_role]);
 
   // Check if this section uses FigureBlock (TipTap JSON)
-  const usesFigureEditor = FIGURE_ENABLED_SECTIONS.includes(section);
+  const sectionSlug = (sections?.find(s => s.slug === section)?.slug ?? sections?.find(s => s.id === section)?.slug ?? section ?? '').trim(); const sectionIdentifier = (section ?? '').trim(); const figuresEnabled = FIGURE_ENABLED_SECTIONS.includes(sectionSlug); const usesFigureEditor = figuresEnabled;
   
   // Figure validation for figure-enabled sections
   const figureValidation = useMemo<FigureValidationResult>(() => {
@@ -250,8 +250,8 @@ export default function AdminContentEditor() {
       return { figures: [], errors: [], warnings: [] };
     }
     const figures = extractFiguresFromContent(content);
-    return validateFigures(figures, section as 'next-big-thing' | 'green-transition');
-  }, [content, section, usesFigureEditor]);
+    return validateFigures(figures, sectionSlug as 'next-big-thing' | 'green-transition');
+  }, [content, sectionSlug, usesFigureEditor]);
   
   const canPublish = (toneValidation.valid || voiceRole === 'hybrid') && figureValidation.errors.length === 0;
 
@@ -682,30 +682,26 @@ export default function AdminContentEditor() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="flex items-center gap-2">
-                    Content
-                    {usesFigureEditor && (
-                      <Badge variant="outline" className="text-xs font-normal">
-                        <ImageIcon className="h-3 w-3 mr-1" />
-                        Figures enabled
-                      </Badge>
-                    )}
-                  </CardTitle>
+                  <CardTitle>Content</CardTitle>
                   <CardDescription>
                     The main content of the essay.
-                    {usesFigureEditor && (
+                    {figuresEnabled ? (
                       <span className="text-primary ml-2">
-                        Use the toolbar's Insert Figure button to add images.
+                        Figures enabled — use the toolbar’s Insert Figure button to add images.
+                      </span>
+                    ) : (
+                      <span className="text-muted-foreground ml-2">
+                        Figures disabled for this section.
                       </span>
                     )}
-                    {templateApplied && selectedTemplate !== 'blank' && !usesFigureEditor && (
+                    {templateApplied && selectedTemplate !== 'blank' && !figuresEnabled && (
                       <span className="text-primary ml-2">
                         (Pre-filled from {essayTemplates[selectedTemplate].name} template)
                       </span>
                     )}
                   </CardDescription>
                 </div>
-                {!usesFigureEditor && (
+                {!figuresEnabled && (
                   <div className="flex items-center gap-2">
                     {/* Editor Mode Toggle - only for non-figure sections */}
                     <div className="flex items-center border border-border rounded-md overflow-hidden">
@@ -752,18 +748,39 @@ export default function AdminContentEditor() {
                 />
               </div>
               
-              <div className="space-y-2">
-                <Label>Full Content</Label>
-                
-                {/* Figure-enabled sections use EssayEditor with TipTap JSON */}
-                {usesFigureEditor ? (
+               <div className="space-y-2">
+                 <Label>Full Content</Label>
+
+                 <div className="space-y-2">
+                   <Badge variant={figuresEnabled ? "outline" : "secondary"} className="w-fit text-xs font-normal">
+                     <ImageIcon className="h-3 w-3 mr-1" />
+                     {figuresEnabled ? "Figures enabled" : "Figures disabled for this section"}
+                   </Badge>
+
+                   {isAdmin && (
+                     <div className="rounded-md border border-border bg-muted/20 px-3 py-2 text-xs font-mono text-muted-foreground">
+                       <span className="text-foreground">editorComponentName</span>={usesFigureEditor ? 'EssayEditor' : (editorMode === 'rich' ? 'RichTextEditor' : 'MarkdownTextarea')}
+                       <span className="mx-2">•</span>
+                       <span className="text-foreground">currentRoute</span>={location.pathname}{location.search}
+                       <span className="mx-2">•</span>
+                       <span className="text-foreground">sectionIdentifier</span>={sectionIdentifier || '(empty)'}
+                       <span className="mx-2">•</span>
+                       <span className="text-foreground">sectionSlug</span>={sectionSlug || '(empty)'}
+                       <span className="mx-2">•</span>
+                       <span className="text-foreground">figuresEnabled</span>={String(figuresEnabled)}
+                     </div>
+                   )}
+                 </div>
+
+                 {/* Figure-enabled sections use EssayEditor with FigureBlock support */}
+                 {usesFigureEditor ? (
                   <EssayEditor
                     content={content}
                     onChange={(html) => {
                       setContent(html);
                       if (templateApplied) setTemplateApplied(false);
                     }}
-                    section={section as 'next-big-thing' | 'green-transition'}
+                    section={sectionSlug as 'next-big-thing' | 'green-transition'}
                     placeholder="Start writing your content... Use the toolbar to insert figures."
                     minHeight="500px"
                   />

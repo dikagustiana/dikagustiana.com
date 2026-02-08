@@ -6,6 +6,13 @@ import { useState, useEffect, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { FigureExtension } from './FigureExtension';
 import { FigureUploader } from './FigureUploader';
 import { FigureBlockData } from './FigureBlock';
@@ -25,6 +32,7 @@ import {
   Unlink,
   Minus,
   ImagePlus,
+  MoreHorizontal,
 } from 'lucide-react';
 
 interface EssayEditorProps {
@@ -252,6 +260,61 @@ function MenuBar({ editor, distractionFree, onInsertFigure }: MenuBarProps) {
       >
         <Redo className="h-4 w-4" />
       </Button>
+
+      <Separator orientation="vertical" className="h-6 mx-1" />
+
+      {/* Overflow (includes Insert Figure so it remains accessible on narrow toolbars) */}
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className={buttonClass}
+            title="More"
+          >
+            <MoreHorizontal className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="min-w-56">
+          <DropdownMenuItem
+            onSelect={(e) => {
+              e.preventDefault();
+              onInsertFigure();
+            }}
+            className="gap-2"
+          >
+            <ImagePlus className="h-4 w-4" />
+            Insert Figure
+          </DropdownMenuItem>
+
+          <DropdownMenuSeparator />
+
+          <DropdownMenuItem
+            onSelect={(e) => {
+              e.preventDefault();
+              setLink();
+            }}
+            className="gap-2"
+          >
+            <LinkIcon className="h-4 w-4" />
+            Add link
+          </DropdownMenuItem>
+
+          {editor.isActive('link') && (
+            <DropdownMenuItem
+              onSelect={(e) => {
+                e.preventDefault();
+                editor.chain().focus().unsetLink().run();
+              }}
+              className="gap-2"
+            >
+              <Unlink className="h-4 w-4" />
+              Remove link
+            </DropdownMenuItem>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   );
 }
