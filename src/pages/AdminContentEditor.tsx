@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { PageLayout } from '@/components/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
@@ -11,8 +11,10 @@ import { ToneFieldsEditor } from '@/components/admin/ToneFieldsEditor';
 import { ContentHealthIndicator } from '@/components/admin/ContentHealthIndicator';
 import { TemplateSelector } from '@/components/admin/TemplateSelector';
 import { DynamicListEditor } from '@/components/admin/DynamicListEditor';
-import { RichTextEditor, markdownToHtml, htmlToMarkdown } from '@/components/admin/RichTextEditor';
+import { RichTextEditor, markdownToHtml, htmlToMarkdown, getPlainTextFromHtml } from '@/components/admin/RichTextEditor';
 import { ContentPreview } from '@/components/admin/ContentPreview';
+import { EssayEditor } from '@/components/editorial/EssayEditor';
+import { validateFigures, extractFiguresFromContent, FigureValidationResult } from '@/lib/figureValidation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -20,13 +22,14 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
 import {
   ResizablePanelGroup,
   ResizablePanel,
   ResizableHandle,
 } from '@/components/ui/resizable';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Save, XCircle, AlertTriangle, CheckCircle, Eye, Edit3 } from 'lucide-react';
+import { ArrowLeft, Save, XCircle, AlertTriangle, CheckCircle, Eye, Edit3, ImageIcon } from 'lucide-react';
 import { 
   VoiceRole, 
   ContentStatus,
@@ -37,6 +40,9 @@ import {
   validateToneFields 
 } from '@/lib/types/toneFields';
 import { EssayTemplateType, applyTemplate, essayTemplates } from '@/lib/essayTemplates';
+
+// Sections that use TipTap JSON with FigureBlock support
+const FIGURE_ENABLED_SECTIONS = ['next-big-thing', 'green-transition'];
 
 export default function AdminContentEditor() {
   // Route uses slug, we store the database uuid internally
@@ -235,7 +241,19 @@ export default function AdminContentEditor() {
     }
   }, [section, sections, essay?.voice_role]);
 
-  const canPublish = toneValidation.valid || voiceRole === 'hybrid';
+  // Check if this section uses FigureBlock (TipTap JSON)
+  const usesFigureEditor = FIGURE_ENABLED_SECTIONS.includes(section);
+  
+  // Figure validation for figure-enabled sections
+  const figureValidation = useMemo<FigureValidationResult>(() => {
+    if (!usesFigureEditor || !content) {
+      return { figures: [], errors: [], warnings: [] };
+    }
+    const figures = extractFiguresFromContent(content);
+    return validateFigures(figures, section as 'next-big-thing' | 'green-transition');
+  }, [content, section, usesFigureEditor]);
+  
+  const canPublish = (toneValidation.valid || voiceRole === 'hybrid') && figureValidation.errors.length === 0;
 
   // Helper to determine if tone fields have content
   const hasContent = (fields: Record<string, unknown> | null | undefined): boolean => {
@@ -470,6 +488,36 @@ export default function AdminContentEditor() {
           </Alert>
         )}
 
+        {/* Figure Validation Errors */}
+        {usesFigureEditor && figureValidation.errors.length > 0 && (
+          <Alert variant="destructive" className="mb-6">
+            <ImageIcon className="h-4 w-4" />
+            <AlertTitle>Figure Errors - Cannot Publish</AlertTitle>
+            <AlertDescription>
+              <ul className="list-disc list-inside mt-1 space-y-1">
+                {figureValidation.errors.map((error, i) => (
+                  <li key={i}>{error.message}</li>
+                ))}
+              </ul>
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* Figure Warnings */}
+        {usesFigureEditor && figureValidation.warnings.length > 0 && (
+          <Alert className="mb-6 border-amber-500/50 bg-amber-500/10">
+            <AlertTriangle className="h-4 w-4 text-amber-600" />
+            <AlertTitle className="text-amber-600">Figure Warnings</AlertTitle>
+            <AlertDescription className="text-muted-foreground">
+              <ul className="list-disc list-inside mt-1 space-y-1">
+                {figureValidation.warnings.map((warning, i) => (
+                  <li key={i}>{warning.message}</li>
+                ))}
+              </ul>
+            </AlertDescription>
+          </Alert>
+        )}
+
         {canPublish && voiceRole !== 'hybrid' && (
           <Alert className="mb-6 border-accent/50 bg-accent/10">
             <CheckCircle className="h-4 w-4 text-accent-foreground" />
@@ -634,47 +682,62 @@ export default function AdminContentEditor() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle>Content</CardTitle>
+                  <CardTitle className="flex items-center gap-2">
+                    Content
+                    {usesFigureEditor && (
+                      <Badge variant="outline" className="text-xs font-normal">
+                        <ImageIcon className="h-3 w-3 mr-1" />
+                        Figures enabled
+                      </Badge>
+                    )}
+                  </CardTitle>
                   <CardDescription>
                     The main content of the essay.
-                    {templateApplied && selectedTemplate !== 'blank' && (
+                    {usesFigureEditor && (
+                      <span className="text-primary ml-2">
+                        Use the toolbar's Insert Figure button to add images.
+                      </span>
+                    )}
+                    {templateApplied && selectedTemplate !== 'blank' && !usesFigureEditor && (
                       <span className="text-primary ml-2">
                         (Pre-filled from {essayTemplates[selectedTemplate].name} template)
                       </span>
                     )}
                   </CardDescription>
                 </div>
-                <div className="flex items-center gap-2">
-                  {/* Editor Mode Toggle */}
-                  <div className="flex items-center border border-border rounded-md overflow-hidden">
+                {!usesFigureEditor && (
+                  <div className="flex items-center gap-2">
+                    {/* Editor Mode Toggle - only for non-figure sections */}
+                    <div className="flex items-center border border-border rounded-md overflow-hidden">
+                      <Button
+                        variant={editorMode === 'rich' ? 'secondary' : 'ghost'}
+                        size="sm"
+                        onClick={() => setEditorMode('rich')}
+                        className="rounded-none border-0 gap-1"
+                      >
+                        <Edit3 className="h-3 w-3" />
+                        Rich
+                      </Button>
+                      <Button
+                        variant={editorMode === 'markdown' ? 'secondary' : 'ghost'}
+                        size="sm"
+                        onClick={() => setEditorMode('markdown')}
+                        className="rounded-none border-0 gap-1"
+                      >
+                        Markdown
+                      </Button>
+                    </div>
                     <Button
-                      variant={editorMode === 'rich' ? 'secondary' : 'ghost'}
+                      variant={showPreview ? 'secondary' : 'outline'}
                       size="sm"
-                      onClick={() => setEditorMode('rich')}
-                      className="rounded-none border-0 gap-1"
+                      onClick={() => setShowPreview(!showPreview)}
+                      className="gap-1"
                     >
-                      <Edit3 className="h-3 w-3" />
-                      Rich
-                    </Button>
-                    <Button
-                      variant={editorMode === 'markdown' ? 'secondary' : 'ghost'}
-                      size="sm"
-                      onClick={() => setEditorMode('markdown')}
-                      className="rounded-none border-0 gap-1"
-                    >
-                      Markdown
+                      <Eye className="h-3 w-3" />
+                      Preview
                     </Button>
                   </div>
-                  <Button
-                    variant={showPreview ? 'secondary' : 'outline'}
-                    size="sm"
-                    onClick={() => setShowPreview(!showPreview)}
-                    className="gap-1"
-                  >
-                    <Eye className="h-3 w-3" />
-                    Preview
-                  </Button>
-                </div>
+                )}
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -692,7 +755,19 @@ export default function AdminContentEditor() {
               <div className="space-y-2">
                 <Label>Full Content</Label>
                 
-                {showPreview ? (
+                {/* Figure-enabled sections use EssayEditor with TipTap JSON */}
+                {usesFigureEditor ? (
+                  <EssayEditor
+                    content={content}
+                    onChange={(html) => {
+                      setContent(html);
+                      if (templateApplied) setTemplateApplied(false);
+                    }}
+                    section={section as 'next-big-thing' | 'green-transition'}
+                    placeholder="Start writing your content... Use the toolbar to insert figures."
+                    minHeight="500px"
+                  />
+                ) : showPreview ? (
                   <ResizablePanelGroup direction="horizontal" className="min-h-[500px] rounded-lg border border-border">
                     <ResizablePanel defaultSize={55} minSize={35}>
                       <div className="h-full">
@@ -763,6 +838,13 @@ export default function AdminContentEditor() {
                       />
                     )}
                   </div>
+                )}
+
+                {/* Figure count indicator for figure-enabled sections */}
+                {usesFigureEditor && figureValidation.figures.length > 0 && (
+                  <p className="text-xs text-muted-foreground">
+                    {figureValidation.figures.length} figure{figureValidation.figures.length !== 1 ? 's' : ''} in content
+                  </p>
                 )}
               </div>
             </CardContent>
