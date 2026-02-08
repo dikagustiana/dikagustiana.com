@@ -687,13 +687,13 @@ export default function AdminContentEditor() {
                     The main content of the essay.
                     {figuresEnabled ? (
                       <span className="text-primary ml-2">
-                        Figures enabled — use the toolbar’s Insert Figure button to add images.
+                        Figures enabled — use the toolbar's Insert Figure button to add images.
                       </span>
-                    ) : (
+                    ) : section ? (
                       <span className="text-muted-foreground ml-2">
                         Figures disabled for this section.
                       </span>
-                    )}
+                    ) : null}
                     {templateApplied && selectedTemplate !== 'blank' && !figuresEnabled && (
                       <span className="text-primary ml-2">
                         (Pre-filled from {essayTemplates[selectedTemplate].name} template)
@@ -701,7 +701,7 @@ export default function AdminContentEditor() {
                     )}
                   </CardDescription>
                 </div>
-                {!figuresEnabled && (
+                {!figuresEnabled && section && (
                   <div className="flex items-center gap-2">
                     {/* Editor Mode Toggle - only for non-figure sections */}
                     <div className="flex items-center border border-border rounded-md overflow-hidden">
@@ -751,29 +751,45 @@ export default function AdminContentEditor() {
                <div className="space-y-2">
                  <Label>Full Content</Label>
 
-                 <div className="space-y-2">
-                   <Badge variant={figuresEnabled ? "outline" : "secondary"} className="w-fit text-xs font-normal">
-                     <ImageIcon className="h-3 w-3 mr-1" />
-                     {figuresEnabled ? "Figures enabled" : "Figures disabled for this section"}
-                   </Badge>
-
-                   {isAdmin && (
-                     <div className="rounded-md border border-border bg-muted/20 px-3 py-2 text-xs font-mono text-muted-foreground">
-                       <span className="text-foreground">editorComponentName</span>={usesFigureEditor ? 'EssayEditor' : (editorMode === 'rich' ? 'RichTextEditor' : 'MarkdownTextarea')}
-                       <span className="mx-2">•</span>
-                       <span className="text-foreground">currentRoute</span>={location.pathname}{location.search}
-                       <span className="mx-2">•</span>
-                       <span className="text-foreground">sectionIdentifier</span>={sectionIdentifier || '(empty)'}
-                       <span className="mx-2">•</span>
-                       <span className="text-foreground">sectionSlug</span>={sectionSlug || '(empty)'}
-                       <span className="mx-2">•</span>
-                       <span className="text-foreground">figuresEnabled</span>={String(figuresEnabled)}
+                 {/* Section required message for new essays */}
+                 {isNew && !section && (
+                   <div className="rounded-lg border-2 border-dashed border-muted-foreground/25 bg-muted/30 p-12 text-center">
+                     <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+                       <Edit3 className="h-6 w-6 text-muted-foreground" />
                      </div>
-                   )}
-                 </div>
+                     <h3 className="text-lg font-semibold text-foreground mb-2">Select a section to start writing</h3>
+                     <p className="text-sm text-muted-foreground max-w-sm mx-auto">
+                       Choose a section from the "Basic Information" card above. The editor and available features will adapt based on your selection.
+                     </p>
+                   </div>
+                 )}
+
+                 {/* Show editor controls only when section is selected */}
+                 {section && (
+                   <div className="space-y-2">
+                     <Badge variant={figuresEnabled ? "outline" : "secondary"} className="w-fit text-xs font-normal">
+                       <ImageIcon className="h-3 w-3 mr-1" />
+                       {figuresEnabled ? "Figures enabled" : "Figures disabled for this section"}
+                     </Badge>
+
+                     {isAdmin && (
+                       <div className="rounded-md border border-border bg-muted/20 px-3 py-2 text-xs font-mono text-muted-foreground">
+                         <span className="text-foreground">editorComponentName</span>={usesFigureEditor ? 'EssayEditor' : (editorMode === 'rich' ? 'RichTextEditor' : 'MarkdownTextarea')}
+                         <span className="mx-2">•</span>
+                         <span className="text-foreground">currentRoute</span>={location.pathname}{location.search}
+                         <span className="mx-2">•</span>
+                         <span className="text-foreground">sectionIdentifier</span>={sectionIdentifier || '(empty)'}
+                         <span className="mx-2">•</span>
+                         <span className="text-foreground">sectionSlug</span>={sectionSlug || '(empty)'}
+                         <span className="mx-2">•</span>
+                         <span className="text-foreground">figuresEnabled</span>={String(figuresEnabled)}
+                       </div>
+                     )}
+                   </div>
+                 )}
 
                  {/* Figure-enabled sections use EssayEditor with FigureBlock support */}
-                 {usesFigureEditor ? (
+                 {section && usesFigureEditor ? (
                   <EssayEditor
                     content={content}
                     onChange={(html) => {
@@ -784,7 +800,7 @@ export default function AdminContentEditor() {
                     placeholder="Start writing your content... Use the toolbar to insert figures."
                     minHeight="500px"
                   />
-                ) : showPreview ? (
+                ) : section && showPreview ? (
                   <ResizablePanelGroup direction="horizontal" className="min-h-[500px] rounded-lg border border-border">
                     <ResizablePanel defaultSize={55} minSize={35}>
                       <div className="h-full">
@@ -831,7 +847,7 @@ export default function AdminContentEditor() {
                       </div>
                     </ResizablePanel>
                   </ResizablePanelGroup>
-                ) : (
+                ) : section ? (
                   <div className="min-h-[500px]">
                     {editorMode === 'rich' ? (
                       <RichTextEditor
@@ -855,10 +871,10 @@ export default function AdminContentEditor() {
                       />
                     )}
                   </div>
-                )}
+                ) : null}
 
                 {/* Figure count indicator for figure-enabled sections */}
-                {usesFigureEditor && figureValidation.figures.length > 0 && (
+                {section && usesFigureEditor && figureValidation.figures.length > 0 && (
                   <p className="text-xs text-muted-foreground">
                     {figureValidation.figures.length} figure{figureValidation.figures.length !== 1 ? 's' : ''} in content
                   </p>
