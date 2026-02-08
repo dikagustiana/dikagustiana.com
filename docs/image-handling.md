@@ -1,85 +1,152 @@
-# Image Handling in Editorial Essays
+# Image & Figure Handling for Editorial Sections
 
-This document explains how to insert and manage images in essays for **The Next Big Thing** and **Green Transition** sections.
+## Overview
 
-## Inserting Images
+Images and graphs are handled as **FigureBlock** nodes within the TipTap JSON content format. This applies **only** to:
 
-### From the Editor
+- **The Next Big Thing** (`next-big-thing`)
+- **The Green Transition** (`green-transition`)
 
-1. Click the **"Insert Image"** button above the body editor
-2. Choose your upload method:
-   - **Upload**: Drag-and-drop, click to browse, or paste from clipboard
-   - **URL**: Paste any public image URL
-3. Fill in the required fields:
-   - **Alt text** (required): Describe the image for accessibility
-   - **Caption** (optional): Displayed below the image
-   - **Source** (required for Green Transition): Attribution for the image
-   - **Source URL** (optional): Link to the source
-   - **Full width** (optional): Toggle for edge-to-edge display
-4. Click **"Insert Image"** to add it to your essay
+Other sections use the standard RichTextEditor without figure support.
 
-### Supported Formats
+## Writer Experience
 
-- PNG (recommended for graphics/screenshots)
-- JPG (recommended for photos)
-- WebP (recommended for web-optimized images)
+### Inserting a Figure
 
-### Size Recommendations
+1. Open the essay in the admin editor (`/admin/content/:slug` or `/admin/writer/:section/:slug`)
+2. For Next Big Thing or Green Transition essays, the editor shows a **"Figures enabled"** badge
+3. Click the **Insert Figure** button (📷) in the toolbar
+4. Choose upload method:
+   - **Upload tab**: Drag & drop, paste from clipboard, or click to browse
+   - **URL tab**: Paste an image URL and click "Load"
+5. Fill in the required metadata:
+   - **Alt text** (required) - Describes the image for accessibility
+   - **Caption** (optional) - Displayed below the image
+   - **Type**: Image or Graph
+   - **Width mode**: Content width (default) or Wide
+   - **Source name** (required for Green Transition unless marked as original)
+   - **Source URL** (optional)
+   - **"Original/self-created"** checkbox - Bypasses source requirement
+6. Click **Insert Figure**
 
-- **Max file size**: 2MB (larger files trigger a warning)
-- **Aspect ratio**: Avoid very tall images (height > 2x width) as they disrupt reading flow
+### Editing a Figure
 
-## Image Fields
+Click on any figure in the editor to select it. The figure shows a selection ring. You can:
+- Delete it using the X button
+- Drag to reorder within the content
 
-| Field | Required | Description |
-|-------|----------|-------------|
-| Alt text | ✅ Yes | Screen reader description (accessibility) |
-| Caption | No | Visible text below image |
-| Source name | ✅ Green Transition only | Attribution (e.g., "Reuters", "Author's photo") |
-| Source URL | No | Link to source |
-| Width mode | No | "content" (760px max) or "full" (wider) |
+### Figure Types
+
+| Type | Behavior |
+|------|----------|
+| **Image** | Standard rendering, no zoom |
+| **Graph** | Tap-to-zoom lightbox on mobile for readability |
+
+### Width Modes
+
+| Mode | Description |
+|------|-------------|
+| **Content** | Fits within article column width (default) |
+| **Wide** | Extends beyond column with page gutters respected |
 
 ## Validation Rules
 
-### Blocking (Cannot Publish)
+### Publishing is Blocked When:
 
-- Any image missing alt text
-- Green Transition: Any image missing source name (unless "No source" checkbox is checked)
+- Any figure is missing **alt text**
+- Green Transition figures are missing **source name** (unless "Original" is checked)
 
-### Warnings (Can Override)
+### Warnings (Non-blocking):
 
-- More than 8 images in one essay
-- Image file larger than 2MB
-- Very tall aspect ratio (may hurt scroll experience)
-- Next Big Thing: Missing source attribution (recommended but not required)
+- More than 8 figures in one essay
+- Image file size > 2MB
+- Very tall aspect ratio (height/width > 2)
+- Next Big Thing figures without source attribution
 
 ## Storage
 
 Images are stored in the `essay-images` Supabase storage bucket:
-- Public access for reading
-- Admin-only upload permissions
-- Cached for 1 year
+- **Path**: `{section}/{timestamp}-{random}.{ext}`
+- **Access**: Public read, authenticated write
+- **Formats**: PNG, JPG, WebP
+- **Max size**: 5MB
 
-## Technical Format
+## Technical Details
 
-Images are stored in the content as HTML with JSON metadata:
+### Content Format
+
+The canonical format is **TipTap HTML** with embedded figure blocks:
 
 ```html
-<p class="image-block" data-image='{"src":"url","alt":"text","caption":"..."}'>📷 [Image: alt text]</p>
+<figure data-type="figure-block" data-figure='{"src":"...","altText":"...","kind":"graph","widthMode":"wide"}'>
+  <img src="..." alt="..." />
+</figure>
 ```
 
-Or in markdown format for direct editing:
+### FigureBlockData Schema
 
-```markdown
-![Alt text](https://example.com/image.jpg){caption="Caption here",source="Source Name",sourceUrl="https://source.com",width="full"}
+```typescript
+interface FigureBlockData {
+  src: string;           // Image URL
+  altText: string;       // Required
+  caption?: string;      // Optional
+  sourceName?: string;   // Required for green-transition
+  sourceUrl?: string;    // Optional
+  noSource?: boolean;    // "Original/self-created" flag
+  widthMode?: 'content' | 'wide';  // Default: 'content'
+  kind?: 'image' | 'graph';        // Default: 'image'
+  naturalWidth?: number;
+  naturalHeight?: number;
+  aspectRatio?: number;
+}
 ```
 
-Both formats are automatically rendered by the ArticleBody component.
+### Components
+
+| Component | Purpose |
+|-----------|---------|
+| `FigureBlock` | Renders figures in reader view |
+| `FigureUploader` | Upload/URL input UI |
+| `FigureExtension` | TipTap node extension |
+| `EssayEditor` | Editor with figure support |
+
+### Validation Functions
+
+```typescript
+import { 
+  validateFigures, 
+  extractFiguresFromContent 
+} from '@/lib/figureValidation';
+
+// Extract figures from HTML content
+const figures = extractFiguresFromContent(htmlContent);
+
+// Validate figures for a section
+const result = validateFigures(figures, 'green-transition');
+// result.errors - blocking issues
+// result.warnings - non-blocking issues
+```
+
+## Rendering
+
+The same `FigureBlock` component is used in:
+- Editor preview (via `FigureExtension` node view)
+- Published article (via `ArticleBody` parsing)
+
+This ensures **preview matches published** exactly.
+
+## Mobile Considerations
+
+- All figures are lazy-loaded
+- Aspect ratio placeholder prevents layout shift
+- Graph type figures have tap-to-zoom lightbox
+- Wide mode respects safe area gutters
 
 ## Best Practices
 
 1. **Always write descriptive alt text** - Screen readers depend on it
 2. **Credit your sources** - Especially important for Green Transition essays
-3. **Use reasonable file sizes** - Compress images before uploading
-4. **Consider mobile readers** - Full-width images should still be readable on small screens
-5. **Don't overuse images** - 3-5 images per essay is typically optimal
+3. **Use reasonable file sizes** - Compress images before uploading (under 2MB)
+4. **Consider mobile readers** - Wide images should still be readable on small screens
+5. **Use Graph type for data visualizations** - Enables tap-to-zoom for mobile
+6. **Don't overuse figures** - 3-5 per essay is typically optimal
