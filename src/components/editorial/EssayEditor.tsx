@@ -200,13 +200,14 @@ function MenuBar({ editor, distractionFree, onInsertFigure }: MenuBarProps) {
       {/* Figure Insert */}
       <Button
         type="button"
-        variant="ghost"
-        size="icon"
-        className={cn(buttonClass, 'text-primary')}
+        variant="secondary"
+        size="sm"
+        className={cn('h-8 px-3 gap-2', distractionFree && 'h-9')}
         onClick={onInsertFigure}
         title="Insert Figure"
       >
         <ImagePlus className="h-4 w-4" />
+        <span className="hidden sm:inline">Insert Figure</span>
       </Button>
 
       <Separator orientation="vertical" className="h-6 mx-1" />
