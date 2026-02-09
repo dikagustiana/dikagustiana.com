@@ -14,7 +14,9 @@ import { DynamicListEditor } from '@/components/admin/DynamicListEditor';
 import { RichTextEditor, markdownToHtml, htmlToMarkdown, getPlainTextFromHtml } from '@/components/admin/RichTextEditor';
 import { ContentPreview } from '@/components/admin/ContentPreview';
 import { EssayEditor } from '@/components/editorial/EssayEditor';
+import { AdminEditorDebugLine } from '@/components/admin/AdminEditorDebugLine';
 import { validateFigures, extractFiguresFromContent, FigureValidationResult } from '@/lib/figureValidation';
+import { isFigureEnabledSection, normalizeSectionValue, resolveSectionSlug } from '@/lib/admin/sectionResolution';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -30,19 +32,16 @@ import {
 } from '@/components/ui/resizable';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, Save, XCircle, AlertTriangle, CheckCircle, Eye, Edit3, ImageIcon } from 'lucide-react';
-import { 
-  VoiceRole, 
+import {
+  VoiceRole,
   ContentStatus,
-  ManagerFields, 
-  EconomistFields, 
-  EducatorFields, 
+  ManagerFields,
+  EconomistFields,
+  EducatorFields,
   CoachFields,
-  validateToneFields 
+  validateToneFields,
 } from '@/lib/types/toneFields';
 import { EssayTemplateType, applyTemplate, essayTemplates } from '@/lib/essayTemplates';
-
-// Sections that use TipTap JSON with FigureBlock support
-const FIGURE_ENABLED_SECTIONS = ['next-big-thing', 'green-transition'];
 
 export default function AdminContentEditor() {
   // Route uses slug, we store the database uuid internally
@@ -50,7 +49,8 @@ export default function AdminContentEditor() {
   const [searchParams] = useSearchParams();
   const isNew = slugParam === 'new';
   const navigate = useNavigate();
-  const location = useLocation(); const { toast } = useToast();
+  const location = useLocation();
+  const { toast } = useToast();
   const { isAdmin, isLoading: authLoading } = useAuth();
 
   // Internal database UUID - loaded from essay data
@@ -61,7 +61,7 @@ export default function AdminContentEditor() {
     isNew ? '' : (slugParam || ''),
     { enabled: !isNew && !!slugParam }
   );
-  const { data: sections } = useSections();
+  const { data: sections, isLoading: sectionsLoading, isFetching: sectionsFetching } = useSections();
   const updateEssay = useUpdateEssay();
   const createEssay = useCreateEssay();
 
@@ -231,29 +231,38 @@ export default function AdminContentEditor() {
     }
   }, [title, isNew]);
 
+  const sectionValue = useMemo(() => normalizeSectionValue(section), [section]);
+  const resolvedSlug = useMemo(() => resolveSectionSlug(sectionValue, sections), [sectionValue, sections]);
+  const sectionValidated = useMemo(() => {
+    if (!resolvedSlug) return false;
+    if (!sections || sections.length === 0) return false;
+    return sections.some((s) => s.slug === resolvedSlug);
+  }, [resolvedSlug, sections]);
+
   // Get voice role from section if not explicitly set
   useEffect(() => {
-    if (section && sections && !essay?.voice_role) {
-      const sectionData = sections.find(s => s.slug === section);
+    if (resolvedSlug && sections && !essay?.voice_role) {
+      const sectionData = sections.find((s) => s.slug === resolvedSlug);
       if (sectionData) {
         setVoiceRole(sectionData.voice_role as VoiceRole);
       }
     }
-  }, [section, sections, essay?.voice_role]);
+  }, [resolvedSlug, sections, essay?.voice_role]);
 
-  // Check if this section uses FigureBlock (TipTap JSON)
-  const sectionSlug = (sections?.find(s => s.slug === section)?.slug ?? sections?.find(s => s.id === section)?.slug ?? section ?? '').trim(); const sectionIdentifier = (section ?? '').trim(); const figuresEnabled = FIGURE_ENABLED_SECTIONS.includes(sectionSlug); const usesFigureEditor = figuresEnabled;
-  
+  // Canonical gating: figuresEnabled is computed ONLY from resolvedSlug
+  const figuresEnabled = isFigureEnabledSection(resolvedSlug);
+  const usesFigureEditor = figuresEnabled;
+
   // Figure validation for figure-enabled sections
   const figureValidation = useMemo<FigureValidationResult>(() => {
-    if (!usesFigureEditor || !content) {
+    if (!usesFigureEditor || !content || !isFigureEnabledSection(resolvedSlug)) {
       return { figures: [], errors: [], warnings: [] };
     }
     const figures = extractFiguresFromContent(content);
-    return validateFigures(figures, sectionSlug as 'next-big-thing' | 'green-transition');
-  }, [content, sectionSlug, usesFigureEditor]);
-  
-  const canPublish = (toneValidation.valid || voiceRole === 'hybrid') && figureValidation.errors.length === 0;
+    return validateFigures(figures, resolvedSlug);
+  }, [content, resolvedSlug, usesFigureEditor]);
+
+  const canPublish = sectionValidated && (toneValidation.valid || voiceRole === 'hybrid') && figureValidation.errors.length === 0;
 
   // Helper to determine if tone fields have content
   const hasContent = (fields: Record<string, unknown> | null | undefined): boolean => {
@@ -265,7 +274,7 @@ export default function AdminContentEditor() {
   };
 
   const handleSave = async (targetStatus: ContentStatus = status) => {
-    if (!title || !slug || !section) {
+    if (!title || !slug || !sectionValue) {
       toast({
         title: 'Missing required fields',
         description: 'Title, slug, and section are required.',
@@ -274,11 +283,24 @@ export default function AdminContentEditor() {
       return;
     }
 
-    // Block publishing without valid tone fields
+    // Never allow publishing without a resolved + validated section
+    if (targetStatus === 'published' && (!resolvedSlug || !sectionValidated)) {
+      toast({
+        title: 'Cannot publish',
+        description: 'Select a valid section before publishing.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Block publishing without valid tone fields and figure validation
     if (targetStatus === 'published' && !canPublish) {
       toast({
         title: 'Cannot publish',
-        description: `Missing required tone fields: ${toneValidation.missing.join(', ')}`,
+        description:
+          figureValidation.errors.length > 0
+            ? 'Fix the figure errors shown above.'
+            : `Missing required tone fields: ${toneValidation.missing.join(', ')}`,
         variant: 'destructive',
       });
       return;
@@ -568,7 +590,7 @@ export default function AdminContentEditor() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="section">Section *</Label>
-                  <Select value={section} onValueChange={setSection}>
+                  <Select value={sectionValue} onValueChange={(v) => setSection(v.trim())}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select section" />
                     </SelectTrigger>
@@ -680,28 +702,31 @@ export default function AdminContentEditor() {
           {/* Content */}
           <Card>
             <CardHeader>
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-4">
                 <div>
                   <CardTitle>Content</CardTitle>
                   <CardDescription>
                     The main content of the essay.
-                    {figuresEnabled ? (
-                      <span className="text-primary ml-2">
-                        Figures enabled — use the toolbar's Insert Figure button to add images.
-                      </span>
-                    ) : section ? (
-                      <span className="text-muted-foreground ml-2">
-                        Figures disabled for this section.
-                      </span>
+                    {resolvedSlug ? (
+                      figuresEnabled ? (
+                        <span className="text-primary ml-2">
+                          Figures enabled — use the toolbar&apos;s Insert Figure button to add images.
+                        </span>
+                      ) : (
+                        <span className="text-muted-foreground ml-2">
+                          Figures disabled for this section.
+                        </span>
+                      )
                     ) : null}
-                    {templateApplied && selectedTemplate !== 'blank' && !figuresEnabled && (
+                    {templateApplied && selectedTemplate !== 'blank' && resolvedSlug && !figuresEnabled && (
                       <span className="text-primary ml-2">
                         (Pre-filled from {essayTemplates[selectedTemplate].name} template)
                       </span>
                     )}
                   </CardDescription>
                 </div>
-                {!figuresEnabled && section && (
+
+                {resolvedSlug && !figuresEnabled && (
                   <div className="flex items-center gap-2">
                     {/* Editor Mode Toggle - only for non-figure sections */}
                     <div className="flex items-center border border-border rounded-md overflow-hidden">
@@ -736,74 +761,167 @@ export default function AdminContentEditor() {
                 )}
               </div>
             </CardHeader>
+
             <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="snippet">Snippet (Preview Text)</Label>
-                <Textarea
-                  id="snippet"
-                  value={snippet}
-                  onChange={(e) => setSnippet(e.target.value)}
-                  placeholder="A brief preview of the content..."
-                  rows={2}
-                />
+              {/* Mandatory section selector (prominent, above editor) */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+                <div className="space-y-2">
+                  <Label htmlFor="section-editor">Section *</Label>
+                  {sectionsLoading ? (
+                    <div className="h-10 rounded-md bg-muted animate-pulse" />
+                  ) : (
+                    <Select value={sectionValue} onValueChange={(v) => setSection(v.trim())}>
+                      <SelectTrigger id="section-editor">
+                        <SelectValue placeholder="Select section" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {sections?.map((s) => (
+                          <SelectItem key={s.id} value={s.slug}>
+                            {s.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-2 md:justify-end">
+                  <Badge variant={figuresEnabled ? 'outline' : 'secondary'} className="w-fit text-xs font-normal">
+                    <ImageIcon className="h-3 w-3 mr-1" />
+                    {figuresEnabled ? 'Figures enabled' : 'Figures disabled for this section'}
+                  </Badge>
+                  {sectionValue && !resolvedSlug && (sectionsLoading || sectionsFetching) && (
+                    <Badge variant="secondary" className="w-fit text-xs font-normal">
+                      Resolving section…
+                    </Badge>
+                  )}
+                </div>
               </div>
-              
-               <div className="space-y-2">
-                 <Label>Full Content</Label>
 
-                 {/* Section required message for new essays */}
-                 {isNew && !section && (
-                   <div className="rounded-lg border-2 border-dashed border-muted-foreground/25 bg-muted/30 p-12 text-center">
-                     <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-                       <Edit3 className="h-6 w-6 text-muted-foreground" />
-                     </div>
-                     <h3 className="text-lg font-semibold text-foreground mb-2">Select a section to start writing</h3>
-                     <p className="text-sm text-muted-foreground max-w-sm mx-auto">
-                       Choose a section from the "Basic Information" card above. The editor and available features will adapt based on your selection.
-                     </p>
-                   </div>
-                 )}
+              {/* Admin-only debug line (sanitized; never shows raw tokens) */}
+              {isAdmin && (
+                <AdminEditorDebugLine
+                  editorComponentName={
+                    resolvedSlug
+                      ? usesFigureEditor
+                        ? 'EssayEditor'
+                        : editorMode === 'rich'
+                          ? 'RichTextEditor'
+                          : 'MarkdownTextarea'
+                      : 'None (section not selected)'
+                  }
+                  pathname={location.pathname}
+                  search={location.search}
+                  sectionValue={sectionValue}
+                  resolvedSlug={resolvedSlug}
+                  figuresEnabled={figuresEnabled}
+                />
+              )}
 
-                 {/* Show editor controls only when section is selected */}
-                 {section && (
-                   <div className="space-y-2">
-                     <Badge variant={figuresEnabled ? "outline" : "secondary"} className="w-fit text-xs font-normal">
-                       <ImageIcon className="h-3 w-3 mr-1" />
-                       {figuresEnabled ? "Figures enabled" : "Figures disabled for this section"}
-                     </Badge>
+              {/* Gate body editor until section is chosen/resolved */}
+              {isNew && !sectionValue ? (
+                <div className="rounded-lg border-2 border-dashed border-border bg-muted/30 p-12 text-center">
+                  <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+                    <Edit3 className="h-6 w-6 text-muted-foreground" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-foreground mb-2">
+                    Select a section to start writing.
+                  </h3>
+                  <p className="text-sm text-muted-foreground max-w-sm mx-auto">
+                    Choose a section above. The editor toolbar and figure capabilities will update immediately.
+                  </p>
+                </div>
+              ) : sectionValue && !resolvedSlug ? (
+                <Alert variant="destructive">
+                  <AlertTriangle className="h-4 w-4" />
+                  <AlertTitle>Section not resolved</AlertTitle>
+                  <AlertDescription>
+                    {sectionsLoading || sectionsFetching
+                      ? 'Sections are still loading. Please wait a moment.'
+                      : 'The selected section value is invalid. Please choose a section from the selector above.'}
+                  </AlertDescription>
+                </Alert>
+              ) : resolvedSlug ? (
+                <>
+                  <div className="space-y-2">
+                    <Label htmlFor="snippet">Snippet (Preview Text)</Label>
+                    <Textarea
+                      id="snippet"
+                      value={snippet}
+                      onChange={(e) => setSnippet(e.target.value)}
+                      placeholder="A brief preview of the content..."
+                      rows={2}
+                    />
+                  </div>
 
-                     {isAdmin && (
-                       <div className="rounded-md border border-border bg-muted/20 px-3 py-2 text-xs font-mono text-muted-foreground">
-                         <span className="text-foreground">editorComponentName</span>={usesFigureEditor ? 'EssayEditor' : (editorMode === 'rich' ? 'RichTextEditor' : 'MarkdownTextarea')}
-                         <span className="mx-2">•</span>
-                         <span className="text-foreground">currentRoute</span>={location.pathname}{location.search}
-                         <span className="mx-2">•</span>
-                         <span className="text-foreground">sectionIdentifier</span>={sectionIdentifier || '(empty)'}
-                         <span className="mx-2">•</span>
-                         <span className="text-foreground">sectionSlug</span>={sectionSlug || '(empty)'}
-                         <span className="mx-2">•</span>
-                         <span className="text-foreground">figuresEnabled</span>={String(figuresEnabled)}
-                       </div>
-                     )}
-                   </div>
-                 )}
+                  <div className="space-y-2">
+                    <Label>Full Content</Label>
 
-                 {/* Figure-enabled sections use EssayEditor with FigureBlock support */}
-                 {section && usesFigureEditor ? (
-                  <EssayEditor
-                    content={content}
-                    onChange={(html) => {
-                      setContent(html);
-                      if (templateApplied) setTemplateApplied(false);
-                    }}
-                    section={sectionSlug as 'next-big-thing' | 'green-transition'}
-                    placeholder="Start writing your content... Use the toolbar to insert figures."
-                    minHeight="500px"
-                  />
-                ) : section && showPreview ? (
-                  <ResizablePanelGroup direction="horizontal" className="min-h-[500px] rounded-lg border border-border">
-                    <ResizablePanel defaultSize={55} minSize={35}>
-                      <div className="h-full">
+                    {/* Figure-enabled sections use EssayEditor with FigureBlock support */}
+                    {usesFigureEditor ? (
+                      <EssayEditor
+                        key={`figure-${resolvedSlug}`}
+                        content={content}
+                        onChange={(html) => {
+                          setContent(html);
+                          if (templateApplied) setTemplateApplied(false);
+                        }}
+                        section={resolvedSlug as 'next-big-thing' | 'green-transition'}
+                        placeholder="Start writing your content... Use the toolbar to insert figures."
+                        minHeight="500px"
+                      />
+                    ) : showPreview ? (
+                      <ResizablePanelGroup
+                        direction="horizontal"
+                        className="min-h-[500px] rounded-lg border border-border"
+                      >
+                        <ResizablePanel defaultSize={55} minSize={35}>
+                          <div className="h-full">
+                            {editorMode === 'rich' ? (
+                              <RichTextEditor
+                                content={content.startsWith('<') ? content : markdownToHtml(content)}
+                                onChange={(html) => {
+                                  setContent(html);
+                                  if (templateApplied) setTemplateApplied(false);
+                                }}
+                                placeholder="Start writing your content..."
+                                minHeight="500px"
+                                className="border-0 rounded-none"
+                              />
+                            ) : (
+                              <Textarea
+                                value={content.startsWith('<') ? htmlToMarkdown(content) : content}
+                                onChange={(e) => {
+                                  setContent(e.target.value);
+                                  if (templateApplied) setTemplateApplied(false);
+                                }}
+                                placeholder="Write in markdown..."
+                                className="h-full min-h-[500px] font-mono text-sm resize-none border-0 rounded-none focus-visible:ring-0"
+                              />
+                            )}
+                          </div>
+                        </ResizablePanel>
+
+                        <ResizableHandle withHandle />
+
+                        <ResizablePanel defaultSize={45} minSize={30}>
+                          <div className="h-full overflow-y-auto p-6 bg-muted/30">
+                            <div className="text-xs uppercase tracking-wide text-muted-foreground mb-4 font-medium">
+                              Live Preview
+                            </div>
+                            <ContentPreview
+                              title={title}
+                              snippet={snippet}
+                              content={content.startsWith('<') ? content : markdownToHtml(content)}
+                              author={author}
+                              date={date}
+                              readTime={readTime}
+                            />
+                          </div>
+                        </ResizablePanel>
+                      </ResizablePanelGroup>
+                    ) : (
+                      <div className="min-h-[500px]">
                         {editorMode === 'rich' ? (
                           <RichTextEditor
                             content={content.startsWith('<') ? content : markdownToHtml(content)}
@@ -813,7 +931,6 @@ export default function AdminContentEditor() {
                             }}
                             placeholder="Start writing your content..."
                             minHeight="500px"
-                            className="border-0 rounded-none"
                           />
                         ) : (
                           <Textarea
@@ -823,63 +940,21 @@ export default function AdminContentEditor() {
                               if (templateApplied) setTemplateApplied(false);
                             }}
                             placeholder="Write in markdown..."
-                            className="h-full min-h-[500px] font-mono text-sm resize-none border-0 rounded-none focus-visible:ring-0"
+                            className="min-h-[500px] font-mono text-sm"
                           />
                         )}
                       </div>
-                    </ResizablePanel>
-                    
-                    <ResizableHandle withHandle />
-                    
-                    <ResizablePanel defaultSize={45} minSize={30}>
-                      <div className="h-full overflow-y-auto p-6 bg-muted/30">
-                        <div className="text-xs uppercase tracking-wide text-muted-foreground mb-4 font-medium">
-                          Live Preview
-                        </div>
-                        <ContentPreview
-                          title={title}
-                          snippet={snippet}
-                          content={content.startsWith('<') ? content : markdownToHtml(content)}
-                          author={author}
-                          date={date}
-                          readTime={readTime}
-                        />
-                      </div>
-                    </ResizablePanel>
-                  </ResizablePanelGroup>
-                ) : section ? (
-                  <div className="min-h-[500px]">
-                    {editorMode === 'rich' ? (
-                      <RichTextEditor
-                        content={content.startsWith('<') ? content : markdownToHtml(content)}
-                        onChange={(html) => {
-                          setContent(html);
-                          if (templateApplied) setTemplateApplied(false);
-                        }}
-                        placeholder="Start writing your content..."
-                        minHeight="500px"
-                      />
-                    ) : (
-                      <Textarea
-                        value={content.startsWith('<') ? htmlToMarkdown(content) : content}
-                        onChange={(e) => {
-                          setContent(e.target.value);
-                          if (templateApplied) setTemplateApplied(false);
-                        }}
-                        placeholder="Write in markdown..."
-                        className="min-h-[500px] font-mono text-sm"
-                      />
+                    )}
+
+                    {/* Figure count indicator for figure-enabled sections */}
+                    {usesFigureEditor && figureValidation.figures.length > 0 && (
+                      <p className="text-xs text-muted-foreground">
+                        {figureValidation.figures.length} figure{figureValidation.figures.length !== 1 ? 's' : ''} in content
+                      </p>
                     )}
                   </div>
-                ) : null}
-
-                {/* Figure count indicator for figure-enabled sections */}
-                {section && usesFigureEditor && figureValidation.figures.length > 0 && (
-                  <p className="text-xs text-muted-foreground">
-                    {figureValidation.figures.length} figure{figureValidation.figures.length !== 1 ? 's' : ''} in content
-                  </p>
-                )}
-              </div>
+                </>
+              ) : null}
             </CardContent>
           </Card>
 
