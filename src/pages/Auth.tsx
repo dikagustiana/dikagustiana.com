@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Layout } from '@/components/Layout';
 import { Button } from '@/components/ui/button';
@@ -17,8 +17,7 @@ export default function Auth() {
   const { toast } = useToast();
 
   if (user) {
-    navigate('/');
-    return null;
+    return <Navigate to="/" replace />;
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -30,7 +29,10 @@ export default function Auth() {
       : await signUp(email, password);
 
     if (error) {
-      toast({ title: error.message, variant: 'destructive' });
+      const message = /failed to fetch/i.test(error.message)
+        ? 'Network error: cannot reach the server. Please check your connection (or disable any blocker) and try again.'
+        : error.message;
+      toast({ title: message, variant: 'destructive' });
     } else {
       toast({ title: isLogin ? 'Welcome back!' : 'Account created!' });
       navigate('/');

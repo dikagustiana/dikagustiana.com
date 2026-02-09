@@ -31,15 +31,19 @@ export function resolveSectionSlug(
   const value = normalizeSectionValue(sectionValue);
   if (!value) return "";
 
+  // If the canonical sections list is available, ONLY accept values that resolve to a known section.
   if (sections && sections.length > 0) {
     const bySlug = sections.find((s) => s.slug === value);
     if (bySlug) return bySlug.slug;
 
     const byId = sections.find((s) => s.id === value);
     if (byId) return byId.slug;
+
+    return "";
   }
 
-  // Fall back only when it already looks like a slug (prevents UUID/garbage from being treated as a slug)
+  // Otherwise, fall back only when it already looks like a slug.
+  // (Prevents UUID/garbage from being treated as a slug, while still allowing deep-linking before sections load.)
   if (looksLikeSlug(value)) return value;
 
   return "";

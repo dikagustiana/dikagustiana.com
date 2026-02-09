@@ -42,7 +42,6 @@ export default function DebugAuth() {
                     role: user.role,
                   } : null,
                   session: session ? {
-                    access_token: session.access_token?.slice(0, 20) + '...',
                     expires_at: session.expires_at,
                   } : null,
                 }, null, 2)}

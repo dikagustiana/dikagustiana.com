@@ -108,8 +108,8 @@ export default function AdminContentEditor() {
     if (isNew) {
       const urlSection = searchParams.get('section');
       const urlPhase = searchParams.get('phase');
-      if (urlSection) setSection(urlSection);
-      if (urlPhase) setPhase(urlPhase);
+      if (urlSection) setSection(urlSection.trim());
+      if (urlPhase) setPhase(urlPhase.trim());
     }
   }, [isNew, searchParams]);
 
@@ -172,14 +172,14 @@ export default function AdminContentEditor() {
       // Store the database UUID for updates
       setEssayId(essay.id);
       
-      setTitle(essay.title || '');
-      setSlug(essay.slug || '');
-      setSection(essay.section || '');
-      setPhase(essay.phase || '');
-      setVoiceRole((essay.voice_role as VoiceRole) || 'hybrid');
-      // Use status as source of truth, fallback to published boolean for legacy
-      setStatus((essay.status as ContentStatus) || (essay.published ? 'published' : 'draft'));
-      setAuthor(essay.author || 'Dika Gustiana');
+       setTitle(essay.title || '');
+       setSlug(essay.slug || '');
+       setSection(normalizeSectionValue(essay.section));
+       setPhase((essay.phase || '').trim());
+       setVoiceRole((essay.voice_role as VoiceRole) || 'hybrid');
+       // Use status as source of truth, fallback to published boolean for legacy
+       setStatus((essay.status as ContentStatus) || (essay.published ? 'published' : 'draft'));
+       setAuthor(essay.author || 'Dika Gustiana');
       setDate(essay.date || '');
       setReadTime(essay.read_time || '');
       setSnippet(essay.snippet || '');
@@ -233,6 +233,18 @@ export default function AdminContentEditor() {
 
   const sectionValue = useMemo(() => normalizeSectionValue(section), [section]);
   const resolvedSlug = useMemo(() => resolveSectionSlug(sectionValue, sections), [sectionValue, sections]);
+
+  // If section was provided as an ID (or any non-slug), normalize form state to the resolved slug as soon as
+  // the canonical sections list becomes available. This keeps gating + selectors consistent and makes
+  // figuresEnabled flip live without refresh.
+  useEffect(() => {
+    if (!isNew) return;
+    if (!sections || sections.length === 0) return;
+    if (!sectionValue || !resolvedSlug) return;
+    if (sectionValue === resolvedSlug) return;
+    setSection(resolvedSlug);
+  }, [isNew, sectionValue, resolvedSlug, sections]);
+
   const sectionValidated = useMemo(() => {
     if (!resolvedSlug) return false;
     if (!sections || sections.length === 0) return false;
@@ -326,7 +338,7 @@ export default function AdminContentEditor() {
     const essayData = {
       title,
       slug,
-      section,
+      section: sectionValue,
       phase: phase || null,
       voice_role: voiceRole,
       status: targetStatus,
@@ -786,9 +798,22 @@ export default function AdminContentEditor() {
                 </div>
 
                 <div className="flex items-center gap-2 md:justify-end">
-                  <Badge variant={figuresEnabled ? 'outline' : 'secondary'} className="w-fit text-xs font-normal">
+                  <Badge
+                    variant={
+                      sectionValue && !resolvedSlug && (sectionsLoading || sectionsFetching)
+                        ? 'secondary'
+                        : figuresEnabled
+                          ? 'outline'
+                          : 'secondary'
+                    }
+                    className="w-fit text-xs font-normal"
+                  >
                     <ImageIcon className="h-3 w-3 mr-1" />
-                    {figuresEnabled ? 'Figures enabled' : 'Figures disabled for this section'}
+                    {sectionValue && !resolvedSlug && (sectionsLoading || sectionsFetching)
+                      ? 'Figures pending (resolving section)'
+                      : figuresEnabled
+                        ? 'Figures enabled'
+                        : 'Figures disabled for this section'}
                   </Badge>
                   {sectionValue && !resolvedSlug && (sectionsLoading || sectionsFetching) && (
                     <Badge variant="secondary" className="w-fit text-xs font-normal">
@@ -831,17 +856,22 @@ export default function AdminContentEditor() {
                     Choose a section above. The editor toolbar and figure capabilities will update immediately.
                   </p>
                 </div>
-              ) : sectionValue && !resolvedSlug ? (
-                <Alert variant="destructive">
-                  <AlertTriangle className="h-4 w-4" />
-                  <AlertTitle>Section not resolved</AlertTitle>
-                  <AlertDescription>
-                    {sectionsLoading || sectionsFetching
-                      ? 'Sections are still loading. Please wait a moment.'
-                      : 'The selected section value is invalid. Please choose a section from the selector above.'}
-                  </AlertDescription>
-                </Alert>
-              ) : resolvedSlug ? (
+               ) : sectionValue && !resolvedSlug ? (
+                 sectionsLoading || sectionsFetching ? (
+                   <div className="rounded-lg border border-border bg-muted/20 p-6">
+                     <div className="text-sm text-muted-foreground mb-4">Resolving section…</div>
+                     <LoadingState />
+                   </div>
+                 ) : (
+                   <Alert variant="destructive">
+                     <AlertTriangle className="h-4 w-4" />
+                     <AlertTitle>Section not resolved</AlertTitle>
+                     <AlertDescription>
+                       The selected section value is invalid. Please choose a section from the selector above.
+                     </AlertDescription>
+                   </Alert>
+                 )
+               ) : resolvedSlug ? (
                 <>
                   <div className="space-y-2">
                     <Label htmlFor="snippet">Snippet (Preview Text)</Label>

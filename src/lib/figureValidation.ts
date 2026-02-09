@@ -88,7 +88,8 @@ export function extractFiguresFromContent(htmlContent: string): FigureBlockData[
         .replace(/&lt;/g, '<')
         .replace(/&gt;/g, '>');
       const data = JSON.parse(jsonStr) as FigureBlockData;
-      if (data.src && data.altText) {
+      // Keep even incomplete figures so we can validate missing fields (alt text, source, etc.)
+      if (data?.src) {
         figures.push(data);
       }
     } catch {
