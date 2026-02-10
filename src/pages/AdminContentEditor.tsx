@@ -57,7 +57,7 @@ export default function AdminContentEditor() {
   const [essayId, setEssayId] = useState<string | null>(null);
 
   // Load essay by slug (not by id)
-  const { data: essay, isLoading: essayLoading, error: essayError } = useEssay(
+  const { data: essay, isLoading: essayLoading, error: essayError, refetch: refetchEssay } = useEssay(
     isNew ? '' : (slugParam || ''),
     { enabled: !isNew && !!slugParam }
   );
@@ -441,7 +441,7 @@ export default function AdminContentEditor() {
       >
         <SEO title="Error" description="Error loading content" />
         <div className="container py-8">
-          <ErrorState onRetry={() => window.location.reload()} />
+          <ErrorState onRetry={() => void refetchEssay()} />
         </div>
       </PageLayout>
     );
