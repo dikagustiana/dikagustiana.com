@@ -55,13 +55,6 @@ export function MainNav() {
         Home
       </Link>
 
-      <Link
-        to="/about"
-        className={cn("nav-link", isActive('/about') && "nav-link-active")}
-      >
-        About
-      </Link>
-
       {isAdmin && (
         <NavDropdown
           label="Finance Workspace"
