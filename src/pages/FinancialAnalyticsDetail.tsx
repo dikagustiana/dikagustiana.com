@@ -1,7 +1,5 @@
 import { useParams } from 'react-router-dom';
-import { Header } from '@/components/Header';
-import { Footer } from '@/components/Footer';
-import { Breadcrumb } from '@/components/Breadcrumb';
+import { PageLayout } from '@/components/layouts/PageLayout';
 
 const topicDetails: Record<string, { title: string; description: string }> = {
   'variance-analysis': { title: 'Variance Analysis', description: 'Learn to identify and explain differences between actual and budgeted figures.' },
@@ -16,22 +14,7 @@ export default function FinancialAnalyticsDetail() {
   const details = topic ? topicDetails[topic] : null;
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <Header />
-      
-      <div className="bg-muted/30 border-b border-border py-3">
-        <div className="container">
-          <Breadcrumb 
-            items={[
-              { label: 'Home', path: '/' },
-              { label: 'Finance', path: '/finance-101' },
-              { label: 'Financial Analytics', path: '/finance-101/financial-analytics' },
-              { label: details?.title || 'Topic' }
-            ]}
-          />
-        </div>
-      </div>
-
+    <PageLayout variant="content" role="manager" breadcrumbs={[{ label: 'Home', path: '/' }, { label: 'Finance', path: '/finance-101' }, { label: 'Financial Analytics', path: '/finance-101/financial-analytics' }, { label: details?.title || 'Topic' }]}>
       <main className="flex-1 container py-8">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-3xl md:text-4xl font-display font-bold mb-4">
@@ -49,7 +32,6 @@ export default function FinancialAnalyticsDetail() {
         </div>
       </main>
 
-      <Footer />
-    </div>
+    </PageLayout>
   );
 }

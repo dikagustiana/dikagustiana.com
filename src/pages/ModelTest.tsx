@@ -1,6 +1,4 @@
-import { Header } from '@/components/Header';
-import { Footer } from '@/components/Footer';
-import { Breadcrumb } from '@/components/Breadcrumb';
+import { PageLayout } from '@/components/layouts/PageLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CheckCircle, XCircle, Clock } from 'lucide-react';
@@ -14,22 +12,16 @@ const testResults = [
 
 export default function ModelTest() {
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <Header />
-      
-      <div className="bg-muted/30 border-b border-border py-3">
-        <div className="container">
-          <Breadcrumb 
-            items={[
-              { label: 'Home', path: '/' },
-              { label: "Dika's Tools", path: '/dikas-tools' },
-              { label: 'Model Platform', path: '/model' },
-              { label: 'Test Suite' }
-            ]}
-          />
-        </div>
-      </div>
-
+    <PageLayout
+      variant="content"
+      role="manager"
+      breadcrumbs={[
+        { label: 'Home', path: '/' },
+        { label: "Dika's Tools", path: '/dikas-tools' },
+        { label: 'Model Platform', path: '/model' },
+        { label: 'Test Suite' }
+      ]}
+    >
       <main className="flex-1 container py-8">
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center justify-between mb-8">
@@ -58,8 +50,6 @@ export default function ModelTest() {
           </Card>
         </div>
       </main>
-
-      <Footer />
-    </div>
+    </PageLayout>
   );
 }

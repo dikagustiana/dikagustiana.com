@@ -1,9 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Search } from 'lucide-react';
-import { Header } from '@/components/Header';
-import { Footer } from '@/components/Footer';
-import { Breadcrumb } from '@/components/Breadcrumb';
+import { PageLayout } from '@/components/layouts/PageLayout';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useFsliPages, FsliPage } from '@/hooks/queries/useFsliPages';
@@ -24,7 +22,7 @@ export default function FsliList() {
   // Calculate totals
   const parseNumber = (str: string | null) => str ? parseFloat(str.replace(/,/g, '')) || 0 : 0;
   const formatNumber = (num: number) => num.toLocaleString('en-US');
-  
+
   const totalCurrentAssets2024 = currentAssets.reduce((sum, item) => sum + parseNumber(item.dec_2024), 0);
   const totalCurrentAssets2023 = currentAssets.reduce((sum, item) => sum + parseNumber(item.dec_2023), 0);
   const totalNonCurrentAssets2024 = nonCurrentAssets.reduce((sum, item) => sum + parseNumber(item.dec_2024), 0);
@@ -75,32 +73,16 @@ export default function FsliList() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex flex-col bg-background">
-        <Header />
+      <PageLayout variant="content" role="manager" breadcrumbs={[{label:'Home',path:'/'},{label:'Accounting',path:'/accounting'},{label:'FSLI Detail'}]}>
         <main className="flex-1 container py-8">
           <LoadingState />
         </main>
-        <Footer />
-      </div>
+      </PageLayout>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <Header />
-      
-      <div className="bg-muted/30 border-b border-border py-3">
-        <div className="container">
-          <Breadcrumb 
-            items={[
-              { label: 'Home', path: '/' },
-              { label: 'Accounting', path: '/accounting' },
-              { label: 'FSLI Detail' }
-            ]}
-          />
-        </div>
-      </div>
-
+    <PageLayout variant="content" role="manager" breadcrumbs={[{label:'Home',path:'/'},{label:'Accounting',path:'/accounting'},{label:'FSLI Detail'}]}>
       <main className="flex-1 container py-8 max-w-6xl">
         {/* Title Section */}
         <div className="text-center mb-8">
@@ -202,8 +184,6 @@ export default function FsliList() {
           </div>
         </div>
       </main>
-
-      <Footer />
-    </div>
+    </PageLayout>
   );
 }

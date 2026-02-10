@@ -1,6 +1,4 @@
-import { Header } from '@/components/Header';
-import { Footer } from '@/components/Footer';
-import { Breadcrumb } from '@/components/Breadcrumb';
+import { PageLayout } from '@/components/layouts/PageLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
 import { BarChart3, TrendingUp, Calculator, PieChart } from 'lucide-react';
@@ -34,20 +32,7 @@ const workspaceItems = [
 
 export default function FinanceWorkspace() {
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <Header />
-      
-      <div className="bg-muted/30 border-b border-border py-3">
-        <div className="container">
-          <Breadcrumb 
-            items={[
-              { label: 'Home', path: '/' },
-              { label: 'Finance Workspace' }
-            ]}
-          />
-        </div>
-      </div>
-
+    <PageLayout variant="content" role="manager" breadcrumbs={[{ label: 'Home', path: '/' }, { label: 'Finance Workspace' }]}>
       <main className="flex-1 container py-8">
         <div className="text-center mb-12">
           <h1 className="text-3xl md:text-4xl font-display font-bold mb-4">
@@ -72,8 +57,6 @@ export default function FinanceWorkspace() {
           ))}
         </div>
       </main>
-
-      <Footer />
-    </div>
+    </PageLayout>
   );
 }

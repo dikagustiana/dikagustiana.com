@@ -1,7 +1,5 @@
 import { useParams, Link } from 'react-router-dom';
-import { Header } from '@/components/Header';
-import { Footer } from '@/components/Footer';
-import { Breadcrumb } from '@/components/Breadcrumb';
+import { PageLayout } from '@/components/layouts/PageLayout';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
@@ -20,22 +18,7 @@ export default function BooksList() {
   const formatTitle = (s: string) => s?.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') || 'Category';
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <Header />
-      
-      <div className="bg-muted/30 border-b border-border py-3">
-        <div className="container">
-          <Breadcrumb 
-            items={[
-              { label: 'Home', path: '/' },
-              { label: 'Books and Academia', path: '/books-academia' },
-              { label: 'Categories', path: '/books/categories' },
-              { label: formatTitle(category || '') }
-            ]}
-          />
-        </div>
-      </div>
-
+    <PageLayout variant="content" role="educator" breadcrumbs={[{label:'Home',path:'/'},{label:'Books and Academia',path:'/books-academia'},{label:'Categories',path:'/books/categories'},{label: formatTitle(category || '')}]}>
       <main className="flex-1 container py-8">
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-3xl font-display font-bold">
@@ -64,8 +47,6 @@ export default function BooksList() {
           ))}
         </div>
       </main>
-
-      <Footer />
-    </div>
+    </PageLayout>
   );
 }

@@ -1,6 +1,4 @@
-import { Header } from '@/components/Header';
-import { Footer } from '@/components/Footer';
-import { Breadcrumb } from '@/components/Breadcrumb';
+import { PageLayout } from '@/components/layouts/PageLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -8,21 +6,7 @@ import { ArrowRight } from 'lucide-react';
 
 export default function FinancialPlanningForecasting() {
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <Header />
-      
-      <div className="bg-muted/30 border-b border-border py-3">
-        <div className="container">
-          <Breadcrumb 
-            items={[
-              { label: 'Home', path: '/' },
-              { label: 'Finance', path: '/finance-101' },
-              { label: 'Financial Planning & Forecasting' }
-            ]}
-          />
-        </div>
-      </div>
-
+    <PageLayout variant="content" role="manager" breadcrumbs={[{ label: 'Home', path: '/' }, { label: 'Finance', path: '/finance-101' }, { label: 'Financial Planning & Forecasting' }]}>
       <main className="flex-1 container py-8">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-3xl md:text-4xl font-display font-bold mb-4">
@@ -227,7 +211,6 @@ export default function FinancialPlanningForecasting() {
         </div>
       </main>
 
-      <Footer />
-    </div>
+    </PageLayout>
   );
 }

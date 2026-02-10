@@ -11,7 +11,7 @@ interface SEOProps {
   modifiedTime?: string;
 }
 
-const SITE_NAME = "Dika's Digital Studio";
+const SITE_NAME = "Dika Gustiana";
 const DEFAULT_IMAGE = '/logo.png';
 
 export function SEO({

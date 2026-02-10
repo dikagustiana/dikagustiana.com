@@ -1,7 +1,5 @@
 import { useParams } from 'react-router-dom';
-import { Header } from '@/components/Header';
-import { Footer } from '@/components/Footer';
-import { Breadcrumb } from '@/components/Breadcrumb';
+import { PageLayout } from '@/components/layouts/PageLayout';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight, Download } from 'lucide-react';
 
@@ -11,22 +9,7 @@ export default function BookReader() {
   const formatTitle = (s: string) => s?.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') || '';
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <Header />
-      
-      <div className="bg-muted/30 border-b border-border py-3">
-        <div className="container">
-          <Breadcrumb 
-            items={[
-              { label: 'Home', path: '/' },
-              { label: 'Books and Academia', path: '/books-academia' },
-              { label: formatTitle(category || ''), path: `/books/${category}` },
-              { label: formatTitle(bookId || '') }
-            ]}
-          />
-        </div>
-      </div>
-
+    <PageLayout variant="content" role="educator" breadcrumbs={[{label:'Home',path:'/'},{label:'Books and Academia',path:'/books-academia'},{label: formatTitle(category || ''), path: `/books/${category}`},{label: formatTitle(bookId || '')}]}>
       <main className="flex-1 container py-8">
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center justify-between mb-6">
@@ -60,8 +43,6 @@ export default function BookReader() {
           </div>
         </div>
       </main>
-
-      <Footer />
-    </div>
+    </PageLayout>
   );
 }
