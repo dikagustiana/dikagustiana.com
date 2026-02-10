@@ -9,10 +9,10 @@ import { RequireAdmin } from "@/components/auth/RequireAdmin";
 
 // Pages
 import Index from "./pages/Index";
+import About from "./pages/About";
 import Auth from "./pages/Auth";
 import Accounting from "./pages/Accounting";
 import Finance101 from "./pages/Finance101";
-// MasyarakatBaru removed - sections flattened to direct access
 import GreenTransition from "./pages/GreenTransition";
 import NotFound from "./pages/NotFound";
 
@@ -43,7 +43,7 @@ import ForecastingOutput from "./pages/ForecastingOutput";
 import GreenTransitionPhase from "./pages/GreenTransitionPhase";
 import GreenTransitionEssayPage from "./pages/GreenTransitionEssayPage";
 
-// Masyarakat Baru children
+// Learning
 import CriticalThinkingResearch from "./pages/CriticalThinkingResearch";
 import CriticalThinkingPhase from "./pages/CriticalThinkingPhase";
 import CriticalThinkingEssay from "./pages/CriticalThinkingEssay";
@@ -84,8 +84,9 @@ const App = () => (
           <Routes>
             {/* Core */}
             <Route path="/" element={<Index />} />
+            <Route path="/about" element={<About />} />
             <Route path="/auth" element={<Auth />} />
-            
+
             {/* Accounting */}
             <Route path="/accounting" element={<Accounting />} />
             <Route path="/accounting/fsli" element={<FsliList />} />
@@ -93,7 +94,7 @@ const App = () => (
             <Route path="/accounting/consolidated-reporting" element={<ConsolidatedReporting />} />
             <Route path="/accounting/statutory-reporting" element={<StatutoryReporting />} />
             <Route path="/accounting/consolidation/:topic" element={<ConsolidationDetail />} />
-            
+
             {/* Finance */}
             <Route path="/finance-101" element={<Finance101 />} />
             <Route path="/finance-101/financial-analytics" element={<FinancialAnalytics />} />
@@ -101,16 +102,16 @@ const App = () => (
             <Route path="/finance-101/financial-planning-forecasting" element={<FinancialPlanningForecasting />} />
             <Route path="/finance-101/budgeting" element={<Budgeting />} />
             <Route path="/finance-101/cfa-prep" element={<CfaPrep />} />
-            
-            {/* Finance Workspace */}
-            <Route path="/finance-workspace" element={<FinanceWorkspace />} />
-            <Route path="/executive-dashboard" element={<ExecutiveDashboard />} />
-            
-            {/* Forecasting */}
-            <Route path="/forecasting/input" element={<ForecastingInput />} />
-            <Route path="/forecasting/assumptions" element={<ForecastingAssumptions />} />
-            <Route path="/forecasting/output" element={<ForecastingOutput />} />
-            
+
+            {/* Finance Workspace (admin-only) */}
+            <Route path="/finance-workspace" element={<RequireAdmin><FinanceWorkspace /></RequireAdmin>} />
+            <Route path="/executive-dashboard" element={<RequireAdmin><ExecutiveDashboard /></RequireAdmin>} />
+
+            {/* Forecasting (admin-only) */}
+            <Route path="/forecasting/input" element={<RequireAdmin><ForecastingInput /></RequireAdmin>} />
+            <Route path="/forecasting/assumptions" element={<RequireAdmin><ForecastingAssumptions /></RequireAdmin>} />
+            <Route path="/forecasting/output" element={<RequireAdmin><ForecastingOutput /></RequireAdmin>} />
+
             {/* Green Transition */}
             <Route path="/green-transition" element={<GreenTransition />} />
             <Route path="/green-transition/now" element={<GreenTransitionPhase />} />
@@ -118,34 +119,34 @@ const App = () => (
             <Route path="/green-transition/future" element={<GreenTransitionPhase />} />
             <Route path="/green-transition/:phase" element={<GreenTransitionPhase />} />
             <Route path="/green-transition/:phase/:slug" element={<GreenTransitionEssayPage />} />
-            
+
             {/* Legacy Masyarakat Baru routes - redirect to flattened sections */}
             <Route path="/masyarakat-baru" element={<Navigate to="/critical-thinking-research" replace />} />
             <Route path="/masyarakat-baru/english-ielts" element={<Navigate to="/english-ielts" replace />} />
             <Route path="/masyarakat-baru/books-academia" element={<Navigate to="/books-academia" replace />} />
             <Route path="/masyarakat-baru/critical-thinking-research" element={<Navigate to="/critical-thinking-research" replace />} />
-            
+
             {/* Critical Thinking */}
             <Route path="/critical-thinking-research" element={<CriticalThinkingResearch />} />
             <Route path="/critical-thinking-research/:phase" element={<CriticalThinkingPhase />} />
             <Route path="/critical-thinking-research/:phase/:essayId" element={<CriticalThinkingEssay />} />
-            
+
             {/* Books */}
             <Route path="/books-academia" element={<BooksAcademia />} />
             <Route path="/books/categories" element={<BooksCategories />} />
             <Route path="/books/:category" element={<BooksList />} />
             <Route path="/books/:category/:bookId/read" element={<BookReader />} />
-            
+
             {/* English IELTS */}
             <Route path="/english-ielts" element={<EnglishIelts />} />
-            
-            {/* Admin/Tools */}
-            <Route path="/dikas-tools" element={<DikasTools />} />
-            <Route path="/dikas-tools/remora-trading" element={<RemoraTrading />} />
-            <Route path="/dikas-tools/quant-engine" element={<DikaQuantEngine />} />
-            <Route path="/personal-finance" element={<PersonalFinance />} />
-            <Route path="/model" element={<ModelPlatform />} />
-            <Route path="/model/test" element={<ModelTest />} />
+
+            {/* Admin-only tools */}
+            <Route path="/personal-finance" element={<RequireAdmin><PersonalFinance /></RequireAdmin>} />
+            <Route path="/dikas-tools" element={<RequireAdmin><DikasTools /></RequireAdmin>} />
+            <Route path="/dikas-tools/remora-trading" element={<RequireAdmin><RemoraTrading /></RequireAdmin>} />
+            <Route path="/dikas-tools/quant-engine" element={<RequireAdmin><DikaQuantEngine /></RequireAdmin>} />
+            <Route path="/model" element={<RequireAdmin><ModelPlatform /></RequireAdmin>} />
+            <Route path="/model/test" element={<RequireAdmin><ModelTest /></RequireAdmin>} />
             <Route path="/settings" element={<RequireAdmin><Settings /></RequireAdmin>} />
             <Route path="/debug/auth" element={<RequireAdmin><DebugAuth /></RequireAdmin>} />
             <Route path="/admin/dashboard" element={<RequireAdmin><AdminDashboard /></RequireAdmin>} />
@@ -156,7 +157,7 @@ const App = () => (
             <Route path="/admin/writer/:section/:slug" element={<RequireAdmin><WriterEditorPage /></RequireAdmin>} />
             <Route path="/the-next-big-thing" element={<TheNextBigThing />} />
             <Route path="/the-next-big-thing/:slug" element={<NextBigThingEssayPage />} />
-            
+
             {/* Not Found */}
             <Route path="*" element={<NotFound />} />
           </Routes>

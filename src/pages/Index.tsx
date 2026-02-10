@@ -66,49 +66,21 @@ const Index = () => {
 
   return (
     <PageLayout role="hybrid">
-      <SEO 
-        title="Technical Education Site"
-        description="Finance, accounting, green transition economics, and IELTS preparation. Opinionated and practical content for professionals."
+      <SEO
+        title="Home"
+        description="Finance, accounting, and green transition economics. Research and analysis by Dika Gustiana."
       />
 
-      {/* Hero - Hybrid Voice */}
+      {/* Hero */}
       <section className="py-16 md:py-24 bg-gradient-to-b from-background to-muted/30">
         <div className="container max-w-4xl text-center">
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-display font-bold text-foreground mb-6">
-            This is a technical education site.
+            Finance, Accounting, and Green Transition Economics.
           </h1>
-          
-          <div className="text-left max-w-2xl mx-auto space-y-4 text-muted-foreground">
-            <p className="text-lg">It covers:</p>
-            <ul className="space-y-2 text-base">
-              <li className="flex items-start gap-2">
-                <span className="text-blue-500 font-semibold">Finance & Accounting:</span>
-                <span>How to do the job correctly</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-accent font-semibold">Green Transition:</span>
-                <span>Economic analysis of decarbonization</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-amber-500 font-semibold">Essays:</span>
-                <span>Rigorous thinking about industry shifts</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-purple-500 font-semibold">Books:</span>
-                <span>Readings that build capability</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-green-500 font-semibold">IELTS:</span>
-                <span>Structured exam preparation</span>
-              </li>
-            </ul>
-            <p className="text-base pt-4 border-t border-border mt-6">
-              The material is opinionated and practical.
-            </p>
-            <p className="text-foreground font-medium">
-              Pick a section. Do the work.
-            </p>
-          </div>
+
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            Practitioner-focused analysis of financial operations, accounting standards, and the economics of decarbonization. Written by Dika Gustiana.
+          </p>
         </div>
       </section>
 

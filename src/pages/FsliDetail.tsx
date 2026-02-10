@@ -1,7 +1,6 @@
 import { useParams, Navigate, Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { Header } from '@/components/Header';
-import { Footer } from '@/components/Footer';
+import { PageLayout } from '@/components/layouts/PageLayout';
 import { FsliRelatedItems } from '@/components/fsli/FsliRelatedItems';
 import { FsliOnThisPage } from '@/components/fsli/FsliOnThisPage';
 import { FsliHeroSection } from '@/components/fsli/FsliHeroSection';
@@ -16,25 +15,25 @@ import { RefreshCw, Clock, ChevronRight, Pencil } from 'lucide-react';
 
 // Content sections configuration
 const contentSections = [
-  { 
-    key: 'definition', 
-    title: 'Definition', 
+  {
+    key: 'definition',
+    title: 'Definition',
     subtitle: 'Understanding the fundamental concepts and requirements for classification.',
     placeholder: 'Cash and cash equivalents represent the most liquid assets that an entity possesses. According to IAS 7 Statement of Cash Flows, cash comprises cash on hand and demand deposits. Cash equivalents are short-term, highly liquid investments that are readily convertible to known amounts of cash and which are subject to an insignificant risk of changes in value.'
   },
-  { 
-    key: 'recognition', 
-    title: 'Recognition Criteria', 
+  {
+    key: 'recognition',
+    title: 'Recognition Criteria',
     placeholder: 'Recognition requires the asset to be readily convertible to cash and subject to insignificant risk of value changes. The entity must have control over the resource and expect future economic benefits.'
   },
-  { 
-    key: 'measurement', 
-    title: 'Measurement Principles', 
+  {
+    key: 'measurement',
+    title: 'Measurement Principles',
     placeholder: 'Cash and cash equivalents are typically measured at their face value or nominal amount. Foreign currency cash holdings are translated using the closing rate at the reporting date.'
   },
-  { 
-    key: 'presentation', 
-    title: 'Presentation and Disclosure', 
+  {
+    key: 'presentation',
+    title: 'Presentation and Disclosure',
     placeholder: 'Proper presentation and disclosure are essential for transparency in financial reporting. The components of cash and cash equivalents should be disclosed in the notes to the financial statements.'
   },
 ];
@@ -91,7 +90,7 @@ export default function FsliDetail() {
   useEffect(() => {
     const handleScroll = () => {
       const sections = [...contentSections, ...issueSections, ...exampleSections];
-      
+
       for (const section of sections) {
         const element = document.getElementById(section.key);
         if (element) {
@@ -110,13 +109,11 @@ export default function FsliDetail() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex flex-col bg-background">
-        <Header />
+      <PageLayout variant="content" role="manager">
         <main className="flex-1 container py-8">
           <LoadingState />
         </main>
-        <Footer />
-      </div>
+      </PageLayout>
     );
   }
 
@@ -129,9 +126,7 @@ export default function FsliDetail() {
   const heroDescription = `${item.title} represent important components on a company's balance sheet`;
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <Header />
-      
+    <PageLayout variant="content" role="manager">
       <main className="flex-1">
         <div className="container py-6">
           {/* Breadcrumb */}
@@ -252,15 +247,13 @@ export default function FsliDetail() {
             </div>
 
             {/* Right Sidebar - On This Page */}
-            <FsliOnThisPage 
+            <FsliOnThisPage
               sections={tocSections}
               activeSection={activeSection}
             />
           </div>
         </div>
       </main>
-
-      <Footer />
-    </div>
+    </PageLayout>
   );
 }

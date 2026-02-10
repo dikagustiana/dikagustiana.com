@@ -12,12 +12,11 @@ export function Footer() {
                 <span className="text-primary-foreground font-bold text-sm">D</span>
               </div>
               <span className="font-display text-lg font-semibold text-foreground">
-                Dika's Digital Studio
+                Dika Gustiana
               </span>
             </Link>
             <p className="text-muted-foreground text-sm max-w-md">
-              Technical education in finance, accounting, and economics. 
-              Opinionated content for professionals who do the work.
+              Finance, accounting, and green transition economics. Research and analysis.
             </p>
           </div>
 
@@ -25,6 +24,7 @@ export function Footer() {
           <div>
             <h4 className="font-semibold text-foreground mb-4">Sections</h4>
             <ul className="space-y-2 text-sm">
+              <li><Link to="/about" className="text-muted-foreground hover:text-foreground transition-colors">About</Link></li>
               <li><Link to="/accounting" className="text-muted-foreground hover:text-foreground transition-colors">Accounting</Link></li>
               <li><Link to="/finance-101" className="text-muted-foreground hover:text-foreground transition-colors">Finance</Link></li>
               <li><Link to="/green-transition" className="text-muted-foreground hover:text-foreground transition-colors">Green Transition</Link></li>
@@ -38,7 +38,7 @@ export function Footer() {
             <ul className="space-y-2 text-sm">
               <li><Link to="/english-ielts" className="text-muted-foreground hover:text-foreground transition-colors">IELTS Preparation</Link></li>
               <li><Link to="/books-academia" className="text-muted-foreground hover:text-foreground transition-colors">Books</Link></li>
-              <li><Link to="/masyarakat-baru" className="text-muted-foreground hover:text-foreground transition-colors">Masyarakat Baru</Link></li>
+              <li><Link to="/critical-thinking-research" className="text-muted-foreground hover:text-foreground transition-colors">Learning</Link></li>
             </ul>
           </div>
         </div>

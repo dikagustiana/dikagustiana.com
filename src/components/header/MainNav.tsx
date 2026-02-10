@@ -22,7 +22,7 @@ const greenTransitionItems = [
   { label: 'Pathways Forward', path: '/green-transition/future' },
 ];
 
-const masyarakatBaruItems = [
+const learningItems = [
   { label: 'Critical Thinking', path: '/critical-thinking-research' },
   { label: 'Books', path: '/books-academia' },
   { label: 'IELTS', path: '/english-ielts' },
@@ -48,66 +48,66 @@ export function MainNav() {
 
   return (
     <nav className="hidden lg:flex items-center gap-1">
-      <Link 
-        to="/" 
+      <Link
+        to="/"
         className={cn("nav-link", isActive('/') && "nav-link-active")}
       >
         Home
       </Link>
 
-      {isAdmin ? (
-        <NavDropdown 
-          label="Finance Workspace" 
+      <Link
+        to="/about"
+        className={cn("nav-link", isActive('/about') && "nav-link-active")}
+      >
+        About
+      </Link>
+
+      {isAdmin && (
+        <NavDropdown
+          label="Finance Workspace"
           items={financeWorkspaceItemsAdmin}
           width="w-48"
           basePath="/finance-workspace"
         />
-      ) : (
-        <Link 
-          to="/finance-workspace" 
-          className={cn("nav-link", isActive('/finance-workspace') && "nav-link-active")}
-        >
-          Finance Workspace
-        </Link>
       )}
 
-      <NavDropdown 
-        label="Accounting" 
+      <NavDropdown
+        label="Accounting"
         items={accountingItems}
         width="w-56"
         basePath="/accounting"
       />
 
-      <NavDropdown 
-        label="Finance" 
+      <NavDropdown
+        label="Finance"
         items={financeItems}
         width="w-72"
         basePath="/finance-101"
       />
 
-      <NavDropdown 
-        label="The Green Transition" 
+      <NavDropdown
+        label="The Green Transition"
         items={greenTransitionItems}
         width="w-56"
         basePath="/green-transition"
       />
 
-      <NavDropdown 
-        label="The Next Big Thing" 
+      <NavDropdown
+        label="The Next Big Thing"
         items={nextBigThingItems}
         width="w-44"
         basePath="/the-next-big-thing"
       />
 
-      <NavDropdown 
-        label="Masyarakat Baru" 
-        items={masyarakatBaruItems}
+      <NavDropdown
+        label="Learning"
+        items={learningItems}
         width="w-48"
       />
 
       {isAdmin && (
-        <Link 
-          to="/admin/dashboard" 
+        <Link
+          to="/admin/dashboard"
           className={cn("nav-link text-accent", location.pathname.startsWith('/admin') && "nav-link-active")}
         >
           Writer's Studio

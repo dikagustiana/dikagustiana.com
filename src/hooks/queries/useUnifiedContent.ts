@@ -49,19 +49,16 @@ export function useUnifiedContent(filter: ContentFilter = {}) {
         if (filter.status && filter.status !== 'all') {
           essayQuery = essayQuery.eq('status', filter.status as 'draft' | 'tone_pending' | 'published' | 'archived');
         }
+        // Search filter - push to Supabase
+        if (filter.search) {
+          const pattern = `%${filter.search}%`;
+          essayQuery = essayQuery.or(`title.ilike.${pattern},slug.ilike.${pattern}`);
+        }
 
         const { data: essays, error: essayError } = await essayQuery;
         if (essayError) throw essayError;
 
         essays?.forEach((essay) => {
-          // Apply search filter client-side
-          if (filter.search) {
-            const searchLower = filter.search.toLowerCase();
-            const matchesTitle = essay.title.toLowerCase().includes(searchLower);
-            const matchesSlug = essay.slug.toLowerCase().includes(searchLower);
-            if (!matchesTitle && !matchesSlug) return;
-          }
-
           items.push({
             id: essay.id,
             type: 'essay',
@@ -80,27 +77,26 @@ export function useUnifiedContent(filter: ContentFilter = {}) {
 
       // Fetch FSLI pages if not filtering by essays only
       if (filter.contentType !== 'essay') {
-        const shouldIncludeFsli = !filter.section || 
-          filter.section === 'all' || 
+        const shouldIncludeFsli = !filter.section ||
+          filter.section === 'all' ||
           filter.section === 'accounting';
 
         if (shouldIncludeFsli) {
-          const { data: fsliPages, error: fsliError } = await supabase
+          let fsliQuery = supabase
             .from('fsli_pages')
             .select('id, title, subtitle, slug, category, updated_at, created_at')
             .order('updated_at', { ascending: false });
 
+          // Search filter - push to Supabase
+          if (filter.search) {
+            const pattern = `%${filter.search}%`;
+            fsliQuery = fsliQuery.or(`title.ilike.${pattern},slug.ilike.${pattern}`);
+          }
+
+          const { data: fsliPages, error: fsliError } = await fsliQuery;
           if (fsliError) throw fsliError;
 
           fsliPages?.forEach((page) => {
-            // Apply search filter client-side
-            if (filter.search) {
-              const searchLower = filter.search.toLowerCase();
-              const matchesTitle = page.title.toLowerCase().includes(searchLower);
-              const matchesSlug = page.slug.toLowerCase().includes(searchLower);
-              if (!matchesTitle && !matchesSlug) return;
-            }
-
             items.push({
               id: page.id,
               type: 'fsli',
@@ -140,7 +136,7 @@ export function useContentStats() {
         .select('*', { count: 'exact', head: true });
 
       const essayList = essays || [];
-      
+
       // Status-based counts (status is source of truth)
       const publishedEssays = essayList.filter(e => e.status === 'published').length;
       const tonePendingEssays = essayList.filter(e => e.status === 'tone_pending').length;
@@ -175,13 +171,13 @@ export function useBulkPublishContent() {
     mutationFn: async ({ ids, published }: { ids: string[]; published: boolean }) => {
       // Sync status with published boolean - status is source of truth
       const newStatus = published ? 'published' : 'draft';
-      
+
       const { error } = await supabase
         .from('essays')
-        .update({ 
-          published, 
+        .update({
+          published,
           status: newStatus,
-          updated_at: new Date().toISOString() 
+          updated_at: new Date().toISOString()
         })
         .in('id', ids);
 
@@ -202,13 +198,13 @@ export function useTogglePublishContent() {
     mutationFn: async ({ id, currentlyPublished }: { id: string; currentlyPublished: boolean }) => {
       const newPublished = !currentlyPublished;
       const newStatus = newPublished ? 'published' : 'draft';
-      
+
       const { error } = await supabase
         .from('essays')
-        .update({ 
-          published: newPublished, 
+        .update({
+          published: newPublished,
           status: newStatus,
-          updated_at: new Date().toISOString() 
+          updated_at: new Date().toISOString()
         })
         .eq('id', id);
 

@@ -1,7 +1,6 @@
 export type SanitizedQueryParam = { key: string; value: string };
 
 const SENSITIVE_KEYS = new Set([
-  "__lovable_token",
   "access_token",
   "refresh_token",
   "id_token",

@@ -1,6 +1,4 @@
-import { Header } from '@/components/Header';
-import { Footer } from '@/components/Footer';
-import { Breadcrumb } from '@/components/Breadcrumb';
+import { PageLayout } from '@/components/layouts/PageLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -8,21 +6,15 @@ export default function DebugAuth() {
   const { user, session, isAdmin, isLoading } = useAuth();
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <Header />
-      
-      <div className="bg-muted/30 border-b border-border py-3">
-        <div className="container">
-          <Breadcrumb 
-            items={[
-              { label: 'Home', path: '/' },
-              { label: 'Debug', path: '/debug/auth' },
-              { label: 'Auth' }
-            ]}
-          />
-        </div>
-      </div>
-
+    <PageLayout
+      variant="content"
+      role="hybrid"
+      breadcrumbs={[
+        { label: 'Home', path: '/' },
+        { label: 'Debug', path: '/debug/auth' },
+        { label: 'Auth' }
+      ]}
+    >
       <main className="flex-1 container py-8">
         <div className="max-w-2xl mx-auto">
           <h1 className="text-3xl font-display font-bold mb-8">Auth Debug</h1>
@@ -50,8 +42,6 @@ export default function DebugAuth() {
           </Card>
         </div>
       </main>
-
-      <Footer />
-    </div>
+    </PageLayout>
   );
 }
