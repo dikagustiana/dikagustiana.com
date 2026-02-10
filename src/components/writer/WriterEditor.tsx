@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -355,6 +355,10 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     );
+  }
+
+  if (!isAdmin) {
+    return <Navigate to="/auth" replace />;
   }
 
   const sectionLabel = section === 'next-big-thing' ? 'The Next Big Thing' : 'Green Transition';

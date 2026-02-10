@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { EssayDialog } from '@/components/next-big-thing/EssayDialog';
 
 const TOPICS = [
@@ -18,6 +19,7 @@ const TOPICS = [
 export default function TheNextBigThing() {
   const { isAdmin } = useAuth();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const queryClient = useQueryClient();
 
   const getEssayUrl = (essay: { slug: string }) => `/the-next-big-thing/${essay.slug}`;
 
@@ -96,7 +98,9 @@ export default function TheNextBigThing() {
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         essay={null}
-        onSuccess={() => window.location.reload()}
+        onSuccess={() => {
+          void queryClient.invalidateQueries({ queryKey: ['editorial-feed', 'next-big-thing'] });
+        }}
       />
     </PageLayout>
   );

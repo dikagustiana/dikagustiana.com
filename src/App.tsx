@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { RequireAdmin } from "@/components/auth/RequireAdmin";
 
 // Pages
 import Index from "./pages/Index";
@@ -145,14 +146,14 @@ const App = () => (
             <Route path="/personal-finance" element={<PersonalFinance />} />
             <Route path="/model" element={<ModelPlatform />} />
             <Route path="/model/test" element={<ModelTest />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/debug/auth" element={<DebugAuth />} />
-            <Route path="/admin/dashboard" element={<AdminDashboard />} />
-            <Route path="/admin/health" element={<AdminHealth />} />
-            <Route path="/admin/content" element={<AdminContent />} />
-            <Route path="/admin/content/:id" element={<AdminContentEditor />} />
-            <Route path="/admin/writer/:section" element={<WriterListPage />} />
-            <Route path="/admin/writer/:section/:slug" element={<WriterEditorPage />} />
+            <Route path="/settings" element={<RequireAdmin><Settings /></RequireAdmin>} />
+            <Route path="/debug/auth" element={<RequireAdmin><DebugAuth /></RequireAdmin>} />
+            <Route path="/admin/dashboard" element={<RequireAdmin><AdminDashboard /></RequireAdmin>} />
+            <Route path="/admin/health" element={<RequireAdmin><AdminHealth /></RequireAdmin>} />
+            <Route path="/admin/content" element={<RequireAdmin><AdminContent /></RequireAdmin>} />
+            <Route path="/admin/content/:id" element={<RequireAdmin><AdminContentEditor /></RequireAdmin>} />
+            <Route path="/admin/writer/:section" element={<RequireAdmin><WriterListPage /></RequireAdmin>} />
+            <Route path="/admin/writer/:section/:slug" element={<RequireAdmin><WriterEditorPage /></RequireAdmin>} />
             <Route path="/the-next-big-thing" element={<TheNextBigThing />} />
             <Route path="/the-next-big-thing/:slug" element={<NextBigThingEssayPage />} />
             
