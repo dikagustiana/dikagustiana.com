@@ -1,0 +1,112 @@
+/**
+ * Section → Phase configuration.
+ *
+ * Maps each section slug to the valid phase options that can be
+ * selected in the admin editor. Sections with no phases defined
+ * will hide the Phase field entirely.
+ */
+
+export interface PhaseOption {
+  value: string;
+  label: string;
+}
+
+export interface SectionPhaseEntry {
+  /** Label shown above the dropdown (e.g. "Sub-theme", "Theme", "Phase") */
+  phaseLabel: string;
+  options: PhaseOption[];
+}
+
+/**
+ * Topics available for the Finance → Financial Analytics sub-section.
+ */
+export const FINANCIAL_ANALYTICS_TOPICS: PhaseOption[] = [
+  { value: 'variance-analysis', label: 'Variance Analysis' },
+  { value: 'profitability-analysis', label: 'Profitability Analysis' },
+  { value: 'liquidity-analysis', label: 'Liquidity Analysis' },
+  { value: 'efficiency-analysis', label: 'Efficiency Analysis' },
+  { value: 'financial-structure-analysis', label: 'Financial Structure Analysis' },
+];
+
+/**
+ * Topics available for Accounting → Consolidated Reporting.
+ */
+export const CONSOLIDATION_TOPICS: PhaseOption[] = [
+  { value: 'psak-principles', label: 'PSAK Principles' },
+  { value: 'equity-adjustment-parent', label: 'Equity Adjustment - Parent' },
+  { value: 'elimination-equity', label: 'Elimination of Equity' },
+  { value: 'elimination-balance-sheet', label: 'Elimination - Balance Sheet' },
+  { value: 'elimination-pnl', label: 'Elimination - P&L' },
+  { value: 'control-soce', label: 'Control - SOCE' },
+  { value: 'control-nci-movement', label: 'Control - NCI Movement' },
+  { value: 'control-bs-schedule', label: 'Control - BS Schedule' },
+  { value: 'control-segment-info', label: 'Control - Segment Info' },
+];
+
+/**
+ * Maps section slug → phase configuration.
+ *
+ * Sections NOT listed here have no phases and the Phase field
+ * is hidden in the admin editor.
+ */
+export const SECTION_PHASE_CONFIG: Record<string, SectionPhaseEntry> = {
+  'green-transition': {
+    phaseLabel: 'Sub-theme',
+    options: [
+      { value: 'where-we-are-now', label: 'Where We Are Now' },
+      { value: 'challenges-ahead', label: 'Challenges Ahead' },
+      { value: 'pathways-forward', label: 'Pathways Forward' },
+    ],
+  },
+  'next-big-thing': {
+    phaseLabel: 'Theme',
+    options: [
+      { value: 'technology', label: 'Technology' },
+      { value: 'economy', label: 'Economy' },
+      { value: 'society', label: 'Society' },
+      { value: 'environment', label: 'Environment' },
+      { value: 'governance', label: 'Governance' },
+    ],
+  },
+  'critical-thinking': {
+    phaseLabel: 'Phase',
+    options: [
+      { value: 'clarify', label: 'Clarify' },
+      { value: 'analyze', label: 'Analyze' },
+      { value: 'construct', label: 'Construct' },
+      { value: 'apply', label: 'Apply' },
+    ],
+  },
+  accounting: {
+    phaseLabel: 'Sub-section',
+    options: [
+      { value: 'fsli', label: 'FSLI' },
+      { value: 'consolidated-reporting', label: 'Consolidated Reporting' },
+      { value: 'statutory-reporting', label: 'Statutory Reporting' },
+    ],
+  },
+  finance: {
+    phaseLabel: 'Sub-section',
+    options: [
+      { value: 'financial-analytics', label: 'Financial Analytics' },
+      { value: 'financial-planning-forecasting', label: 'Financial Planning & Forecasting' },
+      { value: 'budgeting', label: 'Budgeting' },
+      { value: 'cfa-prep', label: 'CFA Prep' },
+    ],
+  },
+};
+
+/**
+ * Phases that require a secondary "topic" picker.
+ * Maps `${section}/${phase}` → topic options.
+ */
+export const PHASE_TOPIC_CONFIG: Record<string, { topicLabel: string; options: PhaseOption[] }> = {
+  'finance/financial-analytics': {
+    topicLabel: 'Analytics Topic',
+    options: FINANCIAL_ANALYTICS_TOPICS,
+  },
+  'accounting/consolidated-reporting': {
+    topicLabel: 'Consolidation Topic',
+    options: CONSOLIDATION_TOPICS,
+  },
+};

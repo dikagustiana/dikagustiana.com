@@ -39,6 +39,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useEssay } from '@/hooks/queries/useEssays';
 import { useSections } from '@/hooks/queries/useSections';
 import { useUpdateEssay, useCreateEssay } from '@/hooks/queries/useAdminEssays';
+import { useFsliPages } from '@/hooks/queries/useFsliPages';
 import { LoadingState, ErrorState } from '@/components/states';
 import { ToneFieldsEditor } from '@/components/admin/ToneFieldsEditor';
 import { UnifiedEditor } from '@/components/admin/UnifiedEditor';
@@ -82,6 +83,7 @@ export default function AdminContentEditor() {
     { enabled: !isNew && !!slugParam }
   );
   const { data: sections, isLoading: sectionsLoading } = useSections();
+  const { data: fsliPages } = useFsliPages();
   const updateEssay = useUpdateEssay();
   const createEssay = useCreateEssay();
 
@@ -97,6 +99,8 @@ export default function AdminContentEditor() {
   const [readTime, setReadTime] = useState('');
   const [snippet, setSnippet] = useState('');
   const [contentJson, setContentJson] = useState<JSONContent | null>(null);
+  const [fsliSlug, setFsliSlug] = useState('');
+  const [topic, setTopic] = useState('');
 
   // Tone fields
   const [managerFields, setManagerFields] = useState<Partial<ManagerFields>>({});
@@ -184,10 +188,12 @@ export default function AdminContentEditor() {
         setContentJson(null);
       }
 
+      setFsliSlug(essay.fsli_slug || '');
+      setTopic(essay.topic || '');
+
       setManagerFields(essay.manager_fields as Partial<ManagerFields> || {});
       setEconomistFields(essay.economist_fields as Partial<EconomistFields> || {});
       setEducatorFields(essay.educator_fields as Partial<EducatorFields> || {});
-      setCoachFields(essay.coach_fields as Partial<CoachFields> || {});
 
       setTimeout(() => {
         isInitialLoad.current = false;
@@ -216,7 +222,7 @@ export default function AdminContentEditor() {
     // Clear publish errors when content changes
     if (showPublishErrors) setShowPublishErrors(false);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [title, slug, section, phase, voiceRole, status, author, date, readTime, snippet, contentJson, managerFields, economistFields, educatorFields, coachFields]);
+  }, [title, slug, section, phase, voiceRole, status, author, date, readTime, snippet, contentJson, managerFields, economistFields, educatorFields, coachFields, fsliSlug, topic]);
 
   // ── Beforeunload guard ──
   useEffect(() => {
@@ -377,6 +383,8 @@ export default function AdminContentEditor() {
       read_time: readTime || null,
       snippet: snippet || null,
       content: contentString,
+      fsli_slug: fsliSlug || null,
+      topic: topic || null,
       ...getToneFieldsData(),
     };
 
@@ -587,8 +595,19 @@ export default function AdminContentEditor() {
             sectionsLoading={sectionsLoading}
             sectionValue={sectionValue}
             onSectionChange={(v) => setSection(v)}
+            resolvedSection={resolvedSlug}
             phase={phase}
-            onPhaseChange={setPhase}
+            onPhaseChange={(v) => {
+              setPhase(v);
+              // Clear dependent fields when phase changes
+              setFsliSlug('');
+              setTopic('');
+            }}
+            fsliSlug={fsliSlug}
+            onFsliSlugChange={setFsliSlug}
+            fsliPages={fsliPages}
+            topic={topic}
+            onTopicChange={setTopic}
             voiceRole={voiceRole}
             onVoiceRoleChange={setVoiceRole}
             status={status}

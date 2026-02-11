@@ -24,6 +24,8 @@ export interface Essay {
   economist_fields: Record<string, unknown> | null;
   educator_fields: Record<string, unknown> | null;
   coach_fields: Record<string, unknown> | null;
+  fsli_slug: string | null;
+  topic: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -101,6 +103,43 @@ export const useFeaturedEssays = (limit = 4) => {
       if (error) throw error;
       return data as Essay[];
     },
+  });
+};
+
+export const useEssaysByFsliSlug = (fsliSlug: string) => {
+  return useQuery({
+    queryKey: ['essays', 'fsli', fsliSlug],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('essays')
+        .select('*')
+        .eq('fsli_slug', fsliSlug)
+        .eq('published', true)
+        .order('sort_order', { ascending: true });
+
+      if (error) throw error;
+      return data as Essay[];
+    },
+    enabled: !!fsliSlug,
+  });
+};
+
+export const useEssaysByTopic = (section: string, topic: string) => {
+  return useQuery({
+    queryKey: ['essays', 'topic', section, topic],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('essays')
+        .select('*')
+        .eq('section', section)
+        .eq('topic', topic)
+        .eq('published', true)
+        .order('sort_order', { ascending: true });
+
+      if (error) throw error;
+      return data as Essay[];
+    },
+    enabled: !!section && !!topic,
   });
 };
 

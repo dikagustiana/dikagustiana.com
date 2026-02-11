@@ -68,15 +68,38 @@ const allSections = [
 ];
 
 // Get public URL for an essay
-const getPublicUrl = (section: string, slug: string, phase?: string) => {
+const getPublicUrl = (section: string, slug: string, phase?: string, fsliSlug?: string, topic?: string) => {
   const baseUrl = window.location.origin;
   switch (section) {
-    case 'green-transition':
-      return `${baseUrl}/green-transition/${phase || 'where-we-are-now'}/${slug}`;
+    case 'green-transition': {
+      // Map DB phase to URL segment
+      const phaseUrlMap: Record<string, string> = {
+        'where-we-are-now': 'now',
+        'challenges-ahead': 'gaps',
+        'pathways-forward': 'future',
+      };
+      const phaseUrl = phase ? (phaseUrlMap[phase] || phase) : 'now';
+      return `${baseUrl}/green-transition/${phaseUrl}/${slug}`;
+    }
     case 'next-big-thing':
       return `${baseUrl}/the-next-big-thing/${slug}`;
     case 'critical-thinking':
       return `${baseUrl}/critical-thinking-research/${phase || 'clarify'}/${slug}`;
+    case 'accounting':
+      if (phase === 'fsli' && fsliSlug) return `${baseUrl}/accounting/fsli/${fsliSlug}`;
+      if (phase === 'consolidated-reporting' && topic) return `${baseUrl}/accounting/consolidation/${topic}`;
+      if (phase === 'statutory-reporting') return `${baseUrl}/accounting/statutory-reporting`;
+      return `${baseUrl}/accounting`;
+    case 'finance':
+      if (phase === 'financial-analytics' && topic) return `${baseUrl}/finance-101/financial-analytics/${topic}`;
+      if (phase === 'financial-planning-forecasting') return `${baseUrl}/finance-101/financial-planning-forecasting`;
+      if (phase === 'budgeting') return `${baseUrl}/finance-101/budgeting`;
+      if (phase === 'cfa-prep') return `${baseUrl}/finance-101/cfa-prep`;
+      return `${baseUrl}/finance-101`;
+    case 'ielts':
+      return `${baseUrl}/english-ielts`;
+    case 'books':
+      return `${baseUrl}/books-academia`;
     default:
       return `${baseUrl}/${section}/${slug}`;
   }
@@ -196,8 +219,8 @@ export default function AdminContent() {
     }
   };
 
-  const handleCopyUrl = async (section: string, slug: string) => {
-    const url = getPublicUrl(section, slug);
+  const handleCopyUrl = async (item: { section: string; slug: string; phase?: string | null; fsli_slug?: string | null; topic?: string | null }) => {
+    const url = getPublicUrl(item.section, item.slug, item.phase || undefined, item.fsli_slug || undefined, item.topic || undefined);
     try {
       await navigator.clipboard.writeText(url);
       setCopiedId(slug);
@@ -502,7 +525,7 @@ export default function AdminContent() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => handleCopyUrl(item.section, item.slug)}
+                            onClick={() => handleCopyUrl(item)}
                             title="Copy public URL"
                           >
                             {copiedId === item.slug ? (

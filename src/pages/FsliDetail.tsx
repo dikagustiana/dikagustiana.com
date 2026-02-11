@@ -7,7 +7,9 @@ import { FsliHeroSection } from '@/components/fsli/FsliHeroSection';
 import { FsliContentSection } from '@/components/fsli/FsliContentSection';
 import { FsliMobileSidebar } from '@/components/fsli/FsliMobileSidebar';
 import { useFsliPage } from '@/hooks/queries/useFsliPages';
+import { useEssaysByFsliSlug } from '@/hooks/queries/useEssays';
 import { useAuth } from '@/contexts/AuthContext';
+import { ArticleBody } from '@/components/editorial/ArticleBody';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { LoadingState } from '@/components/states';
@@ -85,6 +87,7 @@ export default function FsliDetail() {
   const [activeSection, setActiveSection] = useState<string>('definition');
   const { isAdmin, isLoading: authLoading } = useAuth();
   const { data: item, isLoading, error } = useFsliPage(slug || '');
+  const { data: linkedEssays } = useEssaysByFsliSlug(slug || '');
 
   // Track active section on scroll
   useEffect(() => {
@@ -244,6 +247,26 @@ export default function FsliDetail() {
                   placeholder={section.placeholder}
                 />
               ))}
+
+              {/* Linked Essays */}
+              {linkedEssays && linkedEssays.length > 0 && (
+                <>
+                  <div className="pt-8 pb-4" id="linked-essays">
+                    <h2 className="text-lg font-semibold text-foreground">Related Essays</h2>
+                  </div>
+                  {linkedEssays.map((essay) => (
+                    <div key={essay.id} className="mb-8">
+                      <h3 className="text-base font-semibold text-foreground mb-2">{essay.title}</h3>
+                      {essay.snippet && (
+                        <p className="text-sm text-muted-foreground mb-4">{essay.snippet}</p>
+                      )}
+                      {essay.content && (
+                        <ArticleBody content={essay.content} />
+                      )}
+                    </div>
+                  ))}
+                </>
+              )}
             </div>
 
             {/* Right Sidebar - On This Page */}

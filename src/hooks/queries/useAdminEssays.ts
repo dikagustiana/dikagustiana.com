@@ -121,6 +121,8 @@ interface CreateEssayData {
   content?: string | null;
   prerequisites?: string[] | null;
   learning_outcomes?: string[] | null;
+  fsli_slug?: string | null;
+  topic?: string | null;
 }
 
 export function useCreateEssay() {

@@ -2,6 +2,8 @@ import { useParams } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { Breadcrumb } from '@/components/Breadcrumb';
+import { useEssaysByTopic } from '@/hooks/queries/useEssays';
+import { ArticleBody } from '@/components/editorial/ArticleBody';
 
 const topicDetails: Record<string, { title: string; description: string }> = {
   'psak-principles': { title: 'PSAK Principles', description: 'Understanding PSAK consolidation principles and their application.' },
@@ -18,14 +20,15 @@ const topicDetails: Record<string, { title: string; description: string }> = {
 export default function ConsolidationDetail() {
   const { topic } = useParams<{ topic: string }>();
   const details = topic ? topicDetails[topic] : null;
+  const { data: essays } = useEssaysByTopic('accounting', topic || '');
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
-      
+
       <div className="bg-muted/30 border-b border-border py-3">
         <div className="container">
-          <Breadcrumb 
+          <Breadcrumb
             items={[
               { label: 'Home', path: '/' },
               { label: 'Accounting', path: '/accounting' },
@@ -45,11 +48,25 @@ export default function ConsolidationDetail() {
             {details?.description || 'Detailed content for this consolidation topic.'}
           </p>
 
-          <div className="bg-card rounded-lg border border-border p-8">
-            <p className="text-muted-foreground italic">
-              Detailed content for this topic is being developed. Check back soon for comprehensive guides and examples.
-            </p>
-          </div>
+          {essays && essays.length > 0 ? (
+            <div className="space-y-8">
+              {essays.map((essay) => (
+                <div key={essay.id}>
+                  <h2 className="text-2xl font-display font-semibold mb-2">{essay.title}</h2>
+                  {essay.snippet && (
+                    <p className="text-muted-foreground mb-4">{essay.snippet}</p>
+                  )}
+                  {essay.content && <ArticleBody content={essay.content} />}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="bg-card rounded-lg border border-border p-8">
+              <p className="text-muted-foreground italic">
+                Detailed content for this topic is being developed. Check back soon for comprehensive guides and examples.
+              </p>
+            </div>
+          )}
         </div>
       </main>
 

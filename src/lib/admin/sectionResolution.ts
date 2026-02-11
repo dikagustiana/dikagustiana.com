@@ -1,6 +1,6 @@
 import type { Section } from "@/hooks/queries/useSections";
 
-export const FIGURE_ENABLED_SECTION_SLUGS = ["next-big-thing", "green-transition"] as const;
+export const FIGURE_ENABLED_SECTION_SLUGS = ["next-big-thing", "green-transition", "accounting", "finance", "critical-thinking"] as const;
 export type FigureEnabledSectionSlug = (typeof FIGURE_ENABLED_SECTION_SLUGS)[number];
 
 export function normalizeSectionValue(section: string | null | undefined): string {
