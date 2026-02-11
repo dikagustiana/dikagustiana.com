@@ -44,6 +44,7 @@ import { LoadingState, ErrorState } from '@/components/states';
 import { ToneFieldsEditor } from '@/components/admin/ToneFieldsEditor';
 import { UnifiedEditor } from '@/components/admin/UnifiedEditor';
 import { PostSettingsPanel } from '@/components/admin/PostSettingsPanel';
+import { LivePreviewPanel } from '@/components/admin/LivePreviewPanel';
 import { resolveSectionSlug, normalizeSectionValue } from '@/lib/admin/sectionResolution';
 import { validateForPublish } from '@/lib/admin/publishValidation';
 import type { PublishError } from '@/lib/admin/publishValidation';
@@ -471,8 +472,8 @@ export default function AdminContentEditor() {
         description="Content editor"
       />
 
-      <div className="container py-4 max-w-4xl">
-        {/* ── Header bar ── */}
+      {/* ── Header bar (full width) ── */}
+      <div className="container py-4">
         <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
           <div className="flex items-center gap-3">
             <Button variant="ghost" size="icon" onClick={() => navigate('/admin/content')}>
@@ -526,7 +527,7 @@ export default function AdminContentEditor() {
           </div>
         </div>
 
-        {/* ── Publish validation errors (shown ONLY after clicking Publish) ── */}
+        {/* ── Publish validation errors ── */}
         {showPublishErrors && publishErrors.length > 0 && (
           <Alert variant="destructive" className="mb-4">
             <AlertTriangle className="h-4 w-4" />
@@ -565,89 +566,112 @@ export default function AdminContentEditor() {
             </AlertDescription>
           </Alert>
         )}
+      </div>
 
-        {/* ── Title (large, writer-first) ── */}
-        <input
-          id="editor-title"
-          type="text"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="Title"
-          autoFocus={isNew}
-          className="w-full text-3xl md:text-4xl font-display font-bold bg-transparent border-0 outline-none placeholder:text-muted-foreground/40 mb-4 px-0"
-        />
+      {/* ── Side-by-side: Editor + Live Preview ── */}
+      <div className="container pb-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Left column: Editor */}
+          <div className="min-w-0">
+            {/* Title */}
+            <input
+              id="editor-title"
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Title"
+              autoFocus={isNew}
+              className="w-full text-3xl md:text-4xl font-display font-bold bg-transparent border-0 outline-none placeholder:text-muted-foreground/40 mb-4 px-0"
+            />
 
-        {/* ── Editor (occupies 70%+ of viewport) ── */}
-        <UnifiedEditor
-          key={templateHtml ? `tpl-${selectedTemplate}` : `essay-${essayId || 'new'}`}
-          initialContent={editorInitialContent}
-          onChange={handleContentChange}
-          onImageUpload={handleImageUpload}
-          placeholder="Start writing..."
-          autoFocus={!isNew}
-          minHeight="60vh"
-        />
+            {/* Editor */}
+            <UnifiedEditor
+              key={templateHtml ? `tpl-${selectedTemplate}` : `essay-${essayId || 'new'}`}
+              initialContent={editorInitialContent}
+              onChange={handleContentChange}
+              onImageUpload={handleImageUpload}
+              placeholder="Start writing..."
+              autoFocus={!isNew}
+              minHeight="60vh"
+            />
 
-        {/* ── Post Settings (collapsed by default) ── */}
-        <div className="mt-6 space-y-4">
-          <PostSettingsPanel
-            sections={sections}
-            sectionsLoading={sectionsLoading}
-            sectionValue={sectionValue}
-            onSectionChange={(v) => setSection(v)}
-            resolvedSection={resolvedSlug}
-            phase={phase}
-            onPhaseChange={(v) => {
-              setPhase(v);
-              // Clear dependent fields when phase changes
-              setFsliSlug('');
-              setTopic('');
-            }}
-            fsliSlug={fsliSlug}
-            onFsliSlugChange={setFsliSlug}
-            fsliPages={fsliPages}
-            topic={topic}
-            onTopicChange={setTopic}
-            voiceRole={voiceRole}
-            onVoiceRoleChange={setVoiceRole}
-            status={status}
-            onStatusChange={setStatus}
-            slug={slug}
-            onSlugChange={setSlug}
-            author={author}
-            onAuthorChange={setAuthor}
-            date={date}
-            onDateChange={setDate}
-            readTime={readTime}
-            onReadTimeChange={setReadTime}
-            snippet={snippet}
-            onSnippetChange={setSnippet}
-            isNew={isNew}
-            selectedTemplate={selectedTemplate}
-            onTemplateSelect={handleTemplateSelect}
-          />
-
-          {/* ── Tone Fields (collapsed by default) ── */}
-          <Collapsible open={toneOpen} onOpenChange={setToneOpen} id="tone-fields">
-            <CollapsibleTrigger className="flex items-center gap-2 w-full px-4 py-3 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg border border-border transition-colors">
-              <Mic className="h-4 w-4" />
-              <span className="flex-1 text-left">Voice & Tone Fields</span>
-              {toneOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-            </CollapsibleTrigger>
-            <CollapsibleContent className="mt-2">
-              <ToneFieldsEditor
-                role={voiceRole}
-                managerFields={managerFields}
-                economistFields={economistFields}
-                educatorFields={educatorFields}
-                coachFields={coachFields}
-                onManagerFieldsChange={setManagerFields}
-                onEconomistFieldsChange={setEconomistFields}
-                onEducatorFieldsChange={setEducatorFields}
-                onCoachFieldsChange={setCoachFields}
+            {/* Post Settings & Tone Fields */}
+            <div className="mt-6 space-y-4">
+              <PostSettingsPanel
+                sections={sections}
+                sectionsLoading={sectionsLoading}
+                sectionValue={sectionValue}
+                onSectionChange={(v) => setSection(v)}
+                resolvedSection={resolvedSlug}
+                phase={phase}
+                onPhaseChange={(v) => {
+                  setPhase(v);
+                  setFsliSlug('');
+                  setTopic('');
+                }}
+                fsliSlug={fsliSlug}
+                onFsliSlugChange={setFsliSlug}
+                fsliPages={fsliPages}
+                topic={topic}
+                onTopicChange={setTopic}
+                voiceRole={voiceRole}
+                onVoiceRoleChange={setVoiceRole}
+                status={status}
+                onStatusChange={setStatus}
+                slug={slug}
+                onSlugChange={setSlug}
+                author={author}
+                onAuthorChange={setAuthor}
+                date={date}
+                onDateChange={setDate}
+                readTime={readTime}
+                onReadTimeChange={setReadTime}
+                snippet={snippet}
+                onSnippetChange={setSnippet}
+                isNew={isNew}
+                selectedTemplate={selectedTemplate}
+                onTemplateSelect={handleTemplateSelect}
               />
-            </CollapsibleContent>
-          </Collapsible>
+
+              <Collapsible open={toneOpen} onOpenChange={setToneOpen} id="tone-fields">
+                <CollapsibleTrigger className="flex items-center gap-2 w-full px-4 py-3 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg border border-border transition-colors">
+                  <Mic className="h-4 w-4" />
+                  <span className="flex-1 text-left">Voice & Tone Fields</span>
+                  {toneOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                </CollapsibleTrigger>
+                <CollapsibleContent className="mt-2">
+                  <ToneFieldsEditor
+                    role={voiceRole}
+                    managerFields={managerFields}
+                    economistFields={economistFields}
+                    educatorFields={educatorFields}
+                    coachFields={coachFields}
+                    onManagerFieldsChange={setManagerFields}
+                    onEconomistFieldsChange={setEconomistFields}
+                    onEducatorFieldsChange={setEducatorFields}
+                    onCoachFieldsChange={setCoachFields}
+                  />
+                </CollapsibleContent>
+              </Collapsible>
+            </div>
+          </div>
+
+          {/* Right column: Live Preview */}
+          <div className="hidden lg:block min-w-0">
+            <div className="sticky top-0 h-[calc(100vh-6rem)] border border-border rounded-md overflow-hidden bg-background">
+              <LivePreviewPanel
+                title={title}
+                snippet={snippet}
+                author={author}
+                date={date}
+                readTime={readTime}
+                phase={phase}
+                sectionSlug={resolvedSlug}
+                contentJson={contentJson}
+                economistFields={economistFields as Record<string, unknown>}
+              />
+            </div>
+          </div>
         </div>
       </div>
     </PageLayout>
