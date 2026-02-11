@@ -3,6 +3,7 @@ import { PageLayout } from '@/components/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
 import { useEssay } from '@/hooks/queries/useEssays';
 import { RelatedContent } from '@/components/RelatedContent';
+import { contentToHtml } from '@/lib/tiptap/serialize';
 import { LoadingState, ErrorState } from '@/components/states';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -156,7 +157,7 @@ export default function CriticalThinkingEssay() {
 
           <div className="prose prose-neutral dark:prose-invert max-w-none">
             {essay?.content ? (
-              <div dangerouslySetInnerHTML={{ __html: essay.content }} />
+              <div dangerouslySetInnerHTML={{ __html: contentToHtml(essay.content) }} />
             ) : (
               <p className="text-muted-foreground italic">
                 This essay content is being developed. Check back soon for comprehensive insights on this topic.

@@ -2,6 +2,7 @@ import { ReactNode, useMemo } from 'react';
 import { LinkableHeading } from './LinkableHeading';
 import { FigureBlock, FigureBlockData } from './FigureBlock';
 import { cn } from '@/lib/utils';
+import { contentToHtml } from '@/lib/tiptap/serialize';
 
 interface ArticleBodyProps {
   content: string;
@@ -14,8 +15,12 @@ export function ArticleBody({ content, fontSizeClass, className }: ArticleBodyPr
   const parsedContent = useMemo(() => {
     if (!content) return null;
 
+    // Convert TipTap JSON to HTML if needed, then parse
+    const htmlContent = contentToHtml(content);
+    if (!htmlContent) return null;
+
     // Parse HTML content using DOM parser for accurate handling
-    const doc = new DOMParser().parseFromString(content, 'text/html');
+    const doc = new DOMParser().parseFromString(htmlContent, 'text/html');
     let headingCounter = 0;
 
     const processNode = (node: Node, index: number): ReactNode => {

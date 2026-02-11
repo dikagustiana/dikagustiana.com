@@ -1,3 +1,14 @@
+/**
+ * FigureUploader — Image/graph upload dialog for the editor.
+ *
+ * Changes from original:
+ *   - `section` is now optional. Figures can be inserted at any time
+ *     regardless of which section is selected.
+ *   - Source validation is no longer enforced at insert time.
+ *     It is checked only at publish (see publishValidation.ts).
+ *   - Upload path defaults to 'drafts/' when no section is set.
+ */
+
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -24,7 +35,8 @@ import { FigureBlockData } from './FigureBlock';
 interface FigureUploaderProps {
   onInsert: (data: FigureBlockData) => void;
   onCancel: () => void;
-  section: 'next-big-thing' | 'green-transition';
+  /** Optional — used only for the storage upload path. */
+  section?: string;
   initialData?: FigureBlockData;
 }
 
@@ -61,17 +73,16 @@ export function FigureUploader({ onInsert, onCancel, section, initialData }: Fig
   const [sizeWarning, setSizeWarning] = useState<string | null>(null);
   const [aspectWarning, setAspectWarning] = useState<string | null>(null);
 
-  const isGreenTransition = section === 'green-transition';
-  const sourceRequired = isGreenTransition && !noSource;
-  const canInsert = imageSrc && altText.trim() && (!sourceRequired || sourceName.trim());
+  // Source is never required at insert time — validated at publish only
+  const canInsert = !!imageSrc && !!altText.trim();
 
-  // Handle paste from clipboard
+  // Handle paste from clipboard (within the uploader dialog)
   useEffect(() => {
     const handlePaste = async (e: ClipboardEvent) => {
       const items = e.clipboardData?.items;
       if (!items) return;
 
-      for (const item of items) {
+      for (const item of Array.from(items)) {
         if (item.type.startsWith('image/')) {
           e.preventDefault();
           const file = item.getAsFile();
@@ -85,6 +96,7 @@ export function FigureUploader({ onInsert, onCancel, section, initialData }: Fig
 
     document.addEventListener('paste', handlePaste);
     return () => document.removeEventListener('paste', handlePaste);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const validateFile = (file: File): boolean => {
@@ -132,9 +144,10 @@ export function FigureUploader({ onInsert, onCancel, section, initialData }: Fig
     setIsUploading(true);
 
     try {
-      // Generate unique filename
+      // Generate unique filename — use section for path if available, else 'drafts'
       const ext = file.name.split('.').pop() || 'png';
-      const filename = `${section}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+      const folder = section || 'drafts';
+      const filename = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
 
       // Upload to Supabase storage
       const { error: uploadError } = await supabase.storage
@@ -160,7 +173,6 @@ export function FigureUploader({ onInsert, onCancel, section, initialData }: Fig
 
       toast({ title: 'Image uploaded!' });
     } catch (error) {
-      console.error('Upload error:', error);
       toast({
         title: 'Upload failed',
         description: error instanceof Error ? error.message : 'Unknown error',
@@ -179,6 +191,7 @@ export function FigureUploader({ onInsert, onCancel, section, initialData }: Fig
     if (file && file.type.startsWith('image/')) {
       await handleFileUpload(file);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -192,9 +205,9 @@ export function FigureUploader({ onInsert, onCancel, section, initialData }: Fig
 
   const handleLoadUrl = async () => {
     if (!urlInput.trim()) return;
-    
+
     setIsLoadingUrl(true);
-    
+
     // Validate URL format
     try {
       new URL(urlInput);
@@ -294,7 +307,7 @@ export function FigureUploader({ onInsert, onCancel, section, initialData }: Fig
                 Drop image here, paste from clipboard, or click to browse
               </p>
               <p className="text-xs text-muted-foreground/75 mt-1">
-                PNG, JPG, WebP • Max 5MB
+                PNG, JPG, WebP &bull; Max 5MB
               </p>
             </>
           )}
@@ -416,7 +429,7 @@ export function FigureUploader({ onInsert, onCancel, section, initialData }: Fig
             )}
           </div>
 
-          {/* Alt text - Required */}
+          {/* Alt text */}
           <div className="space-y-1">
             <Label className="text-sm">
               Alt text <span className="text-destructive">*</span>
@@ -439,13 +452,10 @@ export function FigureUploader({ onInsert, onCancel, section, initialData }: Fig
             />
           </div>
 
-          {/* Source */}
+          {/* Source — always optional at insert time */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label className="text-sm">
-                Source
-                {sourceRequired && <span className="text-destructive">*</span>}
-              </Label>
+              <Label className="text-sm">Source</Label>
               <label className="flex items-center gap-2 text-xs text-muted-foreground">
                 <input
                   type="checkbox"
