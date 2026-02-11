@@ -9,15 +9,23 @@ export function Footer() {
           <div className="md:col-span-2">
             <Link to="/" className="flex items-center gap-2 mb-4">
               <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-sm">D</span>
+                <span className="text-primary-foreground font-bold text-sm">F</span>
               </div>
               <span className="font-display text-lg font-semibold text-foreground">
-                Dika Gustiana
+                Friendly learning buddy
               </span>
             </Link>
-            <p className="text-muted-foreground text-sm max-w-md">
+            <p className="text-muted-foreground text-sm max-w-md mb-4">
               Finance, accounting, and green transition economics. Research and analysis.
             </p>
+            <div className="flex items-center gap-4">
+              <a href="https://www.linkedin.com/in/dika-gustiana-irawan/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors text-sm inline-flex items-center gap-1">
+                LinkedIn
+              </a>
+              <a href="mailto:dika.g.irawan@gmail.com" className="text-muted-foreground hover:text-foreground transition-colors text-sm inline-flex items-center gap-1">
+                dika.g.irawan@gmail.com
+              </a>
+            </div>
           </div>
 
           {/* Quick Links */}
@@ -44,7 +52,7 @@ export function Footer() {
         </div>
 
         <div className="mt-12 pt-8 border-t border-border text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} Dika Gustiana. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Friendly learning buddy. All rights reserved.</p>
         </div>
       </div>
     </footer>
