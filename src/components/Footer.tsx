@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { Linkedin, Mail } from 'lucide-react';
 
 export function Footer() {
   return (
@@ -18,12 +19,14 @@ export function Footer() {
             <p className="text-muted-foreground text-sm max-w-md mb-4">
               Finance, accounting, and green transition economics. Research and analysis.
             </p>
-            <div className="flex items-center gap-4">
-              <a href="https://www.linkedin.com/in/dika-gustiana-irawan/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors text-sm inline-flex items-center gap-1">
-                LinkedIn
+            <div className="flex flex-col gap-2">
+              <a href="https://www.linkedin.com/in/dika-gustiana-irawan/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors text-sm inline-flex items-center gap-2">
+                <Linkedin className="h-4 w-4" aria-label="LinkedIn" />
+                <span>Dika Gustiana Irawan · LinkedIn</span>
               </a>
-              <a href="mailto:dika.g.irawan@gmail.com" className="text-muted-foreground hover:text-foreground transition-colors text-sm inline-flex items-center gap-1">
-                dika.g.irawan@gmail.com
+              <a href="mailto:dika.g.irawan@gmail.com" className="text-muted-foreground hover:text-foreground transition-colors text-sm inline-flex items-center gap-2">
+                <Mail className="h-4 w-4" aria-label="Email" />
+                <span>dika.g.irawan@gmail.com</span>
               </a>
             </div>
           </div>

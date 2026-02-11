@@ -2,7 +2,7 @@ import { PageLayout } from '@/components/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
 import { Card, CardContent } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
-import { ArrowRight, BarChart3, BookOpen, Leaf, Lightbulb, Clock, User, GraduationCap, Linkedin, Mail } from 'lucide-react';
+import { ArrowRight, BarChart3, BookOpen, Leaf, Lightbulb, Clock, User, GraduationCap } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useFeaturedEssays } from '@/hooks/queries/useEssays';
 import { LoadingState } from '@/components/states/LoadingState';
@@ -78,28 +78,9 @@ const Index = () => {
             Finance, Accounting, and Green Transition Economics.
           </h1>
 
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Practitioner-focused analysis of financial operations, accounting standards, and the economics of decarbonization. Written by Dika Gustiana.
           </p>
-
-          <div className="flex flex-col items-center gap-2 text-sm text-muted-foreground">
-            <a
-              href="https://www.linkedin.com/in/dika-gustiana-irawan/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 hover:text-foreground transition-colors"
-            >
-              <Linkedin className="h-4 w-4" aria-label="LinkedIn" />
-              <span>Dika Gustiana Irawan · LinkedIn</span>
-            </a>
-            <a
-              href="mailto:dika.g.irawan@gmail.com"
-              className="inline-flex items-center gap-2 hover:text-foreground transition-colors"
-            >
-              <Mail className="h-4 w-4" aria-label="Email" />
-              <span>dika.g.irawan@gmail.com</span>
-            </a>
-          </div>
         </div>
       </section>
 
