@@ -164,6 +164,7 @@ export function FigureUploader({ onInsert, onCancel, section, initialData }: Fig
         .from('essay-images')
         .getPublicUrl(filename);
 
+      console.log('Image public URL:', urlData.publicUrl);
       setImageSrc(urlData.publicUrl);
 
       // Get dimensions from loaded image
@@ -173,6 +174,11 @@ export function FigureUploader({ onInsert, onCancel, section, initialData }: Fig
 
       toast({ title: 'Image uploaded!' });
     } catch (error) {
+      console.error('Upload failed:', {
+        error,
+        message: error instanceof Error ? error.message : 'Unknown',
+        statusCode: (error as Record<string, unknown>)?.statusCode,
+      });
       toast({
         title: 'Upload failed',
         description: error instanceof Error ? error.message : 'Unknown error',

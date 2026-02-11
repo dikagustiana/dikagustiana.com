@@ -1,5 +1,7 @@
 import { useParams } from 'react-router-dom';
 import { PageLayout } from '@/components/layouts/PageLayout';
+import { useEssaysByTopic } from '@/hooks/queries/useEssays';
+import { ArticleBody } from '@/components/editorial/ArticleBody';
 
 const topicDetails: Record<string, { title: string; description: string }> = {
   'variance-analysis': { title: 'Variance Analysis', description: 'Learn to identify and explain differences between actual and budgeted figures.' },
@@ -12,6 +14,7 @@ const topicDetails: Record<string, { title: string; description: string }> = {
 export default function FinancialAnalyticsDetail() {
   const { topic } = useParams<{ topic: string }>();
   const details = topic ? topicDetails[topic] : null;
+  const { data: essays } = useEssaysByTopic('finance', topic || '');
 
   return (
     <PageLayout variant="content" role="manager" breadcrumbs={[{ label: 'Home', path: '/' }, { label: 'Finance', path: '/finance-101' }, { label: 'Financial Analytics', path: '/finance-101/financial-analytics' }, { label: details?.title || 'Topic' }]}>
@@ -24,14 +27,27 @@ export default function FinancialAnalyticsDetail() {
             {details?.description || 'Detailed content for this analytics topic.'}
           </p>
 
-          <div className="bg-card rounded-lg border border-border p-8">
-            <p className="text-muted-foreground italic">
-              Detailed content for this topic is being developed. Check back soon for comprehensive guides and examples.
-            </p>
-          </div>
+          {essays && essays.length > 0 ? (
+            <div className="space-y-8">
+              {essays.map((essay) => (
+                <div key={essay.id}>
+                  <h2 className="text-2xl font-display font-semibold mb-2">{essay.title}</h2>
+                  {essay.snippet && (
+                    <p className="text-muted-foreground mb-4">{essay.snippet}</p>
+                  )}
+                  {essay.content && <ArticleBody content={essay.content} />}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="bg-card rounded-lg border border-border p-8">
+              <p className="text-muted-foreground italic">
+                Detailed content for this topic is being developed. Check back soon for comprehensive guides and examples.
+              </p>
+            </div>
+          )}
         </div>
       </main>
-
     </PageLayout>
   );
 }

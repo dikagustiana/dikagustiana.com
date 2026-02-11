@@ -10,6 +10,9 @@ export interface UnifiedContentItem {
   slug: string;
   section: string;
   category?: string;
+  phase?: string | null;
+  fsli_slug?: string | null;
+  topic?: string | null;
   published: boolean;
   status: string | null;
   voice_role: string | null;
@@ -36,7 +39,7 @@ export function useUnifiedContent(filter: ContentFilter = {}) {
       if (filter.contentType !== 'fsli') {
         let essayQuery = supabase
           .from('essays')
-          .select('id, title, slug, section, published, status, voice_role, snippet, updated_at, created_at')
+          .select('id, title, slug, section, phase, fsli_slug, topic, published, status, voice_role, snippet, updated_at, created_at')
           .order('updated_at', { ascending: false });
 
         if (filter.section && filter.section !== 'all') {
@@ -65,6 +68,9 @@ export function useUnifiedContent(filter: ContentFilter = {}) {
             title: essay.title,
             slug: essay.slug,
             section: essay.section,
+            phase: essay.phase,
+            fsli_slug: essay.fsli_slug,
+            topic: essay.topic,
             published: essay.published ?? false,
             status: essay.status || (essay.published ? 'published' : 'draft'),
             voice_role: essay.voice_role,

@@ -5,7 +5,9 @@
  * surface dominates the page. Contains all fields that are NOT
  * the body content:
  *   - Section (also shown in the header bar)
- *   - Phase, Voice Role, Status
+ *   - Phase (section-aware dropdown), Voice Role, Status
+ *   - FSLI picker (when section=accounting, phase=fsli)
+ *   - Topic picker (when phase needs sub-topic)
  *   - Slug, Author, Date, Read Time
  *   - Snippet
  *   - Template selector (new essays only)
@@ -16,7 +18,7 @@
  *   - Changing metadata never reinitializes the editor.
  */
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -27,6 +29,8 @@ import { ChevronDown, ChevronRight, Settings2 } from 'lucide-react';
 import type { Section } from '@/hooks/queries/useSections';
 import type { VoiceRole, ContentStatus } from '@/lib/types/toneFields';
 import type { EssayTemplateType } from '@/lib/essayTemplates';
+import { SECTION_PHASE_CONFIG, PHASE_TOPIC_CONFIG } from '@/lib/admin/sectionPhaseConfig';
+import type { FsliPage } from '@/hooks/queries/useFsliPages';
 
 interface PostSettingsPanelProps {
   // Section
@@ -35,9 +39,21 @@ interface PostSettingsPanelProps {
   sectionValue: string;
   onSectionChange: (value: string) => void;
 
+  // Resolved section slug (after slug resolution)
+  resolvedSection: string;
+
   // Phase
   phase: string;
   onPhaseChange: (value: string) => void;
+
+  // FSLI
+  fsliSlug: string;
+  onFsliSlugChange: (value: string) => void;
+  fsliPages: FsliPage[] | undefined;
+
+  // Topic
+  topic: string;
+  onTopicChange: (value: string) => void;
 
   // Voice role
   voiceRole: VoiceRole;
@@ -78,8 +94,14 @@ export function PostSettingsPanel({
   sectionsLoading,
   sectionValue,
   onSectionChange,
+  resolvedSection,
   phase,
   onPhaseChange,
+  fsliSlug,
+  onFsliSlugChange,
+  fsliPages,
+  topic,
+  onTopicChange,
   voiceRole,
   onVoiceRoleChange,
   status,
@@ -99,6 +121,21 @@ export function PostSettingsPanel({
   onTemplateSelect,
 }: PostSettingsPanelProps) {
   const [isOpen, setIsOpen] = useState(false);
+
+  // Look up phase config for the current section
+  const phaseConfig = useMemo(
+    () => resolvedSection ? SECTION_PHASE_CONFIG[resolvedSection] : undefined,
+    [resolvedSection],
+  );
+
+  // Look up topic config for the current section + phase
+  const topicConfig = useMemo(() => {
+    if (!resolvedSection || !phase) return undefined;
+    return PHASE_TOPIC_CONFIG[`${resolvedSection}/${phase}`];
+  }, [resolvedSection, phase]);
+
+  // Show FSLI picker when section=accounting and phase=fsli
+  const showFsliPicker = resolvedSection === 'accounting' && phase === 'fsli';
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen} id="post-settings">
@@ -138,16 +175,67 @@ export function PostSettingsPanel({
               </Select>
             )}
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="settings-phase">Phase</Label>
-            <Input
-              id="settings-phase"
-              value={phase}
-              onChange={(e) => onPhaseChange(e.target.value)}
-              placeholder="e.g., now, transition"
-            />
-          </div>
+
+          {/* Phase — dropdown when config exists, hidden otherwise */}
+          {phaseConfig && (
+            <div className="space-y-2">
+              <Label htmlFor="settings-phase">{phaseConfig.phaseLabel}</Label>
+              <Select value={phase} onValueChange={onPhaseChange}>
+                <SelectTrigger id="settings-phase">
+                  <SelectValue placeholder={`Select ${phaseConfig.phaseLabel.toLowerCase()}`} />
+                </SelectTrigger>
+                <SelectContent>
+                  {phaseConfig.options.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
         </div>
+
+        {/* FSLI picker — shown when section=accounting, phase=fsli */}
+        {showFsliPicker && (
+          <div className="space-y-2">
+            <Label htmlFor="settings-fsli">FSLI Line Item</Label>
+            <Select value={fsliSlug} onValueChange={onFsliSlugChange}>
+              <SelectTrigger id="settings-fsli">
+                <SelectValue placeholder="Select FSLI page" />
+              </SelectTrigger>
+              <SelectContent>
+                {fsliPages?.map((page) => (
+                  <SelectItem key={page.id} value={page.slug}>
+                    {page.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">
+              The essay will appear on the selected FSLI detail page.
+            </p>
+          </div>
+        )}
+
+        {/* Topic picker — shown when phase has sub-topics */}
+        {topicConfig && (
+          <div className="space-y-2">
+            <Label htmlFor="settings-topic">{topicConfig.topicLabel}</Label>
+            <Select value={topic} onValueChange={onTopicChange}>
+              <SelectTrigger id="settings-topic">
+                <SelectValue placeholder={`Select ${topicConfig.topicLabel.toLowerCase()}`} />
+              </SelectTrigger>
+              <SelectContent>
+                {topicConfig.options.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
 
         {/* Voice Role & Status */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
