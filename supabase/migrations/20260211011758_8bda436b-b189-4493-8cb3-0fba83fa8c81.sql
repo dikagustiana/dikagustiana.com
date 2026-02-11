@@ -1,0 +1,2 @@
+ALTER TABLE public.essays ADD COLUMN IF NOT EXISTS fsli_slug TEXT;
+ALTER TABLE public.essays ADD COLUMN IF NOT EXISTS topic TEXT;

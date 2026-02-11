@@ -234,6 +234,7 @@ export type Database = {
           date: string | null
           economist_fields: Json | null
           educator_fields: Json | null
+          fsli_slug: string | null
           id: string
           learning_outcomes: string[] | null
           manager_fields: Json | null
@@ -248,6 +249,7 @@ export type Database = {
           status: Database["public"]["Enums"]["content_status_enum"] | null
           thumbnail_url: string | null
           title: string
+          topic: string | null
           updated_at: string
           voice_role: string | null
           voice_validated_at: string | null
@@ -261,6 +263,7 @@ export type Database = {
           date?: string | null
           economist_fields?: Json | null
           educator_fields?: Json | null
+          fsli_slug?: string | null
           id?: string
           learning_outcomes?: string[] | null
           manager_fields?: Json | null
@@ -275,6 +278,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["content_status_enum"] | null
           thumbnail_url?: string | null
           title: string
+          topic?: string | null
           updated_at?: string
           voice_role?: string | null
           voice_validated_at?: string | null
@@ -288,6 +292,7 @@ export type Database = {
           date?: string | null
           economist_fields?: Json | null
           educator_fields?: Json | null
+          fsli_slug?: string | null
           id?: string
           learning_outcomes?: string[] | null
           manager_fields?: Json | null
@@ -302,6 +307,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["content_status_enum"] | null
           thumbnail_url?: string | null
           title?: string
+          topic?: string | null
           updated_at?: string
           voice_role?: string | null
           voice_validated_at?: string | null
