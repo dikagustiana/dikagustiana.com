@@ -1,5 +1,38 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
-import { useParams, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
+/**
+ * AdminContentEditor — Writer-first authoring page.
+ *
+ * Layout:
+ *   ┌──────────────────────────────────────────────────────────┐
+ *   │  ← Back   [Section ▾]   (Unsaved)  [Save Draft] [Pub]  │
+ *   ├──────────────────────────────────────────────────────────┤
+ *   │                                                          │
+ *   │  Title of the essay (large, inline input)                │
+ *   │                                                          │
+ *   │  ──────────────────────────────────────────────          │
+ *   │  B I S ~ | H2 H3 | • # | ❝ — | 🖼 | 🔗 | ↶ ↷         │
+ *   │  ──────────────────────────────────────────────          │
+ *   │                                                          │
+ *   │  Start writing here...                                   │
+ *   │                                                          │
+ *   ├──────────────────────────────────────────────────────────┤
+ *   │  ▸ Post Settings (collapsed)                             │
+ *   ├──────────────────────────────────────────────────────────┤
+ *   │  ▸ Voice & Tone Fields (collapsed)                       │
+ *   └──────────────────────────────────────────────────────────┘
+ *
+ * Rules enforced:
+ *   - Editor is visible immediately on load.
+ *   - No section selection required to start writing.
+ *   - No validation errors during drafting.
+ *   - Validation runs only on Publish.
+ *   - Section is changeable at any time without losing content.
+ *   - Metadata is in a collapsed panel below the editor.
+ *   - Canonical format: TipTap JSON.
+ */
+
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import type { JSONContent } from '@tiptap/core';
 import { PageLayout } from '@/components/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
 import { useAuth } from '@/contexts/AuthContext';
@@ -8,30 +41,19 @@ import { useSections } from '@/hooks/queries/useSections';
 import { useUpdateEssay, useCreateEssay } from '@/hooks/queries/useAdminEssays';
 import { LoadingState, ErrorState } from '@/components/states';
 import { ToneFieldsEditor } from '@/components/admin/ToneFieldsEditor';
-import { ContentHealthIndicator } from '@/components/admin/ContentHealthIndicator';
-import { TemplateSelector } from '@/components/admin/TemplateSelector';
-import { DynamicListEditor } from '@/components/admin/DynamicListEditor';
-import { RichTextEditor, markdownToHtml, htmlToMarkdown, getPlainTextFromHtml } from '@/components/admin/RichTextEditor';
-import { ContentPreview } from '@/components/admin/ContentPreview';
-import { EssayEditor } from '@/components/editorial/EssayEditor';
-import { AdminEditorDebugLine } from '@/components/admin/AdminEditorDebugLine';
-import { validateFigures, extractFiguresFromContent, FigureValidationResult } from '@/lib/figureValidation';
-import { isFigureEnabledSection, normalizeSectionValue, resolveSectionSlug } from '@/lib/admin/sectionResolution';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { UnifiedEditor } from '@/components/admin/UnifiedEditor';
+import { PostSettingsPanel } from '@/components/admin/PostSettingsPanel';
+import { resolveSectionSlug, normalizeSectionValue } from '@/lib/admin/sectionResolution';
+import { validateForPublish } from '@/lib/admin/publishValidation';
+import type { PublishError } from '@/lib/admin/publishValidation';
+import { parseTiptapJson } from '@/lib/tiptap/serialize';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
-import {
-  ResizablePanelGroup,
-  ResizablePanel,
-  ResizableHandle,
-} from '@/components/ui/resizable';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Save, XCircle, AlertTriangle, CheckCircle, Eye, Edit3, ImageIcon } from 'lucide-react';
+import { ArrowLeft, Save, XCircle, AlertTriangle, ChevronDown, ChevronRight, Mic } from 'lucide-react';
 import {
   VoiceRole,
   ContentStatus,
@@ -39,41 +61,31 @@ import {
   EconomistFields,
   EducatorFields,
   CoachFields,
-  validateToneFields,
 } from '@/lib/types/toneFields';
 import { EssayTemplateType, applyTemplate, essayTemplates } from '@/lib/essayTemplates';
+import { markdownToHtml } from '@/components/admin/RichTextEditor';
 
 export default function AdminContentEditor() {
-  // Route uses slug, we store the database uuid internally
   const { id: slugParam } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
   const isNew = slugParam === 'new';
   const navigate = useNavigate();
-  const location = useLocation();
   const { toast } = useToast();
   const { isAdmin, isLoading: authLoading } = useAuth();
 
-  // Internal database UUID - loaded from essay data
+  // Internal database UUID
   const [essayId, setEssayId] = useState<string | null>(null);
 
-  // Load essay by slug (not by id)
+  // Data fetching
   const { data: essay, isLoading: essayLoading, error: essayError, refetch: refetchEssay } = useEssay(
     isNew ? '' : (slugParam || ''),
     { enabled: !isNew && !!slugParam }
   );
-  const { data: sections, isLoading: sectionsLoading, isFetching: sectionsFetching } = useSections();
+  const { data: sections, isLoading: sectionsLoading } = useSections();
   const updateEssay = useUpdateEssay();
   const createEssay = useCreateEssay();
 
-  // Template state (only for new essays)
-  const [selectedTemplate, setSelectedTemplate] = useState<EssayTemplateType>('blank');
-  const [templateApplied, setTemplateApplied] = useState(false);
-
-  // Dynamic lists for templates
-  const [keyPoints, setKeyPoints] = useState<string[]>([]);
-  const [steps, setSteps] = useState<string[]>([]);
-
-  // Form state
+  // ── Form state ──
   const [title, setTitle] = useState('');
   const [slug, setSlug] = useState('');
   const [section, setSection] = useState('');
@@ -84,26 +96,42 @@ export default function AdminContentEditor() {
   const [date, setDate] = useState('');
   const [readTime, setReadTime] = useState('');
   const [snippet, setSnippet] = useState('');
-  const [content, setContent] = useState('');
+  const [contentJson, setContentJson] = useState<JSONContent | null>(null);
 
-  // Tone fields - preserve all fields from database
+  // Tone fields
   const [managerFields, setManagerFields] = useState<Partial<ManagerFields>>({});
   const [economistFields, setEconomistFields] = useState<Partial<EconomistFields>>({});
   const [educatorFields, setEducatorFields] = useState<Partial<EducatorFields>>({});
   const [coachFields, setCoachFields] = useState<Partial<CoachFields>>({});
 
-  // Editor mode state
-  const [editorMode, setEditorMode] = useState<'rich' | 'markdown'>('rich');
-  const [showPreview, setShowPreview] = useState(true);
+  // Template (new essays only)
+  const [selectedTemplate, setSelectedTemplate] = useState<EssayTemplateType>('blank');
 
-  // Validation state
-  const [toneValidation, setToneValidation] = useState<{ valid: boolean; missing: string[] }>({ valid: true, missing: [] });
+  // Template HTML for initial editor content (only used for template application)
+  const [templateHtml, setTemplateHtml] = useState<string | null>(null);
 
-  // Dirty state tracking
+  // Dirty tracking
   const [isDirty, setIsDirty] = useState(false);
   const isInitialLoad = useRef(true);
 
-  // Initialize from URL params (for Add Essay from section pages)
+  // Publish validation (only computed on demand)
+  const [publishErrors, setPublishErrors] = useState<PublishError[]>([]);
+  const [publishWarnings, setPublishWarnings] = useState<PublishError[]>([]);
+  const [showPublishErrors, setShowPublishErrors] = useState(false);
+
+  // Tone fields panel
+  const [toneOpen, setToneOpen] = useState(false);
+
+  // ── Section resolution ──
+  const sectionValue = useMemo(() => normalizeSectionValue(section), [section]);
+  const resolvedSlug = useMemo(() => resolveSectionSlug(sectionValue, sections), [sectionValue, sections]);
+  const sectionValidated = useMemo(() => {
+    if (!resolvedSlug) return false;
+    if (!sections || sections.length === 0) return false;
+    return sections.some((s) => s.slug === resolvedSlug);
+  }, [resolvedSlug, sections]);
+
+  // ── Initialize from URL params (deep-linking) ──
   useEffect(() => {
     if (isNew) {
       const urlSection = searchParams.get('section');
@@ -113,84 +141,54 @@ export default function AdminContentEditor() {
     }
   }, [isNew, searchParams]);
 
-  // Handle template selection
-  const handleTemplateSelect = (templateId: EssayTemplateType) => {
-    setSelectedTemplate(templateId);
-    
-    if (templateId === 'blank') {
-      setTitle('');
-      setSnippet('');
-      setContent('');
-      setKeyPoints([]);
-      setSteps([]);
-      setTemplateApplied(false);
-      return;
+  // ── Sync section ID → slug when sections list loads ──
+  useEffect(() => {
+    if (!isNew || !sections || sections.length === 0) return;
+    if (!sectionValue || !resolvedSlug || sectionValue === resolvedSlug) return;
+    setSection(resolvedSlug);
+  }, [isNew, sectionValue, resolvedSlug, sections]);
+
+  // ── Set voice role from section default ──
+  useEffect(() => {
+    if (resolvedSlug && sections && !essay?.voice_role) {
+      const sectionData = sections.find((s) => s.slug === resolvedSlug);
+      if (sectionData) {
+        setVoiceRole(sectionData.voice_role as VoiceRole);
+      }
     }
+  }, [resolvedSlug, sections, essay?.voice_role]);
 
-    const template = essayTemplates[templateId];
-    const initialKeyPoints = template.keyPoints || [];
-    const initialSteps = template.steps || [];
-    
-    setKeyPoints(initialKeyPoints);
-    setSteps(initialSteps);
-
-    const { title: tTitle, snippet: tSnippet, content: tContent } = applyTemplate(
-      templateId,
-      initialKeyPoints,
-      initialSteps
-    );
-    
-    setTitle(tTitle);
-    setSnippet(tSnippet);
-    setContent(tContent);
-    setTemplateApplied(true);
-  };
-
-  // Update content when key points or steps change
-  useEffect(() => {
-    if (!templateApplied || selectedTemplate === 'blank') return;
-
-    const { content: updatedContent } = applyTemplate(
-      selectedTemplate,
-      keyPoints,
-      steps
-    );
-    setContent(updatedContent);
-  }, [keyPoints, steps, selectedTemplate, templateApplied]);
-
-  // Validate tone fields whenever they change
-  useEffect(() => {
-    const validation = validateToneFields(voiceRole, managerFields, economistFields, educatorFields, coachFields);
-    setToneValidation(validation);
-  }, [voiceRole, managerFields, economistFields, educatorFields, coachFields]);
-
-  // Load essay data when editing - store UUID internally
+  // ── Load essay data when editing ──
   useEffect(() => {
     if (essay && !isNew) {
       isInitialLoad.current = true;
-      
-      // Store the database UUID for updates
       setEssayId(essay.id);
-      
-       setTitle(essay.title || '');
-       setSlug(essay.slug || '');
-       setSection(normalizeSectionValue(essay.section));
-       setPhase((essay.phase || '').trim());
-       setVoiceRole((essay.voice_role as VoiceRole) || 'hybrid');
-       // Use status as source of truth, fallback to published boolean for legacy
-       setStatus((essay.status as ContentStatus) || (essay.published ? 'published' : 'draft'));
-       setAuthor(essay.author || 'Dika Gustiana');
+      setTitle(essay.title || '');
+      setSlug(essay.slug || '');
+      setSection(normalizeSectionValue(essay.section));
+      setPhase((essay.phase || '').trim());
+      setVoiceRole((essay.voice_role as VoiceRole) || 'hybrid');
+      setStatus((essay.status as ContentStatus) || (essay.published ? 'published' : 'draft'));
+      setAuthor(essay.author || 'Dika Gustiana');
       setDate(essay.date || '');
       setReadTime(essay.read_time || '');
       setSnippet(essay.snippet || '');
-      setContent(essay.content || '');
-      
-      // Load ALL tone fields from database to preserve existing data
+
+      // Parse content: might be TipTap JSON or legacy HTML
+      const rawContent = essay.content || '';
+      const parsed = parseTiptapJson(rawContent);
+      if (parsed) {
+        setContentJson(parsed);
+      } else {
+        // Legacy HTML — will be loaded into TipTap editor which parses HTML natively
+        setContentJson(null);
+      }
+
       setManagerFields(essay.manager_fields as Partial<ManagerFields> || {});
       setEconomistFields(essay.economist_fields as Partial<EconomistFields> || {});
       setEducatorFields(essay.educator_fields as Partial<EducatorFields> || {});
       setCoachFields(essay.coach_fields as Partial<CoachFields> || {});
-      
+
       setTimeout(() => {
         isInitialLoad.current = false;
         setIsDirty(false);
@@ -198,27 +196,7 @@ export default function AdminContentEditor() {
     }
   }, [essay, isNew]);
 
-  // Track dirty state when form fields change
-  useEffect(() => {
-    if (isInitialLoad.current) {
-      return;
-    }
-    setIsDirty(true);
-  }, [title, slug, section, phase, voiceRole, status, author, date, readTime, snippet, content, managerFields, economistFields, educatorFields, coachFields]);
-
-  // Beforeunload guard
-  useEffect(() => {
-    const handler = (e: BeforeUnloadEvent) => {
-      if (isDirty) {
-        e.preventDefault();
-        e.returnValue = '';
-      }
-    };
-    window.addEventListener('beforeunload', handler);
-    return () => window.removeEventListener('beforeunload', handler);
-  }, [isDirty]);
-
-  // Auto-generate slug from title (only for new essays)
+  // ── Auto-generate slug from title (new essays only) ──
   useEffect(() => {
     if (isNew && title) {
       const generatedSlug = title
@@ -231,123 +209,174 @@ export default function AdminContentEditor() {
     }
   }, [title, isNew]);
 
-  const sectionValue = useMemo(() => normalizeSectionValue(section), [section]);
-  const resolvedSlug = useMemo(() => resolveSectionSlug(sectionValue, sections), [sectionValue, sections]);
-
-  // If section was provided as an ID (or any non-slug), normalize form state to the resolved slug as soon as
-  // the canonical sections list becomes available. This keeps gating + selectors consistent and makes
-  // figuresEnabled flip live without refresh.
+  // ── Track dirty state ──
   useEffect(() => {
-    if (!isNew) return;
-    if (!sections || sections.length === 0) return;
-    if (!sectionValue || !resolvedSlug) return;
-    if (sectionValue === resolvedSlug) return;
-    setSection(resolvedSlug);
-  }, [isNew, sectionValue, resolvedSlug, sections]);
+    if (isInitialLoad.current) return;
+    setIsDirty(true);
+    // Clear publish errors when content changes
+    if (showPublishErrors) setShowPublishErrors(false);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [title, slug, section, phase, voiceRole, status, author, date, readTime, snippet, contentJson, managerFields, economistFields, educatorFields, coachFields]);
 
-  const sectionValidated = useMemo(() => {
-    if (!resolvedSlug) return false;
-    if (!sections || sections.length === 0) return false;
-    return sections.some((s) => s.slug === resolvedSlug);
-  }, [resolvedSlug, sections]);
-
-  // Get voice role from section if not explicitly set
+  // ── Beforeunload guard ──
   useEffect(() => {
-    if (resolvedSlug && sections && !essay?.voice_role) {
-      const sectionData = sections.find((s) => s.slug === resolvedSlug);
-      if (sectionData) {
-        setVoiceRole(sectionData.voice_role as VoiceRole);
+    const handler = (e: BeforeUnloadEvent) => {
+      if (isDirty) {
+        e.preventDefault();
+        e.returnValue = '';
       }
+    };
+    window.addEventListener('beforeunload', handler);
+    return () => window.removeEventListener('beforeunload', handler);
+  }, [isDirty]);
+
+  // ── Template handling ──
+  const handleTemplateSelect = (templateId: EssayTemplateType) => {
+    setSelectedTemplate(templateId);
+    if (templateId === 'blank') return;
+    const template = essayTemplates[templateId];
+    const { title: tTitle, snippet: tSnippet, content: tContent } = applyTemplate(
+      templateId,
+      template.keyPoints || [],
+      template.steps || [],
+    );
+    setTitle(tTitle);
+    setSnippet(tSnippet);
+    // Template content is markdown — convert to HTML for TipTap to parse
+    const html = markdownToHtml(tContent);
+    setContentJson(null);
+    setTemplateHtml(html);
+  };
+
+  // ── Image upload handler ──
+  const handleImageUpload = useCallback(async (file: File): Promise<string> => {
+    const ext = file.name.split('.').pop() || 'png';
+    const folder = resolvedSlug || 'drafts';
+    const filename = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('essay-images')
+      .upload(filename, file, {
+        cacheControl: '31536000',
+        upsert: false,
+      });
+
+    if (uploadError) {
+      toast({
+        title: 'Upload failed',
+        description: uploadError.message,
+        variant: 'destructive',
+      });
+      throw uploadError;
     }
-  }, [resolvedSlug, sections, essay?.voice_role]);
 
-  // Canonical gating: figuresEnabled is computed ONLY from resolvedSlug
-  const figuresEnabled = isFigureEnabledSection(resolvedSlug);
-  const usesFigureEditor = figuresEnabled;
+    const { data: urlData } = supabase.storage
+      .from('essay-images')
+      .getPublicUrl(filename);
 
-  // Figure validation for figure-enabled sections
-  const figureValidation = useMemo<FigureValidationResult>(() => {
-    if (!usesFigureEditor || !content || !isFigureEnabledSection(resolvedSlug)) {
-      return { figures: [], errors: [], warnings: [] };
-    }
-    const figures = extractFiguresFromContent(content);
-    return validateFigures(figures, resolvedSlug);
-  }, [content, resolvedSlug, usesFigureEditor]);
+    toast({ title: 'Image uploaded!' });
+    return urlData.publicUrl;
+  }, [resolvedSlug, toast]);
 
-  const canPublish = sectionValidated && (toneValidation.valid || voiceRole === 'hybrid') && figureValidation.errors.length === 0;
+  // ── Content change handler ──
+  const handleContentChange = useCallback((json: JSONContent) => {
+    setContentJson(json);
+    if (templateHtml) setTemplateHtml(null);
+  }, [templateHtml]);
 
-  // Helper to determine if tone fields have content
+  // ── Helpers for tone fields ──
   const hasContent = (fields: Record<string, unknown> | null | undefined): boolean => {
     if (!fields || typeof fields !== 'object') return false;
-    return Object.values(fields).some(v => 
-      v !== null && v !== undefined && v !== '' && 
+    return Object.values(fields).some(v =>
+      v !== null && v !== undefined && v !== '' &&
       (Array.isArray(v) ? v.length > 0 : true)
     );
   };
 
+  // ── Save / Publish ──
   const handleSave = async (targetStatus: ContentStatus = status) => {
-    if (!title || !slug || !sectionValue) {
+    // For save-as-draft: only require title
+    if (targetStatus !== 'published' && !title.trim()) {
       toast({
-        title: 'Missing required fields',
-        description: 'Title, slug, and section are required.',
+        title: 'Title required',
+        description: 'Add a title before saving.',
         variant: 'destructive',
       });
       return;
     }
 
-    // Never allow publishing without a resolved + validated section
-    if (targetStatus === 'published' && (!resolvedSlug || !sectionValidated)) {
-      toast({
-        title: 'Cannot publish',
-        description: 'Select a valid section before publishing.',
-        variant: 'destructive',
+    // For publish: run full validation
+    if (targetStatus === 'published') {
+      const result = validateForPublish({
+        title,
+        slug,
+        resolvedSection: resolvedSlug,
+        sectionValidated,
+        contentJson,
+        voiceRole,
+        managerFields,
+        economistFields,
+        educatorFields,
+        coachFields,
       });
-      return;
+
+      if (!result.canPublish) {
+        setPublishErrors(result.errors);
+        setPublishWarnings(result.warnings);
+        setShowPublishErrors(true);
+
+        // Scroll to the first error target
+        const firstTarget = result.errors[0]?.scrollTarget;
+        if (firstTarget) {
+          const el = document.querySelector(firstTarget);
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        toast({
+          title: 'Cannot publish',
+          description: `${result.errors.length} issue${result.errors.length === 1 ? '' : 's'} must be fixed.`,
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      setPublishWarnings(result.warnings);
     }
 
-    // Block publishing without valid tone fields and figure validation
-    if (targetStatus === 'published' && !canPublish) {
-      toast({
-        title: 'Cannot publish',
-        description:
-          figureValidation.errors.length > 0
-            ? 'Fix the figure errors shown above.'
-            : `Missing required tone fields: ${toneValidation.missing.join(', ')}`,
-        variant: 'destructive',
-      });
-      return;
-    }
+    // Serialize content to canonical TipTap JSON string
+    const contentString = contentJson ? JSON.stringify(contentJson) : '';
 
-    // Build tone fields - only set active role's fields, preserve others if they have content
-    // This prevents wiping existing data when switching roles temporarily
-    const getToneFieldsData = () => {
-      // For the current role, always use current state
-      // For inactive roles, preserve existing data if it has content
-      const result: Record<string, unknown> = {
-        manager_fields: voiceRole === 'manager' ? (hasContent(managerFields) ? managerFields : null) : (hasContent(managerFields) ? managerFields : null),
-        economist_fields: voiceRole === 'economist' ? (hasContent(economistFields) ? economistFields : null) : (hasContent(economistFields) ? economistFields : null),
-        educator_fields: voiceRole === 'educator' ? (hasContent(educatorFields) ? educatorFields : null) : (hasContent(educatorFields) ? educatorFields : null),
-        coach_fields: voiceRole === 'coach' ? (hasContent(coachFields) ? coachFields : null) : (hasContent(coachFields) ? coachFields : null),
-      };
-      return result;
-    };
+    // Build tone fields payload
+    const getToneFieldsData = () => ({
+      manager_fields: hasContent(managerFields) ? managerFields : null,
+      economist_fields: hasContent(economistFields) ? economistFields : null,
+      educator_fields: hasContent(educatorFields) ? educatorFields : null,
+      coach_fields: hasContent(coachFields) ? coachFields : null,
+    });
 
-    // Calculate published boolean from status (status is source of truth)
     const isPublished = targetStatus === 'published';
 
+    // Generate slug from title if empty
+    const finalSlug = slug.trim() || title
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .trim();
+
     const essayData = {
-      title,
-      slug,
-      section: sectionValue,
+      title: title.trim(),
+      slug: finalSlug,
+      section: resolvedSlug || sectionValue || '',
       phase: phase || null,
       voice_role: voiceRole,
       status: targetStatus,
-      published: isPublished, // Always sync with status
+      published: isPublished,
       author,
       date: date || null,
       read_time: readTime || null,
       snippet: snippet || null,
-      content: content || null,
+      content: contentString,
       ...getToneFieldsData(),
     };
 
@@ -356,69 +385,41 @@ export default function AdminContentEditor() {
         await createEssay.mutateAsync(essayData);
         toast({ title: 'Created', description: 'Essay created successfully.' });
       } else if (essayId) {
-        // Use the stored UUID for updates, not the slug from URL
         await updateEssay.mutateAsync({ id: essayId, data: essayData });
         toast({ title: 'Saved', description: 'Essay updated successfully.' });
       } else {
-        toast({
-          title: 'Error',
-          description: 'Essay ID not found. Cannot save.',
-          variant: 'destructive',
-        });
+        toast({ title: 'Error', description: 'Essay ID not found.', variant: 'destructive' });
         return;
       }
       setIsDirty(false);
+      setShowPublishErrors(false);
       navigate('/admin/content');
     } catch (error: unknown) {
-      // Show exact error message from Supabase/database for validation failures
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      toast({
-        title: 'Error',
-        description: errorMessage,
-        variant: 'destructive',
-      });
+      toast({ title: 'Error', description: errorMessage, variant: 'destructive' });
     }
   };
 
-  // Access denied for non-admins
+  // ── Access denied ──
   if (!authLoading && !isAdmin) {
     return (
-      <PageLayout
-        variant="dashboard"
-        role="manager"
-        breadcrumbs={[
-          { label: 'Home', path: '/' },
-          { label: 'Admin' },
-          { label: 'Content', path: '/admin/content' },
-          { label: isNew ? 'New' : 'Edit' },
-        ]}
-      >
+      <PageLayout variant="dashboard" role="manager" breadcrumbs={[{ label: 'Home', path: '/' }, { label: 'Admin' }, { label: 'Content', path: '/admin/content' }, { label: isNew ? 'New' : 'Edit' }]}>
         <SEO title="Admin Content Editor" description="Edit content" />
         <div className="container py-12">
-          <Card className="max-w-md mx-auto">
-            <CardContent className="py-12 text-center">
-              <XCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
-              <h2 className="text-xl font-semibold mb-2">Access Denied</h2>
-              <p className="text-muted-foreground">You must be an admin to access this page.</p>
-            </CardContent>
-          </Card>
+          <div className="max-w-md mx-auto py-12 text-center">
+            <XCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
+            <h2 className="text-xl font-semibold mb-2">Access Denied</h2>
+            <p className="text-muted-foreground">You must be an admin to access this page.</p>
+          </div>
         </div>
       </PageLayout>
     );
   }
 
+  // ── Loading existing essay ──
   if (!isNew && essayLoading) {
     return (
-      <PageLayout
-        variant="dashboard"
-        role="manager"
-        breadcrumbs={[
-          { label: 'Home', path: '/' },
-          { label: 'Admin' },
-          { label: 'Content', path: '/admin/content' },
-          { label: 'Loading...' },
-        ]}
-      >
+      <PageLayout variant="dashboard" role="manager" breadcrumbs={[{ label: 'Home', path: '/' }, { label: 'Admin' }, { label: 'Content', path: '/admin/content' }, { label: 'Loading...' }]}>
         <SEO title="Loading..." description="Loading content editor" />
         <div className="container py-8">
           <LoadingState />
@@ -429,16 +430,7 @@ export default function AdminContentEditor() {
 
   if (!isNew && essayError) {
     return (
-      <PageLayout
-        variant="dashboard"
-        role="manager"
-        breadcrumbs={[
-          { label: 'Home', path: '/' },
-          { label: 'Admin' },
-          { label: 'Content', path: '/admin/content' },
-          { label: 'Error' },
-        ]}
-      >
+      <PageLayout variant="dashboard" role="manager" breadcrumbs={[{ label: 'Home', path: '/' }, { label: 'Admin' }, { label: 'Content', path: '/admin/content' }, { label: 'Error' }]}>
         <SEO title="Error" description="Error loading content" />
         <div className="container py-8">
           <ErrorState onRetry={() => void refetchEssay()} />
@@ -447,8 +439,13 @@ export default function AdminContentEditor() {
     );
   }
 
-  const showKeyPoints = selectedTemplate === 'essay' && isNew;
-  const showSteps = selectedTemplate === 'tutorial' && isNew;
+  // Compute initial content for the editor
+  const editorInitialContent = (() => {
+    if (templateHtml) return templateHtml;
+    if (contentJson) return contentJson;
+    if (!isNew && essay?.content) return essay.content;
+    return undefined;
+  })();
 
   return (
     <PageLayout
@@ -463,47 +460,57 @@ export default function AdminContentEditor() {
     >
       <SEO
         title={isNew ? 'New Essay' : `Edit: ${title}`}
-        description="Content editor for essays"
+        description="Content editor"
       />
 
-      <div className="container py-8 max-w-4xl">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
+      <div className="container py-4 max-w-4xl">
+        {/* ── Header bar ── */}
+        <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
+          <div className="flex items-center gap-3">
             <Button variant="ghost" size="icon" onClick={() => navigate('/admin/content')}>
               <ArrowLeft className="h-5 w-5" />
             </Button>
-            <div>
-              <h1 className="text-2xl font-display font-bold">
-                {isNew ? 'Create New Essay' : 'Edit Essay'}
-              </h1>
-              <p className="text-muted-foreground text-sm">
-                {isNew ? 'Fill in the required fields to create a new essay.' : `Editing: ${slug}`}
-              </p>
+
+            {/* Section selector — always visible, never blocking */}
+            <div className="min-w-[160px]">
+              {sectionsLoading ? (
+                <div className="h-9 rounded-md bg-muted animate-pulse w-40" />
+              ) : (
+                <Select value={sectionValue} onValueChange={(v) => setSection(v.trim())}>
+                  <SelectTrigger className="h-9 text-sm" id="section-selector">
+                    <SelectValue placeholder="Section (optional)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {sections?.map((s) => (
+                      <SelectItem key={s.id} value={s.slug}>
+                        {s.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
             </div>
           </div>
-          <div className="flex items-center gap-4">
+
+          <div className="flex items-center gap-3">
             {isDirty && (
               <span className="text-sm text-amber-600 flex items-center gap-1">
                 <span className="h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
                 Unsaved
               </span>
             )}
-            <ContentHealthIndicator
-              content={{ snippet, content }}
-              fullText={`${snippet || ''} ${content || ''}`}
-              role={voiceRole}
-            />
-            <Button 
+            <Button
               variant="outline"
-              onClick={() => handleSave('draft')} 
+              size="sm"
+              onClick={() => handleSave('draft')}
               disabled={updateEssay.isPending || createEssay.isPending}
             >
               Save Draft
             </Button>
             <Button
-              onClick={() => handleSave('published')} 
-              disabled={updateEssay.isPending || createEssay.isPending || !canPublish}
+              size="sm"
+              onClick={() => handleSave('published')}
+              disabled={updateEssay.isPending || createEssay.isPending}
             >
               <Save className="h-4 w-4 mr-2" />
               Publish
@@ -511,495 +518,117 @@ export default function AdminContentEditor() {
           </div>
         </div>
 
-        {/* Tone Validation Warning */}
-        {!toneValidation.valid && voiceRole !== 'hybrid' && (
-          <Alert variant="destructive" className="mb-6">
+        {/* ── Publish validation errors (shown ONLY after clicking Publish) ── */}
+        {showPublishErrors && publishErrors.length > 0 && (
+          <Alert variant="destructive" className="mb-4">
             <AlertTriangle className="h-4 w-4" />
             <AlertTitle>Cannot Publish</AlertTitle>
             <AlertDescription>
-              The following tone fields are required for {voiceRole} content: {toneValidation.missing.join(', ')}
-            </AlertDescription>
-          </Alert>
-        )}
-
-        {/* Figure Validation Errors */}
-        {usesFigureEditor && figureValidation.errors.length > 0 && (
-          <Alert variant="destructive" className="mb-6">
-            <ImageIcon className="h-4 w-4" />
-            <AlertTitle>Figure Errors - Cannot Publish</AlertTitle>
-            <AlertDescription>
               <ul className="list-disc list-inside mt-1 space-y-1">
-                {figureValidation.errors.map((error, i) => (
-                  <li key={i}>{error.message}</li>
-                ))}
-              </ul>
-            </AlertDescription>
-          </Alert>
-        )}
-
-        {/* Figure Warnings */}
-        {usesFigureEditor && figureValidation.warnings.length > 0 && (
-          <Alert className="mb-6 border-amber-500/50 bg-amber-500/10">
-            <AlertTriangle className="h-4 w-4 text-amber-600" />
-            <AlertTitle className="text-amber-600">Figure Warnings</AlertTitle>
-            <AlertDescription className="text-muted-foreground">
-              <ul className="list-disc list-inside mt-1 space-y-1">
-                {figureValidation.warnings.map((warning, i) => (
-                  <li key={i}>{warning.message}</li>
-                ))}
-              </ul>
-            </AlertDescription>
-          </Alert>
-        )}
-
-        {canPublish && voiceRole !== 'hybrid' && (
-          <Alert className="mb-6 border-accent/50 bg-accent/10">
-            <CheckCircle className="h-4 w-4 text-accent-foreground" />
-            <AlertTitle className="text-accent-foreground">Ready to Publish</AlertTitle>
-            <AlertDescription className="text-muted-foreground">
-              All required tone fields are complete.
-            </AlertDescription>
-          </Alert>
-        )}
-
-        <div className="space-y-6">
-          {/* Template Selector - Only for new essays */}
-          {isNew && (
-            <TemplateSelector
-              selectedTemplate={selectedTemplate}
-              onTemplateSelect={handleTemplateSelect}
-            />
-          )}
-
-          {/* Basic Info */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Basic Information</CardTitle>
-              <CardDescription>Core metadata for the essay.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="title">Title *</Label>
-                  <Input
-                    id="title"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    placeholder="Essay title"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="slug">Slug *</Label>
-                  <Input
-                    id="slug"
-                    value={slug}
-                    onChange={(e) => setSlug(e.target.value)}
-                    placeholder="url-friendly-slug"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="section">Section *</Label>
-                  <Select value={sectionValue} onValueChange={(v) => setSection(v.trim())}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select section" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {sections?.map((s) => (
-                        <SelectItem key={s.id} value={s.slug}>
-                          {s.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="phase">Phase</Label>
-                  <Input
-                    id="phase"
-                    value={phase}
-                    onChange={(e) => setPhase(e.target.value)}
-                    placeholder="e.g., now, transition"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="voiceRole">Voice Role</Label>
-                  <Select value={voiceRole} onValueChange={(v) => setVoiceRole(v as VoiceRole)}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="manager">Manager</SelectItem>
-                      <SelectItem value="economist">Economist</SelectItem>
-                      <SelectItem value="educator">Educator</SelectItem>
-                      <SelectItem value="coach">Coach</SelectItem>
-                      <SelectItem value="hybrid">Hybrid</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="status">Status</Label>
-                  <Select value={status} onValueChange={(v) => setStatus(v as ContentStatus)}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="draft">Draft</SelectItem>
-                      <SelectItem value="tone_pending">Tone Pending</SelectItem>
-                      <SelectItem value="published">Published</SelectItem>
-                      <SelectItem value="archived">Archived</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="author">Author</Label>
-                  <Input
-                    id="author"
-                    value={author}
-                    onChange={(e) => setAuthor(e.target.value)}
-                    placeholder="Author name"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="date">Date</Label>
-                  <Input
-                    id="date"
-                    value={date}
-                    onChange={(e) => setDate(e.target.value)}
-                    placeholder="e.g., January 2025"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="readTime">Read Time</Label>
-                  <Input
-                    id="readTime"
-                    value={readTime}
-                    onChange={(e) => setReadTime(e.target.value)}
-                    placeholder="e.g., 5 min read"
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Dynamic Key Points - Only for Essay template */}
-          {showKeyPoints && (
-            <DynamicListEditor
-              title="Key Points"
-              description="Add unlimited key points for your essay. These will be inserted into the content."
-              items={keyPoints}
-              onItemsChange={setKeyPoints}
-              itemLabel="Point"
-              placeholder="Enter a key point..."
-            />
-          )}
-
-          {/* Dynamic Steps - Only for Tutorial template */}
-          {showSteps && (
-            <DynamicListEditor
-              title="Steps"
-              description="Add unlimited steps for your tutorial. These will be inserted into the content."
-              items={steps}
-              onItemsChange={setSteps}
-              itemLabel="Step"
-              placeholder="Enter a step..."
-            />
-          )}
-
-          {/* Content */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <CardTitle>Content</CardTitle>
-                  <CardDescription>
-                    The main content of the essay.
-                    {resolvedSlug ? (
-                      figuresEnabled ? (
-                        <span className="text-primary ml-2">
-                          Figures enabled — use the toolbar&apos;s Insert Figure button to add images.
-                        </span>
-                      ) : (
-                        <span className="text-muted-foreground ml-2">
-                          Figures disabled for this section.
-                        </span>
-                      )
-                    ) : null}
-                    {templateApplied && selectedTemplate !== 'blank' && resolvedSlug && !figuresEnabled && (
-                      <span className="text-primary ml-2">
-                        (Pre-filled from {essayTemplates[selectedTemplate].name} template)
-                      </span>
-                    )}
-                  </CardDescription>
-                </div>
-
-                {resolvedSlug && !figuresEnabled && (
-                  <div className="flex items-center gap-2">
-                    {/* Editor Mode Toggle - only for non-figure sections */}
-                    <div className="flex items-center border border-border rounded-md overflow-hidden">
-                      <Button
-                        variant={editorMode === 'rich' ? 'secondary' : 'ghost'}
-                        size="sm"
-                        onClick={() => setEditorMode('rich')}
-                        className="rounded-none border-0 gap-1"
-                      >
-                        <Edit3 className="h-3 w-3" />
-                        Rich
-                      </Button>
-                      <Button
-                        variant={editorMode === 'markdown' ? 'secondary' : 'ghost'}
-                        size="sm"
-                        onClick={() => setEditorMode('markdown')}
-                        className="rounded-none border-0 gap-1"
-                      >
-                        Markdown
-                      </Button>
-                    </div>
-                    <Button
-                      variant={showPreview ? 'secondary' : 'outline'}
-                      size="sm"
-                      onClick={() => setShowPreview(!showPreview)}
-                      className="gap-1"
-                    >
-                      <Eye className="h-3 w-3" />
-                      Preview
-                    </Button>
-                  </div>
-                )}
-              </div>
-            </CardHeader>
-
-            <CardContent className="space-y-4">
-              {/* Mandatory section selector (prominent, above editor) */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
-                <div className="space-y-2">
-                  <Label htmlFor="section-editor">Section *</Label>
-                  {sectionsLoading ? (
-                    <div className="h-10 rounded-md bg-muted animate-pulse" />
-                  ) : (
-                    <Select value={sectionValue} onValueChange={(v) => setSection(v.trim())}>
-                      <SelectTrigger id="section-editor">
-                        <SelectValue placeholder="Select section" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {sections?.map((s) => (
-                          <SelectItem key={s.id} value={s.slug}>
-                            {s.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                </div>
-
-                <div className="flex items-center gap-2 md:justify-end">
-                  <Badge
-                    variant={
-                      sectionValue && !resolvedSlug && (sectionsLoading || sectionsFetching)
-                        ? 'secondary'
-                        : figuresEnabled
-                          ? 'outline'
-                          : 'secondary'
-                    }
-                    className="w-fit text-xs font-normal"
+                {publishErrors.map((err, i) => (
+                  <li
+                    key={i}
+                    className="cursor-pointer hover:underline"
+                    onClick={() => {
+                      if (err.scrollTarget) {
+                        const el = document.querySelector(err.scrollTarget);
+                        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      }
+                    }}
                   >
-                    <ImageIcon className="h-3 w-3 mr-1" />
-                    {sectionValue && !resolvedSlug && (sectionsLoading || sectionsFetching)
-                      ? 'Figures pending (resolving section)'
-                      : figuresEnabled
-                        ? 'Figures enabled'
-                        : 'Figures disabled for this section'}
-                  </Badge>
-                  {sectionValue && !resolvedSlug && (sectionsLoading || sectionsFetching) && (
-                    <Badge variant="secondary" className="w-fit text-xs font-normal">
-                      Resolving section…
-                    </Badge>
-                  )}
-                </div>
-              </div>
+                    {err.message}
+                  </li>
+                ))}
+              </ul>
+            </AlertDescription>
+          </Alert>
+        )}
 
-              {/* Admin-only debug line (sanitized; never shows raw tokens) */}
-              {isAdmin && (
-                <AdminEditorDebugLine
-                  editorComponentName={
-                    resolvedSlug
-                      ? usesFigureEditor
-                        ? 'EssayEditor'
-                        : editorMode === 'rich'
-                          ? 'RichTextEditor'
-                          : 'MarkdownTextarea'
-                      : 'None (section not selected)'
-                  }
-                  pathname={location.pathname}
-                  search={location.search}
-                  sectionValue={sectionValue}
-                  resolvedSlug={resolvedSlug}
-                  figuresEnabled={figuresEnabled}
-                />
-              )}
+        {showPublishErrors && publishWarnings.length > 0 && (
+          <Alert className="mb-4 border-amber-500/50 bg-amber-500/10">
+            <AlertTriangle className="h-4 w-4 text-amber-600" />
+            <AlertTitle className="text-amber-600">Warnings</AlertTitle>
+            <AlertDescription className="text-muted-foreground">
+              <ul className="list-disc list-inside mt-1 space-y-1">
+                {publishWarnings.map((warn, i) => (
+                  <li key={i}>{warn.message}</li>
+                ))}
+              </ul>
+            </AlertDescription>
+          </Alert>
+        )}
 
-              {/* Gate body editor until section is chosen/resolved */}
-              {isNew && !sectionValue ? (
-                <div className="rounded-lg border-2 border-dashed border-border bg-muted/30 p-12 text-center">
-                  <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-                    <Edit3 className="h-6 w-6 text-muted-foreground" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-foreground mb-2">
-                    Select a section to start writing.
-                  </h3>
-                  <p className="text-sm text-muted-foreground max-w-sm mx-auto">
-                    Choose a section above. The editor toolbar and figure capabilities will update immediately.
-                  </p>
-                </div>
-               ) : sectionValue && !resolvedSlug ? (
-                 sectionsLoading || sectionsFetching ? (
-                   <div className="rounded-lg border border-border bg-muted/20 p-6">
-                     <div className="text-sm text-muted-foreground mb-4">Resolving section…</div>
-                     <LoadingState />
-                   </div>
-                 ) : (
-                   <Alert variant="destructive">
-                     <AlertTriangle className="h-4 w-4" />
-                     <AlertTitle>Section not resolved</AlertTitle>
-                     <AlertDescription>
-                       The selected section value is invalid. Please choose a section from the selector above.
-                     </AlertDescription>
-                   </Alert>
-                 )
-               ) : resolvedSlug ? (
-                <>
-                  <div className="space-y-2">
-                    <Label htmlFor="snippet">Snippet (Preview Text)</Label>
-                    <Textarea
-                      id="snippet"
-                      value={snippet}
-                      onChange={(e) => setSnippet(e.target.value)}
-                      placeholder="A brief preview of the content..."
-                      rows={2}
-                    />
-                  </div>
+        {/* ── Title (large, writer-first) ── */}
+        <input
+          id="editor-title"
+          type="text"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="Title"
+          autoFocus={isNew}
+          className="w-full text-3xl md:text-4xl font-display font-bold bg-transparent border-0 outline-none placeholder:text-muted-foreground/40 mb-4 px-0"
+        />
 
-                  <div className="space-y-2">
-                    <Label>Full Content</Label>
+        {/* ── Editor (occupies 70%+ of viewport) ── */}
+        <UnifiedEditor
+          key={templateHtml ? `tpl-${selectedTemplate}` : `essay-${essayId || 'new'}`}
+          initialContent={editorInitialContent}
+          onChange={handleContentChange}
+          onImageUpload={handleImageUpload}
+          placeholder="Start writing..."
+          autoFocus={!isNew}
+          minHeight="60vh"
+        />
 
-                    {/* Figure-enabled sections use EssayEditor with FigureBlock support */}
-                    {usesFigureEditor ? (
-                      <EssayEditor
-                        key={`figure-${resolvedSlug}`}
-                        content={content}
-                        onChange={(html) => {
-                          setContent(html);
-                          if (templateApplied) setTemplateApplied(false);
-                        }}
-                        section={resolvedSlug as 'next-big-thing' | 'green-transition'}
-                        placeholder="Start writing your content... Use the toolbar to insert figures."
-                        minHeight="500px"
-                      />
-                    ) : showPreview ? (
-                      <ResizablePanelGroup
-                        direction="horizontal"
-                        className="min-h-[500px] rounded-lg border border-border"
-                      >
-                        <ResizablePanel defaultSize={55} minSize={35}>
-                          <div className="h-full">
-                            {editorMode === 'rich' ? (
-                              <RichTextEditor
-                                content={content.startsWith('<') ? content : markdownToHtml(content)}
-                                onChange={(html) => {
-                                  setContent(html);
-                                  if (templateApplied) setTemplateApplied(false);
-                                }}
-                                placeholder="Start writing your content..."
-                                minHeight="500px"
-                                className="border-0 rounded-none"
-                              />
-                            ) : (
-                              <Textarea
-                                value={content.startsWith('<') ? htmlToMarkdown(content) : content}
-                                onChange={(e) => {
-                                  setContent(e.target.value);
-                                  if (templateApplied) setTemplateApplied(false);
-                                }}
-                                placeholder="Write in markdown..."
-                                className="h-full min-h-[500px] font-mono text-sm resize-none border-0 rounded-none focus-visible:ring-0"
-                              />
-                            )}
-                          </div>
-                        </ResizablePanel>
-
-                        <ResizableHandle withHandle />
-
-                        <ResizablePanel defaultSize={45} minSize={30}>
-                          <div className="h-full overflow-y-auto p-6 bg-muted/30">
-                            <div className="text-xs uppercase tracking-wide text-muted-foreground mb-4 font-medium">
-                              Live Preview
-                            </div>
-                            <ContentPreview
-                              title={title}
-                              snippet={snippet}
-                              content={content.startsWith('<') ? content : markdownToHtml(content)}
-                              author={author}
-                              date={date}
-                              readTime={readTime}
-                            />
-                          </div>
-                        </ResizablePanel>
-                      </ResizablePanelGroup>
-                    ) : (
-                      <div className="min-h-[500px]">
-                        {editorMode === 'rich' ? (
-                          <RichTextEditor
-                            content={content.startsWith('<') ? content : markdownToHtml(content)}
-                            onChange={(html) => {
-                              setContent(html);
-                              if (templateApplied) setTemplateApplied(false);
-                            }}
-                            placeholder="Start writing your content..."
-                            minHeight="500px"
-                          />
-                        ) : (
-                          <Textarea
-                            value={content.startsWith('<') ? htmlToMarkdown(content) : content}
-                            onChange={(e) => {
-                              setContent(e.target.value);
-                              if (templateApplied) setTemplateApplied(false);
-                            }}
-                            placeholder="Write in markdown..."
-                            className="min-h-[500px] font-mono text-sm"
-                          />
-                        )}
-                      </div>
-                    )}
-
-                    {/* Figure count indicator for figure-enabled sections */}
-                    {usesFigureEditor && figureValidation.figures.length > 0 && (
-                      <p className="text-xs text-muted-foreground">
-                        {figureValidation.figures.length} figure{figureValidation.figures.length !== 1 ? 's' : ''} in content
-                      </p>
-                    )}
-                  </div>
-                </>
-              ) : null}
-            </CardContent>
-          </Card>
-
-          {/* Tone-Specific Fields */}
-          <ToneFieldsEditor
-            role={voiceRole}
-            managerFields={managerFields}
-            economistFields={economistFields}
-            educatorFields={educatorFields}
-            coachFields={coachFields}
-            onManagerFieldsChange={setManagerFields}
-            onEconomistFieldsChange={setEconomistFields}
-            onEducatorFieldsChange={setEducatorFields}
-            onCoachFieldsChange={setCoachFields}
+        {/* ── Post Settings (collapsed by default) ── */}
+        <div className="mt-6 space-y-4">
+          <PostSettingsPanel
+            sections={sections}
+            sectionsLoading={sectionsLoading}
+            sectionValue={sectionValue}
+            onSectionChange={(v) => setSection(v)}
+            phase={phase}
+            onPhaseChange={setPhase}
+            voiceRole={voiceRole}
+            onVoiceRoleChange={setVoiceRole}
+            status={status}
+            onStatusChange={setStatus}
+            slug={slug}
+            onSlugChange={setSlug}
+            author={author}
+            onAuthorChange={setAuthor}
+            date={date}
+            onDateChange={setDate}
+            readTime={readTime}
+            onReadTimeChange={setReadTime}
+            snippet={snippet}
+            onSnippetChange={setSnippet}
+            isNew={isNew}
+            selectedTemplate={selectedTemplate}
+            onTemplateSelect={handleTemplateSelect}
           />
+
+          {/* ── Tone Fields (collapsed by default) ── */}
+          <Collapsible open={toneOpen} onOpenChange={setToneOpen} id="tone-fields">
+            <CollapsibleTrigger className="flex items-center gap-2 w-full px-4 py-3 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg border border-border transition-colors">
+              <Mic className="h-4 w-4" />
+              <span className="flex-1 text-left">Voice & Tone Fields</span>
+              {toneOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+            </CollapsibleTrigger>
+            <CollapsibleContent className="mt-2">
+              <ToneFieldsEditor
+                role={voiceRole}
+                managerFields={managerFields}
+                economistFields={economistFields}
+                educatorFields={educatorFields}
+                coachFields={coachFields}
+                onManagerFieldsChange={setManagerFields}
+                onEconomistFieldsChange={setEconomistFields}
+                onEducatorFieldsChange={setEducatorFields}
+                onCoachFieldsChange={setCoachFields}
+              />
+            </CollapsibleContent>
+          </Collapsible>
         </div>
       </div>
     </PageLayout>

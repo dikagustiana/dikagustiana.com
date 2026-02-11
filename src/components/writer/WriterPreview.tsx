@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { User, Calendar, Clock, Tag } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { contentToHtml } from '@/lib/tiptap/serialize';
 
 interface WriterPreviewProps {
   title: string;
@@ -153,8 +154,8 @@ export function WriterPreview({
           "prose-li:text-muted-foreground",
           "prose-a:text-primary prose-a:underline prose-a:underline-offset-4 prose-a:hover:text-primary/80",
         )}
-        dangerouslySetInnerHTML={{ 
-          __html: content || '<p class="text-muted-foreground italic">Start writing to see your content here...</p>' 
+        dangerouslySetInnerHTML={{
+          __html: contentToHtml(content) || '<p class="text-muted-foreground italic">Start writing to see your content here...</p>'
         }}
       />
 
