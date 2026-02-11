@@ -223,7 +223,7 @@ export default function AdminContent() {
     const url = getPublicUrl(item.section, item.slug, item.phase || undefined, item.fsli_slug || undefined, item.topic || undefined);
     try {
       await navigator.clipboard.writeText(url);
-      setCopiedId(slug);
+      setCopiedId(item.slug);
       setTimeout(() => setCopiedId(null), 2000);
       toast({ title: 'Copied', description: 'Public URL copied to clipboard.' });
     } catch {
