@@ -237,6 +237,7 @@ export type Database = {
           finance_order: number | null
           finance_section: string | null
           fsli_slug: string | null
+          fundamental_id: string | null
           id: string
           learning_outcomes: string[] | null
           manager_fields: Json | null
@@ -268,6 +269,7 @@ export type Database = {
           finance_order?: number | null
           finance_section?: string | null
           fsli_slug?: string | null
+          fundamental_id?: string | null
           id?: string
           learning_outcomes?: string[] | null
           manager_fields?: Json | null
@@ -299,6 +301,7 @@ export type Database = {
           finance_order?: number | null
           finance_section?: string | null
           fsli_slug?: string | null
+          fundamental_id?: string | null
           id?: string
           learning_outcomes?: string[] | null
           manager_fields?: Json | null
@@ -324,6 +327,13 @@ export type Database = {
             columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "essays_fundamental_id_fkey"
+            columns: ["fundamental_id"]
+            isOneToOne: false
+            referencedRelation: "finance_fundamentals"
             referencedColumns: ["id"]
           },
         ]
@@ -469,29 +479,35 @@ export type Database = {
       }
       finance_fundamentals: {
         Row: {
-          core_content: string | null
           created_at: string
+          framing_content: string | null
           id: string
+          number: number | null
           slug: string
           sort_order: number
+          thesis: string | null
           title: string
           updated_at: string
         }
         Insert: {
-          core_content?: string | null
           created_at?: string
+          framing_content?: string | null
           id?: string
+          number?: number | null
           slug: string
           sort_order?: number
+          thesis?: string | null
           title: string
           updated_at?: string
         }
         Update: {
-          core_content?: string | null
           created_at?: string
+          framing_content?: string | null
           id?: string
+          number?: number | null
           slug?: string
           sort_order?: number
+          thesis?: string | null
           title?: string
           updated_at?: string
         }
