@@ -1,5 +1,6 @@
 import { useParams, Navigate, Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { SEO } from '@/components/SEO';
@@ -8,13 +9,16 @@ import {
   ArticleLayout,
   ArticleHeader,
   ArticleBody,
+  ArticleToc,
   KeyTakeaways,
   References,
   AuthorBox,
   RelatedEssays,
+  EssayNavigation,
   useFontSize,
 } from '@/components/editorial';
 import { ArrowLeft } from 'lucide-react';
+import { contentToHtml } from '@/lib/tiptap/serialize';
 
 interface Essay {
   id: string;
@@ -31,7 +35,6 @@ interface Essay {
   published: boolean | null;
   created_at: string;
   updated_at: string;
-  // Extended fields for Aeon-style reading
   economist_fields: {
     deck?: string;
     key_takeaways?: string[];
@@ -39,6 +42,11 @@ interface Essay {
     hero_caption?: string;
     author_bio?: string;
   } | null;
+}
+
+interface EssayListItem {
+  slug: string;
+  title: string;
 }
 
 const categoryLabels: Record<string, string> = {
@@ -75,7 +83,6 @@ export default function NextBigThingEssayPage() {
       if (error) throw error;
 
       if (data) {
-        // Check access: non-admins can only see published essays
         const isPublished = data.status === 'published';
         if (!isPublished && !isAdmin) {
           setNotFound(true);
@@ -96,6 +103,28 @@ export default function NextBigThingEssayPage() {
     }
   };
 
+  // Fetch sibling essays for prev/next
+  const { data: siblings } = useQuery({
+    queryKey: ['nbt-siblings', essay?.phase],
+    queryFn: async () => {
+      let query = supabase
+        .from('essays')
+        .select('slug, title')
+        .eq('section', 'next-big-thing')
+        .eq('status', 'published')
+        .order('created_at', { ascending: false });
+
+      if (essay?.phase) {
+        query = query.eq('phase', essay.phase);
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+      return data as EssayListItem[];
+    },
+    enabled: !!essay,
+  });
+
   // Redirect non-admins accessing drafts
   if (notFound || (!loading && !essay)) {
     return <Navigate to="/the-next-big-thing" replace />;
@@ -111,6 +140,15 @@ export default function NextBigThingEssayPage() {
 
   if (!essay) return null;
 
+  // Compute prev/next
+  const currentIndex = siblings?.findIndex((e) => e.slug === slug) ?? -1;
+  const previous = currentIndex > 0 ? siblings![currentIndex - 1] : null;
+  const next = siblings && currentIndex >= 0 && currentIndex < siblings.length - 1
+    ? siblings[currentIndex + 1]
+    : null;
+
+  const getEssayUrl = (essaySlug: string) => `/the-next-big-thing/${essaySlug}`;
+
   // Extract extended fields
   const economistFields = essay.economist_fields || {};
   const deck = economistFields.deck || essay.snippet;
@@ -119,6 +157,14 @@ export default function NextBigThingEssayPage() {
   const heroCaption = economistFields.hero_caption;
   const authorBio = economistFields.author_bio;
   const topic = essay.phase ? categoryLabels[essay.phase] || essay.phase : undefined;
+
+  // Get HTML content for TOC
+  const htmlContent = contentToHtml(essay.content || '');
+
+  // Build back link with theme context
+  const backPath = essay.phase
+    ? `/the-next-big-thing?theme=${essay.phase}`
+    : '/the-next-big-thing';
 
   return (
     <ArticleLayout>
@@ -131,7 +177,7 @@ export default function NextBigThingEssayPage() {
 
       {/* Back link */}
       <Link
-        to="/the-next-big-thing"
+        to={backPath}
         className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-8"
       >
         <ArrowLeft className="h-4 w-4" />
@@ -152,23 +198,37 @@ export default function NextBigThingEssayPage() {
         heroCaption={heroCaption}
       />
 
+      {/* Table of Contents */}
+      <ArticleToc content={htmlContent} />
+
       {/* Article Body */}
-      <ArticleBody 
-        content={essay.content || ''} 
+      <ArticleBody
+        content={essay.content || ''}
         fontSizeClass={fontSizeClass}
       />
 
       {/* End Matter */}
       <KeyTakeaways takeaways={keyTakeaways} />
-      
+
       <References references={references} />
-      
+
       {essay.author && (
-        <AuthorBox 
-          name={essay.author} 
+        <AuthorBox
+          name={essay.author}
           bio={authorBio}
         />
       )}
+
+      {/* Prev/Next + Back */}
+      <EssayNavigation
+        backLink={{
+          label: 'Back to The Next Big Thing',
+          path: backPath,
+        }}
+        previous={previous}
+        next={next}
+        getEssayUrl={getEssayUrl}
+      />
 
       {/* Related Essays */}
       <RelatedEssays

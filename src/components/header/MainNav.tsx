@@ -44,13 +44,11 @@ export function MainNav() {
   const location = useLocation();
   const { isAdmin } = useAuth();
 
-  const isActive = (path: string) => location.pathname === path;
-
   return (
-    <nav className="hidden lg:flex items-center gap-1">
+    <nav className="hidden lg:flex items-center gap-1" aria-label="Main navigation">
       <Link
         to="/"
-        className={cn("nav-link", isActive('/') && "nav-link-active")}
+        className={cn('nav-link', location.pathname === '/' && 'nav-link-active')}
       >
         Home
       </Link>
@@ -92,16 +90,15 @@ export function MainNav() {
         basePath="/the-next-big-thing"
       />
 
-      <NavDropdown
-        label="Learning"
-        items={learningItems}
-        width="w-48"
-      />
+      <NavDropdown label="Learning" items={learningItems} width="w-48" />
 
       {isAdmin && (
         <Link
           to="/admin/dashboard"
-          className={cn("nav-link text-accent", location.pathname.startsWith('/admin') && "nav-link-active")}
+          className={cn(
+            'nav-link text-accent',
+            location.pathname.startsWith('/admin') && 'nav-link-active'
+          )}
         >
           Writer's Studio
         </Link>

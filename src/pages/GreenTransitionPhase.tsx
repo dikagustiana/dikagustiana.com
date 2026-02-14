@@ -3,34 +3,38 @@ import { PageLayout } from '@/components/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
-import { Plus, ArrowLeft } from 'lucide-react';
-import { EditorialFeed } from '@/components/editorial';
+import { Plus } from 'lucide-react';
 
 // Map URL slugs to database phase values
 const phaseMapping: Record<string, string> = {
   'now': 'where-we-are-now',
   'gaps': 'challenges-ahead',
   'future': 'pathways-forward',
-  // Also support direct names
   'where-we-are-now': 'where-we-are-now',
   'challenges-ahead': 'challenges-ahead',
   'pathways-forward': 'pathways-forward',
 };
 
 const phaseDetails: Record<string, { title: string; coreQuestion: string }> = {
-  'where-we-are-now': { 
-    title: 'Where We Are Now', 
+  'where-we-are-now': {
+    title: 'Where We Are Now',
     coreQuestion: 'What is the actual state of energy transition in Indonesia—not the press releases?',
   },
-  'challenges-ahead': { 
-    title: 'Challenges Ahead', 
+  'challenges-ahead': {
+    title: 'Challenges Ahead',
     coreQuestion: 'What structural barriers will block progress regardless of political will?',
   },
-  'pathways-forward': { 
-    title: 'Pathways Forward', 
+  'pathways-forward': {
+    title: 'Pathways Forward',
     coreQuestion: 'Which interventions create the highest leverage with limited resources?',
   },
 };
+
+const GREEN_TRANSITION_TABS = [
+  { label: 'Where We Are Now', path: '/green-transition/now' },
+  { label: 'Challenges Ahead', path: '/green-transition/gaps' },
+  { label: 'Pathways Forward', path: '/green-transition/future' },
+];
 
 export default function GreenTransitionPhase() {
   const { phase } = useParams<{ phase: string }>();
@@ -49,9 +53,6 @@ export default function GreenTransitionPhase() {
     return `/green-transition/${phase}/${essay.slug}`;
   };
 
-  // Filter essays by the mapped phase
-  const TOPICS = [{ id: dbPhase, label: details?.title || '' }];
-
   return (
     <PageLayout
       variant="content"
@@ -61,6 +62,10 @@ export default function GreenTransitionPhase() {
         { label: 'Green Transition', path: '/green-transition' },
         { label: details?.title || 'Phase' }
       ]}
+      subNav={{
+        tabs: GREEN_TRANSITION_TABS,
+        backLink: { label: 'Green Transition', path: '/green-transition' },
+      }}
     >
       <SEO
         title={`${details?.title || 'Essays'} - Green Transition`}
@@ -68,15 +73,6 @@ export default function GreenTransitionPhase() {
       />
 
       <div className="container max-w-4xl py-8">
-        {/* Back Link */}
-        <Link 
-          to="/green-transition" 
-          className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-8 transition-colors"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to Green Transition
-        </Link>
-
         {/* Header Section */}
         <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-8">
           <div>
@@ -97,7 +93,7 @@ export default function GreenTransitionPhase() {
         </div>
 
         {/* Editorial Feed - filtered by phase */}
-        <GreenTransitionPhaseFeed 
+        <GreenTransitionPhaseFeed
           phase={dbPhase}
           getEssayUrl={getEssayUrl}
         />
@@ -160,7 +156,7 @@ function GreenTransitionPhaseFeed({ phase, getEssayUrl }: GreenTransitionPhaseFe
 
   const filteredEssays = useMemo(() => {
     if (!essays) return [];
-    
+
     let result = essays;
 
     if (searchQuery) {
@@ -182,10 +178,10 @@ function GreenTransitionPhaseFeed({ phase, getEssayUrl }: GreenTransitionPhaseFe
   const formatDate = (dateStr: string) => {
     try {
       const date = new Date(dateStr);
-      return date.toLocaleDateString('en-US', { 
-        day: 'numeric', 
-        month: 'short', 
-        year: 'numeric' 
+      return date.toLocaleDateString('en-US', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
       });
     } catch {
       return dateStr;
@@ -246,7 +242,7 @@ function GreenTransitionPhaseFeed({ phase, getEssayUrl }: GreenTransitionPhaseFe
         <div className="divide-y divide-border">
           {filteredEssays.map((essay) => (
             <article key={essay.id} className="py-8 first:pt-0 last:pb-0">
-              <Link 
+              <Link
                 to={getEssayUrl(essay)}
                 className="group flex flex-col sm:flex-row gap-6"
               >

@@ -2,6 +2,7 @@ import { ReactNode } from 'react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { Breadcrumb, BreadcrumbItem } from '@/components/Breadcrumb';
+import { SectionSubNav, SubNavTab } from '@/components/SectionSubNav';
 import { SectionIntro } from '@/components/sections/SectionIntro';
 
 export type VoiceRole = 'manager' | 'economist' | 'educator' | 'coach' | 'hybrid';
@@ -13,6 +14,10 @@ interface PageLayoutProps {
   role?: VoiceRole;
   title?: string;
   breadcrumbs?: BreadcrumbItem[];
+  subNav?: {
+    tabs: SubNavTab[];
+    backLink?: { label: string; path: string };
+  };
   showManifesto?: boolean;
   manifesto?: string;
   className?: string;
@@ -24,6 +29,7 @@ export function PageLayout({
   role = 'hybrid',
   title,
   breadcrumbs,
+  subNav,
   showManifesto = false,
   manifesto,
   className = '',
@@ -44,13 +50,20 @@ export function PageLayout({
   return (
     <div className={`min-h-screen flex flex-col ${getVariantStyles()}`}>
       <Header />
-      
+
       {breadcrumbs && breadcrumbs.length > 0 && (
         <div className="bg-muted/30 border-b border-border py-3">
           <div className="container">
             <Breadcrumb items={breadcrumbs} />
           </div>
         </div>
+      )}
+
+      {subNav && (
+        <SectionSubNav
+          tabs={subNav.tabs}
+          backLink={subNav.backLink}
+        />
       )}
 
       {showManifesto && manifesto && (
@@ -60,7 +73,7 @@ export function PageLayout({
       <main className={`flex-1 ${className}`}>
         {children}
       </main>
-      
+
       <Footer />
     </div>
   );

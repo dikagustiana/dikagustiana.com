@@ -115,11 +115,11 @@
 
 @layer components {
   .nav-link {
-    @apply px-4 py-2 text-sm font-medium text-white/90 transition-colors hover:text-white rounded-full;
+    @apply px-3 py-2 text-sm font-medium text-white/80 transition-colors hover:text-white rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40;
   }
 
   .nav-link-active {
-    @apply text-white;
+    @apply text-white bg-white/10;
   }
 
   .hero-gradient {

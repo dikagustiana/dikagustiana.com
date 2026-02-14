@@ -3,6 +3,8 @@ export { LinkableHeading } from './LinkableHeading';
 export { FontSizeToggle, useFontSize } from './FontSizeToggle';
 export { ArticleHeader } from './ArticleHeader';
 export { ArticleBody } from './ArticleBody';
+export { ArticleToc } from './ArticleToc';
+export { EssayNavigation } from './EssayNavigation';
 export { KeyTakeaways } from './KeyTakeaways';
 export { References } from './References';
 export { AuthorBox } from './AuthorBox';
