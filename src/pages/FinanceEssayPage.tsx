@@ -1,3 +1,10 @@
+/**
+ * FinanceEssayPage — Renders finance essays using the canonical ArticleShell.
+ *
+ * Same reading experience as Next Big Thing and Green Transition essays.
+ * Route: /finance-101/essays/:slug
+ */
+
 import { useParams, Navigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
@@ -37,28 +44,18 @@ interface EssayListItem {
 }
 
 const phaseLabels: Record<string, string> = {
-  'where-we-are-now': 'Where We Are Now',
-  'challenges-ahead': 'Challenges Ahead',
-  'pathways-forward': 'Pathways Forward',
-  now: 'Where We Are Now',
-  gaps: 'Challenges Ahead',
-  future: 'Pathways Forward',
+  fundamentals: 'Fundamentals',
+  'strategic-finance': 'Strategic Finance',
+  'financial-planning': 'Financial Planning & Forecasting',
+  'financial-analytics': 'Financial Analytics',
 };
 
-const phaseMapping: Record<string, string> = {
-  now: 'where-we-are-now',
-  gaps: 'challenges-ahead',
-  future: 'pathways-forward',
-};
-
-export default function GreenTransitionEssayPage() {
-  const { phase, slug } = useParams<{ phase: string; slug: string }>();
+export default function FinanceEssayPage() {
+  const { slug } = useParams<{ slug: string }>();
   const { isAdmin } = useAuth();
   const [essay, setEssay] = useState<Essay | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
-
-  const dbPhase = phase ? phaseMapping[phase] || phase : '';
 
   useEffect(() => {
     if (slug) loadEssay();
@@ -72,7 +69,7 @@ export default function GreenTransitionEssayPage() {
         .from('essays')
         .select('*')
         .eq('slug', slug)
-        .eq('section', 'green-transition')
+        .eq('section', 'finance')
         .maybeSingle();
 
       if (error) throw error;
@@ -99,26 +96,28 @@ export default function GreenTransitionEssayPage() {
   };
 
   const { data: siblings } = useQuery({
-    queryKey: ['green-transition-siblings', dbPhase],
+    queryKey: ['finance-siblings', essay?.phase],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from('essays')
         .select('slug, title')
-        .eq('section', 'green-transition')
-        .eq('phase', dbPhase)
+        .eq('section', 'finance')
         .eq('status', 'published')
-        .order('created_at', { ascending: false });
+        .order('sort_order', { ascending: true });
 
+      if (essay?.phase) {
+        query = query.eq('phase', essay.phase);
+      }
+
+      const { data, error } = await query;
       if (error) throw error;
       return data as EssayListItem[];
     },
-    enabled: !!dbPhase,
+    enabled: !!essay,
   });
 
-  const phaseLabel = phase ? phaseLabels[phase] || phase : '';
-
   if (notFound || (!loading && !essay)) {
-    return <Navigate to={`/green-transition/${phase || ''}`} replace />;
+    return <Navigate to="/finance-101" replace />;
   }
 
   if (loading) {
@@ -138,21 +137,19 @@ export default function GreenTransitionEssayPage() {
       ? siblings[currentIndex + 1]
       : null;
 
-  const getEssayUrl = (essaySlug: string) => `/green-transition/${phase}/${essaySlug}`;
+  const getEssayUrl = (essaySlug: string) => `/finance-101/essays/${essaySlug}`;
 
   const economistFields = essay.economist_fields || {};
   const deck = economistFields.deck || essay.snippet;
+  const topic = essay.phase ? phaseLabels[essay.phase] || essay.phase : 'Finance';
   const htmlContent = contentToHtml(essay.content || '');
 
   return (
     <ArticleShell
       seoTitle={essay.title}
-      seoDescription={deck || 'Economic analysis of Indonesia green transition.'}
+      seoDescription={deck || 'Finance knowledge for decision-making.'}
       seoAuthor={essay.author || undefined}
-      backLink={{
-        label: `Back to ${phaseLabel || 'Green Transition'}`,
-        path: `/green-transition/${phase || ''}`,
-      }}
+      backLink={{ label: 'Back to Finance', path: '/finance-101' }}
       title={essay.title}
       deck={deck}
       author={essay.author}
@@ -160,7 +157,7 @@ export default function GreenTransitionEssayPage() {
       updatedAt={essay.updated_at}
       createdAt={essay.created_at}
       readTime={essay.read_time}
-      topic={phaseLabel}
+      topic={topic}
       heroImage={essay.thumbnail_url}
       heroCaption={economistFields.hero_caption}
       content={essay.content || ''}
@@ -172,7 +169,7 @@ export default function GreenTransitionEssayPage() {
       next={next}
       getEssayUrl={getEssayUrl}
       currentEssayId={essay.id}
-      section="green-transition"
+      section="finance"
     />
   );
 }

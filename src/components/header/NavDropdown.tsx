@@ -12,6 +12,7 @@ interface NavDropdownProps {
   label: string;
   items: NavDropdownItem[];
   width?: string;
+  /** When set, clicking the label navigates here. */
   basePath?: string;
 }
 
@@ -20,7 +21,7 @@ export function NavDropdown({ label, items, width = 'w-56', basePath }: NavDropd
   const location = useLocation();
   const containerRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
-  const triggerRef = useRef<HTMLButtonElement>(null);
+  const triggerRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<(HTMLAnchorElement | null)[]>([]);
 
   const isActive = basePath
@@ -32,7 +33,6 @@ export function NavDropdown({ label, items, width = 'w-56', basePath }: NavDropd
 
   const close = useCallback(() => {
     setIsOpen(false);
-    triggerRef.current?.focus();
   }, []);
 
   // Close on outside click
@@ -59,7 +59,7 @@ export function NavDropdown({ label, items, width = 'w-56', basePath }: NavDropd
     return () => document.removeEventListener('keydown', handleKey);
   }, [isOpen, close]);
 
-  // Focus first item when opening via keyboard
+  // Focus first item when menu opens via keyboard
   useEffect(() => {
     if (isOpen && itemRefs.current[0]) {
       itemRefs.current[0].focus();
@@ -107,24 +107,45 @@ export function NavDropdown({ label, items, width = 'w-56', basePath }: NavDropd
       onMouseLeave={() => setIsOpen(false)}
       onKeyDown={handleKeyDown}
     >
-      <button
+      {/* Split trigger: clickable label + dropdown chevron */}
+      <div
         ref={triggerRef}
-        onClick={() => setIsOpen((prev) => !prev)}
-        aria-expanded={isOpen}
-        aria-haspopup="true"
         className={cn(
-          'nav-link flex items-center gap-1',
+          'nav-link flex items-center gap-0.5',
           isActive && 'nav-link-active'
         )}
       >
-        {label}
-        <ChevronDown
-          className={cn(
-            'h-4 w-4 transition-transform duration-200',
-            isOpen && 'rotate-180'
-          )}
-        />
-      </button>
+        {basePath ? (
+          <Link
+            to={basePath}
+            className="hover:text-header-foreground transition-colors"
+            onClick={() => setIsOpen(false)}
+          >
+            {label}
+          </Link>
+        ) : (
+          <button
+            onClick={() => setIsOpen((prev) => !prev)}
+            className="hover:text-header-foreground transition-colors"
+          >
+            {label}
+          </button>
+        )}
+        <button
+          onClick={() => setIsOpen((prev) => !prev)}
+          aria-expanded={isOpen}
+          aria-haspopup="true"
+          aria-label={`${label} submenu`}
+          className="p-0.5 hover:text-header-foreground transition-colors"
+        >
+          <ChevronDown
+            className={cn(
+              'h-3.5 w-3.5 transition-transform duration-200',
+              isOpen && 'rotate-180'
+            )}
+          />
+        </button>
+      </div>
 
       {isOpen && (
         <div

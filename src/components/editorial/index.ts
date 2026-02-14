@@ -11,6 +11,8 @@ export { AuthorBox } from './AuthorBox';
 export { RelatedEssays } from './RelatedEssays';
 export { EditorialFeed } from './EditorialFeed';
 export { ArticleLayout } from './ArticleLayout';
+export { ArticleShell } from './ArticleShell';
+export type { ArticleShellProps } from './ArticleShell';
 // Legacy image block exports (deprecated - use FigureBlock instead)
 export { ImageBlock, parseImageBlock, serializeImageBlock } from './ImageBlock';
 export type { ImageBlockData } from './ImageBlock';
