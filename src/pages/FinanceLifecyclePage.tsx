@@ -3,40 +3,41 @@
  *
  * Noahpinion-inspired: headline-led listing, no full essay rendering.
  * Reused for strategic-finance, planning-forecasting, financial-analytics.
+ *
+ * Route: /finance/:section
+ *
+ * Section metadata (title, description) is DB-backed via finance_sections table.
+ * Essays filtered by finance_section field, ordered by finance_order then date.
  */
 
 import { Link, useParams, Navigate } from 'react-router-dom';
 import { PageLayout } from '@/components/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useFinanceSectionEssays } from '@/hooks/queries/useFinance';
+import { useFinanceSectionBySlug, useFinanceSectionEssays } from '@/hooks/queries/useFinance';
 import { format, parseISO } from 'date-fns';
 
-const sectionMeta: Record<string, { title: string; description: string; dbKey: string }> = {
-  'strategic-finance': {
-    title: 'Strategic Finance',
-    description: 'Where finance meets strategy. Capital allocation, investment decisions, and long-term value creation.',
-    dbKey: 'strategic',
-  },
-  'planning-forecasting': {
-    title: 'Planning & Forecasting',
-    description: 'Translating strategy into numbers. Assumptions, scenarios, and action triggers.',
-    dbKey: 'planning',
-  },
-  'financial-analytics': {
-    title: 'Financial Analytics',
-    description: 'Turning data into insight. Variance analysis, trend identification, and performance diagnosis.',
-    dbKey: 'analytics',
-  },
-};
+const VALID_SECTIONS = new Set(['strategic-finance', 'planning-forecasting', 'financial-analytics']);
 
 export default function FinanceLifecyclePage() {
   const { section } = useParams<{ section: string }>();
 
-  const meta = section ? sectionMeta[section] : null;
-  if (!meta) return <Navigate to="/finance" replace />;
+  // Redirect invalid sections back to finance landing
+  if (!section || !VALID_SECTIONS.has(section)) {
+    return <Navigate to="/finance" replace />;
+  }
 
-  const { data: essays, isLoading } = useFinanceSectionEssays(meta.dbKey);
+  return <LifecycleContent section={section} />;
+}
+
+function LifecycleContent({ section }: { section: string }) {
+  const { data: meta, isLoading: metaLoading } = useFinanceSectionBySlug(section);
+  const { data: essays, isLoading: essaysLoading } = useFinanceSectionEssays(section);
+
+  const isLoading = metaLoading || essaysLoading;
+
+  const title = meta?.title || section;
+  const description = meta?.description || '';
 
   return (
     <PageLayout
@@ -44,14 +45,25 @@ export default function FinanceLifecyclePage() {
       breadcrumbs={[
         { label: 'Home', path: '/' },
         { label: 'Finance', path: '/finance' },
-        { label: meta.title },
+        { label: title },
       ]}
     >
-      <SEO title={meta.title} description={meta.description} />
+      <SEO title={title} description={description} />
 
       <div className="py-8 container max-w-3xl">
-        <h1 className="text-3xl md:text-4xl font-display font-bold mb-3">{meta.title}</h1>
-        <p className="text-lg text-muted-foreground mb-10">{meta.description}</p>
+        {metaLoading ? (
+          <>
+            <Skeleton className="h-10 w-64 mb-3" />
+            <Skeleton className="h-5 w-full mb-10" />
+          </>
+        ) : (
+          <>
+            <h1 className="text-3xl md:text-4xl font-display font-bold mb-3">{title}</h1>
+            {description && (
+              <p className="text-lg text-muted-foreground mb-10">{description}</p>
+            )}
+          </>
+        )}
 
         {isLoading ? (
           <div className="space-y-8">

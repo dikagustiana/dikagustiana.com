@@ -8,6 +8,8 @@
  *   - Phase (section-aware dropdown), Voice Role, Status
  *   - FSLI picker (when section=accounting, phase=fsli)
  *   - Topic picker (when phase needs sub-topic)
+ *   - Finance Domain & Order (when section=finance)
+ *   - Fundamental picker (when finance_section=fundamentals)
  *   - Slug, Author, Date, Read Time
  *   - Snippet
  *   - Template selector (new essays only)
@@ -29,8 +31,9 @@ import { ChevronDown, ChevronRight, Settings2 } from 'lucide-react';
 import type { Section } from '@/hooks/queries/useSections';
 import type { VoiceRole, ContentStatus } from '@/lib/types/toneFields';
 import type { EssayTemplateType } from '@/lib/essayTemplates';
-import { SECTION_PHASE_CONFIG, PHASE_TOPIC_CONFIG } from '@/lib/admin/sectionPhaseConfig';
+import { SECTION_PHASE_CONFIG, PHASE_TOPIC_CONFIG, FINANCE_DOMAIN_OPTIONS } from '@/lib/admin/sectionPhaseConfig';
 import type { FsliPage } from '@/hooks/queries/useFsliPages';
+import type { FinanceFundamental } from '@/hooks/queries/useFinance';
 
 interface PostSettingsPanelProps {
   // Section
@@ -54,6 +57,13 @@ interface PostSettingsPanelProps {
   // Topic
   topic: string;
   onTopicChange: (value: string) => void;
+
+  // Finance-specific
+  financeSection: string;
+  onFinanceSectionChange: (value: string) => void;
+  financeOrder: string;
+  onFinanceOrderChange: (value: string) => void;
+  fundamentals: FinanceFundamental[] | undefined;
 
   // Voice role
   voiceRole: VoiceRole;
@@ -102,6 +112,11 @@ export function PostSettingsPanel({
   fsliPages,
   topic,
   onTopicChange,
+  financeSection,
+  onFinanceSectionChange,
+  financeOrder,
+  onFinanceOrderChange,
+  fundamentals,
   voiceRole,
   onVoiceRoleChange,
   status,
@@ -122,6 +137,9 @@ export function PostSettingsPanel({
 }: PostSettingsPanelProps) {
   const [isOpen, setIsOpen] = useState(false);
 
+  // Finance section active?
+  const isFinance = resolvedSection === 'finance';
+
   // Look up phase config for the current section
   const phaseConfig = useMemo(
     () => resolvedSection ? SECTION_PHASE_CONFIG[resolvedSection] : undefined,
@@ -136,6 +154,9 @@ export function PostSettingsPanel({
 
   // Show FSLI picker when section=accounting and phase=fsli
   const showFsliPicker = resolvedSection === 'accounting' && phase === 'fsli';
+
+  // Show fundamental topic picker when finance_section=fundamentals
+  const showFundamentalPicker = isFinance && financeSection === 'fundamentals';
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen} id="post-settings">
@@ -196,6 +217,60 @@ export function PostSettingsPanel({
           )}
         </div>
 
+        {/* Finance Domain & Order — shown when section=finance */}
+        {isFinance && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="settings-finance-section">Finance Domain</Label>
+              <Select value={financeSection} onValueChange={onFinanceSectionChange}>
+                <SelectTrigger id="settings-finance-section">
+                  <SelectValue placeholder="Select domain" />
+                </SelectTrigger>
+                <SelectContent>
+                  {FINANCE_DOMAIN_OPTIONS.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="settings-finance-order">Finance Order</Label>
+              <Input
+                id="settings-finance-order"
+                type="number"
+                value={financeOrder}
+                onChange={(e) => onFinanceOrderChange(e.target.value)}
+                placeholder="Sort position"
+                min={0}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Fundamental picker — shown when finance domain = fundamentals */}
+        {showFundamentalPicker && (
+          <div className="space-y-2">
+            <Label htmlFor="settings-fundamental">Fundamental</Label>
+            <Select value={topic} onValueChange={onTopicChange}>
+              <SelectTrigger id="settings-fundamental">
+                <SelectValue placeholder="Select fundamental" />
+              </SelectTrigger>
+              <SelectContent>
+                {fundamentals?.map((f) => (
+                  <SelectItem key={f.slug} value={f.slug}>
+                    {f.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">
+              Links this essay to a fundamental concept on the Fundamentals page.
+            </p>
+          </div>
+        )}
+
         {/* FSLI picker — shown when section=accounting, phase=fsli */}
         {showFsliPicker && (
           <div className="space-y-2">
@@ -218,7 +293,7 @@ export function PostSettingsPanel({
           </div>
         )}
 
-        {/* Topic picker — shown when phase has sub-topics */}
+        {/* Topic picker — shown when phase has sub-topics (non-finance) */}
         {topicConfig && (
           <div className="space-y-2">
             <Label htmlFor="settings-topic">{topicConfig.topicLabel}</Label>

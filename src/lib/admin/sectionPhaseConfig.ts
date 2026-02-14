@@ -85,20 +85,28 @@ export const SECTION_PHASE_CONFIG: Record<string, SectionPhaseEntry> = {
       { value: 'statutory-reporting', label: 'Statutory Reporting' },
     ],
   },
-  finance: {
-    phaseLabel: 'Sub-section',
-    options: [
-      { value: 'financial-analytics', label: 'Financial Analytics' },
-      { value: 'financial-planning-forecasting', label: 'Financial Planning & Forecasting' },
-      { value: 'budgeting', label: 'Budgeting' },
-      { value: 'cfa-prep', label: 'CFA Prep' },
-    ],
-  },
 };
+
+/**
+ * Finance domain options.
+ *
+ * These map to the `finance_section` DB field on essays (not `phase`).
+ * When section=finance, the admin editor shows these as "Finance Domain"
+ * and writes to finance_section instead of phase.
+ */
+export const FINANCE_DOMAIN_OPTIONS: PhaseOption[] = [
+  { value: 'fundamentals', label: 'Fundamentals' },
+  { value: 'strategic', label: 'Strategic Finance' },
+  { value: 'planning', label: 'Planning & Forecasting' },
+  { value: 'analytics', label: 'Financial Analytics' },
+];
 
 /**
  * Phases that require a secondary "topic" picker.
  * Maps `${section}/${phase}` → topic options.
+ *
+ * For finance/fundamentals, topics are loaded dynamically from DB
+ * (see PostSettingsPanel), so they are not listed here.
  */
 export const PHASE_TOPIC_CONFIG: Record<string, { topicLabel: string; options: PhaseOption[] }> = {
   'finance/financial-analytics': {
