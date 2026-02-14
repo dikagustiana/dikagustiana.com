@@ -2,7 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { EssayTemplateType, getTemplateOptions, essayTemplates } from '@/lib/essayTemplates';
-import { FileText, BarChart3, BookOpen, GraduationCap, File } from 'lucide-react';
+import { FileText, BarChart3, BookOpen, GraduationCap, File, Landmark, Target, LineChart, PieChart } from 'lucide-react';
 
 interface TemplateSelectorProps {
   selectedTemplate: EssayTemplateType;
@@ -16,6 +16,10 @@ const templateIcons: Record<EssayTemplateType, React.ReactNode> = {
   analysis: <BarChart3 className="h-4 w-4" />,
   'case-study': <BookOpen className="h-4 w-4" />,
   tutorial: <GraduationCap className="h-4 w-4" />,
+  foundations: <Landmark className="h-4 w-4" />,
+  'strategic-finance': <Target className="h-4 w-4" />,
+  planning: <LineChart className="h-4 w-4" />,
+  'analytics-review': <PieChart className="h-4 w-4" />,
 };
 
 const templateDescriptions: Record<EssayTemplateType, string> = {
@@ -24,6 +28,10 @@ const templateDescriptions: Record<EssayTemplateType, string> = {
   analysis: 'Problem Statement, Assumptions, Evidence, Findings',
   'case-study': 'Background, Problem, Actions, Results, Lessons',
   tutorial: 'Objective, Requirements, Steps, Tips, Conclusion',
+  foundations: 'Core Idea, Key Concepts, Practice, Blind Spot',
+  'strategic-finance': 'Decision, Framework, Trade-offs, Criteria',
+  planning: 'Assumptions, Drivers, Scenarios, Action Triggers',
+  'analytics-review': 'Executive Summary, Metrics, Variance, Actions',
 };
 
 export function TemplateSelector({ 

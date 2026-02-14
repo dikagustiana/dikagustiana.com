@@ -38,7 +38,7 @@ import {
 interface EssayEditorProps {
   content: string;
   onChange: (content: string) => void;
-  section: 'next-big-thing' | 'green-transition';
+  section: 'next-big-thing' | 'green-transition' | 'finance';
   placeholder?: string;
   className?: string;
   minHeight?: string;

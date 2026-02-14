@@ -234,6 +234,8 @@ export type Database = {
           date: string | null
           economist_fields: Json | null
           educator_fields: Json | null
+          finance_order: number | null
+          finance_section: string | null
           fsli_slug: string | null
           id: string
           learning_outcomes: string[] | null
@@ -263,6 +265,8 @@ export type Database = {
           date?: string | null
           economist_fields?: Json | null
           educator_fields?: Json | null
+          finance_order?: number | null
+          finance_section?: string | null
           fsli_slug?: string | null
           id?: string
           learning_outcomes?: string[] | null
@@ -292,6 +296,8 @@ export type Database = {
           date?: string | null
           economist_fields?: Json | null
           educator_fields?: Json | null
+          finance_order?: number | null
+          finance_section?: string | null
           fsli_slug?: string | null
           id?: string
           learning_outcomes?: string[] | null
@@ -461,6 +467,36 @@ export type Database = {
           },
         ]
       }
+      finance_fundamentals: {
+        Row: {
+          core_content: string | null
+          created_at: string
+          id: string
+          slug: string
+          sort_order: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          core_content?: string | null
+          created_at?: string
+          id?: string
+          slug: string
+          sort_order?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          core_content?: string | null
+          created_at?: string
+          id?: string
+          slug?: string
+          sort_order?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       finance_net_worth_history: {
         Row: {
           created_at: string
@@ -488,6 +524,30 @@ export type Database = {
           total_assets?: number
           total_liabilities?: number
           user_id?: string
+        }
+        Relationships: []
+      }
+      finance_settings: {
+        Row: {
+          created_at: string
+          id: string
+          key: string
+          updated_at: string
+          value: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          key: string
+          updated_at?: string
+          value?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          key?: string
+          updated_at?: string
+          value?: string | null
         }
         Relationships: []
       }
