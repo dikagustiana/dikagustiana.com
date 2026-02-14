@@ -102,9 +102,7 @@ const App = () => (
             {/* Finance */}
             <Route path="/finance" element={<FinanceLanding />} />
             <Route path="/finance/fundamentals" element={<FinanceFundamentals />} />
-            <Route path="/finance/strategic-finance" element={<FinanceLifecyclePage />} />
-            <Route path="/finance/planning-forecasting" element={<FinanceLifecyclePage />} />
-            <Route path="/finance/financial-analytics" element={<FinanceLifecyclePage />} />
+            <Route path="/finance/:section" element={<FinanceLifecyclePage />} />
 
             {/* Legacy finance-101 redirects */}
             <Route path="/finance-101" element={<Navigate to="/finance" replace />} />

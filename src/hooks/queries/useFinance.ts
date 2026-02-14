@@ -28,6 +28,83 @@ export const useFinanceFundamentals = () => {
   });
 };
 
+export const useUpdateFundamental = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: { title?: string; core_content?: string | null; sort_order?: number } }) => {
+      const { error } = await supabase
+        .from('finance_fundamentals')
+        .update(data)
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['finance-fundamentals'] });
+    },
+  });
+};
+
+// ── Finance Sections (DB-backed domain metadata) ──
+
+export interface FinanceSection {
+  id: string;
+  slug: string;
+  title: string;
+  description: string | null;
+  icon: string | null;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export const useFinanceSections = () => {
+  return useQuery({
+    queryKey: ['finance-sections'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('finance_sections')
+        .select('*')
+        .order('sort_order', { ascending: true });
+
+      if (error) throw error;
+      return data as FinanceSection[];
+    },
+  });
+};
+
+export const useFinanceSectionBySlug = (slug: string) => {
+  return useQuery({
+    queryKey: ['finance-sections', slug],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('finance_sections')
+        .select('*')
+        .eq('slug', slug)
+        .single();
+
+      if (error) throw error;
+      return data as FinanceSection;
+    },
+    enabled: !!slug,
+  });
+};
+
+export const useUpdateFinanceSection = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: { title?: string; description?: string | null; sort_order?: number } }) => {
+      const { error } = await supabase
+        .from('finance_sections')
+        .update(data)
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['finance-sections'] });
+    },
+  });
+};
+
 // ── Finance Settings ──
 
 export const useFinanceSettings = () => {
@@ -60,6 +137,7 @@ export const useUpdateFinanceSetting = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['finance-settings'] });
+      queryClient.invalidateQueries({ queryKey: ['finance-featured-essay'] });
     },
   });
 };
@@ -107,15 +185,28 @@ export interface FinanceSectionEssay {
   created_at: string;
 }
 
-export const useFinanceSectionEssays = (financeSection: string) => {
+/**
+ * Maps route slug to DB finance_section value.
+ * Route slugs: strategic-finance, planning-forecasting, financial-analytics
+ * DB values: strategic, planning, analytics
+ */
+const ROUTE_TO_DB_SECTION: Record<string, string> = {
+  'strategic-finance': 'strategic',
+  'planning-forecasting': 'planning',
+  'financial-analytics': 'analytics',
+};
+
+export const useFinanceSectionEssays = (routeSlugOrDbKey: string) => {
+  const dbKey = ROUTE_TO_DB_SECTION[routeSlugOrDbKey] || routeSlugOrDbKey;
+
   return useQuery({
-    queryKey: ['finance-section-essays', financeSection],
+    queryKey: ['finance-section-essays', dbKey],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('essays')
         .select('id, slug, title, snippet, author, date, read_time, thumbnail_url, finance_section, finance_order, created_at')
         .eq('section', 'finance')
-        .eq('finance_section', financeSection)
+        .eq('finance_section', dbKey)
         .eq('published', true)
         .order('finance_order', { ascending: true, nullsFirst: false })
         .order('created_at', { ascending: false });
@@ -123,7 +214,25 @@ export const useFinanceSectionEssays = (financeSection: string) => {
       if (error) throw error;
       return data as FinanceSectionEssay[];
     },
-    enabled: !!financeSection,
+    enabled: !!dbKey,
+  });
+};
+
+// ── Finance essays for admin (all statuses) ──
+
+export const useFinanceEssaysForAdmin = () => {
+  return useQuery({
+    queryKey: ['finance-essays-admin'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('essays')
+        .select('id, slug, title, snippet, status, published, finance_section, finance_order')
+        .eq('section', 'finance')
+        .order('title', { ascending: true });
+
+      if (error) throw error;
+      return data;
+    },
   });
 };
 

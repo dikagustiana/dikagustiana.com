@@ -497,6 +497,39 @@ export type Database = {
         }
         Relationships: []
       }
+      finance_sections: {
+        Row: {
+          created_at: string
+          description: string | null
+          icon: string | null
+          id: string
+          slug: string
+          sort_order: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          slug: string
+          sort_order?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          slug?: string
+          sort_order?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       finance_net_worth_history: {
         Row: {
           created_at: string

@@ -40,6 +40,7 @@ import { useEssay } from '@/hooks/queries/useEssays';
 import { useSections } from '@/hooks/queries/useSections';
 import { useUpdateEssay, useCreateEssay } from '@/hooks/queries/useAdminEssays';
 import { useFsliPages } from '@/hooks/queries/useFsliPages';
+import { useFinanceFundamentals } from '@/hooks/queries/useFinance';
 import { LoadingState, ErrorState } from '@/components/states';
 import { ToneFieldsEditor } from '@/components/admin/ToneFieldsEditor';
 import { UnifiedEditor } from '@/components/admin/UnifiedEditor';
@@ -85,6 +86,7 @@ export default function AdminContentEditor() {
   );
   const { data: sections, isLoading: sectionsLoading } = useSections();
   const { data: fsliPages } = useFsliPages();
+  const { data: fundamentals } = useFinanceFundamentals();
   const updateEssay = useUpdateEssay();
   const createEssay = useCreateEssay();
 
@@ -102,6 +104,8 @@ export default function AdminContentEditor() {
   const [contentJson, setContentJson] = useState<JSONContent | null>(null);
   const [fsliSlug, setFsliSlug] = useState('');
   const [topic, setTopic] = useState('');
+  const [financeSection, setFinanceSection] = useState('');
+  const [financeOrder, setFinanceOrder] = useState('');
 
   // Tone fields
   const [managerFields, setManagerFields] = useState<Partial<ManagerFields>>({});
@@ -191,6 +195,8 @@ export default function AdminContentEditor() {
 
       setFsliSlug(essay.fsli_slug || '');
       setTopic(essay.topic || '');
+      setFinanceSection(essay.finance_section || '');
+      setFinanceOrder(essay.finance_order != null ? String(essay.finance_order) : '');
 
       setManagerFields(essay.manager_fields as Partial<ManagerFields> || {});
       setEconomistFields(essay.economist_fields as Partial<EconomistFields> || {});
@@ -223,7 +229,7 @@ export default function AdminContentEditor() {
     // Clear publish errors when content changes
     if (showPublishErrors) setShowPublishErrors(false);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [title, slug, section, phase, voiceRole, status, author, date, readTime, snippet, contentJson, managerFields, economistFields, educatorFields, coachFields, fsliSlug, topic]);
+  }, [title, slug, section, phase, voiceRole, status, author, date, readTime, snippet, contentJson, managerFields, economistFields, educatorFields, coachFields, fsliSlug, topic, financeSection, financeOrder]);
 
   // ── Beforeunload guard ──
   useEffect(() => {
@@ -386,6 +392,8 @@ export default function AdminContentEditor() {
       content: contentString,
       fsli_slug: fsliSlug || null,
       topic: topic || null,
+      finance_section: financeSection || null,
+      finance_order: financeOrder ? parseInt(financeOrder, 10) : null,
       ...getToneFieldsData(),
     };
 
@@ -614,6 +622,11 @@ export default function AdminContentEditor() {
                 fsliPages={fsliPages}
                 topic={topic}
                 onTopicChange={setTopic}
+                financeSection={financeSection}
+                onFinanceSectionChange={setFinanceSection}
+                financeOrder={financeOrder}
+                onFinanceOrderChange={setFinanceOrder}
+                fundamentals={fundamentals}
                 voiceRole={voiceRole}
                 onVoiceRoleChange={setVoiceRole}
                 status={status}
