@@ -71,6 +71,9 @@ import WriterListPage from "./pages/WriterListPage";
 import WriterEditorPage from "./pages/WriterEditorPage";
 import NextBigThingEssayPage from "./pages/NextBigThingEssayPage";
 import FinanceEssayPage from "./pages/FinanceEssayPage";
+import FinanceLanding from "./pages/FinanceLanding";
+import FinanceLifecyclePage from "./pages/FinanceLifecyclePage";
+import FinanceFundamentals from "./pages/FinanceFundamentals";
 
 const queryClient = new QueryClient();
 
@@ -97,11 +100,18 @@ const App = () => (
             <Route path="/accounting/consolidation/:topic" element={<ConsolidationDetail />} />
 
             {/* Finance */}
-            <Route path="/finance-101" element={<Finance101 />} />
+            <Route path="/finance" element={<FinanceLanding />} />
+            <Route path="/finance/fundamentals" element={<FinanceFundamentals />} />
+            <Route path="/finance/strategic-finance" element={<FinanceLifecyclePage />} />
+            <Route path="/finance/planning-forecasting" element={<FinanceLifecyclePage />} />
+            <Route path="/finance/financial-analytics" element={<FinanceLifecyclePage />} />
+
+            {/* Legacy finance-101 redirects */}
+            <Route path="/finance-101" element={<Navigate to="/finance" replace />} />
             <Route path="/finance-101/essays/:slug" element={<FinanceEssayPage />} />
-            <Route path="/finance-101/financial-analytics" element={<FinancialAnalytics />} />
+            <Route path="/finance-101/financial-analytics" element={<Navigate to="/finance/financial-analytics" replace />} />
             <Route path="/finance-101/financial-analytics/:topic" element={<FinancialAnalyticsDetail />} />
-            <Route path="/finance-101/financial-planning-forecasting" element={<FinancialPlanningForecasting />} />
+            <Route path="/finance-101/financial-planning-forecasting" element={<Navigate to="/finance/planning-forecasting" replace />} />
             <Route path="/finance-101/budgeting" element={<Budgeting />} />
             <Route path="/finance-101/cfa-prep" element={<CfaPrep />} />
 
