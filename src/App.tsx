@@ -70,6 +70,7 @@ import TheNextBigThing from "./pages/TheNextBigThing";
 import WriterListPage from "./pages/WriterListPage";
 import WriterEditorPage from "./pages/WriterEditorPage";
 import NextBigThingEssayPage from "./pages/NextBigThingEssayPage";
+import FinanceEssayPage from "./pages/FinanceEssayPage";
 
 const queryClient = new QueryClient();
 
@@ -97,6 +98,7 @@ const App = () => (
 
             {/* Finance */}
             <Route path="/finance-101" element={<Finance101 />} />
+            <Route path="/finance-101/essays/:slug" element={<FinanceEssayPage />} />
             <Route path="/finance-101/financial-analytics" element={<FinancialAnalytics />} />
             <Route path="/finance-101/financial-analytics/:topic" element={<FinancialAnalyticsDetail />} />
             <Route path="/finance-101/financial-planning-forecasting" element={<FinancialPlanningForecasting />} />

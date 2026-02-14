@@ -34,7 +34,7 @@ import {
 import { cn } from '@/lib/utils';
 
 interface WriterEditorProps {
-  section: 'next-big-thing' | 'green-transition';
+  section: 'next-big-thing' | 'green-transition' | 'finance';
   essayId?: string; // Database UUID for editing existing essays
   initialSlug?: string; // For loading by slug
 }
@@ -79,6 +79,12 @@ const PHASE_OPTIONS: Record<string, { id: string; label: string }[]> = {
     { id: 'where-we-are-now', label: 'Where We Are Now' },
     { id: 'challenges-ahead', label: 'Challenges Ahead' },
     { id: 'pathways-forward', label: 'Pathways Forward' },
+  ],
+  finance: [
+    { id: 'fundamentals', label: 'Fundamentals' },
+    { id: 'strategic-finance', label: 'Strategic Finance' },
+    { id: 'financial-planning', label: 'Financial Planning & Forecasting' },
+    { id: 'financial-analytics', label: 'Financial Analytics' },
   ],
 };
 
