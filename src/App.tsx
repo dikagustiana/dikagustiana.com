@@ -74,6 +74,7 @@ import FinanceEssayPage from "./pages/FinanceEssayPage";
 import FinanceLanding from "./pages/FinanceLanding";
 import FinanceLifecyclePage from "./pages/FinanceLifecyclePage";
 import FinanceFundamentals from "./pages/FinanceFundamentals";
+import FundamentalDetail from "./pages/FundamentalDetail";
 
 const queryClient = new QueryClient();
 
@@ -102,6 +103,7 @@ const App = () => (
             {/* Finance */}
             <Route path="/finance" element={<FinanceLanding />} />
             <Route path="/finance/fundamentals" element={<FinanceFundamentals />} />
+            <Route path="/finance/fundamentals/:slug" element={<FundamentalDetail />} />
             <Route path="/finance/:section" element={<FinanceLifecyclePage />} />
 
             {/* Legacy finance-101 redirects */}

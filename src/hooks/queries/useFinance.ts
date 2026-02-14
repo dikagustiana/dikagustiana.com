@@ -7,7 +7,9 @@ export interface FinanceFundamental {
   id: string;
   slug: string;
   title: string;
-  core_content: string | null;
+  thesis: string | null;
+  framing_content: string | null;
+  number: number | null;
   sort_order: number;
   created_at: string;
   updated_at: string;
@@ -28,10 +30,46 @@ export const useFinanceFundamentals = () => {
   });
 };
 
+export const useFinanceFundamentalBySlug = (slug: string) => {
+  return useQuery({
+    queryKey: ['finance-fundamentals', slug],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('finance_fundamentals')
+        .select('*')
+        .eq('slug', slug)
+        .single();
+
+      if (error) throw error;
+      return data as FinanceFundamental;
+    },
+    enabled: !!slug,
+  });
+};
+
+export const useFundamentalEssaysByFundamentalId = (fundamentalId: string | undefined) => {
+  return useQuery({
+    queryKey: ['fundamental-essays-by-id', fundamentalId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('essays')
+        .select('id, slug, title, snippet, date, read_time, finance_order, created_at')
+        .eq('fundamental_id', fundamentalId!)
+        .eq('published', true)
+        .order('finance_order', { ascending: true, nullsFirst: false })
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data as FinanceSectionEssay[];
+    },
+    enabled: !!fundamentalId,
+  });
+};
+
 export const useUpdateFundamental = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: { title?: string; core_content?: string | null; sort_order?: number } }) => {
+    mutationFn: async ({ id, data }: { id: string; data: { title?: string; framing_content?: string | null; thesis?: string | null; number?: number; sort_order?: number } }) => {
       const { error } = await supabase
         .from('finance_fundamentals')
         .update(data)

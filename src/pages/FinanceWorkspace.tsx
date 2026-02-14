@@ -212,12 +212,12 @@ export default function FinanceWorkspace() {
                     <FundamentalEditor
                       key={f.id}
                       title={f.title}
-                      initialContent={f.core_content || ''}
+                      initialContent={f.framing_content || ''}
                       sortOrder={f.sort_order}
-                      onSave={async (coreContent) => {
+                      onSave={async (framingContent) => {
                         await updateFundamental.mutateAsync({
                           id: f.id,
-                          data: { core_content: coreContent },
+                          data: { framing_content: framingContent },
                         });
                         toast({ title: `${f.title} updated` });
                       }}
