@@ -497,6 +497,36 @@ export type Database = {
         }
         Relationships: []
       }
+      finance_net_worth_history: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          net_worth: number
+          total_assets: number
+          total_liabilities: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          date?: string
+          id?: string
+          net_worth?: number
+          total_assets?: number
+          total_liabilities?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          net_worth?: number
+          total_assets?: number
+          total_liabilities?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       finance_sections: {
         Row: {
           created_at: string
@@ -527,36 +557,6 @@ export type Database = {
           sort_order?: number
           title?: string
           updated_at?: string
-        }
-        Relationships: []
-      }
-      finance_net_worth_history: {
-        Row: {
-          created_at: string
-          date: string
-          id: string
-          net_worth: number
-          total_assets: number
-          total_liabilities: number
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          date?: string
-          id?: string
-          net_worth?: number
-          total_assets?: number
-          total_liabilities?: number
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          date?: string
-          id?: string
-          net_worth?: number
-          total_assets?: number
-          total_liabilities?: number
-          user_id?: string
         }
         Relationships: []
       }

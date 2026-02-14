@@ -26,6 +26,8 @@ export interface Essay {
   coach_fields: Record<string, unknown> | null;
   fsli_slug: string | null;
   topic: string | null;
+  finance_section: string | null;
+  finance_order: number | null;
   created_at: string;
   updated_at: string;
 }
