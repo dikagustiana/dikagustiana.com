@@ -23,13 +23,18 @@ export function ReadingProgress({ className }: ReadingProgressProps) {
   }, []);
 
   return (
-    <div 
+    <div
       className={cn(
-        "fixed top-0 left-0 right-0 h-1 z-50 bg-muted/30",
+        "sticky top-16 left-0 right-0 h-0.5 z-40 bg-muted/30",
         className
       )}
+      role="progressbar"
+      aria-valuenow={Math.round(progress)}
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-label="Reading progress"
     >
-      <div 
+      <div
         className="h-full bg-primary transition-all duration-100 ease-out"
         style={{ width: `${progress}%` }}
       />

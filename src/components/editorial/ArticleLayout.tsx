@@ -22,13 +22,13 @@ export function ArticleLayout({
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      {showProgress && <ReadingProgress />}
       <Header />
+      {showProgress && <ReadingProgress />}
 
       <main className="flex-1">
         {/* Reader controls bar */}
         {showFontToggle && (
-          <div className="sticky top-0 z-40 bg-background/95 backdrop-blur border-b border-border">
+          <div className="sticky top-16 z-30 bg-background/95 backdrop-blur border-b border-border">
             <div className="container max-w-3xl py-2 flex justify-end">
               <FontSizeToggle fontSize={fontSize} onChange={changeFontSize} />
             </div>

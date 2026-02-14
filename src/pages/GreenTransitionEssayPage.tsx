@@ -1,5 +1,6 @@
 import { useParams, Navigate, Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { SEO } from '@/components/SEO';
@@ -8,13 +9,16 @@ import {
   ArticleLayout,
   ArticleHeader,
   ArticleBody,
+  ArticleToc,
   KeyTakeaways,
   References,
   AuthorBox,
   RelatedEssays,
+  EssayNavigation,
   useFontSize,
 } from '@/components/editorial';
 import { ArrowLeft } from 'lucide-react';
+import { contentToHtml } from '@/lib/tiptap/serialize';
 
 interface Essay {
   id: string;
@@ -40,6 +44,11 @@ interface Essay {
   } | null;
 }
 
+interface EssayListItem {
+  slug: string;
+  title: string;
+}
+
 const phaseLabels: Record<string, string> = {
   'where-we-are-now': 'Where We Are Now',
   'challenges-ahead': 'Challenges Ahead',
@@ -49,6 +58,13 @@ const phaseLabels: Record<string, string> = {
   future: 'Pathways Forward',
 };
 
+// Map URL slug to db phase
+const phaseMapping: Record<string, string> = {
+  now: 'where-we-are-now',
+  gaps: 'challenges-ahead',
+  future: 'pathways-forward',
+};
+
 export default function GreenTransitionEssayPage() {
   const { phase, slug } = useParams<{ phase: string; slug: string }>();
   const { isAdmin } = useAuth();
@@ -56,6 +72,8 @@ export default function GreenTransitionEssayPage() {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const { fontSizeClass } = useFontSize();
+
+  const dbPhase = phase ? phaseMapping[phase] || phase : '';
 
   useEffect(() => {
     if (slug) loadEssay();
@@ -95,6 +113,25 @@ export default function GreenTransitionEssayPage() {
     }
   };
 
+  // Fetch sibling essays for prev/next navigation
+  const { data: siblings } = useQuery({
+    queryKey: ['green-transition-siblings', dbPhase],
+    queryFn: async () => {
+      let query = supabase
+        .from('essays')
+        .select('slug, title')
+        .eq('section', 'green-transition')
+        .eq('phase', dbPhase)
+        .eq('status', 'published')
+        .order('created_at', { ascending: false });
+
+      const { data, error } = await query;
+      if (error) throw error;
+      return data as EssayListItem[];
+    },
+    enabled: !!dbPhase,
+  });
+
   const phaseLabel = phase ? phaseLabels[phase] || phase : '';
 
   // Redirect non-admins accessing drafts
@@ -112,6 +149,15 @@ export default function GreenTransitionEssayPage() {
 
   if (!essay) return null;
 
+  // Compute prev/next
+  const currentIndex = siblings?.findIndex((e) => e.slug === slug) ?? -1;
+  const previous = currentIndex > 0 ? siblings![currentIndex - 1] : null;
+  const next = siblings && currentIndex >= 0 && currentIndex < siblings.length - 1
+    ? siblings[currentIndex + 1]
+    : null;
+
+  const getEssayUrl = (essaySlug: string) => `/green-transition/${phase}/${essaySlug}`;
+
   // Extract extended fields
   const economistFields = essay.economist_fields || {};
   const deck = economistFields.deck || essay.snippet;
@@ -119,6 +165,9 @@ export default function GreenTransitionEssayPage() {
   const references = economistFields.references || [];
   const heroCaption = economistFields.hero_caption;
   const authorBio = economistFields.author_bio;
+
+  // Get HTML content for TOC
+  const htmlContent = contentToHtml(essay.content || '');
 
   return (
     <ArticleLayout>
@@ -152,23 +201,37 @@ export default function GreenTransitionEssayPage() {
         heroCaption={heroCaption}
       />
 
+      {/* Table of Contents */}
+      <ArticleToc content={htmlContent} />
+
       {/* Article Body */}
-      <ArticleBody 
-        content={essay.content || ''} 
+      <ArticleBody
+        content={essay.content || ''}
         fontSizeClass={fontSizeClass}
       />
 
       {/* End Matter */}
       <KeyTakeaways takeaways={keyTakeaways} />
-      
+
       <References references={references} />
-      
+
       {essay.author && (
-        <AuthorBox 
-          name={essay.author} 
+        <AuthorBox
+          name={essay.author}
           bio={authorBio}
         />
       )}
+
+      {/* Prev/Next + Back */}
+      <EssayNavigation
+        backLink={{
+          label: `Back to ${phaseLabel || 'Green Transition'}`,
+          path: `/green-transition/${phase || ''}`,
+        }}
+        previous={previous}
+        next={next}
+        getEssayUrl={getEssayUrl}
+      />
 
       {/* Related Essays */}
       <RelatedEssays

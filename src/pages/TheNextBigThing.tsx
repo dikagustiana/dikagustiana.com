@@ -16,6 +16,14 @@ const TOPICS = [
   { id: 'governance', label: 'Governance' },
 ];
 
+const NEXT_BIG_THING_TABS = [
+  { label: 'Technology', path: '/the-next-big-thing?theme=technology' },
+  { label: 'Economy', path: '/the-next-big-thing?theme=economy' },
+  { label: 'Society', path: '/the-next-big-thing?theme=society' },
+  { label: 'Environment', path: '/the-next-big-thing?theme=environment' },
+  { label: 'Governance', path: '/the-next-big-thing?theme=governance' },
+];
+
 export default function TheNextBigThing() {
   const { isAdmin } = useAuth();
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -30,6 +38,9 @@ export default function TheNextBigThing() {
         { label: 'Home', path: '/' },
         { label: 'The Next Big Thing' },
       ]}
+      subNav={{
+        tabs: NEXT_BIG_THING_TABS,
+      }}
     >
       <SEO
         title="The Next Big Thing"
