@@ -72,6 +72,8 @@ import FinanceLifecyclePage from "./pages/FinanceLifecyclePage";
 import FinanceFundamentals from "./pages/FinanceFundamentals";
 import FundamentalDetail from "./pages/FundamentalDetail";
 import AdminEditorRedirect from "./pages/AdminEditorRedirect";
+import WriterEditorPage from "./pages/WriterEditorPage";
+import WriterListPage from "./pages/WriterListPage";
 
 // Canonical Writer Studio (lazy-loaded)
 const WriterStudio = lazy(() => import("./domains/writing/WriterStudio"));
@@ -173,6 +175,10 @@ const App = () => (
                 </Suspense>
               </RequireAdmin>
             } />
+
+            {/* Section-scoped writer list and editor */}
+            <Route path="/admin/writer/:section/list" element={<RequireAdmin><WriterListPage /></RequireAdmin>} />
+            <Route path="/admin/writer/:section/:slug" element={<RequireAdmin><WriterEditorPage /></RequireAdmin>} />
 
             {/* Legacy admin editor routes → redirect to Writer Studio */}
             <Route path="/admin/content/:id" element={<RequireAdmin><AdminEditorRedirect /></RequireAdmin>} />
