@@ -164,7 +164,7 @@ export function AdminEditBanner({ essayId, essaySlug }: AdminEditBannerProps) {
         </span>
       </div>
       <Button asChild size="sm" variant="outline">
-        <Link to={`/admin/content/${essayId}`}>
+        <Link to={`/admin/writer/${essaySlug}`}>
           <Pencil className="h-4 w-4 mr-2" />
           Full Editor
         </Link>

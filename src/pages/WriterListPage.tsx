@@ -3,10 +3,8 @@ import { WriterList } from '@/components/writer/WriterList';
 
 export default function WriterListPage() {
   const { section } = useParams<{ section: string }>();
-  
-  const validSection = section === 'next-big-thing' || section === 'green-transition' 
-    ? section 
-    : 'next-big-thing';
+
+  const validSection = section || 'next-big-thing';
 
   return <WriterList section={validSection} />;
 }

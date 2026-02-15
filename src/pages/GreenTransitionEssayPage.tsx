@@ -20,6 +20,7 @@ interface Essay {
   phase: string | null;
   status: string | null;
   published: boolean | null;
+  category_id: string | null;
   created_at: string;
   updated_at: string;
   economist_fields: {
@@ -45,20 +46,12 @@ const phaseLabels: Record<string, string> = {
   future: 'Pathways Forward',
 };
 
-const phaseMapping: Record<string, string> = {
-  now: 'where-we-are-now',
-  gaps: 'challenges-ahead',
-  future: 'pathways-forward',
-};
-
 export default function GreenTransitionEssayPage() {
   const { phase, slug } = useParams<{ phase: string; slug: string }>();
   const { isAdmin } = useAuth();
   const [essay, setEssay] = useState<Essay | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
-
-  const dbPhase = phase ? phaseMapping[phase] || phase : '';
 
   useEffect(() => {
     if (slug) loadEssay();
@@ -68,11 +61,11 @@ export default function GreenTransitionEssayPage() {
     setLoading(true);
     setNotFound(false);
     try {
+      // Fetch by globally unique slug — no section string matching needed
       const { data, error } = await supabase
         .from('essays')
         .select('*')
-        .eq('slug', slug)
-        .eq('section', 'green-transition')
+        .eq('slug', slug!)
         .maybeSingle();
 
       if (error) throw error;
@@ -88,31 +81,29 @@ export default function GreenTransitionEssayPage() {
       } else {
         setNotFound(true);
       }
-    } catch (error) {
-      if (import.meta.env.DEV) {
-        console.error('Failed to load essay:', error);
-      }
+    } catch {
       setNotFound(true);
     } finally {
       setLoading(false);
     }
   };
 
+  // Fetch siblings via category_id FK
   const { data: siblings } = useQuery({
-    queryKey: ['green-transition-siblings', dbPhase],
+    queryKey: ['green-transition-siblings', essay?.category_id],
     queryFn: async () => {
+      if (!essay?.category_id) return [];
       const { data, error } = await supabase
         .from('essays')
         .select('slug, title')
-        .eq('section', 'green-transition')
-        .eq('phase', dbPhase)
+        .eq('category_id', essay.category_id)
         .eq('status', 'published')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
       return data as EssayListItem[];
     },
-    enabled: !!dbPhase,
+    enabled: !!essay?.category_id,
   });
 
   const phaseLabel = phase ? phaseLabels[phase] || phase : '';

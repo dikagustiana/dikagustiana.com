@@ -18,6 +18,7 @@ interface ValidateParams {
   references: { label: string; url?: string }[];
   section: string;
   content: string;
+  categoryId?: string;
 }
 
 const MIN_WORD_COUNT = 500;
@@ -30,6 +31,7 @@ export function validateEssay({
   references,
   section,
   content,
+  categoryId,
 }: ValidateParams): ValidationResult {
   const errors: { field: string; message: string }[] = [];
   const warnings: { field: string; message: string }[] = [];
@@ -37,6 +39,11 @@ export function validateEssay({
   // Required: Title
   if (!title.trim()) {
     errors.push({ field: 'title', message: 'Title is required' });
+  }
+
+  // Required: Category
+  if (!categoryId) {
+    errors.push({ field: 'categoryId', message: 'Category is required' });
   }
 
   // Required: Deck line

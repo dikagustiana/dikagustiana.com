@@ -104,7 +104,7 @@ export default function AdminDashboard() {
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           <Card className="group hover:shadow-md transition-shadow cursor-pointer border-2 border-transparent hover:border-accent">
-            <Link to="/admin/content/new">
+            <Link to="/admin/writer/new">
               <CardContent className="p-6 flex items-center gap-4">
                 <div className="p-3 rounded-full bg-accent/10 text-accent group-hover:bg-accent group-hover:text-accent-foreground transition-colors">
                   <Plus className="h-6 w-6" />
@@ -234,7 +234,7 @@ export default function AdminDashboard() {
                   {recentDrafts.map((draft) => (
                     <li key={draft.id}>
                       <Link
-                        to={`/admin/content/${draft.slug}`}
+                        to={`/admin/writer/${draft.slug}`}
                         className="flex items-center justify-between p-3 rounded-lg hover:bg-muted/50 transition-colors group"
                       >
                         <div className="flex-1 min-w-0">
@@ -287,7 +287,7 @@ export default function AdminDashboard() {
                   {recentPublished.map((essay) => (
                     <li key={essay.id}>
                       <Link
-                        to={`/admin/content/${essay.slug}`}
+                        to={`/admin/writer/${essay.slug}`}
                         className="flex items-center justify-between p-3 rounded-lg hover:bg-muted/50 transition-colors group"
                       >
                         <div className="flex-1 min-w-0">

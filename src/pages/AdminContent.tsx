@@ -187,7 +187,7 @@ export default function AdminContent() {
 
   const getEditPath = (item: { id: string; type: ContentType; slug: string }) => {
     if (item.type === 'fsli') return `/accounting/${item.slug}`;
-    return `/admin/content/${item.slug}`;
+    return `/admin/writer/${item.slug}`;
   };
 
   const formatDate = (dateStr: string) => {
@@ -217,7 +217,7 @@ export default function AdminContent() {
           </div>
           <div className="flex gap-2">
             <Button asChild>
-              <Link to="/admin/content/new">
+              <Link to="/admin/writer/new">
                 <Plus className="h-4 w-4 mr-2" />
                 New Essay
               </Link>

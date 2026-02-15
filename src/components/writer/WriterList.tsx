@@ -25,7 +25,7 @@ import {
 import { cn } from '@/lib/utils';
 
 interface WriterListProps {
-  section: 'next-big-thing' | 'green-transition';
+  section: string;
 }
 
 interface Essay {
@@ -38,6 +38,7 @@ interface Essay {
   read_time: string | null;
   status: string | null;
   phase: string | null;
+  category_id: string | null;
   updated_at: string;
   created_at: string;
 }
@@ -52,7 +53,7 @@ export function WriterList({ section }: WriterListProps) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('essays')
-        .select('id, slug, title, snippet, author, date, read_time, status, phase, updated_at, created_at')
+        .select('id, slug, title, snippet, author, date, read_time, status, phase, category_id, updated_at, created_at')
         .eq('section', section)
         .order('updated_at', { ascending: false });
 
@@ -74,14 +75,32 @@ export function WriterList({ section }: WriterListProps) {
   const drafts = filteredEssays?.filter(e => e.status !== 'published') || [];
   const published = filteredEssays?.filter(e => e.status === 'published') || [];
 
-  const sectionLabel = section === 'next-big-thing' ? 'The Next Big Thing' : 'Green Transition';
-  const sectionPath = section === 'next-big-thing' ? '/the-next-big-thing' : '/green-transition';
+  const sectionLabelMap: Record<string, string> = {
+    'next-big-thing': 'The Next Big Thing',
+    'green-transition': 'Green Transition',
+    finance: 'Finance',
+    'critical-thinking': 'Critical Thinking',
+  };
+  const sectionPathMap: Record<string, string> = {
+    'next-big-thing': '/the-next-big-thing',
+    'green-transition': '/green-transition',
+    finance: '/finance',
+    'critical-thinking': '/critical-thinking-research',
+  };
+  const sectionLabel = sectionLabelMap[section] || section;
+  const sectionPath = sectionPathMap[section] || `/${section}`;
 
   const getPublicUrl = (essay: Essay) => {
     if (section === 'next-big-thing') {
       return `/the-next-big-thing/${essay.slug}`;
     }
-    return `/green-transition/${essay.phase}/${essay.slug}`;
+    if (section === 'finance') {
+      return `/finance-101/essays/${essay.slug}`;
+    }
+    if (essay.phase) {
+      return `/${section}/${essay.phase}/${essay.slug}`;
+    }
+    return `/${section}/${essay.slug}`;
   };
 
   const formatDate = (dateStr: string) => {

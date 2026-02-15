@@ -19,10 +19,10 @@ import {
   ResizablePanel,
   ResizableHandle,
 } from '@/components/ui/resizable';
-import { 
-  ArrowLeft, 
-  Save, 
-  Eye, 
+import {
+  ArrowLeft,
+  Save,
+  Eye,
   EyeOff,
   Send,
   Clock,
@@ -32,9 +32,11 @@ import {
   CheckCircle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useWriterSections, useWriterCategories } from '@/domains/writing/hooks';
+import { generateUniqueSlug } from '@/domains/writing/hooks/useWriterEssay';
 
 interface WriterEditorProps {
-  section: 'next-big-thing' | 'green-transition' | 'finance';
+  section: string;
   essayId?: string; // Database UUID for editing existing essays
   initialSlug?: string; // For loading by slug
 }
@@ -45,6 +47,7 @@ interface EssayData {
   slug: string;
   section: string;
   phase: string;
+  category_id: string;
   author: string;
   date: string;
   read_time: string;
@@ -105,7 +108,13 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const { isAdmin } = useAuth();
-  
+
+  // Sections & categories
+  const { data: sections = [] } = useWriterSections();
+  const sectionObj = sections.find(s => s.slug === section);
+  const sectionId = sectionObj?.id || '';
+  const { data: categories = [] } = useWriterCategories(sectionId || undefined);
+
   // Editor state
   const [showPreview, setShowPreview] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -118,6 +127,7 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
   const [title, setTitle] = useState('');
   const [slug, setSlug] = useState('');
   const [phase, setPhase] = useState(searchParams.get('phase') || '');
+  const [categoryId, setCategoryId] = useState('');
   const [author, setAuthor] = useState(DEFAULT_AUTHOR);
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [readTime, setReadTime] = useState('');
@@ -142,15 +152,16 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
     const loadEssay = async () => {
       try {
         let query = supabase.from('essays').select('*');
-        
+
         if (essayId) {
           query = query.eq('id', essayId);
         } else if (initialSlug) {
-          query = query.eq('slug', initialSlug).eq('section', section);
+          // Slug is globally unique — no need to filter by section
+          query = query.eq('slug', initialSlug);
         }
 
         const { data, error } = await query.maybeSingle();
-        
+
         if (error) throw error;
         if (!data) {
           toast({ title: 'Essay not found', variant: 'destructive' });
@@ -163,6 +174,7 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
         setTitle(data.title || '');
         setSlug(data.slug || '');
         setPhase(data.phase || '');
+        setCategoryId(data.category_id || '');
         setAuthor(data.author || DEFAULT_AUTHOR);
         setDate(data.date || '');
         setReadTime(data.read_time || '');
@@ -201,7 +213,7 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
   useEffect(() => {
     if (isInitialLoad.current) return;
     setIsDirty(true);
-  }, [title, slug, phase, author, date, deck, heroImageUrl, heroCaption, content, keyTakeaways, references, authorBio]);
+  }, [title, slug, phase, categoryId, author, date, deck, heroImageUrl, heroCaption, content, keyTakeaways, references, authorBio]);
 
   // Auto-generate slug from title
   useEffect(() => {
@@ -251,8 +263,9 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
       references: references.filter(r => r.label.trim()),
       section,
       content,
+      categoryId,
     });
-  }, [title, deck, keyTakeaways, wordCount, references, section, content]);
+  }, [title, deck, keyTakeaways, wordCount, references, section, content, categoryId]);
 
   const handleSave = async (targetStatus: 'draft' | 'published' = status) => {
     // Block publishing if validation fails
@@ -277,6 +290,9 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
     setIsSaving(true);
 
     try {
+      // Ensure slug uniqueness
+      const finalSlug = await generateUniqueSlug(slug, essayDbId || undefined);
+
       const economistFields = {
         deck: deck || null,
         key_takeaways: keyTakeaways.filter(k => k.trim()),
@@ -288,9 +304,9 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
         author_bio: authorBio || null,
       };
 
-      const essayData = {
+      const essayData: Record<string, unknown> = {
         title,
-        slug,
+        slug: finalSlug,
         section,
         phase: phase || null,
         author,
@@ -304,6 +320,11 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
         voice_role: 'economist',
         economist_fields: economistFields,
       };
+
+      // Attach category_id if set
+      if (categoryId) {
+        essayData.category_id = categoryId;
+      }
 
       if (essayDbId) {
         // Update existing
@@ -329,6 +350,7 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
         toast({ title: 'Essay created!' });
       }
 
+      setSlug(finalSlug);
       setStatus(targetStatus);
       setIsDirty(false);
     } catch (error: unknown) {
@@ -347,7 +369,13 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
     if (section === 'next-big-thing') {
       return `/the-next-big-thing/${slug}`;
     }
-    return `/green-transition/${phase}/${slug}`;
+    if (section === 'finance') {
+      return `/finance-101/essays/${slug}`;
+    }
+    if (phase) {
+      return `/${section}/${phase}/${slug}`;
+    }
+    return `/${section}/${slug}`;
   };
 
   const getPreviewUrl = () => {
@@ -472,7 +500,10 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
                   setSlug={setSlug}
                   phase={phase}
                   setPhase={setPhase}
-                  phaseOptions={PHASE_OPTIONS[section]}
+                  phaseOptions={PHASE_OPTIONS[section] || []}
+                  categoryId={categoryId}
+                  setCategoryId={setCategoryId}
+                  categories={categories}
                   author={author}
                   setAuthor={setAuthor}
                   date={date}

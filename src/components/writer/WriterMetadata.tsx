@@ -6,6 +6,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Plus, Trash2, GripVertical } from 'lucide-react';
 
+interface CategoryOption {
+  id: string;
+  name: string;
+  slug: string;
+}
+
 interface WriterMetadataProps {
   title: string;
   setTitle: (v: string) => void;
@@ -14,6 +20,9 @@ interface WriterMetadataProps {
   phase: string;
   setPhase: (v: string) => void;
   phaseOptions: { id: string; label: string }[];
+  categoryId: string;
+  setCategoryId: (v: string) => void;
+  categories: CategoryOption[];
   author: string;
   setAuthor: (v: string) => void;
   date: string;
@@ -41,6 +50,9 @@ export function WriterMetadata({
   phase,
   setPhase,
   phaseOptions,
+  categoryId,
+  setCategoryId,
+  categories,
   author,
   setAuthor,
   date,
@@ -139,6 +151,25 @@ export function WriterMetadata({
               </Select>
             </div>
           </div>
+
+          {/* Category (dependent on section) */}
+          {categories.length > 0 && (
+            <div className="space-y-2">
+              <Label htmlFor="category">Category *</Label>
+              <Select value={categoryId} onValueChange={setCategoryId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select category..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((cat) => (
+                    <SelectItem key={cat.id} value={cat.id}>
+                      {cat.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           {/* Author & Date */}
           <div className="grid grid-cols-2 gap-4">
