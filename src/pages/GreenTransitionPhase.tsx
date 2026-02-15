@@ -46,7 +46,7 @@ export default function GreenTransitionPhase() {
   const details = dbPhase ? phaseDetails[dbPhase] : null;
 
   const handleAddEssay = () => {
-    navigate(`/admin/content/new?section=green-transition&phase=${dbPhase}`);
+    navigate('/admin/writer/new');
   };
 
   const getEssayUrl = (essay: { slug: string; phase?: string | null }) => {
@@ -134,14 +134,39 @@ function GreenTransitionPhaseFeed({ phase, getEssayUrl }: GreenTransitionPhaseFe
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('newest');
 
+  // Fetch essays via category FK chain: categories.section_id → sections
+  // Step 1: Find the category matching this phase under green-transition section
   const { data: essays, isLoading } = useQuery({
     queryKey: ['green-transition-phase', phase],
     queryFn: async () => {
-      let query = supabase
-        .from('essays')
-        .select('id, slug, title, snippet, author, date, read_time, thumbnail_url, phase, status')
-        .eq('section', 'green-transition')
-        .eq('phase', phase);
+      // Find categories for green-transition section that match this phase
+      const { data: cats } = await supabase
+        .from('categories')
+        .select('id, sections!categories_section_id_fkey(slug)')
+        .eq('sections.slug', 'green-transition');
+
+      // Filter categories whose slug matches the phase pattern
+      const categoryIds = (cats || [])
+        .filter((c: any) => {
+          const slug = (c as any).slug || '';
+          return slug === `green-transition-${phase}` || slug === phase;
+        })
+        .map((c: any) => c.id);
+
+      // Fallback: use denormalized section+phase if no categories found yet
+      let query;
+      if (categoryIds.length > 0) {
+        query = supabase
+          .from('essays')
+          .select('id, slug, title, snippet, author, date, read_time, thumbnail_url, phase, status')
+          .in('category_id', categoryIds);
+      } else {
+        query = supabase
+          .from('essays')
+          .select('id, slug, title, snippet, author, date, read_time, thumbnail_url, phase, status')
+          .eq('section', 'green-transition')
+          .eq('phase', phase);
+      }
 
       if (!isAdmin) {
         query = query.eq('status', 'published');

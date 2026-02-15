@@ -27,6 +27,7 @@ interface Essay {
   phase: string | null;
   status: string | null;
   published: boolean | null;
+  category_id: string | null;
   created_at: string;
   updated_at: string;
   economist_fields: {
@@ -65,11 +66,11 @@ export default function FinanceEssayPage() {
     setLoading(true);
     setNotFound(false);
     try {
+      // Fetch by globally unique slug
       const { data, error } = await supabase
         .from('essays')
         .select('*')
-        .eq('slug', slug)
-        .eq('section', 'finance')
+        .eq('slug', slug!)
         .maybeSingle();
 
       if (error) throw error;
@@ -85,35 +86,29 @@ export default function FinanceEssayPage() {
       } else {
         setNotFound(true);
       }
-    } catch (error) {
-      if (import.meta.env.DEV) {
-        console.error('Failed to load essay:', error);
-      }
+    } catch {
       setNotFound(true);
     } finally {
       setLoading(false);
     }
   };
 
+  // Fetch siblings via category_id FK
   const { data: siblings } = useQuery({
-    queryKey: ['finance-siblings', essay?.phase],
+    queryKey: ['finance-siblings', essay?.category_id],
     queryFn: async () => {
-      let query = supabase
+      if (!essay?.category_id) return [];
+      const { data, error } = await supabase
         .from('essays')
         .select('slug, title')
-        .eq('section', 'finance')
+        .eq('category_id', essay.category_id)
         .eq('status', 'published')
         .order('sort_order', { ascending: true });
 
-      if (essay?.phase) {
-        query = query.eq('phase', essay.phase);
-      }
-
-      const { data, error } = await query;
       if (error) throw error;
       return data as EssayListItem[];
     },
-    enabled: !!essay,
+    enabled: !!essay?.category_id,
   });
 
   if (notFound || (!loading && !essay)) {

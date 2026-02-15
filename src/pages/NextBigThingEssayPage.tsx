@@ -20,6 +20,7 @@ interface Essay {
   phase: string | null;
   status: string | null;
   published: boolean | null;
+  category_id: string | null;
   created_at: string;
   updated_at: string;
   economist_fields: {
@@ -59,11 +60,11 @@ export default function NextBigThingEssayPage() {
     setLoading(true);
     setNotFound(false);
     try {
+      // Fetch by globally unique slug — no section string matching needed
       const { data, error } = await supabase
         .from('essays')
         .select('*')
-        .eq('slug', slug)
-        .eq('section', 'next-big-thing')
+        .eq('slug', slug!)
         .maybeSingle();
 
       if (error) throw error;
@@ -79,36 +80,29 @@ export default function NextBigThingEssayPage() {
       } else {
         setNotFound(true);
       }
-    } catch (error) {
-      if (import.meta.env.DEV) {
-        console.error('Failed to load essay:', error);
-      }
+    } catch {
       setNotFound(true);
     } finally {
       setLoading(false);
     }
   };
 
-  // Fetch sibling essays for prev/next
+  // Fetch sibling essays via category_id FK
   const { data: siblings } = useQuery({
-    queryKey: ['nbt-siblings', essay?.phase],
+    queryKey: ['nbt-siblings', essay?.category_id],
     queryFn: async () => {
-      let query = supabase
+      if (!essay?.category_id) return [];
+      const { data, error } = await supabase
         .from('essays')
         .select('slug, title')
-        .eq('section', 'next-big-thing')
+        .eq('category_id', essay.category_id)
         .eq('status', 'published')
         .order('created_at', { ascending: false });
 
-      if (essay?.phase) {
-        query = query.eq('phase', essay.phase);
-      }
-
-      const { data, error } = await query;
       if (error) throw error;
       return data as EssayListItem[];
     },
-    enabled: !!essay,
+    enabled: !!essay?.category_id,
   });
 
   if (notFound || (!loading && !essay)) {
@@ -125,7 +119,6 @@ export default function NextBigThingEssayPage() {
 
   if (!essay) return null;
 
-  // Compute prev/next
   const currentIndex = siblings?.findIndex((e) => e.slug === slug) ?? -1;
   const previous = currentIndex > 0 ? siblings![currentIndex - 1] : null;
   const next =
@@ -142,7 +135,6 @@ export default function NextBigThingEssayPage() {
     ? `/the-next-big-thing?theme=${essay.phase}`
     : '/the-next-big-thing';
 
-  // Pre-compute HTML for TOC
   const htmlContent = contentToHtml(essay.content || '');
 
   return (

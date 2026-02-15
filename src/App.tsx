@@ -6,13 +6,14 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { RequireAdmin } from "@/components/auth/RequireAdmin";
+import { lazy, Suspense } from "react";
+import { LoadingState } from "@/components/states";
 
 // Pages
 import Index from "./pages/Index";
 import About from "./pages/About";
 import Auth from "./pages/Auth";
 import Accounting from "./pages/Accounting";
-import Finance101 from "./pages/Finance101";
 import GreenTransition from "./pages/GreenTransition";
 import NotFound from "./pages/NotFound";
 
@@ -27,9 +28,7 @@ import ConsolidationDetail from "./pages/ConsolidationDetail";
 
 // Finance
 import FinanceWorkspace from "./pages/FinanceWorkspace";
-import FinancialAnalytics from "./pages/FinancialAnalytics";
 import FinancialAnalyticsDetail from "./pages/FinancialAnalyticsDetail";
-import FinancialPlanningForecasting from "./pages/FinancialPlanningForecasting";
 import Budgeting from "./pages/Budgeting";
 import CfaPrep from "./pages/CfaPrep";
 import ExecutiveDashboard from "./pages/ExecutiveDashboard";
@@ -62,19 +61,20 @@ import Settings from "./pages/Settings";
 import DebugAuth from "./pages/DebugAuth";
 import AdminHealth from "./pages/AdminHealth";
 import AdminContent from "./pages/AdminContent";
-import AdminContentEditor from "./pages/AdminContentEditor";
 import AdminDashboard from "./pages/AdminDashboard";
 import RemoraTrading from "./pages/RemoraTrading";
 import DikaQuantEngine from "./pages/DikaQuantEngine";
 import TheNextBigThing from "./pages/TheNextBigThing";
-import WriterListPage from "./pages/WriterListPage";
-import WriterEditorPage from "./pages/WriterEditorPage";
 import NextBigThingEssayPage from "./pages/NextBigThingEssayPage";
 import FinanceEssayPage from "./pages/FinanceEssayPage";
 import FinanceLanding from "./pages/FinanceLanding";
 import FinanceLifecyclePage from "./pages/FinanceLifecyclePage";
 import FinanceFundamentals from "./pages/FinanceFundamentals";
 import FundamentalDetail from "./pages/FundamentalDetail";
+import AdminEditorRedirect from "./pages/AdminEditorRedirect";
+
+// Canonical Writer Studio (lazy-loaded)
+const WriterStudio = lazy(() => import("./domains/writing/WriterStudio"));
 
 const queryClient = new QueryClient();
 
@@ -132,7 +132,7 @@ const App = () => (
             <Route path="/green-transition/:phase" element={<GreenTransitionPhase />} />
             <Route path="/green-transition/:phase/:slug" element={<GreenTransitionEssayPage />} />
 
-            {/* Legacy Masyarakat Baru routes - redirect to flattened sections */}
+            {/* Legacy Masyarakat Baru routes */}
             <Route path="/masyarakat-baru" element={<Navigate to="/critical-thinking-research" replace />} />
             <Route path="/masyarakat-baru/english-ielts" element={<Navigate to="/english-ielts" replace />} />
             <Route path="/masyarakat-baru/books-academia" element={<Navigate to="/books-academia" replace />} />
@@ -164,9 +164,20 @@ const App = () => (
             <Route path="/admin/dashboard" element={<RequireAdmin><AdminDashboard /></RequireAdmin>} />
             <Route path="/admin/health" element={<RequireAdmin><AdminHealth /></RequireAdmin>} />
             <Route path="/admin/content" element={<RequireAdmin><AdminContent /></RequireAdmin>} />
-            <Route path="/admin/content/:id" element={<RequireAdmin><AdminContentEditor /></RequireAdmin>} />
-            <Route path="/admin/writer/:section" element={<RequireAdmin><WriterListPage /></RequireAdmin>} />
-            <Route path="/admin/writer/:section/:slug" element={<RequireAdmin><WriterEditorPage /></RequireAdmin>} />
+
+            {/* Canonical Writer Studio — single editor for all essays */}
+            <Route path="/admin/writer/:id" element={
+              <RequireAdmin>
+                <Suspense fallback={<div className="flex items-center justify-center h-screen"><LoadingState /></div>}>
+                  <WriterStudio />
+                </Suspense>
+              </RequireAdmin>
+            } />
+
+            {/* Legacy admin editor routes → redirect to Writer Studio */}
+            <Route path="/admin/content/:id" element={<RequireAdmin><AdminEditorRedirect /></RequireAdmin>} />
+
+            {/* Public essay pages */}
             <Route path="/the-next-big-thing" element={<TheNextBigThing />} />
             <Route path="/the-next-big-thing/:slug" element={<NextBigThingEssayPage />} />
 
