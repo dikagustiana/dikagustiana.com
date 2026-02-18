@@ -10,7 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { Upload, FileText, Loader2, Check, AlertCircle } from 'lucide-react';
-import { formatCurrency } from '@/lib/financeUtils';
+import { formatCurrency } from '@/lib/personalFinanceUtils';
 
 interface ParsedTransaction {
   date: string;

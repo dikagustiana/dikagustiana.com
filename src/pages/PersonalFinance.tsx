@@ -26,12 +26,12 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { AddAccountDialog } from '@/components/finance/AddAccountDialog';
-import { AddTransactionDialog } from '@/components/finance/AddTransactionDialog';
-import { UploadStatementDialog } from '@/components/finance/UploadStatementDialog';
-import { SpendingInsights } from '@/components/finance/SpendingInsights';
-import { RecurringTransactions } from '@/components/finance/RecurringTransactions';
-import { formatCurrency } from '@/lib/financeUtils';
+import { AddAccountDialog } from '@/components/personal-finance/AddAccountDialog';
+import { AddTransactionDialog } from '@/components/personal-finance/AddTransactionDialog';
+import { UploadStatementDialog } from '@/components/personal-finance/UploadStatementDialog';
+import { SpendingInsights } from '@/components/personal-finance/SpendingInsights';
+import { RecurringTransactions } from '@/components/personal-finance/RecurringTransactions';
+import { formatCurrency } from '@/lib/personalFinanceUtils';
 
 interface Account {
   id: string;

@@ -1,87 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
-// ── Finance Fundamentals ──
-
-export interface FinanceFundamental {
-  id: string;
-  slug: string;
-  title: string;
-  thesis: string | null;
-  framing_content: string | null;
-  number: number | null;
-  sort_order: number;
-  created_at: string;
-  updated_at: string;
-}
-
-export const useFinanceFundamentals = () => {
-  return useQuery({
-    queryKey: ['finance-fundamentals'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('finance_fundamentals')
-        .select('*')
-        .order('sort_order', { ascending: true });
-
-      if (error) throw error;
-      return data as FinanceFundamental[];
-    },
-  });
-};
-
-export const useFinanceFundamentalBySlug = (slug: string) => {
-  return useQuery({
-    queryKey: ['finance-fundamentals', slug],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('finance_fundamentals')
-        .select('*')
-        .eq('slug', slug)
-        .single();
-
-      if (error) throw error;
-      return data as FinanceFundamental;
-    },
-    enabled: !!slug,
-  });
-};
-
-export const useFundamentalEssaysByFundamentalId = (fundamentalId: string | undefined) => {
-  return useQuery({
-    queryKey: ['fundamental-essays-by-id', fundamentalId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('essays')
-        .select('id, slug, title, snippet, date, read_time, finance_order, created_at')
-        .eq('fundamental_id', fundamentalId!)
-        .eq('published', true)
-        .order('finance_order', { ascending: true, nullsFirst: false })
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      return data as FinanceSectionEssay[];
-    },
-    enabled: !!fundamentalId,
-  });
-};
-
-export const useUpdateFundamental = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: { title?: string; framing_content?: string | null; thesis?: string | null; number?: number; sort_order?: number } }) => {
-      const { error } = await supabase
-        .from('finance_fundamentals')
-        .update(data)
-        .eq('id', id);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['finance-fundamentals'] });
-    },
-  });
-};
-
 // ── Finance Sections (DB-backed domain metadata) ──
 
 export interface FinanceSection {
@@ -223,19 +142,8 @@ export interface FinanceSectionEssay {
   created_at: string;
 }
 
-/**
- * Maps route slug to DB finance_section value.
- * Route slugs: strategic-finance, planning-forecasting, financial-analytics
- * DB values: strategic, planning, analytics
- */
-const ROUTE_TO_DB_SECTION: Record<string, string> = {
-  'strategic-finance': 'strategic',
-  'planning-forecasting': 'planning',
-  'financial-analytics': 'analytics',
-};
-
 export const useFinanceSectionEssays = (routeSlugOrDbKey: string) => {
-  const dbKey = ROUTE_TO_DB_SECTION[routeSlugOrDbKey] || routeSlugOrDbKey;
+  const dbKey = routeSlugOrDbKey;
 
   return useQuery({
     queryKey: ['finance-section-essays', dbKey],
@@ -354,28 +262,5 @@ export const useEssaysByModuleId = (moduleId: string | undefined) => {
       return data as FinanceModuleEssay[];
     },
     enabled: !!moduleId,
-  });
-};
-
-// ── Essays linked to a fundamental ──
-
-export const useFundamentalEssays = (fundamentalSlug: string) => {
-  return useQuery({
-    queryKey: ['fundamental-essays', fundamentalSlug],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('essays')
-        .select('id, slug, title, snippet, author, date, read_time, thumbnail_url, finance_order, created_at')
-        .eq('section', 'finance')
-        .eq('finance_section', 'fundamentals')
-        .eq('topic', fundamentalSlug)
-        .eq('published', true)
-        .order('finance_order', { ascending: true, nullsFirst: false })
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      return data as FinanceSectionEssay[];
-    },
-    enabled: !!fundamentalSlug,
   });
 };
