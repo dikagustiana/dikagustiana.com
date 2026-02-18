@@ -274,6 +274,37 @@ export const useFinanceEssaysForAdmin = () => {
   });
 };
 
+// ── Finance Modules ──
+
+export interface FinanceModule {
+  id: string;
+  track_slug: string;
+  slug: string;
+  title: string;
+  thesis: string | null;
+  sort_order: number;
+  framing_content: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export const useFinanceModulesByTrack = (trackSlug: string) => {
+  return useQuery({
+    queryKey: ['finance-modules', trackSlug],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('finance_modules')
+        .select('*')
+        .eq('track_slug', trackSlug)
+        .order('sort_order', { ascending: true });
+
+      if (error) throw error;
+      return data as FinanceModule[];
+    },
+    enabled: !!trackSlug,
+  });
+};
+
 // ── Essays linked to a fundamental ──
 
 export const useFundamentalEssays = (fundamentalSlug: string) => {
