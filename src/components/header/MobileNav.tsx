@@ -11,64 +11,7 @@ import {
 } from '@/components/ui/sheet';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
-
-interface NavSection {
-  label: string;
-  path?: string;
-  basePath?: string;
-  items?: { label: string; path: string }[];
-}
-
-const navSections: NavSection[] = [
-  { label: 'Home', path: '/' },
-  {
-    label: 'Accounting',
-    basePath: '/accounting',
-    items: [
-      { label: 'FSLI Detail', path: '/accounting/fsli' },
-      { label: 'Consolidated Reporting', path: '/accounting/consolidated-reporting' },
-      { label: 'Statutory Reporting', path: '/accounting/statutory-reporting' },
-    ],
-  },
-  {
-    label: 'Finance',
-    basePath: '/finance-101',
-    items: [
-      { label: 'Financial Analytics', path: '/finance-101/financial-analytics' },
-      { label: 'Financial Planning & Forecasting', path: '/finance-101/financial-planning-forecasting' },
-      { label: 'Budgeting', path: '/finance-101/budgeting' },
-      { label: 'CFA Prep', path: '/finance-101/cfa-prep' },
-    ],
-  },
-  {
-    label: 'The Green Transition',
-    basePath: '/green-transition',
-    items: [
-      { label: 'Where We Are Now', path: '/green-transition/now' },
-      { label: 'Challenges Ahead', path: '/green-transition/gaps' },
-      { label: 'Pathways Forward', path: '/green-transition/future' },
-    ],
-  },
-  {
-    label: 'The Next Big Thing',
-    basePath: '/the-next-big-thing',
-    items: [
-      { label: 'Technology', path: '/the-next-big-thing?theme=technology' },
-      { label: 'Economy', path: '/the-next-big-thing?theme=economy' },
-      { label: 'Society', path: '/the-next-big-thing?theme=society' },
-      { label: 'Environment', path: '/the-next-big-thing?theme=environment' },
-      { label: 'Governance', path: '/the-next-big-thing?theme=governance' },
-    ],
-  },
-  {
-    label: 'Learning',
-    items: [
-      { label: 'Critical Thinking', path: '/critical-thinking-research' },
-      { label: 'Books', path: '/books-academia' },
-      { label: 'IELTS', path: '/english-ielts' },
-    ],
-  },
-];
+import { navSections, type NavSection } from '@/config/navConfig';
 
 export function MobileNav() {
   const [isOpen, setIsOpen] = useState(false);
