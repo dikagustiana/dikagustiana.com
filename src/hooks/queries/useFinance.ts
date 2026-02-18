@@ -305,6 +305,58 @@ export const useFinanceModulesByTrack = (trackSlug: string) => {
   });
 };
 
+// ── Finance Module by slug ──
+
+export const useFinanceModuleBySlug = (slug: string) => {
+  return useQuery({
+    queryKey: ['finance-modules-by-slug', slug],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('finance_modules')
+        .select('*')
+        .eq('slug', slug)
+        .limit(1)
+        .single();
+
+      if (error) throw error;
+      return data as FinanceModule;
+    },
+    enabled: !!slug,
+  });
+};
+
+// ── Essays linked to a finance module ──
+
+export interface FinanceModuleEssay {
+  id: string;
+  slug: string;
+  title: string;
+  snippet: string | null;
+  date: string | null;
+  read_time: string | null;
+  finance_order: number | null;
+  created_at: string;
+}
+
+export const useEssaysByModuleId = (moduleId: string | undefined) => {
+  return useQuery({
+    queryKey: ['essays-by-module-id', moduleId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('essays')
+        .select('id, slug, title, snippet, date, read_time, finance_order, created_at')
+        .eq('module_id', moduleId!)
+        .eq('published', true)
+        .order('finance_order', { ascending: true, nullsFirst: false })
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data as FinanceModuleEssay[];
+    },
+    enabled: !!moduleId,
+  });
+};
+
 // ── Essays linked to a fundamental ──
 
 export const useFundamentalEssays = (fundamentalSlug: string) => {
