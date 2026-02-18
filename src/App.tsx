@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useParams } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { RequireAdmin } from "@/components/auth/RequireAdmin";
@@ -28,9 +28,6 @@ import ConsolidationDetail from "./pages/ConsolidationDetail";
 
 // Finance
 import FinanceWorkspace from "./pages/FinanceWorkspace";
-import FinancialAnalyticsDetail from "./pages/FinancialAnalyticsDetail";
-import Budgeting from "./pages/Budgeting";
-import CfaPrep from "./pages/CfaPrep";
 import ExecutiveDashboard from "./pages/ExecutiveDashboard";
 
 // Forecasting
@@ -68,9 +65,8 @@ import TheNextBigThing from "./pages/TheNextBigThing";
 import NextBigThingEssayPage from "./pages/NextBigThingEssayPage";
 import FinanceEssayPage from "./pages/FinanceEssayPage";
 import FinanceLanding from "./pages/FinanceLanding";
-import FinanceLifecyclePage from "./pages/FinanceLifecyclePage";
-import FinanceFundamentals from "./pages/FinanceFundamentals";
-import FundamentalDetail from "./pages/FundamentalDetail";
+import FinanceTrackIndex from "./pages/FinanceTrackIndex";
+import FinanceModulePage from "./pages/FinanceModulePage";
 import AdminEditorRedirect from "./pages/AdminEditorRedirect";
 import WriterEditorPage from "./pages/WriterEditorPage";
 import WriterListPage from "./pages/WriterListPage";
@@ -79,6 +75,16 @@ import WriterListPage from "./pages/WriterListPage";
 const WriterStudio = lazy(() => import("./domains/writing/WriterStudio"));
 
 const queryClient = new QueryClient();
+
+const FinanceEssayLegacyRedirect = () => {
+  const { slug } = useParams();
+
+  if (slug) {
+    return <Navigate to="/finance" replace />;
+  }
+
+  return <Navigate to="/finance" replace />;
+};
 
 const App = () => (
   <HelmetProvider>
@@ -104,18 +110,18 @@ const App = () => (
 
             {/* Finance */}
             <Route path="/finance" element={<FinanceLanding />} />
-            <Route path="/finance/fundamentals" element={<FinanceFundamentals />} />
-            <Route path="/finance/fundamentals/:slug" element={<FundamentalDetail />} />
-            <Route path="/finance/:section" element={<FinanceLifecyclePage />} />
+            <Route path="/finance/:track" element={<FinanceTrackIndex />} />
+            <Route path="/finance/:track/:moduleSlug" element={<FinanceModulePage />} />
+            <Route path="/finance/:track/:moduleSlug/:essaySlug" element={<FinanceEssayPage />} />
 
-            {/* Legacy finance-101 redirects */}
+            {/* Legacy redirects */}
             <Route path="/finance-101" element={<Navigate to="/finance" replace />} />
-            <Route path="/finance-101/essays/:slug" element={<FinanceEssayPage />} />
-            <Route path="/finance-101/financial-analytics" element={<Navigate to="/finance/financial-analytics" replace />} />
-            <Route path="/finance-101/financial-analytics/:topic" element={<FinancialAnalyticsDetail />} />
-            <Route path="/finance-101/financial-planning-forecasting" element={<Navigate to="/finance/planning-forecasting" replace />} />
-            <Route path="/finance-101/budgeting" element={<Budgeting />} />
-            <Route path="/finance-101/cfa-prep" element={<CfaPrep />} />
+            <Route path="/finance-101/financial-analytics" element={<Navigate to="/finance/analytics" replace />} />
+            <Route path="/finance-101/financial-analytics/:topic" element={<Navigate to="/finance/analytics" replace />} />
+            <Route path="/finance-101/financial-planning-forecasting" element={<Navigate to="/finance/planning" replace />} />
+            <Route path="/finance-101/budgeting" element={<Navigate to="/finance/planning/budget-architecture" replace />} />
+            <Route path="/finance-101/cfa-prep" element={<Navigate to="/finance/fundamentals" replace />} />
+            <Route path="/finance-101/essays/:slug" element={<FinanceEssayLegacyRedirect />} />
 
             {/* Finance Workspace (admin-only) */}
             <Route path="/finance-workspace" element={<RequireAdmin><FinanceWorkspace /></RequireAdmin>} />
