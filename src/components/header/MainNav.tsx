@@ -2,39 +2,13 @@ import { Link, useLocation } from 'react-router-dom';
 import { NavDropdown } from './NavDropdown';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
-
-const accountingItems = [
-  { label: 'FSLI Detail', path: '/accounting/fsli' },
-  { label: 'Consolidated Reporting', path: '/accounting/consolidated-reporting' },
-  { label: 'Statutory Reporting', path: '/accounting/statutory-reporting' },
-];
-
-const financeItems = [
-  { label: 'Financial Analytics', path: '/finance-101/financial-analytics' },
-  { label: 'Financial Planning & Forecasting', path: '/finance-101/financial-planning-forecasting' },
-  { label: 'Budgeting', path: '/finance-101/budgeting' },
-  { label: 'CFA Prep', path: '/finance-101/cfa-prep' },
-];
-
-const greenTransitionItems = [
-  { label: 'Where We Are Now', path: '/green-transition/now' },
-  { label: 'Challenges Ahead', path: '/green-transition/gaps' },
-  { label: 'Pathways Forward', path: '/green-transition/future' },
-];
-
-const learningItems = [
-  { label: 'Critical Thinking', path: '/critical-thinking-research' },
-  { label: 'Books', path: '/books-academia' },
-  { label: 'IELTS', path: '/english-ielts' },
-];
-
-const nextBigThingItems = [
-  { label: 'Technology', path: '/the-next-big-thing?theme=technology' },
-  { label: 'Economy', path: '/the-next-big-thing?theme=economy' },
-  { label: 'Society', path: '/the-next-big-thing?theme=society' },
-  { label: 'Environment', path: '/the-next-big-thing?theme=environment' },
-  { label: 'Governance', path: '/the-next-big-thing?theme=governance' },
-];
+import {
+  accountingItems,
+  financeItems,
+  greenTransitionItems,
+  learningItems,
+  nextBigThingItems,
+} from '@/config/navConfig';
 
 const financeWorkspaceItemsAdmin = [
   { label: "Dika's Tools", path: '/dikas-tools' },
@@ -73,7 +47,7 @@ export function MainNav() {
         label="Finance"
         items={financeItems}
         width="w-72"
-        basePath="/finance-101"
+        basePath="/finance"
       />
 
       <NavDropdown
