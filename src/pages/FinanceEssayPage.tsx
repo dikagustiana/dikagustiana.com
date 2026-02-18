@@ -2,7 +2,7 @@
  * FinanceEssayPage — Renders finance essays using the canonical ArticleShell.
  *
  * Same reading experience as Next Big Thing and Green Transition essays.
- * Route: /finance-101/essays/:slug
+ * Route: /finance/:track/:moduleSlug/:essaySlug
  */
 
 import { useParams, Navigate } from 'react-router-dom';
@@ -13,6 +13,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { LoadingState } from '@/components/states';
 import { ArticleShell, ArticleLayout } from '@/components/editorial';
 import { contentToHtml } from '@/lib/tiptap/serialize';
+import { useFinanceModuleBySlug } from '@/hooks/queries/useFinance';
 
 interface Essay {
   id: string;
@@ -28,6 +29,7 @@ interface Essay {
   status: string | null;
   published: boolean | null;
   category_id: string | null;
+  module_id: string | null;
   created_at: string;
   updated_at: string;
   economist_fields: {
@@ -44,23 +46,22 @@ interface EssayListItem {
   title: string;
 }
 
-const phaseLabels: Record<string, string> = {
-  fundamentals: 'Fundamentals',
-  'strategic-finance': 'Strategic Finance',
-  'financial-planning': 'Financial Planning & Forecasting',
-  'financial-analytics': 'Financial Analytics',
-};
-
 export default function FinanceEssayPage() {
-  const { slug } = useParams<{ slug: string }>();
+  const { track, moduleSlug, essaySlug } = useParams<{
+    track: string;
+    moduleSlug: string;
+    essaySlug: string;
+  }>();
   const { isAdmin } = useAuth();
   const [essay, setEssay] = useState<Essay | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
+  const { data: module } = useFinanceModuleBySlug(moduleSlug!);
+
   useEffect(() => {
-    if (slug) loadEssay();
-  }, [slug, isAdmin]);
+    if (essaySlug) loadEssay();
+  }, [essaySlug, isAdmin]);
 
   const loadEssay = async () => {
     setLoading(true);
@@ -70,7 +71,7 @@ export default function FinanceEssayPage() {
       const { data, error } = await supabase
         .from('essays')
         .select('*')
-        .eq('slug', slug!)
+        .eq('slug', essaySlug!)
         .maybeSingle();
 
       if (error) throw error;
@@ -93,26 +94,26 @@ export default function FinanceEssayPage() {
     }
   };
 
-  // Fetch siblings via category_id FK
+  // Fetch siblings via module_id FK
   const { data: siblings } = useQuery({
-    queryKey: ['finance-siblings', essay?.category_id],
+    queryKey: ['finance-siblings', essay?.module_id],
     queryFn: async () => {
-      if (!essay?.category_id) return [];
+      if (!essay?.module_id) return [];
       const { data, error } = await supabase
         .from('essays')
         .select('slug, title')
-        .eq('category_id', essay.category_id)
+        .eq('module_id', essay.module_id)
         .eq('status', 'published')
         .order('sort_order', { ascending: true });
 
       if (error) throw error;
       return data as EssayListItem[];
     },
-    enabled: !!essay?.category_id,
+    enabled: !!essay?.module_id,
   });
 
   if (notFound || (!loading && !essay)) {
-    return <Navigate to="/finance-101" replace />;
+    return <Navigate to="/finance" replace />;
   }
 
   if (loading) {
@@ -125,18 +126,18 @@ export default function FinanceEssayPage() {
 
   if (!essay) return null;
 
-  const currentIndex = siblings?.findIndex((e) => e.slug === slug) ?? -1;
+  const currentIndex = siblings?.findIndex((e) => e.slug === essaySlug) ?? -1;
   const previous = currentIndex > 0 ? siblings![currentIndex - 1] : null;
   const next =
     siblings && currentIndex >= 0 && currentIndex < siblings.length - 1
       ? siblings[currentIndex + 1]
       : null;
 
-  const getEssayUrl = (essaySlug: string) => `/finance-101/essays/${essaySlug}`;
+  const getEssayUrl = (slug: string) => `/finance/${track}/${moduleSlug}/${slug}`;
 
   const economistFields = essay.economist_fields || {};
   const deck = economistFields.deck || essay.snippet;
-  const topic = essay.phase ? phaseLabels[essay.phase] || essay.phase : 'Finance';
+  const topic = module?.title ?? essay.phase ?? 'Finance';
   const htmlContent = contentToHtml(essay.content || '');
 
   return (
@@ -144,7 +145,7 @@ export default function FinanceEssayPage() {
       seoTitle={essay.title}
       seoDescription={deck || 'Finance knowledge for decision-making.'}
       seoAuthor={essay.author || undefined}
-      backLink={{ label: 'Back to Finance', path: '/finance-101' }}
+      backLink={{ label: 'Back to module', path: `/finance/${track}/${moduleSlug}` }}
       title={essay.title}
       deck={deck}
       author={essay.author}
