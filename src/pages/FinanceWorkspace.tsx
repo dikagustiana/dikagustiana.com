@@ -4,7 +4,6 @@
  * Provides:
  *   - Featured essay selector
  *   - Finance section (domain) metadata editor
- *   - Fundamentals core content editor
  *   - Quick links to tools
  */
 
@@ -18,15 +17,13 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Link } from 'react-router-dom';
-import { BarChart3, Calculator, Star, Layers, BookOpen, Save, Check } from 'lucide-react';
+import { BarChart3, Calculator, Star, Layers, Save, Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import {
   useFinanceSettings,
   useUpdateFinanceSetting,
   useFinanceSections,
   useUpdateFinanceSection,
-  useFinanceFundamentals,
-  useUpdateFundamental,
   useFinanceEssaysForAdmin,
 } from '@/hooks/queries/useFinance';
 
@@ -52,12 +49,10 @@ export default function FinanceWorkspace() {
   const { data: settings, isLoading: settingsLoading } = useFinanceSettings();
   const { data: essays, isLoading: essaysLoading } = useFinanceEssaysForAdmin();
   const { data: sections, isLoading: sectionsLoading } = useFinanceSections();
-  const { data: fundamentals, isLoading: fundamentalsLoading } = useFinanceFundamentals();
 
   // Mutations
   const updateSetting = useUpdateFinanceSetting();
   const updateSection = useUpdateFinanceSection();
-  const updateFundamental = useUpdateFundamental();
 
   // Featured essay state
   const currentFeaturedId = settings?.featured_finance_essay_id || '';
@@ -94,7 +89,7 @@ export default function FinanceWorkspace() {
           Finance Workspace
         </h1>
         <p className="text-lg text-muted-foreground mb-8">
-          Manage finance content, sections, and fundamentals.
+          Manage finance content and sections.
         </p>
 
         <div className="space-y-8">
@@ -184,48 +179,6 @@ export default function FinanceWorkspace() {
                 </div>
               ) : (
                 <p className="text-muted-foreground italic">No sections found.</p>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Fundamentals Editor */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BookOpen className="h-5 w-5" />
-                Fundamentals
-              </CardTitle>
-              <CardDescription>
-                Edit core content for each of the 12 foundational concepts.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {fundamentalsLoading ? (
-                <div className="space-y-4">
-                  {Array.from({ length: 6 }).map((_, i) => (
-                    <Skeleton key={i} className="h-16 w-full" />
-                  ))}
-                </div>
-              ) : fundamentals && fundamentals.length > 0 ? (
-                <div className="space-y-6">
-                  {fundamentals.map((f) => (
-                    <FundamentalEditor
-                      key={f.id}
-                      title={f.title}
-                      initialContent={f.framing_content || ''}
-                      sortOrder={f.sort_order}
-                      onSave={async (framingContent) => {
-                        await updateFundamental.mutateAsync({
-                          id: f.id,
-                          data: { framing_content: framingContent },
-                        });
-                        toast({ title: `${f.title} updated` });
-                      }}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <p className="text-muted-foreground italic">No fundamentals found.</p>
               )}
             </CardContent>
           </Card>
@@ -327,45 +280,6 @@ function SectionEditor({ initialTitle, initialDescription, slug, onSave }: {
         onChange={(e) => setDescription(e.target.value)}
         placeholder="Short positioning line..."
         rows={2}
-      />
-    </div>
-  );
-}
-
-function FundamentalEditor({ title, initialContent, sortOrder, onSave }: {
-  title: string;
-  initialContent: string;
-  sortOrder: number;
-  onSave: (coreContent: string) => Promise<void>;
-}) {
-  const [content, setContent] = useState(initialContent);
-  const [saving, setSaving] = useState(false);
-  const dirty = content !== initialContent;
-
-  return (
-    <div className="border border-border rounded-lg p-4 space-y-3">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-mono text-muted-foreground tabular-nums">
-            {String(sortOrder).padStart(2, '0')}
-          </span>
-          <span className="font-semibold text-sm">{title}</span>
-        </div>
-        {dirty && (
-          <Button size="sm" variant="outline" onClick={async () => {
-            setSaving(true);
-            try { await onSave(content); } finally { setSaving(false); }
-          }} disabled={saving}>
-            {saving ? <Check className="h-3 w-3 mr-1" /> : <Save className="h-3 w-3 mr-1" />}
-            Save
-          </Button>
-        )}
-      </div>
-      <Textarea
-        value={content}
-        onChange={(e) => setContent(e.target.value)}
-        placeholder="Core content for this fundamental..."
-        rows={3}
       />
     </div>
   );
