@@ -15,7 +15,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowRight, Landmark, Target, BarChart3, TrendingUp, type LucideIcon } from 'lucide-react';
-import { useFeaturedFinanceEssay, useFinanceSections, useFinanceSettings } from '@/hooks/queries/useFinance';
+import { useFeaturedFinanceEssay, useFinanceSections } from '@/hooks/queries/useFinance';
 
 /**
  * Map DB icon name → Lucide component.
@@ -38,9 +38,6 @@ function sectionHref(slug: string): string {
 export default function FinanceLanding() {
   const { data: featured, isLoading: featuredLoading } = useFeaturedFinanceEssay();
   const { data: sections, isLoading: sectionsLoading } = useFinanceSections();
-  const { data: settings, isLoading: settingsLoading } = useFinanceSettings();
-
-  const tagline = settings?.finance_tagline || '';
 
   return (
     <PageLayout
@@ -54,11 +51,15 @@ export default function FinanceLanding() {
 
       <div className="py-8 container max-w-4xl">
         <h1 className="text-4xl font-display font-bold mb-2">Finance</h1>
-        {(settingsLoading || tagline) && (
-          <p className="text-lg text-muted-foreground mb-10 max-w-2xl">
-            {settingsLoading ? <Skeleton className="h-5 w-64 inline-block" /> : tagline}
+        <div className="mb-10 max-w-2xl">
+          <p className="text-lg text-muted-foreground leading-relaxed">
+            Finance exists to support decisions — not to produce reports.
+            This section covers the ideas, the strategy, the planning, and the analysis.
           </p>
-        )}
+          <p className="text-base text-muted-foreground mt-3">
+            Start with Fundamentals if you are building from scratch.
+          </p>
+        </div>
 
         {/* Featured Essay */}
         {featuredLoading ? (
@@ -106,9 +107,14 @@ export default function FinanceLanding() {
                       <div className="flex items-start gap-4">
                         <Icon className="h-6 w-6 text-primary flex-shrink-0 mt-0.5" />
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-foreground mb-1 group-hover:text-primary transition-colors">
-                            {domain.title}
-                          </h3>
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
+                              {domain.title}
+                            </h3>
+                            {domain.slug === 'fundamentals' && (
+                              <Badge variant="secondary" className="text-xs">Start here</Badge>
+                            )}
+                          </div>
                           {domain.description && (
                             <p className="text-sm text-muted-foreground leading-relaxed">
                               {domain.description}
