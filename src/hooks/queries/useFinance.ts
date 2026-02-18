@@ -213,6 +213,22 @@ export const useFinanceModulesByTrack = (trackSlug: string) => {
   });
 };
 
+export const useAllFinanceModules = () => {
+  return useQuery({
+    queryKey: ['finance-modules', 'all'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('finance_modules')
+        .select('*')
+        .order('track_slug', { ascending: true })
+        .order('sort_order', { ascending: true });
+
+      if (error) throw error;
+      return data as FinanceModule[];
+    },
+  });
+};
+
 // ── Finance Module by slug ──
 
 export const useFinanceModuleBySlug = (slug: string) => {

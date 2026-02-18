@@ -7,7 +7,7 @@
  *   - Quick links to tools
  */
 
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { PageLayout } from '@/components/layouts/PageLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -16,10 +16,14 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Link } from 'react-router-dom';
 import { BarChart3, Calculator, Star, Layers, Save, Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 import {
+  type FinanceModule,
+  useAllFinanceModules,
   useFinanceSettings,
   useUpdateFinanceSetting,
   useFinanceSections,
@@ -49,6 +53,7 @@ export default function FinanceWorkspace() {
   const { data: settings, isLoading: settingsLoading } = useFinanceSettings();
   const { data: essays, isLoading: essaysLoading } = useFinanceEssaysForAdmin();
   const { data: sections, isLoading: sectionsLoading } = useFinanceSections();
+  const { data: modules, isLoading: modulesLoading, refetch: refetchModules } = useAllFinanceModules();
 
   // Mutations
   const updateSetting = useUpdateFinanceSetting();
@@ -81,6 +86,25 @@ export default function FinanceWorkspace() {
       toast({ title: 'Failed to update', variant: 'destructive' });
     }
   };
+
+  const modulesByTrack = useMemo(() => {
+    if (!modules) return [] as Array<{ trackSlug: string; modules: FinanceModule[] }>;
+
+    const groups = modules.reduce((acc, module) => {
+      if (!acc[module.track_slug]) {
+        acc[module.track_slug] = [];
+      }
+      acc[module.track_slug].push(module);
+      return acc;
+    }, {} as Record<string, FinanceModule[]>);
+
+    return Object.entries(groups)
+      .map(([trackSlug, trackModules]) => ({
+        trackSlug,
+        modules: trackModules,
+      }))
+      .sort((a, b) => a.trackSlug.localeCompare(b.trackSlug));
+  }, [modules]);
 
   return (
     <PageLayout variant="content" role="manager" breadcrumbs={[{ label: 'Home', path: '/' }, { label: 'Finance Workspace' }]}>
@@ -138,6 +162,53 @@ export default function FinanceWorkspace() {
                 loading={settingsLoading}
                 onSave={handleTaglineSave}
               />
+            </CardContent>
+          </Card>
+
+          {/* Modules Editor */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Layers className="h-5 w-5" />
+                Modules
+              </CardTitle>
+              <CardDescription>
+                Edit module copy and ordering grouped by track.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {modulesLoading ? (
+                <div className="space-y-4">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <Skeleton key={i} className="h-20 w-full" />
+                  ))}
+                </div>
+              ) : modulesByTrack.length > 0 ? (
+                <Accordion type="multiple" className="w-full space-y-2">
+                  {modulesByTrack.map((group) => (
+                    <AccordionItem key={group.trackSlug} value={group.trackSlug} className="border rounded-lg px-4">
+                      <AccordionTrigger className="hover:no-underline">
+                        <span className="font-semibold">{group.trackSlug}</span>
+                      </AccordionTrigger>
+                      <AccordionContent>
+                        <div className="space-y-4 pb-2">
+                          {group.modules.map((module) => (
+                            <ModuleEditor
+                              key={module.id}
+                              module={module}
+                              onSaved={async () => {
+                                await refetchModules();
+                              }}
+                            />
+                          ))}
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
+              ) : (
+                <p className="text-muted-foreground italic">No modules found.</p>
+              )}
             </CardContent>
           </Card>
 
@@ -281,6 +352,107 @@ function SectionEditor({ initialTitle, initialDescription, slug, onSave }: {
         placeholder="Short positioning line..."
         rows={2}
       />
+    </div>
+  );
+}
+
+function ModuleEditor({ module, onSaved }: {
+  module: FinanceModule;
+  onSaved: () => Promise<void>;
+}) {
+  const { toast } = useToast();
+  const [title, setTitle] = useState(module.title);
+  const [thesis, setThesis] = useState(module.thesis || '');
+  const [sortOrder, setSortOrder] = useState(String(module.sort_order));
+  const [framingContent, setFramingContent] = useState(module.framing_content || '');
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    setTitle(module.title);
+    setThesis(module.thesis || '');
+    setSortOrder(String(module.sort_order));
+    setFramingContent(module.framing_content || '');
+  }, [module]);
+
+  const dirty =
+    title !== module.title ||
+    thesis !== (module.thesis || '') ||
+    sortOrder !== String(module.sort_order) ||
+    framingContent !== (module.framing_content || '');
+
+  return (
+    <div className="border border-border rounded-lg p-4 space-y-3">
+      <div className="flex items-center justify-between gap-2">
+        <div className="text-sm text-muted-foreground">
+          <code className="bg-muted px-2 py-0.5 rounded">{module.slug}</code>
+        </div>
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={!dirty || saving}
+          onClick={async () => {
+            setSaving(true);
+            try {
+              const parsedSortOrder = Number.parseInt(sortOrder, 10);
+              if (Number.isNaN(parsedSortOrder)) {
+                toast({ title: 'Sort order must be a valid number', variant: 'destructive' });
+                return;
+              }
+
+              const { error } = await supabase
+                .from('finance_modules')
+                .update({
+                  title,
+                  thesis: thesis || null,
+                  sort_order: parsedSortOrder,
+                  framing_content: framingContent || null,
+                })
+                .eq('id', module.id);
+
+              if (error) throw error;
+
+              await onSaved();
+              toast({ title: `Saved ${title}` });
+            } catch {
+              toast({ title: 'Failed to save module', variant: 'destructive' });
+            } finally {
+              setSaving(false);
+            }
+          }}
+        >
+          {saving ? <Check className="h-3 w-3 mr-1" /> : <Save className="h-3 w-3 mr-1" />}
+          Save
+        </Button>
+      </div>
+
+      <div className="grid gap-3 md:grid-cols-2">
+        <div className="space-y-2">
+          <Label>Title</Label>
+          <Input value={title} onChange={(e) => setTitle(e.target.value)} />
+        </div>
+        <div className="space-y-2">
+          <Label>Sort order</Label>
+          <Input
+            type="number"
+            value={sortOrder}
+            onChange={(e) => setSortOrder(e.target.value)}
+          />
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label>Thesis</Label>
+        <Input value={thesis} onChange={(e) => setThesis(e.target.value)} />
+      </div>
+
+      <div className="space-y-2">
+        <Label>Framing content</Label>
+        <Textarea
+          rows={5}
+          value={framingContent}
+          onChange={(e) => setFramingContent(e.target.value)}
+        />
+      </div>
     </div>
   );
 }
