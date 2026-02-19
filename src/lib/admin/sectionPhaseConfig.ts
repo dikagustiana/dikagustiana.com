@@ -96,7 +96,7 @@ export const SECTION_PHASE_CONFIG: Record<string, SectionPhaseEntry> = {
  */
 export const FINANCE_DOMAIN_OPTIONS: PhaseOption[] = [
   { value: 'fundamentals', label: 'Fundamentals' },
-  { value: 'strategic', label: 'Strategic Finance' },
+  { value: 'strategic-finance', label: 'Strategic Finance' },
   { value: 'planning', label: 'Planning & Forecasting' },
   { value: 'analytics', label: 'Financial Analytics' },
 ];
