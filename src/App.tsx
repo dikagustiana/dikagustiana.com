@@ -70,6 +70,7 @@ import FinanceModulePage from "./pages/FinanceModulePage";
 import AdminEditorRedirect from "./pages/AdminEditorRedirect";
 import WriterEditorPage from "./pages/WriterEditorPage";
 import WriterListPage from "./pages/WriterListPage";
+import FinanceFundamentals from "./pages/FinanceFundamentals";
 
 // Canonical Writer Studio (lazy-loaded)
 const WriterStudio = lazy(() => import("./domains/writing/WriterStudio"));
@@ -110,6 +111,7 @@ const App = () => (
 
             {/* Finance */}
             <Route path="/finance" element={<FinanceLanding />} />
+            <Route path="/finance/fundamentals" element={<FinanceFundamentals />} />
             <Route path="/finance/:track" element={<FinanceTrackIndex />} />
             <Route path="/finance/:track/:moduleSlug" element={<FinanceModulePage />} />
             <Route path="/finance/:track/:moduleSlug/:essaySlug" element={<FinanceEssayPage />} />
