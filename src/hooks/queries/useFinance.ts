@@ -196,6 +196,7 @@ export interface FinanceModule {
   thesis: string | null;
   sort_order: number;
   framing_content: string | null;
+  module_meta: { variant?: string; icon?: string; color_accent?: string } | null;
   created_at: string;
   updated_at: string;
 }
