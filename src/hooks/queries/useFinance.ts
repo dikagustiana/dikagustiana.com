@@ -196,93 +196,56 @@ export interface FinanceModule {
   updated_at: string;
 }
 
-// ── Finance Fundamentals ──
-
-export interface FinanceFundamental {
-  id: string;
-  number: number | null;
-  slug: string;
-  title: string;
-  thesis: string | null;
-  framing_content: string | null;
-  sort_order: number;
-  created_at: string;
-  updated_at: string;
-}
-
-export const useFinanceFundamentals = () => {
+export const useFinanceModulesByTrack = (trackSlug: string) => {
   return useQuery({
-    queryKey: ['finance-fundamentals'],
+    queryKey: ['finance-modules', trackSlug],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('finance_fundamentals')
+        .from('finance_modules')
         .select('*')
+        .eq('track_slug', trackSlug)
         .order('sort_order', { ascending: true });
 
       if (error) throw error;
-      return data as FinanceFundamental[];
+      return data as FinanceModule[];
     },
-  });
-};
-
-export const useFinanceFundamentalBySlug = (slug: string) => {
-  return useQuery({
-    queryKey: ['finance-fundamentals', slug],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('finance_fundamentals')
-        .select('*')
-        .eq('slug', slug)
-        .single();
-
-      if (error) throw error;
-      return data as FinanceFundamental;
-    },
-    enabled: !!slug,
-  });
-};
-
-export const useEssaysByFundamentalId = (fundamentalId: string | undefined) => {
-  return useQuery({
-    queryKey: ['essays-by-fundamental-id', fundamentalId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('essays')
-        .select('id, slug, title, snippet, date, read_time, finance_order, created_at')
-        .eq('fundamental_id', fundamentalId!)
-        .eq('published', true)
-        .order('finance_order', { ascending: true, nullsFirst: false })
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!fundamentalId,
-  });
-};
-
-// Stub hooks for finance_modules — kept for backward compat but no table querying
-export const useFinanceModulesByTrack = (_trackSlug: string) => {
-  return useQuery({
-    queryKey: ['finance-modules-stub'],
-    queryFn: async () => [] as FinanceModule[],
-    enabled: false,
+    enabled: !!trackSlug,
   });
 };
 
 export const useAllFinanceModules = () => {
   return useQuery({
-    queryKey: ['finance-modules-all-stub'],
-    queryFn: async () => [] as FinanceModule[],
-    enabled: false,
+    queryKey: ['finance-modules', 'all'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('finance_modules')
+        .select('*')
+        .order('track_slug', { ascending: true })
+        .order('sort_order', { ascending: true });
+
+      if (error) throw error;
+      return data as FinanceModule[];
+    },
   });
 };
 
-export const useFinanceModuleBySlug = (_slug: string) => {
+// ── Finance Module by slug ──
+
+export const useFinanceModuleBySlug = (slug: string) => {
   return useQuery({
-    queryKey: ['finance-module-by-slug-stub'],
-    queryFn: async () => null as FinanceModule | null,
-    enabled: false,
+    queryKey: ['finance-modules-by-slug', slug],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('finance_modules')
+        .select('*')
+        .eq('slug', slug)
+        .limit(1)
+        .single();
+
+      if (error) throw error;
+      return data as FinanceModule;
+    },
+    enabled: !!slug,
   });
 };
 
@@ -306,7 +269,7 @@ export const useEssaysByModuleId = (moduleId: string | undefined) => {
       const { data, error } = await supabase
         .from('essays')
         .select('id, slug, title, snippet, date, read_time, finance_order, created_at')
-        .eq('section', 'finance')
+        .eq('module_id', moduleId!)
         .eq('published', true)
         .order('finance_order', { ascending: true, nullsFirst: false })
         .order('created_at', { ascending: false });

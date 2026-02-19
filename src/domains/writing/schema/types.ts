@@ -54,9 +54,6 @@ export interface WritingEssay {
   economist_fields: Record<string, unknown> | null;
   educator_fields: Record<string, unknown> | null;
   coach_fields: Record<string, unknown> | null;
-  // DB fields mapped from essays table
-  snippet?: string | null;
-  content?: string | null;
   // Joined
   category?: WritingCategory;
 }

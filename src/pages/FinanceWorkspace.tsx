@@ -400,7 +400,7 @@ function ModuleEditor({ module, onSaved }: {
               }
 
               const { error } = await supabase
-                .from('finance_fundamentals')
+                .from('finance_modules')
                 .update({
                   title,
                   thesis: thesis || null,

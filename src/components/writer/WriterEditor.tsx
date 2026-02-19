@@ -304,7 +304,7 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
         author_bio: authorBio || null,
       };
 
-      const essayData = {
+      const essayData: Record<string, unknown> = {
         title,
         slug: finalSlug,
         section,
@@ -317,10 +317,14 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
         thumbnail_url: heroImageUrl || null,
         status: targetStatus,
         published: targetStatus === 'published',
-        voice_role: 'economist' as const,
-        economist_fields: economistFields as unknown as import('@/integrations/supabase/types').Json,
-        category_id: categoryId || null,
+        voice_role: 'economist',
+        economist_fields: economistFields,
       };
+
+      // Attach category_id if set
+      if (categoryId) {
+        essayData.category_id = categoryId;
+      }
 
       if (essayDbId) {
         // Update existing
@@ -336,7 +340,7 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
         // Create new
         const { data, error } = await supabase
           .from('essays')
-          .insert([{ ...essayData, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }])
+          .insert(essayData)
           .select()
           .single();
 
