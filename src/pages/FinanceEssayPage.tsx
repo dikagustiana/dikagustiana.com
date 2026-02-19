@@ -29,7 +29,8 @@ interface Essay {
   status: string | null;
   published: boolean | null;
   category_id: string | null;
-  module_id: string | null;
+  module_id?: string | null;
+  fundamental_id?: string | null;
   created_at: string;
   updated_at: string;
   economist_fields: {
@@ -94,22 +95,11 @@ export default function FinanceEssayPage() {
     }
   };
 
-  // Fetch siblings via module_id FK
+  // Fetch siblings — disabled as module_id is no longer used
   const { data: siblings } = useQuery({
-    queryKey: ['finance-siblings', essay?.module_id],
-    queryFn: async () => {
-      if (!essay?.module_id) return [];
-      const { data, error } = await supabase
-        .from('essays')
-        .select('slug, title')
-        .eq('module_id', essay.module_id)
-        .eq('status', 'published')
-        .order('sort_order', { ascending: true });
-
-      if (error) throw error;
-      return data as EssayListItem[];
-    },
-    enabled: !!essay?.module_id,
+    queryKey: ['finance-siblings-stub'],
+    queryFn: async (): Promise<EssayListItem[]> => [],
+    enabled: false,
   });
 
   if (notFound || (!loading && !essay)) {

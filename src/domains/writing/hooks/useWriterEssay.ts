@@ -55,6 +55,8 @@ interface SaveEssayData {
   economist_fields?: Record<string, unknown> | null;
   educator_fields?: Record<string, unknown> | null;
   coach_fields?: Record<string, unknown> | null;
+  fundamental_id?: string | null;
+  module_id?: string | null;
 }
 
 export function useSaveEssay() {
@@ -64,6 +66,11 @@ export function useSaveEssay() {
     mutationFn: async ({ id, data }: { id: string | null; data: SaveEssayData }) => {
       const payload = {
         ...data,
+        // Cast Json-compatible fields to avoid TS type mismatch
+        manager_fields: (data.manager_fields ?? null) as unknown,
+        economist_fields: (data.economist_fields ?? null) as unknown,
+        educator_fields: (data.educator_fields ?? null) as unknown,
+        coach_fields: (data.coach_fields ?? null) as unknown,
         published: data.status === 'published',
         updated_at: new Date().toISOString(),
       };
@@ -71,7 +78,7 @@ export function useSaveEssay() {
       if (id) {
         const { data: result, error } = await supabase
           .from('essays')
-          .update(payload)
+          .update(payload as never)
           .eq('id', id)
           .select()
           .single();
@@ -80,7 +87,7 @@ export function useSaveEssay() {
       } else {
         const { data: result, error } = await supabase
           .from('essays')
-          .insert(payload)
+          .insert(payload as never)
           .select()
           .single();
         if (error) throw error;
