@@ -237,7 +237,7 @@ export type Database = {
           finance_order: number | null
           finance_section: string | null
           fsli_slug: string | null
-          fundamental_id: string | null
+          module_id: string | null
           id: string
           learning_outcomes: string[] | null
           manager_fields: Json | null
@@ -269,7 +269,7 @@ export type Database = {
           finance_order?: number | null
           finance_section?: string | null
           fsli_slug?: string | null
-          fundamental_id?: string | null
+          module_id?: string | null
           id?: string
           learning_outcomes?: string[] | null
           manager_fields?: Json | null
@@ -301,7 +301,7 @@ export type Database = {
           finance_order?: number | null
           finance_section?: string | null
           fsli_slug?: string | null
-          fundamental_id?: string | null
+          module_id?: string | null
           id?: string
           learning_outcomes?: string[] | null
           manager_fields?: Json | null
@@ -327,13 +327,6 @@ export type Database = {
             columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "categories"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "essays_fundamental_id_fkey"
-            columns: ["fundamental_id"]
-            isOneToOne: false
-            referencedRelation: "finance_fundamentals"
             referencedColumns: ["id"]
           },
         ]

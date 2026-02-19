@@ -116,7 +116,11 @@ export const useFeaturedFinanceEssay = () => {
 
       const { data, error } = await supabase
         .from('essays')
-        .select('id, slug, title, snippet, author, date, read_time, thumbnail_url, economist_fields')
+        .select(`
+          id, slug, title, snippet, author, date, read_time, thumbnail_url, economist_fields,
+          finance_section,
+          module:finance_modules!module_id ( slug )
+        `)
         .eq('id', settings.value)
         .single();
 

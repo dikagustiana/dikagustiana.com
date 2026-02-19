@@ -69,10 +69,18 @@ export default function FinanceLanding() {
             <Skeleton className="h-4 w-full" />
           </div>
         ) : featured ? (
-          <Link
-            to={`/finance-101/essays/${featured.slug}`}
-            className="block border border-border rounded-lg p-8 mb-12 hover:border-primary/40 transition-colors group"
-          >
+          (() => {
+            const moduleSlug = featured.module?.slug || '';
+            const trackSlug = featured.finance_section || 'fundamentals';
+            const featuredHref = moduleSlug
+              ? `/finance/${trackSlug}/${moduleSlug}/${featured.slug}`
+              : `/finance/${trackSlug}`;
+
+            return (
+              <Link
+                to={featuredHref}
+                className="block border border-border rounded-lg p-8 mb-12 hover:border-primary/40 transition-colors group"
+              >
             <Badge variant="outline" className="mb-4 text-xs">Featured</Badge>
             <h2 className="text-2xl md:text-3xl font-display font-semibold mb-3 group-hover:text-primary transition-colors">
               {featured.title}
@@ -86,7 +94,9 @@ export default function FinanceLanding() {
               {featured.author && <span>{featured.author}</span>}
               {featured.read_time && <span>{featured.read_time}</span>}
             </div>
-          </Link>
+              </Link>
+            );
+          })()
         ) : null}
 
         {/* Domain Entry Points — DB-driven */}
