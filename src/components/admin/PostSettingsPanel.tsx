@@ -35,6 +35,8 @@ import { SECTION_PHASE_CONFIG, PHASE_TOPIC_CONFIG, FINANCE_DOMAIN_OPTIONS } from
 import type { FsliPage } from '@/hooks/queries/useFsliPages';
 import type { FinanceFundamental } from '@/hooks/queries/useFinance';
 
+type LessonType = 'concept' | 'framework' | 'case-study' | 'exercise' | 'model-walkthrough';
+
 interface PostSettingsPanelProps {
   // Section
   sections: Section[] | undefined;
@@ -63,6 +65,8 @@ interface PostSettingsPanelProps {
   onFinanceSectionChange: (value: string) => void;
   financeOrder: string;
   onFinanceOrderChange: (value: string) => void;
+  lessonType: LessonType | null;
+  onLessonTypeChange: (value: LessonType) => void;
   fundamentals: FinanceFundamental[] | undefined;
 
   // Voice role
@@ -116,6 +120,8 @@ export function PostSettingsPanel({
   onFinanceSectionChange,
   financeOrder,
   onFinanceOrderChange,
+  lessonType,
+  onLessonTypeChange,
   fundamentals,
   voiceRole,
   onVoiceRoleChange,
@@ -219,7 +225,7 @@ export function PostSettingsPanel({
 
         {/* Finance Domain & Order — shown when section=finance */}
         {isFinance && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="settings-finance-section">Finance Domain</Label>
               <Select value={financeSection} onValueChange={onFinanceSectionChange}>
@@ -232,6 +238,21 @@ export function PostSettingsPanel({
                       {opt.label}
                     </SelectItem>
                   ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="settings-lesson-type">Lesson Type</Label>
+              <Select value={lessonType ?? 'concept'} onValueChange={(v) => onLessonTypeChange(v as LessonType)}>
+                <SelectTrigger id="settings-lesson-type">
+                  <SelectValue placeholder="Select lesson type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="concept">concept</SelectItem>
+                  <SelectItem value="framework">framework</SelectItem>
+                  <SelectItem value="case-study">case-study</SelectItem>
+                  <SelectItem value="exercise">exercise</SelectItem>
+                  <SelectItem value="model-walkthrough">model-walkthrough</SelectItem>
                 </SelectContent>
               </Select>
             </div>
