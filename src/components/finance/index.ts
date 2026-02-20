@@ -1,0 +1,1 @@
+export { StrategicModuleHeader } from './StrategicModuleHeader';
