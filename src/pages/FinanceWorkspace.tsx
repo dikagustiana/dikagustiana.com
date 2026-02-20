@@ -399,7 +399,8 @@ function ModuleEditor({ module, onSaved }: {
                 return;
               }
 
-              const { error } = await supabase
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              const { error } = await (supabase as any)
                 .from('finance_modules')
                 .update({
                   title,

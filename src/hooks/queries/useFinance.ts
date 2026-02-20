@@ -118,8 +118,7 @@ export const useFeaturedFinanceEssay = () => {
         .from('essays')
         .select(`
           id, slug, title, snippet, author, date, read_time, thumbnail_url, economist_fields,
-          finance_section,
-          module:finance_modules!module_id ( slug )
+          finance_section
         `)
         .eq('id', settings.value)
         .single();
@@ -212,14 +211,15 @@ export const useFinanceModulesByTrack = (trackSlug: string) => {
   return useQuery({
     queryKey: ['finance-modules', trackSlug],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data, error } = await (supabase as any)
         .from('finance_modules')
         .select('*')
         .eq('track_slug', trackSlug)
         .order('sort_order', { ascending: true });
 
       if (error) throw error;
-      return data as FinanceModule[];
+      return (data || []) as FinanceModule[];
     },
     enabled: !!trackSlug,
   });
@@ -229,7 +229,8 @@ export const useModuleLessonCounts = (trackSlug: string) => {
   return useQuery({
     queryKey: ['finance-module-lesson-counts', trackSlug],
     queryFn: async () => {
-      const { data: modules, error: modError } = await supabase
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: modules, error: modError } = await (supabase as any)
         .from('finance_modules')
         .select('id, slug')
         .eq('track_slug', trackSlug);
@@ -238,8 +239,9 @@ export const useModuleLessonCounts = (trackSlug: string) => {
       if (!modules || modules.length === 0) return {};
 
       const counts: Record<string, number> = {};
-      for (const mod of modules) {
-        const { count, error } = await supabase
+      for (const mod of modules as { id: string; slug: string }[]) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { count, error } = await (supabase as any)
           .from('essays')
           .select('id', { count: 'exact', head: true })
           .eq('module_id', mod.id)
@@ -258,14 +260,15 @@ export const useAllFinanceModules = () => {
   return useQuery({
     queryKey: ['finance-modules', 'all'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data, error } = await (supabase as any)
         .from('finance_modules')
         .select('*')
         .order('track_slug', { ascending: true })
         .order('sort_order', { ascending: true });
 
       if (error) throw error;
-      return data as FinanceModule[];
+      return (data || []) as FinanceModule[];
     },
   });
 };
@@ -276,7 +279,8 @@ export const useFinanceModuleBySlug = (slug: string) => {
   return useQuery({
     queryKey: ['finance-modules-by-slug', slug],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data, error } = await (supabase as any)
         .from('finance_modules')
         .select('*')
         .eq('slug', slug)
@@ -308,7 +312,8 @@ export const useEssaysByModuleId = (moduleId: string | undefined) => {
   return useQuery({
     queryKey: ['essays-by-module-id', moduleId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data, error } = await (supabase as any)
         .from('essays')
         .select('id, slug, title, snippet, date, read_time, finance_order, lesson_type, created_at')
         .eq('module_id', moduleId!)
@@ -317,7 +322,7 @@ export const useEssaysByModuleId = (moduleId: string | undefined) => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data as FinanceModuleEssay[];
+      return (data || []) as FinanceModuleEssay[];
     },
     enabled: !!moduleId,
   });

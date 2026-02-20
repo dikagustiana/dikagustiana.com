@@ -237,10 +237,9 @@ export type Database = {
           finance_order: number | null
           finance_section: string | null
           fsli_slug: string | null
-          module_id: string | null
+          fundamental_id: string | null
           id: string
           learning_outcomes: string[] | null
-          lesson_type: 'concept' | 'framework' | 'case-study' | 'exercise' | 'model-walkthrough' | null
           manager_fields: Json | null
           phase: string | null
           prerequisites: string[] | null
@@ -270,10 +269,9 @@ export type Database = {
           finance_order?: number | null
           finance_section?: string | null
           fsli_slug?: string | null
-          module_id?: string | null
+          fundamental_id?: string | null
           id?: string
           learning_outcomes?: string[] | null
-          lesson_type?: 'concept' | 'framework' | 'case-study' | 'exercise' | 'model-walkthrough' | null
           manager_fields?: Json | null
           phase?: string | null
           prerequisites?: string[] | null
@@ -303,10 +301,9 @@ export type Database = {
           finance_order?: number | null
           finance_section?: string | null
           fsli_slug?: string | null
-          module_id?: string | null
+          fundamental_id?: string | null
           id?: string
           learning_outcomes?: string[] | null
-          lesson_type?: 'concept' | 'framework' | 'case-study' | 'exercise' | 'model-walkthrough' | null
           manager_fields?: Json | null
           phase?: string | null
           prerequisites?: string[] | null
@@ -330,6 +327,13 @@ export type Database = {
             columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "essays_fundamental_id_fkey"
+            columns: ["fundamental_id"]
+            isOneToOne: false
+            referencedRelation: "finance_fundamentals"
             referencedColumns: ["id"]
           },
         ]
@@ -508,53 +512,6 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
-      }
-      finance_modules: {
-        Row: {
-          created_at: string
-          framing_content: string | null
-          id: string
-          module_meta: Record<string, unknown> | null
-          slug: string
-          sort_order: number
-          thesis: string | null
-          title: string
-          track_slug: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          framing_content?: string | null
-          id?: string
-          module_meta?: Record<string, unknown> | null
-          slug: string
-          sort_order?: number
-          thesis?: string | null
-          title: string
-          track_slug: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          framing_content?: string | null
-          id?: string
-          module_meta?: Record<string, unknown> | null
-          slug?: string
-          sort_order?: number
-          thesis?: string | null
-          title?: string
-          track_slug?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "finance_modules_track_slug_fkey"
-            columns: ["track_slug"]
-            isOneToOne: false
-            referencedRelation: "finance_sections"
-            referencedColumns: ["slug"]
-          },
-        ]
       }
       finance_net_worth_history: {
         Row: {
@@ -1678,12 +1635,6 @@ export type Database = {
         | "other"
       app_role: "admin" | "user"
       content_status_enum: "draft" | "tone_pending" | "published" | "archived"
-      lesson_type_enum:
-        | "concept"
-        | "framework"
-        | "case-study"
-        | "exercise"
-        | "model-walkthrough"
       transaction_type: "income" | "expense" | "transfer"
       voice_role_enum: "manager" | "economist" | "educator" | "coach" | "hybrid"
     }

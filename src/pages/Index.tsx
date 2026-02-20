@@ -6,6 +6,7 @@ import { ArrowRight, BarChart3, BookOpen, Leaf, Lightbulb, Clock, User, Graduati
 import { Badge } from '@/components/ui/badge';
 import { useFeaturedEssays } from '@/hooks/queries/useEssays';
 import { LoadingState } from '@/components/states/LoadingState';
+import { HeroSection } from '@/components/HeroSection';
 
 const sections = [
   {
@@ -72,17 +73,7 @@ const Index = () => {
       />
 
       {/* Hero */}
-      <section className="py-16 md:py-24 bg-gradient-to-b from-background to-muted/30">
-        <div className="container max-w-4xl text-center">
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-display font-bold text-foreground mb-6">
-            Finance, Accounting, and Green Transition Economics.
-          </h1>
-
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Practitioner-focused analysis of financial operations, accounting standards, and the economics of decarbonization. Written by Dika Gustiana.
-          </p>
-        </div>
-      </section>
+      <HeroSection />
 
       {/* Featured Analysis */}
       {!isLoading && featuredEssays && featuredEssays.length > 0 && (

@@ -62,7 +62,8 @@ export function useSaveEssay() {
 
   return useMutation({
     mutationFn: async ({ id, data }: { id: string | null; data: SaveEssayData }) => {
-      const payload = {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const payload: any = {
         ...data,
         published: data.status === 'published',
         updated_at: new Date().toISOString(),

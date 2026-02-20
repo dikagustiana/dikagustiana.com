@@ -36,6 +36,9 @@ export interface WritingEssay {
   slug: string;
   deck: string | null;
   body: string | null;
+  // DB field aliases (kept for backward compat with raw DB queries)
+  snippet?: string | null;
+  content?: string | null;
   category_id: string;
   tags: string[];
   status: EssayStatus;

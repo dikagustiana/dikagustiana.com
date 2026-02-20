@@ -70,11 +70,8 @@ export default function FinanceLanding() {
           </div>
         ) : featured ? (
           (() => {
-            const moduleSlug = featured.module?.slug || '';
             const trackSlug = featured.finance_section || 'fundamentals';
-            const featuredHref = moduleSlug
-              ? `/finance/${trackSlug}/${moduleSlug}/${featured.slug}`
-              : `/finance/${trackSlug}`;
+            const featuredHref = `/finance/${trackSlug}`;
 
             return (
               <Link

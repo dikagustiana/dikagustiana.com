@@ -82,7 +82,7 @@ export default function FinanceEssayPage() {
           setNotFound(true);
           setEssay(null);
         } else {
-          setEssay(data as Essay);
+          setEssay(data as unknown as Essay);
         }
       } else {
         setNotFound(true);
@@ -96,20 +96,21 @@ export default function FinanceEssayPage() {
 
   // Fetch siblings via module_id FK
   const { data: siblings } = useQuery({
-    queryKey: ['finance-siblings', essay?.module_id],
+    queryKey: ['finance-siblings', (essay as any)?.module_id],
     queryFn: async () => {
-      if (!essay?.module_id) return [];
-      const { data, error } = await supabase
+      if (!(essay as any)?.module_id) return [];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data, error } = await (supabase as any)
         .from('essays')
         .select('slug, title')
-        .eq('module_id', essay.module_id)
+        .eq('module_id', (essay as any).module_id)
         .eq('status', 'published')
         .order('sort_order', { ascending: true });
 
       if (error) throw error;
       return data as EssayListItem[];
     },
-    enabled: !!essay?.module_id,
+    enabled: !!(essay as any)?.module_id,
   });
 
   if (notFound || (!loading && !essay)) {
