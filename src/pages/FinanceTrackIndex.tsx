@@ -26,6 +26,7 @@ export default function FinanceTrackIndex() {
 }
 
 function TrackContent({ track }: { track: string }) {
+  const isStrategic = track === 'strategic-finance';
   const {
     data: section,
     isLoading: sectionLoading,
@@ -89,13 +90,17 @@ function TrackContent({ track }: { track: string }) {
               <Link
                 key={mod.id}
                 to={`/finance/${track}/${mod.slug}`}
-                className="flex items-baseline gap-4 py-5 group"
+                className={`flex items-baseline gap-4 py-5 group ${
+                  isStrategic ? 'border-l-2 border-transparent hover:border-foreground/20 hover:pl-3 transition-all' : ''
+                }`}
               >
                 <span className="text-sm font-mono text-muted-foreground tabular-nums shrink-0">
                   {String(mod.sort_order).padStart(2, '0')}
                 </span>
                 <div className="min-w-0">
-                  <span className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors block leading-snug">
+                  <span className={`font-semibold text-foreground group-hover:text-primary transition-colors block leading-snug ${
+                    isStrategic ? 'text-base' : 'text-lg'
+                  }`}>
                     {mod.title}
                   </span>
                   {mod.thesis && (
