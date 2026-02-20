@@ -240,7 +240,9 @@ export type Database = {
           fundamental_id: string | null
           id: string
           learning_outcomes: string[] | null
+          lesson_type: Database["public"]["Enums"]["lesson_type_enum"] | null
           manager_fields: Json | null
+          module_id: string | null
           phase: string | null
           prerequisites: string[] | null
           published: boolean | null
@@ -272,7 +274,9 @@ export type Database = {
           fundamental_id?: string | null
           id?: string
           learning_outcomes?: string[] | null
+          lesson_type?: Database["public"]["Enums"]["lesson_type_enum"] | null
           manager_fields?: Json | null
+          module_id?: string | null
           phase?: string | null
           prerequisites?: string[] | null
           published?: boolean | null
@@ -304,7 +308,9 @@ export type Database = {
           fundamental_id?: string | null
           id?: string
           learning_outcomes?: string[] | null
+          lesson_type?: Database["public"]["Enums"]["lesson_type_enum"] | null
           manager_fields?: Json | null
+          module_id?: string | null
           phase?: string | null
           prerequisites?: string[] | null
           published?: boolean | null
@@ -334,6 +340,13 @@ export type Database = {
             columns: ["fundamental_id"]
             isOneToOne: false
             referencedRelation: "finance_fundamentals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "essays_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "finance_modules"
             referencedColumns: ["id"]
           },
         ]
@@ -509,6 +522,45 @@ export type Database = {
           sort_order?: number
           thesis?: string | null
           title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      finance_modules: {
+        Row: {
+          created_at: string
+          framing_content: string | null
+          id: string
+          module_meta: Json | null
+          slug: string
+          sort_order: number
+          thesis: string | null
+          title: string
+          track_slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          framing_content?: string | null
+          id?: string
+          module_meta?: Json | null
+          slug: string
+          sort_order?: number
+          thesis?: string | null
+          title: string
+          track_slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          framing_content?: string | null
+          id?: string
+          module_meta?: Json | null
+          slug?: string
+          sort_order?: number
+          thesis?: string | null
+          title?: string
+          track_slug?: string
           updated_at?: string
         }
         Relationships: []
@@ -1635,6 +1687,12 @@ export type Database = {
         | "other"
       app_role: "admin" | "user"
       content_status_enum: "draft" | "tone_pending" | "published" | "archived"
+      lesson_type_enum:
+        | "concept"
+        | "framework"
+        | "case-study"
+        | "exercise"
+        | "model-walkthrough"
       transaction_type: "income" | "expense" | "transfer"
       voice_role_enum: "manager" | "economist" | "educator" | "coach" | "hybrid"
     }
@@ -1777,6 +1835,13 @@ export const Constants = {
       ],
       app_role: ["admin", "user"],
       content_status_enum: ["draft", "tone_pending", "published", "archived"],
+      lesson_type_enum: [
+        "concept",
+        "framework",
+        "case-study",
+        "exercise",
+        "model-walkthrough",
+      ],
       transaction_type: ["income", "expense", "transfer"],
       voice_role_enum: ["manager", "economist", "educator", "coach", "hybrid"],
     },
