@@ -9,11 +9,42 @@
  * Redirects to /finance if the track slug is not found in the DB.
  */
 
+import React from 'react';
 import { Link, useParams, Navigate } from 'react-router-dom';
 import { PageLayout } from '@/components/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useFinanceSectionBySlug, useFinanceModulesByTrack, useModuleLessonCounts } from '@/hooks/queries/useFinance';
+import { useFinanceSectionBySlug, useFinanceModulesByTrack, useModuleLessonCounts, type FinanceModule } from '@/hooks/queries/useFinance';
+
+const ModuleRow = React.memo(function ModuleRow({ mod, track, lessonCount }: {
+  mod: FinanceModule;
+  track: string;
+  lessonCount: number;
+}) {
+  return (
+    <Link
+      to={`/finance/${track}/${mod.slug}`}
+      className="grid grid-cols-[3rem_1fr_auto] items-baseline gap-4 py-5 group hover:bg-muted/30 transition-colors -mx-3 px-3 rounded"
+    >
+      <span className="text-sm font-mono text-muted-foreground tabular-nums">
+        {String(mod.sort_order).padStart(2, '0')}
+      </span>
+      <div className="min-w-0">
+        <span className="text-base font-semibold text-foreground group-hover:text-primary transition-colors block leading-snug">
+          {mod.title}
+        </span>
+        {mod.thesis && (
+          <p className="text-sm text-muted-foreground mt-1 line-clamp-1">
+            {mod.thesis}
+          </p>
+        )}
+      </div>
+      <span className="text-xs text-muted-foreground tabular-nums shrink-0">
+        {lessonCount} lessons
+      </span>
+    </Link>
+  );
+});
 
 export default function FinanceTrackIndex() {
   const { track } = useParams<{ track: string }>();
@@ -26,7 +57,6 @@ export default function FinanceTrackIndex() {
 }
 
 function TrackContent({ track }: { track: string }) {
-  const isStrategic = track === 'strategic-finance';
   const {
     data: section,
     isLoading: sectionLoading,
@@ -87,32 +117,12 @@ function TrackContent({ track }: { track: string }) {
         ) : modules && modules.length > 0 ? (
           <div className="divide-y divide-border border-y border-border">
             {modules.map((mod) => (
-              <Link
+              <ModuleRow
                 key={mod.id}
-                to={`/finance/${track}/${mod.slug}`}
-                className={`flex items-baseline gap-4 py-5 group ${
-                  isStrategic ? 'border-l-2 border-transparent hover:border-foreground/20 hover:pl-3 transition-all' : ''
-                }`}
-              >
-                <span className="text-sm font-mono text-muted-foreground tabular-nums shrink-0">
-                  {String(mod.sort_order).padStart(2, '0')}
-                </span>
-                <div className="min-w-0">
-                  <span className={`font-semibold text-foreground group-hover:text-primary transition-colors block leading-snug ${
-                    isStrategic ? 'text-base' : 'text-lg'
-                  }`}>
-                    {mod.title}
-                  </span>
-                  {mod.thesis && (
-                    <p className="text-sm text-muted-foreground mt-1 line-clamp-1">
-                      {mod.thesis}
-                    </p>
-                  )}
-                  <span className="text-xs text-muted-foreground">
-                    {lessonCounts?.[mod.slug] || 0} lessons
-                  </span>
-                </div>
-              </Link>
+                mod={mod}
+                track={track}
+                lessonCount={lessonCounts?.[mod.slug] || 0}
+              />
             ))}
           </div>
         ) : (

@@ -11,22 +11,9 @@
 import { Link } from 'react-router-dom';
 import { PageLayout } from '@/components/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowRight, Landmark, Target, BarChart3, TrendingUp, type LucideIcon } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { useFeaturedFinanceEssay, useFinanceSections } from '@/hooks/queries/useFinance';
-
-/**
- * Map DB icon name → Lucide component.
- * Icons stored in finance_sections.icon column.
- */
-const ICON_MAP: Record<string, LucideIcon> = {
-  Landmark,
-  Target,
-  BarChart3,
-  TrendingUp,
-};
 
 /**
  * Map section slug → route path.
@@ -49,10 +36,10 @@ export default function FinanceLanding() {
         description="Finance knowledge for decision-making. Fundamentals first, then applied finance lifecycle."
       />
 
-      <div className="py-8 container max-w-4xl">
-        <h1 className="text-4xl font-display font-bold mb-2">Finance</h1>
+      <div className="py-8 container max-w-3xl">
+        <h1 className="text-3xl md:text-4xl font-display font-bold mb-2">Finance</h1>
         <div className="mb-10 max-w-2xl">
-          <p className="text-lg text-muted-foreground leading-relaxed">
+          <p className="text-base text-muted-foreground leading-relaxed">
             Finance exists to support decisions — not to produce reports.
             This section covers the ideas, the strategy, the planning, and the analysis.
           </p>
@@ -77,7 +64,7 @@ export default function FinanceLanding() {
                 to={featuredHref}
                 className="block border border-border rounded-lg p-8 mb-12 hover:border-primary/40 transition-colors group"
               >
-            <Badge variant="outline" className="mb-4 text-xs">Featured</Badge>
+            <span className="text-[10px] font-mono uppercase tracking-wider text-primary border border-primary/30 rounded px-1.5 py-0.5 mb-4 inline-block">Featured</span>
             <h2 className="text-2xl md:text-3xl font-display font-semibold mb-3 group-hover:text-primary transition-colors">
               {featured.title}
             </h2>
@@ -104,36 +91,33 @@ export default function FinanceLanding() {
           </div>
         ) : sections && sections.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {sections.map((domain) => {
-              const Icon = (domain.icon && ICON_MAP[domain.icon]) || Landmark;
-              return (
-                <Link key={domain.id} to={sectionHref(domain.slug)}>
-                  <Card className="h-full hover:border-primary/40 transition-all group cursor-pointer">
-                    <CardContent className="p-6">
-                      <div className="flex items-start gap-4">
-                        <Icon className="h-6 w-6 text-primary flex-shrink-0 mt-0.5" />
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
-                              {domain.title}
-                            </h3>
-                            {domain.slug === 'fundamentals' && (
-                              <Badge variant="secondary" className="text-xs">Start here</Badge>
-                            )}
-                          </div>
-                          {domain.description && (
-                            <p className="text-sm text-muted-foreground leading-relaxed">
-                              {domain.description}
-                            </p>
-                          )}
-                        </div>
-                        <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0 mt-1" />
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
-              );
-            })}
+            {sections.map((domain) => (
+              <Link key={domain.id} to={sectionHref(domain.slug)} className="group">
+                <div className="flex items-start gap-4 rounded-lg border border-border p-5 hover:border-primary/40 transition-all h-full">
+                  <span className="text-lg font-mono font-bold text-muted-foreground tabular-nums shrink-0">
+                    {String(domain.sort_order).padStart(2, '0')}
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
+                        {domain.title}
+                      </h3>
+                      {domain.slug === 'fundamentals' && (
+                        <span className="text-[10px] font-mono uppercase tracking-wider text-primary border border-primary/30 rounded px-1.5 py-0.5">
+                          Start here
+                        </span>
+                      )}
+                    </div>
+                    {domain.description && (
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        {domain.description}
+                      </p>
+                    )}
+                  </div>
+                  <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0 mt-1" />
+                </div>
+              </Link>
+            ))}
           </div>
         ) : null}
       </div>
