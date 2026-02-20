@@ -12,7 +12,7 @@ import { PageLayout } from '@/components/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
-import { StrategicModuleHeader } from '@/components/finance';
+import { StrategicModuleHeader, PlanningModuleHeader } from '@/components/finance';
 import {
   useFinanceSectionBySlug,
   useFinanceModuleBySlug,
@@ -159,6 +159,15 @@ export default function FinanceModulePage() {
           if (variant === 'board') {
             return (
               <StrategicModuleHeader
+                title={module.title}
+                thesis={module.thesis}
+                sortOrder={module.sort_order}
+              />
+            );
+          }
+          if (variant === 'planning') {
+            return (
+              <PlanningModuleHeader
                 title={module.title}
                 thesis={module.thesis}
                 sortOrder={module.sort_order}
