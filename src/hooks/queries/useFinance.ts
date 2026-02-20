@@ -225,6 +225,35 @@ export const useFinanceModulesByTrack = (trackSlug: string) => {
   });
 };
 
+export const useModuleLessonCounts = (trackSlug: string) => {
+  return useQuery({
+    queryKey: ['finance-module-lesson-counts', trackSlug],
+    queryFn: async () => {
+      const { data: modules, error: modError } = await supabase
+        .from('finance_modules')
+        .select('id, slug')
+        .eq('track_slug', trackSlug);
+
+      if (modError) throw modError;
+      if (!modules || modules.length === 0) return {};
+
+      const counts: Record<string, number> = {};
+      for (const mod of modules) {
+        const { count, error } = await supabase
+          .from('essays')
+          .select('id', { count: 'exact', head: true })
+          .eq('module_id', mod.id)
+          .eq('published', true);
+
+        counts[mod.slug] = error ? 0 : (count || 0);
+      }
+
+      return counts;
+    },
+    enabled: !!trackSlug,
+  });
+};
+
 export const useAllFinanceModules = () => {
   return useQuery({
     queryKey: ['finance-modules', 'all'],
@@ -271,6 +300,7 @@ export interface FinanceModuleEssay {
   date: string | null;
   read_time: string | null;
   finance_order: number | null;
+  lesson_type: string | null;
   created_at: string;
 }
 
@@ -280,7 +310,7 @@ export const useEssaysByModuleId = (moduleId: string | undefined) => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('essays')
-        .select('id, slug, title, snippet, date, read_time, finance_order, created_at')
+        .select('id, slug, title, snippet, date, read_time, finance_order, lesson_type, created_at')
         .eq('module_id', moduleId!)
         .eq('published', true)
         .order('finance_order', { ascending: true, nullsFirst: false })

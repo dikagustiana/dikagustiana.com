@@ -13,7 +13,7 @@ import { Link, useParams, Navigate } from 'react-router-dom';
 import { PageLayout } from '@/components/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useFinanceSectionBySlug, useFinanceModulesByTrack } from '@/hooks/queries/useFinance';
+import { useFinanceSectionBySlug, useFinanceModulesByTrack, useModuleLessonCounts } from '@/hooks/queries/useFinance';
 
 export default function FinanceTrackIndex() {
   const { track } = useParams<{ track: string }>();
@@ -33,15 +33,18 @@ function TrackContent({ track }: { track: string }) {
   } = useFinanceSectionBySlug(track);
 
   const { data: modules, isLoading: modulesLoading } = useFinanceModulesByTrack(track);
+  const { data: lessonCounts, isLoading: countsLoading } = useModuleLessonCounts(track);
 
   // Redirect once we confirm the slug doesn't exist in the DB
   if (!sectionLoading && sectionError) {
     return <Navigate to="/finance" replace />;
   }
 
-  const isLoading = sectionLoading || modulesLoading;
+  const isLoading = sectionLoading || modulesLoading || countsLoading;
   const title = section?.title ?? '';
   const description = section?.description ?? '';
+  const totalModules = modules?.length ?? 0;
+  const modulesWithContent = Object.values(lessonCounts || {}).filter((count) => count > 0).length;
 
   return (
     <PageLayout
@@ -66,8 +69,11 @@ function TrackContent({ track }: { track: string }) {
               {title}
             </h1>
             {description && (
-              <p className="text-lg text-muted-foreground mb-10">{description}</p>
+              <p className="text-lg text-muted-foreground mb-4">{description}</p>
             )}
+            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-8">
+              <span>{modulesWithContent} of {totalModules} modules have content</span>
+            </div>
           </>
         )}
 
@@ -97,6 +103,9 @@ function TrackContent({ track }: { track: string }) {
                       {mod.thesis}
                     </p>
                   )}
+                  <span className="text-xs text-muted-foreground">
+                    {lessonCounts?.[mod.slug] || 0} lessons
+                  </span>
                 </div>
               </Link>
             ))}

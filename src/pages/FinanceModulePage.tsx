@@ -17,16 +17,17 @@ import {
   useFinanceModuleBySlug,
   useEssaysByModuleId,
 } from '@/hooks/queries/useFinance';
-import { format, parseISO } from 'date-fns';
 
 // ── Essay listing sub-component ──────────────────────────────────────────────
 
 function EssayListing({
   moduleId,
+  moduleSortOrder,
   track,
   moduleSlug,
 }: {
   moduleId: string;
+  moduleSortOrder: number;
   track: string;
   moduleSlug: string;
 }) {
@@ -51,25 +52,35 @@ function EssayListing({
   }
 
   return (
-    <div className="space-y-5">
-      {essays.map((essay) => (
+    <div>
+      {essays.map((essay, index) => (
         <Link
           key={essay.id}
           to={`/finance/${track}/${moduleSlug}/${essay.slug}`}
-          className="block group"
+          className="flex items-start gap-4 py-4 group border-b border-border last:border-b-0"
         >
-          <h3 className="text-base font-medium text-foreground group-hover:text-primary transition-colors leading-snug">
-            {essay.title}
-          </h3>
-          {essay.snippet && (
-            <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-              {essay.snippet}
-            </p>
-          )}
-          {essay.date && (
-            <time className="text-xs text-muted-foreground mt-1 block">
-              {format(parseISO(essay.date), 'MMM d, yyyy')}
-            </time>
+          <span className="text-sm font-mono text-muted-foreground tabular-nums shrink-0 mt-0.5">
+            {String(moduleSortOrder).padStart(2, '0')}.{String(index + 1).padStart(2, '0')}
+          </span>
+
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <h3 className="text-base font-medium text-foreground group-hover:text-primary transition-colors leading-snug">
+                {essay.title}
+              </h3>
+              {essay.lesson_type && essay.lesson_type !== 'concept' && (
+                <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground border border-border rounded px-1.5 py-0.5">
+                  {essay.lesson_type}
+                </span>
+              )}
+            </div>
+            {essay.snippet && (
+              <p className="text-sm text-muted-foreground mt-1 line-clamp-1">{essay.snippet}</p>
+            )}
+          </div>
+
+          {essay.read_time && (
+            <span className="text-xs text-muted-foreground shrink-0 mt-1">{essay.read_time}</span>
           )}
         </Link>
       ))}
@@ -163,11 +174,12 @@ export default function FinanceModulePage() {
         <Separator className="my-8" />
 
         <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-6">
-          Essays
+          Lessons
         </h2>
 
         <EssayListing
           moduleId={module.id}
+          moduleSortOrder={module.sort_order}
           track={track!}
           moduleSlug={moduleSlug!}
         />
