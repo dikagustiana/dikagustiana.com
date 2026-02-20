@@ -304,7 +304,8 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
         author_bio: authorBio || null,
       };
 
-      const essayData: Record<string, unknown> = {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const essayData: any = {
         title,
         slug: finalSlug,
         section,
@@ -529,7 +530,7 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
                   <EssayEditor
                     content={content}
                     onChange={setContent}
-                    section={section}
+                    section={section as 'finance' | 'green-transition' | 'next-big-thing'}
                     distractionFree={false}
                     minHeight="400px"
                   />
@@ -595,7 +596,7 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
               <EssayEditor
                 content={content}
                 onChange={setContent}
-                section={section}
+                section={section as 'finance' | 'green-transition' | 'next-big-thing'}
                 distractionFree={true}
                 minHeight="500px"
               />
