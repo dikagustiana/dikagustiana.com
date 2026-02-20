@@ -201,6 +201,13 @@ export interface FinanceModule {
   updated_at: string;
 }
 
+/**
+ * FinanceFundamental — Alias for FinanceModule.
+ * Used by PostSettingsPanel to populate the fundamentals picker.
+ * (PostSettingsPanel imports this type by name; it must be exported.)
+ */
+export type FinanceFundamental = FinanceModule;
+
 export const useFinanceModulesByTrack = (trackSlug: string) => {
   return useQuery({
     queryKey: ['finance-modules', trackSlug],
