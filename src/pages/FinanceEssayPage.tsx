@@ -146,7 +146,7 @@ export default function FinanceEssayPage() {
       seoTitle={essay.title}
       seoDescription={deck || 'Finance knowledge for decision-making.'}
       seoAuthor={essay.author || undefined}
-      backLink={{ label: 'Back to module', path: `/finance/${track}/${moduleSlug}` }}
+      backLink={{ label: 'Back to lessons', path: `/finance/${track}/${moduleSlug}` }}
       title={essay.title}
       deck={deck}
       author={essay.author}

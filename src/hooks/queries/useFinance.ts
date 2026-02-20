@@ -17,6 +17,7 @@ export interface FinanceSection {
 export const useFinanceSections = () => {
   return useQuery({
     queryKey: ['finance-sections'],
+    staleTime: 5 * 60 * 1000,
     queryFn: async () => {
       const { data, error } = await supabase
         .from('finance_sections')
@@ -32,6 +33,7 @@ export const useFinanceSections = () => {
 export const useFinanceSectionBySlug = (slug: string) => {
   return useQuery({
     queryKey: ['finance-sections', slug],
+    staleTime: 5 * 60 * 1000,
     queryFn: async () => {
       const { data, error } = await supabase
         .from('finance_sections')
@@ -150,6 +152,7 @@ export const useFinanceSectionEssays = (routeSlugOrDbKey: string) => {
 
   return useQuery({
     queryKey: ['finance-section-essays', dbKey],
+    staleTime: 2 * 60 * 1000,
     queryFn: async () => {
       const { data, error } = await supabase
         .from('essays')
@@ -210,6 +213,7 @@ export type FinanceFundamental = FinanceModule;
 export const useFinanceModulesByTrack = (trackSlug: string) => {
   return useQuery({
     queryKey: ['finance-modules', trackSlug],
+    staleTime: 5 * 60 * 1000,
     queryFn: async () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data, error } = await (supabase as any)
@@ -228,6 +232,7 @@ export const useFinanceModulesByTrack = (trackSlug: string) => {
 export const useModuleLessonCounts = (trackSlug: string) => {
   return useQuery({
     queryKey: ['finance-module-lesson-counts', trackSlug],
+    staleTime: 5 * 60 * 1000,
     queryFn: async () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data: modules, error: modError } = await (supabase as any)
@@ -259,6 +264,7 @@ export const useModuleLessonCounts = (trackSlug: string) => {
 export const useAllFinanceModules = () => {
   return useQuery({
     queryKey: ['finance-modules', 'all'],
+    staleTime: 5 * 60 * 1000,
     queryFn: async () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data, error } = await (supabase as any)
@@ -278,6 +284,7 @@ export const useAllFinanceModules = () => {
 export const useFinanceModuleBySlug = (slug: string) => {
   return useQuery({
     queryKey: ['finance-modules-by-slug', slug],
+    staleTime: 5 * 60 * 1000,
     queryFn: async () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data, error } = await (supabase as any)
@@ -311,6 +318,7 @@ export interface FinanceModuleEssay {
 export const useEssaysByModuleId = (moduleId: string | undefined) => {
   return useQuery({
     queryKey: ['essays-by-module-id', moduleId],
+    staleTime: 2 * 60 * 1000,
     queryFn: async () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data, error } = await (supabase as any)

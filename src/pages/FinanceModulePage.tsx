@@ -12,7 +12,7 @@ import { PageLayout } from '@/components/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
-import { StrategicModuleHeader, PlanningModuleHeader, AnalyticsModuleHeader } from '@/components/finance';
+import { ModuleHeaderFactory } from '@/components/finance/ModuleHeaderFactory';
 import {
   useFinanceSectionBySlug,
   useFinanceModuleBySlug,
@@ -154,46 +154,12 @@ export default function FinanceModulePage() {
       />
 
       <div className="py-8 container max-w-3xl">
-        {(() => {
-          const variant = (module.module_meta as any)?.variant || 'standard';
-          if (variant === 'board') {
-            return (
-              <StrategicModuleHeader
-                title={module.title}
-                thesis={module.thesis}
-                sortOrder={module.sort_order}
-              />
-            );
-          }
-          if (variant === 'planning') {
-            return (
-              <PlanningModuleHeader
-                title={module.title}
-                thesis={module.thesis}
-                sortOrder={module.sort_order}
-              />
-            );
-          }
-          if (variant === 'analytics') {
-            return (
-              <AnalyticsModuleHeader
-                title={module.title}
-                thesis={module.thesis}
-                sortOrder={module.sort_order}
-              />
-            );
-          }
-          return (
-            <>
-              <span className="text-sm font-mono text-muted-foreground mb-2 block">
-                {String(module.sort_order).padStart(2, '0')}
-              </span>
-              <h1 className="text-3xl md:text-4xl font-display font-bold mb-6">
-                {module.title}
-              </h1>
-            </>
-          );
-        })()}
+        <ModuleHeaderFactory
+          variant={(module.module_meta as any)?.variant || 'standard'}
+          title={module.title}
+          thesis={module.thesis}
+          sortOrder={module.sort_order}
+        />
 
         {module.framing_content ? (
           <div
