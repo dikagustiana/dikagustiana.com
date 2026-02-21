@@ -105,7 +105,8 @@ export default function FinanceEssayPage() {
         .select('slug, title')
         .eq('module_id', (essay as any).module_id)
         .eq('status', 'published')
-        .order('sort_order', { ascending: true });
+        .order('finance_order', { ascending: true, nullsFirst: false })
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
       return data as EssayListItem[];
