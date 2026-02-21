@@ -73,9 +73,9 @@ function FinanceModulePanel({
   }, [allModules]);
 
   const handleModuleChange = (value: string) => {
-    const nextId = value || null;
+    const nextId = value === '__none__' ? null : value;
     onModuleIdChange(nextId);
-    const selectedModule = allModules.find(mod => mod.id === value);
+    const selectedModule = allModules.find(mod => mod.id === nextId);
     onFinanceSectionChange(selectedModule?.track_slug || '');
   };
 
@@ -85,11 +85,12 @@ function FinanceModulePanel({
       {isLoading ? (
         <div className="h-9 rounded-md bg-muted animate-pulse" />
       ) : (
-        <Select value={moduleId || ''} onValueChange={handleModuleChange}>
+        <Select value={moduleId || '__none__'} onValueChange={handleModuleChange}>
           <SelectTrigger className="h-9 text-sm">
             <SelectValue placeholder="Assign module..." />
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value="__none__">— No module —</SelectItem>
             {Object.entries(groupedModules).map(([track, modules]) => (
               <SelectGroup key={track}>
                 <SelectLabel>{track}</SelectLabel>

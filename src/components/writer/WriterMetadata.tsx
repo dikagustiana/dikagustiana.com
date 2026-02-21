@@ -2,7 +2,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Plus, Trash2 } from 'lucide-react';
 import { useAllFinanceModules } from '@/hooks/queries/useFinance';
@@ -243,18 +243,22 @@ export function WriterMetadata({
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label>Module</Label>
-              <Select value={moduleId || ''} onValueChange={(v) => setModuleId(v || null)}>
+              <Select
+                value={moduleId || '__none__'}
+                onValueChange={(v) => setModuleId(v === '__none__' ? null : v)}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select finance module..." />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="__none__">— No module —</SelectItem>
                   {Object.entries(modulesByTrack).map(([track, modules]) => (
-                    <div key={track}>
-                      <p className="px-2 py-1.5 text-xs font-semibold text-muted-foreground uppercase">{track}</p>
+                    <SelectGroup key={track}>
+                      <SelectLabel>{track}</SelectLabel>
                       {modules.map((mod) => (
                         <SelectItem key={mod.id} value={mod.id}>[{mod.track_slug}] {mod.title}</SelectItem>
                       ))}
-                    </div>
+                    </SelectGroup>
                   ))}
                 </SelectContent>
               </Select>

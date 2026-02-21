@@ -146,6 +146,16 @@ export default function WriterStudio() {
     }
   }, [title, slugManuallyEdited]);
 
+  useEffect(() => {
+    if (isInitialLoad.current) return;
+    const sectionSlug = sections.find(s => s.id === sectionId)?.slug || '';
+    if (sectionSlug !== 'finance') {
+      setModuleId(null);
+      setFinanceSection('');
+      setFinanceOrder(null);
+    }
+  }, [sectionId, sections]);
+
   // ── Track dirty state ──
   useEffect(() => {
     if (isInitialLoad.current) return;
