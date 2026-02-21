@@ -243,16 +243,25 @@ export const useModuleLessonCounts = (trackSlug: string) => {
       if (modError) throw modError;
       if (!modules || modules.length === 0) return {};
 
-      const counts: Record<string, number> = {};
+      const counts: Record<string, { published: number; total: number }> = {};
       for (const mod of modules as { id: string; slug: string }[]) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { count, error } = await (supabase as any)
+        const { count: pubCount, error: pubErr } = await (supabase as any)
           .from('essays')
           .select('id', { count: 'exact', head: true })
           .eq('module_id', mod.id)
           .eq('published', true);
 
-        counts[mod.slug] = error ? 0 : (count || 0);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { count: totalCount, error: totalErr } = await (supabase as any)
+          .from('essays')
+          .select('id', { count: 'exact', head: true })
+          .eq('module_id', mod.id);
+
+        counts[mod.slug] = {
+          published: pubErr ? 0 : (pubCount || 0),
+          total: totalErr ? 0 : (totalCount || 0),
+        };
       }
 
       return counts;
@@ -313,21 +322,28 @@ export interface FinanceModuleEssay {
   finance_order: number | null;
   lesson_type: string | null;
   created_at: string;
+  published: boolean;
+  status: string | null;
 }
 
-export const useEssaysByModuleId = (moduleId: string | undefined) => {
+export const useEssaysByModuleId = (moduleId: string | undefined, includeUnpublished = false) => {
   return useQuery({
-    queryKey: ['essays-by-module-id', moduleId],
+    queryKey: ['essays-by-module-id', moduleId, includeUnpublished],
     staleTime: 2 * 60 * 1000,
     queryFn: async () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data, error } = await (supabase as any)
+      let query = (supabase as any)
         .from('essays')
-        .select('id, slug, title, snippet, date, read_time, finance_order, lesson_type, created_at')
+        .select('id, slug, title, snippet, date, read_time, finance_order, lesson_type, created_at, published, status')
         .eq('module_id', moduleId!)
-        .eq('published', true)
         .order('finance_order', { ascending: true, nullsFirst: false })
         .order('created_at', { ascending: false });
+
+      if (!includeUnpublished) {
+        query = query.eq('published', true);
+      }
+
+      const { data, error } = await query;
 
       if (error) throw error;
       return (data || []) as FinanceModuleEssay[];

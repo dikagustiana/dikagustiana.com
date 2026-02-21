@@ -2,9 +2,10 @@ import { useEffect, useMemo } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { X } from 'lucide-react';
+import { useAllFinanceModules } from '@/hooks/queries/useFinance';
 import type { WritingSection, WritingCategory, EssayStatus } from '../schema/types';
 
 interface RightSidebarProps {
@@ -32,6 +33,104 @@ interface RightSidebarProps {
   // Preview toggle
   showPreview: boolean;
   onTogglePreview: () => void;
+  moduleId: string | null;
+  onModuleIdChange: (id: string | null) => void;
+  financeSection: string;
+  onFinanceSectionChange: (s: string) => void;
+  financeOrder: number | null;
+  onFinanceOrderChange: (n: number | null) => void;
+  lessonType: string;
+  onLessonTypeChange: (t: string) => void;
+  currentSectionSlug: string;
+}
+
+const LESSON_TYPE_OPTIONS = ['concept', 'framework', 'case-study', 'exercise', 'model-walkthrough'] as const;
+
+function FinanceModulePanel({
+  moduleId,
+  onModuleIdChange,
+  financeOrder,
+  onFinanceOrderChange,
+  lessonType,
+  onLessonTypeChange,
+  onFinanceSectionChange,
+}: {
+  moduleId: string | null;
+  onModuleIdChange: (id: string | null) => void;
+  financeOrder: number | null;
+  onFinanceOrderChange: (n: number | null) => void;
+  lessonType: string;
+  onLessonTypeChange: (t: string) => void;
+  onFinanceSectionChange: (s: string) => void;
+}) {
+  const { data: allModules = [], isLoading } = useAllFinanceModules();
+  const groupedModules = useMemo(() => {
+    return allModules.reduce<Record<string, typeof allModules>>((acc, mod) => {
+      if (!acc[mod.track_slug]) acc[mod.track_slug] = [];
+      acc[mod.track_slug].push(mod);
+      return acc;
+    }, {});
+  }, [allModules]);
+
+  const handleModuleChange = (value: string) => {
+    const nextId = value || null;
+    onModuleIdChange(nextId);
+    const selectedModule = allModules.find(mod => mod.id === value);
+    onFinanceSectionChange(selectedModule?.track_slug || '');
+  };
+
+  return (
+    <div className="space-y-3 rounded-md border border-border p-3 bg-background/60">
+      <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Finance Module</Label>
+      {isLoading ? (
+        <div className="h-9 rounded-md bg-muted animate-pulse" />
+      ) : (
+        <Select value={moduleId || ''} onValueChange={handleModuleChange}>
+          <SelectTrigger className="h-9 text-sm">
+            <SelectValue placeholder="Assign module..." />
+          </SelectTrigger>
+          <SelectContent>
+            {Object.entries(groupedModules).map(([track, modules]) => (
+              <SelectGroup key={track}>
+                <SelectLabel>{track}</SelectLabel>
+                {modules.map(mod => (
+                  <SelectItem key={mod.id} value={mod.id}>
+                    [{mod.track_slug}] {mod.title}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            ))}
+          </SelectContent>
+        </Select>
+      )}
+
+      <div className="space-y-1.5">
+        <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Lesson Order</Label>
+        <Input
+          type="number"
+          min={1}
+          value={financeOrder ?? ''}
+          onChange={e => onFinanceOrderChange(e.target.value ? Number(e.target.value) : null)}
+          className="h-9 text-sm"
+          placeholder="e.g. 1"
+        />
+      </div>
+
+      <div className="space-y-1.5">
+        <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Lesson Type</Label>
+        <Select value={lessonType} onValueChange={onLessonTypeChange}>
+          <SelectTrigger className="h-9 text-sm">
+            <SelectValue placeholder="Select lesson type" />
+          </SelectTrigger>
+          <SelectContent>
+            {LESSON_TYPE_OPTIONS.map(option => (
+              <SelectItem key={option} value={option}>{option}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    </div>
+  );
 }
 
 export function RightSidebar({
@@ -53,7 +152,18 @@ export function RightSidebar({
   onMetaDescriptionChange,
   showPreview,
   onTogglePreview,
+  moduleId,
+  onModuleIdChange,
+  financeSection,
+  onFinanceSectionChange,
+  financeOrder,
+  onFinanceOrderChange,
+  lessonType,
+  onLessonTypeChange,
+  currentSectionSlug,
 }: RightSidebarProps) {
+  const { data: allModules } = useAllFinanceModules();
+
   const canonicalUrl = useMemo(() => {
     if (!slug) return '';
     const section = sections.find(s => s.id === sectionId);
@@ -67,7 +177,12 @@ export function RightSidebar({
       case 'next-big-thing':
         return `/the-next-big-thing/${slug}`;
       case 'finance':
-        return `/finance-101/essays/${slug}`;
+        if (moduleId && allModules) {
+          const mod = allModules.find(m => m.id === moduleId);
+          if (mod) return `/finance/${mod.track_slug}/${mod.slug}/${slug}`;
+        }
+        if (financeSection) return `/finance/${financeSection}/${slug}`;
+        return `/finance/${slug}`;
       case 'critical-thinking': {
         const cat = categories.find(c => c.id === categoryId);
         const phase = cat?.slug?.replace(`${section.slug}-`, '') || 'clarify';
@@ -76,7 +191,7 @@ export function RightSidebar({
       default:
         return `/${section.slug}/${slug}`;
     }
-  }, [slug, sectionId, categoryId, sections, categories]);
+  }, [slug, sectionId, categoryId, sections, categories, moduleId, allModules, financeSection]);
 
   // Reset category when section changes
   useEffect(() => {
@@ -165,6 +280,18 @@ export function RightSidebar({
             className="h-9 text-sm font-mono"
           />
         </div>
+
+        {currentSectionSlug === 'finance' && (
+          <FinanceModulePanel
+            moduleId={moduleId}
+            onModuleIdChange={onModuleIdChange}
+            financeOrder={financeOrder}
+            onFinanceOrderChange={onFinanceOrderChange}
+            lessonType={lessonType}
+            onLessonTypeChange={onLessonTypeChange}
+            onFinanceSectionChange={onFinanceSectionChange}
+          />
+        )}
 
         {/* Tags */}
         <div className="space-y-1.5">

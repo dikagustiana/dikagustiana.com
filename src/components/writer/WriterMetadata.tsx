@@ -4,7 +4,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, Trash2, GripVertical } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
+import { useAllFinanceModules } from '@/hooks/queries/useFinance';
 
 interface CategoryOption {
   id: string;
@@ -40,6 +41,13 @@ interface WriterMetadataProps {
   authorBio: string;
   setAuthorBio: (v: string) => void;
   isNew: boolean;
+  moduleId: string | null;
+  setModuleId: (v: string | null) => void;
+  financeOrder: number | null;
+  setFinanceOrder: (v: number | null) => void;
+  lessonType: string;
+  setLessonType: (v: string) => void;
+  isFinanceSection: boolean;
 }
 
 export function WriterMetadata({
@@ -70,7 +78,22 @@ export function WriterMetadata({
   authorBio,
   setAuthorBio,
   isNew,
+  moduleId,
+  setModuleId,
+  financeOrder,
+  setFinanceOrder,
+  lessonType,
+  setLessonType,
+  isFinanceSection,
 }: WriterMetadataProps) {
+  const { data: allFinanceModules = [] } = useAllFinanceModules();
+
+  const modulesByTrack = allFinanceModules.reduce<Record<string, typeof allFinanceModules>>((acc, mod) => {
+    if (!acc[mod.track_slug]) acc[mod.track_slug] = [];
+    acc[mod.track_slug].push(mod);
+    return acc;
+  }, {});
+
   // Key takeaways handlers
   const updateTakeaway = (index: number, value: string) => {
     const updated = [...keyTakeaways];
@@ -209,6 +232,64 @@ export function WriterMetadata({
           </div>
         </CardContent>
       </Card>
+
+
+      {isFinanceSection && (
+        <Card>
+          <CardHeader className="pb-4">
+            <CardTitle className="text-base">Finance Module</CardTitle>
+            <CardDescription>Assign this lesson to a module and set ordering metadata.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label>Module</Label>
+              <Select value={moduleId || ''} onValueChange={(v) => setModuleId(v || null)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select finance module..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.entries(modulesByTrack).map(([track, modules]) => (
+                    <div key={track}>
+                      <p className="px-2 py-1.5 text-xs font-semibold text-muted-foreground uppercase">{track}</p>
+                      {modules.map((mod) => (
+                        <SelectItem key={mod.id} value={mod.id}>[{mod.track_slug}] {mod.title}</SelectItem>
+                      ))}
+                    </div>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Finance Order</Label>
+                <Input
+                  type="number"
+                  min={1}
+                  value={financeOrder ?? ''}
+                  onChange={(e) => setFinanceOrder(e.target.value ? Number(e.target.value) : null)}
+                  placeholder="1"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Lesson Type</Label>
+                <Select value={lessonType} onValueChange={setLessonType}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Lesson type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="concept">concept</SelectItem>
+                    <SelectItem value="framework">framework</SelectItem>
+                    <SelectItem value="case-study">case-study</SelectItem>
+                    <SelectItem value="exercise">exercise</SelectItem>
+                    <SelectItem value="model-walkthrough">model-walkthrough</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Hero Image */}
       <Card>

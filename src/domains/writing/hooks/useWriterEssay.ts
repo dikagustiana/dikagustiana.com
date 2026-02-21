@@ -55,6 +55,10 @@ interface SaveEssayData {
   economist_fields?: Record<string, unknown> | null;
   educator_fields?: Record<string, unknown> | null;
   coach_fields?: Record<string, unknown> | null;
+  module_id?: string | null;
+  finance_section?: string | null;
+  finance_order?: number | null;
+  lesson_type?: string | null;
 }
 
 export function useSaveEssay() {
@@ -92,6 +96,8 @@ export function useSaveEssay() {
       queryClient.invalidateQueries({ queryKey: ['writer-essay'] });
       queryClient.invalidateQueries({ queryKey: ['admin-essays'] });
       queryClient.invalidateQueries({ queryKey: ['essays'] });
+      queryClient.invalidateQueries({ queryKey: ['finance-module-lesson-counts'] });
+      queryClient.invalidateQueries({ queryKey: ['essays-by-module-id'] });
     },
   });
 }
