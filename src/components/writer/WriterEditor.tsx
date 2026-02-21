@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -33,6 +34,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useWriterSections, useWriterCategories } from '@/domains/writing/hooks';
+import { useAllFinanceModules } from '@/hooks/queries/useFinance';
 import { generateUniqueSlug } from '@/domains/writing/hooks/useWriterEssay';
 
 interface WriterEditorProps {
@@ -108,12 +110,14 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const { isAdmin } = useAuth();
+  const queryClient = useQueryClient();
 
   // Sections & categories
   const { data: sections = [] } = useWriterSections();
   const sectionObj = sections.find(s => s.slug === section);
   const sectionId = sectionObj?.id || '';
   const { data: categories = [] } = useWriterCategories(sectionId || undefined);
+  const { data: allFinanceModules = [] } = useAllFinanceModules();
 
   // Editor state
   const [showPreview, setShowPreview] = useState(true);
@@ -141,6 +145,10 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
   const [status, setStatus] = useState<'draft' | 'published'>('draft');
   const [createdAt, setCreatedAt] = useState<string | null>(null);
   const [updatedAt, setUpdatedAt] = useState<string | null>(null);
+  const [moduleId, setModuleId] = useState<string | null>(null);
+  const [financeSection, setFinanceSection] = useState('');
+  const [financeOrder, setFinanceOrder] = useState<number | null>(null);
+  const [lessonType, setLessonType] = useState<string>('concept');
 
   // Load existing essay
   useEffect(() => {
@@ -184,6 +192,15 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
         setStatus(data.status === 'published' ? 'published' : 'draft');
         setCreatedAt(data.created_at);
         setUpdatedAt(data.updated_at);
+        const financeMeta = data as typeof data & {
+          finance_section?: string | null;
+          finance_order?: number | null;
+          lesson_type?: string | null;
+        };
+        setModuleId(data.module_id || null);
+        setFinanceSection(financeMeta.finance_section || '');
+        setFinanceOrder(financeMeta.finance_order ?? null);
+        setLessonType(financeMeta.lesson_type || 'concept');
 
         // Economist fields
         const ef = (data.economist_fields as EssayData['economist_fields']) || {};
@@ -213,7 +230,7 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
   useEffect(() => {
     if (isInitialLoad.current) return;
     setIsDirty(true);
-  }, [title, slug, phase, categoryId, author, date, deck, heroImageUrl, heroCaption, content, keyTakeaways, references, authorBio]);
+  }, [title, slug, phase, categoryId, author, date, deck, heroImageUrl, heroCaption, content, keyTakeaways, references, authorBio, moduleId, financeOrder, lessonType]);
 
   // Auto-generate slug from title
   useEffect(() => {
@@ -320,6 +337,10 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
         published: targetStatus === 'published',
         voice_role: 'economist',
         economist_fields: economistFields,
+        module_id: moduleId,
+        finance_section: financeSection || null,
+        finance_order: financeOrder,
+        lesson_type: lessonType || null,
       };
 
       // Attach category_id if set
@@ -354,6 +375,8 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
       setSlug(finalSlug);
       setStatus(targetStatus);
       setIsDirty(false);
+      await queryClient.invalidateQueries({ queryKey: ['finance-module-lesson-counts'] });
+      await queryClient.invalidateQueries({ queryKey: ['essays-by-module-id'] });
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       toast({
@@ -366,12 +389,23 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
     }
   };
 
+  const selectedFinanceModule = useMemo(() => allFinanceModules.find(mod => mod.id === moduleId), [allFinanceModules, moduleId]);
+
+  useEffect(() => {
+    if (section === 'finance' && selectedFinanceModule) {
+      setFinanceSection(selectedFinanceModule.track_slug);
+    }
+  }, [section, selectedFinanceModule]);
+
   const getPublicUrl = () => {
     if (section === 'next-big-thing') {
       return `/the-next-big-thing/${slug}`;
     }
+    if (section === 'finance' && moduleId && selectedFinanceModule) {
+      return `/finance/${financeSection || selectedFinanceModule.track_slug}/${selectedFinanceModule.slug}/${slug}`;
+    }
     if (section === 'finance') {
-      return `/finance-101/essays/${slug}`;
+      return `/finance/${slug}`;
     }
     if (phase) {
       return `/${section}/${phase}/${slug}`;
@@ -396,7 +430,11 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
     return <Navigate to="/auth" replace />;
   }
 
-  const sectionLabel = section === 'next-big-thing' ? 'The Next Big Thing' : 'Green Transition';
+  const sectionLabel = section === 'next-big-thing'
+    ? 'The Next Big Thing'
+    : section === 'finance'
+      ? 'Finance'
+      : 'Green Transition';
   const isNew = !essayDbId;
 
   return (
@@ -522,6 +560,13 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
                   authorBio={authorBio}
                   setAuthorBio={setAuthorBio}
                   isNew={isNew}
+                  moduleId={moduleId}
+                  setModuleId={setModuleId}
+                  financeOrder={financeOrder}
+                  setFinanceOrder={setFinanceOrder}
+                  lessonType={lessonType}
+                  setLessonType={setLessonType}
+                  isFinanceSection={section === 'finance'}
                 />
 
                 {/* Body Editor with Figure Support */}

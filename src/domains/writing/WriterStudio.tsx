@@ -60,6 +60,10 @@ export default function WriterStudio() {
   const [status, setStatus] = useState<EssayStatus>('draft');
   const [metaDescription, setMetaDescription] = useState('');
   const [author, setAuthor] = useState('Dika Gustiana');
+  const [moduleId, setModuleId] = useState<string | null>(null);
+  const [financeSection, setFinanceSection] = useState('');
+  const [financeOrder, setFinanceOrder] = useState<number | null>(null);
+  const [lessonType, setLessonType] = useState<string>('concept');
   const [contentJson, setContentJson] = useState<JSONContent | null>(null);
   const [showPreview, setShowPreview] = useState(false);
 
@@ -99,6 +103,15 @@ export default function WriterStudio() {
       setMetaDescription('');
       setStatus((essayData.status as EssayStatus) || 'draft');
       setTags([]);
+      const financeMeta = essayData as typeof essayData & {
+        finance_section?: string | null;
+        finance_order?: number | null;
+        lesson_type?: string | null;
+      };
+      setModuleId(essayData.module_id || null);
+      setFinanceSection(financeMeta.finance_section || '');
+      setFinanceOrder(financeMeta.finance_order ?? null);
+      setLessonType(financeMeta.lesson_type || 'concept');
 
       // Set category and section from joined data
       if (essayData.categories) {
@@ -137,7 +150,7 @@ export default function WriterStudio() {
   useEffect(() => {
     if (isInitialLoad.current) return;
     setIsDirty(true);
-  }, [title, deck, slug, sectionId, categoryId, tags, status, metaDescription, contentJson]);
+  }, [title, deck, slug, sectionId, categoryId, tags, status, metaDescription, contentJson, moduleId, financeOrder, lessonType]);
 
   // ── Beforeunload guard ──
   useEffect(() => {
@@ -247,6 +260,10 @@ export default function WriterStudio() {
           phase: getPhaseFromCategory(),
           published: targetStatus === 'published',
           date: targetStatus === 'published' ? new Date().toISOString().split('T')[0] : null,
+          module_id: moduleId,
+          finance_section: financeSection || null,
+          finance_order: financeOrder,
+          lesson_type: lessonType || null,
         },
       });
 
@@ -403,6 +420,15 @@ export default function WriterStudio() {
           onMetaDescriptionChange={setMetaDescription}
           showPreview={showPreview}
           onTogglePreview={() => setShowPreview(p => !p)}
+          moduleId={moduleId}
+          onModuleIdChange={setModuleId}
+          financeSection={financeSection}
+          onFinanceSectionChange={setFinanceSection}
+          financeOrder={financeOrder}
+          onFinanceOrderChange={setFinanceOrder}
+          lessonType={lessonType}
+          onLessonTypeChange={setLessonType}
+          currentSectionSlug={getSectionSlug()}
         />
       </div>
     </div>

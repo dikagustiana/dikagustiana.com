@@ -19,7 +19,7 @@ import { useFinanceSectionBySlug, useFinanceModulesByTrack, useModuleLessonCount
 const ModuleRow = React.memo(function ModuleRow({ mod, track, lessonCount }: {
   mod: FinanceModule;
   track: string;
-  lessonCount: number;
+  lessonCount: { published: number; total: number };
 }) {
   return (
     <Link
@@ -40,7 +40,7 @@ const ModuleRow = React.memo(function ModuleRow({ mod, track, lessonCount }: {
         )}
       </div>
       <span className="text-xs text-muted-foreground tabular-nums shrink-0">
-        {lessonCount} lessons
+        {lessonCount.published}/{lessonCount.total} lessons
       </span>
     </Link>
   );
@@ -75,7 +75,7 @@ function TrackContent({ track }: { track: string }) {
   const title = section?.title ?? '';
   const description = section?.description ?? '';
   const totalModules = modules?.length ?? 0;
-  const modulesWithContent = Object.values(lessonCounts || {}).filter((count) => count > 0).length;
+  const modulesWithContent = Object.values(lessonCounts || {}).filter((c) => c.total > 0).length;
 
   return (
     <PageLayout
@@ -121,7 +121,7 @@ function TrackContent({ track }: { track: string }) {
                 key={mod.id}
                 mod={mod}
                 track={track}
-                lessonCount={lessonCounts?.[mod.slug] || 0}
+                lessonCount={lessonCounts?.[mod.slug] || { published: 0, total: 0 }}
               />
             ))}
           </div>

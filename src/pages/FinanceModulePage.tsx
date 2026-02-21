@@ -12,12 +12,14 @@ import { PageLayout } from '@/components/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
+import { Badge } from '@/components/ui/badge';
 import { ModuleHeaderFactory } from '@/components/finance/ModuleHeaderFactory';
 import {
   useFinanceSectionBySlug,
   useFinanceModuleBySlug,
   useEssaysByModuleId,
 } from '@/hooks/queries/useFinance';
+import { useAuth } from '@/contexts/AuthContext';
 
 // ── Essay listing sub-component ──────────────────────────────────────────────
 
@@ -32,7 +34,8 @@ function EssayListing({
   track: string;
   moduleSlug: string;
 }) {
-  const { data: essays, isLoading } = useEssaysByModuleId(moduleId);
+  const { isAdmin } = useAuth();
+  const { data: essays, isLoading } = useEssaysByModuleId(moduleId, !!isAdmin);
 
   if (isLoading) {
     return (
@@ -47,7 +50,7 @@ function EssayListing({
   if (!essays || essays.length === 0) {
     return (
       <p className="text-sm text-muted-foreground italic">
-        No essays assigned to this module yet.
+No lessons assigned to this module yet.
       </p>
     );
   }
@@ -73,6 +76,11 @@ function EssayListing({
                 <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground border border-border rounded px-1.5 py-0.5">
                   {essay.lesson_type}
                 </span>
+              )}
+              {isAdmin && !essay.published && (
+                <Badge variant="secondary" className="text-[10px] uppercase tracking-wider">
+                  Draft
+                </Badge>
               )}
             </div>
             {essay.snippet && (
@@ -155,7 +163,7 @@ export default function FinanceModulePage() {
 
       <div className="py-8 container max-w-3xl">
         <ModuleHeaderFactory
-          variant={(module.module_meta as any)?.variant || 'standard'}
+          variant={((module.module_meta as { variant?: string } | null)?.variant) || 'standard'}
           title={module.title}
           thesis={module.thesis}
           sortOrder={module.sort_order}
