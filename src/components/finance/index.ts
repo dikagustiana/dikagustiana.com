@@ -8,3 +8,4 @@ export { ModelSuggestionBlock } from './ModelSuggestionBlock';
 export { ExpandableFormula } from './ExpandableFormula';
 export { FormulaBlock } from './FormulaBlock';
 export { FinanceCycleMap } from './FinanceCycleMap';
+export { CapitalConditionCard } from './CapitalConditionCard';

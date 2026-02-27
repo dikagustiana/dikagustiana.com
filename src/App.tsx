@@ -65,6 +65,7 @@ import TheNextBigThing from "./pages/TheNextBigThing";
 import NextBigThingEssayPage from "./pages/NextBigThingEssayPage";
 import FinanceEssayPage from "./pages/FinanceEssayPage";
 import FinanceLanding from "./pages/FinanceLanding";
+import FinanceInMotion from "./pages/FinanceInMotion";
 import FinanceTrackIndex from "./pages/FinanceTrackIndex";
 import FinanceModulePage from "./pages/FinanceModulePage";
 import AdminEditorRedirect from "./pages/AdminEditorRedirect";
@@ -110,6 +111,7 @@ const App = () => (
 
             {/* Finance */}
             <Route path="/finance" element={<FinanceLanding />} />
+            <Route path="/finance/finance-in-motion" element={<FinanceInMotion />} />
             <Route path="/finance/:track" element={<FinanceTrackIndex />} />
             <Route path="/finance/:track/:moduleSlug" element={<FinanceModulePage />} />
             <Route path="/finance/:track/:moduleSlug/:essaySlug" element={<FinanceEssayPage />} />
