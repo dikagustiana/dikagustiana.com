@@ -5,6 +5,7 @@
 import { StrategicModuleHeader } from './StrategicModuleHeader';
 import { PlanningModuleHeader } from './PlanningModuleHeader';
 import { AnalyticsModuleHeader } from './AnalyticsModuleHeader';
+import { NarrativeModuleHeader } from './NarrativeModuleHeader';
 
 interface ModuleHeaderProps {
   variant: string;
