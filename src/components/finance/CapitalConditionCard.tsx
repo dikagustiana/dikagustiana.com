@@ -1,9 +1,9 @@
 /**
- * CapitalConditionCard — Accordion-style card for capital allocation conditions.
- * Institutional design. Dark-on-dark. No decoration.
+ * CapitalConditionCard — Institutional condition card.
+ * Light theme. Compressed. No decoration. Modular.
  */
 
-import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion';
+import { useState } from 'react';
 
 export interface CapitalCondition {
   id: string;
@@ -11,70 +11,80 @@ export interface CapitalCondition {
   title: string;
   case: string;
   tension: string;
-  implication: string;
+  quantitative: string;
   rule: string;
-  group: 'operational' | 'balance-sheet' | 'portfolio' | 'transition' | 'valuation';
+  layer: 'operational' | 'balance-sheet' | 'portfolio' | 'transition' | 'valuation';
 }
 
 interface CapitalConditionCardProps {
   condition: CapitalCondition;
-  showQuantitative: boolean;
 }
 
-export function CapitalConditionCard({ condition, showQuantitative }: CapitalConditionCardProps) {
+export function CapitalConditionCard({ condition }: CapitalConditionCardProps) {
+  const [showQuant, setShowQuant] = useState(false);
+
   return (
-    <AccordionItem value={condition.id} className="border-b border-[hsl(215_20%_22%)] last:border-b-0">
-      <AccordionTrigger className="py-5 hover:no-underline group text-left">
-        <div className="flex items-baseline gap-4 w-full pr-4">
-          <span className="text-xs font-mono text-[hsl(215_12%_45%)] tabular-nums shrink-0">
-            {String(condition.number).padStart(2, '0')}
+    <div className="py-5 border-b border-border last:border-b-0">
+      {/* Number + Title */}
+      <div className="flex items-baseline gap-3 mb-3">
+        <span className="text-xs font-mono text-muted-foreground tabular-nums shrink-0">
+          {String(condition.number).padStart(2, '0')}
+        </span>
+        <h3 className="text-base font-display font-semibold text-foreground leading-snug">
+          {condition.title}
+        </h3>
+      </div>
+
+      <div className="pl-7 space-y-2.5">
+        {/* Case */}
+        <div>
+          <span className="text-[10px] font-mono uppercase tracking-[0.12em] text-muted-foreground">
+            Case
           </span>
-          <span className="text-[15px] font-semibold text-[hsl(0_0%_92%)] group-hover:text-[hsl(0_0%_100%)] transition-colors leading-snug">
-            {condition.title}
+          <p className="text-sm text-foreground mt-0.5">{condition.case}</p>
+        </div>
+
+        {/* Capital Tension */}
+        <div>
+          <span className="text-[10px] font-mono uppercase tracking-[0.12em] text-muted-foreground">
+            Capital Tension
           </span>
+          <p className="text-sm text-muted-foreground mt-0.5">{condition.tension}</p>
         </div>
-      </AccordionTrigger>
-      <AccordionContent>
-        <div className="pl-[calc(1rem+1.25rem)] space-y-4 pb-2">
-          {/* Case */}
+
+        {/* Quantitative Lens — text link toggle */}
+        {condition.quantitative && (
           <div>
-            <span className="text-[10px] font-mono uppercase tracking-[0.15em] text-[hsl(215_12%_45%)]">
-              Indonesian Case
-            </span>
-            <p className="text-sm text-[hsl(0_0%_82%)] mt-1">{condition.case}</p>
+            {!showQuant ? (
+              <button
+                onClick={() => setShowQuant(true)}
+                className="text-[11px] font-mono text-primary hover:text-primary/80 transition-colors"
+              >
+                Show Quantitative Lens →
+              </button>
+            ) : (
+              <div>
+                <span className="text-[10px] font-mono uppercase tracking-[0.12em] text-muted-foreground">
+                  Quantitative Lens
+                </span>
+                <p className="text-sm font-mono text-muted-foreground mt-0.5">
+                  {condition.quantitative}
+                </p>
+              </div>
+            )}
           </div>
+        )}
 
-          {/* Tension */}
-          <div>
-            <span className="text-[10px] font-mono uppercase tracking-[0.15em] text-[hsl(215_12%_45%)]">
-              Capital Tension
-            </span>
-            <p className="text-sm text-[hsl(0_0%_76%)] mt-1 leading-relaxed">{condition.tension}</p>
-          </div>
-
-          {/* Quantitative Implication — togglable */}
-          {showQuantitative && condition.implication && (
-            <div>
-              <span className="text-[10px] font-mono uppercase tracking-[0.15em] text-[hsl(215_12%_45%)]">
-                Quantitative Implication
-              </span>
-              <p className="text-sm text-[hsl(0_0%_70%)] mt-1 leading-relaxed font-mono">
-                {condition.implication}
-              </p>
-            </div>
-          )}
-
-          {/* Decision Rule */}
-          <div className="pt-2 border-t border-[hsl(215_20%_18%)]">
-            <span className="text-[10px] font-mono uppercase tracking-[0.15em] text-[hsl(142_71%_45%_/_0.6)]">
-              Decision Rule
-            </span>
-            <p className="text-sm font-semibold text-[hsl(0_0%_95%)] mt-1">
-              {condition.rule}
-            </p>
-          </div>
+        {/* Decision Rule */}
+        <div className="pt-1.5">
+          <span className="text-[10px] font-mono uppercase tracking-[0.12em] text-primary/70">
+            Decision Rule
+          </span>
+          <p className="text-sm font-semibold text-primary mt-0.5">
+            {condition.rule}
+          </p>
         </div>
-      </AccordionContent>
-    </AccordionItem>
+      </div>
+    </div>
   );
 }
