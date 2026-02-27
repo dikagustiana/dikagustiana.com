@@ -14,6 +14,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { ModuleHeaderFactory } from '@/components/finance/ModuleHeaderFactory';
+import { FinanceCycleMap } from '@/components/finance/FinanceCycleMap';
 import {
   useFinanceSectionBySlug,
   useFinanceModuleBySlug,
