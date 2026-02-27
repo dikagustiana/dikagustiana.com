@@ -163,8 +163,10 @@ export default function FinanceModulePage() {
       />
 
       <div className="py-8 container max-w-3xl">
+        {variant === 'narrative' && <FinanceCycleMap />}
+
         <ModuleHeaderFactory
-          variant={((module.module_meta as { variant?: string } | null)?.variant) || 'standard'}
+          variant={variant}
           title={module.title}
           thesis={module.thesis}
           sortOrder={module.sort_order}
