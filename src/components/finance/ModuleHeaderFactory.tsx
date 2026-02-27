@@ -22,6 +22,8 @@ export function ModuleHeaderFactory({ variant, title, thesis, sortOrder }: Modul
       return <PlanningModuleHeader title={title} thesis={thesis} sortOrder={sortOrder} />;
     case 'analytics':
       return <AnalyticsModuleHeader title={title} thesis={thesis} sortOrder={sortOrder} />;
+    case 'narrative':
+      return <NarrativeModuleHeader title={title} thesis={thesis} sortOrder={sortOrder} />;
     default:
       return (
         <div className="mb-10">

@@ -1,8 +1,10 @@
 export { StrategicModuleHeader } from './StrategicModuleHeader';
 export { PlanningModuleHeader } from './PlanningModuleHeader';
 export { AnalyticsModuleHeader } from './AnalyticsModuleHeader';
+export { NarrativeModuleHeader } from './NarrativeModuleHeader';
 export { ModuleHeaderFactory } from './ModuleHeaderFactory';
 export { AnalyticsSidebar } from './AnalyticsSidebar';
 export { ModelSuggestionBlock } from './ModelSuggestionBlock';
 export { ExpandableFormula } from './ExpandableFormula';
 export { FormulaBlock } from './FormulaBlock';
+export { FinanceCycleMap } from './FinanceCycleMap';
