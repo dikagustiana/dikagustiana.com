@@ -147,6 +147,8 @@ export default function FinanceModulePage() {
     );
   }
 
+  const variant = ((module.module_meta as { variant?: string } | null)?.variant) || 'standard';
+
   return (
     <PageLayout
       role="manager"
