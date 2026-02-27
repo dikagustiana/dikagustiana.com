@@ -40,6 +40,7 @@ export interface WritingEssay {
   snippet?: string | null;
   content?: string | null;
   category_id: string;
+  module_id: string | null;
   tags: string[];
   status: EssayStatus;
   meta_description: string | null;

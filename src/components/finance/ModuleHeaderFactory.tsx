@@ -5,6 +5,7 @@
 import { StrategicModuleHeader } from './StrategicModuleHeader';
 import { PlanningModuleHeader } from './PlanningModuleHeader';
 import { AnalyticsModuleHeader } from './AnalyticsModuleHeader';
+import { NarrativeModuleHeader } from './NarrativeModuleHeader';
 
 interface ModuleHeaderProps {
   variant: string;
@@ -21,6 +22,8 @@ export function ModuleHeaderFactory({ variant, title, thesis, sortOrder }: Modul
       return <PlanningModuleHeader title={title} thesis={thesis} sortOrder={sortOrder} />;
     case 'analytics':
       return <AnalyticsModuleHeader title={title} thesis={thesis} sortOrder={sortOrder} />;
+    case 'narrative':
+      return <NarrativeModuleHeader title={title} thesis={thesis} sortOrder={sortOrder} />;
     default:
       return (
         <div className="mb-10">

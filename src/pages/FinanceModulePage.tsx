@@ -14,6 +14,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { ModuleHeaderFactory } from '@/components/finance/ModuleHeaderFactory';
+import { FinanceCycleMap } from '@/components/finance/FinanceCycleMap';
 import {
   useFinanceSectionBySlug,
   useFinanceModuleBySlug,
@@ -146,6 +147,8 @@ export default function FinanceModulePage() {
     );
   }
 
+  const variant = ((module.module_meta as { variant?: string } | null)?.variant) || 'standard';
+
   return (
     <PageLayout
       role="manager"
@@ -162,8 +165,10 @@ export default function FinanceModulePage() {
       />
 
       <div className="py-8 container max-w-3xl">
+        {variant === 'narrative' && <FinanceCycleMap />}
+
         <ModuleHeaderFactory
-          variant={((module.module_meta as { variant?: string } | null)?.variant) || 'standard'}
+          variant={variant}
           title={module.title}
           thesis={module.thesis}
           sortOrder={module.sort_order}
