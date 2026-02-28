@@ -39,6 +39,7 @@ import ForecastingOutput from "./pages/ForecastingOutput";
 import GreenTransitionPhase from "./pages/GreenTransitionPhase";
 import GreenTransitionEssayPage from "./pages/GreenTransitionEssayPage";
 import GreenTransitionTracker from "./pages/GreenTransitionTracker";
+import GreenTransitionTrackerDetail from "./pages/GreenTransitionTrackerDetail";
 
 // Learning
 import CriticalThinkingResearch from "./pages/CriticalThinkingResearch";
