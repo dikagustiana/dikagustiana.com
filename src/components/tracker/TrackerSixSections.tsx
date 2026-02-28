@@ -14,12 +14,12 @@ interface TrackerSixSectionsProps {
 }
 
 const sectionMeta = [
-  { key: 'policyMovement', id: '01', label: 'POLICY MOVEMENT', desc: 'Enacted regulations, decrees, and formally adopted instruments' },
-  { key: 'capitalSignal', id: '02', label: 'CAPITAL SIGNAL', desc: 'Observable shifts in institutional and commercial capital positioning' },
-  { key: 'institutionalIncentiveShift', id: '03', label: 'INSTITUTIONAL INCENTIVE SHIFT', desc: 'Changes to structural incentives facing key actors' },
-  { key: 'executionFriction', id: '04', label: 'EXECUTION FRICTION', desc: 'Documented obstacles to transition capital deployment' },
-  { key: 'directionalAssessment', id: '05', label: 'DIRECTIONAL ASSESSMENT', desc: 'Committed quarterly analytical reading' },
-  { key: 'strategicImplication', id: '06', label: 'STRATEGIC IMPLICATION', desc: 'Concrete observation for capital allocators and practitioners' },
+  { key: 'policyMovement', label: 'POLICY MOVEMENT', desc: 'Enacted regulations, decrees, and formally adopted instruments' },
+  { key: 'capitalSignal', label: 'CAPITAL SIGNAL', desc: 'Observable shifts in institutional and commercial capital positioning' },
+  { key: 'institutionalIncentiveShift', label: 'INSTITUTIONAL INCENTIVE SHIFT', desc: 'Changes to structural incentives facing key actors' },
+  { key: 'executionFriction', label: 'EXECUTION FRICTION', desc: 'Documented obstacles to transition capital deployment' },
+  { key: 'directionalAssessment', label: 'DIRECTIONAL ASSESSMENT', desc: 'Committed quarterly analytical reading' },
+  { key: 'strategicImplication', label: 'STRATEGIC IMPLICATION', desc: 'Concrete observation for capital allocators and practitioners' },
 ] as const;
 
 export function TrackerSixSections({ sections, directionalReading, openQuestion }: TrackerSixSectionsProps) {
@@ -33,17 +33,12 @@ export function TrackerSixSections({ sections, directionalReading, openQuestion 
 
         return (
           <div key={meta.key}>
-            {i > 0 && <div className="border-t border-border my-12" />}
+            {i > 0 && <div className="border-t border-border/50 my-14" />}
 
-            {/* Section identifier */}
-            <div className="flex items-baseline gap-3 mb-1">
-              <span className="font-mono text-xs text-muted-foreground tracking-widest">
-                {meta.id}
-              </span>
-              <span className="font-mono text-xs text-muted-foreground tracking-widest uppercase">
-                {meta.label}
-              </span>
-            </div>
+            {/* Section label */}
+            <p className="text-xs font-mono text-muted-foreground uppercase tracking-[0.18em] mb-2">
+              {meta.label}
+            </p>
 
             {/* Descriptor */}
             <p className="text-sm text-muted-foreground italic mb-6">
