@@ -83,6 +83,18 @@ export default function GreenTransitionTrackerEssay() {
             {sectionMeta.label}
           </p>
 
+          {/* Reading badge for Directional Assessment */}
+          {sectionKey === 'directionalAssessment' && issue && (
+            <div className="inline-flex items-center gap-2 mb-6 py-1.5 px-3 bg-muted rounded-sm">
+              <span className="font-mono text-xs text-muted-foreground uppercase tracking-widest">
+                Reading:
+              </span>
+              <span className="font-mono text-xs font-semibold text-foreground uppercase tracking-widest">
+                {issue.directionalReading}
+              </span>
+            </div>
+          )}
+
           {/* Title */}
           <h1 className="text-2xl font-display font-semibold text-foreground leading-tight mb-4 max-w-[620px]">
             {entry.title}
@@ -110,61 +122,74 @@ export default function GreenTransitionTrackerEssay() {
             ))}
           </div>
 
-          {/* Key Observation */}
-          {entry.keyObservation && (
+          {/* Key Observation or Open Question */}
+          {sectionKey === 'strategicImplication' && issue?.openQuestion ? (
             <div className="mt-10 pl-4 border-l-2 border-foreground/20">
               <p className="text-xs font-mono text-muted-foreground uppercase tracking-widest mb-1">
-                Key Observation
+                Question for Next Quarter
               </p>
-              <p className="text-[15px] text-foreground font-medium leading-snug">
-                {entry.keyObservation}
+              <p className="text-[15px] text-foreground font-medium leading-snug italic">
+                {issue.openQuestion}
               </p>
             </div>
+          ) : (
+            entry.keyObservation && (
+              <div className="mt-10 pl-4 border-l-2 border-foreground/20">
+                <p className="text-xs font-mono text-muted-foreground uppercase tracking-widest mb-1">
+                  Key Observation
+                </p>
+                <p className="text-[15px] text-foreground font-medium leading-snug">
+                  {entry.keyObservation}
+                </p>
+              </div>
+            )
           )}
 
-          {/* Prev / Next within section */}
-          <div className="mt-16 pt-6 border-t border-border flex items-start justify-between gap-8">
-            {prevEntry ? (
-              <button
-                onClick={() =>
-                  navigate(
-                    `/green-transition/tracker/${issue.slug}/${sectionKey}/${prevEntry.slug}`
-                  )
-                }
-                className="text-left max-w-[45%]"
-              >
-                <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
-                  <ArrowLeft className="w-3.5 h-3.5" />
-                  Previous
-                </span>
-                <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                  {prevEntry.title}
-                </p>
-              </button>
-            ) : (
-              <span />
-            )}
-            {nextEntry ? (
-              <button
-                onClick={() =>
-                  navigate(
-                    `/green-transition/tracker/${issue.slug}/${sectionKey}/${nextEntry.slug}`
-                  )
-                }
-                className="text-right max-w-[45%]"
-              >
-                <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
-                  Next
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </span>
-                <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                  {nextEntry.title}
-                </p>
-              </button>
-            ) : (
-              <span />
-            )}
-          </div>
+          {/* Prev / Next within section — hidden if only one entry */}
+          {(prevEntry || nextEntry) && (
+            <div className="mt-16 pt-6 border-t border-border flex items-start justify-between gap-8">
+              {prevEntry ? (
+                <button
+                  onClick={() =>
+                    navigate(
+                      `/green-transition/tracker/${issue.slug}/${sectionKey}/${prevEntry.slug}`
+                    )
+                  }
+                  className="text-left max-w-[45%]"
+                >
+                  <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
+                    <ArrowLeft className="w-3.5 h-3.5" />
+                    Previous
+                  </span>
+                  <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                    {prevEntry.title}
+                  </p>
+                </button>
+              ) : (
+                <span />
+              )}
+              {nextEntry ? (
+                <button
+                  onClick={() =>
+                    navigate(
+                      `/green-transition/tracker/${issue.slug}/${sectionKey}/${nextEntry.slug}`
+                    )
+                  }
+                  className="text-right max-w-[45%]"
+                >
+                  <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
+                    Next
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </span>
+                  <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                    {nextEntry.title}
+                  </p>
+                </button>
+              ) : (
+                <span />
+              )}
+            </div>
+          )}
         </div>
       </div>
     </PageLayout>
