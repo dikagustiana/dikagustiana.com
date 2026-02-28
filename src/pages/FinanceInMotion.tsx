@@ -1,17 +1,24 @@
 /**
  * FinanceInMotion — Section 05: Capital in Motion
- * View 1: Premise → Layer Cards → 3-column Condition Grid
+ * View 1: Clean continuous editorial list of all 21 conditions.
  */
 
 import { useNavigate } from 'react-router-dom';
 import { PageLayout } from '@/components/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
 import { CapitalConditionCard } from '@/components/finance/CapitalConditionCard';
-import { CapitalLayerCard } from '@/components/finance/CapitalLayerCard';
-import { CONDITIONS, LAYERS, LAYER_ORDER } from '@/data/capitalConditions';
+import { CONDITIONS, LAYER_ORDER } from '@/data/capitalConditions';
+import { Separator } from '@/components/ui/separator';
+
+/** Flat ordered list matching the spec display order */
+const DISPLAY_ORDER = LAYER_ORDER.flatMap((l) => l.conditionNumbers);
 
 export default function FinanceInMotion() {
   const navigate = useNavigate();
+
+  const orderedConditions = DISPLAY_ORDER.map(
+    (n) => CONDITIONS.find((c) => c.number === n)!
+  );
 
   return (
     <PageLayout
@@ -27,7 +34,7 @@ export default function FinanceInMotion() {
         description="Twenty-one structural capital conditions observed in Indonesian markets. Institutional framework for allocators."
       />
 
-      <div className="py-10 container max-w-5xl">
+      <div className="py-10 container max-w-3xl">
         {/* Header */}
         <div className="mb-5">
           <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-muted-foreground block mb-3">
@@ -64,35 +71,21 @@ export default function FinanceInMotion() {
           </div>
         </div>
 
-        {/* Layers + Condition Grids */}
-        {LAYER_ORDER.map(({ layer, conditionNumbers }) => {
-          const layerDef = LAYERS.find((l) => l.key === layer)!;
-          const layerConditions = conditionNumbers.map(
-            (n) => CONDITIONS.find((c) => c.number === n)!
-          );
-
-          return (
-            <div key={layer} className="mb-8">
-              <CapitalLayerCard
-                layerNumber={layerDef.number}
-                layerName={layerDef.label}
-                narrative={layerDef.narrative}
+        {/* Condition List */}
+        <div>
+          {orderedConditions.map((condition, i) => (
+            <div key={condition.id}>
+              <CapitalConditionCard
+                condition={condition}
+                onClick={() => navigate(`/finance/capital-in-motion/${condition.id}`)}
               />
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {layerConditions.map((condition) => (
-                  <CapitalConditionCard
-                    key={condition.id}
-                    condition={condition}
-                    onClick={() => navigate(`/finance/capital-in-motion/${condition.number}`)}
-                  />
-                ))}
-              </div>
+              {i < orderedConditions.length - 1 && <Separator />}
             </div>
-          );
-        })}
+          ))}
+        </div>
 
         {/* Closing */}
-        <div className="mt-4 pt-6 border-t border-border">
+        <div className="mt-8 pt-6 border-t border-border">
           <p className="text-xs text-muted-foreground mb-1">Allocator credibility requires:</p>
           <p className="text-xs font-mono text-foreground">
             Condition → Equation → Stress scenario → Capital consequence.
