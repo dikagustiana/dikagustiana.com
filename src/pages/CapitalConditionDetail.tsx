@@ -75,42 +75,41 @@ export default function CapitalConditionDetail() {
         description={condition.tension}
       />
 
-      <div className="py-10 container max-w-3xl">
-        {/* Back link */}
-        <Link
-          to="/finance/finance-in-motion"
-          className="inline-flex items-center gap-1.5 text-xs font-mono text-muted-foreground hover:text-foreground transition-colors mb-8"
-        >
-          <ArrowLeft className="w-3 h-3" />
-          Back to Capital in Motion
-        </Link>
+      <article className="max-w-[780px] mx-auto px-6 lg:px-16 py-16">
+        <div className="space-y-10">
+          {/* Back link */}
+          <Link
+            to="/finance/finance-in-motion"
+            className="inline-flex items-center gap-1.5 text-xs font-mono text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ArrowLeft className="w-3 h-3" />
+            Back to Capital in Motion
+          </Link>
 
-        {/* Header */}
-        <div className="mb-8">
-          <span className="text-[10px] font-mono uppercase tracking-[0.12em] text-primary/70 block mb-2">
-            {getLayerLabel(condition.layer)}
-          </span>
-          <h1 className="text-xl md:text-2xl font-display font-bold text-foreground tracking-tight leading-tight">
-            {condition.title}
-          </h1>
-        </div>
+          {/* Header */}
+          <div>
+            <span className="text-xs tracking-[0.25em] uppercase text-slate-500 mb-4 block">
+              {getLayerLabel(condition.layer)}
+            </span>
+            <h1 className="text-5xl font-black leading-tight text-slate-900 mt-2">
+              {condition.title}
+            </h1>
+          </div>
 
-        {/* Body */}
-        <div className="space-y-5">
           {/* Case */}
           <div>
-            <span className="text-[10px] font-mono uppercase tracking-[0.12em] text-muted-foreground">
+            <span className="text-xs tracking-[0.25em] uppercase text-slate-500 mt-14 mb-3 block">
               Case
             </span>
-            <p className="text-sm text-foreground mt-0.5">{condition.caseCompany}</p>
+            <p className="text-xl leading-loose text-slate-800">{condition.caseCompany}</p>
           </div>
 
           {/* Capital Tension */}
           <div>
-            <span className="text-[10px] font-mono uppercase tracking-[0.12em] text-muted-foreground">
+            <span className="text-xs tracking-[0.25em] uppercase text-slate-500 mt-14 mb-3 block">
               Capital Tension
             </span>
-            <p className="text-sm text-muted-foreground mt-0.5">{condition.tension}</p>
+            <p className="text-xl leading-loose text-slate-800">{condition.tension}</p>
           </div>
 
           {/* Quantitative Lens */}
@@ -119,7 +118,7 @@ export default function CapitalConditionDetail() {
               {!showQuant ? (
                 <button
                   onClick={() => setShowQuant(true)}
-                  className="text-[11px] font-mono text-primary hover:text-primary/80 transition-colors"
+                  className="text-slate-900 underline underline-offset-4 hover:text-slate-700 transition-colors font-mono text-sm"
                 >
                   Show Quantitative Lens →
                 </button>
@@ -127,11 +126,11 @@ export default function CapitalConditionDetail() {
                 <div>
                   <button
                     onClick={() => setShowQuant(false)}
-                    className="text-[10px] font-mono uppercase tracking-[0.12em] text-muted-foreground mb-1 hover:text-foreground transition-colors"
+                    className="text-xs tracking-[0.25em] uppercase text-slate-500 mb-3 block hover:text-slate-700 transition-colors"
                   >
                     Quantitative Lens ↑
                   </button>
-                  <p className="text-sm font-mono text-muted-foreground">
+                  <p className="text-xl leading-loose text-slate-800 font-mono">
                     {condition.quantitative}
                   </p>
                 </div>
@@ -140,11 +139,11 @@ export default function CapitalConditionDetail() {
           )}
 
           {/* Decision Rule */}
-          <div className="pt-1.5">
-            <span className="text-[10px] font-mono uppercase tracking-[0.12em] text-primary/70">
+          <div>
+            <span className="text-xs tracking-[0.25em] uppercase text-slate-500 mt-14 mb-3 block">
               Decision Rule
             </span>
-            <p className="text-sm font-semibold text-primary mt-0.5">
+            <p className="text-2xl font-semibold leading-snug text-slate-900">
               {condition.rule}
             </p>
           </div>
@@ -154,7 +153,7 @@ export default function CapitalConditionDetail() {
             {!showModel ? (
               <button
                 onClick={() => setShowModel(true)}
-                className="text-[11px] font-mono text-primary hover:text-primary/80 transition-colors"
+                className="text-slate-900 underline underline-offset-4 hover:text-slate-700 transition-colors font-mono text-sm"
               >
                 Show Hypothetical Model →
               </button>
@@ -162,59 +161,61 @@ export default function CapitalConditionDetail() {
               <div className="mt-1">
                 <button
                   onClick={() => setShowModel(false)}
-                  className="text-[10px] font-mono uppercase tracking-[0.12em] text-muted-foreground block mb-2 hover:text-foreground transition-colors"
+                  className="text-xs tracking-[0.25em] uppercase text-slate-500 block mb-3 hover:text-slate-700 transition-colors"
                 >
                   Hypothetical Model ↑
                 </button>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="h-8 px-3 text-[10px] font-mono uppercase tracking-wider">Metric</TableHead>
-                      <TableHead className="h-8 px-3 text-[10px] font-mono uppercase tracking-wider">What Happened</TableHead>
-                      <TableHead className="h-8 px-3 text-[10px] font-mono uppercase tracking-wider">What Should Have Happened</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {modelRows.map((row, i) => (
-                      <TableRow key={i}>
-                        <TableCell className="px-3 py-2 text-xs font-medium">{row.metric}</TableCell>
-                        <TableCell className="px-3 py-2 text-xs text-muted-foreground">{row.whatHappened}</TableCell>
-                        <TableCell className="px-3 py-2 text-xs text-muted-foreground">{row.whatShouldHaveHappened}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse text-sm">
+                    <thead>
+                      <tr>
+                        <th className="text-left px-3 py-2 border border-slate-200 text-xs tracking-[0.25em] uppercase text-slate-500 font-medium">Metric</th>
+                        <th className="text-left px-3 py-2 border border-slate-200 text-xs tracking-[0.25em] uppercase text-slate-500 font-medium">What Happened</th>
+                        <th className="text-left px-3 py-2 border border-slate-200 text-xs tracking-[0.25em] uppercase text-slate-500 font-medium">What Should Have Happened</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {modelRows.map((row, i) => (
+                        <tr key={i}>
+                          <td className="px-3 py-2 border border-slate-200 font-medium text-slate-900">{row.metric}</td>
+                          <td className="px-3 py-2 border border-slate-200 text-slate-600">{row.whatHappened}</td>
+                          <td className="px-3 py-2 border border-slate-200 text-slate-600">{row.whatShouldHaveHappened}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             )}
           </div>
-        </div>
 
-        {/* Prev / Next */}
-        <div className="mt-12 pt-6 border-t border-border flex items-center justify-between">
-          {prevCondition ? (
-            <button
-              onClick={() => navigate(`/finance/capital-in-motion/${prevCondition.id}`)}
-              className="inline-flex items-center gap-1.5 text-xs font-mono text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <ArrowLeft className="w-3 h-3" />
-              Previous
-            </button>
-          ) : (
-            <span />
-          )}
-          {nextCondition ? (
-            <button
-              onClick={() => navigate(`/finance/capital-in-motion/${nextCondition.id}`)}
-              className="inline-flex items-center gap-1.5 text-xs font-mono text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Next
-              <ArrowRight className="w-3 h-3" />
-            </button>
-          ) : (
-            <span />
-          )}
+          {/* Prev / Next */}
+          <div className="pt-6 border-t border-slate-200 flex items-center justify-between">
+            {prevCondition ? (
+              <button
+                onClick={() => navigate(`/finance/capital-in-motion/${prevCondition.id}`)}
+                className="inline-flex items-center gap-1.5 text-xs font-mono text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <ArrowLeft className="w-3 h-3" />
+                Previous
+              </button>
+            ) : (
+              <span />
+            )}
+            {nextCondition ? (
+              <button
+                onClick={() => navigate(`/finance/capital-in-motion/${nextCondition.id}`)}
+                className="inline-flex items-center gap-1.5 text-xs font-mono text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Next
+                <ArrowRight className="w-3 h-3" />
+              </button>
+            ) : (
+              <span />
+            )}
+          </div>
         </div>
-      </div>
+      </article>
     </PageLayout>
   );
 }
