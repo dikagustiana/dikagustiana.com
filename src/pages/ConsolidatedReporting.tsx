@@ -1,15 +1,8 @@
-import { Building2, Network, Users, TrendingUp, BookOpen, Layers, MinusCircle, Calculator, FileCheck } from 'lucide-react';
+import { PageLayout } from '@/components/layouts/PageLayout';
 import { ConceptPanel } from '@/components/consolidation/ConceptPanel';
 import { ConsolidationProcessStep } from '@/components/consolidation/ConsolidationProcessStep';
 import { AccountRow } from '@/components/consolidation/AccountRow';
-import { Link } from 'react-router-dom';
-
-const NAV_LINKS = [
-  { label: 'Home', path: '/' },
-  { label: 'Accounting', path: '/accounting' },
-  { label: 'FSLI', path: '/accounting/fsli' },
-  { label: 'Consolidated Reporting', path: '/accounting/consolidated-reporting', active: true },
-];
+import { Network, Users, TrendingUp, BookOpen, Layers, MinusCircle, Calculator, FileCheck } from 'lucide-react';
 
 const PROCESS_STEPS = [
   { icon: BookOpen, title: 'Individual Books', description: 'Each entity maintains its own complete set of financials.' },
@@ -38,7 +31,6 @@ const TABLE_DATA = [
   { label: 'Restricted Cash and Time Deposits', values: [0, 0, 0, 5000], combined: 5000, elimination: 0, consolidated: 5000, indent: 1 },
   { label: 'Other Current Assets', values: [3400, 1100, 700, 200], combined: 5400, elimination: 0, consolidated: 5400, indent: 1 },
   { label: 'TOTAL CURRENT ASSETS', values: [446100, 130300, 84800, 47800], combined: 709000, elimination: -113000, consolidated: 596000, isSubtotal: true },
-
   { label: 'NON-CURRENT ASSET', isHeader: true },
   { label: 'Investment in Subsidiaries', values: [250000, 0, 0, 0], combined: 250000, elimination: -250000, consolidated: 0, indent: 1 },
   { label: 'Deemed Investment', values: [0, 0, 0, 0], combined: 0, elimination: 0, consolidated: 0, indent: 1 },
@@ -50,7 +42,6 @@ const TABLE_DATA = [
   { label: 'Other Non-Current Assets', values: [7500, 2200, 1800, 500], combined: 12000, elimination: 0, consolidated: 12000, indent: 1 },
   { label: 'TOTAL NON-CURRENT ASSETS', values: [680500, 133200, 104300, 47500], combined: 965500, elimination: -250000, consolidated: 800500, isSubtotal: true },
   { label: 'TOTAL ASSETS', values: [1126600, 263500, 189100, 95300], combined: 1674500, elimination: -363000, consolidated: 1396500, isSubtotal: true },
-
   { label: 'LIABILITIES', isHeader: true },
   { label: 'CURRENT LIABILITIES', isHeader: true },
   { label: 'Trade Payables — Third Parties', values: [78000, 19000, 14000, 7000], combined: 118000, elimination: 0, consolidated: 118000, indent: 1 },
@@ -60,7 +51,6 @@ const TABLE_DATA = [
   { label: 'Short-term Borrowings', values: [50000, 15000, 10000, 5000], combined: 80000, elimination: 0, consolidated: 80000, indent: 1 },
   { label: 'Current portion of Long-term Debt', values: [20000, 8000, 5000, 3000], combined: 36000, elimination: 0, consolidated: 36000, indent: 1 },
   { label: 'TOTAL CURRENT LIABILITIES', values: [184000, 54500, 37200, 19800], combined: 295500, elimination: -22000, consolidated: 273500, isSubtotal: true },
-
   { label: 'NON-CURRENT LIABILITIES', isHeader: true },
   { label: 'Long-term Borrowings', values: [200000, 60000, 45000, 20000], combined: 325000, elimination: 0, consolidated: 325000, indent: 1 },
   { label: 'Lease Liabilities', values: [15000, 5000, 3500, 1500], combined: 25000, elimination: 0, consolidated: 25000, indent: 1 },
@@ -68,7 +58,6 @@ const TABLE_DATA = [
   { label: 'Deferred Tax Liabilities', values: [8000, 2500, 1800, 800], combined: 13100, elimination: 0, consolidated: 13100, indent: 1 },
   { label: 'TOTAL NON-CURRENT LIABILITIES', values: [241000, 73500, 54300, 24300], combined: 393100, elimination: 0, consolidated: 393100, isSubtotal: true },
   { label: 'TOTAL LIABILITIES', values: [425000, 128000, 91500, 44100], combined: 688600, elimination: -22000, consolidated: 666600, isSubtotal: true },
-
   { label: 'EQUITY', isHeader: true },
   { label: 'Share Capital', values: [400000, 80000, 60000, 30000], combined: 570000, elimination: -170000, consolidated: 400000, indent: 1 },
   { label: 'Retained Earnings', values: [250000, 45000, 30000, 18000], combined: 343000, elimination: -86000, consolidated: 257000, indent: 1 },
@@ -82,197 +71,158 @@ const TABLE_DATA = [
 
 export default function ConsolidatedReporting() {
   return (
-    <div className="min-h-screen bg-slate-50">
-      {/* ── Nav Bar ── */}
-      <nav className="bg-slate-900 border-b border-slate-800">
-        <div className="max-w-7xl mx-auto px-8 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Building2 className="w-5 h-5 text-emerald-400" />
-            <span className="text-white font-semibold text-sm">Friendly learning buddy</span>
-            <span className="text-[10px] font-bold uppercase tracking-wider bg-emerald-600 text-white px-2 py-0.5 rounded">
-              Admin
-            </span>
-          </div>
-          <div className="hidden md:flex items-center gap-6">
-            {NAV_LINKS.map((link) => (
-              <Link
-                key={link.path}
-                to={link.path}
-                className={`text-xs ${
-                  link.active
-                    ? 'text-white font-medium'
-                    : 'text-slate-400 hover:text-slate-200'
-                }`}
+    <PageLayout
+      variant="content"
+      role="manager"
+      breadcrumbs={[
+        { label: 'Home', path: '/' },
+        { label: 'Accounting', path: '/accounting' },
+        { label: 'Consolidated Reporting' },
+      ]}
+    >
+      <div className="container py-8">
+        <div className="max-w-6xl mx-auto">
+
+          {/* ── SECTION 1 — Hero ── */}
+          <section className="mb-14">
+            <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-3 tracking-tight">
+              Consolidated Reporting
+            </h1>
+            <p className="text-muted-foreground text-base leading-relaxed max-w-3xl">
+              When a group has multiple legal entities, you need one set of financials that shows
+              the whole picture — as if it were a single economic entity. This working paper shows
+              how that is done, step by step, using a real multi-entity group under PSAK 338.
+            </p>
+            <div className="w-full h-px bg-border mt-6" />
+          </section>
+
+          {/* ── SECTION 2 — Concept Framework ── */}
+          <section className="mb-14">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <ConceptPanel
+                icon={Network}
+                title="Control"
+                definition="You consolidate entities you control. Control usually means more than 50% voting rights but can exist with less if you have contractual power over key decisions."
+              />
+              <ConceptPanel
+                icon={Users}
+                title="Non-Controlling Interest"
+                definition="If you own 51% of a subsidiary, you consolidate 100% of its results. The 49% you do not own is shown as NCI — a separate line in equity."
               >
-                {link.label}
-              </Link>
-            ))}
-          </div>
-        </div>
-      </nav>
-
-      {/* ── Breadcrumb ── */}
-      <div className="bg-white border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-8 py-2.5 flex items-center gap-2 text-xs">
-          <Link to="/" className="text-slate-600 hover:text-slate-800">Home</Link>
-          <span className="text-slate-400">/</span>
-          <Link to="/accounting" className="text-slate-600 hover:text-slate-800">Accounting</Link>
-          <span className="text-slate-400">/</span>
-          <span className="text-slate-900 font-semibold">Consolidated Reporting</span>
-        </div>
-      </div>
-
-      {/* ── Main Content ── */}
-      <div className="max-w-7xl mx-auto px-8 py-12">
-
-        {/* ── SECTION 1 — Hero ── */}
-        <section className="mb-16">
-          <h1 className="text-4xl font-bold text-slate-900 mb-3 tracking-tight">
-            Consolidated Reporting
-          </h1>
-          <p className="text-slate-600 text-base leading-relaxed max-w-3xl">
-            When a group has multiple legal entities, you need one set of financials that shows
-            the whole picture — as if it were a single economic entity. This working paper shows
-            how that is done, step by step, using a real multi-entity group under PSAK 338.
-          </p>
-          <div className="w-full h-px bg-slate-300 mt-6" />
-        </section>
-
-        {/* ── SECTION 2 — Concept Framework ── */}
-        <section className="mb-16">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Control */}
-            <ConceptPanel
-              icon={Network}
-              title="Control"
-              definition="You consolidate entities you control. Control usually means more than 50% voting rights but can exist with less if you have contractual power over key decisions."
-            />
-
-            {/* NCI */}
-            <ConceptPanel
-              icon={Users}
-              title="Non-Controlling Interest"
-              definition="If you own 51% of a subsidiary, you consolidate 100% of its results. The 49% you do not own is shown as NCI — a separate line in equity."
-            >
-              <div className="flex h-5 rounded overflow-hidden border border-slate-200">
-                <div className="bg-slate-800 flex items-center justify-center" style={{ width: '51%' }}>
-                  <span className="text-[10px] font-mono text-white">51%</span>
+                <div className="flex h-5 rounded overflow-hidden border border-border">
+                  <div className="bg-foreground flex items-center justify-center" style={{ width: '51%' }}>
+                    <span className="text-[10px] font-mono text-background">51%</span>
+                  </div>
+                  <div className="bg-muted flex items-center justify-center" style={{ width: '49%' }}>
+                    <span className="text-[10px] font-mono text-muted-foreground">49%</span>
+                  </div>
                 </div>
-                <div className="bg-slate-200 flex items-center justify-center" style={{ width: '49%' }}>
-                  <span className="text-[10px] font-mono text-slate-600">49%</span>
-                </div>
+              </ConceptPanel>
+              <ConceptPanel
+                icon={TrendingUp}
+                title="Goodwill"
+                definition="The excess of what you paid over the fair value of net assets acquired at the acquisition date. Represents future economic benefits not separately identifiable."
+              >
+                <p className="text-xs font-mono text-muted-foreground bg-muted px-3 py-2 border border-border text-center">
+                  Price Paid − Net Assets = Goodwill
+                </p>
+              </ConceptPanel>
+            </div>
+          </section>
+
+          {/* ── SECTION 3 — Process Architecture ── */}
+          <section className="mb-14">
+            <h2 className="text-2xl font-bold text-foreground mb-1">Process Architecture</h2>
+            <p className="text-sm text-muted-foreground mb-6">
+              How consolidation works — from individual books to the final consolidated output.
+            </p>
+            <div className="bg-card border border-border p-8">
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-6 lg:gap-8">
+                {PROCESS_STEPS.map((step, i) => (
+                  <ConsolidationProcessStep
+                    key={step.title}
+                    stepNumber={i + 1}
+                    icon={step.icon}
+                    title={step.title}
+                    description={step.description}
+                    showArrow={i < PROCESS_STEPS.length - 1}
+                  />
+                ))}
               </div>
-            </ConceptPanel>
-
-            {/* Goodwill */}
-            <ConceptPanel
-              icon={TrendingUp}
-              title="Goodwill"
-              definition="The excess of what you paid over the fair value of net assets acquired at the acquisition date. Represents future economic benefits not separately identifiable."
-            >
-              <p className="text-xs font-mono text-slate-500 bg-slate-50 px-3 py-2 border border-slate-200 text-center">
-                Price Paid − Net Assets = Goodwill
-              </p>
-            </ConceptPanel>
-          </div>
-        </section>
-
-        {/* ── SECTION 3 — Process Architecture ── */}
-        <section className="mb-16">
-          <h2 className="text-2xl font-bold text-slate-900 mb-1">Process Architecture</h2>
-          <p className="text-sm text-slate-500 mb-6">
-            How consolidation works — from individual books to the final consolidated output.
-          </p>
-
-          <div className="bg-white border border-slate-200 p-8">
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-6 lg:gap-8">
-              {PROCESS_STEPS.map((step, i) => (
-                <ConsolidationProcessStep
-                  key={step.title}
-                  stepNumber={i + 1}
-                  icon={step.icon}
-                  title={step.title}
-                  description={step.description}
-                  showArrow={i < PROCESS_STEPS.length - 1}
-                />
-              ))}
             </div>
-          </div>
-        </section>
+          </section>
 
-        {/* ── SECTION 4 — Working Paper ── */}
-        <section className="mb-16">
-          <h2 className="text-2xl font-bold text-slate-900 mb-1">Working Paper Simulation</h2>
-          <p className="text-sm text-slate-500 mb-6">
-            PT Dummy C and Subsidiaries — Consolidated Statement of Financial Position — December 31, 2024
-          </p>
-
-          <div className="bg-white border border-slate-200 overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-xs border-collapse min-w-[900px]">
-                <thead>
-                  {/* Group header row */}
-                  <tr className="border-b border-slate-200 bg-slate-50">
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider w-[220px]">
-                      Account
-                    </th>
-                    <th colSpan={4} className="px-3 py-3 text-center text-xs font-semibold text-slate-700 uppercase tracking-wider border-l border-slate-200">
-                      Individual Entities
-                    </th>
-                    <th className="px-3 py-3 text-center text-xs font-semibold text-slate-700 uppercase tracking-wider border-l border-slate-200 bg-slate-50/50">
-                      Combined
-                    </th>
-                    <th className="px-3 py-3 text-center text-xs font-semibold text-slate-700 uppercase tracking-wider border-l border-slate-200 bg-amber-50/30">
-                      Eliminations
-                    </th>
-                    <th className="px-3 py-3 text-center text-xs font-semibold text-slate-700 uppercase tracking-wider border-l border-slate-200 bg-emerald-50/40">
-                      Consolidated
-                    </th>
-                  </tr>
-                  {/* Sub-header row */}
-                  <tr className="border-b border-slate-200 bg-white">
-                    <th className="px-4 py-2" />
-                    {['Dummy C', 'Dummy D', 'Dummy E', 'Dummy F'].map((name) => (
-                      <th key={name} className="px-3 py-2 text-right text-[11px] font-medium text-slate-500 border-l border-slate-100">
-                        {name}
+          {/* ── SECTION 4 — Working Paper ── */}
+          <section className="mb-14">
+            <h2 className="text-2xl font-bold text-foreground mb-1">Working Paper Simulation</h2>
+            <p className="text-sm text-muted-foreground mb-6">
+              PT Dummy C and Subsidiaries — Consolidated Statement of Financial Position — December 31, 2024
+            </p>
+            <div className="bg-card border border-border overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs border-collapse min-w-[900px]">
+                  <thead>
+                    <tr className="border-b border-border bg-muted/50">
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-foreground uppercase tracking-wider w-[220px]">
+                        Account
                       </th>
+                      <th colSpan={4} className="px-3 py-3 text-center text-xs font-semibold text-foreground uppercase tracking-wider border-l border-border">
+                        Individual Entities
+                      </th>
+                      <th className="px-3 py-3 text-center text-xs font-semibold text-foreground uppercase tracking-wider border-l border-border bg-muted/30">
+                        Combined
+                      </th>
+                      <th className="px-3 py-3 text-center text-xs font-semibold text-foreground uppercase tracking-wider border-l border-border bg-amber-50/30">
+                        Eliminations
+                      </th>
+                      <th className="px-3 py-3 text-center text-xs font-semibold text-foreground uppercase tracking-wider border-l border-border bg-accent/[0.07]">
+                        Consolidated
+                      </th>
+                    </tr>
+                    <tr className="border-b border-border bg-card">
+                      <th className="px-4 py-2" />
+                      {['Dummy C', 'Dummy D', 'Dummy E', 'Dummy F'].map((name) => (
+                        <th key={name} className="px-3 py-2 text-right text-[11px] font-medium text-muted-foreground border-l border-border/50">
+                          {name}
+                        </th>
+                      ))}
+                      <th className="px-3 py-2 text-right text-[11px] font-medium text-muted-foreground border-l border-border bg-muted/30">
+                        Total
+                      </th>
+                      <th className="px-3 py-2 text-right text-[11px] font-medium text-muted-foreground border-l border-border bg-amber-50/30">
+                        Adj.
+                      </th>
+                      <th className="px-3 py-2 text-right text-[11px] font-medium text-muted-foreground border-l border-border bg-accent/[0.07]">
+                        Final
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {TABLE_DATA.map((row, i) => (
+                      <AccountRow
+                        key={`${row.label}-${i}`}
+                        label={row.label}
+                        values={row.values || []}
+                        combined={row.combined}
+                        elimination={row.elimination}
+                        consolidated={row.consolidated}
+                        isHeader={row.isHeader}
+                        isSubtotal={row.isSubtotal}
+                        indent={row.indent}
+                      />
                     ))}
-                    <th className="px-3 py-2 text-right text-[11px] font-medium text-slate-500 border-l border-slate-200 bg-slate-50/50">
-                      Total
-                    </th>
-                    <th className="px-3 py-2 text-right text-[11px] font-medium text-slate-500 border-l border-slate-200 bg-amber-50/30">
-                      Adj.
-                    </th>
-                    <th className="px-3 py-2 text-right text-[11px] font-medium text-slate-500 border-l border-slate-200 bg-emerald-50/40">
-                      Final
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {TABLE_DATA.map((row, i) => (
-                    <AccountRow
-                      key={`${row.label}-${i}`}
-                      label={row.label}
-                      values={row.values || []}
-                      combined={row.combined}
-                      elimination={row.elimination}
-                      consolidated={row.consolidated}
-                      isHeader={row.isHeader}
-                      isSubtotal={row.isSubtotal}
-                      indent={row.indent}
-                    />
-                  ))}
-                </tbody>
-              </table>
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
 
-        {/* ── Closing ── */}
-        <p className="text-sm text-slate-500">
-          Consolidation is not a formula. It is a judgment about control, structure, and what the numbers are actually saying.
-        </p>
+          {/* ── Closing ── */}
+          <p className="text-sm text-muted-foreground">
+            Consolidation is not a formula. It is a judgment about control, structure, and what the numbers are actually saying.
+          </p>
+        </div>
       </div>
-    </div>
+    </PageLayout>
   );
 }

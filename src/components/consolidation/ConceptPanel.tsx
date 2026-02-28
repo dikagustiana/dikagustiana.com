@@ -10,14 +10,14 @@ interface ConceptPanelProps {
 
 export function ConceptPanel({ icon: Icon, title, definition, children }: ConceptPanelProps) {
   return (
-    <div className="border border-slate-200 bg-white p-6">
-      <div className="inline-flex p-2 bg-slate-50 border border-slate-200">
-        <Icon className="w-5 h-5 text-slate-700" />
+    <div className="border border-border bg-card p-6">
+      <div className="inline-flex p-2 bg-muted border border-border">
+        <Icon className="w-5 h-5 text-foreground" />
       </div>
-      <h3 className="uppercase tracking-wider text-xs font-semibold text-slate-900 mt-3">
+      <h3 className="uppercase tracking-wider text-xs font-semibold text-foreground mt-3">
         {title}
       </h3>
-      <p className="text-sm text-slate-600 leading-relaxed mt-2 mb-4">{definition}</p>
+      <p className="text-sm text-muted-foreground leading-relaxed mt-2 mb-4">{definition}</p>
       {children}
     </div>
   );
