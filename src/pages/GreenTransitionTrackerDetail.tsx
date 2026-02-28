@@ -97,8 +97,6 @@ export default function GreenTransitionTrackerDetail() {
             const entries = issue.sections[meta.key] ?? [];
             if (entries.length === 0) return null;
 
-            const isInline = INLINE_SECTIONS.includes(meta.key);
-
             return (
               <div key={meta.key} className="mb-12">
                 {/* Section group header */}
@@ -111,88 +109,29 @@ export default function GreenTransitionTrackerDetail() {
                   </p>
                 </div>
 
-                {/* Directional Assessment reading label */}
-                {meta.key === 'directionalAssessment' && (
-                  <div className="inline-flex items-center gap-2 mb-6 py-1.5 px-3 bg-muted rounded-sm">
-                    <span className="font-mono text-xs text-muted-foreground uppercase tracking-widest">
-                      Reading:
-                    </span>
-                    <span className="font-mono text-xs font-semibold text-foreground uppercase tracking-widest">
-                      {issue.directionalReading}
-                    </span>
-                  </div>
-                )}
-
-                {isInline ? (
-                  /* Render inline for assessment/implication sections */
-                  entries.map((entry) => {
-                    const paragraphs = entry.body.split('\n\n').filter(Boolean);
-                    const isStrategicImplication = meta.key === 'strategicImplication';
-                    return (
-                      <div key={entry.slug}>
-                        <h3 className="text-[17px] font-semibold text-foreground leading-snug mb-1.5">
+                {/* Feed cards */}
+                <div>
+                  {entries.map((entry) => (
+                    <Link
+                      key={entry.slug}
+                      to={`/green-transition/tracker/${issue.slug}/${meta.key}/${entry.slug}`}
+                    >
+                      <div className="group py-5 border-b border-border/40 last:border-0 hover:bg-muted/30 -mx-4 px-4 transition-colors cursor-pointer">
+                        <h3 className="text-[17px] font-semibold text-foreground leading-snug mb-1.5 group-hover:text-foreground/80 transition-colors">
                           {entry.title}
                         </h3>
-                        <p className="text-[15px] text-muted-foreground leading-snug mb-6">
+                        <p className="text-[15px] text-muted-foreground leading-snug mb-3">
                           {entry.subtitle}
                         </p>
-                        <div>
-                          {paragraphs.map((p, j) => (
-                            <p key={j} className="text-[17px] leading-[1.75] text-foreground mb-5">
-                              {p}
-                            </p>
-                          ))}
+                        <div className="flex items-center gap-3">
+                          <span className="text-xs font-mono text-muted-foreground/70">
+                            {formatDate(entry.publishedAt)}
+                          </span>
                         </div>
-                        {/* Key Observation or Open Question */}
-                        {isStrategicImplication && issue.openQuestion ? (
-                          <div className="mt-8 mb-2 pl-4 border-l-2 border-foreground/30">
-                            <p className="text-xs font-mono text-muted-foreground uppercase tracking-widest mb-1">
-                              Question for Next Quarter
-                            </p>
-                            <p className="text-[15px] text-foreground font-medium leading-snug italic">
-                              {issue.openQuestion}
-                            </p>
-                          </div>
-                        ) : (
-                          entry.keyObservation && (
-                            <div className="mt-8 mb-2 pl-4 border-l-2 border-foreground/20">
-                              <p className="text-xs font-mono text-muted-foreground uppercase tracking-widest mb-1">
-                                Key Observation
-                              </p>
-                              <p className="text-[15px] text-foreground font-medium leading-snug">
-                                {entry.keyObservation}
-                              </p>
-                            </div>
-                          )
-                        )}
                       </div>
-                    );
-                  })
-                ) : (
-                  /* Render as feed cards for navigable sections */
-                  <div>
-                    {entries.map((entry) => (
-                      <Link
-                        key={entry.slug}
-                        to={`/green-transition/tracker/${issue.slug}/${meta.key}/${entry.slug}`}
-                      >
-                        <div className="group py-5 border-b border-border/40 last:border-0 hover:bg-muted/30 -mx-4 px-4 transition-colors cursor-pointer">
-                          <h3 className="text-[17px] font-semibold text-foreground leading-snug mb-1.5 group-hover:text-foreground/80 transition-colors">
-                            {entry.title}
-                          </h3>
-                          <p className="text-[15px] text-muted-foreground leading-snug mb-3">
-                            {entry.subtitle}
-                          </p>
-                          <div className="flex items-center gap-3">
-                            <span className="text-xs font-mono text-muted-foreground/70">
-                              {formatDate(entry.publishedAt)}
-                            </span>
-                          </div>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                )}
+                    </Link>
+                  ))}
+                </div>
               </div>
             );
           })}
