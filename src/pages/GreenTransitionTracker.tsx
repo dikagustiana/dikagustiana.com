@@ -51,7 +51,7 @@ export default function GreenTransitionTracker() {
             <Card>
               <CardContent className="p-6 space-y-3">
                 <p className="text-xs font-mono text-muted-foreground">
-                  {latestIssue.label} · {latestIssue.publishedDate}
+                  {latestIssue.label} · {latestIssue.publishedAt}
                 </p>
                 <h3 className="text-xl font-semibold text-foreground">
                   {latestIssue.directionalReading}
