@@ -1,6 +1,6 @@
 /**
- * CapitalConditionCard — Grid card for main page.
- * Clicking navigates to detail page.
+ * CapitalConditionCard — Clean editorial list item.
+ * No borders, no boxes. Just title, case, layer tag, arrow.
  */
 
 import { ArrowRight } from 'lucide-react';
@@ -16,25 +16,20 @@ export function CapitalConditionCard({ condition, onClick }: CapitalConditionCar
   return (
     <button
       onClick={onClick}
-      className="w-full text-left bg-card border border-border rounded-sm px-5 py-4 hover:border-foreground/30 transition-colors group flex items-start gap-3"
+      className="w-full text-left py-5 flex items-center gap-4 group"
     >
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2.5 mb-2">
-          <span className="text-[10px] font-mono text-muted-foreground tabular-nums">
-            {String(condition.number).padStart(2, '0')}
-          </span>
-          <span className="text-[10px] font-mono uppercase tracking-[0.12em] text-primary/70">
-            {getLayerLabel(condition.layer)}
-          </span>
-        </div>
-        <h3 className="text-sm font-display font-semibold text-foreground leading-snug mb-1.5">
+        <h3 className="text-base font-display font-semibold text-foreground leading-snug mb-1">
           {condition.title}
         </h3>
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-muted-foreground mb-1">
           {condition.caseCompany}
         </p>
+        <span className="text-[10px] font-mono uppercase tracking-[0.12em] text-primary/70">
+          {getLayerLabel(condition.layer)}
+        </span>
       </div>
-      <ArrowRight className="w-3.5 h-3.5 text-muted-foreground/50 mt-3 shrink-0 group-hover:text-foreground/60 transition-colors" />
+      <ArrowRight className="w-4 h-4 text-muted-foreground/40 shrink-0 group-hover:text-foreground/60 transition-colors" />
     </button>
   );
 }

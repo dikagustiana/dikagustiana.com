@@ -1,6 +1,6 @@
 /**
  * CapitalConditionDetail — View 2: Single condition detail page.
- * Route: /finance/capital-in-motion/:conditionNumber
+ * Route: /finance/capital-in-motion/:conditionSlug
  */
 
 import { useState } from 'react';
@@ -9,7 +9,7 @@ import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { PageLayout } from '@/components/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
 import {
-  getConditionByNumber,
+  CONDITIONS,
   getLayerLabel,
   CONDITION_ORDER,
 } from '@/data/capitalConditions';
@@ -23,10 +23,13 @@ import {
 } from '@/components/ui/table';
 
 export default function CapitalConditionDetail() {
-  const { conditionNumber } = useParams();
+  const { conditionSlug } = useParams();
   const navigate = useNavigate();
-  const num = Number(conditionNumber);
-  const condition = getConditionByNumber(num);
+
+  // Support both slug and number-based lookup for backwards compat
+  const condition = CONDITIONS.find(
+    (c) => c.id === conditionSlug || String(c.number) === conditionSlug
+  );
 
   const [showQuant, setShowQuant] = useState(false);
   const [showModel, setShowModel] = useState(false);
@@ -42,8 +45,12 @@ export default function CapitalConditionDetail() {
   }
 
   const currentIdx = CONDITION_ORDER.indexOf(condition.number);
-  const prevNum = currentIdx > 0 ? CONDITION_ORDER[currentIdx - 1] : null;
-  const nextNum = currentIdx < CONDITION_ORDER.length - 1 ? CONDITION_ORDER[currentIdx + 1] : null;
+  const prevCondition = currentIdx > 0
+    ? CONDITIONS.find((c) => c.number === CONDITION_ORDER[currentIdx - 1])
+    : null;
+  const nextCondition = currentIdx < CONDITION_ORDER.length - 1
+    ? CONDITIONS.find((c) => c.number === CONDITION_ORDER[currentIdx + 1])
+    : null;
 
   const modelRows = condition.hypotheticalModel && condition.hypotheticalModel.length > 0
     ? condition.hypotheticalModel
@@ -80,14 +87,9 @@ export default function CapitalConditionDetail() {
 
         {/* Header */}
         <div className="mb-8">
-          <div className="flex items-center gap-3 mb-3">
-            <span className="text-xs font-mono text-muted-foreground tabular-nums">
-              {String(condition.number).padStart(2, '0')}
-            </span>
-            <span className="text-[10px] font-mono uppercase tracking-[0.12em] text-primary/70">
-              {getLayerLabel(condition.layer)}
-            </span>
-          </div>
+          <span className="text-[10px] font-mono uppercase tracking-[0.12em] text-primary/70 block mb-2">
+            {getLayerLabel(condition.layer)}
+          </span>
           <h1 className="text-xl md:text-2xl font-display font-bold text-foreground tracking-tight leading-tight">
             {condition.title}
           </h1>
@@ -123,10 +125,13 @@ export default function CapitalConditionDetail() {
                 </button>
               ) : (
                 <div>
-                  <span className="text-[10px] font-mono uppercase tracking-[0.12em] text-muted-foreground">
-                    Quantitative Lens
-                  </span>
-                  <p className="text-sm font-mono text-muted-foreground mt-0.5">
+                  <button
+                    onClick={() => setShowQuant(false)}
+                    className="text-[10px] font-mono uppercase tracking-[0.12em] text-muted-foreground mb-1 hover:text-foreground transition-colors"
+                  >
+                    Quantitative Lens ↑
+                  </button>
+                  <p className="text-sm font-mono text-muted-foreground">
                     {condition.quantitative}
                   </p>
                 </div>
@@ -155,9 +160,12 @@ export default function CapitalConditionDetail() {
               </button>
             ) : (
               <div className="mt-1">
-                <span className="text-[10px] font-mono uppercase tracking-[0.12em] text-muted-foreground block mb-2">
-                  Hypothetical Model
-                </span>
+                <button
+                  onClick={() => setShowModel(false)}
+                  className="text-[10px] font-mono uppercase tracking-[0.12em] text-muted-foreground block mb-2 hover:text-foreground transition-colors"
+                >
+                  Hypothetical Model ↑
+                </button>
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -183,23 +191,23 @@ export default function CapitalConditionDetail() {
 
         {/* Prev / Next */}
         <div className="mt-12 pt-6 border-t border-border flex items-center justify-between">
-          {prevNum ? (
+          {prevCondition ? (
             <button
-              onClick={() => navigate(`/finance/capital-in-motion/${prevNum}`)}
+              onClick={() => navigate(`/finance/capital-in-motion/${prevCondition.id}`)}
               className="inline-flex items-center gap-1.5 text-xs font-mono text-muted-foreground hover:text-foreground transition-colors"
             >
               <ArrowLeft className="w-3 h-3" />
-              Previous Condition
+              Previous
             </button>
           ) : (
             <span />
           )}
-          {nextNum ? (
+          {nextCondition ? (
             <button
-              onClick={() => navigate(`/finance/capital-in-motion/${nextNum}`)}
+              onClick={() => navigate(`/finance/capital-in-motion/${nextCondition.id}`)}
               className="inline-flex items-center gap-1.5 text-xs font-mono text-muted-foreground hover:text-foreground transition-colors"
             >
-              Next Condition
+              Next
               <ArrowRight className="w-3 h-3" />
             </button>
           ) : (
