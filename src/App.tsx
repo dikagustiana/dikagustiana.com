@@ -113,6 +113,7 @@ const App = () => (
             {/* Finance */}
             <Route path="/finance" element={<FinanceLanding />} />
             <Route path="/finance/finance-in-motion" element={<FinanceInMotion />} />
+            <Route path="/finance/capital-in-motion/:conditionNumber" element={<CapitalConditionDetail />} />
             <Route path="/finance/:track" element={<FinanceTrackIndex />} />
             <Route path="/finance/:track/:moduleSlug" element={<FinanceModulePage />} />
             <Route path="/finance/:track/:moduleSlug/:essaySlug" element={<FinanceEssayPage />} />
