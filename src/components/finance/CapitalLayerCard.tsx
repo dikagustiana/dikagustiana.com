@@ -1,6 +1,6 @@
 /**
  * CapitalLayerCard — Full-width layer introduction card.
- * Light theme. Warm grey background. Minimal. Institutional.
+ * Light theme. Warm grey. Minimal. Institutional.
  */
 
 interface CapitalLayerCardProps {
@@ -11,7 +11,7 @@ interface CapitalLayerCardProps {
 
 export function CapitalLayerCard({ layerNumber, layerName, narrative }: CapitalLayerCardProps) {
   return (
-    <div className="bg-muted/40 px-6 py-5 border-b border-border">
+    <div className="bg-muted/40 border border-border rounded-sm px-6 py-5 mb-4">
       <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-primary/70 block mb-1">
         Layer {layerNumber}
       </span>
