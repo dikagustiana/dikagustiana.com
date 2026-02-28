@@ -3,7 +3,7 @@ import { PageLayout } from '@/components/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
 import { GREEN_TRANSITION_TABS } from '@/data/greenTransitionTabs';
 import { WhatChangedPanel } from '@/components/tracker/WhatChangedPanel';
-import { trackerIssues, SECTION_META, SectionKey } from '@/data/trackerIssues';
+import { trackerIssues, SECTION_META } from '@/data/trackerIssues';
 import { formatDate } from '@/lib/formatDate';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 
