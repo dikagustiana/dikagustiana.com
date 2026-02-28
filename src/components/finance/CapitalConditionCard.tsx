@@ -24,7 +24,7 @@ export function CapitalConditionCard({ condition, onClick }: CapitalConditionCar
         {condition.tension}
       </p>
       <span className="text-[11px] font-mono uppercase tracking-[0.08em] text-muted-foreground/70">
-        {getLayerLabel(condition.layer)} · {condition.caseCompany}
+        {getLayerLabel(condition.layer)} · Dika Gustiana
       </span>
     </button>
   );
