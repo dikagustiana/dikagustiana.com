@@ -55,7 +55,7 @@ export default function GreenTransitionTrackerDetail() {
     >
       <SEO
         title={`${issue.label} — Green Transition Tracker`}
-        description={issue.strategicImplication || issue.directionalReading}
+        description={issue.strategicImplicationPreview || issue.directionalReading}
       />
 
       <div className="container max-w-4xl py-10 space-y-10">
