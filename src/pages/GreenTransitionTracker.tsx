@@ -4,9 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { GREEN_TRANSITION_TABS } from '@/data/greenTransitionTabs';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
-
-// Will be populated in Prompt 4
-const trackerIssues: any[] = [];
+import { trackerIssues } from '@/data/trackerIssues';
 
 export default function GreenTransitionTracker() {
   const latestIssue = trackerIssues[0] ?? null;
@@ -53,13 +51,13 @@ export default function GreenTransitionTracker() {
             <Card>
               <CardContent className="p-6 space-y-3">
                 <p className="text-xs font-mono text-muted-foreground">
-                  {latestIssue.label} · {latestIssue.publishedDate}
+                  {latestIssue.label} · {latestIssue.publishedAt}
                 </p>
                 <h3 className="text-xl font-semibold text-foreground">
                   {latestIssue.directionalReading}
                 </h3>
                 <p className="text-muted-foreground">
-                  {latestIssue.strategicImplication}
+                  {latestIssue.strategicImplicationPreview}
                 </p>
                 <Link
                   to={`/green-transition/tracker/${latestIssue.slug}`}
@@ -138,13 +136,13 @@ export default function GreenTransitionTracker() {
                   <Card>
                     <CardContent className="p-6 space-y-2">
                       <p className="text-xs font-mono text-muted-foreground">
-                        {issue.label} · {issue.publishedDate}
+                        {issue.label} · {issue.publishedAt}
                       </p>
                       <h3 className="text-lg font-semibold text-foreground">
                         {issue.directionalReading}
                       </h3>
                       <p className="text-sm text-muted-foreground line-clamp-2">
-                        {issue.strategicImplication}
+                        {issue.strategicImplicationPreview}
                       </p>
                       <Link
                         to={`/green-transition/tracker/${issue.slug}`}

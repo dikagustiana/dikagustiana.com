@@ -5,9 +5,7 @@ import { GREEN_TRANSITION_TABS } from '@/data/greenTransitionTabs';
 import { TrackerSixSections } from '@/components/tracker/TrackerSixSections';
 import { WhatChangedPanel } from '@/components/tracker/WhatChangedPanel';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
-
-// Will be replaced with real data import in Prompt 4
-const trackerIssues: any[] = [];
+import { trackerIssues } from '@/data/trackerIssues';
 
 export default function GreenTransitionTrackerDetail() {
   const { issueSlug } = useParams<{ issueSlug: string }>();
@@ -57,7 +55,7 @@ export default function GreenTransitionTrackerDetail() {
     >
       <SEO
         title={`${issue.label} — Green Transition Tracker`}
-        description={issue.strategicImplication || issue.directionalReading}
+        description={issue.strategicImplicationPreview || issue.directionalReading}
       />
 
       <div className="container max-w-4xl py-10 space-y-10">
@@ -73,7 +71,7 @@ export default function GreenTransitionTrackerDetail() {
         {/* Issue header */}
         <div className="space-y-2">
           <p className="font-mono text-xs text-muted-foreground uppercase tracking-widest">
-            {issue.label} · {issue.publishedDate}
+            {issue.label} · {issue.publishedAt}
           </p>
           <p className="text-xl font-semibold text-foreground">
             Directional Reading: {issue.directionalReading}
@@ -85,7 +83,7 @@ export default function GreenTransitionTrackerDetail() {
           changed={issue.whatChanged?.changed ?? []}
           held={issue.whatChanged?.held ?? []}
           reversed={issue.whatChanged?.reversed ?? []}
-          previousReading={issue.whatChanged?.previousReading ?? ''}
+          previousReading={issue.previousReading}
           currentReading={issue.directionalReading}
         />
 
