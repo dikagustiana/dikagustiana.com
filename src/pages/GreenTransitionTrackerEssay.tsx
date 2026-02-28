@@ -143,51 +143,53 @@ export default function GreenTransitionTrackerEssay() {
                 </p>
               </div>
             )
-          )
+          )}
 
-          {/* Prev / Next within section */}
-          <div className="mt-16 pt-6 border-t border-border flex items-start justify-between gap-8">
-            {prevEntry ? (
-              <button
-                onClick={() =>
-                  navigate(
-                    `/green-transition/tracker/${issue.slug}/${sectionKey}/${prevEntry.slug}`
-                  )
-                }
-                className="text-left max-w-[45%]"
-              >
-                <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
-                  <ArrowLeft className="w-3.5 h-3.5" />
-                  Previous
-                </span>
-                <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                  {prevEntry.title}
-                </p>
-              </button>
-            ) : (
-              <span />
-            )}
-            {nextEntry ? (
-              <button
-                onClick={() =>
-                  navigate(
-                    `/green-transition/tracker/${issue.slug}/${sectionKey}/${nextEntry.slug}`
-                  )
-                }
-                className="text-right max-w-[45%]"
-              >
-                <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
-                  Next
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </span>
-                <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                  {nextEntry.title}
-                </p>
-              </button>
-            ) : (
-              <span />
-            )}
-          </div>
+          {/* Prev / Next within section — hidden if only one entry */}
+          {(prevEntry || nextEntry) && (
+            <div className="mt-16 pt-6 border-t border-border flex items-start justify-between gap-8">
+              {prevEntry ? (
+                <button
+                  onClick={() =>
+                    navigate(
+                      `/green-transition/tracker/${issue.slug}/${sectionKey}/${prevEntry.slug}`
+                    )
+                  }
+                  className="text-left max-w-[45%]"
+                >
+                  <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
+                    <ArrowLeft className="w-3.5 h-3.5" />
+                    Previous
+                  </span>
+                  <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                    {prevEntry.title}
+                  </p>
+                </button>
+              ) : (
+                <span />
+              )}
+              {nextEntry ? (
+                <button
+                  onClick={() =>
+                    navigate(
+                      `/green-transition/tracker/${issue.slug}/${sectionKey}/${nextEntry.slug}`
+                    )
+                  }
+                  className="text-right max-w-[45%]"
+                >
+                  <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
+                    Next
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </span>
+                  <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                    {nextEntry.title}
+                  </p>
+                </button>
+              ) : (
+                <span />
+              )}
+            </div>
+          )}
         </div>
       </div>
     </PageLayout>
