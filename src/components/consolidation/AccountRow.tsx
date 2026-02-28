@@ -24,14 +24,12 @@ export function AccountRow({
   isSubtotal = false,
   indent = 0,
 }: AccountRowProps) {
-  const baseClasses = 'text-xs py-2.5 border-b border-slate-100';
-
   if (isHeader) {
     return (
-      <tr className={`${baseClasses} bg-slate-50`}>
+      <tr className="text-xs py-2.5 border-b border-border bg-muted/50">
         <td
           colSpan={8}
-          className="px-4 py-2.5 text-xs font-semibold text-slate-700 uppercase tracking-wider"
+          className="px-4 py-2.5 text-xs font-semibold text-foreground uppercase tracking-wider"
         >
           {label}
         </td>
@@ -39,29 +37,29 @@ export function AccountRow({
     );
   }
 
-  const rowClasses = `${baseClasses} ${isSubtotal ? 'font-semibold bg-slate-50/50' : 'hover:bg-slate-50/30'}`;
+  const rowClasses = `text-xs py-2.5 border-b border-border/50 ${isSubtotal ? 'font-semibold bg-muted/30' : 'hover:bg-muted/20'}`;
   const paddingLeft = indent > 0 ? `${indent * 16 + 16}px` : '16px';
 
   return (
     <tr className={rowClasses}>
       <td
-        className="px-4 py-2.5 text-slate-800 whitespace-nowrap min-w-[220px]"
+        className="px-4 py-2.5 text-foreground whitespace-nowrap min-w-[220px]"
         style={{ paddingLeft }}
       >
         {label}
       </td>
       {values.map((v, i) => (
-        <td key={i} className="px-3 py-2.5 text-right text-slate-600 tabular-nums font-mono whitespace-nowrap">
+        <td key={i} className="px-3 py-2.5 text-right text-muted-foreground tabular-nums font-mono whitespace-nowrap">
           {displayValue(v)}
         </td>
       ))}
-      <td className="px-3 py-2.5 text-right text-slate-600 tabular-nums font-mono whitespace-nowrap bg-slate-50/50">
+      <td className="px-3 py-2.5 text-right text-muted-foreground tabular-nums font-mono whitespace-nowrap bg-muted/30">
         {displayValue(combined)}
       </td>
-      <td className="px-3 py-2.5 text-right text-slate-600 tabular-nums font-mono whitespace-nowrap bg-amber-50/30">
+      <td className="px-3 py-2.5 text-right text-muted-foreground tabular-nums font-mono whitespace-nowrap bg-amber-50/30">
         {displayValue(elimination)}
       </td>
-      <td className="px-3 py-2.5 text-right text-emerald-800 tabular-nums font-mono whitespace-nowrap bg-emerald-50/40 font-medium">
+      <td className="px-3 py-2.5 text-right text-foreground tabular-nums font-mono whitespace-nowrap bg-accent/[0.07] font-medium">
         {displayValue(consolidated)}
       </td>
     </tr>
