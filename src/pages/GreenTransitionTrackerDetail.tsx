@@ -7,7 +7,7 @@ import { trackerIssues, SECTION_META } from '@/data/trackerIssues';
 import { formatDate } from '@/lib/formatDate';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 
-const INLINE_SECTIONS: SectionKey[] = ['directionalAssessment', 'strategicImplication'];
+
 
 export default function GreenTransitionTrackerDetail() {
   const { issueSlug } = useParams<{ issueSlug: string }>();
