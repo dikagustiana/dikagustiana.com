@@ -66,6 +66,7 @@ import NextBigThingEssayPage from "./pages/NextBigThingEssayPage";
 import FinanceEssayPage from "./pages/FinanceEssayPage";
 import FinanceLanding from "./pages/FinanceLanding";
 import FinanceInMotion from "./pages/FinanceInMotion";
+import CapitalConditionDetail from "./pages/CapitalConditionDetail";
 import FinanceTrackIndex from "./pages/FinanceTrackIndex";
 import FinanceModulePage from "./pages/FinanceModulePage";
 import AdminEditorRedirect from "./pages/AdminEditorRedirect";
