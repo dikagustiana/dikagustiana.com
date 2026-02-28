@@ -171,3 +171,40 @@
     @apply opacity-100;
   }
 }
+
+/* ── Longform essay overrides (Noahpinion-style, finance-in-motion only) ── */
+@layer components {
+  .longform-body p {
+    @apply text-xl leading-loose text-foreground mb-6;
+  }
+
+  .longform-body h2 {
+    @apply text-3xl font-semibold text-foreground mt-16 mb-4;
+  }
+
+  .longform-body h3 {
+    @apply text-2xl font-semibold text-foreground mt-10 mb-3;
+  }
+
+  .longform-body blockquote {
+    @apply text-2xl font-semibold text-center my-12 border-none pl-0 not-italic;
+  }
+
+  .longform-body blockquote p {
+    @apply text-2xl font-semibold text-center;
+  }
+
+  .longform-body ul,
+  .longform-body ol {
+    @apply text-lg leading-relaxed my-6;
+  }
+
+  .longform-body table {
+    @apply border-collapse w-full text-sm my-8;
+  }
+
+  .longform-body table th,
+  .longform-body table td {
+    @apply border border-border px-3 py-2;
+  }
+}

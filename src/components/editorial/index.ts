@@ -13,6 +13,8 @@ export { EditorialFeed } from './EditorialFeed';
 export { ArticleLayout } from './ArticleLayout';
 export { ArticleShell } from './ArticleShell';
 export type { ArticleShellProps } from './ArticleShell';
+export { LongformArticleShell } from './LongformArticleShell';
+export type { LongformArticleShellProps } from './LongformArticleShell';
 // Legacy image block exports (deprecated - use FigureBlock instead)
 export { ImageBlock, parseImageBlock, serializeImageBlock } from './ImageBlock';
 export type { ImageBlockData } from './ImageBlock';
