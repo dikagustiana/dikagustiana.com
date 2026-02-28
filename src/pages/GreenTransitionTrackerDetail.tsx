@@ -88,7 +88,7 @@ export default function GreenTransitionTrackerDetail() {
           previousReading={issue.previousReading}
           currentReading={issue.directionalReading}
           issueLabel={issue.label}
-          previousLabel={nextIssue?.label}
+          previousLabel={trackerIssues[issueIndex + 1]?.label}
         />
 
         {/* Section-grouped feed */}

@@ -107,30 +107,24 @@ export default function GreenTransitionTracker() {
             <h2 className="text-sm font-mono text-muted-foreground uppercase tracking-widest mb-4">
               Previous Issues
             </h2>
-            <div className="divide-y divide-border">
+            <div className="divide-y divide-border/50">
               {pastIssues.map((issue: any) => (
-                <article key={issue.slug} className="py-6 first:pt-0 last:pb-0">
-                  <Card>
-                    <CardContent className="p-6 space-y-2">
-                      <p className="text-xs font-mono text-muted-foreground">
-                        {issue.label} · {issue.publishedAt}
-                      </p>
-                      <h3 className="text-lg font-semibold text-foreground">
-                        {issue.directionalReading}
-                      </h3>
-                      <p className="text-sm text-muted-foreground line-clamp-2">
-                        {issue.strategicImplicationPreview}
-                      </p>
-                      <Link
-                        to={`/green-transition/tracker/${issue.slug}`}
-                        className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:gap-2.5 transition-all"
-                      >
-                        Read this issue
-                        <ArrowRight className="h-4 w-4" />
-                      </Link>
-                    </CardContent>
-                  </Card>
-                </article>
+                <Link
+                  key={issue.slug}
+                  to={`/green-transition/tracker/${issue.slug}`}
+                >
+                  <div className="group py-5 hover:bg-muted/30 -mx-4 px-4 transition-colors">
+                    <p className="text-xs font-mono text-muted-foreground mb-1.5">
+                      {issue.label} · {issue.publishedAt}
+                    </p>
+                    <h3 className="text-[16px] font-semibold text-foreground leading-snug mb-1 group-hover:text-foreground/80 transition-colors">
+                      {issue.directionalReading}
+                    </h3>
+                    <p className="text-[14px] text-muted-foreground leading-snug line-clamp-2">
+                      {issue.strategicImplicationPreview}
+                    </p>
+                  </div>
+                </Link>
               ))}
             </div>
           </section>
