@@ -57,7 +57,7 @@ export default function GreenTransitionTracker() {
                   {latestIssue.directionalReading}
                 </h3>
                 <p className="text-muted-foreground">
-                  {latestIssue.strategicImplication}
+                  {latestIssue.strategicImplicationPreview}
                 </p>
                 <Link
                   to={`/green-transition/tracker/${latestIssue.slug}`}
