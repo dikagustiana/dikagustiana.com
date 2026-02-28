@@ -12,6 +12,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { LoadingState } from '@/components/states';
 import { ArticleShell, ArticleLayout } from '@/components/editorial';
+import { LongformArticleShell } from '@/components/editorial/LongformArticleShell';
 import { contentToHtml } from '@/lib/tiptap/serialize';
 import { useFinanceModuleBySlug } from '@/hooks/queries/useFinance';
 
