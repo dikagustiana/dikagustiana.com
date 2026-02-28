@@ -139,6 +139,7 @@ const App = () => (
 
             {/* Green Transition */}
             <Route path="/green-transition" element={<GreenTransition />} />
+            <Route path="/green-transition/tracker" element={<GreenTransitionTracker />} />
             <Route path="/green-transition/now" element={<GreenTransitionPhase />} />
             <Route path="/green-transition/gaps" element={<GreenTransitionPhase />} />
             <Route path="/green-transition/future" element={<GreenTransitionPhase />} />
