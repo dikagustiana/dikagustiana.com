@@ -5,9 +5,7 @@ import { GREEN_TRANSITION_TABS } from '@/data/greenTransitionTabs';
 import { TrackerSixSections } from '@/components/tracker/TrackerSixSections';
 import { WhatChangedPanel } from '@/components/tracker/WhatChangedPanel';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
-
-// Will be replaced with real data import in Prompt 4
-const trackerIssues: any[] = [];
+import { trackerIssues } from '@/data/trackerIssues';
 
 export default function GreenTransitionTrackerDetail() {
   const { issueSlug } = useParams<{ issueSlug: string }>();

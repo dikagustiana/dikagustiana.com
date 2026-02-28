@@ -4,9 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { GREEN_TRANSITION_TABS } from '@/data/greenTransitionTabs';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
-
-// Will be populated in Prompt 4
-const trackerIssues: any[] = [];
+import { trackerIssues } from '@/data/trackerIssues';
 
 export default function GreenTransitionTracker() {
   const latestIssue = trackerIssues[0] ?? null;
