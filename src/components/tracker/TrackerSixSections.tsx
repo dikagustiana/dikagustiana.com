@@ -14,12 +14,12 @@ interface TrackerSixSectionsProps {
 }
 
 const sectionMeta = [
-  { key: 'policyMovement', id: '01', label: 'POLICY MOVEMENT', desc: 'Enacted regulations, decrees, and formally adopted instruments' },
-  { key: 'capitalSignal', id: '02', label: 'CAPITAL SIGNAL', desc: 'Observable shifts in institutional and commercial capital positioning' },
-  { key: 'institutionalIncentiveShift', id: '03', label: 'INSTITUTIONAL INCENTIVE SHIFT', desc: 'Changes to structural incentives facing key actors' },
-  { key: 'executionFriction', id: '04', label: 'EXECUTION FRICTION', desc: 'Documented obstacles to transition capital deployment' },
-  { key: 'directionalAssessment', id: '05', label: 'DIRECTIONAL ASSESSMENT', desc: 'Committed quarterly analytical reading' },
-  { key: 'strategicImplication', id: '06', label: 'STRATEGIC IMPLICATION', desc: 'Concrete observation for capital allocators and practitioners' },
+  { key: 'policyMovement', label: 'POLICY MOVEMENT', desc: 'Enacted regulations, decrees, and formally adopted instruments' },
+  { key: 'capitalSignal', label: 'CAPITAL SIGNAL', desc: 'Observable shifts in institutional and commercial capital positioning' },
+  { key: 'institutionalIncentiveShift', label: 'INSTITUTIONAL INCENTIVE SHIFT', desc: 'Changes to structural incentives facing key actors' },
+  { key: 'executionFriction', label: 'EXECUTION FRICTION', desc: 'Documented obstacles to transition capital deployment' },
+  { key: 'directionalAssessment', label: 'DIRECTIONAL ASSESSMENT', desc: 'Committed quarterly analytical reading' },
+  { key: 'strategicImplication', label: 'STRATEGIC IMPLICATION', desc: 'Concrete observation for capital allocators and practitioners' },
 ] as const;
 
 export function TrackerSixSections({ sections, directionalReading, openQuestion }: TrackerSixSectionsProps) {
