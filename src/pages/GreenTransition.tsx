@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { PageLayout } from '@/components/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
+import { GREEN_TRANSITION_TABS } from '@/data/greenTransitionTabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { MapPin, AlertTriangle, Route, ArrowRight } from 'lucide-react';
 
@@ -36,6 +37,9 @@ export default function GreenTransition() {
         { label: 'Home', path: '/' },
         { label: 'Green Transition' },
       ]}
+      subNav={{
+        tabs: GREEN_TRANSITION_TABS,
+      }}
     >
       <SEO
         title="Green Transition"

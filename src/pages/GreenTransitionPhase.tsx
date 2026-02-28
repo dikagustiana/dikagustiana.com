@@ -4,6 +4,7 @@ import { SEO } from '@/components/SEO';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { Plus } from 'lucide-react';
+import { GREEN_TRANSITION_TABS } from '@/data/greenTransitionTabs';
 
 // Map URL slugs to database phase values
 const phaseMapping: Record<string, string> = {
@@ -30,11 +31,7 @@ const phaseDetails: Record<string, { title: string; coreQuestion: string }> = {
   },
 };
 
-const GREEN_TRANSITION_TABS = [
-  { label: 'Where We Are Now', path: '/green-transition/now' },
-  { label: 'Challenges Ahead', path: '/green-transition/gaps' },
-  { label: 'Pathways Forward', path: '/green-transition/future' },
-];
+// Tabs imported from shared config
 
 export default function GreenTransitionPhase() {
   const { phase } = useParams<{ phase: string }>();
