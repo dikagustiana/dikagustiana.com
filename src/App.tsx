@@ -41,6 +41,7 @@ import GreenTransitionEssayPage from "./pages/GreenTransitionEssayPage";
 import GreenTransitionTracker from "./pages/GreenTransitionTracker";
 import GreenTransitionTrackerDetail from "./pages/GreenTransitionTrackerDetail";
 import GreenTransitionTrackerArchive from "./pages/GreenTransitionTrackerArchive";
+import GreenTransitionTrackerEssay from "./pages/GreenTransitionTrackerEssay";
 
 // Learning
 import CriticalThinkingResearch from "./pages/CriticalThinkingResearch";
