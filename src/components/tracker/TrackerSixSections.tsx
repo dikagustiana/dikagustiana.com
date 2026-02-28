@@ -33,17 +33,12 @@ export function TrackerSixSections({ sections, directionalReading, openQuestion 
 
         return (
           <div key={meta.key}>
-            {i > 0 && <div className="border-t border-border my-12" />}
+            {i > 0 && <div className="border-t border-border/50 my-14" />}
 
-            {/* Section identifier */}
-            <div className="flex items-baseline gap-3 mb-1">
-              <span className="font-mono text-xs text-muted-foreground tracking-widest">
-                {meta.id}
-              </span>
-              <span className="font-mono text-xs text-muted-foreground tracking-widest uppercase">
-                {meta.label}
-              </span>
-            </div>
+            {/* Section label */}
+            <p className="text-xs font-mono text-muted-foreground uppercase tracking-[0.18em] mb-2">
+              {meta.label}
+            </p>
 
             {/* Descriptor */}
             <p className="text-sm text-muted-foreground italic mb-6">
