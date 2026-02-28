@@ -5,6 +5,7 @@ import { GREEN_TRANSITION_TABS } from '@/data/greenTransitionTabs';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { trackerIssues } from '@/data/trackerIssues';
+import { WhatChangedPanel } from '@/components/tracker/WhatChangedPanel';
 
 export default function GreenTransitionTracker() {
   const latestIssue = trackerIssues[0] ?? null;
