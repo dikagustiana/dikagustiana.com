@@ -9,3 +9,4 @@ export { ExpandableFormula } from './ExpandableFormula';
 export { FormulaBlock } from './FormulaBlock';
 export { FinanceCycleMap } from './FinanceCycleMap';
 export { CapitalConditionCard } from './CapitalConditionCard';
+export { CapitalLayerCard } from './CapitalLayerCard';
