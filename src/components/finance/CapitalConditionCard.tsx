@@ -1,9 +1,8 @@
 /**
- * CapitalConditionCard — Clean editorial list item.
- * No borders, no boxes. Just title, case, layer tag, arrow.
+ * CapitalConditionCard — Substack-style editorial list item.
+ * Bold title, description snippet, subtle metadata line.
  */
 
-import { ArrowRight } from 'lucide-react';
 import { getLayerLabel } from '@/data/capitalConditions';
 import type { CapitalCondition } from '@/data/capitalConditions';
 
@@ -16,20 +15,17 @@ export function CapitalConditionCard({ condition, onClick }: CapitalConditionCar
   return (
     <button
       onClick={onClick}
-      className="w-full text-left py-5 flex items-center gap-4 group"
+      className="w-full text-left py-6 group block"
     >
-      <div className="flex-1 min-w-0">
-        <h3 className="text-base font-display font-semibold text-foreground leading-snug mb-1">
-          {condition.title}
-        </h3>
-        <p className="text-xs text-muted-foreground mb-1">
-          {condition.caseCompany}
-        </p>
-        <span className="text-[10px] font-mono uppercase tracking-[0.12em] text-primary/70">
-          {getLayerLabel(condition.layer)}
-        </span>
-      </div>
-      <ArrowRight className="w-4 h-4 text-muted-foreground/40 shrink-0 group-hover:text-foreground/60 transition-colors" />
+      <h3 className="text-lg md:text-xl font-display font-bold text-foreground leading-snug mb-1.5 group-hover:text-primary/80 transition-colors">
+        {condition.title}
+      </h3>
+      <p className="text-sm text-muted-foreground leading-relaxed mb-2 max-w-xl line-clamp-2">
+        {condition.tension}
+      </p>
+      <span className="text-[11px] font-mono uppercase tracking-[0.08em] text-muted-foreground/70">
+        {getLayerLabel(condition.layer)} · {condition.caseCompany}
+      </span>
     </button>
   );
 }
