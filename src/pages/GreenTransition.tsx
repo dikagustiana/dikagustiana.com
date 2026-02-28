@@ -37,6 +37,9 @@ export default function GreenTransition() {
         { label: 'Home', path: '/' },
         { label: 'Green Transition' },
       ]}
+      subNav={{
+        tabs: GREEN_TRANSITION_TABS,
+      }}
     >
       <SEO
         title="Green Transition"
