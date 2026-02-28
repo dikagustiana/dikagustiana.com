@@ -71,7 +71,7 @@ export default function GreenTransitionTrackerDetail() {
         {/* Issue header */}
         <div className="space-y-2">
           <p className="font-mono text-xs text-muted-foreground uppercase tracking-widest">
-            {issue.label} · {issue.publishedDate}
+            {issue.label} · {issue.publishedAt}
           </p>
           <p className="text-xl font-semibold text-foreground">
             Directional Reading: {issue.directionalReading}
