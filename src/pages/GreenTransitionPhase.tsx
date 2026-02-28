@@ -4,6 +4,7 @@ import { SEO } from '@/components/SEO';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { Plus } from 'lucide-react';
+import { GREEN_TRANSITION_TABS } from '@/data/greenTransitionTabs';
 
 // Map URL slugs to database phase values
 const phaseMapping: Record<string, string> = {
