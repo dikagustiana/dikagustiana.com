@@ -142,33 +142,42 @@ export default function FinanceEssayPage() {
   const deck = economistFields.deck || essay.snippet;
   const topic = module?.title ?? essay.phase ?? 'Finance';
   const htmlContent = contentToHtml(essay.content || '');
+  const isLongform = track === 'finance-in-motion';
+
+  const sharedProps = {
+    seoTitle: essay.title,
+    seoDescription: deck || 'Finance knowledge for decision-making.',
+    seoAuthor: essay.author || undefined,
+    backLink: { label: 'Back to lessons', path: `/finance/${track}/${moduleSlug}` },
+    title: essay.title,
+    deck,
+    author: essay.author,
+    publishedAt: essay.date,
+    updatedAt: essay.updated_at,
+    createdAt: essay.created_at,
+    readTime: essay.read_time,
+    heroImage: essay.thumbnail_url,
+    heroCaption: economistFields.hero_caption,
+    content: essay.content || '',
+    keyTakeaways: economistFields.key_takeaways,
+    references: economistFields.references,
+    authorBio: economistFields.author_bio,
+    previous,
+    next,
+    getEssayUrl,
+    currentEssayId: essay.id,
+    section: 'finance' as const,
+  };
+
+  if (isLongform) {
+    return <LongformArticleShell {...sharedProps} />;
+  }
 
   return (
     <ArticleShell
-      seoTitle={essay.title}
-      seoDescription={deck || 'Finance knowledge for decision-making.'}
-      seoAuthor={essay.author || undefined}
-      backLink={{ label: 'Back to lessons', path: `/finance/${track}/${moduleSlug}` }}
-      title={essay.title}
-      deck={deck}
-      author={essay.author}
-      publishedAt={essay.date}
-      updatedAt={essay.updated_at}
-      createdAt={essay.created_at}
-      readTime={essay.read_time}
+      {...sharedProps}
       topic={topic}
-      heroImage={essay.thumbnail_url}
-      heroCaption={economistFields.hero_caption}
-      content={essay.content || ''}
       htmlContent={htmlContent}
-      keyTakeaways={economistFields.key_takeaways}
-      references={economistFields.references}
-      authorBio={economistFields.author_bio}
-      previous={previous}
-      next={next}
-      getEssayUrl={getEssayUrl}
-      currentEssayId={essay.id}
-      section="finance"
     />
   );
 }
