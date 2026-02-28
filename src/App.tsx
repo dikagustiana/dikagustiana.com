@@ -40,6 +40,7 @@ import GreenTransitionPhase from "./pages/GreenTransitionPhase";
 import GreenTransitionEssayPage from "./pages/GreenTransitionEssayPage";
 import GreenTransitionTracker from "./pages/GreenTransitionTracker";
 import GreenTransitionTrackerDetail from "./pages/GreenTransitionTrackerDetail";
+import GreenTransitionTrackerArchive from "./pages/GreenTransitionTrackerArchive";
 
 // Learning
 import CriticalThinkingResearch from "./pages/CriticalThinkingResearch";
