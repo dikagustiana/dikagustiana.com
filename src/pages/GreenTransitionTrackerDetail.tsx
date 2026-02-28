@@ -85,6 +85,8 @@ export default function GreenTransitionTrackerDetail() {
           reversed={issue.whatChanged?.reversed ?? []}
           previousReading={issue.previousReading}
           currentReading={issue.directionalReading}
+          issueLabel={issue.label}
+          previousLabel={nextIssue?.label}
         />
 
         {/* Divider */}

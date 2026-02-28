@@ -5,6 +5,7 @@ import { GREEN_TRANSITION_TABS } from '@/data/greenTransitionTabs';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { trackerIssues } from '@/data/trackerIssues';
+import { WhatChangedPanel } from '@/components/tracker/WhatChangedPanel';
 
 export default function GreenTransitionTracker() {
   const latestIssue = trackerIssues[0] ?? null;
@@ -89,39 +90,15 @@ export default function GreenTransitionTracker() {
           <h2 className="text-sm font-mono text-muted-foreground uppercase tracking-widest mb-4">
             What Changed
           </h2>
-          {latestIssue?.whatChanged ? (
-            <div className="space-y-4">
-              {(['changed', 'held', 'reversed'] as const).map((key) => {
-                const items: string[] = latestIssue.whatChanged?.[key] ?? [];
-                return (
-                  <Card key={key}>
-                    <CardContent className="p-6">
-                      <h3 className="text-sm font-semibold text-foreground capitalize mb-2">
-                        {key}
-                      </h3>
-                      {items.length > 0 ? (
-                        <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1">
-                          {items.map((item, i) => (
-                            <li key={i}>{item}</li>
-                          ))}
-                        </ul>
-                      ) : (
-                        <p className="text-sm text-muted-foreground">None this quarter.</p>
-                      )}
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
-          ) : (
-            <Card>
-              <CardContent className="p-6">
-                <p className="text-muted-foreground">
-                  No prior comparison — first issue.
-                </p>
-              </CardContent>
-            </Card>
-          )}
+          <WhatChangedPanel
+            changed={latestIssue?.whatChanged?.changed ?? []}
+            held={latestIssue?.whatChanged?.held ?? []}
+            reversed={latestIssue?.whatChanged?.reversed ?? []}
+            previousReading={latestIssue?.previousReading ?? ''}
+            currentReading={latestIssue?.directionalReading ?? ''}
+            issueLabel={latestIssue?.label}
+            previousLabel={trackerIssues[1]?.label}
+          />
         </section>
 
         {/* 4. Issue Feed */}

@@ -4,52 +4,84 @@ interface WhatChangedPanelProps {
   reversed: string[];
   previousReading: string;
   currentReading: string;
+  issueLabel?: string;
+  previousLabel?: string;
 }
 
-export function WhatChangedPanel({ changed, held, reversed, previousReading, currentReading }: WhatChangedPanelProps) {
+export function WhatChangedPanel({
+  changed,
+  held,
+  reversed,
+  previousReading,
+  currentReading,
+  issueLabel,
+  previousLabel,
+}: WhatChangedPanelProps) {
   if (!previousReading) {
     return (
-      <div className="border border-border rounded-lg p-6">
-        <p className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-4">
+      <div className="bg-muted/40 border border-border rounded-lg p-6">
+        <p className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
           What Changed Since Last Update
         </p>
-        <p className="text-muted-foreground">No prior comparison — this is the first issue.</p>
+        <hr className="border-t border-border my-4" />
+        <p className="text-muted-foreground">
+          This is the first issue. No prior period comparison available.
+        </p>
       </div>
     );
   }
 
-  const rows = [
-    { label: 'Changed', items: changed },
-    { label: 'Held', items: held },
-    { label: 'Reversed', items: reversed },
+  const columns: {
+    label: string;
+    items: string[];
+    borderClass: string;
+  }[] = [
+    { label: 'Changed', items: changed, borderClass: 'border-primary' },
+    { label: 'Held', items: held, borderClass: 'border-muted-foreground' },
+    { label: 'Reversed', items: reversed, borderClass: 'border-destructive/50' },
   ];
 
+  const comparisonLabel =
+    issueLabel && previousLabel
+      ? `${issueLabel} vs ${previousLabel}`
+      : undefined;
+
   return (
-    <div className="border border-border rounded-lg p-6 space-y-6">
-      <p className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
-        What Changed Since Last Update
-      </p>
+    <div className="bg-muted/40 border border-border rounded-lg p-6">
+      {/* Header */}
+      <div className="flex items-start justify-between gap-4">
+        <p className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
+          Comparison: {previousReading} → {currentReading}
+        </p>
+        {comparisonLabel && (
+          <p className="font-mono text-xs text-muted-foreground flex-shrink-0">
+            {comparisonLabel}
+          </p>
+        )}
+      </div>
 
-      <p className="text-sm text-foreground">
-        Previous quarter: <span className="font-semibold">{previousReading}</span>
-        {' → '}
-        This quarter: <span className="font-semibold">{currentReading}</span>
-      </p>
+      <hr className="border-t border-border my-4" />
 
-      <div className="space-y-4">
-        {rows.map((row) => (
-          <div key={row.label}>
-            <p className="font-mono text-xs text-muted-foreground uppercase tracking-widest mb-1">
-              {row.label}
+      {/* Three-column grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {columns.map((col) => (
+          <div key={col.label}>
+            <p className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-3">
+              {col.label}
             </p>
-            {row.items.length > 0 ? (
-              <ul className="list-disc list-inside text-sm text-foreground leading-relaxed space-y-1">
-                {row.items.map((item, i) => (
-                  <li key={i}>{item}</li>
+            {col.items.length > 0 ? (
+              <div className="space-y-2">
+                {col.items.map((item, i) => (
+                  <p
+                    key={i}
+                    className={`text-sm text-foreground leading-relaxed border-l-2 ${col.borderClass} pl-2`}
+                  >
+                    {item}
+                  </p>
                 ))}
-              </ul>
+              </div>
             ) : (
-              <p className="text-sm text-muted-foreground">None this quarter.</p>
+              <p className="text-sm text-muted-foreground">—</p>
             )}
           </div>
         ))}
