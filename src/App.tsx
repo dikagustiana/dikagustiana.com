@@ -41,6 +41,7 @@ import GreenTransitionEssayPage from "./pages/GreenTransitionEssayPage";
 import GreenTransitionTracker from "./pages/GreenTransitionTracker";
 import GreenTransitionTrackerDetail from "./pages/GreenTransitionTrackerDetail";
 import GreenTransitionTrackerArchive from "./pages/GreenTransitionTrackerArchive";
+import GreenTransitionTrackerEssay from "./pages/GreenTransitionTrackerEssay";
 
 // Learning
 import CriticalThinkingResearch from "./pages/CriticalThinkingResearch";
@@ -143,6 +144,7 @@ const App = () => (
             <Route path="/green-transition" element={<GreenTransition />} />
             <Route path="/green-transition/tracker" element={<GreenTransitionTracker />} />
             <Route path="/green-transition/tracker/archive" element={<GreenTransitionTrackerArchive />} />
+            <Route path="/green-transition/tracker/:issueSlug/:sectionKey/:entrySlug" element={<GreenTransitionTrackerEssay />} />
             <Route path="/green-transition/tracker/:issueSlug" element={<GreenTransitionTrackerDetail />} />
             <Route path="/green-transition/now" element={<GreenTransitionPhase />} />
             <Route path="/green-transition/gaps" element={<GreenTransitionPhase />} />
