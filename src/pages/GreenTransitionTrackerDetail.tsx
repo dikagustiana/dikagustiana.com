@@ -93,7 +93,11 @@ export default function GreenTransitionTrackerDetail() {
         <hr className="border-t border-border" />
 
         {/* Six Sections */}
-        <TrackerSixSections sections={issue.sections} />
+        <TrackerSixSections
+          sections={issue.sections}
+          directionalReading={issue.directionalReading}
+          openQuestion={issue.openQuestion}
+        />
 
         {/* Prev / Next */}
         <div className="mt-16 pt-6 border-t border-border flex items-center justify-between">
