@@ -3,7 +3,7 @@ import { PageLayout } from '@/components/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
 import { GREEN_TRANSITION_TABS } from '@/data/greenTransitionTabs';
 import { Card, CardContent } from '@/components/ui/card';
-import { MapPin, AlertTriangle, Route, ArrowRight } from 'lucide-react';
+import { MapPin, AlertTriangle, Route, ArrowRight, TrendingUp } from 'lucide-react';
 
 const phaseCards = [
   {
@@ -26,6 +26,13 @@ const phaseCards = [
     description: 'What might actually work: sector priorities, policy mechanisms, financing structures, and realistic timelines.',
     icon: Route,
     question: 'Which interventions create the highest leverage?',
+  },
+  {
+    slug: 'climate-finance',
+    title: 'Climate Finance',
+    description: 'The instruments, institutions, and capital flows that fund the green transition. Green bonds, carbon markets, and climate-aligned lending.',
+    icon: TrendingUp,
+    question: 'Who provides the capital, on what terms, and what does it achieve?',
   },
 ];
 

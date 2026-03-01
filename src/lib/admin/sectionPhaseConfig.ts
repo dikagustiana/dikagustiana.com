@@ -56,6 +56,16 @@ export const SECTION_PHASE_CONFIG: Record<string, SectionPhaseEntry> = {
       { value: 'where-we-are-now', label: 'Where We Are Now' },
       { value: 'challenges-ahead', label: 'Challenges Ahead' },
       { value: 'pathways-forward', label: 'Pathways Forward' },
+      { value: 'climate-finance', label: 'Climate Finance' },
+    ],
+  },
+  'development-finance': {
+    phaseLabel: 'Topic',
+    options: [
+      { value: 'sovereign-wealth-funds', label: 'Sovereign Wealth Funds' },
+      { value: 'multilateral-development-banks', label: 'Multilateral Development Banks' },
+      { value: 'blended-finance', label: 'Blended Finance' },
+      { value: 'indonesia-capital-architecture', label: 'Indonesia\'s Capital Architecture' },
     ],
   },
   'next-big-thing': {

@@ -2,7 +2,7 @@ import { PageLayout } from '@/components/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
 import { Card, CardContent } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
-import { ArrowRight, BarChart3, BookOpen, Leaf, Lightbulb, Clock, User, GraduationCap } from 'lucide-react';
+import { ArrowRight, BarChart3, BookOpen, Leaf, Lightbulb, Clock, User, GraduationCap, Landmark } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useFeaturedEssays } from '@/hooks/queries/useEssays';
 import { LoadingState } from '@/components/states/LoadingState';
@@ -43,6 +43,13 @@ const sections = [
     description: 'Band 7+ methodology. Time limits, task protocols, scoring criteria.',
     path: '/english-ielts',
     accent: 'text-green-500',
+  },
+  {
+    icon: Landmark,
+    title: 'Development Finance',
+    description: 'Sovereign funds, multilateral lenders, and blended finance. How public capital shapes economies.',
+    path: '/development-finance',
+    accent: 'text-sky-500',
   },
 ];
 

@@ -239,6 +239,7 @@ export type Database = {
           fsli_slug: string | null
           fundamental_id: string | null
           id: string
+          is_selected: boolean
           learning_outcomes: string[] | null
           lesson_type: Database["public"]["Enums"]["lesson_type_enum"] | null
           manager_fields: Json | null
@@ -273,6 +274,7 @@ export type Database = {
           fsli_slug?: string | null
           fundamental_id?: string | null
           id?: string
+          is_selected?: boolean
           learning_outcomes?: string[] | null
           lesson_type?: Database["public"]["Enums"]["lesson_type_enum"] | null
           manager_fields?: Json | null
@@ -307,6 +309,7 @@ export type Database = {
           fsli_slug?: string | null
           fundamental_id?: string | null
           id?: string
+          is_selected?: boolean
           learning_outcomes?: string[] | null
           lesson_type?: Database["public"]["Enums"]["lesson_type_enum"] | null
           manager_fields?: Json | null

@@ -28,6 +28,14 @@ export const greenTransitionItems: NavItem[] = [
   { label: 'Where We Are Now', path: '/green-transition/now' },
   { label: 'Challenges Ahead', path: '/green-transition/gaps' },
   { label: 'Pathways Forward', path: '/green-transition/future' },
+  { label: 'Climate Finance', path: '/green-transition/climate-finance' },
+];
+
+export const developmentFinanceItems: NavItem[] = [
+  { label: 'Sovereign Wealth Funds', path: '/development-finance/sovereign-wealth-funds' },
+  { label: 'Multilateral Development Banks', path: '/development-finance/multilateral-development-banks' },
+  { label: 'Blended Finance', path: '/development-finance/blended-finance' },
+  { label: 'Indonesia\'s Capital Architecture', path: '/development-finance/indonesia-capital-architecture' },
 ];
 
 export const learningItems: NavItem[] = [
@@ -65,6 +73,11 @@ export const navSections: NavSection[] = [
     label: 'The Next Big Thing',
     basePath: '/the-next-big-thing',
     items: nextBigThingItems,
+  },
+  {
+    label: 'Development Finance',
+    basePath: '/development-finance',
+    items: developmentFinanceItems,
   },
   {
     label: 'Learning',
