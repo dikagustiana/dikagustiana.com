@@ -36,25 +36,18 @@ const EssayRow = React.memo(function EssayRow({ essay }: { essay: FinanceModuleE
   const { line1, line2 } = splitTitle(essay.title);
 
   return (
-    <div className="py-4 pl-[3rem] ml-4 border-l border-border/50">
-      <div className="flex items-start justify-between gap-4 pl-4">
-        <div className="min-w-0 flex-1">
-          <p className="text-[15px] font-semibold text-foreground leading-snug">
-            {line1}
-          </p>
-          {line2 && (
-            <p className="text-[14px] text-muted-foreground leading-snug mt-0.5">
-              {line2}
-            </p>
-          )}
-          <p className="text-xs text-muted-foreground/60 mt-1.5">
-            Essay not yet published.
-          </p>
-        </div>
-        <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-muted text-muted-foreground shrink-0 mt-0.5">
-          Draft
-        </span>
-      </div>
+    <div className="py-5 pl-[3.5rem]">
+      <p className="text-[16px] font-semibold text-foreground leading-snug">
+        {line1}
+      </p>
+      {line2 && (
+        <p className="text-[16px] text-foreground leading-snug mt-0.5">
+          {line2}
+        </p>
+      )}
+      <p className="text-xs text-muted-foreground mt-2">
+        Draft · Dika Gustiana
+      </p>
     </div>
   );
 });
