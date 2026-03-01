@@ -150,6 +150,8 @@ const App = () => (
 
             {/* Green Transition */}
             <Route path="/green-transition" element={<GreenTransition />} />
+            <Route path="/green-transition/climate-finance" element={<ClimateFinance />} />
+            <Route path="/green-transition/climate-finance/:slug" element={<GreenTransitionEssayPage />} />
             <Route path="/green-transition/tracker" element={<GreenTransitionTracker />} />
             <Route path="/green-transition/tracker/archive" element={<GreenTransitionTrackerArchive />} />
             <Route path="/green-transition/tracker/:issueSlug/:sectionKey/:entrySlug" element={<GreenTransitionTrackerEssay />} />
@@ -159,6 +161,11 @@ const App = () => (
             <Route path="/green-transition/future" element={<GreenTransitionPhase />} />
             <Route path="/green-transition/:phase" element={<GreenTransitionPhase />} />
             <Route path="/green-transition/:phase/:slug" element={<GreenTransitionEssayPage />} />
+
+            {/* Development Finance */}
+            <Route path="/development-finance" element={<DevelopmentFinance />} />
+            <Route path="/development-finance/:phase" element={<DevelopmentFinancePhase />} />
+            <Route path="/development-finance/:phase/:slug" element={<DevelopmentFinanceEssayPage />} />
 
             {/* Legacy Masyarakat Baru routes */}
             <Route path="/masyarakat-baru" element={<Navigate to="/critical-thinking-research" replace />} />

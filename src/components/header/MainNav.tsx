@@ -65,6 +65,13 @@ export function MainNav() {
         basePath="/the-next-big-thing"
       />
 
+      <NavDropdown
+        label="Development Finance"
+        items={developmentFinanceItems}
+        width="w-72"
+        basePath="/development-finance"
+      />
+
       <NavDropdown label="Learning" items={learningItems} width="w-48" />
 
       {isAdmin && (
