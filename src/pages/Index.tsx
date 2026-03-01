@@ -2,7 +2,7 @@ import { PageLayout } from '@/components/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
 import { Card, CardContent } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
-import { ArrowRight, BarChart3, BookOpen, Leaf, Lightbulb, Clock, User, GraduationCap } from 'lucide-react';
+import { ArrowRight, BarChart3, BookOpen, Leaf, Lightbulb, Clock, User, GraduationCap, Landmark } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useFeaturedEssays } from '@/hooks/queries/useEssays';
 import { LoadingState } from '@/components/states/LoadingState';
