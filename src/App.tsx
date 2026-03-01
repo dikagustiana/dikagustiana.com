@@ -72,6 +72,8 @@ import FinanceLanding from "./pages/FinanceLanding";
 import FinanceInMotion from "./pages/FinanceInMotion";
 import CapitalConditionDetail from "./pages/CapitalConditionDetail";
 import FinanceTrackIndex from "./pages/FinanceTrackIndex";
+import FinanceInActionIndex from "./pages/FinanceInActionIndex";
+import FinanceModelDetail from "./pages/FinanceModelDetail";
 import FinanceModulePage from "./pages/FinanceModulePage";
 import AdminEditorRedirect from "./pages/AdminEditorRedirect";
 import WriterEditorPage from "./pages/WriterEditorPage";
