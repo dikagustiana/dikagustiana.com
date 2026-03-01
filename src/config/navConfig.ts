@@ -19,8 +19,8 @@ export const accountingItems: NavItem[] = [
 export const financeItems: NavItem[] = [
   { label: 'Fundamentals', path: '/finance/fundamentals' },
   { label: 'Strategic Finance', path: '/finance/strategic-finance' },
-  { label: 'Financial Planning', path: '/finance/planning' },
-  { label: 'Financial Analytics', path: '/finance/analytics' },
+  { label: 'Planning & Forecasting', path: '/finance/planning-forecasting' },
+  { label: 'Financial Analytics', path: '/finance/financial-analytics' },
 ];
 
 export const greenTransitionItems: NavItem[] = [
