@@ -526,6 +526,63 @@ export type Database = {
         }
         Relationships: []
       }
+      finance_models: {
+        Row: {
+          created_at: string
+          depth: Database["public"]["Enums"]["model_depth"]
+          description: string | null
+          documentation: Json
+          excel_file_url: string | null
+          id: string
+          is_flagship: boolean
+          is_published: boolean
+          last_updated: string
+          module_references: string[]
+          name: string
+          number: string
+          slug: string
+          sort_order: number
+          updated_at: string
+          version: string
+        }
+        Insert: {
+          created_at?: string
+          depth?: Database["public"]["Enums"]["model_depth"]
+          description?: string | null
+          documentation?: Json
+          excel_file_url?: string | null
+          id?: string
+          is_flagship?: boolean
+          is_published?: boolean
+          last_updated?: string
+          module_references?: string[]
+          name: string
+          number: string
+          slug: string
+          sort_order?: number
+          updated_at?: string
+          version?: string
+        }
+        Update: {
+          created_at?: string
+          depth?: Database["public"]["Enums"]["model_depth"]
+          description?: string | null
+          documentation?: Json
+          excel_file_url?: string | null
+          id?: string
+          is_flagship?: boolean
+          is_published?: boolean
+          last_updated?: string
+          module_references?: string[]
+          name?: string
+          number?: string
+          slug?: string
+          sort_order?: number
+          updated_at?: string
+          version?: string
+        }
+        Relationships: []
+      }
       finance_modules: {
         Row: {
           created_at: string
@@ -1693,6 +1750,7 @@ export type Database = {
         | "case-study"
         | "exercise"
         | "model-walkthrough"
+      model_depth: "foundation" | "executive" | "institutional"
       transaction_type: "income" | "expense" | "transfer"
       voice_role_enum: "manager" | "economist" | "educator" | "coach" | "hybrid"
     }
@@ -1842,6 +1900,7 @@ export const Constants = {
         "exercise",
         "model-walkthrough",
       ],
+      model_depth: ["foundation", "executive", "institutional"],
       transaction_type: ["income", "expense", "transfer"],
       voice_role_enum: ["manager", "economist", "educator", "coach", "hybrid"],
     },

@@ -21,6 +21,7 @@ export const financeItems: NavItem[] = [
   { label: 'Strategic Finance', path: '/finance/strategic-finance' },
   { label: 'Planning & Forecasting', path: '/finance/planning-forecasting' },
   { label: 'Financial Analytics', path: '/finance/financial-analytics' },
+  { label: 'Finance in Action', path: '/finance/finance-in-action' },
 ];
 
 export const greenTransitionItems: NavItem[] = [
