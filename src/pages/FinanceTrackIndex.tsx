@@ -91,7 +91,7 @@ const CollapsibleModuleRow = React.memo(function CollapsibleModuleRow({
       </button>
 
       {isOpen && essays.length > 0 && (
-        <div className="divide-y divide-border/40 mb-2">
+        <div className="divide-y divide-border/30">
           {essays.map((essay) => (
             <EssayRow key={essay.id} essay={essay} />
           ))}
