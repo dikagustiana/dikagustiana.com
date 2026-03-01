@@ -16,6 +16,10 @@ import Auth from "./pages/Auth";
 import Accounting from "./pages/Accounting";
 import GreenTransition from "./pages/GreenTransition";
 import NotFound from "./pages/NotFound";
+import DevelopmentFinance from "./pages/DevelopmentFinance";
+import DevelopmentFinancePhase from "./pages/DevelopmentFinancePhase";
+import DevelopmentFinanceEssayPage from "./pages/DevelopmentFinanceEssayPage";
+import ClimateFinance from "./pages/ClimateFinance";
 
 // FSLI
 import FsliList from "./pages/FsliList";
