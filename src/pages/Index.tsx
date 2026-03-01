@@ -44,6 +44,13 @@ const sections = [
     path: '/english-ielts',
     accent: 'text-green-500',
   },
+  {
+    icon: Landmark,
+    title: 'Development Finance',
+    description: 'Sovereign funds, multilateral lenders, and blended finance. How public capital shapes economies.',
+    path: '/development-finance',
+    accent: 'text-sky-500',
+  },
 ];
 
 const getSectionLabel = (section: string, phase: string | null) => {

@@ -75,6 +75,11 @@ export const navSections: NavSection[] = [
     items: nextBigThingItems,
   },
   {
+    label: 'Development Finance',
+    basePath: '/development-finance',
+    items: developmentFinanceItems,
+  },
+  {
     label: 'Learning',
     items: learningItems,
   },
