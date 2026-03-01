@@ -3,7 +3,7 @@ import { PageLayout } from '@/components/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
 import { GREEN_TRANSITION_TABS } from '@/data/greenTransitionTabs';
 import { Card, CardContent } from '@/components/ui/card';
-import { MapPin, AlertTriangle, Route, ArrowRight } from 'lucide-react';
+import { MapPin, AlertTriangle, Route, ArrowRight, TrendingUp } from 'lucide-react';
 
 const phaseCards = [
   {
