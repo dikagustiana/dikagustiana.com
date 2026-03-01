@@ -8,6 +8,7 @@ import {
   greenTransitionItems,
   learningItems,
   nextBigThingItems,
+  developmentFinanceItems,
 } from '@/config/navConfig';
 
 const financeWorkspaceItemsAdmin = [
