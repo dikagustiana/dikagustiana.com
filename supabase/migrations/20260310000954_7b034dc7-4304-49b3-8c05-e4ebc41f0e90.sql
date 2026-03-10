@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX IF NOT EXISTS essays_slug_unique ON essays (slug);
