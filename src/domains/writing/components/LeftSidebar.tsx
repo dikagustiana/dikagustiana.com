@@ -54,6 +54,17 @@ function estimateReadingTime(wordCount: number): string {
   return `${minutes} min read`;
 }
 
+/** Scroll the editor to the Nth heading (outline order matches DOM order). */
+function scrollToHeading(index: number): void {
+  const editor = document.querySelector('.ProseMirror');
+  if (!editor) return;
+  const headingEls = editor.querySelectorAll('h2, h3');
+  const target = headingEls[index];
+  if (!target) return;
+  const prefersReduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  target.scrollIntoView({ behavior: prefersReduced ? 'auto' : 'smooth', block: 'start' });
+}
+
 export function LeftSidebar({ contentJson }: LeftSidebarProps) {
   const headings = useMemo(() => extractHeadings(contentJson), [contentJson]);
   const wordCount = useMemo(() => countWords(contentJson), [contentJson]);
@@ -85,8 +96,9 @@ export function LeftSidebar({ contentJson }: LeftSidebarProps) {
               {headings.map((h, i) => (
                 <button
                   key={`${h.id}-${i}`}
+                  onClick={() => scrollToHeading(i)}
                   className={cn(
-                    'block w-full text-left text-xs truncate rounded px-2 py-1 hover:bg-muted transition-colors',
+                    'block w-full text-left text-xs truncate rounded px-2 py-1 hover:bg-muted transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                     h.level === 2
                       ? 'text-foreground font-medium'
                       : 'text-muted-foreground pl-5'

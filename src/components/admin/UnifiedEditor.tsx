@@ -90,7 +90,7 @@ function MenuBar({ editor, onInsertFigure, isUploading }: MenuBarProps) {
   const active = 'bg-secondary text-foreground';
 
   return (
-    <div className="flex flex-wrap items-center gap-1 p-2 border-b border-border bg-muted/30 sticky top-0 z-10">
+    <div className="flex flex-wrap items-center gap-1 py-2 mb-3 border-b border-border/60 bg-background/85 backdrop-blur-sm sticky top-0 z-10">
       {/* Text formatting */}
       <Button type="button" variant="ghost" size="icon" className={cn(btn, editor.isActive('bold') && active)} onClick={() => editor.chain().focus().toggleBold().run()} title="Bold (Ctrl+B)">
         <Bold className="h-4 w-4" />
@@ -327,19 +327,14 @@ export function UnifiedEditor({
   );
 
   return (
-    <div
-      className={cn(
-        'border border-border rounded-md overflow-hidden bg-background',
-        className,
-      )}
-    >
+    <div className={cn('bg-background', className)}>
       <MenuBar
         editor={editor}
         onInsertFigure={() => setShowFigureDialog(true)}
         isUploading={isUploading}
       />
 
-      <div className="p-4 sm:px-6 overflow-y-auto" style={{ minHeight }}>
+      <div className="overflow-y-auto" style={{ minHeight }}>
         <EditorContent editor={editor} />
       </div>
 

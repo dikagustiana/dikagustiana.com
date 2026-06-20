@@ -21,8 +21,21 @@
 
 ### UI/UX & Design system
 - _Before:_ Tokens exist (`index.css`/`tailwind.config.ts`); shadcn primitives present.
-  Writer Studio surface is a bordered box with a heavy toolbar; metadata always in a sidebar.
-- _After:_ (to be filled per commit)
+  Writer Studio surface is a bordered box with a heavy muted toolbar; **no autosave** (only a static
+  "Unsaved" dot); outline items were dead buttons.
+- _After (Writer Studio):_
+  - **Silent autosave** (1.5s debounce) once the essay exists + has title/section/category, with a
+    live **Saving / Saved / Unsaved / Save failed** status chip in the top bar. Autosave skips the
+    publish gate and preserves the current status; manual Save/Publish keep full validation + toasts.
+    [MOCK — `canAutosave` gate unit-tested; full debounce wiring verified by tsc/build, not e2e]
+  - **Calmer one-column surface:** removed the editor's bordered "box" and heavy muted toolbar
+    (now a light, blurred, sticky strip), and aligned body text with the title/deck so it reads like
+    the page, not a form field.
+  - **Outline is now clickable** — jumps to the matching heading (respects `prefers-reduced-motion`).
+- _Still TODO (needs visual QA — only judgeable by using it):_ selection **bubble menu** + empty-line
+  **"+" insert menu**, moving metadata into a "Publish settings" drawer, and making editor typography
+  byte-for-byte match the published `ArticleBody`. Deferred deliberately: these are visual/interaction
+  changes I can't verify without a browser in this environment.
 
 ### Content hierarchy & routing / Writer Studio
 - _Before:_ Placement = Section → Category (+ Finance Module). No way to place into FSLI (`fsli_slug`)

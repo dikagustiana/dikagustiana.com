@@ -25,8 +25,8 @@ import { useWriterEssay, useSaveEssay, generateUniqueSlug } from './hooks/useWri
 import { useWriterCategories } from './hooks/useWriterCategories';
 import { useWriterSections } from './hooks/useWriterSections';
 import { resolvePlacementFields } from './schema/placement';
-import { slugify, validateForPublish } from './schema/types';
-import type { EssayStatus, PublishValidationError } from './schema/types';
+import { slugify, validateForPublish, canAutosave } from './schema/types';
+import type { EssayStatus, PublishValidationError, SaveStatus } from './schema/types';
 import { TopBar } from './components/TopBar';
 import { LeftSidebar } from './components/LeftSidebar';
 import { RightSidebar } from './components/RightSidebar';
@@ -70,7 +70,9 @@ export default function WriterStudio() {
 
   // Dirty tracking
   const [isDirty, setIsDirty] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
   const isInitialLoad = useRef(true);
+  const autosaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Categories filtered by section
   const { data: categories = [], isLoading: categoriesLoading } = useWriterCategories(sectionId || undefined);
@@ -167,6 +169,7 @@ export default function WriterStudio() {
   useEffect(() => {
     if (isInitialLoad.current) return;
     setIsDirty(true);
+    setSaveStatus('unsaved');
   }, [title, deck, slug, sectionId, categoryId, status, contentJson, moduleId, financeOrder, lessonType, fsliSlug, topic]);
 
   // ── Beforeunload guard ──
@@ -230,9 +233,13 @@ export default function WriterStudio() {
   }, [categories, categoryId, getSectionSlug]);
 
   // ── Save ──
-  const handleSave = async (targetStatus: EssayStatus = 'draft') => {
+  // `silent` is used by autosave: it skips toasts and the publish gate and just
+  // persists the latest content under the current status.
+  const handleSave = useCallback(
+    async (targetStatus: EssayStatus = 'draft', opts: { silent?: boolean } = {}) => {
+    const { silent = false } = opts;
     if (!title.trim()) {
-      toast({ title: 'Title required', description: 'Add a title before saving.', variant: 'destructive' });
+      if (!silent) toast({ title: 'Title required', description: 'Add a title before saving.', variant: 'destructive' });
       return;
     }
 
@@ -240,7 +247,7 @@ export default function WriterStudio() {
     // section/category is rejected by the DB. Validate up-front on every save
     // (not just publish) to give a clear message and avoid an orphan reference.
     if (!sectionId || !categoryId) {
-      toast({
+      if (!silent) toast({
         title: 'Placement required',
         description: 'Choose a section and category before saving.',
         variant: 'destructive',
@@ -248,7 +255,7 @@ export default function WriterStudio() {
       return;
     }
 
-    if (targetStatus === 'published') {
+    if (targetStatus === 'published' && !silent) {
       const errors = validateForPublish({
         title, deck, slug,
         body: contentJson ? JSON.stringify(contentJson) : null,
@@ -285,6 +292,7 @@ export default function WriterStudio() {
       topic,
     });
 
+    setSaveStatus('saving');
     try {
       const result = await saveEssay.mutateAsync({
         id: essayId,
@@ -303,19 +311,38 @@ export default function WriterStudio() {
       });
 
       setIsDirty(false);
+      setSaveStatus('saved');
       setSlug(finalSlug);
 
       if (isNew && result?.id) {
-        toast({ title: 'Created', description: 'Essay created.' });
+        if (!silent) toast({ title: 'Created', description: 'Essay created.' });
         navigate(`/admin/writer/${result.slug}`, { replace: true });
-      } else {
+      } else if (!silent) {
         toast({ title: 'Saved', description: 'Essay updated.' });
       }
     } catch (error: unknown) {
+      setSaveStatus('error');
       const msg = error instanceof Error ? error.message : 'Unknown error';
-      toast({ title: 'Error', description: msg, variant: 'destructive' });
+      if (!silent) toast({ title: 'Error', description: msg, variant: 'destructive' });
     }
-  };
+  },
+    [title, sectionId, categoryId, deck, slug, contentJson, author, essayId, getSectionSlug,
+     categories, moduleId, financeSection, financeOrder, lessonType, fsliSlug, topic, isNew,
+     saveEssay, navigate, toast],
+  );
+
+  // ── Silent autosave (debounced) ──
+  useEffect(() => {
+    if (isInitialLoad.current || !isDirty) return;
+    if (!canAutosave({ essayId, title, sectionId, categoryId })) return;
+    if (autosaveTimer.current) clearTimeout(autosaveTimer.current);
+    autosaveTimer.current = setTimeout(() => {
+      void handleSave(status, { silent: true });
+    }, 1500);
+    return () => {
+      if (autosaveTimer.current) clearTimeout(autosaveTimer.current);
+    };
+  }, [isDirty, essayId, title, sectionId, categoryId, status, handleSave]);
 
   // ── Access denied ──
   if (!authLoading && !isAdmin) {
@@ -363,7 +390,7 @@ export default function WriterStudio() {
 
       {/* Top Bar */}
       <TopBar
-        isDirty={isDirty}
+        saveStatus={saveStatus}
         isSaving={saveEssay.isPending}
         publishErrors={publishErrors}
         onSave={() => handleSave('draft')}
