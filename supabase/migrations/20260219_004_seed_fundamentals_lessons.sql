@@ -1,5 +1,25 @@
 BEGIN;
 
+-- ---------------------------------------------------------------------------
+-- Finance lessons are organized by the finance_modules hierarchy (module_id +
+-- finance_section), not the legacy section -> category hierarchy. They must
+-- still satisfy the essays.category_id NOT NULL constraint added in
+-- 20260215_001. Ensure a fallback "General" category exists in the finance
+-- section and default category_id to it so the lesson inserts below (and the
+-- later 20260301073xxx content inserts, which also omit category_id) succeed.
+-- ---------------------------------------------------------------------------
+INSERT INTO public.categories (id, name, slug, section_id, sort_order)
+SELECT '0f111111-1111-4111-8111-111111111111'::uuid, 'General', 'finance-general', s.id, 0
+FROM public.sections s
+WHERE s.slug = 'finance'
+  AND NOT EXISTS (
+    SELECT 1 FROM public.categories c
+    WHERE c.section_id = s.id AND c.slug = 'finance-general'
+  );
+
+ALTER TABLE public.essays
+  ALTER COLUMN category_id SET DEFAULT '0f111111-1111-4111-8111-111111111111'::uuid;
+
 -- =========================================================================
 -- MODULE 01: purpose-of-financial-management (4 lessons)
 -- =========================================================================

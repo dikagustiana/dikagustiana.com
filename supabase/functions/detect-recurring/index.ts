@@ -43,7 +43,9 @@ serve(async (req) => {
     }
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_PUBLISHABLE_KEY')!;
+    // The runtime auto-injects SUPABASE_ANON_KEY (and SUPABASE_PUBLISHABLE_KEYS);
+    // fall back to the anon key so this works regardless of key-naming scheme.
+    const supabaseKey = (Deno.env.get('SUPABASE_PUBLISHABLE_KEY') ?? Deno.env.get('SUPABASE_ANON_KEY'))!;
     const supabase = createClient(supabaseUrl, supabaseKey, {
       global: { headers: { Authorization: authHeader } }
     });

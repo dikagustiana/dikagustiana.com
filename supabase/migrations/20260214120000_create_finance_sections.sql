@@ -13,13 +13,16 @@ CREATE TABLE IF NOT EXISTS public.finance_sections (
 
 ALTER TABLE public.finance_sections ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Finance sections are publicly readable" ON public.finance_sections;
 CREATE POLICY "Finance sections are publicly readable"
   ON public.finance_sections FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "Admins can modify finance sections" ON public.finance_sections;
 CREATE POLICY "Admins can modify finance sections"
   ON public.finance_sections FOR ALL
   USING (has_role(auth.uid(), 'admin'::app_role));
 
+DROP TRIGGER IF EXISTS update_finance_sections_updated_at ON public.finance_sections;
 CREATE TRIGGER update_finance_sections_updated_at
   BEFORE UPDATE ON public.finance_sections
   FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();

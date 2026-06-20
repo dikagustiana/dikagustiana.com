@@ -1,3 +1,10 @@
+-- The placeholder fundamentals lessons seeded earlier (20260219_004) reference
+-- the modules replaced below. Remove those lessons first so the FK on
+-- essays.module_id does not block the curriculum rebuild. (Authoritative
+-- lessons are managed via the admin UI.)
+DELETE FROM essays
+WHERE module_id IN (SELECT id FROM finance_modules WHERE track_slug = 'fundamentals');
+
 -- Delete existing fundamentals modules and re-insert with updated curriculum
 DELETE FROM finance_modules WHERE track_slug = 'fundamentals';
 
