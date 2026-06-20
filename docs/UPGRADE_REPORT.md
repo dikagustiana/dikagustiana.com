@@ -5,11 +5,14 @@
 > (Vitest/mocked Playwright) · **[LIVE?]** needs live-DB verification (queued).
 
 ## 0. Coordination (READ FIRST)
-- Two branches/PRs must merge **in order: (1) the migration session's branch
-  `claude/quirky-albattani-wlphbf`/PR #30, then (2) this upgrade branch
-  `claude/keen-galileo-occyc8`.**
-- This branch **never touched the live DB**. Everything below is **[MOCK]** unless stated.
-- Any new schema is delivered as a **new, unapplied migration** for manual reconciliation.
+- This upgrade is **PR #31** (`claude/keen-galileo-occyc8` → `main`). It is **clean and independent**
+  against `main` (which already contains the merged PR #30 editor/test baseline).
+- A concurrent session owns the **live DB migration** (branch `claude/quirky-albattani-wlphbf`). This
+  branch **never touched the live DB or any migration file** and pushes only to its own branch/PR.
+- **Deploy order:** apply the DB migration FIRST, then deploy this frontend — it expects the migrated
+  schema (`category_id` NOT NULL, `fsli_slug`/`topic`, `finance_modules`). Don't double-apply.
+- Everything below is **[MOCK]** unless stated. No new migration files were added (only a generated
+  convenience bundle `docs/db/import.sql`).
 
 ## 1. Baseline (start of pass)
 - Lint: **0 errors**, 60 warnings. Type-check (`tsc -p tsconfig.app.json`): **0 errors**.
@@ -179,16 +182,24 @@
 - (filled per commit)
 
 ## 8. WHEN YOU WAKE UP (prioritized)
-1. **Merge order:** migration PR first, then this branch.
-2. **Live-DB verification (queued):** run the mocked suites first (`npm run test:unit`,
-   `npm run test:e2e`), then the live suite (`npm run test:e2e:live`) once the migration session is
-   done. Provision Vercel env (`VITE_SUPABASE_URL`, `VITE_SUPABASE_PROJECT_ID`,
-   `VITE_SUPABASE_PUBLISHABLE_KEY`) and edge-function secrets (`LOVABLE_API_KEY`,
-   `SUPABASE_SERVICE_ROLE_KEY`).
-3. **Regenerate `src/integrations/supabase/types.ts`** from the migrated DB (it is stale: shows
-   dropped `fundamental_id`/`finance_fundamentals`, nullable `category_id`).
-4. **Taste calls only you can make:** the Substack editor feel and the hierarchy-placement UX —
-   judge by using them.
+1. **Reconcile the two PRs:** ensure the DB-migration session's work is applied to the live DB, then
+   merge **PR #31** (this one). See `docs/DB_READINESS.md` for the exact runbook (env vars, buckets,
+   secrets, admin grant).
+2. **Live-DB verification (queued):** mocked suites first — `npm run test:unit` (145, no backend) and
+   `npm run test:e2e` (needs `npx playwright install chromium`; browsers couldn't be installed here) —
+   then `npm run test:e2e:live` once the schema is ready.
+3. **Regenerate `src/integrations/supabase/types.ts`** from the migrated DB (it's stale: shows dropped
+   `fundamental_id`/`finance_fundamentals` and a nullable `category_id`). Then re-run `tsc`.
+4. **Taste calls only you can make (use it to judge):** the Substack editor *feel* — I delivered the
+   calm surface + autosave + clickable outline, but deferred the **selection bubble menu**, empty-line
+   **"+" insert menu**, the **"Publish settings" drawer**, and making editor typography match
+   `ArticleBody` exactly (all need a browser to judge). Also sanity-check the **hierarchy-placement**
+   per section against your real category/phase naming (phase is derived from category slugs).
 5. **Functions needing external secrets:** `spending-insights`, `parse-bank-statement`,
-   `parse-pdf-statement` (all `LOVABLE_API_KEY`); `quant-data-fetch` (Yahoo Finance).
-6. **Product decision:** should draft essays be publicly readable by slug? (Currently yes.)
+   `parse-pdf-statement` (`LOVABLE_API_KEY`); service-role functions need `SUPABASE_SERVICE_ROLE_KEY`.
+6. **Reasonable cleanups (low risk, deferred to stay verifiably green):** `npm audit fix` for
+   build-tooling advisories; DOMPurify on the two legacy-HTML `dangerouslySetInnerHTML` render paths;
+   fix the duplicate `<main>` landmark (pages nest `<main>` inside PageLayout's `<main>`); add
+   `DialogDescription` to dialogs that warn; re-encode the 1.14 MB `hero-manga-texture.png`.
+7. **Product decisions:** should draft essays be publicly readable by slug? (Currently yes, app-gated.)
+   Do you want a per-essay `meta_description` column (SQL ready in §5)?
