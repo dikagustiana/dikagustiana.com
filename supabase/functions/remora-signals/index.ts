@@ -178,7 +178,7 @@ serve(async (req) => {
   const supabase = createClient(supabaseUrl, supabaseKey);
 
   try {
-    const { symbols } = await req.json();
+    const { symbols } = await req.json().catch(() => ({}));
     console.log('[Remora Signals] Generating signals for:', symbols || 'all stocks');
 
     // Check data freshness first
