@@ -44,8 +44,14 @@
 - _After:_ (to be filled per commit)
 
 ### Performance
-- _Before:_ see Baseline (1.53 MB main chunk).
-- _After:_ (to be filled per commit — chunk count + sizes)
+- _Before:_ single main JS chunk **1,531 kB (436 kB gzip)** + chunk-size warning. [MOCK]
+- _After:_ route-level `React.lazy` + vendor `manualChunks`. Main entry now **137 kB (43.7 kB gzip)**;
+  vendors split into `react-vendor` 186 kB (61.6 gz), `supabase` 172 kB (44.4 gz), and the **`editor`
+  (TipTap+ProseMirror) 377 kB (120 gz) is deferred** to editor routes only. **Chunk-size warning
+  gone.** Initial shell ≈ 44 + 61.6 + 44.4 + 21.3(css) ≈ **171 kB gz vs 436 kB gz before (~61%
+  smaller)**. Each page is its own small chunk. [MOCK — `npm run build`]
+- _Still TODO:_ `public`/`assets` `hero-manga-texture.png` is 1,141 kB (homepage LCP image) — needs
+  image re-encode (webp/resize); not done (no image tooling guaranteed in CI). Queued.
 
 ### SEO
 - _Before:_ 27/58 pages missing `<SEO>`; SEO component has no canonical; no sitemap.
