@@ -27,7 +27,20 @@
 ### Content hierarchy & routing / Writer Studio
 - _Before:_ Placement = Section → Category (+ Finance Module). No way to place into FSLI (`fsli_slug`)
   or Consolidation (`topic`); category only enforced on publish; dead `tags`/`meta_description`.
-- _After:_ (to be filled per commit)
+- _After:_ New **pure placement module** (`src/domains/writing/schema/placement.ts`) is the single
+  source of truth mapping editor selections → both the DB fields written and the public URL, so the
+  saved row always matches how the public page queries. [MOCK — 16 placement tests]
+  - **Accounting placement panel** added: data-driven **FSLI line-item** selector (from `fsli_pages`)
+    sets `fsli_slug`, and **Consolidation topic** selector (shared `config/consolidationTopics.ts`,
+    also used by the public page) sets `topic`. An admin can now place an essay on e.g. "Cash
+    Equivalents" and it resolves to `/accounting/fsli/cash-equivalents`.
+  - **Category now required on every save** (was publish-only) → no opaque FK error, upholds the
+    NOT-NULL `category_id` integrity (no orphan essays).
+  - Switching section **clears stale cross-section fields** (finance & accounting) so essays never
+    carry another section's placement.
+  - Dead `tags`/`meta_description` inputs removed (no such columns existed; input was discarded).
+  - URL preview unified via `buildCanonicalUrl`; fixed dev-finance preview that previously dropped
+    the `:phase` segment; shows a clear "not reachable" hint for accounting essays with no leaf.
 
 ### Function correctness
 - _Before:_ `BooksList` renders hardcoded sample data (`useBooks` unused). 8 pages fetch via
@@ -73,10 +86,24 @@
 | (filled as work lands) | | |
 
 ## 4. Bugs found & fixed
-- (filled per commit)
+- **BooksList ignored its data hook** — rendered 3 hardcoded sample books; uploaded books were
+  invisible. Now queries `useBooks({category})` with full states. [MOCK]
+- **BookReader was a fake placeholder** ("Page 1 of 1"); now loads the real book + embeds/downloads
+  the file from the `books` bucket. [MOCK]
+- **Writer Studio discarded `tags` & `meta_description`** (no such columns) — removed. [MOCK]
+- **Writer Studio draft-save with no category** hit an opaque DB FK error — now validated. [MOCK]
+- **Writer Studio could not place essays into FSLI/Consolidation** — added placement. [MOCK]
+- **Dev-finance URL preview dropped the `:phase` segment** — fixed in `buildCanonicalUrl`. [MOCK]
+- **No global error boundary** — a render error white-screened the app; added one. [MOCK]
 
 ## 5. New migrations queued (NOT applied)
-- (filled if/when added)
+- _None applied._ Optional, only-if-wanted SQL for per-essay SEO meta (the `snippet`/deck already
+  serves as the SEO description today, so this is low priority):
+  ```sql
+  -- Run on a fresh/empty DB or after the migration session reconciles; then regen types.ts.
+  alter table public.essays add column if not exists meta_description text;
+  alter table public.essays add column if not exists tags text[];
+  ```
 
 ## 6. Performance numbers
 - (before/after chunk table)

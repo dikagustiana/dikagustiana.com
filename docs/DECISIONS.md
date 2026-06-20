@@ -19,9 +19,11 @@ alternatives. Newest first.
 - **Rationale:** Neither column exists on `essays`; the fields silently discarded input — a
   data-integrity/UX defect. Removing them makes the surface honest.
 - **Rejected:** (a) Wiring them to the save payload — would make `insert/update` fail at the DB
-  (unknown column). (b) Adding+applying a migration tonight — forbidden (live DB). A queued
-  migration that adds these columns is provided for future wiring (see
-  `supabase/migrations/*_queued_*`), but the UI stays clean until it is applied.
+  (unknown column). (b) Adding a new migration + UI wiring tonight — the live DB is mid-migration and
+  the essay `snippet`/deck already supplies the SEO description on public essay pages, so a dedicated
+  `meta_description` column is low value. The ready-to-apply SQL is documented in
+  `UPGRADE_REPORT.md` if it is ever wanted, rather than shipped as an unapplied migration file that
+  could collide with the concurrent migration session.
 
 ## Writer Studio: category required on every save
 - **Decision:** Validate `category_id` (and section) on **draft saves too**, not only on publish.

@@ -2,28 +2,22 @@ import { useParams } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { Breadcrumb } from '@/components/Breadcrumb';
+import { SEO } from '@/components/SEO';
 import { useEssaysByTopic } from '@/hooks/queries/useEssays';
 import { ArticleBody } from '@/components/editorial/ArticleBody';
-
-const topicDetails: Record<string, { title: string; description: string }> = {
-  'psak-principles': { title: 'PSAK Principles', description: 'Understanding PSAK consolidation principles and their application.' },
-  'equity-adjustment-parent': { title: 'Equity Adjustment - Parent', description: 'Parent company equity adjustments in consolidated statements.' },
-  'elimination-equity': { title: 'Elimination of Equity', description: 'Intercompany equity elimination entries and procedures.' },
-  'elimination-balance-sheet': { title: 'Elimination - Balance Sheet', description: 'Balance sheet elimination entries for intercompany transactions.' },
-  'elimination-pnl': { title: 'Elimination - P&L', description: 'Income statement elimination entries for intercompany transactions.' },
-  'control-soce': { title: 'Control - SOCE', description: 'Statement of Changes in Equity control procedures.' },
-  'control-nci-movement': { title: 'Control - NCI Movement', description: 'Non-controlling interest movement tracking and reporting.' },
-  'control-bs-schedule': { title: 'Control - BS Schedule', description: 'Balance sheet schedule controls and reconciliation.' },
-  'control-segment-info': { title: 'Control - Segment Info', description: 'Segment information reporting and disclosure.' },
-};
+import { CONSOLIDATION_TOPIC_MAP } from '@/config/consolidationTopics';
 
 export default function ConsolidationDetail() {
   const { topic } = useParams<{ topic: string }>();
-  const details = topic ? topicDetails[topic] : null;
+  const details = topic ? CONSOLIDATION_TOPIC_MAP[topic] : null;
   const { data: essays } = useEssaysByTopic('accounting', topic || '');
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <SEO
+        title={details?.title || 'Consolidation Topic'}
+        description={details?.description || 'Consolidated reporting under PSAK.'}
+      />
       <Header />
 
       <div className="bg-muted/30 border-b border-border py-3">

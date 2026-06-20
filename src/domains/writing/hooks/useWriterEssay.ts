@@ -42,12 +42,10 @@ interface SaveEssayData {
   content: string | null;
   category_id: string;
   section: string;
-  tags?: string[];
   status: EssayStatus;
   author: string | null;
   phase?: string | null;
   voice_role?: string | null;
-  meta_description?: string | null;
   published?: boolean;
   date?: string | null;
   read_time?: string | null;
@@ -59,6 +57,8 @@ interface SaveEssayData {
   finance_section?: string | null;
   finance_order?: number | null;
   lesson_type?: string | null;
+  fsli_slug?: string | null;
+  topic?: string | null;
 }
 
 export function useSaveEssay() {

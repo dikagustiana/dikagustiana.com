@@ -24,6 +24,7 @@ import { parseTiptapJson } from '@/lib/tiptap/serialize';
 import { useWriterEssay, useSaveEssay, generateUniqueSlug } from './hooks/useWriterEssay';
 import { useWriterCategories } from './hooks/useWriterCategories';
 import { useWriterSections } from './hooks/useWriterSections';
+import { resolvePlacementFields } from './schema/placement';
 import { slugify, validateForPublish } from './schema/types';
 import type { EssayStatus, PublishValidationError } from './schema/types';
 import { TopBar } from './components/TopBar';
@@ -56,14 +57,14 @@ export default function WriterStudio() {
   const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
   const [sectionId, setSectionId] = useState('');
   const [categoryId, setCategoryId] = useState('');
-  const [tags, setTags] = useState<string[]>([]);
   const [status, setStatus] = useState<EssayStatus>('draft');
-  const [metaDescription, setMetaDescription] = useState('');
   const [author, setAuthor] = useState('Dika Gustiana');
   const [moduleId, setModuleId] = useState<string | null>(null);
   const [financeSection, setFinanceSection] = useState('');
   const [financeOrder, setFinanceOrder] = useState<number | null>(null);
   const [lessonType, setLessonType] = useState<string>('concept');
+  const [fsliSlug, setFsliSlug] = useState('');
+  const [topic, setTopic] = useState('');
   const [contentJson, setContentJson] = useState<JSONContent | null>(null);
   const [showPreview, setShowPreview] = useState(false);
 
@@ -83,12 +84,12 @@ export default function WriterStudio() {
       body: contentJson ? JSON.stringify(contentJson) : null,
       category_id: categoryId,
       section_id: sectionId,
-      tags,
+      tags: [],
       status,
-      meta_description: metaDescription,
+      meta_description: '',
       author,
     });
-  }, [title, deck, slug, contentJson, categoryId, sectionId, tags, status, metaDescription, author]);
+  }, [title, deck, slug, contentJson, categoryId, sectionId, status, author]);
 
   // ── Load essay data when editing ──
   useEffect(() => {
@@ -100,18 +101,20 @@ export default function WriterStudio() {
       setSlug(essayData.slug || '');
       setSlugManuallyEdited(true); // Existing essays have manual slugs
       setAuthor(essayData.author || 'Dika Gustiana');
-      setMetaDescription('');
       setStatus((essayData.status as EssayStatus) || 'draft');
-      setTags([]);
-      const financeMeta = essayData as typeof essayData & {
+      const placementMeta = essayData as typeof essayData & {
         finance_section?: string | null;
         finance_order?: number | null;
         lesson_type?: string | null;
+        fsli_slug?: string | null;
+        topic?: string | null;
       };
       setModuleId(essayData.module_id || null);
-      setFinanceSection(financeMeta.finance_section || '');
-      setFinanceOrder(financeMeta.finance_order ?? null);
-      setLessonType(financeMeta.lesson_type || 'concept');
+      setFinanceSection(placementMeta.finance_section || '');
+      setFinanceOrder(placementMeta.finance_order ?? null);
+      setLessonType(placementMeta.lesson_type || 'concept');
+      setFsliSlug(placementMeta.fsli_slug || '');
+      setTopic(placementMeta.topic || '');
 
       // Set category and section from joined data
       if (essayData.categories) {
@@ -154,13 +157,17 @@ export default function WriterStudio() {
       setFinanceSection('');
       setFinanceOrder(null);
     }
+    if (sectionSlug !== 'accounting') {
+      setFsliSlug('');
+      setTopic('');
+    }
   }, [sectionId, sections]);
 
   // ── Track dirty state ──
   useEffect(() => {
     if (isInitialLoad.current) return;
     setIsDirty(true);
-  }, [title, deck, slug, sectionId, categoryId, tags, status, metaDescription, contentJson, moduleId, financeOrder, lessonType]);
+  }, [title, deck, slug, sectionId, categoryId, status, contentJson, moduleId, financeOrder, lessonType, fsliSlug, topic]);
 
   // ── Beforeunload guard ──
   useEffect(() => {
@@ -229,13 +236,25 @@ export default function WriterStudio() {
       return;
     }
 
+    // `essays.category_id` is NOT NULL with an FK RESTRICT, so a save without a
+    // section/category is rejected by the DB. Validate up-front on every save
+    // (not just publish) to give a clear message and avoid an orphan reference.
+    if (!sectionId || !categoryId) {
+      toast({
+        title: 'Placement required',
+        description: 'Choose a section and category before saving.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     if (targetStatus === 'published') {
       const errors = validateForPublish({
         title, deck, slug,
         body: contentJson ? JSON.stringify(contentJson) : null,
         category_id: categoryId,
         section_id: sectionId,
-        tags, status: targetStatus, meta_description: metaDescription, author,
+        tags: [], status: targetStatus, meta_description: '', author,
       });
 
       if (errors.length > 0) {
@@ -254,6 +273,17 @@ export default function WriterStudio() {
 
     const contentString = contentJson ? JSON.stringify(contentJson) : '';
     const sectionSlug = getSectionSlug();
+    const placement = resolvePlacementFields({
+      sectionSlug,
+      categorySlug: categories.find(c => c.id === categoryId)?.slug || null,
+      slug: finalSlug,
+      moduleId,
+      financeSection,
+      financeOrder,
+      lessonType,
+      fsliSlug,
+      topic,
+    });
 
     try {
       const result = await saveEssay.mutateAsync({
@@ -264,16 +294,11 @@ export default function WriterStudio() {
           snippet: deck.trim() || null,
           content: contentString,
           category_id: categoryId,
-          section: sectionSlug,
           status: targetStatus,
           author: author || null,
-          phase: getPhaseFromCategory(),
           published: targetStatus === 'published',
           date: targetStatus === 'published' ? new Date().toISOString().split('T')[0] : null,
-          module_id: moduleId,
-          finance_section: financeSection || null,
-          finance_order: financeOrder,
-          lesson_type: lessonType || null,
+          ...placement,
         },
       });
 
@@ -422,12 +447,8 @@ export default function WriterStudio() {
           onCategoryChange={setCategoryId}
           slug={slug}
           onSlugChange={handleSlugChange}
-          tags={tags}
-          onTagsChange={setTags}
           status={status}
           onStatusChange={setStatus}
-          metaDescription={metaDescription}
-          onMetaDescriptionChange={setMetaDescription}
           showPreview={showPreview}
           onTogglePreview={() => setShowPreview(p => !p)}
           moduleId={moduleId}
@@ -438,6 +459,10 @@ export default function WriterStudio() {
           onFinanceOrderChange={setFinanceOrder}
           lessonType={lessonType}
           onLessonTypeChange={setLessonType}
+          fsliSlug={fsliSlug}
+          onFsliSlugChange={setFsliSlug}
+          topic={topic}
+          onTopicChange={setTopic}
           currentSectionSlug={getSectionSlug()}
         />
       </div>
