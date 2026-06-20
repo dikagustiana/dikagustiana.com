@@ -115,12 +115,27 @@
   for figure/KaTeX). Product decision still open: drafts are publicly selectable by slug.
 
 ### Database readiness
-- See §5 and FASE 4 package. No live changes applied.
+- No live changes applied. Run-ready package added: **`docs/DB_READINESS.md`** (apply order, exact
+  Vercel env vars, storage buckets, edge-fn secrets, prod admin grant, queued live verification) and
+  **`docs/db/import.sql`** (38 migrations concatenated in timestamp order for a one-shot import into a
+  fresh/empty DB). Reconcile with the concurrent session's applied state before pushing. [LIVE?]
 
 ## 3. Feature status (accurate labels)
-| Feature | Status | Label |
+| Feature | What changed | Label |
 |---|---|---|
-| (filled as work lands) | | |
+| Route code-splitting / bundle | lazy routes + manualChunks; main 436→44 kB gz | [MOCK] build |
+| Global ErrorBoundary | recoverable fallback on render error | [MOCK] 3 tests |
+| BooksList / BookReader | wired to `useBooks`/`useBook` + states + file viewer | [MOCK] 5 tests |
+| Writer Studio placement | pure module maps selection→DB fields + URL | [MOCK] 16 tests |
+| FSLI/Consolidation placement | new accounting panel (fsli_slug / topic) | [MOCK] |
+| Category-required save | validates section+category on every save | [MOCK] |
+| Writer Studio autosave + status | debounced silent save, status chip | [MOCK] gate tested; wiring by build |
+| Calmer editor surface | borderless, light toolbar, clickable outline | [MOCK] build; **visual QA needed** |
+| SEO canonical + sweep | canonical/noindex + missing public pages | [MOCK] |
+| Skip link / a11y | skip-to-content, focusable outline | [MOCK] |
+| No secrets in bundle | verified `dist/` + `src/` clean | [MOCK] static |
+| Edge functions | behavior unchanged; contracts documented | [LIVE?] needs secrets |
+| All DB-backed reads/writes | unchanged queries; schema cross-checked | [LIVE?] after migration |
 
 ## 4. Bugs found & fixed
 - **BooksList ignored its data hook** — rendered 3 hardcoded sample books; uploaded books were
