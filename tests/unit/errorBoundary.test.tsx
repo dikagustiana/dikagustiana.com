@@ -1,9 +1,14 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 function Boom(): JSX.Element {
   throw new Error('kaboom');
+}
+
+function ChunkBoom(): JSX.Element {
+  throw new Error('Failed to fetch dynamically imported module: /assets/Page-abc.js');
 }
 
 describe('ErrorBoundary', () => {
@@ -43,5 +48,21 @@ describe('ErrorBoundary', () => {
       </ErrorBoundary>,
     );
     expect(screen.getByText('custom: kaboom')).toBeInTheDocument();
+  });
+
+  it('reloads the page to recover from a chunk-load error (cached rejected import)', async () => {
+    const reload = vi.fn();
+    Object.defineProperty(window, 'location', {
+      value: { ...window.location, reload },
+      writable: true,
+      configurable: true,
+    });
+    render(
+      <ErrorBoundary>
+        <ChunkBoom />
+      </ErrorBoundary>,
+    );
+    await userEvent.click(screen.getByRole('button', { name: /try again/i }));
+    expect(reload).toHaveBeenCalledOnce();
   });
 });

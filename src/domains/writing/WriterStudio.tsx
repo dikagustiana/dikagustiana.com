@@ -73,6 +73,11 @@ export default function WriterStudio() {
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
   const isInitialLoad = useRef(true);
   const autosaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Guards: load form state from the server ONCE per essay id (so a background
+  // refetch after autosave never stomps in-progress edits), and remember the last
+  // PERSISTED status so autosave never escalates a draft to published.
+  const loadedIdRef = useRef<string | null>(null);
+  const lastSavedStatusRef = useRef<EssayStatus>('draft');
 
   // Categories filtered by section
   const { data: categories = [], isLoading: categoriesLoading } = useWriterCategories(sectionId || undefined);
@@ -93,9 +98,10 @@ export default function WriterStudio() {
     });
   }, [title, deck, slug, contentJson, categoryId, sectionId, status, author]);
 
-  // ── Load essay data when editing ──
+  // ── Load essay data when editing (once per essay id) ──
   useEffect(() => {
-    if (essayData && !isNew) {
+    if (essayData && !isNew && essayData.id !== loadedIdRef.current) {
+      loadedIdRef.current = essayData.id;
       isInitialLoad.current = true;
       setEssayId(essayData.id);
       setTitle(essayData.title || '');
@@ -103,7 +109,9 @@ export default function WriterStudio() {
       setSlug(essayData.slug || '');
       setSlugManuallyEdited(true); // Existing essays have manual slugs
       setAuthor(essayData.author || 'Dika Gustiana');
-      setStatus((essayData.status as EssayStatus) || 'draft');
+      const loadedStatus: EssayStatus = essayData.status === 'published' ? 'published' : 'draft';
+      setStatus(loadedStatus);
+      lastSavedStatusRef.current = loadedStatus;
       const placementMeta = essayData as typeof essayData & {
         finance_section?: string | null;
         finance_order?: number | null;
@@ -313,6 +321,7 @@ export default function WriterStudio() {
       setIsDirty(false);
       setSaveStatus('saved');
       setSlug(finalSlug);
+      lastSavedStatusRef.current = targetStatus;
 
       if (isNew && result?.id) {
         if (!silent) toast({ title: 'Created', description: 'Essay created.' });
@@ -337,7 +346,9 @@ export default function WriterStudio() {
     if (!canAutosave({ essayId, title, sectionId, categoryId })) return;
     if (autosaveTimer.current) clearTimeout(autosaveTimer.current);
     autosaveTimer.current = setTimeout(() => {
-      void handleSave(status, { silent: true });
+      // Use the last PERSISTED status, never the dropdown selection, so autosave
+      // can never publish a draft (publishing stays an explicit, validated action).
+      void handleSave(lastSavedStatusRef.current, { silent: true });
     }, 1500);
     return () => {
       if (autosaveTimer.current) clearTimeout(autosaveTimer.current);

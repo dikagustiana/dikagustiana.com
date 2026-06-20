@@ -148,6 +148,21 @@
 - **Dev-finance URL preview dropped the `:phase` segment** — fixed in `buildCanonicalUrl`. [MOCK]
 - **No global error boundary** — a render error white-screened the app; added one. [MOCK]
 
+### Found & fixed during adversarial self-review (Phase 5)
+- **Autosave could silently publish a draft without validation** if the Status dropdown was set to
+  "published" (silent save skipped the publish gate). Fixed: autosave now uses the last *persisted*
+  status (`lastSavedStatusRef`), never the dropdown — publishing stays an explicit, validated action.
+- **Autosave caused an editor-state stomp / data-loss window**: `onSuccess` invalidates
+  `['writer-essay']` → refetch → the load effect re-ran on every save and reset `contentJson` from the
+  server while the live TipTap DOM kept newer text. Fixed: the load effect now runs **once per essay
+  id** (`loadedIdRef`), so a background refetch never overwrites in-progress edits. (Also fixes
+  pre-existing churn after manual saves.)
+- **Outline click scrolled to the wrong heading** when empty headings existed (outline filtered them,
+  DOM index didn't). Fixed: `scrollToHeading` filters empty headings to match.
+- **ErrorBoundary "Try again" couldn't recover chunk-load failures** (React caches the rejected lazy
+  import). Fixed: chunk-load errors now trigger a full reload; ordinary render errors still soft-reset.
+  [MOCK — all four covered by reasoning + tests where unit-testable; 145 tests green]
+
 ## 5. New migrations queued (NOT applied)
 - _None applied._ Optional, only-if-wanted SQL for per-essay SEO meta (the `snippet`/deck already
   serves as the SEO description today, so this is low priority):

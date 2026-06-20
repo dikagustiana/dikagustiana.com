@@ -30,7 +30,18 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     }
   }
 
-  reset = () => this.setState({ error: null });
+  reset = () => {
+    // A failed lazy/dynamic import caches the rejected module promise, so a soft
+    // state reset would immediately re-throw. For chunk-load errors, a full reload
+    // is the only real recovery; for ordinary render errors, a soft reset is enough.
+    const msg = this.state.error?.message ?? '';
+    const isChunkError = /dynamically imported module|Loading chunk|importing a module|Failed to fetch/i.test(msg);
+    if (isChunkError) {
+      window.location.reload();
+      return;
+    }
+    this.setState({ error: null });
+  };
 
   render() {
     const { error } = this.state;

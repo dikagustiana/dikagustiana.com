@@ -54,11 +54,16 @@ function estimateReadingTime(wordCount: number): string {
   return `${minutes} min read`;
 }
 
-/** Scroll the editor to the Nth heading (outline order matches DOM order). */
+/**
+ * Scroll the editor to the Nth outline heading. The outline (extractHeadings)
+ * drops empty headings, so filter the DOM list the same way to keep indices aligned.
+ */
 function scrollToHeading(index: number): void {
   const editor = document.querySelector('.ProseMirror');
   if (!editor) return;
-  const headingEls = editor.querySelectorAll('h2, h3');
+  const headingEls = Array.from(editor.querySelectorAll('h2, h3')).filter(
+    (el) => (el.textContent || '').trim().length > 0,
+  );
   const target = headingEls[index];
   if (!target) return;
   const prefersReduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
