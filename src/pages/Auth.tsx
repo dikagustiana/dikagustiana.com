@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Layout } from '@/components/Layout';
+import { SEO } from '@/components/SEO';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -42,6 +43,7 @@ export default function Auth() {
 
   return (
     <Layout>
+      <SEO title={isLogin ? 'Sign In' : 'Create Account'} description="Sign in or create an account to access Dika Gustiana's studio." noindex />
       <div className="min-h-[80vh] flex items-center justify-center py-12">
         <div className="w-full max-w-md p-8 bg-card rounded-xl border border-border">
           <h1 className="text-2xl font-display font-bold text-center mb-6">

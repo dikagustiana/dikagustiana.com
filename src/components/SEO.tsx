@@ -9,6 +9,8 @@ interface SEOProps {
   author?: string;
   publishedTime?: string;
   modifiedTime?: string;
+  /** When true, ask crawlers not to index this page (admin/utility surfaces). */
+  noindex?: boolean;
 }
 
 const SITE_NAME = "Dika Gustiana";
@@ -23,11 +25,15 @@ export function SEO({
   author,
   publishedTime,
   modifiedTime,
+  noindex = false,
 }: SEOProps) {
   const fullTitle = `${title} | ${SITE_NAME}`;
-  const truncatedDescription = description.length > 160 
-    ? description.substring(0, 157) + '...' 
+  const truncatedDescription = description.length > 160
+    ? description.substring(0, 157) + '...'
     : description;
+  // Canonicalise to origin + path (no query/hash) when no explicit url is given.
+  const canonicalUrl =
+    url ?? (typeof window !== 'undefined' ? window.location.origin + window.location.pathname : undefined);
 
   const jsonLd = type === 'article' ? {
     '@context': 'https://schema.org',
@@ -57,13 +63,15 @@ export function SEO({
       {/* Basic */}
       <title>{fullTitle}</title>
       <meta name="description" content={truncatedDescription} />
+      {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
+      {noindex && <meta name="robots" content="noindex, nofollow" />}
 
       {/* Open Graph */}
       <meta property="og:type" content={type} />
       <meta property="og:title" content={fullTitle} />
       <meta property="og:description" content={truncatedDescription} />
       <meta property="og:image" content={image} />
-      {url && <meta property="og:url" content={url} />}
+      {canonicalUrl && <meta property="og:url" content={canonicalUrl} />}
       <meta property="og:site_name" content={SITE_NAME} />
 
       {/* Twitter */}

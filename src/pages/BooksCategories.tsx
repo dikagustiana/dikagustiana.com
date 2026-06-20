@@ -1,4 +1,5 @@
 import { PageLayout } from '@/components/layouts/PageLayout';
+import { SEO } from '@/components/SEO';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
 
@@ -12,6 +13,7 @@ const categories = [
 export default function BooksCategories() {
   return (
     <PageLayout variant="content" role="educator" breadcrumbs={[{label:'Home',path:'/'},{label:'Books and Academia',path:'/books-academia'},{label:'Categories'}]}>
+      <SEO title="Book Categories" description="Browse the library by category — finance, accounting, strategy, and academic readings." />
       <main className="flex-1 container py-8">
         <div className="text-center mb-12">
           <h1 className="text-3xl md:text-4xl font-display font-bold mb-4">

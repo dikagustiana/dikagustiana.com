@@ -67,8 +67,15 @@
   image re-encode (webp/resize); not done (no image tooling guaranteed in CI). Queued.
 
 ### SEO
-- _Before:_ 27/58 pages missing `<SEO>`; SEO component has no canonical; no sitemap.
-- _After:_ (to be filled per commit)
+- _Before:_ audit flagged ~27 pages without `<SEO>`; SEO component had no canonical; no sitemap.
+- _After:_ `SEO` component now emits a **`<link rel="canonical">`** (origin+path) on every page that
+  uses it and supports **`noindex`**. Verified that most "missing" pages actually render SEO via
+  `ArticleShell` (audit grepped `<SEO>` literally and undercounted). Added `<SEO>` to the genuinely
+  missing public pages: FsliList, FsliDetail, ConsolidatedReporting, StatutoryReporting,
+  ConsolidationDetail, BooksCategories (plus BooksList/BookReader from the Books fix). Added
+  `noindex` to Auth and the polished 404. [MOCK]
+- _Still TODO:_ `sitemap.xml` requires the production domain (site is CSR; SEO is client-rendered —
+  consider prerender/SSG for crawlers that don't run JS). Queued.
 
 ### Security (static)
 - _Before:_ `.env` is git-tracked but contains only the publishable anon key (RLS-protected, safe per
