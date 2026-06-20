@@ -21,6 +21,17 @@ export default tseslint.config(
       ...reactHooks.configs.recommended.rules,
       "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
       "@typescript-eslint/no-unused-vars": "off",
+      // Supabase's generated types are intentionally bypassed with `as any`
+      // escape hatches for columns/tables missing from the stale generated
+      // types. Surface these as warnings rather than blocking errors.
+      "@typescript-eslint/no-explicit-any": "warn",
+    },
+  },
+  {
+    // E2E tests and Playwright config run under Node, not the browser.
+    files: ["tests/**/*.{ts,tsx}", "playwright.config.ts"],
+    languageOptions: {
+      globals: { ...globals.browser, ...globals.node },
     },
   },
 );

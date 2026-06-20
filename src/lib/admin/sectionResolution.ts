@@ -44,6 +44,10 @@ export function resolveSectionSlug(
 
   // Otherwise, fall back only when it already looks like a slug.
   // (Prevents UUID/garbage from being treated as a slug, while still allowing deep-linking before sections load.)
+  // NOTE: a UUID is lowercase-hex joined by single hyphens, so it also matches
+  // the slug pattern — guard against it explicitly so an unresolved section id
+  // is never mistaken for a slug.
+  if (looksLikeUuid(value)) return "";
   if (looksLikeSlug(value)) return value;
 
   return "";
