@@ -65,9 +65,16 @@
 - _After:_ (to be filled per commit)
 
 ### Accessibility
-- _Before:_ shadcn primitives are largely accessible; dialogs missing `Description`/aria warnings in
-  tests; Writer Studio outline buttons are non-functional; no skip link.
-- _After:_ (to be filled per commit)
+- _Before:_ shadcn primitives are largely accessible; dialogs miss `Description`/aria (jsdom warns);
+  Writer Studio outline buttons non-functional; no skip link.
+- _After:_ Added a **"Skip to content" link** + `#main-content` landmark in `PageLayout`;
+  outline buttons are now functional + keyboard-focusable; `prefers-reduced-motion` respected for
+  outline scroll; `ErrorBoundary` uses `role="alert"`; TopBar back button has an `aria-label`; 404
+  uses semantic markup + a real `Link`. [MOCK]
+- _Still TODO:_ pages render their own `<main>` inside PageLayout's `<main>` → **duplicate `main`
+  landmark** (pre-existing; fix by switching inner page wrappers to `<div>`); some shadcn `Dialog`s
+  lack `DialogDescription`/`aria-describedby` (jsdom warns); full keyboard/contrast/AA audit needs a
+  browser (queued).
 
 ### Performance
 - _Before:_ single main JS chunk **1,531 kB (436 kB gzip)** + chunk-size warning. [MOCK]
@@ -91,11 +98,21 @@
   consider prerender/SSG for crawlers that don't run JS). Queued.
 
 ### Security (static)
-- _Before:_ `.env` is git-tracked but contains only the publishable anon key (RLS-protected, safe per
-  `.env.example`) for project `rhwzvgklasvitocbbhvi` (≠ task project ref — migration session is
-  repointing). No service_role key in client code. Legacy HTML essay content is rendered pass-through
-  (sanitization point). All essays are publicly selectable incl. drafts (app-gated).
-- _After:_ (to be filled per commit)
+- _Before:_ `.env` git-tracked (publishable anon key only — RLS-protected, safe per `.env.example`).
+  Concerns flagged: rich-content render sanitization; drafts publicly selectable.
+- _After (verified statically):_
+  - **No `service_role`/`sb_secret_`/secret strings in the client bundle** (`dist/`) or `src/`. ✓
+  - Primary public renderer **`ArticleBody` builds React nodes from TipTap JSON (no
+    `dangerouslySetInnerHTML`)** → XSS-safe by construction; the JSON→HTML serializer also escapes
+    text + attributes. ✓
+  - `npm audit`: 20 advisories, **but the production-tree ones (`ws`, `yaml`, `rollup`) are
+    build/tooling deps and are NOT in the shipped browser bundle** (verified). Remediation:
+    `npm audit fix` (run + re-verify build/tests; deferred here to avoid an unverifiable dependency
+    bump during the concurrent migration session).
+- _Residual / TODO:_ a few pages (`CriticalThinkingEssay`, `FinanceModulePage`) use
+  `dangerouslySetInnerHTML` for legacy HTML content — low risk (writes are admin-only via RLS) but
+  should be sanitized with DOMPurify on the legacy-HTML path (not added blindly; would need visual QA
+  for figure/KaTeX). Product decision still open: drafts are publicly selectable by slug.
 
 ### Database readiness
 - See §5 and FASE 4 package. No live changes applied.
