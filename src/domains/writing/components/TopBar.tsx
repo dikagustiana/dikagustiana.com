@@ -1,10 +1,10 @@
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Save, Upload } from 'lucide-react';
-import type { PublishValidationError } from '../schema/types';
+import { ArrowLeft, Save, Upload, Check, Loader2, AlertCircle } from 'lucide-react';
+import type { PublishValidationError, SaveStatus } from '../schema/types';
 
 interface TopBarProps {
-  isDirty: boolean;
+  saveStatus: SaveStatus;
   isSaving: boolean;
   publishErrors: PublishValidationError[];
   onSave: () => void;
@@ -12,8 +12,39 @@ interface TopBarProps {
   essayTitle: string;
 }
 
+function StatusIndicator({ status }: { status: SaveStatus }) {
+  switch (status) {
+    case 'saving':
+      return (
+        <span className="text-xs text-muted-foreground flex items-center gap-1.5 shrink-0">
+          <Loader2 className="h-3 w-3 animate-spin" /> Saving…
+        </span>
+      );
+    case 'saved':
+      return (
+        <span className="text-xs text-emerald-600 flex items-center gap-1.5 shrink-0">
+          <Check className="h-3.5 w-3.5" /> Saved
+        </span>
+      );
+    case 'unsaved':
+      return (
+        <span className="text-xs text-amber-600 flex items-center gap-1.5 shrink-0">
+          <span className="h-1.5 w-1.5 rounded-full bg-amber-500" /> Unsaved
+        </span>
+      );
+    case 'error':
+      return (
+        <span className="text-xs text-destructive flex items-center gap-1.5 shrink-0">
+          <AlertCircle className="h-3.5 w-3.5" /> Save failed
+        </span>
+      );
+    default:
+      return null;
+  }
+}
+
 export function TopBar({
-  isDirty,
+  saveStatus,
   isSaving,
   publishErrors,
   onSave,
@@ -32,18 +63,14 @@ export function TopBar({
           size="icon"
           className="shrink-0"
           onClick={() => navigate('/admin/content')}
+          aria-label="Back to content"
         >
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <span className="text-sm font-medium text-foreground truncate max-w-[300px]">
           {essayTitle || 'Untitled Essay'}
         </span>
-        {isDirty && (
-          <span className="text-xs text-amber-600 flex items-center gap-1 shrink-0">
-            <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
-            Unsaved
-          </span>
-        )}
+        <StatusIndicator status={saveStatus} />
       </div>
 
       <div className="flex items-center gap-2">

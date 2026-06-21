@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import { PageLayout } from '@/components/layouts/PageLayout';
+import { SEO } from '@/components/SEO';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useFsliPages, FsliPage } from '@/hooks/queries/useFsliPages';
@@ -83,6 +84,7 @@ export default function FsliList() {
 
   return (
     <PageLayout variant="content" role="manager" breadcrumbs={[{label:'Home',path:'/'},{label:'Accounting',path:'/accounting'},{label:'FSLI Detail'}]}>
+      <SEO title="Financial Statement Line Items" description="A line-by-line walkthrough of the consolidated statement of financial position — each FSLI explained with notes and figures." />
       <main className="flex-1 container py-8 max-w-6xl">
         {/* Title Section */}
         <div className="text-center mb-8">

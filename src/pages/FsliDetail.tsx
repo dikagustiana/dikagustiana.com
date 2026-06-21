@@ -1,6 +1,7 @@
 import { useParams, Navigate, Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { PageLayout } from '@/components/layouts/PageLayout';
+import { SEO } from '@/components/SEO';
 import { FsliRelatedItems } from '@/components/fsli/FsliRelatedItems';
 import { FsliOnThisPage } from '@/components/fsli/FsliOnThisPage';
 import { FsliHeroSection } from '@/components/fsli/FsliHeroSection';
@@ -130,6 +131,7 @@ export default function FsliDetail() {
 
   return (
     <PageLayout variant="content" role="manager">
+      <SEO title={item.title} description={item.subtitle || `${item.title} — financial statement line item detail.`} />
       <main className="flex-1">
         <div className="container py-6">
           {/* Breadcrumb */}

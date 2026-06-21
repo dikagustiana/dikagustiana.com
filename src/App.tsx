@@ -6,82 +6,84 @@ import { BrowserRouter, Routes, Route, Navigate, useParams } from "react-router-
 import { HelmetProvider } from "react-helmet-async";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { RequireAdmin } from "@/components/auth/RequireAdmin";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { lazy, Suspense } from "react";
 import { LoadingState } from "@/components/states";
 
-// Pages
-import Index from "./pages/Index";
-import About from "./pages/About";
-import Auth from "./pages/Auth";
-import Accounting from "./pages/Accounting";
-import GreenTransition from "./pages/GreenTransition";
-import NotFound from "./pages/NotFound";
-import DevelopmentFinance from "./pages/DevelopmentFinance";
-import DevelopmentFinancePhase from "./pages/DevelopmentFinancePhase";
-import DevelopmentFinanceEssayPage from "./pages/DevelopmentFinanceEssayPage";
-import ClimateFinance from "./pages/ClimateFinance";
+// Pages — lazy-loaded so each route ships its own chunk and heavy libraries
+// (editor, charts, math) only download when a route that needs them is visited.
+const Index = lazy(() => import("./pages/Index"));
+const About = lazy(() => import("./pages/About"));
+const Auth = lazy(() => import("./pages/Auth"));
+const Accounting = lazy(() => import("./pages/Accounting"));
+const GreenTransition = lazy(() => import("./pages/GreenTransition"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const DevelopmentFinance = lazy(() => import("./pages/DevelopmentFinance"));
+const DevelopmentFinancePhase = lazy(() => import("./pages/DevelopmentFinancePhase"));
+const DevelopmentFinanceEssayPage = lazy(() => import("./pages/DevelopmentFinanceEssayPage"));
+const ClimateFinance = lazy(() => import("./pages/ClimateFinance"));
 
 // FSLI
-import FsliList from "./pages/FsliList";
-import FsliDetail from "./pages/FsliDetail";
+const FsliList = lazy(() => import("./pages/FsliList"));
+const FsliDetail = lazy(() => import("./pages/FsliDetail"));
 
 // Accounting
-import ConsolidatedReporting from "./pages/ConsolidatedReporting";
-import StatutoryReporting from "./pages/StatutoryReporting";
-import ConsolidationDetail from "./pages/ConsolidationDetail";
+const ConsolidatedReporting = lazy(() => import("./pages/ConsolidatedReporting"));
+const StatutoryReporting = lazy(() => import("./pages/StatutoryReporting"));
+const ConsolidationDetail = lazy(() => import("./pages/ConsolidationDetail"));
 
 // Finance
-import FinanceWorkspace from "./pages/FinanceWorkspace";
-import ExecutiveDashboard from "./pages/ExecutiveDashboard";
+const FinanceWorkspace = lazy(() => import("./pages/FinanceWorkspace"));
+const ExecutiveDashboard = lazy(() => import("./pages/ExecutiveDashboard"));
 
 // Forecasting
-import ForecastingInput from "./pages/ForecastingInput";
-import ForecastingAssumptions from "./pages/ForecastingAssumptions";
-import ForecastingOutput from "./pages/ForecastingOutput";
+const ForecastingInput = lazy(() => import("./pages/ForecastingInput"));
+const ForecastingAssumptions = lazy(() => import("./pages/ForecastingAssumptions"));
+const ForecastingOutput = lazy(() => import("./pages/ForecastingOutput"));
 
 // Green Transition
-import GreenTransitionPhase from "./pages/GreenTransitionPhase";
-import GreenTransitionEssayPage from "./pages/GreenTransitionEssayPage";
-import GreenTransitionTracker from "./pages/GreenTransitionTracker";
-import GreenTransitionTrackerDetail from "./pages/GreenTransitionTrackerDetail";
-import GreenTransitionTrackerArchive from "./pages/GreenTransitionTrackerArchive";
-import GreenTransitionTrackerEssay from "./pages/GreenTransitionTrackerEssay";
+const GreenTransitionPhase = lazy(() => import("./pages/GreenTransitionPhase"));
+const GreenTransitionEssayPage = lazy(() => import("./pages/GreenTransitionEssayPage"));
+const GreenTransitionTracker = lazy(() => import("./pages/GreenTransitionTracker"));
+const GreenTransitionTrackerDetail = lazy(() => import("./pages/GreenTransitionTrackerDetail"));
+const GreenTransitionTrackerArchive = lazy(() => import("./pages/GreenTransitionTrackerArchive"));
+const GreenTransitionTrackerEssay = lazy(() => import("./pages/GreenTransitionTrackerEssay"));
 
 // Learning
-import CriticalThinkingResearch from "./pages/CriticalThinkingResearch";
-import CriticalThinkingPhase from "./pages/CriticalThinkingPhase";
-import CriticalThinkingEssay from "./pages/CriticalThinkingEssay";
-import BooksAcademia from "./pages/BooksAcademia";
-import BooksCategories from "./pages/BooksCategories";
-import BooksList from "./pages/BooksList";
-import BookReader from "./pages/BookReader";
-import EnglishIelts from "./pages/EnglishIelts";
+const CriticalThinkingResearch = lazy(() => import("./pages/CriticalThinkingResearch"));
+const CriticalThinkingPhase = lazy(() => import("./pages/CriticalThinkingPhase"));
+const CriticalThinkingEssay = lazy(() => import("./pages/CriticalThinkingEssay"));
+const BooksAcademia = lazy(() => import("./pages/BooksAcademia"));
+const BooksCategories = lazy(() => import("./pages/BooksCategories"));
+const BooksList = lazy(() => import("./pages/BooksList"));
+const BookReader = lazy(() => import("./pages/BookReader"));
+const EnglishIelts = lazy(() => import("./pages/EnglishIelts"));
 
 // Admin/Tools
-import DikasTools from "./pages/DikasTools";
-import PersonalFinance from "./pages/PersonalFinance";
-import ModelPlatform from "./pages/ModelPlatform";
-import ModelTest from "./pages/ModelTest";
-import Settings from "./pages/Settings";
-import DebugAuth from "./pages/DebugAuth";
-import AdminHealth from "./pages/AdminHealth";
-import AdminContent from "./pages/AdminContent";
-import AdminDashboard from "./pages/AdminDashboard";
-import RemoraTrading from "./pages/RemoraTrading";
-import DikaQuantEngine from "./pages/DikaQuantEngine";
-import TheNextBigThing from "./pages/TheNextBigThing";
-import NextBigThingEssayPage from "./pages/NextBigThingEssayPage";
-import FinanceEssayPage from "./pages/FinanceEssayPage";
-import FinanceLanding from "./pages/FinanceLanding";
-import FinanceInMotion from "./pages/FinanceInMotion";
-import CapitalConditionDetail from "./pages/CapitalConditionDetail";
-import FinanceTrackIndex from "./pages/FinanceTrackIndex";
-import FinanceInActionIndex from "./pages/FinanceInActionIndex";
-import FinanceModelDetail from "./pages/FinanceModelDetail";
-import FinanceModulePage from "./pages/FinanceModulePage";
-import AdminEditorRedirect from "./pages/AdminEditorRedirect";
-import WriterEditorPage from "./pages/WriterEditorPage";
-import WriterListPage from "./pages/WriterListPage";
+const DikasTools = lazy(() => import("./pages/DikasTools"));
+const PersonalFinance = lazy(() => import("./pages/PersonalFinance"));
+const ModelPlatform = lazy(() => import("./pages/ModelPlatform"));
+const ModelTest = lazy(() => import("./pages/ModelTest"));
+const Settings = lazy(() => import("./pages/Settings"));
+const DebugAuth = lazy(() => import("./pages/DebugAuth"));
+const AdminHealth = lazy(() => import("./pages/AdminHealth"));
+const AdminContent = lazy(() => import("./pages/AdminContent"));
+const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+const RemoraTrading = lazy(() => import("./pages/RemoraTrading"));
+const DikaQuantEngine = lazy(() => import("./pages/DikaQuantEngine"));
+const TheNextBigThing = lazy(() => import("./pages/TheNextBigThing"));
+const NextBigThingEssayPage = lazy(() => import("./pages/NextBigThingEssayPage"));
+const FinanceEssayPage = lazy(() => import("./pages/FinanceEssayPage"));
+const FinanceLanding = lazy(() => import("./pages/FinanceLanding"));
+const FinanceInMotion = lazy(() => import("./pages/FinanceInMotion"));
+const CapitalConditionDetail = lazy(() => import("./pages/CapitalConditionDetail"));
+const FinanceTrackIndex = lazy(() => import("./pages/FinanceTrackIndex"));
+const FinanceInActionIndex = lazy(() => import("./pages/FinanceInActionIndex"));
+const FinanceModelDetail = lazy(() => import("./pages/FinanceModelDetail"));
+const FinanceModulePage = lazy(() => import("./pages/FinanceModulePage"));
+const AdminEditorRedirect = lazy(() => import("./pages/AdminEditorRedirect"));
+const WriterEditorPage = lazy(() => import("./pages/WriterEditorPage"));
+const WriterListPage = lazy(() => import("./pages/WriterListPage"));
 
 // Canonical Writer Studio (lazy-loaded)
 const WriterStudio = lazy(() => import("./domains/writing/WriterStudio"));
@@ -98,6 +100,12 @@ const FinanceEssayLegacyRedirect = () => {
   return <Navigate to="/finance" replace />;
 };
 
+const RouteFallback = () => (
+  <div className="flex items-center justify-center min-h-screen">
+    <LoadingState />
+  </div>
+);
+
 const App = () => (
   <HelmetProvider>
     <QueryClientProvider client={queryClient}>
@@ -106,7 +114,9 @@ const App = () => (
           <Toaster />
           <Sonner />
         <BrowserRouter>
-          <Routes>
+          <ErrorBoundary>
+            <Suspense fallback={<RouteFallback />}>
+            <Routes>
             {/* Core */}
             <Route path="/" element={<Index />} />
             <Route path="/about" element={<About />} />
@@ -203,9 +213,7 @@ const App = () => (
             {/* Canonical Writer Studio — single editor for all essays */}
             <Route path="/admin/writer/:id" element={
               <RequireAdmin>
-                <Suspense fallback={<div className="flex items-center justify-center h-screen"><LoadingState /></div>}>
-                  <WriterStudio />
-                </Suspense>
+                <WriterStudio />
               </RequireAdmin>
             } />
 
@@ -222,7 +230,9 @@ const App = () => (
 
             {/* Not Found */}
             <Route path="*" element={<NotFound />} />
-          </Routes>
+            </Routes>
+            </Suspense>
+          </ErrorBoundary>
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>

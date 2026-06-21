@@ -49,6 +49,12 @@ export function PageLayout({
 
   return (
     <div className={`min-h-screen flex flex-col ${getVariantStyles()}`}>
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:text-primary-foreground"
+      >
+        Skip to content
+      </a>
       <Header />
 
       {breadcrumbs && breadcrumbs.length > 0 && (
@@ -70,7 +76,7 @@ export function PageLayout({
         <SectionIntro role={role} manifesto={manifesto} />
       )}
 
-      <main className={`flex-1 ${className}`}>
+      <main id="main-content" tabIndex={-1} className={`flex-1 outline-none ${className}`}>
         {children}
       </main>
 

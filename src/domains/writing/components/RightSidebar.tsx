@@ -1,11 +1,11 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { X } from 'lucide-react';
 import { useAllFinanceModules } from '@/hooks/queries/useFinance';
+import { useFsliPages } from '@/hooks/queries/useFsliPages';
+import { CONSOLIDATION_TOPICS } from '@/config/consolidationTopics';
+import { buildCanonicalUrl } from '../schema/placement';
 import type { WritingSection, WritingCategory, EssayStatus } from '../schema/types';
 
 interface RightSidebarProps {
@@ -21,18 +21,13 @@ interface RightSidebarProps {
   // Slug
   slug: string;
   onSlugChange: (slug: string) => void;
-  // Tags
-  tags: string[];
-  onTagsChange: (tags: string[]) => void;
   // Status
   status: EssayStatus;
   onStatusChange: (status: EssayStatus) => void;
-  // Meta
-  metaDescription: string;
-  onMetaDescriptionChange: (desc: string) => void;
   // Preview toggle
   showPreview: boolean;
   onTogglePreview: () => void;
+  // Finance placement
   moduleId: string | null;
   onModuleIdChange: (id: string | null) => void;
   financeSection: string;
@@ -41,10 +36,16 @@ interface RightSidebarProps {
   onFinanceOrderChange: (n: number | null) => void;
   lessonType: string;
   onLessonTypeChange: (t: string) => void;
+  // Accounting placement
+  fsliSlug: string;
+  onFsliSlugChange: (s: string) => void;
+  topic: string;
+  onTopicChange: (s: string) => void;
   currentSectionSlug: string;
 }
 
 const LESSON_TYPE_OPTIONS = ['concept', 'framework', 'case-study', 'exercise', 'model-walkthrough'] as const;
+const NONE = '__none__';
 
 function FinanceModulePanel({
   moduleId,
@@ -64,18 +65,16 @@ function FinanceModulePanel({
   onFinanceSectionChange: (s: string) => void;
 }) {
   const { data: allModules = [], isLoading } = useAllFinanceModules();
-  const groupedModules = useMemo(() => {
-    return allModules.reduce<Record<string, typeof allModules>>((acc, mod) => {
-      if (!acc[mod.track_slug]) acc[mod.track_slug] = [];
-      acc[mod.track_slug].push(mod);
-      return acc;
-    }, {});
-  }, [allModules]);
+  const groupedModules = allModules.reduce<Record<string, typeof allModules>>((acc, mod) => {
+    if (!acc[mod.track_slug]) acc[mod.track_slug] = [];
+    acc[mod.track_slug].push(mod);
+    return acc;
+  }, {});
 
   const handleModuleChange = (value: string) => {
-    const nextId = value === '__none__' ? null : value;
+    const nextId = value === NONE ? null : value;
     onModuleIdChange(nextId);
-    const selectedModule = allModules.find(mod => mod.id === nextId);
+    const selectedModule = allModules.find((mod) => mod.id === nextId);
     onFinanceSectionChange(selectedModule?.track_slug || '');
   };
 
@@ -85,16 +84,16 @@ function FinanceModulePanel({
       {isLoading ? (
         <div className="h-9 rounded-md bg-muted animate-pulse" />
       ) : (
-        <Select value={moduleId || '__none__'} onValueChange={handleModuleChange}>
+        <Select value={moduleId || NONE} onValueChange={handleModuleChange}>
           <SelectTrigger className="h-9 text-sm">
             <SelectValue placeholder="Assign module..." />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="__none__">— No module —</SelectItem>
+            <SelectItem value={NONE}>— No module —</SelectItem>
             {Object.entries(groupedModules).map(([track, modules]) => (
               <SelectGroup key={track}>
                 <SelectLabel>{track}</SelectLabel>
-                {modules.map(mod => (
+                {modules.map((mod) => (
                   <SelectItem key={mod.id} value={mod.id}>
                     [{mod.track_slug}] {mod.title}
                   </SelectItem>
@@ -111,7 +110,7 @@ function FinanceModulePanel({
           type="number"
           min={1}
           value={financeOrder ?? ''}
-          onChange={e => onFinanceOrderChange(e.target.value ? Number(e.target.value) : null)}
+          onChange={(e) => onFinanceOrderChange(e.target.value ? Number(e.target.value) : null)}
           className="h-9 text-sm"
           placeholder="e.g. 1"
         />
@@ -124,8 +123,66 @@ function FinanceModulePanel({
             <SelectValue placeholder="Select lesson type" />
           </SelectTrigger>
           <SelectContent>
-            {LESSON_TYPE_OPTIONS.map(option => (
+            {LESSON_TYPE_OPTIONS.map((option) => (
               <SelectItem key={option} value={option}>{option}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    </div>
+  );
+}
+
+function AccountingPlacementPanel({
+  fsliSlug,
+  onFsliSlugChange,
+  topic,
+  onTopicChange,
+}: {
+  fsliSlug: string;
+  onFsliSlugChange: (s: string) => void;
+  topic: string;
+  onTopicChange: (s: string) => void;
+}) {
+  const { data: fsliPages = [], isLoading } = useFsliPages();
+
+  return (
+    <div className="space-y-3 rounded-md border border-border p-3 bg-background/60">
+      <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Accounting placement</Label>
+      <p className="text-[11px] text-muted-foreground">
+        Attach this essay to an FSLI line item or a consolidation topic so it appears under the right
+        leaf in the public nav.
+      </p>
+
+      <div className="space-y-1.5">
+        <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">FSLI line item</Label>
+        {isLoading ? (
+          <div className="h-9 rounded-md bg-muted animate-pulse" />
+        ) : (
+          <Select value={fsliSlug || NONE} onValueChange={(v) => onFsliSlugChange(v === NONE ? '' : v)}>
+            <SelectTrigger className="h-9 text-sm">
+              <SelectValue placeholder="Assign FSLI line item..." />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={NONE}>— None —</SelectItem>
+              {fsliPages.map((page) => (
+                <SelectItem key={page.id} value={page.slug}>{page.title}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
+      </div>
+
+      <div className="space-y-1.5">
+        <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Consolidation topic</Label>
+        <Select value={topic || NONE} onValueChange={(v) => onTopicChange(v === NONE ? '' : v)}>
+          <SelectTrigger className="h-9 text-sm">
+            <SelectValue placeholder="Assign consolidation topic..." />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={NONE}>— None —</SelectItem>
+            {CONSOLIDATION_TOPICS.map((t) => (
+              <SelectItem key={t.slug} value={t.slug}>{t.title}</SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -145,12 +202,8 @@ export function RightSidebar({
   onCategoryChange,
   slug,
   onSlugChange,
-  tags,
-  onTagsChange,
   status,
   onStatusChange,
-  metaDescription,
-  onMetaDescriptionChange,
   showPreview,
   onTogglePreview,
   moduleId,
@@ -161,66 +214,39 @@ export function RightSidebar({
   onFinanceOrderChange,
   lessonType,
   onLessonTypeChange,
+  fsliSlug,
+  onFsliSlugChange,
+  topic,
+  onTopicChange,
   currentSectionSlug,
 }: RightSidebarProps) {
-  const { data: allModules } = useAllFinanceModules();
+  const { data: allModules = [] } = useAllFinanceModules();
 
-  const canonicalUrl = useMemo(() => {
-    if (!slug) return '';
-    const section = sections.find(s => s.id === sectionId);
-    if (!section) return `/${slug}`;
-    switch (section.slug) {
-      case 'green-transition': {
-        const cat = categories.find(c => c.id === categoryId);
-        const phase = cat?.slug?.replace(`${section.slug}-`, '') || 'general';
-        return `/green-transition/${phase}/${slug}`;
-      }
-      case 'next-big-thing':
-        return `/the-next-big-thing/${slug}`;
-      case 'finance':
-        if (moduleId && allModules) {
-          const mod = allModules.find(m => m.id === moduleId);
-          if (mod) return `/finance/${mod.track_slug}/${mod.slug}/${slug}`;
-        }
-        if (financeSection) return `/finance/${financeSection}/${slug}`;
-        return `/finance/${slug}`;
-      case 'critical-thinking': {
-        const cat = categories.find(c => c.id === categoryId);
-        const phase = cat?.slug?.replace(`${section.slug}-`, '') || 'clarify';
-        return `/critical-thinking-research/${phase}/${slug}`;
-      }
-      default:
-        return `/${section.slug}/${slug}`;
-    }
-  }, [slug, sectionId, categoryId, sections, categories, moduleId, allModules, financeSection]);
+  const selectedModule = allModules.find((m) => m.id === moduleId);
+  const categorySlug = categories.find((c) => c.id === categoryId)?.slug || null;
+  const canonicalUrl = buildCanonicalUrl({
+    sectionSlug: currentSectionSlug,
+    slug,
+    categorySlug,
+    moduleId,
+    moduleTrackSlug: selectedModule?.track_slug || null,
+    moduleSlug: selectedModule?.slug || null,
+    financeSection,
+    fsliSlug,
+    topic,
+  });
 
-  // Reset category when section changes
+  // Reset category when section changes and the selected one no longer belongs.
   useEffect(() => {
     if (sectionId && categoryId) {
       const catBelongsToSection = categories.some(
-        c => c.id === categoryId && c.section_id === sectionId
+        (c) => c.id === categoryId && c.section_id === sectionId,
       );
       if (!catBelongsToSection) {
         onCategoryChange('');
       }
     }
   }, [sectionId, categoryId, categories, onCategoryChange]);
-
-  const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' || e.key === ',') {
-      e.preventDefault();
-      const input = e.currentTarget;
-      const value = input.value.trim();
-      if (value && !tags.includes(value)) {
-        onTagsChange([...tags, value]);
-      }
-      input.value = '';
-    }
-  };
-
-  const removeTag = (tag: string) => {
-    onTagsChange(tags.filter(t => t !== tag));
-  };
 
   return (
     <aside className="w-72 shrink-0 border-l border-border bg-muted/20 overflow-y-auto">
@@ -238,7 +264,7 @@ export function RightSidebar({
                 <SelectValue placeholder="Select section..." />
               </SelectTrigger>
               <SelectContent>
-                {sections.map(s => (
+                {sections.map((s) => (
                   <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
                 ))}
               </SelectContent>
@@ -263,7 +289,7 @@ export function RightSidebar({
                 <SelectValue placeholder="Select category..." />
               </SelectTrigger>
               <SelectContent>
-                {categories.map(c => (
+                {categories.map((c) => (
                   <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
                 ))}
               </SelectContent>
@@ -276,7 +302,7 @@ export function RightSidebar({
           <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Slug</Label>
           <Input
             value={slug}
-            onChange={e => onSlugChange(e.target.value)}
+            onChange={(e) => onSlugChange(e.target.value)}
             placeholder="auto-generated-slug"
             className="h-9 text-sm font-mono"
           />
@@ -294,32 +320,19 @@ export function RightSidebar({
           />
         )}
 
-        {/* Tags */}
-        <div className="space-y-1.5">
-          <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Tags</Label>
-          <Input
-            placeholder="Type and press Enter..."
-            className="h-9 text-sm"
-            onKeyDown={handleTagKeyDown}
+        {currentSectionSlug === 'accounting' && (
+          <AccountingPlacementPanel
+            fsliSlug={fsliSlug}
+            onFsliSlugChange={onFsliSlugChange}
+            topic={topic}
+            onTopicChange={onTopicChange}
           />
-          {tags.length > 0 && (
-            <div className="flex flex-wrap gap-1 mt-1">
-              {tags.map(tag => (
-                <Badge key={tag} variant="secondary" className="text-xs gap-1">
-                  {tag}
-                  <button onClick={() => removeTag(tag)} className="hover:text-destructive">
-                    <X className="h-3 w-3" />
-                  </button>
-                </Badge>
-              ))}
-            </div>
-          )}
-        </div>
+        )}
 
         {/* Status */}
         <div className="space-y-1.5">
           <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Status</Label>
-          <Select value={status} onValueChange={v => onStatusChange(v as EssayStatus)}>
+          <Select value={status} onValueChange={(v) => onStatusChange(v as EssayStatus)}>
             <SelectTrigger className="h-9 text-sm">
               <SelectValue />
             </SelectTrigger>
@@ -330,25 +343,20 @@ export function RightSidebar({
           </Select>
         </div>
 
-        {/* Meta Description */}
-        <div className="space-y-1.5">
-          <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Meta Description</Label>
-          <Textarea
-            value={metaDescription}
-            onChange={e => onMetaDescriptionChange(e.target.value)}
-            placeholder="Brief description for search engines..."
-            className="text-sm min-h-[60px] resize-none"
-            maxLength={160}
-          />
-          <p className="text-xs text-muted-foreground text-right">{metaDescription.length}/160</p>
-        </div>
-
         {/* Canonical URL Preview */}
         <div className="space-y-1.5">
           <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">URL Preview</Label>
-          <p className="text-xs font-mono text-muted-foreground break-all bg-muted/50 rounded px-2 py-1.5">
-            {canonicalUrl || '/...'}
-          </p>
+          {canonicalUrl ? (
+            <p className="text-xs font-mono text-muted-foreground break-all bg-muted/50 rounded px-2 py-1.5">
+              {canonicalUrl}
+            </p>
+          ) : (
+            <p className="text-xs text-amber-600 bg-amber-500/10 rounded px-2 py-1.5">
+              {currentSectionSlug === 'accounting'
+                ? 'Pick an FSLI line item or consolidation topic so this essay is reachable.'
+                : 'Add a slug to preview the URL.'}
+            </p>
+          )}
         </div>
 
         {/* Desktop Preview Toggle */}

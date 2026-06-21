@@ -24,8 +24,9 @@ import { parseTiptapJson } from '@/lib/tiptap/serialize';
 import { useWriterEssay, useSaveEssay, generateUniqueSlug } from './hooks/useWriterEssay';
 import { useWriterCategories } from './hooks/useWriterCategories';
 import { useWriterSections } from './hooks/useWriterSections';
-import { slugify, validateForPublish } from './schema/types';
-import type { EssayStatus, PublishValidationError } from './schema/types';
+import { resolvePlacementFields } from './schema/placement';
+import { slugify, validateForPublish, canAutosave } from './schema/types';
+import type { EssayStatus, PublishValidationError, SaveStatus } from './schema/types';
 import { TopBar } from './components/TopBar';
 import { LeftSidebar } from './components/LeftSidebar';
 import { RightSidebar } from './components/RightSidebar';
@@ -56,20 +57,27 @@ export default function WriterStudio() {
   const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
   const [sectionId, setSectionId] = useState('');
   const [categoryId, setCategoryId] = useState('');
-  const [tags, setTags] = useState<string[]>([]);
   const [status, setStatus] = useState<EssayStatus>('draft');
-  const [metaDescription, setMetaDescription] = useState('');
   const [author, setAuthor] = useState('Dika Gustiana');
   const [moduleId, setModuleId] = useState<string | null>(null);
   const [financeSection, setFinanceSection] = useState('');
   const [financeOrder, setFinanceOrder] = useState<number | null>(null);
   const [lessonType, setLessonType] = useState<string>('concept');
+  const [fsliSlug, setFsliSlug] = useState('');
+  const [topic, setTopic] = useState('');
   const [contentJson, setContentJson] = useState<JSONContent | null>(null);
   const [showPreview, setShowPreview] = useState(false);
 
   // Dirty tracking
   const [isDirty, setIsDirty] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
   const isInitialLoad = useRef(true);
+  const autosaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Guards: load form state from the server ONCE per essay id (so a background
+  // refetch after autosave never stomps in-progress edits), and remember the last
+  // PERSISTED status so autosave never escalates a draft to published.
+  const loadedIdRef = useRef<string | null>(null);
+  const lastSavedStatusRef = useRef<EssayStatus>('draft');
 
   // Categories filtered by section
   const { data: categories = [], isLoading: categoriesLoading } = useWriterCategories(sectionId || undefined);
@@ -83,16 +91,17 @@ export default function WriterStudio() {
       body: contentJson ? JSON.stringify(contentJson) : null,
       category_id: categoryId,
       section_id: sectionId,
-      tags,
+      tags: [],
       status,
-      meta_description: metaDescription,
+      meta_description: '',
       author,
     });
-  }, [title, deck, slug, contentJson, categoryId, sectionId, tags, status, metaDescription, author]);
+  }, [title, deck, slug, contentJson, categoryId, sectionId, status, author]);
 
-  // ── Load essay data when editing ──
+  // ── Load essay data when editing (once per essay id) ──
   useEffect(() => {
-    if (essayData && !isNew) {
+    if (essayData && !isNew && essayData.id !== loadedIdRef.current) {
+      loadedIdRef.current = essayData.id;
       isInitialLoad.current = true;
       setEssayId(essayData.id);
       setTitle(essayData.title || '');
@@ -100,18 +109,22 @@ export default function WriterStudio() {
       setSlug(essayData.slug || '');
       setSlugManuallyEdited(true); // Existing essays have manual slugs
       setAuthor(essayData.author || 'Dika Gustiana');
-      setMetaDescription('');
-      setStatus((essayData.status as EssayStatus) || 'draft');
-      setTags([]);
-      const financeMeta = essayData as typeof essayData & {
+      const loadedStatus: EssayStatus = essayData.status === 'published' ? 'published' : 'draft';
+      setStatus(loadedStatus);
+      lastSavedStatusRef.current = loadedStatus;
+      const placementMeta = essayData as typeof essayData & {
         finance_section?: string | null;
         finance_order?: number | null;
         lesson_type?: string | null;
+        fsli_slug?: string | null;
+        topic?: string | null;
       };
       setModuleId(essayData.module_id || null);
-      setFinanceSection(financeMeta.finance_section || '');
-      setFinanceOrder(financeMeta.finance_order ?? null);
-      setLessonType(financeMeta.lesson_type || 'concept');
+      setFinanceSection(placementMeta.finance_section || '');
+      setFinanceOrder(placementMeta.finance_order ?? null);
+      setLessonType(placementMeta.lesson_type || 'concept');
+      setFsliSlug(placementMeta.fsli_slug || '');
+      setTopic(placementMeta.topic || '');
 
       // Set category and section from joined data
       if (essayData.categories) {
@@ -154,13 +167,18 @@ export default function WriterStudio() {
       setFinanceSection('');
       setFinanceOrder(null);
     }
+    if (sectionSlug !== 'accounting') {
+      setFsliSlug('');
+      setTopic('');
+    }
   }, [sectionId, sections]);
 
   // ── Track dirty state ──
   useEffect(() => {
     if (isInitialLoad.current) return;
     setIsDirty(true);
-  }, [title, deck, slug, sectionId, categoryId, tags, status, metaDescription, contentJson, moduleId, financeOrder, lessonType]);
+    setSaveStatus('unsaved');
+  }, [title, deck, slug, sectionId, categoryId, status, contentJson, moduleId, financeOrder, lessonType, fsliSlug, topic]);
 
   // ── Beforeunload guard ──
   useEffect(() => {
@@ -223,19 +241,35 @@ export default function WriterStudio() {
   }, [categories, categoryId, getSectionSlug]);
 
   // ── Save ──
-  const handleSave = async (targetStatus: EssayStatus = 'draft') => {
+  // `silent` is used by autosave: it skips toasts and the publish gate and just
+  // persists the latest content under the current status.
+  const handleSave = useCallback(
+    async (targetStatus: EssayStatus = 'draft', opts: { silent?: boolean } = {}) => {
+    const { silent = false } = opts;
     if (!title.trim()) {
-      toast({ title: 'Title required', description: 'Add a title before saving.', variant: 'destructive' });
+      if (!silent) toast({ title: 'Title required', description: 'Add a title before saving.', variant: 'destructive' });
       return;
     }
 
-    if (targetStatus === 'published') {
+    // `essays.category_id` is NOT NULL with an FK RESTRICT, so a save without a
+    // section/category is rejected by the DB. Validate up-front on every save
+    // (not just publish) to give a clear message and avoid an orphan reference.
+    if (!sectionId || !categoryId) {
+      if (!silent) toast({
+        title: 'Placement required',
+        description: 'Choose a section and category before saving.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (targetStatus === 'published' && !silent) {
       const errors = validateForPublish({
         title, deck, slug,
         body: contentJson ? JSON.stringify(contentJson) : null,
         category_id: categoryId,
         section_id: sectionId,
-        tags, status: targetStatus, meta_description: metaDescription, author,
+        tags: [], status: targetStatus, meta_description: '', author,
       });
 
       if (errors.length > 0) {
@@ -254,7 +288,19 @@ export default function WriterStudio() {
 
     const contentString = contentJson ? JSON.stringify(contentJson) : '';
     const sectionSlug = getSectionSlug();
+    const placement = resolvePlacementFields({
+      sectionSlug,
+      categorySlug: categories.find(c => c.id === categoryId)?.slug || null,
+      slug: finalSlug,
+      moduleId,
+      financeSection,
+      financeOrder,
+      lessonType,
+      fsliSlug,
+      topic,
+    });
 
+    setSaveStatus('saving');
     try {
       const result = await saveEssay.mutateAsync({
         id: essayId,
@@ -264,33 +310,50 @@ export default function WriterStudio() {
           snippet: deck.trim() || null,
           content: contentString,
           category_id: categoryId,
-          section: sectionSlug,
           status: targetStatus,
           author: author || null,
-          phase: getPhaseFromCategory(),
           published: targetStatus === 'published',
           date: targetStatus === 'published' ? new Date().toISOString().split('T')[0] : null,
-          module_id: moduleId,
-          finance_section: financeSection || null,
-          finance_order: financeOrder,
-          lesson_type: lessonType || null,
+          ...placement,
         },
       });
 
       setIsDirty(false);
+      setSaveStatus('saved');
       setSlug(finalSlug);
+      lastSavedStatusRef.current = targetStatus;
 
       if (isNew && result?.id) {
-        toast({ title: 'Created', description: 'Essay created.' });
+        if (!silent) toast({ title: 'Created', description: 'Essay created.' });
         navigate(`/admin/writer/${result.slug}`, { replace: true });
-      } else {
+      } else if (!silent) {
         toast({ title: 'Saved', description: 'Essay updated.' });
       }
     } catch (error: unknown) {
+      setSaveStatus('error');
       const msg = error instanceof Error ? error.message : 'Unknown error';
-      toast({ title: 'Error', description: msg, variant: 'destructive' });
+      if (!silent) toast({ title: 'Error', description: msg, variant: 'destructive' });
     }
-  };
+  },
+    [title, sectionId, categoryId, deck, slug, contentJson, author, essayId, getSectionSlug,
+     categories, moduleId, financeSection, financeOrder, lessonType, fsliSlug, topic, isNew,
+     saveEssay, navigate, toast],
+  );
+
+  // ── Silent autosave (debounced) ──
+  useEffect(() => {
+    if (isInitialLoad.current || !isDirty) return;
+    if (!canAutosave({ essayId, title, sectionId, categoryId })) return;
+    if (autosaveTimer.current) clearTimeout(autosaveTimer.current);
+    autosaveTimer.current = setTimeout(() => {
+      // Use the last PERSISTED status, never the dropdown selection, so autosave
+      // can never publish a draft (publishing stays an explicit, validated action).
+      void handleSave(lastSavedStatusRef.current, { silent: true });
+    }, 1500);
+    return () => {
+      if (autosaveTimer.current) clearTimeout(autosaveTimer.current);
+    };
+  }, [isDirty, essayId, title, sectionId, categoryId, status, handleSave]);
 
   // ── Access denied ──
   if (!authLoading && !isAdmin) {
@@ -338,7 +401,7 @@ export default function WriterStudio() {
 
       {/* Top Bar */}
       <TopBar
-        isDirty={isDirty}
+        saveStatus={saveStatus}
         isSaving={saveEssay.isPending}
         publishErrors={publishErrors}
         onSave={() => handleSave('draft')}
@@ -422,12 +485,8 @@ export default function WriterStudio() {
           onCategoryChange={setCategoryId}
           slug={slug}
           onSlugChange={handleSlugChange}
-          tags={tags}
-          onTagsChange={setTags}
           status={status}
           onStatusChange={setStatus}
-          metaDescription={metaDescription}
-          onMetaDescriptionChange={setMetaDescription}
           showPreview={showPreview}
           onTogglePreview={() => setShowPreview(p => !p)}
           moduleId={moduleId}
@@ -438,6 +497,10 @@ export default function WriterStudio() {
           onFinanceOrderChange={setFinanceOrder}
           lessonType={lessonType}
           onLessonTypeChange={setLessonType}
+          fsliSlug={fsliSlug}
+          onFsliSlugChange={setFsliSlug}
+          topic={topic}
+          onTopicChange={setTopic}
           currentSectionSlug={getSectionSlug()}
         />
       </div>

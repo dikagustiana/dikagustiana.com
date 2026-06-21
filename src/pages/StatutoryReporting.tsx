@@ -1,9 +1,11 @@
 import { PageLayout } from '@/components/layouts/PageLayout';
+import { SEO } from '@/components/SEO';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function StatutoryReporting() {
   return (
     <PageLayout variant="content" role="manager" breadcrumbs={[{ label: 'Home', path: '/' }, { label: 'Accounting', path: '/accounting' }, { label: 'Statutory Reporting' }]}>
+      <SEO title="Statutory Reporting" description="Local statutory (PSAK) reporting requirements, filing obligations, and the standalone financial statements behind the consolidated group." />
       <main className="flex-1 container py-8">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-3xl md:text-4xl font-display font-bold mb-4">

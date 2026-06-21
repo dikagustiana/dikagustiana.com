@@ -1,51 +1,66 @@
 import { useParams, Link } from 'react-router-dom';
 import { PageLayout } from '@/components/layouts/PageLayout';
+import { SEO } from '@/components/SEO';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { useAuth } from '@/contexts/AuthContext';
-import { Upload } from 'lucide-react';
+import { useBooks } from '@/hooks/queries/useBooks';
+import { LoadingState } from '@/components/states/LoadingState';
+import { ErrorState } from '@/components/states/ErrorState';
+import { EmptyState } from '@/components/states/EmptyState';
 
-const sampleBooks = [
-  { id: 'book-1', title: 'Financial Statement Analysis', author: 'Various', year: 2023 },
-  { id: 'book-2', title: 'Corporate Finance Principles', author: 'Various', year: 2022 },
-  { id: 'book-3', title: 'Accounting Standards Guide', author: 'Various', year: 2024 },
-];
+const formatTitle = (s: string) =>
+  s?.split('-').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') || 'Category';
 
 export default function BooksList() {
   const { category } = useParams<{ category: string }>();
-  const { isAdmin } = useAuth();
+  const { data: books, isLoading, error, refetch } = useBooks({ category });
 
-  const formatTitle = (s: string) => s?.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') || 'Category';
+  const heading = formatTitle(category || '');
 
   return (
-    <PageLayout variant="content" role="educator" breadcrumbs={[{label:'Home',path:'/'},{label:'Books and Academia',path:'/books-academia'},{label:'Categories',path:'/books/categories'},{label: formatTitle(category || '')}]}>
+    <PageLayout
+      variant="content"
+      role="educator"
+      breadcrumbs={[
+        { label: 'Home', path: '/' },
+        { label: 'Books and Academia', path: '/books-academia' },
+        { label: 'Categories', path: '/books/categories' },
+        { label: heading },
+      ]}
+    >
+      <SEO
+        title={`${heading} — Books`}
+        description={`Books in the ${heading} collection.`}
+      />
       <main className="flex-1 container py-8">
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-3xl font-display font-bold">
-            {formatTitle(category || '')}
-          </h1>
-          {isAdmin && (
-            <Button>
-              <Upload className="h-4 w-4 mr-2" />
-              Upload Book
-            </Button>
-          )}
+        <div className="mb-8">
+          <h1 className="text-3xl font-display font-bold">{heading}</h1>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {sampleBooks.map((book) => (
-            <Link key={book.id} to={`/books/${category}/${book.id}/read`}>
-              <Card className="h-full hover:shadow-lg transition-all hover:-translate-y-1 cursor-pointer">
-                <CardHeader>
-                  <CardTitle className="text-lg">{book.title}</CardTitle>
-                  <CardDescription>
-                    {book.author} • {book.year}
-                  </CardDescription>
-                </CardHeader>
-              </Card>
-            </Link>
-          ))}
-        </div>
+        {isLoading ? (
+          <LoadingState />
+        ) : error ? (
+          <ErrorState onRetry={() => void refetch()} />
+        ) : !books || books.length === 0 ? (
+          <EmptyState
+            title="No books yet"
+            message="No books have been added to this category."
+          />
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {books.map((book) => (
+              <Link key={book.id} to={`/books/${category}/${book.id}/read`}>
+                <Card className="h-full hover:shadow-lg transition-all hover:-translate-y-1 cursor-pointer">
+                  <CardHeader>
+                    <CardTitle className="text-lg">{book.title || book.filename}</CardTitle>
+                    <CardDescription>
+                      {[book.author, book.year].filter(Boolean).join(' • ') || 'Unknown author'}
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        )}
       </main>
     </PageLayout>
   );

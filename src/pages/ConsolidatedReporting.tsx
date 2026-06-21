@@ -1,4 +1,5 @@
 import { PageLayout } from '@/components/layouts/PageLayout';
+import { SEO } from '@/components/SEO';
 import { ConceptPanel } from '@/components/consolidation/ConceptPanel';
 import { ConsolidationProcessStep } from '@/components/consolidation/ConsolidationProcessStep';
 import { AccountRow } from '@/components/consolidation/AccountRow';
@@ -80,6 +81,7 @@ export default function ConsolidatedReporting() {
         { label: 'Consolidated Reporting' },
       ]}
     >
+      <SEO title="Consolidated Reporting" description="How a parent and its subsidiaries combine into one set of financial statements under PSAK — elimination entries, non-controlling interests, and control procedures." />
       <div className="container py-8">
         <div className="max-w-6xl mx-auto">
 
