@@ -32,3 +32,10 @@ dist-ssr
 # Supabase CLI local artifacts
 supabase/.temp
 supabase/.branches
+
+# Local environment & secrets (NEVER commit these)
+.env
+.env.local
+.env.*.local
+.secrets.env
+*.secret
