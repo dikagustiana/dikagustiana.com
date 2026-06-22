@@ -94,12 +94,27 @@ export function useDeleteEssay() {
 
   return useMutation({
     mutationFn: async (id: string) => {
+      const { data: target } = await supabase
+        .from('essays')
+        .select('id, title, slug, section')
+        .eq('id', id)
+        .maybeSingle();
+
       const { error } = await supabase
         .from('essays')
         .delete()
         .eq('id', id);
 
       if (error) throw error;
+
+      await logAuditEvent({
+        action: 'delete',
+        table_name: 'essays',
+        record_id: id,
+        record_title: target?.title ?? null,
+        record_slug: target?.slug ?? null,
+        record_section: target?.section ?? null,
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-essays'] });
@@ -119,6 +134,27 @@ export function useUpdateEssay() {
         .eq('id', id);
 
       if (error) throw error;
+
+      const { data: target } = await supabase
+        .from('essays')
+        .select('title, slug, section')
+        .eq('id', id)
+        .maybeSingle();
+
+      const isPublishToggle = Object.prototype.hasOwnProperty.call(data, 'published');
+      await logAuditEvent({
+        action: isPublishToggle
+          ? data.published
+            ? 'publish'
+            : 'unpublish'
+          : 'update',
+        table_name: 'essays',
+        record_id: id,
+        record_title: target?.title ?? data.title ?? null,
+        record_slug: target?.slug ?? data.slug ?? null,
+        record_section: target?.section ?? data.section ?? null,
+        changes: { fields: Object.keys(data) },
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-essays'] });
