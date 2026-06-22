@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { logAuditEvent } from '@/lib/auditLog';
 import { VoiceRole } from '@/components/layouts/PageLayout';
 
 export interface EssayWithHealth {
@@ -49,17 +50,37 @@ export function useBulkPublish() {
     mutationFn: async ({ ids, published }: { ids: string[]; published: boolean }) => {
       // Sync status with published boolean - status is source of truth
       const newStatus = published ? 'published' : 'draft';
-      
+
+      // Fetch titles for audit before update
+      const { data: targets } = await supabase
+        .from('essays')
+        .select('id, title, slug, section')
+        .in('id', ids);
+
       const { error } = await supabase
         .from('essays')
-        .update({ 
-          published, 
+        .update({
+          published,
           status: newStatus,
-          updated_at: new Date().toISOString() 
+          updated_at: new Date().toISOString()
         })
         .in('id', ids);
 
       if (error) throw error;
+
+      await Promise.all(
+        (targets ?? []).map((t) =>
+          logAuditEvent({
+            action: published ? 'bulk_publish' : 'bulk_unpublish',
+            table_name: 'essays',
+            record_id: t.id,
+            record_title: t.title,
+            record_slug: t.slug,
+            record_section: t.section,
+            changes: { published, status: newStatus },
+          })
+        )
+      );
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-essays'] });
