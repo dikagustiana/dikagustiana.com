@@ -1,5 +1,6 @@
 import { cn } from '@/lib/utils';
 import { contentToHtml } from '@/lib/tiptap/serialize';
+import { sanitizeHtml } from '@/lib/sanitizeHtml';
 
 interface ContentPreviewProps {
   title: string;

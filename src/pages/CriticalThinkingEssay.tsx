@@ -9,6 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Pencil, Clock, User, Calendar } from 'lucide-react';
+import { sanitizeHtml } from '@/lib/sanitizeHtml';
 
 const phaseNames: Record<string, string> = {
   'clarify': 'Clarify',

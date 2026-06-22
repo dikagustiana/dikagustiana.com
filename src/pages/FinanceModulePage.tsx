@@ -21,6 +21,7 @@ import {
   useEssaysByModuleId,
 } from '@/hooks/queries/useFinance';
 import { useAuth } from '@/contexts/AuthContext';
+import { sanitizeHtml } from '@/lib/sanitizeHtml';
 
 // ── Essay listing sub-component ──────────────────────────────────────────────
 

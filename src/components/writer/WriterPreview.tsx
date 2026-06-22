@@ -3,6 +3,7 @@ import { User, Calendar, Clock, Tag } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { contentToHtml } from '@/lib/tiptap/serialize';
+import { sanitizeHtml } from '@/lib/sanitizeHtml';
 
 interface WriterPreviewProps {
   title: string;
