@@ -69,6 +69,7 @@ const DebugAuth = lazy(() => import("./pages/DebugAuth"));
 const AdminHealth = lazy(() => import("./pages/AdminHealth"));
 const AdminContent = lazy(() => import("./pages/AdminContent"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+const AdminAuditLog = lazy(() => import("./pages/AdminAuditLog"));
 const RemoraTrading = lazy(() => import("./pages/RemoraTrading"));
 const DikaQuantEngine = lazy(() => import("./pages/DikaQuantEngine"));
 const TheNextBigThing = lazy(() => import("./pages/TheNextBigThing"));
@@ -209,6 +210,8 @@ const App = () => (
             <Route path="/admin/dashboard" element={<RequireAdmin><AdminDashboard /></RequireAdmin>} />
             <Route path="/admin/health" element={<RequireAdmin><AdminHealth /></RequireAdmin>} />
             <Route path="/admin/content" element={<RequireAdmin><AdminContent /></RequireAdmin>} />
+            <Route path="/admin/audit-log" element={<RequireAdmin><AdminAuditLog /></RequireAdmin>} />
+
 
             {/* Canonical Writer Studio — single editor for all essays */}
             <Route path="/admin/writer/:id" element={
