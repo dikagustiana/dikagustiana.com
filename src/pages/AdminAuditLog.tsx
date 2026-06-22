@@ -126,7 +126,7 @@ export default function AdminAuditLog() {
         ) : rows.length === 0 ? (
           <EmptyState
             title="No audit entries"
-            description="Once admins edit content, their actions will appear here."
+            message="Once admins edit content, their actions will appear here."
           />
         ) : (
           <Card>
