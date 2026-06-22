@@ -14,6 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_audit_log: {
+        Row: {
+          action: string
+          changes: Json | null
+          created_at: string
+          id: string
+          metadata: Json | null
+          record_id: string | null
+          record_section: string | null
+          record_slug: string | null
+          record_title: string | null
+          table_name: string
+          user_email: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          changes?: Json | null
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          record_id?: string | null
+          record_section?: string | null
+          record_slug?: string | null
+          record_title?: string | null
+          table_name: string
+          user_email?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          changes?: Json | null
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          record_id?: string | null
+          record_section?: string | null
+          record_slug?: string | null
+          record_title?: string | null
+          table_name?: string
+          user_email?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       books_uploads: {
         Row: {
           author: string | null
