@@ -9,6 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Pencil, Clock, User, Calendar } from 'lucide-react';
+import { sanitizeHtml } from '@/lib/sanitizeHtml';
 
 const phaseNames: Record<string, string> = {
   'clarify': 'Clarify',
@@ -157,7 +158,7 @@ export default function CriticalThinkingEssay() {
 
           <div className="prose prose-neutral dark:prose-invert max-w-none">
             {essay?.content ? (
-              <div dangerouslySetInnerHTML={{ __html: contentToHtml(essay.content) }} />
+              <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(contentToHtml(essay.content)) }} />
             ) : (
               <p className="text-muted-foreground italic">
                 This essay content is being developed. Check back soon for comprehensive insights on this topic.

@@ -21,6 +21,7 @@ import {
   useEssaysByModuleId,
 } from '@/hooks/queries/useFinance';
 import { useAuth } from '@/contexts/AuthContext';
+import { sanitizeHtml } from '@/lib/sanitizeHtml';
 
 // ── Essay listing sub-component ──────────────────────────────────────────────
 
@@ -177,7 +178,7 @@ export default function FinanceModulePage() {
         {module.framing_content ? (
           <div
             className="prose prose-sm max-w-none text-foreground mb-8"
-            dangerouslySetInnerHTML={{ __html: module.framing_content }}
+            dangerouslySetInnerHTML={{ __html: sanitizeHtml(module.framing_content) }}
           />
         ) : (
           <p className="text-muted-foreground italic mb-8">
