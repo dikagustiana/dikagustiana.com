@@ -194,6 +194,16 @@ export function useCreateEssay() {
         .single();
 
       if (error) throw error;
+
+      await logAuditEvent({
+        action: 'create',
+        table_name: 'essays',
+        record_id: result.id,
+        record_title: result.title,
+        record_slug: result.slug,
+        record_section: result.section,
+      });
+
       return result;
     },
     onSuccess: () => {
