@@ -144,6 +144,20 @@ export default function AdminDashboard() {
               </CardContent>
             </Link>
           </Card>
+
+          <Card className="group hover:shadow-md transition-shadow cursor-pointer">
+            <Link to="/admin/audit-log">
+              <CardContent className="p-6 flex items-center gap-4">
+                <div className="p-3 rounded-full bg-muted text-foreground group-hover:bg-muted/80 transition-colors">
+                  <Clock className="h-6 w-6" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-lg">Audit Log</h3>
+                  <p className="text-sm text-muted-foreground">Who edited what, and when</p>
+                </div>
+              </CardContent>
+            </Link>
+          </Card>
         </div>
 
         {/* Stats Grid */}
