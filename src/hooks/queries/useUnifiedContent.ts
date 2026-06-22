@@ -176,8 +176,12 @@ export function useBulkPublishContent() {
 
   return useMutation({
     mutationFn: async ({ ids, published }: { ids: string[]; published: boolean }) => {
-      // Sync status with published boolean - status is source of truth
       const newStatus = published ? 'published' : 'draft';
+
+      const { data: targets } = await supabase
+        .from('essays')
+        .select('id, title, slug, section')
+        .in('id', ids);
 
       const { error } = await supabase
         .from('essays')
@@ -189,6 +193,20 @@ export function useBulkPublishContent() {
         .in('id', ids);
 
       if (error) throw error;
+
+      await Promise.all(
+        (targets ?? []).map((t) =>
+          logAuditEvent({
+            action: published ? 'bulk_publish' : 'bulk_unpublish',
+            table_name: 'essays',
+            record_id: t.id,
+            record_title: t.title,
+            record_slug: t.slug,
+            record_section: t.section,
+            changes: { published, status: newStatus },
+          })
+        )
+      );
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['unified-content'] });
@@ -216,6 +234,22 @@ export function useTogglePublishContent() {
         .eq('id', id);
 
       if (error) throw error;
+
+      const { data: target } = await supabase
+        .from('essays')
+        .select('title, slug, section')
+        .eq('id', id)
+        .maybeSingle();
+
+      await logAuditEvent({
+        action: newPublished ? 'publish' : 'unpublish',
+        table_name: 'essays',
+        record_id: id,
+        record_title: target?.title ?? null,
+        record_slug: target?.slug ?? null,
+        record_section: target?.section ?? null,
+      });
+
       return { published: newPublished, status: newStatus };
     },
     onSuccess: () => {
@@ -232,11 +266,37 @@ export function useDeleteContent() {
   return useMutation({
     mutationFn: async ({ id, type }: { id: string; type: ContentType }) => {
       if (type === 'essay') {
+        const { data: target } = await supabase
+          .from('essays')
+          .select('title, slug, section')
+          .eq('id', id)
+          .maybeSingle();
         const { error } = await supabase.from('essays').delete().eq('id', id);
         if (error) throw error;
+        await logAuditEvent({
+          action: 'delete',
+          table_name: 'essays',
+          record_id: id,
+          record_title: target?.title ?? null,
+          record_slug: target?.slug ?? null,
+          record_section: target?.section ?? null,
+        });
       } else if (type === 'fsli') {
+        const { data: target } = await supabase
+          .from('fsli_pages')
+          .select('title, slug')
+          .eq('id', id)
+          .maybeSingle();
         const { error } = await supabase.from('fsli_pages').delete().eq('id', id);
         if (error) throw error;
+        await logAuditEvent({
+          action: 'delete',
+          table_name: 'fsli_pages',
+          record_id: id,
+          record_title: target?.title ?? null,
+          record_slug: target?.slug ?? null,
+          record_section: 'accounting',
+        });
       }
     },
     onSuccess: () => {
