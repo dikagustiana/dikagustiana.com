@@ -157,7 +157,7 @@ export default function CriticalThinkingEssay() {
 
           <div className="prose prose-neutral dark:prose-invert max-w-none">
             {essay?.content ? (
-              <div dangerouslySetInnerHTML={{ __html: contentToHtml(essay.content) }} />
+              <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(contentToHtml(essay.content)) }} />
             ) : (
               <p className="text-muted-foreground italic">
                 This essay content is being developed. Check back soon for comprehensive insights on this topic.

@@ -73,7 +73,7 @@ export function ContentPreview({
           "prose-a:text-accent prose-a:underline prose-a:hover:text-accent/80",
           "prose-hr:border-border prose-hr:my-8"
         )}
-        dangerouslySetInnerHTML={{ __html: htmlContent }}
+        dangerouslySetInnerHTML={{ __html: sanitizeHtml(htmlContent) }}
       />
     </article>
   );

@@ -155,7 +155,7 @@ export function WriterPreview({
           "prose-a:text-primary prose-a:underline prose-a:underline-offset-4 prose-a:hover:text-primary/80",
         )}
         dangerouslySetInnerHTML={{
-          __html: contentToHtml(content) || '<p class="text-muted-foreground italic">Start writing to see your content here...</p>'
+          __html: sanitizeHtml(contentToHtml(content)) || '<p class="text-muted-foreground italic">Start writing to see your content here...</p>'
         }}
       />
 
