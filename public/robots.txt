@@ -12,3 +12,11 @@ Allow: /
 
 User-agent: *
 Allow: /
+
+# Private/admin-only app routes (gated by RequireAdmin; no public content)
+Disallow: /admin/
+Disallow: /auth
+Disallow: /settings
+Disallow: /debug/
+Disallow: /personal-finance
+Disallow: /dikas-tools
