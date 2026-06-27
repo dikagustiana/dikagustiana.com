@@ -31,7 +31,7 @@ export default function BooksList() {
         title={`${heading} — Books`}
         description={`Books in the ${heading} collection.`}
       />
-      <main className="flex-1 container py-8">
+      <div className="flex-1 container py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-display font-bold">{heading}</h1>
         </div>
@@ -61,7 +61,7 @@ export default function BooksList() {
             ))}
           </div>
         )}
-      </main>
+      </div>
     </PageLayout>
   );
 }

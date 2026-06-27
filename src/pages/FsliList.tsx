@@ -75,9 +75,9 @@ export default function FsliList() {
   if (isLoading) {
     return (
       <PageLayout variant="content" role="manager" breadcrumbs={[{label:'Home',path:'/'},{label:'Accounting',path:'/accounting'},{label:'FSLI Detail'}]}>
-        <main className="flex-1 container py-8">
+        <div className="flex-1 container py-8">
           <LoadingState />
-        </main>
+        </div>
       </PageLayout>
     );
   }
@@ -85,7 +85,7 @@ export default function FsliList() {
   return (
     <PageLayout variant="content" role="manager" breadcrumbs={[{label:'Home',path:'/'},{label:'Accounting',path:'/accounting'},{label:'FSLI Detail'}]}>
       <SEO title="Financial Statement Line Items" description="A line-by-line walkthrough of the consolidated statement of financial position — each FSLI explained with notes and figures." />
-      <main className="flex-1 container py-8 max-w-6xl">
+      <div className="flex-1 container py-8 max-w-6xl">
         {/* Title Section */}
         <div className="text-center mb-8">
           <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
@@ -185,7 +185,7 @@ export default function FsliList() {
             </Button>
           </div>
         </div>
-      </main>
+      </div>
     </PageLayout>
   );
 }

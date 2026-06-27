@@ -51,7 +51,7 @@ export default function BooksAcademia() {
         description="Readings that build capability. Each book fights a specific ignorance. Read with purpose."
       />
 
-      <main className="container py-8">
+      <div className="container py-8">
         <div className="max-w-3xl mx-auto mb-12">
           <h1 className="text-3xl md:text-4xl font-display font-bold mb-4">
             Books
@@ -130,7 +130,7 @@ export default function BooksAcademia() {
             message="Book categories will appear here once books are uploaded."
           />
         )}
-      </main>
+      </div>
     </PageLayout>
   );
 }

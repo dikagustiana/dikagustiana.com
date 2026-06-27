@@ -14,7 +14,7 @@ export default function BooksCategories() {
   return (
     <PageLayout variant="content" role="educator" breadcrumbs={[{label:'Home',path:'/'},{label:'Books and Academia',path:'/books-academia'},{label:'Categories'}]}>
       <SEO title="Book Categories" description="Browse the library by category — finance, accounting, strategy, and academic readings." />
-      <main className="flex-1 container py-8">
+      <div className="flex-1 container py-8">
         <div className="text-center mb-12">
           <h1 className="text-3xl md:text-4xl font-display font-bold mb-4">
             Book Categories
@@ -36,7 +36,7 @@ export default function BooksCategories() {
             </Link>
           ))}
         </div>
-      </main>
+      </div>
     </PageLayout>
   );
 }

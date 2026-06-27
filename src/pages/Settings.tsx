@@ -17,7 +17,7 @@ export default function Settings() {
         { label: 'Settings' }
       ]}
     >
-      <main className="flex-1 container py-8">
+      <div className="flex-1 container py-8">
         <div className="max-w-2xl mx-auto">
           <h1 className="text-3xl font-display font-bold mb-8">Settings</h1>
 
@@ -39,7 +39,7 @@ export default function Settings() {
             </CardContent>
           </Card>
         </div>
-      </main>
+      </div>
     </PageLayout>
   );
 }

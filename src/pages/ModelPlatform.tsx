@@ -14,7 +14,7 @@ export default function ModelPlatform() {
         { label: 'Financial Model Platform' }
       ]}
     >
-      <main className="flex-1 container py-8">
+      <div className="flex-1 container py-8">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-3xl font-display font-bold mb-4">
             Financial Model Platform
@@ -47,7 +47,7 @@ export default function ModelPlatform() {
             </Card>
           </div>
         </div>
-      </main>
+      </div>
     </PageLayout>
   );
 }
