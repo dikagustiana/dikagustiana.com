@@ -42,6 +42,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from '@/components/ui/dialog';
 
 // ---------------------------------------------------------------------------
@@ -343,6 +344,9 @@ export function UnifiedEditor({
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Insert Figure</DialogTitle>
+            <DialogDescription>
+              Upload an image and add a caption to embed it in the content.
+            </DialogDescription>
           </DialogHeader>
           <FigureUploader
             onInsert={handleFigureInsert}
