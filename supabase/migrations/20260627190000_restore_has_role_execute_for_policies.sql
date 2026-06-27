@@ -1,0 +1,31 @@
+-- P0 fix: restore EXECUTE on public.has_role() for the client roles.
+--
+-- Migration 20260622135932 ran:
+--   REVOKE EXECUTE ON FUNCTION public.has_role(uuid, app_role)
+--     FROM anon, authenticated, PUBLIC;
+-- while leaving (and adding) many RLS policies that call has_role() in the
+-- anon/authenticated context, e.g.:
+--   * essays  "Admins can modify essays"  FOR ALL USING (has_role(auth.uid(),'admin'))
+--   * remora_system_health / remora_data_freshness / remora_ingestion_logs
+--     / quant_data_quality  "Admins view ..."  FOR SELECT TO authenticated
+--   * storage.objects  "Admins can list public bucket objects"
+--
+-- PostgreSQL requires the querying role to hold EXECUTE on any function used in
+-- an RLS policy expression (SECURITY DEFINER changes the body's privileges, not
+-- the caller's right to invoke). Verified locally: after the REVOKE, a SELECT by
+-- anon/authenticated whose policy references has_role fails with
+-- "ERROR: permission denied for function has_role". Because the essays write
+-- policy is FOR ALL and unscoped, this would break even anonymous reads of the
+-- public site once the revoke is applied.
+--
+-- Re-granting EXECUTE to the client roles restores the pre-revoke (working)
+-- behaviour. This is additive and reversible.
+--
+-- Trade-off: this re-opens the ability to call has_role() directly via RPC
+-- (a low-severity boolean probe that also requires knowing other users' UUIDs).
+-- The proper way to keep that hardening *and* working RLS is to inline the
+-- user_roles EXISTS check into each policy instead of calling the function;
+-- that is queued as a follow-up (see UPGRADE-SUMMARY roadmap) because it must be
+-- applied/verified against the live schema.
+
+GRANT EXECUTE ON FUNCTION public.has_role(uuid, app_role) TO authenticated, anon;
