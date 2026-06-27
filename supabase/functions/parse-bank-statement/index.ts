@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -11,12 +12,44 @@ serve(async (req) => {
   }
 
   try {
+    // Require an authenticated caller: this endpoint processes sensitive
+    // financial data and proxies a paid AI gateway, so it must not be an
+    // open/anonymous proxy. functions.invoke attaches the user's JWT.
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: 'Authorization required' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseKey = (Deno.env.get('SUPABASE_PUBLISHABLE_KEY') ?? Deno.env.get('SUPABASE_ANON_KEY'))!;
+    const supabase = createClient(supabaseUrl, supabaseKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const { statementText, bankName } = await req.json();
-    
-    if (!statementText) {
+
+    if (!statementText || typeof statementText !== 'string') {
       return new Response(
         JSON.stringify({ error: 'Statement text is required' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Bound the payload to avoid resource exhaustion / runaway AI spend.
+    const MAX_STATEMENT_CHARS = 200_000;
+    if (statementText.length > MAX_STATEMENT_CHARS) {
+      return new Response(
+        JSON.stringify({ error: 'Statement text is too large' }),
+        { status: 413, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
