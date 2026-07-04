@@ -94,16 +94,20 @@ serve(async (req) => {
       return jsonResponse({ error: 'Unauthorized' }, 401);
     }
 
-    // Admin gate — never rely on the frontend guard alone.
-    const { data: isAdmin, error: roleError } = await supabase.rpc('has_role', {
-      _user_id: user.id,
-      _role: 'admin',
-    });
+    // Admin gate — never rely on the frontend guard alone. Query user_roles
+    // directly (RLS lets users read their own roles) instead of rpc('has_role'),
+    // whose EXECUTE grant for authenticated has been revoked/restored before.
+    const { data: adminRole, error: roleError } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id)
+      .eq('role', 'admin')
+      .maybeSingle();
     if (roleError) {
-      console.error('has_role check failed:', roleError);
+      console.error('Admin role check failed:', roleError);
       throw roleError;
     }
-    if (!isAdmin) {
+    if (!adminRole) {
       return jsonResponse({ error: 'Admin access required' }, 403);
     }
 
