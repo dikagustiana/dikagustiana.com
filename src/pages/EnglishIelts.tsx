@@ -54,7 +54,7 @@ export default function EnglishIelts() {
         description="Band 7+ methodology for IELTS. Time limits, task protocols, scoring criteria. Structured exam preparation."
       />
 
-      <main className="container py-8">
+      <div className="container py-8">
         <div className="text-center mb-12">
           <h1 className="text-3xl md:text-4xl font-display font-bold mb-4">
             IELTS Preparation: Band 7+ Methodology
@@ -118,7 +118,7 @@ export default function EnglishIelts() {
             </CardContent>
           </Card>
         </div>
-      </main>
+      </div>
     </PageLayout>
   );
 }

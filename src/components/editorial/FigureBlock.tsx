@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { ImageOff, ZoomIn, X } from 'lucide-react';
-import { Dialog, DialogContent, DialogClose } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogClose, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 
 export interface FigureBlockData {
   src: string;
@@ -171,6 +171,10 @@ export function FigureBlock({ data, className, isEditing, onEdit, onDelete }: Fi
       {isGraph && (
         <Dialog open={isLightboxOpen} onOpenChange={setIsLightboxOpen}>
           <DialogContent className="max-w-[95vw] max-h-[95vh] p-0 overflow-hidden bg-background/95 backdrop-blur-sm">
+            <DialogTitle className="sr-only">{altText || 'Enlarged figure'}</DialogTitle>
+            <DialogDescription className="sr-only">
+              {caption || 'Enlarged view of the figure.'}
+            </DialogDescription>
             <DialogClose className="absolute top-4 right-4 z-10 p-2 bg-background rounded-full shadow-lg">
               <X className="h-5 w-5" />
             </DialogClose>

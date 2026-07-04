@@ -78,7 +78,7 @@ export default function TheNextBigThing() {
       </div>
 
       {/* Main Content */}
-      <main className="container max-w-4xl py-12">
+      <div className="container max-w-4xl py-12">
         <div className="flex items-center justify-between mb-8">
           <div>
             <h2 className="text-2xl font-display font-semibold text-foreground mb-1">
@@ -102,7 +102,7 @@ export default function TheNextBigThing() {
           topics={TOPICS}
           getEssayUrl={getEssayUrl}
         />
-      </main>
+      </div>
 
       {/* Admin dialog */}
       <EssayDialog

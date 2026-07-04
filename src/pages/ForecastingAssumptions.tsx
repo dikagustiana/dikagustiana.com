@@ -16,7 +16,7 @@ export default function ForecastingAssumptions() {
         { label: 'Assumptions' }
       ]}
     >
-      <main className="flex-1 container py-8">
+      <div className="flex-1 container py-8">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-3xl font-display font-bold mb-8">Forecasting Assumptions</h1>
 
@@ -57,7 +57,7 @@ export default function ForecastingAssumptions() {
             </CardContent>
           </Card>
         </div>
-      </main>
+      </div>
     </PageLayout>
   );
 }

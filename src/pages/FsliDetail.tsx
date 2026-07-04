@@ -114,9 +114,9 @@ export default function FsliDetail() {
   if (isLoading) {
     return (
       <PageLayout variant="content" role="manager">
-        <main className="flex-1 container py-8">
+        <div className="flex-1 container py-8">
           <LoadingState />
-        </main>
+        </div>
       </PageLayout>
     );
   }
@@ -132,7 +132,7 @@ export default function FsliDetail() {
   return (
     <PageLayout variant="content" role="manager">
       <SEO title={item.title} description={item.subtitle || `${item.title} — financial statement line item detail.`} />
-      <main className="flex-1">
+      <div className="flex-1">
         <div className="container py-6">
           {/* Breadcrumb */}
           <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
@@ -278,7 +278,7 @@ export default function FsliDetail() {
             />
           </div>
         </div>
-      </main>
+      </div>
     </PageLayout>
   );
 }

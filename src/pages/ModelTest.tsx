@@ -22,7 +22,7 @@ export default function ModelTest() {
         { label: 'Test Suite' }
       ]}
     >
-      <main className="flex-1 container py-8">
+      <div className="flex-1 container py-8">
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center justify-between mb-8">
             <h1 className="text-3xl font-display font-bold">
@@ -49,7 +49,7 @@ export default function ModelTest() {
             </CardContent>
           </Card>
         </div>
-      </main>
+      </div>
     </PageLayout>
   );
 }

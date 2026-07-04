@@ -33,7 +33,7 @@ export default function BookReader() {
       ]}
     >
       <SEO title={`${heading} — Reader`} description={`Read ${heading}.`} />
-      <main className="flex-1 container py-8">
+      <div className="flex-1 container py-8">
         <div className="max-w-4xl mx-auto">
           {isLoading ? (
             <LoadingState />
@@ -80,7 +80,7 @@ export default function BookReader() {
             </>
           )}
         </div>
-      </main>
+      </div>
     </PageLayout>
   );
 }

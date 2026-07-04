@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { decode as base64Decode } from "https://deno.land/std@0.168.0/encoding/base64.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -12,12 +13,44 @@ serve(async (req) => {
   }
 
   try {
+    // Require an authenticated caller: this endpoint processes sensitive
+    // financial data and proxies a paid AI gateway, so it must not be an
+    // open/anonymous proxy. functions.invoke attaches the user's JWT.
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: 'Authorization required' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseKey = (Deno.env.get('SUPABASE_PUBLISHABLE_KEY') ?? Deno.env.get('SUPABASE_ANON_KEY'))!;
+    const supabase = createClient(supabaseUrl, supabaseKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const { pdfBase64, bankName } = await req.json();
-    
-    if (!pdfBase64) {
+
+    if (!pdfBase64 || typeof pdfBase64 !== 'string') {
       return new Response(
         JSON.stringify({ error: 'PDF data is required' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Bound the payload (~15 MB of base64) to avoid resource exhaustion.
+    const MAX_PDF_B64_CHARS = 20_000_000;
+    if (pdfBase64.length > MAX_PDF_B64_CHARS) {
+      return new Response(
+        JSON.stringify({ error: 'PDF is too large' }),
+        { status: 413, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 

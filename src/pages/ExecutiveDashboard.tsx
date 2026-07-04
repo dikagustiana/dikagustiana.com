@@ -5,7 +5,7 @@ import { BarChart3, TrendingUp, PieChart, Activity } from 'lucide-react';
 export default function ExecutiveDashboard() {
   return (
     <PageLayout variant="content" role="manager" breadcrumbs={[{ label: 'Home', path: '/' }, { label: 'Executive Dashboard' }]}>
-      <main className="flex-1 container py-8">
+      <div className="flex-1 container py-8">
         <div className="text-center mb-12">
           <h1 className="text-3xl md:text-4xl font-display font-bold mb-4">
             Executive Dashboard
@@ -45,7 +45,7 @@ export default function ExecutiveDashboard() {
             </CardHeader>
           </Card>
         </div>
-      </main>
+      </div>
 
     </PageLayout>
   );

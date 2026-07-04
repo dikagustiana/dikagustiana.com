@@ -108,7 +108,7 @@ export default function FinanceWorkspace() {
 
   return (
     <PageLayout variant="content" role="manager" breadcrumbs={[{ label: 'Home', path: '/' }, { label: 'Finance Workspace' }]}>
-      <main className="flex-1 container py-8 max-w-4xl">
+      <div className="flex-1 container py-8 max-w-4xl">
         <h1 className="text-3xl md:text-4xl font-display font-bold mb-2">
           Finance Workspace
         </h1>
@@ -272,7 +272,7 @@ export default function FinanceWorkspace() {
             </div>
           </div>
         </div>
-      </main>
+      </div>
     </PageLayout>
   );
 }

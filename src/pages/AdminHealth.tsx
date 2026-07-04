@@ -20,7 +20,7 @@ export default function AdminHealth() {
         { label: 'Health Check' }
       ]}
     >
-      <main className="flex-1 container py-8">
+      <div className="flex-1 container py-8">
         <div className="max-w-2xl mx-auto">
           <h1 className="text-3xl font-display font-bold mb-8">System Health</h1>
 
@@ -44,7 +44,7 @@ export default function AdminHealth() {
             </CardContent>
           </Card>
         </div>
-      </main>
+      </div>
     </PageLayout>
   );
 }
