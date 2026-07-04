@@ -204,6 +204,101 @@ export function contentToHtml(content: string | null | undefined): string {
 }
 
 // ---------------------------------------------------------------------------
+// JSON → Markdown (plain-text rendering for AI review, exports, etc.)
+// ---------------------------------------------------------------------------
+
+function markdownMarks(text: string, marks?: Array<{ type: string; attrs?: Record<string, unknown> }>): string {
+  if (!marks || marks.length === 0) return text;
+  let result = text;
+  for (const mark of marks) {
+    switch (mark.type) {
+      case 'bold':
+        result = `**${result}**`;
+        break;
+      case 'italic':
+        result = `*${result}*`;
+        break;
+      case 'strike':
+        result = `~~${result}~~`;
+        break;
+      case 'code':
+        result = `\`${result}\``;
+        break;
+      case 'link': {
+        const href = String(mark.attrs?.href ?? '');
+        result = href ? `[${result}](${href})` : result;
+        break;
+      }
+    }
+  }
+  return result;
+}
+
+function inlineMarkdown(content?: JSONContent[]): string {
+  if (!content) return '';
+  return content
+    .map(node => {
+      if (node.type === 'text') {
+        return markdownMarks(
+          node.text ?? '',
+          node.marks as Array<{ type: string; attrs?: Record<string, unknown> }>,
+        );
+      }
+      if (node.type === 'hardBreak') return '\n';
+      return inlineMarkdown(node.content);
+    })
+    .join('');
+}
+
+function blockMarkdown(node: JSONContent): string {
+  switch (node.type) {
+    case 'paragraph':
+      return inlineMarkdown(node.content);
+    case 'heading': {
+      const level = Number(node.attrs?.level ?? 2);
+      return `${'#'.repeat(Math.min(Math.max(level, 1), 6))} ${inlineMarkdown(node.content)}`;
+    }
+    case 'bulletList':
+      return (node.content ?? [])
+        .map(item => `- ${inlineMarkdownFromListItem(item)}`)
+        .join('\n');
+    case 'orderedList':
+      return (node.content ?? [])
+        .map((item, index) => `${index + 1}. ${inlineMarkdownFromListItem(item)}`)
+        .join('\n');
+    case 'blockquote':
+      return (node.content ?? [])
+        .map(child => `> ${blockMarkdown(child)}`)
+        .join('\n');
+    case 'codeBlock':
+      return `\`\`\`\n${inlineMarkdown(node.content)}\n\`\`\``;
+    case 'horizontalRule':
+      return '---';
+    case 'figure': {
+      const attrs = node.attrs as unknown as FigureBlockData | undefined;
+      if (!attrs?.src) return '';
+      const caption = attrs.caption || attrs.altText || 'figure';
+      return `![${caption}](${attrs.src})`;
+    }
+    default:
+      return (node.content ?? []).map(blockMarkdown).filter(Boolean).join('\n\n');
+  }
+}
+
+function inlineMarkdownFromListItem(item: JSONContent): string {
+  return (item.content ?? []).map(blockMarkdown).filter(Boolean).join(' ');
+}
+
+/**
+ * Convert a TipTap JSON document to Markdown-flavoured plain text.
+ * Used to hand drafts to the Writing Council (and other text-only consumers).
+ */
+export function tiptapJsonToMarkdown(doc: JSONContent | null | undefined): string {
+  if (!doc || !doc.content) return '';
+  return doc.content.map(blockMarkdown).filter(Boolean).join('\n\n').trim();
+}
+
+// ---------------------------------------------------------------------------
 // Figure extraction from TipTap JSON
 // ---------------------------------------------------------------------------
 

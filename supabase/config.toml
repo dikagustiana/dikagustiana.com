@@ -12,6 +12,9 @@ verify_jwt = true
 [functions.spending-insights]
 verify_jwt = true
 
+[functions.council-review]
+verify_jwt = true
+
 [functions.remora-ingest]
 verify_jwt = false
 
