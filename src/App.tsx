@@ -120,6 +120,7 @@ const App = () => (
             <Routes>
             {/* Core */}
             <Route path="/" element={<Index />} />
+            <Route path="/index" element={<Navigate to="/" replace />} />
             <Route path="/about" element={<About />} />
             <Route path="/auth" element={<Auth />} />
 
