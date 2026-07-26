@@ -5,6 +5,7 @@ import {
   tiptapJsonToHtml,
   contentToHtml,
   extractFiguresFromJson,
+  tiptapJsonToMarkdown,
 } from '@/lib/tiptap/serialize';
 import type { JSONContent } from '@tiptap/core';
 
@@ -105,5 +106,43 @@ describe('extractFiguresFromJson', () => {
   it('returns empty for null/empty docs', () => {
     expect(extractFiguresFromJson(null)).toEqual([]);
     expect(extractFiguresFromJson({ type: 'doc' } as JSONContent)).toEqual([]);
+  });
+});
+
+describe('tiptapJsonToMarkdown', () => {
+  it('renders headings, paragraphs, and marks', () => {
+    const tree = doc(
+      { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: 'Title' }] },
+      para('bold', [{ type: 'bold' }]),
+      para('a link', [{ type: 'link', attrs: { href: 'https://x.com' } }]),
+    );
+    const md = tiptapJsonToMarkdown(tree);
+    expect(md).toContain('## Title');
+    expect(md).toContain('**bold**');
+    expect(md).toContain('[a link](https://x.com)');
+  });
+
+  it('renders lists, blockquotes, and figures', () => {
+    const tree = doc(
+      {
+        type: 'bulletList',
+        content: [
+          { type: 'listItem', content: [para('first')] },
+          { type: 'listItem', content: [para('second')] },
+        ],
+      },
+      { type: 'blockquote', content: [para('quoted')] },
+      { type: 'figure', attrs: { src: 'img.png', caption: 'A chart' } },
+    );
+    const md = tiptapJsonToMarkdown(tree);
+    expect(md).toContain('- first');
+    expect(md).toContain('- second');
+    expect(md).toContain('> quoted');
+    expect(md).toContain('![A chart](img.png)');
+  });
+
+  it('returns empty string for nullish/empty docs', () => {
+    expect(tiptapJsonToMarkdown(null)).toBe('');
+    expect(tiptapJsonToMarkdown({ type: 'doc' } as JSONContent)).toBe('');
   });
 });

@@ -18,9 +18,17 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { UnifiedEditor } from '@/components/admin/UnifiedEditor';
 import { LivePreviewPanel } from '@/components/admin/LivePreviewPanel';
+import { CouncilPanel } from '@/components/admin/CouncilPanel';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet';
 import { LoadingState, ErrorState } from '@/components/states';
 import { SEO } from '@/components/SEO';
-import { parseTiptapJson } from '@/lib/tiptap/serialize';
+import { parseTiptapJson, tiptapJsonToMarkdown } from '@/lib/tiptap/serialize';
 import { useWriterEssay, useSaveEssay, generateUniqueSlug } from './hooks/useWriterEssay';
 import { useWriterCategories } from './hooks/useWriterCategories';
 import { useWriterSections } from './hooks/useWriterSections';
@@ -67,6 +75,7 @@ export default function WriterStudio() {
   const [topic, setTopic] = useState('');
   const [contentJson, setContentJson] = useState<JSONContent | null>(null);
   const [showPreview, setShowPreview] = useState(false);
+  const [showCouncil, setShowCouncil] = useState(false);
 
   // Dirty tracking
   const [isDirty, setIsDirty] = useState(false);
@@ -406,8 +415,30 @@ export default function WriterStudio() {
         publishErrors={publishErrors}
         onSave={() => handleSave('draft')}
         onPublish={() => handleSave('published')}
+        onOpenCouncil={() => setShowCouncil(true)}
         essayTitle={title}
       />
+
+      {/* Writing Council (review mode) */}
+      <Sheet open={showCouncil} onOpenChange={setShowCouncil}>
+        <SheetContent side="right" className="w-full sm:max-w-xl overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle>Writing Council</SheetTitle>
+            <SheetDescription>
+              Five advisors review the current draft independently, peer-review each other
+              anonymously, and the chairman delivers a verdict.
+            </SheetDescription>
+          </SheetHeader>
+          <div className="mt-4">
+            <CouncilPanel
+              mode="review"
+              getContent={() => tiptapJsonToMarkdown(contentJson)}
+              postId={essayId}
+              topic={title}
+            />
+          </div>
+        </SheetContent>
+      </Sheet>
 
       {/* Three-panel layout */}
       <div className="flex-1 flex min-h-0">

@@ -227,6 +227,53 @@ export type Database = {
         }
         Relationships: []
       }
+      council_sessions: {
+        Row: {
+          advisor_responses: Json
+          advisors_config: Json
+          created_at: string
+          created_by: string
+          id: string
+          input_snapshot: string
+          mode: string
+          peer_reviews: Json
+          post_id: string | null
+          verdict: Json
+        }
+        Insert: {
+          advisor_responses: Json
+          advisors_config: Json
+          created_at?: string
+          created_by?: string
+          id?: string
+          input_snapshot: string
+          mode: string
+          peer_reviews: Json
+          post_id?: string | null
+          verdict: Json
+        }
+        Update: {
+          advisor_responses?: Json
+          advisors_config?: Json
+          created_at?: string
+          created_by?: string
+          id?: string
+          input_snapshot?: string
+          mode?: string
+          peer_reviews?: Json
+          post_id?: string | null
+          verdict?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "council_sessions_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "essays"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       embeds: {
         Row: {
           created_at: string

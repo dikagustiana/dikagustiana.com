@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Save, Upload, Check, Loader2, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Save, Upload, Check, Loader2, AlertCircle, Users } from 'lucide-react';
 import type { PublishValidationError, SaveStatus } from '../schema/types';
 
 interface TopBarProps {
@@ -9,6 +9,7 @@ interface TopBarProps {
   publishErrors: PublishValidationError[];
   onSave: () => void;
   onPublish: () => void;
+  onOpenCouncil: () => void;
   essayTitle: string;
 }
 
@@ -49,6 +50,7 @@ export function TopBar({
   publishErrors,
   onSave,
   onPublish,
+  onOpenCouncil,
   essayTitle,
 }: TopBarProps) {
   const navigate = useNavigate();
@@ -74,6 +76,15 @@ export function TopBar({
       </div>
 
       <div className="flex items-center gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onOpenCouncil}
+          title="Send this draft to the Writing Council"
+        >
+          <Users className="h-3.5 w-3.5 mr-1.5" />
+          Council Review
+        </Button>
         <Button
           variant="outline"
           size="sm"

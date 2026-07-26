@@ -5,3 +5,4 @@ export * from './useBooks';
 export * from './useContentBlocks';
 export * from './useAdminEssays';
 export * from './useUnifiedContent';
+export * from './useCouncil';
