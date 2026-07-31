@@ -2,11 +2,75 @@
 
 Append-only. Newest entry first. A fresh session must be able to resume from this file.
 
+## STATUS (session 3, 2026-07-31): LIVE PROJECT UP. Baseline + curriculum applied; one real essay imported end-to-end.
+Project `asypkbkiebjvvpimewfp` (dikagustiana-com, ap-southeast-1, free) created and wired.
+All migrations applied, types regenerated, council-review deployed. The T4-M07-1 essay is
+authored-through-the-editor, published, and anon-readable at
+`/finance/analytics/t4-m07/fa-07-01`. `tsc` ✓, build ✓, 163 tests ✓.
+
+## NEXT ACTION (single)
+**Owner must sign up + get admin, set two secrets, and deploy Vercel** — none doable from a session:
+1. **Owner signs up at `/auth`** with `dika.irawan@samb.co.id`, then a service-side
+   `INSERT INTO user_roles (user_id,'admin')` grants admin (self-grant is blocked by
+   design). A TEMPORARY admin (`import-admin@dikagustiana.com`) exists for the import test
+   and should be deleted once the owner's admin works.
+2. **Set `LOVABLE_API_KEY`** on the project's edge-function secrets (no MCP tool). Without
+   it `/admin/council` loads but a run errors. `council-review` is deployed, `verify_jwt=true`.
+3. **Vercel:** set `VITE_SUPABASE_URL` + `VITE_SUPABASE_PUBLISHABLE_KEY` on the project
+   serving `dikagustiana.com` and redeploy (Vite inlines env at build time). The reachable
+   Vercel team still has zero projects, so the owning account must do this or connect it.
+
+Deferred (committed, not applied): `docs/db/pending/`-style full academic-mapping + deck
+enrichment for all 49 modules / 105 existing stubs — generated, held back to keep the
+applied migration reviewable.
+
+## 2026-07-31 (session 3) — stand-up + framework-v2 import test
+
+- **The "delete two paused projects" blocker was stale.** The owner's new mandate stated
+  there are no paused projects; `list_projects` confirmed only `personal-os`
+  (`ascbthsgborseynmmthm`, untouched). `create_project` succeeded immediately:
+  `asypkbkiebjvvpimewfp`, ap-southeast-1, free tier.
+- **Applied all migrations via `apply_migration`** (never CLI): the 4 verified baseline
+  files, then `20260731050000` (adversarial framework-v2 slugs on 4 modules),
+  `20260731060000` (cross-tree placement-coherence trigger), `20260731070000` (full
+  framework-v2 curriculum: all 49 modules on the `t{n}-m{label}` scheme, 56 Fundamentals
+  essay stubs, Section 05 row). 14 tables, RLS on all, advisors clean but the documented
+  `has_role` WARN.
+- **Wired the app:** `types.ts` regenerated from the live schema (clean swap, as predicted);
+  `config.toml` project_id set; `.env` set (production values; gitignored). `council-review`
+  deployed with `verify_jwt=true`. Bootstrapped a temporary admin + a permanent non-admin
+  test user (service-side, since self-grant is blocked by design).
+- **Import test T4-M07-1 (full report: `docs/IMPORT_TEST_T4M07.md`).** Took the real 3,246-word
+  "Driver Tree Construction" essay all the way in *through the editor UI* (Playwright), not
+  by SQL. Result: 9 of 10 acceptance checks pass. Headings demote H1→h2/H2→h3 with zero
+  dropped (10+3); 89/89 source blocks round-trip verbatim; equations survive as bold;
+  ANCHORS→References, Post-Flight→body; resolves at its real taxonomy URL; anon reads it
+  published and saw 0 of 105 drafts; preview == published (text-level). The **one failure:
+  no autosave** in the WriterEditor stack (only WriterStudio has `canAutosave`) — a hard
+  reload mid-paste loses work. Other findings: no body-image support (StarterKit has no
+  Image node — pasted images silently dropped); Topic/Phase required but redundant for
+  curriculum essays; publish requires ≥3 key takeaways the source lacks; body stored as
+  HTML not TipTap JSON.
+- **The 4 constraint collisions resolved:** slug `t4-m07` (framework's own cross-ref
+  convention, since Module 07 exists in 4 sections and slug is globally UNIQUE);
+  `sort_order` stays the integer ordinal with the label (`08A`, `QM1`) in
+  `module_meta.display_label`; heading demotion; ANCHORS→References / Post-Flight→body /
+  equations kept as bold text.
+- **Placement coherence enforced by trigger** (a CHECK can't cross tables): a curriculum
+  essay (module_id set) must sit in the finance editorial tree. Verified live — giving
+  fa-07-01 a green-transition category alongside its module was refused (ERRCODE 23514).
+- **Count reconciliation:** framework claims 6/49/160. Seeded 5 section rows (Section 06 is
+  models, not essays — out of scope), 49 modules, **161** essay stubs. The 160-vs-161 gap is
+  INTERNAL to the source: its overview says 55 Fundamentals essays but its module lists sum
+  to 56. Seeded to the module detail (the authoritative side).
+- **Draft-leak check passed** at the RLS layer: anon + non-admin see only the 2 published
+  essays, 0 of 161 drafts — so no nav/count/"next essay" component can leak a draft.
+
 ## STATUS (session 2, 2026-07-31): everything not requiring the project is DONE.
 The baseline SQL is fixed, verified by execution, and moved to `supabase/migrations/`.
 `docs/SCHEMA_PLAN.md` is written. Still nothing applied to Supabase — no project exists.
 
-## NEXT ACTION
+## Session 2's NEXT ACTION (superseded by session 3 — kept for the record)
 **BLOCKED on the owner, three independent actions. Full detail in `docs/RUNBOOK.md`.**
 
 1. **Delete the two paused 2025 Supabase projects** (`fqayxopcfxlkuftglqbl`,
