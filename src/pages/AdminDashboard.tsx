@@ -15,7 +15,6 @@ import {
   Clock,
   TrendingUp,
   BookOpen,
-  Settings,
   XCircle,
   ArrowRight,
   PenLine,
@@ -126,20 +125,6 @@ export default function AdminDashboard() {
                 <div>
                   <h3 className="font-semibold text-lg">Manage Content</h3>
                   <p className="text-sm text-muted-foreground">Edit, publish, or delete</p>
-                </div>
-              </CardContent>
-            </Link>
-          </Card>
-
-          <Card className="group hover:shadow-md transition-shadow cursor-pointer">
-            <Link to="/admin/health">
-              <CardContent className="p-6 flex items-center gap-4">
-                <div className="p-3 rounded-full bg-secondary text-secondary-foreground group-hover:bg-secondary/80 transition-colors">
-                  <Settings className="h-6 w-6" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-lg">Content Health</h3>
-                  <p className="text-sm text-muted-foreground">Review quality metrics</p>
                 </div>
               </CardContent>
             </Link>

@@ -168,16 +168,6 @@ export function MobileNav() {
                 >
                   Writer's Studio
                 </Link>
-                <Link
-                  to="/dikas-tools"
-                  onClick={() => setIsOpen(false)}
-                  className={cn(
-                    'block py-3 px-4 font-medium text-accent hover:bg-secondary rounded-lg transition-colors',
-                    location.pathname.startsWith('/dikas-tools') && 'bg-secondary'
-                  )}
-                >
-                  Dika's Tools
-                </Link>
               </div>
             )}
 

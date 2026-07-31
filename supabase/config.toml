@@ -1,40 +1,18 @@
-project_id = "rhwzvgklasvitocbbhvi"
+# project_id is rewired to the rebuilt project once it exists; see
+# docs/SESSION_LOG.md. The old ref (rhwzvgklasvitocbbhvi) is a deleted project.
+project_id = "PENDING"
 
-[functions.parse-bank-statement]
-verify_jwt = true
-
-[functions.parse-pdf-statement]
-verify_jwt = true
-
-[functions.detect-recurring]
-verify_jwt = true
-
-[functions.spending-insights]
-verify_jwt = true
-
+# council-review is the only edge function left after the rebuild. The quant,
+# remora and personal-finance functions were cut with their modules.
+#
+# verify_jwt = true: the platform rejects a missing or invalid JWT before the
+# function body runs. The body then re-checks the admin role against user_roles
+# server-side (index.ts:100-112), so the gate does not depend on the frontend
+# RequireAdmin guard. Both layers are deliberate.
+#
+# Historical note: the eight quant-* and remora-* functions ran verify_jwt =
+# false while each constructed a SUPABASE_SERVICE_ROLE_KEY client internally,
+# meaning any unauthenticated caller could drive service-role writes that bypass
+# RLS. Nothing in this project ships with verify_jwt = false.
 [functions.council-review]
 verify_jwt = true
-
-[functions.remora-ingest]
-verify_jwt = false
-
-[functions.remora-signals]
-verify_jwt = false
-
-[functions.remora-health]
-verify_jwt = false
-
-[functions.quant-data-fetch]
-verify_jwt = false
-
-[functions.quant-features]
-verify_jwt = false
-
-[functions.quant-regime]
-verify_jwt = false
-
-[functions.quant-signals]
-verify_jwt = false
-
-[functions.quant-backtest]
-verify_jwt = false

@@ -34,12 +34,6 @@ const ConsolidationDetail = lazy(() => import("./pages/ConsolidationDetail"));
 
 // Finance
 const FinanceWorkspace = lazy(() => import("./pages/FinanceWorkspace"));
-const ExecutiveDashboard = lazy(() => import("./pages/ExecutiveDashboard"));
-
-// Forecasting
-const ForecastingInput = lazy(() => import("./pages/ForecastingInput"));
-const ForecastingAssumptions = lazy(() => import("./pages/ForecastingAssumptions"));
-const ForecastingOutput = lazy(() => import("./pages/ForecastingOutput"));
 
 // Green Transition
 const GreenTransitionPhase = lazy(() => import("./pages/GreenTransitionPhase"));
@@ -59,20 +53,13 @@ const BooksList = lazy(() => import("./pages/BooksList"));
 const BookReader = lazy(() => import("./pages/BookReader"));
 const EnglishIelts = lazy(() => import("./pages/EnglishIelts"));
 
-// Admin/Tools
-const DikasTools = lazy(() => import("./pages/DikasTools"));
-const PersonalFinance = lazy(() => import("./pages/PersonalFinance"));
-const ModelPlatform = lazy(() => import("./pages/ModelPlatform"));
-const ModelTest = lazy(() => import("./pages/ModelTest"));
+// Admin
 const Settings = lazy(() => import("./pages/Settings"));
 const DebugAuth = lazy(() => import("./pages/DebugAuth"));
-const AdminHealth = lazy(() => import("./pages/AdminHealth"));
 const AdminContent = lazy(() => import("./pages/AdminContent"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const AdminAuditLog = lazy(() => import("./pages/AdminAuditLog"));
 const AdminCouncil = lazy(() => import("./pages/AdminCouncil"));
-const RemoraTrading = lazy(() => import("./pages/RemoraTrading"));
-const DikaQuantEngine = lazy(() => import("./pages/DikaQuantEngine"));
 const TheNextBigThing = lazy(() => import("./pages/TheNextBigThing"));
 const NextBigThingEssayPage = lazy(() => import("./pages/NextBigThingEssayPage"));
 const FinanceEssayPage = lazy(() => import("./pages/FinanceEssayPage"));
@@ -154,12 +141,6 @@ const App = () => (
 
             {/* Finance Workspace (admin-only) */}
             <Route path="/finance-workspace" element={<RequireAdmin><FinanceWorkspace /></RequireAdmin>} />
-            <Route path="/executive-dashboard" element={<RequireAdmin><ExecutiveDashboard /></RequireAdmin>} />
-
-            {/* Forecasting (admin-only) */}
-            <Route path="/forecasting/input" element={<RequireAdmin><ForecastingInput /></RequireAdmin>} />
-            <Route path="/forecasting/assumptions" element={<RequireAdmin><ForecastingAssumptions /></RequireAdmin>} />
-            <Route path="/forecasting/output" element={<RequireAdmin><ForecastingOutput /></RequireAdmin>} />
 
             {/* Green Transition */}
             <Route path="/green-transition" element={<GreenTransition />} />
@@ -200,21 +181,13 @@ const App = () => (
             {/* English IELTS */}
             <Route path="/english-ielts" element={<EnglishIelts />} />
 
-            {/* Admin-only tools */}
-            <Route path="/personal-finance" element={<RequireAdmin><PersonalFinance /></RequireAdmin>} />
-            <Route path="/dikas-tools" element={<RequireAdmin><DikasTools /></RequireAdmin>} />
-            <Route path="/dikas-tools/remora-trading" element={<RequireAdmin><RemoraTrading /></RequireAdmin>} />
-            <Route path="/dikas-tools/quant-engine" element={<RequireAdmin><DikaQuantEngine /></RequireAdmin>} />
-            <Route path="/model" element={<RequireAdmin><ModelPlatform /></RequireAdmin>} />
-            <Route path="/model/test" element={<RequireAdmin><ModelTest /></RequireAdmin>} />
+            {/* Admin */}
             <Route path="/settings" element={<RequireAdmin><Settings /></RequireAdmin>} />
             <Route path="/debug/auth" element={<RequireAdmin><DebugAuth /></RequireAdmin>} />
             <Route path="/admin/dashboard" element={<RequireAdmin><AdminDashboard /></RequireAdmin>} />
-            <Route path="/admin/health" element={<RequireAdmin><AdminHealth /></RequireAdmin>} />
             <Route path="/admin/content" element={<RequireAdmin><AdminContent /></RequireAdmin>} />
             <Route path="/admin/audit-log" element={<RequireAdmin><AdminAuditLog /></RequireAdmin>} />
             <Route path="/admin/council" element={<RequireAdmin><AdminCouncil /></RequireAdmin>} />
-
 
             {/* Canonical Writer Studio — single editor for all essays */}
             <Route path="/admin/writer/:id" element={

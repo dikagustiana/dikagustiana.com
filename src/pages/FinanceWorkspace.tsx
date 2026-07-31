@@ -17,8 +17,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Link } from 'react-router-dom';
-import { BarChart3, Calculator, Star, Layers, Save, Check } from 'lucide-react';
+import { Star, Layers, Save, Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import {
@@ -30,21 +29,6 @@ import {
   useUpdateFinanceSection,
   useFinanceEssaysForAdmin,
 } from '@/hooks/queries/useFinance';
-
-const toolLinks = [
-  {
-    title: 'Executive Dashboard',
-    description: 'Key financial metrics and KPIs',
-    icon: BarChart3,
-    path: '/executive-dashboard',
-  },
-  {
-    title: 'Forecasting',
-    description: 'Financial planning and forecasting tools',
-    icon: Calculator,
-    path: '/forecasting/input',
-  },
-];
 
 export default function FinanceWorkspace() {
   const { toast } = useToast();
@@ -253,24 +237,6 @@ export default function FinanceWorkspace() {
               )}
             </CardContent>
           </Card>
-
-          {/* Quick Links */}
-          <div>
-            <h2 className="text-lg font-semibold mb-4">Tools</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {toolLinks.map((item) => (
-                <Link key={item.path} to={item.path}>
-                  <Card className="h-full hover:shadow-md transition-all hover:-translate-y-0.5 cursor-pointer">
-                    <CardHeader className="pb-2">
-                      <item.icon className="h-8 w-8 text-primary mb-1" />
-                      <CardTitle className="text-base">{item.title}</CardTitle>
-                      <CardDescription className="text-sm">{item.description}</CardDescription>
-                    </CardHeader>
-                  </Card>
-                </Link>
-              ))}
-            </div>
-          </div>
         </div>
       </div>
     </PageLayout>

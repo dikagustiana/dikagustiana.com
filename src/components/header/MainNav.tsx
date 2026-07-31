@@ -11,10 +11,6 @@ import {
   developmentFinanceItems,
 } from '@/config/navConfig';
 
-const financeWorkspaceItemsAdmin = [
-  { label: "Dika's Tools", path: '/dikas-tools' },
-];
-
 export function MainNav() {
   const location = useLocation();
   const { isAdmin } = useAuth();
@@ -29,12 +25,15 @@ export function MainNav() {
       </Link>
 
       {isAdmin && (
-        <NavDropdown
-          label="Finance Workspace"
-          items={financeWorkspaceItemsAdmin}
-          width="w-48"
-          basePath="/finance-workspace"
-        />
+        <Link
+          to="/finance-workspace"
+          className={cn(
+            'nav-link',
+            location.pathname.startsWith('/finance-workspace') && 'nav-link-active'
+          )}
+        >
+          Finance Workspace
+        </Link>
       )}
 
       <NavDropdown

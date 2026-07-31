@@ -14,7 +14,7 @@ test.beforeEach(async ({ page }) => {
 });
 
 test('admin-only route redirects unauthenticated users to /auth', async ({ page }) => {
-  await page.goto('/personal-finance', { waitUntil: 'load' });
+  await page.goto('/admin/dashboard', { waitUntil: 'load' });
   await page.waitForTimeout(500);
   await expect(page).toHaveURL(/\/auth$/);
   await expect(page.getByRole('heading', { name: 'Sign In' })).toBeVisible();
