@@ -28,10 +28,11 @@ su postgres -c "/usr/lib/postgresql/16/bin/pg_ctl -D $PGDATA -o '-k $PGHOST -c l
 psql -h $PGHOST -U postgres -c 'CREATE DATABASE dry'
 psql -h $PGHOST -U postgres -d dry -v ON_ERROR_STOP=1 -f docs/db/verify/00_supabase_harness.sql
 
-# APPLY ORDER IS 01 -> 03 -> 02 -> 04, not filename order:
-# essays.module_id has an FK to finance_modules.
-for f in 01_foundation 03_finance 02_cms 04_seed; do
-  psql -h $PGHOST -U postgres -d dry -v ON_ERROR_STOP=1 -f docs/db/pending/$f.sql
+# Filename order IS dependency order now -- the files were renamed for exactly
+# this reason (essays.module_id has an FK to finance_modules, so finance must
+# precede CMS). No special ordering knowledge required.
+for f in supabase/migrations/*.sql; do
+  psql -h $PGHOST -U postgres -d dry -v ON_ERROR_STOP=1 -f "$f"
 done
 
 psql -h $PGHOST -U postgres -d dry -f docs/db/verify/01_rls_acceptance.sql

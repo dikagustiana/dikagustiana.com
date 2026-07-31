@@ -5,7 +5,7 @@ The database of record for the site after the greenfield rebuild: 14 tables, 5 e
 
 **This document is written from the schema as applied, not from the drafts.** Every
 table, column, constraint, index, policy and trigger below was read back out of a live
-Postgres 16 that had `docs/db/pending/{01,03,02,04}.sql` applied to it in that order
+Postgres 16 that had `supabase/migrations/*.sql` applied to it in filename order
 (see `docs/db/verify/`). Where it disagrees with a draft comment or with
 `docs/db/pending/*.notes.json`, this document is right and those are stale.
 
