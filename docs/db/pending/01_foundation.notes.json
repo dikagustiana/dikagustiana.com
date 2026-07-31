@@ -1,0 +1,79 @@
+{
+  "tables_covered": [
+    "public.user_roles",
+    "public.profiles",
+    "storage.buckets (3 rows inserted: essay-images, books, finance-models)",
+    "storage.objects (policies only -- table is owned by supabase_storage_admin and already has RLS enabled)"
+  ],
+  "columns_per_table": [
+    "user_roles: id uuid notnull default gen_random_uuid() (PK)",
+    "user_roles: user_id uuid notnull no-default (FK auth.users(id) ON DELETE CASCADE)",
+    "user_roles: role public.app_role notnull default 'user'",
+    "user_roles: created_at timestamptz notnull default now()",
+    "user_roles: CONSTRAINT UNIQUE (user_id, role) -- also serves as the user_id lookup index",
+    "profiles: id uuid notnull default gen_random_uuid() (PK)",
+    "profiles: user_id uuid notnull UNIQUE no-default (FK auth.users(id) ON DELETE CASCADE)",
+    "profiles: email text null no-default",
+    "profiles: display_name text null no-default",
+    "profiles: created_at timestamptz notnull default now()",
+    "profiles: updated_at timestamptz notnull default now() (bumped by update_profiles_updated_at trigger)",
+    "storage.buckets rows: id/name text, public boolean = true for all three kept buckets"
+  ],
+  "rls_policies": [
+    "user_roles: user_roles_select_own (SELECT, authenticated) USING user_id = (SELECT auth.uid()) -- the ONLY SELECT policy; contains no has_role() call so the AuthContext admin probe survives any function-grant change",
+    "user_roles: user_roles_insert_admin (INSERT, authenticated) WITH CHECK public.has_role((SELECT auth.uid()),'admin')",
+    "user_roles: user_roles_update_admin (UPDATE, authenticated) USING + WITH CHECK public.has_role((SELECT auth.uid()),'admin')",
+    "user_roles: user_roles_delete_admin (DELETE, authenticated) USING public.has_role((SELECT auth.uid()),'admin')",
+    "user_roles: user_roles_no_self_grant_insert (RESTRICTIVE INSERT, authenticated) WITH CHECK user_id <> (SELECT auth.uid()) -- structural anti-escalation guard",
+    "user_roles: user_roles_no_self_grant_update (RESTRICTIVE UPDATE, authenticated) USING + WITH CHECK user_id <> (SELECT auth.uid())",
+    "user_roles: no anon policy of any kind -> anon reads return zero rows, anon writes are rejected",
+    "profiles: profiles_select_own (SELECT, authenticated) USING user_id = (SELECT auth.uid()) -- PERMISSIVE, deliberately not the RESTRICTIVE-only form from 20260203043313",
+    "profiles: profiles_insert_own (INSERT, authenticated) WITH CHECK user_id = (SELECT auth.uid())",
+    "profiles: profiles_update_own (UPDATE, authenticated) USING + WITH CHECK user_id = (SELECT auth.uid())",
+    "profiles: no DELETE policy, no anon policy -> deletion happens only via auth.users ON DELETE CASCADE",
+    "storage.objects: public_buckets_read (SELECT, anon + authenticated) USING bucket_id IN ('essay-images','books','finance-models')",
+    "storage.objects: public_buckets_admin_insert (INSERT, authenticated) WITH CHECK bucket_id IN (3 kept buckets) AND inlined EXISTS on user_roles admin",
+    "storage.objects: public_buckets_admin_update (UPDATE, authenticated) USING + WITH CHECK bucket_id IN (3 kept buckets) AND inlined EXISTS on user_roles admin -- required by the upsert:true finance-models upload",
+    "storage.objects: public_buckets_admin_delete (DELETE, authenticated) USING bucket_id IN (3 kept buckets) AND inlined EXISTS on user_roles admin"
+  ],
+  "src_queries_supported": [
+    "src/contexts/AuthContext.tsx:23-36 -> from('user_roles').select('role').eq('user_id', uid).eq('role','admin').maybeSingle(): satisfied by user_roles_select_own; a non-admin matches zero rows so maybeSingle() yields null, not an error (verified)",
+    "supabase/functions/council-review/index.ts:100-106 -> same own-row user_roles admin probe, executed with the anon/publishable key plus the caller's Authorization header (i.e. as authenticated): satisfied by user_roles_select_own",
+    "tests/live/adminGating.spec.ts:13-23 -> admin resolves role='admin' via user_roles: satisfied (verified, returns 1 row)",
+    "tests/live/adminGating.spec.ts:25-34 -> ordinary user gets data === null from the same query: satisfied (verified, 0 rows)",
+    "tests/live/realAuth.spec.ts:51 -> from('profiles').select('email').limit(1) as a signed-in user returns the caller's own row with no error: satisfied by profiles_select_own (verified, 1 row -- the historical RESTRICTIVE-only policy would have returned 0)",
+    "supabase/seed.sql -> INSERT INTO auth.users then INSERT INTO public.user_roles: profiles rows are auto-created by on_auth_user_created -> handle_new_user() (verified, 2 profiles seeded from 2 auth.users inserts)",
+    "src/domains/writing/WriterStudio.tsx:215 -> storage.from('essay-images').upload(filename, file, {upsert:false}): satisfied by public_buckets_admin_insert for an admin, rejected for a non-admin (verified)",
+    "src/components/editorial/ImageUploader.tsx:122 -> storage.from('essay-images').upload(..., {upsert:false}): same policy",
+    "src/components/editorial/FigureUploader.tsx:153 -> storage.from('essay-images').upload(..., {upsert:false}): same policy",
+    "src/components/finance-in-action/ModelAdminPanel.tsx:46 -> storage.from('finance-models').upload(path, file, {upsert:true}): needs BOTH public_buckets_admin_insert and public_buckets_admin_update (verified INSERT + UPDATE both succeed for admin)",
+    "src/components/finance-in-action/ModelAdminPanel.tsx:54 and src/domains/writing/WriterStudio.tsx:224 -> getPublicUrl on finance-models / essay-images: buckets are public=true and public_buckets_read keeps unauthenticated SELECT open",
+    "src/pages/BookReader.tsx:19 -> storage.from('books').getPublicUrl(book.filepath) with no session: satisfied by public_buckets_read TO anon (verified, anon sees the object row)"
+  ],
+  "decisions": [
+    "content_json / layout_config / essay_revisions: grep over src/ AND tests/ returns ZERO hits, and they are absent from types.ts as well. Migration 20260212090000 (+ the 20260212091000 backfill) was authored locally and never applied live, which is why import.sql contains them and types.ts does not. Per precedence rule 1 they must NOT be created. This is a note for whoever authors the essays table -- it is outside my file.",
+    "has_role() is created, SECURITY DEFINER, STABLE, SET search_path = public, and GRANTed EXECUTE to authenticated + anon + service_role, with a COMMENT ON FUNCTION carrying the outage history so a future reviewer cannot re-run the revoke innocently. But only the user_roles WRITE policies call it; everything else inlines the EXISTS check.",
+    "user_roles is the one table where inlining is impossible: a policy on public.user_roles that references public.user_roles raises 'infinite recursion detected in policy for relation user_roles'. I proved this in a scratch cluster rather than assuming it. has_role() breaks the cycle because SECURITY DEFINER runs the body as the table owner, and table owners bypass RLS.",
+    "I deliberately did NOT add an 'admins can read all roles' SELECT policy on user_roles. Permissive policies for one command are ORed into a single expression and Postgres checks function EXECUTE during expression initialisation, not lazily per branch -- I confirmed empirically that adding such a policy makes the AuthContext query fail with 'permission denied for function has_role' the moment the grant is revoked, whereas with the shipped policy set the same query still succeeds under a revoke. Keeping the SELECT surface has_role-free confines any future grant mistake to role writes; it can never take down sign-in or the public site.",
+    "Anti-escalation is enforced twice: the permissive INSERT/UPDATE policies require admin, AND two RESTRICTIVE policies forbid any authenticated session from writing a row whose user_id is its own. Restrictive policies AND with the permissive set, so self-granting stays impossible even if someone later loosens the admin check. The comparison is NULL-safe (fails closed).",
+    "BOOTSTRAP CONSEQUENCE (called out as requested): because granting admin requires being admin and self-grants are blocked outright, no client-side role can mint the FIRST admin. That is intentional -- the first admin row must come from a caller that bypasses RLS. supabase/seed.sql already does this for the e2e fixtures (it runs as superuser during db reset), and production needs a one-off service_role / SQL-editor INSERT. Documented inline in the migration.",
+    "profiles_select_own is PERMISSIVE. Migration 20260203043313 recreated 'Users can view own profile' AS RESTRICTIVE and left no permissive SELECT policy, which silently returns zero rows to everyone -- restrictive policies narrow, they never grant. realAuth.spec.ts:51 only asserts error === null and Array.isArray(data), so an empty array passed the test and the bug went unnoticed. Not reproduced; the baseline actually returns the row.",
+    "handle_new_user() keeps the 20260622135932 revoke from anon/authenticated/PUBLIC. That revoke is safe here (unlike has_role) because EXECUTE on a trigger function is checked at CREATE TRIGGER time, not at fire time -- signup still works, verified. update_updated_at_column() is NOT SECURITY DEFINER, matching the original, and both keep SET search_path = public.",
+    "Added ON CONFLICT (user_id) DO NOTHING to handle_new_user()'s insert (the 20251223113138 original had a bare INSERT). An exception inside this AFTER INSERT trigger aborts the whole auth.users insert, i.e. signup fails outright; idempotency removes that failure class for re-seeded fixtures and retried signups.",
+    "Storage read is PUBLIC for all three buckets, which relaxes the 20260622135932 listing lockdown that had replaced public read with an admin-only SELECT policy. Done per the brief ('public read so getPublicUrl works unauthenticated'); the trade-off is that anon can enumerate object names inside three buckets that are already public = true. Documented in the SQL.",
+    "Storage write policies use the inlined user_roles EXISTS form, never has_role -- the form 20260211100001 already adopted for essay-images. I verified the storage read AND admin write paths still work with EXECUTE on has_role revoked, which is the whole point.",
+    "GRANT SELECT ON public.user_roles TO anon is intentional and load-bearing, not an oversight: with RLS on and no anon policy the read returns zero rows anyway, and it means any inlined user_roles EXISTS check elsewhere in the baseline evaluates to false for anon instead of erroring with 'permission denied for table user_roles'. A privilege-layer revoke here would recreate failure (a) one layer down. Commented as such.",
+    "has_role() is defined in section 3 (immediately after CREATE TABLE user_roles) rather than section 2 as the brief ordered. LANGUAGE sql bodies are parsed and validated at CREATE time, so the function cannot be created before the table it reads. handle_new_user() stays in section 2 because plpgsql bodies are not validated then, so its forward reference to public.profiles is fine. Deviation is noted in the file.",
+    "No index on user_roles(user_id): the UNIQUE (user_id, role) constraint's btree already leads with user_id and serves the per-page-load lookup.",
+    "VERIFICATION: I stood up a real PostgreSQL 16 cluster with a Supabase-shaped harness (anon/authenticated/service_role roles, auth.users, auth.uid(), storage.buckets/objects, Supabase's default public-schema grants) and applied this file cleanly on an empty database, twice. 24 probes passed: profiles auto-seeded by trigger; non-admin own-role read returns 0 rows with no error; admin returns 1; anon read 0 rows; anon write to user_roles and profiles rejected; non-admin self-grant rejected; non-admin third-party grant rejected; non-admin update of the admin row affects 0 rows; admin grant to another user succeeds; admin self-grant rejected by the restrictive policy; own-profile read returns the row; own-profile update succeeds and foreign-profile update affects 0 rows; updated_at trigger fires; anon storage read succeeds; anon and non-admin uploads rejected; admin insert/update/delete on storage succeed; has_role callable by both client roles; handle_new_user NOT callable by authenticated; recursion error reproduced; all three buckets present and public."
+  ],
+  "open_risks": [
+    "Admin role administration over PostgREST is intentionally incomplete: admin INSERT works, but a targeted admin UPDATE/DELETE on user_roles affects 0 rows because Postgres applies SELECT policies to rows READ by an UPDATE/DELETE and the only SELECT policy here is the own-row one. Verified. Nothing in src/ needs it today. If a role-admin UI is ever built, expose it through a SECURITY DEFINER RPC -- adding a has_role()-based SELECT policy would put the sign-in path back in the blast radius of failure (a).",
+    "An unqualified DELETE FROM public.user_roles by an admin removes every row including their own (no read is required when there is no WHERE clause, and the restrictive guards only cover INSERT/UPDATE). Self-demotion is not escalation, so I left DELETE alone, but it is worth knowing before anyone builds a bulk role tool.",
+    "The inlined EXISTS pattern is not privilege-free -- it needs authenticated to hold SELECT on public.user_roles plus the own-row SELECT policy. That is a weaker dependency than the function grant that actually caused the outage (a table grant plus a policy the sign-in path already requires), but it is a dependency. Anyone hardening grants later must not revoke SELECT on user_roles from authenticated.",
+    "The three buckets are public = true with an open SELECT policy, so anonymous callers can enumerate object names in essay-images, books and finance-models. Acceptable for public assets; if any bucket ever holds non-public material it must be moved to public = false with its own scoped policies rather than relying on obscurity.",
+    "Sibling migration 20260728155549 (the cited house-style source for the (SELECT auth.uid()) initplan pattern) is not present in this repository, so I matched the pattern from the brief's description rather than reading it.",
+    "My local verification used PostgreSQL 16 with hand-built auth/storage stubs (the target is Postgres 17 on real Supabase). The behaviours I relied on -- policy recursion, ORed permissive policies and function EXECUTE checks, SELECT policies applying to UPDATE/DELETE reads, owner bypass of RLS -- are stable across 15-17, but the storage.objects grant matrix in my stub is narrower than Supabase's (anon upload failed with 'permission denied for table objects' rather than an RLS violation; on real Supabase it will be the RLS violation -- denied either way).",
+    "The five migrations missing from docs/db/import.sql that fall OUTSIDE this file still need to be honoured by the other baseline parts: admin_audit_log (20260622140914, including its GRANT SELECT, INSERT TO authenticated), council_sessions (20260704080000), the essays published-gating split (20260627190100), and the non-storage policy rewrites in 20260622135932 -- several of which target cut quant_*/remora_* tables and simply disappear. Also note 20260622135932 moved pg_net into an `extensions` schema and enabled pg_cron (20260103082156); neither is in my scope, so whoever owns extensions should decide whether they are still needed."
+  ]
+}

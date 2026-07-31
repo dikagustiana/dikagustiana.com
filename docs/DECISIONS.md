@@ -19,7 +19,7 @@ database is rebuilt fresh. Decisions below, newest first within this section.
   history (Lovable scaffold 2025-12-23 → PR #34 merge 2026-07-26), the only Supabase ref
   ever present in `supabase/config.toml`, `client.ts`, or any file is `rhwzvgklasvitocbbhvi`.
 - **Consequence:** `docs/db/legacy-dump.sql` cannot exist. All CMS content authored after
-  the last content-bearing migration (2026-07-04) is lost. What survives is what the 44
+  the last content-bearing migration (2026-07-04) is lost. What survives is what the 43
   migrations seed.
 - **Production was already dark:** the deployed JS bundle on www.dikagustiana.com contains
   no Supabase URL at all (env vars were unset at its build time), so the live site has been
@@ -30,6 +30,39 @@ database is rebuilt fresh. Decisions below, newest first within this section.
   2-active-free-project limit. The Supabase MCP has no `delete_project` tool, so the
   deletion the owner approved (both paused 2025 projects) must be done in the dashboard.
   Creation is retried automatically until a slot frees up.
+
+## Reseed strategy: reconstruct, never invent
+- **Decision:** Reseed the 8 sections, 24 fsli_pages, 4 finance_sections, 2 finance_settings,
+  49 finance_modules and 105 essay draft stubs; resolve every foreign key by subquery rather
+  than by literal UUID; leave a column NULL where the archive holds no value.
+- **Why the essay stubs are recoverable at all:** the three seed migrations hardcode
+  `module_id` UUIDs for modules that no migration ever creates (they existed only in
+  production), so a verbatim replay fails the foreign key. But each file groups its essays
+  under a `-- Module NN:` comment and the slug prefix encodes the mapping (`sf-07-03` =
+  strategic-finance module 07, essay 03), so the 29 missing modules and the whole
+  105-essay outline are deterministically reconstructible.
+- **Rejected:** replaying the three INSERTs verbatim (FK failure); dropping the stubs
+  (throws away the curriculum plan of record); inventing theses for the 11 modules with no
+  authored source (would put words in the owner's mouth).
+
+## No `docs/db/legacy-dump.sql`, and `import.sql` is not the baseline
+- **Decision:** author the baseline from scratch rather than from `docs/db/import.sql`.
+- **Evidence:** `import.sql` concatenates only the first 38 of 43 migrations (last header
+  `20260310000954`). It omits the security hardening, `admin_audit_log`, `council_sessions`,
+  and **both** P0 auth-gating repairs — so it reproduces the *broken* state of both
+  historical failures and ships without two tables the app queries.
+  `docs/DB_READINESS.md` still says "38 migrations", confirming both docs predate the last
+  five migrations. Its own header also recommends `supabase db push`, which is prohibited here.
+
+## RLS: inline the role check instead of calling `has_role()`
+- **Decision:** every policy uses `EXISTS (SELECT 1 FROM user_roles ur WHERE ur.user_id =
+  (SELECT auth.uid()) AND ur.role = 'admin')`. `has_role()` is still created (types.ts
+  declares it) but no policy depends on it.
+- **Rationale:** the P0 outage happened because `EXECUTE` on `has_role()` was revoked from
+  `anon`/`authenticated` while dozens of policies called it — Postgres requires the *calling*
+  role to hold EXECUTE on a function used in a policy expression. A policy that reads
+  `user_roles` directly cannot be broken by a future grant change. The `essays` anon SELECT
+  policy is `published = true` and references no function at all.
 
 ## Restore `src/` from the tracked zip — nothing to arbitrate on configs
 - `src/` (284 files), `tests/` (30), and `public/_redirects`, `placeholder.svg`,

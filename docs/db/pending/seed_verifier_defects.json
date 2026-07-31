@@ -1,0 +1,190 @@
+[
+  {
+    "defects": [
+      {
+        "severity": "blocker",
+        "what": "The baseline schema this seed is written against does not exist in the repo, so the file cannot be applied and every ON CONFLICT / type-cast claim in its header is verified only against a DDL source the archive README says is NOT what ships.",
+        "evidence": "`ls /home/user/dikagustiana.com/supabase/migrations/` returns exactly two entries: `20260731235900_seed_surviving_content.sql` and `_archive/`. `find /home/user/dikagustiana.com -name '*baseline*'` returns nothing, yet `_archive/README.md:7` promises `../20260731*_baseline_schema.sql`. Executed against an empty database (what `supabase db push` does on the fresh project today): `psql:seed.sql:139: ERROR: relation \"public.sections\" does not exist` \u2014 it dies on the first statement. The header block at lines 93-107 asserts each ON CONFLICT \"names a real unique constraint\" in \"the baseline schema\"; those names can only be checked against `_archive`, which `README.md:4-7` states is \"not applied to the current project and must never be replayed\". Three concrete dependencies the seed hard-codes and cannot verify: `'draft'::public.content_status_enum` (lines 461, 543, 589) and `'published'::public.content_status_enum` (line 678) require the enum from `_archive/20260204074340_*.sql:3` to survive verbatim in the baseline; `finance_modules.module_meta` (lines 249+, 281+, 344+, 386+) exists only because of ALTERs in `_archive/20260219_001_*.sql:22` and `_archive/20260220_001_*.sql:82`; `essays.section` (every essay INSERT column list) is a column `_archive/20260215_001_*.sql:11` lists as step 6 \"Drop essays.section column\" of its own plan. The author's ordering claim (\"20260731235900 ... sorts after any 20260731* baseline\") is likewise unverifiable and false if the baseline lands later in the day.",
+        "fix": "Land the baseline migration first, then re-run this seed against it and re-confirm the 7 constraint names, the two enum casts, `finance_modules.module_meta`, and `essays.section` against the real DDL rather than against `_archive`. Also confirm the baseline's timestamp is < 235900. The seed's data does not need to change \u2014 the verification does."
+      },
+      {
+        "severity": "major",
+        "what": "Replay aborts hard if any finance track ever holds two modules at the same sort_order. The three module_id lookups are scalar subqueries on (track_slug, sort_order), but nothing in the schema or the app keeps that pair unique \u2014 so the file is not idempotent in exactly the scenario its own assertion thresholds were written to tolerate.",
+        "evidence": "Lines 456-457, 538-539, 584-585: `(SELECT m.id FROM public.finance_modules m WHERE m.track_slug = '<track>' AND m.sort_order = v.module_no)`. `finance_modules` carries only `UNIQUE (slug)` \u2014 `_archive/20260218_001_finance_modules_and_slug_unification.sql:56` and `_archive/20260220_001_fix_production_finance_data.sql:26`; confirmed in the live test DB, `pg_constraint` shows `finance_modules_slug_key | UNIQUE (slug)` and nothing on `(track_slug, sort_order)`. Meanwhile `src/pages/FinanceWorkspace.tsx:362-379` hands the admin a free-text integer `sort_order` field on every module and writes it with `.update({ title, thesis, sort_order: parsedSortOrder, framing_content })` \u2014 validating only `Number.isNaN`, never uniqueness. Executed: after `INSERT INTO finance_modules(track_slug,slug,title,sort_order) VALUES ('analytics','owner-added-module','Owner Added',5);` a replay of the seed died with `psql:/tmp/pgt/seed.sql:625: ERROR: more than one row returned by a subquery used as an expression` \u2014 even though `ON CONFLICT (slug) DO NOTHING` means not one row would have been written (rollback was clean: essays stayed 106). This contradicts the file's own design: the assertions at lines 711-718 deliberately use `>=` because \"later admin rows could legitimately raise them\".",
+        "fix": "Make the lookup total instead of assuming uniqueness: add `ORDER BY m.id LIMIT 1` to each of the three subqueries at lines 456-457, 538-539, 584-585 \u2014 or, better, resolve `module_id` from the module's globally-unique `slug` by carrying the module slug in the VALUES list alongside `module_no`, so the lookup keys on the one column the schema actually constrains."
+      },
+      {
+        "severity": "minor",
+        "what": "The finance_sections DO UPDATE silently reverts admin edits on replay \u2014 the exact policy the file explicitly refuses to apply to finance_settings, and its stated justification for the fsli_pages DO NOTHING is backwards.",
+        "evidence": "Lines 225-229: `ON CONFLICT (slug) DO UPDATE SET title = EXCLUDED.title, description = EXCLUDED.description, icon = EXCLUDED.icon, sort_order = EXCLUDED.sort_order`. `src/hooks/queries/useFinance.ts:51-65` (`useUpdateFinanceSection`) UPDATEs `finance_sections` with exactly `{ title?, description?, sort_order? }` \u2014 three of those four columns. So a second run of this file silently discards the owner's Finance Workspace edits to all four finance tracks. The file's own rule at lines 101-103 is the opposite: \"finance_settings ... DO NOTHING \u2014 DO UPDATE would reset a featured_finance_essay_id the owner had since set.\" And the justification given for the fsli_pages DO NOTHING at lines 164-165 (\"the figures are editable from the admin UI and must not be reset by a re-run\") is factually inverted: grep across `src/` shows `fsli_pages` has no UPDATE or UPSERT path at all \u2014 only SELECT (`useFsliPages.ts:23,38`, `useUnifiedContent.ts:93,142`) and DELETE (`useUnifiedContent.ts:290`). The one seeded table that is genuinely admin-editable is the one that got the clobbering clause.",
+        "fix": "Change line 225 to `ON CONFLICT (slug) DO NOTHING`. The fresh baseline has no finance_sections rows, so the 4-row end state still lands intact on the first run and convergence costs nothing; if `icon` genuinely must converge (it is the one column the admin UI cannot write), narrow the DO UPDATE to `icon = EXCLUDED.icon` only."
+      },
+      {
+        "severity": "minor",
+        "what": "Comment claims the 105 stubs are left with sort_order NULL; they land as 0. Documentation-only error, but the comments in this file are its audit trail.",
+        "evidence": "Lines 447-448: \"finance_section and sort_order are left NULL exactly as the originals left them\". `essays.sort_order INTEGER DEFAULT 0` \u2014 `_archive/20251223120457_1f1d9359-ac71-46c3-893a-372a54b27a3e.sql:71`. Executed after the seed: `SELECT sort_order, finance_section, count(*) FROM essays WHERE slug ~ '^(sf|pf|fa)-[0-9]{2}-[0-9]{2}$' GROUP BY 1,2` returns a single row `0 | NULL | 105`. The behaviour is identical to the archived originals (they also omitted the column and took the same default), so only the comment is wrong.",
+        "fix": "Reword lines 447-448 to \"finance_section is left NULL and sort_order takes its column default of 0, exactly as the originals left them\"."
+      }
+    ],
+    "verdict": "defects-found"
+  },
+  {
+    "verdict": "defects-found",
+    "defects": [
+      {
+        "severity": "major",
+        "what": "The one published, visitor-facing row misstates a countable fact: it claims the surviving outline is \"49 modules and 105 lesson titles across Strategic Finance, Planning & Forecasting, and Financial Analytics\". 49 is the four-track total; only 29 modules sit in the three named tracks (strategic-finance 13 + planning 7 + analytics 9 = 29), and the 20 Fundamentals modules carry zero seeded lessons because the 68 stubs of 20260219_004 were deliberately excluded.",
+        "evidence": "/home/user/dikagustiana.com/supabase/migrations/20260731235900_seed_surviving_content.sql:672 \u2014 inside the $tiptap$ body of 'site-rebuild-note': \"...the full curriculum outline of 49 modules and 105 lesson titles across Strategic Finance, Planning & Forecasting, and Financial Analytics. That outline is intact.\" Counted from the executed DB: SELECT track_slug, count(*) FROM finance_modules GROUP BY 1 -> analytics 9, fundamentals 20, planning 7, strategic-finance 13. The 105 stubs bind only to the 29 non-fundamentals modules (SELECT count(*) FROM essays e JOIN finance_modules m ON m.id=e.module_id WHERE m.track_slug='fundamentals' -> 0). This row is published=true, status='published', author='Dika Gustiana' and is the only row an anonymous visitor can read, so a reader who follows it to /finance/fundamentals finds 20 modules with no lessons.",
+        "fix": "Change \"49 modules\" to \"29 modules\" in that sentence, or restructure to \"the four finance tracks, 49 module titles, and 105 lesson titles across Strategic Finance, Planning & Forecasting, and Financial Analytics\" and add that the Fundamentals lessons were not recoverable."
+      },
+      {
+        "severity": "minor",
+        "what": "The header's blanket honesty claim is contradicted 40 lines later inside the same header block, and by the file's own content. \"Nothing here was invented: every title, slug, thesis, figure and manifesto is copied from a committed migration, and where the archive holds no value the column is left NULL rather than filled with a guess\" is false for section 8: 'site-rebuild-note' has an invented title, snippet, content, date and read_time, none copied from any migration, and none left NULL.",
+        "evidence": "/home/user/dikagustiana.com/supabase/migrations/20260731235900_seed_surviving_content.sql:8-11 asserts \"Nothing here was invented: every title, slug, thesis, figure and manifesto is copied from a committed migration...\" while lines 46-49 of the same header say of the published row \"Not from the archive: no migration anywhere contains a published essay or any essay body.\" Confirmed against the archive: no archived migration inserts an essay with published=true or any content/body, so the row is genuinely unsourced.",
+        "fix": "Qualify line 8-11, e.g. \"Everything reseeded from the archive is verbatim... The single exception is the published placeholder in section 8, which is not archive-derived and is labelled as such.\""
+      },
+      {
+        "severity": "minor",
+        "what": "module_meta on the 11 DERIVED modules is an unsourced value, and the stated rationale does not cover them. The file's rule \"module_meta follows 20260219_001 / 20260220_001\" cannot apply to these 11 rows: they exist in no migration, so they were created in production after both of those UPDATEs ran and were never touched by them \u2014 exactly the reasoning the file uses to justify giving fundamentals '{}'. Applying it consistently would give the 11 derived modules '{}' too. This is the same inconsistency the file's \"left NULL rather than filled with a guess\" principle forbids: thesis is correctly left NULL on these 11 rows while module_meta is filled with a guess.",
+        "evidence": "/home/user/dikagustiana.com/supabase/migrations/20260731235900_seed_surviving_content.sql:38-41 (\"module_meta follows 20260219_001 / 20260220_001 ... fundamentals keeps '{}' because 20260301070510 re-inserted those rows after 20260219_001 had already run\"). The 11 rows begin at line 287 (corporate-governance-and-agency-theory) and include interest-rate-risk, credit-risk, fx-risk, derivatives, esg, political-economy, treasury-architecture, linear-algebra, calculus, probability \u2014 each carries '{\"variant\":\"board\"|\"planning\"|\"analytics\"}'::jsonb with thesis NULL. supabase/migrations/_archive/20260219_001_add_lesson_type_and_module_meta.sql lines 26-37 and 20260220_001_fix_production_finance_data.sql lines 12-21 are UPDATE ... WHERE track_slug = X, which only reach rows existing at that time. Concrete effect: src/pages/FinanceModulePage.tsx:151 (`const variant = ((module.module_meta as {variant?:string}|null)?.variant) || 'standard'`) selects the header component from this value, so these 11 render a board/planning/analytics header rather than the 'standard' fallback that '{}' would produce.",
+        "fix": "Either set module_meta '{}' on the 11 derived modules for consistency with the fundamentals treatment and the NULL-rather-than-guess rule, or amend the line 38 comment to state explicitly that the track-level variant rule of 20260219_001 is being extrapolated to 11 modules those migrations never reached, and why that extrapolation is preferred to '{}'."
+      },
+      {
+        "severity": "minor",
+        "what": "Comment claims essays.sort_order is left NULL; it is actually 0 on all 106 rows because the column carries DEFAULT 0. The reconstructed state still matches the originals (which also omitted the column), so there is no fidelity error \u2014 only an inaccurate statement about the resulting DB state.",
+        "evidence": "/home/user/dikagustiana.com/supabase/migrations/20260731235900_seed_surviving_content.sql:447 \u2014 \"finance_section and sort_order are left NULL exactly as the originals left them\". essays.sort_order is declared `sort_order INTEGER DEFAULT 0` in supabase/migrations/_archive/20251223120457_1f1d9359-ac71-46c3-893a-372a54b27a3e.sql (essays CREATE TABLE). Measured after applying the seed: SELECT sort_order, finance_section, count(*) FROM essays GROUP BY 1,2 -> `0 | <null> | 106`. finance_section is genuinely NULL; sort_order is 0.",
+        "fix": "Reword to \"finance_section is left NULL and sort_order falls to its column DEFAULT of 0 \u2014 exactly as the originals left them, since they omitted both columns too.\""
+      },
+      {
+        "severity": "minor",
+        "what": "The list of \"originals that were NOT idempotent and are fixed here\" is incomplete. It omits two archived INSERTs that also lack any ON CONFLICT clause and that this seed likewise makes idempotent, which understates what the file is fixing.",
+        "evidence": "/home/user/dikagustiana.com/supabase/migrations/20260731235900_seed_surviving_content.sql:108-112 lists only the finance_categories seed (20251225064909), the finance_sections seed (20260214113534) and the three essay INSERTs (20260301073238/073420/073540). Missing: (a) supabase/migrations/_archive/20260301070510_bb746555-d919-4c60-ab62-d69f5193405b.sql \u2014 `grep -c 'ON CONFLICT'` returns 0; its 20-row fundamentals INSERT ends `...emerging market constraints.');` with no conflict clause, and the candidate adds ON CONFLICT (slug) DO NOTHING for those rows; (b) supabase/migrations/_archive/20260203162402_424e06b9-a8a3-4cb8-b43f-249260f059fc.sql \u2014 `grep -c 'ON CONFLICT'` returns 0; its 6-row sections seed ends `6);`, and the candidate covers those slugs with ON CONFLICT (slug) DO UPDATE at line 135.",
+        "fix": "Add 20260301070510 (finance_modules fundamentals) and 20260203162402 (sections) to the line 108 list."
+      },
+      {
+        "severity": "minor",
+        "what": "finance_sections uses ON CONFLICT ... DO UPDATE, which on any replay silently reverts owner edits to title/description/icon/sort_order \u2014 the exact hazard the file cites as its reason to use DO NOTHING for fsli_pages. finance_sections is admin-editable through the same Finance Workspace, so the two clauses are justified by contradictory reasoning.",
+        "evidence": "/home/user/dikagustiana.com/supabase/migrations/20260731235900_seed_surviving_content.sql:225-229 (`ON CONFLICT (slug) DO UPDATE SET title=..., description=..., icon=..., sort_order=...`), justified at line 99 as \"DO UPDATE: this is a resolved end state; converging is the point\". Compare line 164: \"DO NOTHING: the figures are editable from the admin UI and must not be reset by a re-run.\" finance_sections is equally editable: src/hooks/queries/useFinance.ts:56-59 \u2014 `.from('finance_sections').update(data).eq('id', id)`. Same pattern applies to the sections DO UPDATE at line 135, though there the upsert-in-20260204074340 precedent is a stronger defence.",
+        "fix": "Either switch finance_sections to DO NOTHING (a fresh baseline has no rows, so first-run behaviour is identical), or state at line 99 that finance_sections is admin-editable and that convergence was chosen anyway because the mid-chain slug renames left production's row values unverifiable."
+      }
+    ]
+  },
+  {
+    "defects": [
+      {
+        "severity": "blocker",
+        "what": "The published essay tells visitors the recovered curriculum \"outline is intact\" \u2014 the migration's own loss list says otherwise.",
+        "evidence": "Essay body, /home/user/dikagustiana.com/supabase/migrations/20260731235900_seed_surviving_content.sql:672: \"...the full curriculum outline of 49 modules and 105 lesson titles ... That outline is intact.\" Contradicted by the same file: line 75-76 \"finance_modules.framing_content for all 49 modules, and the thesis for the 11 non-fundamentals modules\" is lost; lines 283-286 state 11 module titles are the `-- Module NN:` comment labels and their slugs are \"lowercased ... non-alphanumerics collapsed to '-'\" (so 'ESG', 'Derivatives', 'FX Risk', 'Credit Risk', 'Calculus' at lines 316-424 are reconstructions, not authored titles); lines 77-82 record that the production finance_sections row 'finance-in-motion' (title 'Capital Allocation', a real track \u2014 src/pages/FinanceEssayPage.tsx:144 branches on `track === 'finance-in-motion'`) is deliberately not recreated; and the 20 Fundamentals modules seeded at lines 152-172 get zero lessons. An \"intact outline\" is exactly the sort of recovery overclaim the placeholder exists to avoid.",
+        "fix": "Replace with a factual, bounded statement, e.g. \"What survived is a partial outline: module and lesson titles for three of the four tracks. Module framing text, some module theses, and the Fundamentals lesson list did not survive.\" Do not use \"intact\", \"full\", or \"complete\"."
+      },
+      {
+        "severity": "major",
+        "what": "The essay claims the outline is rendered below it (\"It is what you see below\") \u2014 nothing is rendered below the body.",
+        "evidence": "Essay body, migrations/20260731235900_seed_surviving_content.sql:672: \"It is what you see below.\" src/pages/FinanceEssayPage.tsx:176-181 renders only ArticleShell (title, deck, htmlContent, prev/next); there is no curriculum listing on the essay route. Worse, the sibling query that produces even prev/next is `enabled: !!(essay as any)?.module_id` (FinanceEssayPage.tsx:115) and this row is seeded with module_id NULL (header states this at lines 650-653), so prev/next is empty too. A visitor reading the note sees the note and nothing else.",
+        "fix": "Delete the sentence, or replace it with a link-free factual pointer (\"The surviving titles are listed under /finance\"), since the essay body cannot know what is beside it."
+      },
+      {
+        "severity": "major",
+        "what": "The essay title (and snippet) assert a loss date \u2014 2026-07-31 \u2014 that nothing in the rebuild establishes.",
+        "evidence": "migrations/20260731235900_seed_surviving_content.sql:668: title \"Site Rebuild Note: What Was Lost on 2026-07-31, and What Survived\"; line 671 snippet: \"rebuilt on 2026-07-31. Essays written through the CMS before that date were lost.\" docs/DECISIONS.md dates only the rebuild (\"2026-07-31 \u2014 Greenfield Supabase rebuild\") and says the project is simply absent from the account (\"`rhwzvgklasvitocbbhvi` is absent \u2014 deleted, unrecoverable via restore\"); it also records that the deployed bundle already carried no Supabase URL, so the site was dark before this date. The deletion date is unknown, and the last content-bearing migration is 2026-07-04. Dating the loss to the rebuild date is an invented fact.",
+        "fix": "Title: \"Site Rebuild Note: What Was Lost, and What Survived\". In the snippet keep only what is supported: \"The database behind this site was rebuilt on 2026-07-31. Essays written through the CMS were stored only in the deleted database and are gone.\""
+      },
+      {
+        "severity": "major",
+        "what": "The essay attributes 49 modules to the three tracks that actually hold 29, and silently counts the Fundamentals track (which this seed gives zero lessons) as part of the surviving outline.",
+        "evidence": "migrations/20260731235900_seed_surviving_content.sql:672: \"49 modules and 105 lesson titles across Strategic Finance, Planning & Forecasting, and Financial Analytics.\" The seed writes 13 strategic-finance + 7 planning + 9 analytics = 29 modules in those three tracks (lines 279-460) and 20 more under `fundamentals` (lines 152-172); the 105 stubs (55 sf + 25 pf + 25 fa, verified against _archive/20260301073238/073420/073540 \u2014 55/25/25 distinct slugs) belong only to the three named tracks.",
+        "fix": "State the two numbers separately: \"29 modules and 105 lesson titles across Strategic Finance, Planning & Forecasting and Financial Analytics, plus 20 Fundamentals modules whose lesson list did not survive.\""
+      },
+      {
+        "severity": "major",
+        "what": "The header omits a category of loss that did occur: the Fundamentals track's lessons. It presents the 68 stub deletions as a non-loss and never records that the real Fundamentals lessons existed only in production.",
+        "evidence": "Header lines 48-49: \"The 68 fundamentals lesson stubs of 20260219_004 are NOT reseeded \u2014 20260301070510 deleted them.\" That migration's own comment says why: _archive/20260301070510_bb746555-d919-4c60-ab62-d69f5193405b.sql:1-4 \"The placeholder fundamentals lessons seeded earlier (20260219_004) reference the modules replaced below. Remove those lessons first ... (Authoritative lessons are managed via the admin UI.)\" So from 2026-03-01 the authoritative Fundamentals lessons lived only in the deleted database. After this seed all 20 fundamentals modules have zero essays, and the WHAT WAS LOST list (lines 60-88) never says so.",
+        "fix": "Add a loss bullet: \"* Every Fundamentals lesson. 20260301070510 deleted the 68 placeholder stubs of 20260219_004 and its own comment records that the authoritative lessons were thereafter managed in the admin UI; they existed only in the deleted project. All 20 fundamentals modules are seeded with no lessons.\""
+      },
+      {
+        "severity": "major",
+        "what": "The header's admin-UI loss bullet is scoped to \"after 2026-07-04\", which implies CMS content authored before that date survives in the migrations. It does not \u2014 no migration ever inserted a real essay, and the production categories are unreconstructable.",
+        "evidence": "Header lines 86-88: \"Any category or essay authored through the admin UI after 2026-07-04 (the last archived migration). Nothing after that date left a trace in version control.\" But the archive contains only draft stubs (105 in 20260301073238/073420/073540, 68 in 20260219_004) \u2014 no INSERT anywhere sets `content` or `published = true` (grep across _archive: zero `UPDATE ... published = true` outside policies). And _archive/20260215_001_enforce_category_hierarchy.sql:19-73 created categories *from production data* \u2014 one `<section>-general` per section that had essays, plus phase-derived categories (`e.section || '-' || e.phase`, e.g. green-transition phases). Those rows cannot be reproduced; this seed writes exactly one category (line 163-168, 'finance-general'), so the other seven sections have no category at all.",
+        "fix": "Rephrase: \"* Every essay and category that existed only in the database \u2014 i.e. all CMS-authored content from the project's life, not just after 2026-07-04. The archive holds draft stubs only; the per-section 'General' and phase categories that 20260215_001 generated from production data are gone, so only finance-general is reseeded.\""
+      },
+      {
+        "severity": "minor",
+        "what": "Header's top-line \"Nothing here was invented\" is contradicted 25 lines later and by the placeholder essay itself.",
+        "evidence": "Header lines 8-11: \"Nothing here was invented: every title, slug, thesis, figure and manifesto is copied from a committed migration.\" Lines 36-37 then say 11 modules \"carry a slug derived mechanically from the comment label\", lines 283-286 restate that their titles are the comment labels rather than any authored title value, and the entire published row at lines 668-672 (title, snippet, four-paragraph body) is composed for this migration and appears in no archived file.",
+        "fix": "Scope the claim: \"No figure, thesis or manifesto is invented; 11 module slugs are derived mechanically from source-code comment labels (rule stated in \u00a76), and the single published placeholder at \u00a78 is written for this migration and marked as such.\""
+      },
+      {
+        "severity": "minor",
+        "what": "Header says finance-in-motion's slug is unknown; the slug is known and is quoted in the same bullet.",
+        "evidence": "Header lines 77-82: \"The finance_sections row with slug 'finance-in-motion'. 20260227153508 UPDATEs it (title 'Capital Allocation', a 15-capital-conditions description) ... Its slug, icon and sort_order are unknown\". _archive/20260227153508_99407ed6-c198-4608-ad8b-bf43030f51bc.sql:4 is `WHERE slug = 'finance-in-motion';` and lines 2-3 give the title and full description. Only icon and sort_order are unknown.",
+        "fix": "\"Its icon and sort_order are unknown (slug, title and description are recoverable from the UPDATE), so the row is not recreated.\""
+      },
+      {
+        "severity": "minor",
+        "what": "Header claims the note \"renders with correct breadcrumbs\" \u2014 in fact it renders under the kicker of whatever module is in the URL, the misattribution the header says module_id NULL avoids.",
+        "evidence": "Header lines 650-656: \"module_id is NULL: this is a site notice, not a lesson ... /finance/fundamentals/purpose-of-financial-management/site-rebuild-note renders it with correct breadcrumbs and back-link.\" src/pages/FinanceEssayPage.tsx:143 `const topic = module?.title ?? essay.phase ?? 'Finance'` is taken from the URL's moduleSlug, and src/components/editorial/ArticleHeader.tsx:57-62 renders it as a visible badge \u2014 so the rebuild notice displays as \"THE PURPOSE OF FINANCIAL MANAGEMENT\" with a \"Back to lessons\" link into that module.",
+        "fix": "Drop \"correct breadcrumbs\": \"\u2026renders by slug alone; note that the module kicker and back-link come from whatever module path is used, so any URL presents the notice under that module's name.\""
+      },
+      {
+        "severity": "minor",
+        "what": "Header states the note exists so a visitor to an empty site gets an explanation, but nothing on the site links to it.",
+        "evidence": "Header line 635: \"(b) a visitor arriving at a suddenly-empty site deserves an explanation.\" With module_id NULL the note is excluded from every finance listing \u2014 src/hooks/queries/useFinanceTrackEssays.ts:29-31 and 68-73 filter `.in('module_id', moduleIds)`; featured_finance_essay_id is seeded NULL (migration line 241) so useFeaturedFinanceEssay (src/hooks/queries/useFinance.ts:112-118) returns null; and no page renders an EditorialFeed for section 'finance' (only src/pages/TheNextBigThing.tsx:100). The only route is a hand-typed four-segment URL.",
+        "fix": "Either drop rationale (b) and justify the row solely by the published/draft acceptance test, or state plainly that the note is unlinked until the owner points featured_finance_essay_id at it."
+      },
+      {
+        "severity": "minor",
+        "what": "The essay speaks for the owner's future actions, and its snippet contradicts its body.",
+        "evidence": "migrations/20260731235900_seed_surviving_content.sql:672: \"The lessons themselves are being rewritten.\" and \"This note is a placeholder. It will be deleted once the essays are back.\" Nothing in the repo records that the owner is rewriting the 105 lessons or has agreed to delete this row. The snippet (line 671) also says \"The curriculum outline survived in version control and is being rewritten\", while the body says the outline \"is intact\" and the lessons are what is being rewritten.",
+        "fix": "Keep only state-of-the-world facts: \"The surviving lesson titles are unpublished drafts, so the curriculum shows titles only. This note is a placeholder and can be deleted from the admin UI.\" Make the snippet a strict subset of the body."
+      },
+      {
+        "severity": "minor",
+        "what": "The essay lists the 24 FSLI pages among what survived without noting their narrative is gone, so the pages a visitor opens will be emptier than the note implies.",
+        "evidence": "migrations/20260731235900_seed_surviving_content.sql:672 lists \"the 24 FSLI reference pages\" as survived. The header is honest about the rest (lines 67-68: \"fsli_sections \u2014 all editable narrative for the 24 FSLI pages. The page headers survive (fsli_pages); the commentary under them does not\"), and src/components/fsli/FsliContentSection.tsx:38 / src/hooks/queries/useFsliPages.ts:55 read fsli_sections for that commentary, which this seed does not write.",
+        "fix": "Qualify in the essay: \"the 24 FSLI page headers and figures (their written commentary was in the database and is gone)\"."
+      }
+    ],
+    "verdict": "defects-found"
+  },
+  {
+    "defects": [
+      {
+        "severity": "major",
+        "what": "The baseline schema this file targets does not exist in the repo, so the migration set cannot be applied at all today \u2014 and the chosen timestamp leaves only a 60-second ordering margin.",
+        "evidence": "`ls /home/user/dikagustiana.com/supabase/migrations/` returns exactly two entries: `20260731235900_seed_surviving_content.sql` and `_archive/`. `supabase/migrations/_archive/README.md` says \"the rebuild ships a single clean baseline instead (`../20260731*_baseline_schema.sql`)\" \u2014 that file is absent. Applying the repo's migration set in filename order against an empty PG cluster fails on the first statement: `ERROR: relation \"public.sections\" does not exist` / `LINE 1: INSERT INTO public.sections (slug, name, voice_role, manifes...` (statement at file line 126, psql reports line 139). Separately, `20260731235900` is 23:59:00; `supabase migration new` stamps UTC, so a baseline authored \u226560s later lands at `20260801*` and sorts AFTER the seed, at which point the same failure recurs on a fresh push.",
+        "fix": "Do not merge the seed alone. Commit the baseline as an explicitly-named earlier file (e.g. `20260731000000_baseline_schema.sql`) and re-timestamp the seed with real margin (e.g. `20260801000000_seed_surviving_content.sql`) rather than relying on a 60-second gap against a glob."
+      },
+      {
+        "severity": "major",
+        "what": "Seeding the `finance-general` category with a generated UUID instead of the archive's pinned `0f111111-1111-4111-8111-111111111111` breaks `supabase/seed.sql`, which `supabase db reset` applies in the same run \u2014 the documented local/staging e2e bring-up cannot complete.",
+        "evidence": "Candidate line 147: \"We deliberately do NOT reuse either\" (the fixed UUID plus the column DEFAULT from `20260219_004`). But `/home/user/dikagustiana.com/supabase/seed.sql:63-66` inserts `seed-published-essay` omitting `category_id`, and `essays.category_id` is NOT NULL (`_archive/20260215_001_enforce_category_hierarchy.sql:103`) with FK RESTRICT (:122-123). The only thing that made that fixture insert work in the lost project was `_archive/20260219_004_seed_fundamentals_lessons.sql:11-21` \u2014 the pinned category row plus `ALTER COLUMN category_id SET DEFAULT '0f111111-...'`. Tested both baseline variants after applying the candidate: (A) baseline carries the DEFAULT \u2192 `ERROR: insert or update on table \"essays\" violates foreign key constraint \"essays_category_id_fkey\" DETAIL: Key (category_id)=(0f111111-1111-4111-8111-111111111111) is not present in table \"categories\".` (B) baseline drops the DEFAULT \u2192 `ERROR: null value in column \"category_id\" of relation \"essays\" violates not-null constraint`. `scripts/setup-test-db.sh` runs `npx supabase db reset` (migrations + seed); `docs/e2e-live-testing.md:27` and :51-53 document the same path.",
+        "fix": "Pin the id in section 2 while keeping the subquery resolution everywhere else: `INSERT INTO public.categories (id, name, slug, section_id, sort_order) SELECT '0f111111-1111-4111-8111-111111111111'::uuid, 'General', 'finance-general', s.id, 0 FROM public.sections s WHERE s.slug = 'finance' ON CONFLICT (section_id, slug) DO NOTHING;`. This costs nothing (essays still resolve `category_id` by subquery, so it still works if the row pre-exists under another id) and makes `db reset` complete on a fresh database."
+      },
+      {
+        "severity": "minor",
+        "what": "The `n <> 105` curriculum-stub assertion uses exact equality on a slug pattern the file does not exclusively own, so any re-run after the owner adds one more lesson aborts the whole seed.",
+        "evidence": "Line 723: `IF n <> 105 THEN RAISE EXCEPTION 'seed: expected 105 curriculum stubs, found %', n; END IF;` counting `WHERE slug ~ '^(sf|pf|fa)-[0-9]{2}-[0-9]{2}$'`. Demonstrated: after inserting `sf-13-04` (a legitimate 4th lesson in strategic-finance module 13, exactly the kind of row the header expects the admin UI to add), re-applying the file gives `ERROR: seed: expected 105 curriculum stubs, found 106` at file line 768 and rolls back everything. This contradicts the file's own stated rule that exact equality is used \"only for the closed sets this file owns\" \u2014 this set is not closed.",
+        "fix": "Either scope the count to the 105 slugs this file writes (`AND slug IN (...)`, or join against the VALUES list) or relax the threshold to `IF n < 105` to match the other counters."
+      },
+      {
+        "severity": "minor",
+        "what": "module_id is resolved with a scalar subquery on (track_slug, sort_order), a pair with no uniqueness guarantee, so a re-run aborts if a module with a duplicate sort_order is ever added to a track.",
+        "evidence": "`_archive/20260218_001_finance_modules_and_slug_unification.sql:53-64` defines `finance_modules` with only `slug text NOT NULL UNIQUE`; confirmed on the live test DB \u2014 `pg_constraint` for `public.finance_modules` lists only `finance_modules_pkey`, `finance_modules_slug_key`, `finance_modules_track_slug_fkey`. No UNIQUE(track_slug, sort_order). Demonstrated: after `INSERT INTO public.finance_modules (track_slug, slug, sort_order, title) VALUES ('planning','treasury-architecture-ii',4,'Treasury Architecture II');`, re-applying the file gives `ERROR: more than one row returned by a subquery used as an expression` at file line 577 \u2014 before the assertions can produce a diagnostic message.",
+        "fix": "Add `ORDER BY m.created_at LIMIT 1` (or `m.slug`) to each of the three module lookup subqueries so the resolution stays deterministic, and let the existing per-track/per-module assertions catch a genuine mismatch with a readable error."
+      },
+      {
+        "severity": "minor",
+        "what": "Provenance comment states the stubs' sort_order is NULL; it is 0.",
+        "evidence": "Line 447: \"finance_section and sort_order are left NULL exactly as the originals left them\". `essays.sort_order INTEGER DEFAULT 0` (`_archive/20251223120457_...sql:72`). Measured after apply: of the 105 stubs, `sort_order IS NULL` = 0 and `sort_order = 0` = 105 (`finance_section IS NULL` = 105, so that half of the sentence is correct). Behaviour matches the originals, which also omitted the column \u2014 only the documented claim is wrong, in a file whose value rests on its provenance notes being exact.",
+        "fix": "Change the comment to \"finance_section is left NULL and sort_order takes its column default of 0, exactly as the originals left them\"."
+      },
+      {
+        "severity": "minor",
+        "what": "The published placeholder is reachable only by typing its URL \u2014 no index, track page, module list, or featured slot can surface it \u2014 so the second of the two reasons the file gives for creating it is not achieved.",
+        "evidence": "File lines ~648-652 justify the row partly because \"a visitor arriving at a suddenly-empty site deserves an explanation.\" But the row is inserted with `module_id` and `finance_section` unset (INSERT column list at line 662-664 omits both) and `featured_finance_essay_id` is seeded NULL. The three queries that could list it all filter on exactly those: `useFinanceSectionEssays` uses `.eq('finance_section', dbKey)` (src/hooks/queries/useFinance.ts:161), module lesson lists use `.eq('module_id', mod.id)` (:252, :259), and `useFeaturedFinanceEssay` uses `.eq('id', settings.value)` (:125). `FinanceEssayPage` does find it by slug alone (src/pages/FinanceEssayPage.tsx:70-75), so the acceptance-bar reason (a) does hold \u2014 it is only reason (b) that fails.",
+        "fix": "After the essay INSERT, point the setting at it \u2014 `UPDATE public.finance_settings SET value = (SELECT id::text FROM public.essays WHERE slug = 'site-rebuild-note') WHERE key = 'featured_finance_essay_id';` \u2014 or drop reason (b) from the comment and keep the row purely as the published-read test fixture."
+      }
+    ],
+    "verdict": "defects-found"
+  }
+]
