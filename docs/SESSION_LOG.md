@@ -7,7 +7,7 @@ The baseline SQL is fixed, verified by execution, and moved to `supabase/migrati
 `docs/SCHEMA_PLAN.md` is written. Still nothing applied to Supabase — no project exists.
 
 ## NEXT ACTION
-**BLOCKED on the owner, three independent actions. Full detail in `docs/RUNBOOK_phase2.md`.**
+**BLOCKED on the owner, three independent actions. Full detail in `docs/RUNBOOK.md`.**
 
 1. **Delete the two paused 2025 Supabase projects** (`fqayxopcfxlkuftglqbl`,
    `llqehykfmbgjnbwbijfs`) at https://supabase.com/dashboard. Re-confirmed this session:
@@ -19,7 +19,7 @@ The baseline SQL is fixed, verified by execution, and moved to `supabase/migrati
    inlines env at build time).
 3. **Set `LOVABLE_API_KEY`** in the new project's edge-function secrets. No MCP tool for it.
 
-The moment slot 1 frees, `docs/RUNBOOK_phase2.md` is a mechanical 8-step sequence.
+The moment slot 1 frees, `docs/RUNBOOK.md` is a mechanical 8-step sequence.
 
 ## 2026-07-31 (session 2)
 

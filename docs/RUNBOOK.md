@@ -1,6 +1,6 @@
-# Phase 2 runbook — everything left, in order
+# Runbook — everything left, in order
 
-Phase 2 did all the work that does not require the Supabase project to exist. What
+Phases 1-2 did all the work that does not require the Supabase project to exist. What
 remains is blocked on three owner actions that no session can perform. This file is the
 exact sequence to run once each unblocks, so the remaining work is mechanical.
 
