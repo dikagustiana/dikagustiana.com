@@ -39,3 +39,6 @@ supabase/.branches
 .env.*.local
 .secrets.env
 *.secret
+
+# Archives — never track source-of-truth code inside zips again
+*.zip
