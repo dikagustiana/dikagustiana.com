@@ -137,3 +137,68 @@ database is rebuilt fresh. Decisions below, newest first within this section.
 - New behavior is guarded by **Vitest unit/component tests with a mocked Supabase client** (the repo
   already mocks Supabase in `src/test/`), keeping the suite green without touching any backend. Live
   e2e (`tests/live`) stays queued for after the migration session completes.
+
+---
+
+# 2026-07-31 (session 2) — verifying the baseline before applying it
+
+## Dry-run the baseline against a local Postgres before it ever meets Supabase
+- **Decision:** stand up a throwaway Postgres 16 with the Supabase role, schema and
+  default-privilege shape replayed (`docs/db/verify/`), apply the real migration files to
+  it, and run the whole acceptance bar against real RLS — before creating the project.
+- **Rationale:** the SQL had never been executed. Four adversarial review lenses had read
+  it and found seven defects; running it found an eighth they structurally could not see
+  (see below). A 2,400-line schema should not meet a real database for the first time in
+  production, and the project-creation blocker made the wait free.
+- **Not a rule violation:** the prohibition is on `supabase db push` / `db reset` / any
+  CLI migration command against the project. This is plain `psql` against a scratch
+  cluster and touches no Supabase project.
+- **Rejected:** applying straight to the new project and fixing forward — every fix would
+  then be a migration on top of a wrong baseline, which is exactly the history the rebuild
+  exists to escape.
+
+## On managed Supabase, a privilege is never absent by default
+- **Observation:** the platform ships `ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL
+  ON TABLES/FUNCTIONS TO postgres, anon, authenticated, service_role`. Every new table and
+  function is therefore *born* with ALL granted to `anon` and `authenticated`, and `GRANT`
+  is additive — it cannot subtract.
+- **Consequence 1 (defect 7):** `admin_audit_log`'s "second, independent barrier behind
+  RLS" did not exist. The table was UPDATE-able and DELETE-able at the privilege layer
+  despite the deliberately absent policies.
+- **Consequence 2 (the 8th defect):** `REVOKE EXECUTE ON FUNCTION has_role FROM PUBLIC` —
+  the natural fix for "has_role is a public admin oracle" — leaves `anon`'s *named* grant
+  intact. Verified: `SET ROLE anon; SELECT public.has_role(<uuid>,'admin')` still returned
+  true. The revoke must name `anon`.
+- **Decision:** every table and the one policy-callable function REVOKEs before granting.
+  Stated as a rule in `docs/SCHEMA_PLAN.md` §1 so it is not undone by someone adding a
+  table later and copying the grant block without the revoke.
+
+## `user_roles` writes: delete what does not work rather than ship a silent no-op
+- **Decision:** removed the admin UPDATE and DELETE policies on `user_roles`; kept INSERT.
+- **Rationale:** Postgres applies a table's SELECT policies to the rows an UPDATE/DELETE
+  *reads*. With only the own-row SELECT policy, a targeted admin UPDATE matched zero rows
+  and **returned success**, and the only working DELETE was the unqualified one — which
+  deleted the admin's own role and would lock the owner out of their own site. A policy
+  that reports success while doing nothing is worse than no policy.
+- **Rejected:** adding an admin SELECT policy to make them work. Permissive SELECT policies
+  are ORed, so sign-in's admin probe would become `user_id = auth.uid() OR has_role(...)`
+  and a future EXECUTE revoke would take the public site down — that is historical failure
+  (a) exactly. Role administration stays a service_role/SQL operation, which is what it
+  already was: nothing in `src/` administers roles.
+
+## Filenames must encode dependency order
+- **Decision:** `01/03/02/04` became `20260731010000/020000/030000/040000`.
+- **Rationale:** the numbering was authoring order, but `essays.module_id` has an FK to
+  `finance_modules`, so the real apply order was `01 → 03 → 02 → 04`. Nothing infers that,
+  and `supabase db reset` — which the live e2e suite depends on — applies files in sorted
+  order and would have failed. Correctness that lives only in a README is not correctness.
+
+## The placeholder essay states losses, not reassurance
+- **Decision:** rewrote the one published essay to remove four claims that were false —
+  that the curriculum outline is "intact", that 49 modules belong to the three tracks that
+  hold 29, that the outline "is what you see below", and a data-loss date the rebuild does
+  not establish.
+- **Rationale:** it is the only thing an anonymous visitor can read. A note explaining a
+  data loss that overstates what survived is the worst possible first impression, and the
+  same migration's own loss list contradicted it three paragraphs earlier. Every number in
+  the replacement was re-counted against the seed data.

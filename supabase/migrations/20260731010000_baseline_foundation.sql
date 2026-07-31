@@ -20,10 +20,11 @@
 --     it. Every gated query started failing with "permission denied for
 --     function has_role" and the public site went down until 20260627190000
 --     re-granted EXECUTE.
---     GUARD: has_role() is created and granted (types.ts declares it, edge
---     functions and future SQL may call it), but no policy in this baseline
---     depends on it except the write policies on public.user_roles itself,
---     where inlining is impossible -- see the recursion note in section 3.
+--     GUARD: has_role() is created and granted to `authenticated` (types.ts
+--     declares it, edge functions and future SQL may call it) but NOT to anon,
+--     and no policy in this baseline depends on it except the single INSERT
+--     policy on public.user_roles itself, where inlining is impossible -- see
+--     the recursion note in section 3.
 --     Every other admin check is INLINED as
 --       EXISTS (SELECT 1 FROM public.user_roles ur
 --                WHERE ur.user_id = (SELECT auth.uid()) AND ur.role = 'admin')
@@ -180,14 +181,31 @@ CREATE TABLE public.user_roles (
 -- policies without tripping "infinite recursion detected in policy for
 -- relation user_roles".
 --
--- EXECUTE is granted to authenticated AND anon. This is not optional
--- house-keeping -- it is the direct remediation of failure (a): 20260622135932
--- revoked it while policies called it and took the public site down;
--- 20260627190000 had to restore it as a P0. Nothing in this baseline calls
--- has_role() from a policy except the user_roles write policies below, but the
--- grant stays so that edge functions, RPC callers and any hand-written SQL
--- keep working, and so that a policy elsewhere that does reference it cannot
--- fail closed.
+-- EXECUTE is granted to `authenticated` ONLY (plus service_role). It is NOT
+-- granted to anon, and the implicit PUBLIC grant that CREATE FUNCTION hands out
+-- is revoked explicitly.
+--
+-- Why not anon (this reverses the draft, which granted to anon "for symmetry
+-- with the historical repair"): every function in the `public` schema is
+-- exposed by PostgREST as POST /rest/v1/rpc/<name>. Granting EXECUTE to anon
+-- therefore publishes has_role() as an anonymous oracle over user_roles --
+-- anyone could ask "is <uuid> an admin?" and get a truthful answer, which is
+-- exactly what the user_roles SELECT policy (own rows only) exists to prevent.
+-- The grant would have defeated that table's only read policy from outside it.
+--
+-- Why this does NOT reintroduce failure (a): failure (a) was a policy calling
+-- has_role() in a role that lacked EXECUTE. No policy in this baseline is
+-- evaluated as anon and calls has_role() -- the anon policies are bare column
+-- tests (essays: published = true) or USING (true), and every admin check
+-- outside user_roles is an inlined EXISTS. The only has_role() callers are the
+-- user_roles write policies below, which are TO authenticated, and authenticated
+-- keeps the grant. Revoking from anon removes an oracle; it breaks nothing.
+--
+-- The residual, accepted exposure: an authenticated non-admin can still call
+-- rpc/has_role with someone else's uuid and learn whether that account is an
+-- admin. That is the price of the grant the user_roles write policies need, it
+-- requires already knowing a user's uuid, and it leaks one boolean. It is
+-- strictly smaller than the anonymous version.
 -- ----------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION public.has_role(_user_id uuid, _role public.app_role)
 RETURNS boolean
@@ -204,11 +222,26 @@ AS $$
   )
 $$;
 
+-- Revoke BEFORE granting, and revoke from anon BY NAME -- not just from PUBLIC.
+-- Two separate grants have to be removed here and PUBLIC only covers one:
+--   1. CREATE FUNCTION grants EXECUTE to PUBLIC implicitly.
+--   2. Supabase ships
+--        ALTER DEFAULT PRIVILEGES IN SCHEMA public
+--          GRANT ALL ON FUNCTIONS TO postgres, anon, authenticated, service_role;
+--      which grants EXECUTE to anon *explicitly, by name*, at CREATE time.
+-- Revoking only from PUBLIC leaves grant 2 in place and anon keeps EXECUTE, so
+-- rpc/has_role stays an anonymous "is <uuid> an admin?" oracle. Verified against
+-- a local Postgres 16 with Supabase's default privileges replayed: with
+-- FROM PUBLIC alone, `SET ROLE anon; SELECT public.has_role(<admin uuid>,
+-- 'admin')` still returned true. Naming anon closes it.
+-- This is the same trap as the table grants further down: on managed Supabase a
+-- privilege is never absent by default, only ever explicitly taken away.
+REVOKE EXECUTE ON FUNCTION public.has_role(uuid, public.app_role) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.has_role(uuid, public.app_role)
-  TO authenticated, anon, service_role;
+  TO authenticated, service_role;
 
 COMMENT ON FUNCTION public.has_role(uuid, public.app_role) IS
-  'DO NOT REVOKE EXECUTE FROM anon/authenticated. Postgres checks EXECUTE against the CALLING role for functions used in RLS policy expressions; SECURITY DEFINER does not exempt the caller. Revoking it (migration 20260622135932) broke every gated read and took the public site down until 20260627190000 restored the grant. Policies in this schema inline the user_roles EXISTS check instead of calling this function, except on user_roles itself where inlining would recurse.';
+  'DO NOT REVOKE EXECUTE FROM authenticated. Postgres checks EXECUTE against the CALLING role for functions used in RLS policy expressions; SECURITY DEFINER does not exempt the caller. Revoking it (migration 20260622135932) broke every gated read and took the public site down until 20260627190000 restored the grant. In this schema only the user_roles write policies call it -- every other admin check inlines the user_roles EXISTS -- so a revoke would break role writes, not reads. Deliberately NOT granted to anon: PostgREST exposes every public function as /rpc/, and an anon grant would turn this into a public "is <uuid> an admin?" oracle that defeats the own-rows-only SELECT policy on user_roles.';
 
 ALTER TABLE public.user_roles ENABLE ROW LEVEL SECURITY;
 
@@ -239,14 +272,43 @@ CREATE POLICY "user_roles_select_own"
 -- operation, not a PostgREST one.
 
 -- ----------------------------------------------------------------------------
--- WRITE: admin only. These are the ONLY policies in the baseline that call
--- has_role(), they are off the public read path, and the call is unavoidable
--- here: inlining
+-- WRITE: INSERT only, admin only.
+--
+-- This is the ONLY policy in the baseline that calls has_role(). It is off the
+-- public read path, and the call is unavoidable here: inlining
 --   EXISTS (SELECT 1 FROM public.user_roles ...)
 -- into a policy ON public.user_roles raises
 --   ERROR: infinite recursion detected in policy for relation "user_roles"
 -- has_role() is SECURITY DEFINER, so its body bypasses RLS and breaks the
--- cycle. See the COMMENT ON FUNCTION above: the EXECUTE grant must survive.
+-- cycle. See the COMMENT ON FUNCTION above: the authenticated EXECUTE grant
+-- must survive.
+--
+-- WHY THERE IS NO UPDATE AND NO DELETE POLICY (re-derived; the draft had both
+-- and neither worked). Postgres applies a table's SELECT policies to the rows
+-- an UPDATE or DELETE READS, not just its UPDATE/DELETE policy. The only SELECT
+-- policy here is the own-row one, so:
+--   * a targeted admin `UPDATE ... WHERE user_id = <someone else>` matched zero
+--     rows and returned success -- a silent no-op, the worst possible shape for
+--     a privilege operation;
+--   * the only DELETE that ever worked was the UNQUALIFIED one, and because the
+--     visible row set is the caller's own rows, `DELETE FROM user_roles` run by
+--     an admin deleted the admin's OWN role and nothing else. A footgun that
+--     locks the owner out of their own site.
+-- Shipping policies that report success while doing nothing is worse than not
+-- having them, so they are gone. Role revocation and role edits are service_role
+-- / SQL-editor operations (both bypass RLS), which is what they already were in
+-- practice: `grep -rn "from('user_roles')" src/` hits only AuthContext's own-row
+-- read. Nothing in the app administers roles.
+--
+-- The rejected alternative, recorded so it is not "fixed" later by accident:
+-- adding a `USING (public.has_role((SELECT auth.uid()),'admin'))` SELECT policy
+-- would make targeted UPDATE/DELETE work, but permissive SELECT policies are
+-- ORed, so AuthContext's sign-in probe would start evaluating
+--   user_id = (SELECT auth.uid()) OR public.has_role((SELECT auth.uid()),'admin')
+-- and a future revoke of that EXECUTE grant would take sign-in -- and with it
+-- the public site -- down. That is failure (a), exactly. If a role-admin UI is
+-- ever wanted, expose it through a SECURITY DEFINER RPC that does its own admin
+-- check; do not touch the SELECT policy on this table.
 -- ----------------------------------------------------------------------------
 CREATE POLICY "user_roles_insert_admin"
   ON public.user_roles
@@ -254,56 +316,31 @@ CREATE POLICY "user_roles_insert_admin"
   TO authenticated
   WITH CHECK (public.has_role((SELECT auth.uid()), 'admin'));
 
-CREATE POLICY "user_roles_update_admin"
-  ON public.user_roles
-  FOR UPDATE
-  TO authenticated
-  USING (public.has_role((SELECT auth.uid()), 'admin'))
-  WITH CHECK (public.has_role((SELECT auth.uid()), 'admin'));
-
-CREATE POLICY "user_roles_delete_admin"
-  ON public.user_roles
-  FOR DELETE
-  TO authenticated
-  USING (public.has_role((SELECT auth.uid()), 'admin'));
-
--- KNOWN AND ACCEPTED LIMIT (verified locally, PG 16): because the only SELECT
--- policy on this table is the own-row one, an admin's UPDATE or DELETE that
--- carries a WHERE clause matches zero rows -- Postgres applies SELECT policies
--- to rows READ by an UPDATE/DELETE, not just the UPDATE/DELETE policy. So
--- admin INSERT works over PostgREST, targeted admin UPDATE/DELETE silently
--- affects 0 rows. That is the deliberate trade: nothing in src/ administers
--- roles (grep from('user_roles') hits only AuthContext's own-row read), so
--- revoking a role is a service_role / SQL-editor operation, and in exchange the
--- sign-in path stays immune to failure (a). If a role-admin UI is ever built,
--- do NOT solve it by adding a has_role()-based SELECT policy here -- that
--- reintroduces the outage. Expose it through a SECURITY DEFINER RPC instead.
+-- INSERT caveat: over PostgREST this works with the default
+-- `Prefer: return=minimal`. An admin who chains `.select()` onto the insert asks
+-- PostgREST to read the new row back, which the own-rows-only SELECT policy
+-- refuses for another user's row -- the INSERT commits, the response errors.
+-- Insert without .select(), or grant roles from the SQL editor.
 
 -- ----------------------------------------------------------------------------
 -- PRIVILEGE-ESCALATION GUARD (defense in depth).
 -- RESTRICTIVE policies are ANDed with the permissive set, so no authenticated
--- session can create or modify a role row for ITSELF no matter how the
--- permissive admin checks above are later edited. A non-admin is already
--- blocked by the permissive policies; this makes self-granting structurally
--- impossible rather than merely unauthorised.
+-- session can create a role row for ITSELF no matter how the permissive admin
+-- check above is later edited. A non-admin is already blocked by the permissive
+-- policy; this makes self-granting structurally impossible rather than merely
+-- unauthorised.
 -- NULL-safe by construction: if auth.uid() were NULL the comparison yields
 -- NULL, which RLS treats as false -- it fails closed.
 -- Consequence: role rows for one's own account must be written by service_role
 -- or in SQL (both bypass RLS). See the bootstrap note below.
+-- There is no matching RESTRICTIVE UPDATE policy because there is no permissive
+-- UPDATE policy for it to narrow -- UPDATE is denied outright by RLS default.
 -- ----------------------------------------------------------------------------
 CREATE POLICY "user_roles_no_self_grant_insert"
   ON public.user_roles
   AS RESTRICTIVE
   FOR INSERT
   TO authenticated
-  WITH CHECK (user_id <> (SELECT auth.uid()));
-
-CREATE POLICY "user_roles_no_self_grant_update"
-  ON public.user_roles
-  AS RESTRICTIVE
-  FOR UPDATE
-  TO authenticated
-  USING (user_id <> (SELECT auth.uid()))
   WITH CHECK (user_id <> (SELECT auth.uid()));
 
 -- ----------------------------------------------------------------------------
@@ -318,18 +355,35 @@ CREATE POLICY "user_roles_no_self_grant_update"
 --       VALUES ('<auth.users.id>', 'admin');
 -- ----------------------------------------------------------------------------
 
--- Table privileges. RLS is the trust boundary here, not GRANTs.
+-- Table privileges.
+--
+-- READ THIS BEFORE EDITING: on managed Supabase a bare GRANT list is NOT a
+-- restriction. The platform ships
+--   ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES
+--     TO postgres, anon, authenticated, service_role;
+-- so every table created by a migration is born with ALL privileges already
+-- granted to anon and authenticated. GRANT is additive and cannot take that
+-- away. Listing "GRANT SELECT ... TO anon" therefore documents an intention
+-- while changing nothing -- anon still holds INSERT/UPDATE/DELETE underneath.
+-- Only an explicit REVOKE makes the privilege layer a real second barrier
+-- behind RLS. Every table in this baseline is revoked first, then granted.
+--
 -- anon keeps SELECT on purpose: it has NO policy on this table, so an anon
 -- read returns zero rows, AND any policy elsewhere that inlines the
 -- user_roles EXISTS check evaluates to false for anon instead of erroring with
--- "permission denied for table user_roles". A privilege-layer revoke here
+-- "permission denied for table user_roles". A privilege-layer revoke of SELECT
 -- would recreate failure (a) one layer down -- do not add one.
 -- authenticated needs SELECT for the same reason in reverse: the inlined
 -- EXISTS pattern used by the storage policies (and by the content tables in
 -- later parts of the baseline) reads this table as the calling role.
-GRANT SELECT ON public.user_roles TO anon;
-GRANT SELECT, INSERT, UPDATE, DELETE ON public.user_roles TO authenticated;
-GRANT ALL ON public.user_roles TO service_role;
+-- authenticated gets INSERT and NOT update/delete, matching the policy set:
+-- there is no UPDATE or DELETE policy on this table, so the privilege would be
+-- unusable anyway -- and revoking it means a future permissive policy added by
+-- mistake still cannot write without someone also re-granting.
+REVOKE ALL ON public.user_roles FROM anon, authenticated;
+GRANT SELECT                 ON public.user_roles TO anon;
+GRANT SELECT, INSERT         ON public.user_roles TO authenticated;
+GRANT ALL                    ON public.user_roles TO service_role;
 
 COMMENT ON TABLE public.user_roles IS
   'Role assignments. Read: own rows only, via a policy that never calls has_role() (protects the sign-in path). Write: admin only, and never for one''s own user_id (RESTRICTIVE self-grant block). First admin must be seeded via service_role/SQL.';
@@ -381,8 +435,12 @@ CREATE POLICY "profiles_update_own"
 -- No DELETE policy and no anon policy of any kind: rows are removed by the
 -- ON DELETE CASCADE from auth.users, and anonymous visitors get nothing.
 
+-- REVOKE first -- see the note on Supabase default privileges above. Without it
+-- anon would silently retain the ALL grant the platform hands to every new
+-- table, and "no anon grant at all" would be a claim rather than a fact.
+REVOKE ALL ON public.profiles FROM anon, authenticated;
 GRANT SELECT, INSERT, UPDATE ON public.profiles TO authenticated;
-GRANT ALL ON public.profiles TO service_role;
+GRANT ALL                    ON public.profiles TO service_role;
 
 -- The signup trigger writes through handle_new_user(), which is SECURITY
 -- DEFINER and owned by the migration role -- a table owner bypasses RLS, so

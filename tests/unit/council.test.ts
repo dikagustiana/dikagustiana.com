@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import {
   frameInput,
@@ -227,22 +227,62 @@ describe('persona config', () => {
   });
 });
 
-describe('council_sessions migration (permission guardrail)', () => {
-  const sql = readFileSync(
-    join(__dirname, '../../supabase/migrations/20260704080000_create_council_sessions.sql'),
-    'utf-8',
+describe('council_sessions schema (permission guardrail)', () => {
+  // Locate whichever file currently defines the table rather than hardcoding a
+  // path. The original pointed at supabase/migrations/20260704080000_*.sql; the
+  // rebuild archived the 43 historical migrations and authored a fresh baseline,
+  // so that path no longer exists and this whole file failed to load. Searching
+  // means the test keeps working while the baseline sits in docs/db/pending/ and
+  // after it is moved into supabase/migrations/.
+  const roots = [
+    join(__dirname, '../../supabase/migrations'),
+    join(__dirname, '../../docs/db/pending'),
+  ];
+  const sql = (() => {
+    for (const dir of roots) {
+      if (!existsSync(dir)) continue;
+      for (const f of readdirSync(dir).filter((n) => n.endsWith('.sql')).sort()) {
+        const text = readFileSync(join(dir, f), 'utf-8');
+        if (/CREATE TABLE public\.council_sessions/i.test(text)) return text;
+      }
+    }
+    throw new Error('no SQL file defines public.council_sessions');
+  })();
+
+  // Only the council_sessions policies. The baseline is one file covering several
+  // tables, and sections/categories legitimately carry USING (true) as public
+  // reference data — asserting over the whole file would fail on those.
+  const councilPolicies = (sql.match(/CREATE POLICY[\s\S]*?;/gi) ?? []).filter((p) =>
+    /ON public\.council_sessions/i.test(p),
   );
 
   it('enables RLS on the table', () => {
     expect(sql).toMatch(/ALTER TABLE public\.council_sessions ENABLE ROW LEVEL SECURITY/i);
   });
 
-  it('gates every policy on has_role admin and never uses USING (true)', () => {
-    const policies = sql.match(/CREATE POLICY[\s\S]*?;/gi) ?? [];
-    expect(policies.length).toBeGreaterThanOrEqual(4);
-    for (const policy of policies) {
-      expect(policy).toMatch(/has_role\(auth\.uid\(\), 'admin'\)/);
+  it('gates every policy on admin and never uses USING (true)', () => {
+    expect(councilPolicies.length).toBeGreaterThanOrEqual(4);
+    for (const policy of councilPolicies) {
+      // Two accepted spellings of the same check. The original migration called
+      // has_role(); the rebuilt baseline INLINES the user_roles lookup instead,
+      // deliberately — a policy that reads user_roles directly cannot be broken
+      // by a future EXECUTE grant change on has_role(), which is exactly what
+      // took the public site down once. Accept either, reject anything else.
+      expect(
+        /has_role\(\s*\(?\s*(SELECT\s+)?auth\.uid\(\)\s*\)?\s*,\s*'admin'/i.test(policy) ||
+          /EXISTS\s*\([\s\S]*?public\.user_roles[\s\S]*?role\s*=\s*'admin'/i.test(policy),
+      ).toBe(true);
     }
-    expect(sql).not.toMatch(/USING\s*\(\s*true\s*\)/i);
+    for (const policy of councilPolicies) {
+      expect(policy).not.toMatch(/USING\s*\(\s*true\s*\)/i);
+    }
+  });
+
+  it('transcripts are never readable anonymously', () => {
+    // Council transcripts embed unpublished draft content, so no policy on this
+    // table may name the anon role at all.
+    for (const policy of councilPolicies) {
+      expect(policy).not.toMatch(/\bTO\b[^;]*\banon\b/i);
+    }
   });
 });

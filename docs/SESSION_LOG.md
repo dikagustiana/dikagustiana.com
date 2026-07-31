@@ -2,12 +2,79 @@
 
 Append-only. Newest entry first. A fresh session must be able to resume from this file.
 
-## STATUS: stopped by the owner on credit cost, 2026-07-31. Nothing was applied.
+## STATUS (session 2, 2026-07-31): everything not requiring the project is DONE.
+The baseline SQL is fixed, verified by execution, and moved to `supabase/migrations/`.
+`docs/SCHEMA_PLAN.md` is written. Still nothing applied to Supabase — no project exists.
+
+## NEXT ACTION
+**BLOCKED on the owner, three independent actions. Full detail in `docs/RUNBOOK_phase2.md`.**
+
+1. **Delete the two paused 2025 Supabase projects** (`fqayxopcfxlkuftglqbl`,
+   `llqehykfmbgjnbwbijfs`) at https://supabase.com/dashboard. Re-confirmed this session:
+   `create_project` still returns `BadRequestException: 2 project limit`, and the limit
+   counts paused projects. The MCP has no `delete_project` tool. **This blocks everything.**
+2. **Vercel** — re-confirmed zero projects in the only reachable team
+   (`team_qkOkuTIM75I336YmxaGlDwWZ`). Connect the owning account, or set
+   `VITE_SUPABASE_URL` + `VITE_SUPABASE_PUBLISHABLE_KEY` by hand **and redeploy** (Vite
+   inlines env at build time).
+3. **Set `LOVABLE_API_KEY`** in the new project's edge-function secrets. No MCP tool for it.
+
+The moment slot 1 frees, `docs/RUNBOOK_phase2.md` is a mechanical 8-step sequence.
+
+## 2026-07-31 (session 2)
+
+- **Fixed all 7 reviewed defects** in the drafted SQL (commit `aa29c03`), including both
+  blockers: `essays.category_id` got back the DEFAULT the live schema had (pinned to
+  `finance-general`), which unbreaks four insert paths while keeping NOT NULL + FK
+  RESTRICT; and the published placeholder essay was rewritten to drop four false claims.
+- **Built a local dry-run harness** (`docs/db/verify/`) — a throwaway Postgres 16 with the
+  Supabase role/schema/default-privilege shape replayed, so the baseline could be executed
+  and attacked before touching a real project. Plain `psql`, not a CLI migration command.
+- **Running it found an 8th defect that four reading-based review lenses had missed:**
+  `REVOKE EXECUTE ... FROM PUBLIC` does not remove `anon`'s EXECUTE on `has_role()`,
+  because `ALTER DEFAULT PRIVILEGES` grants it to `anon` *by name* as well. The fix for
+  defect 3 was incomplete until it revoked `FROM PUBLIC, anon`. General rule for this
+  platform: **a privilege is never absent by default, only ever explicitly taken away.**
+  The same trap is what made defect 7 (`admin_audit_log` append-only) real rather than
+  claimed — every table now REVOKEs before granting.
+- **Defect 4 re-derived rather than patched.** The three `user_roles` write policies were
+  worse than non-functional: a targeted admin UPDATE/DELETE matched zero rows and
+  *reported success*, and the only DELETE that worked was the unqualified one — which,
+  because the visible row set is the caller's own rows, deleted **the admin's own role**.
+  UPDATE/DELETE removed; INSERT kept and verified working for granting another user.
+- **Verified against real RLS locally:** anon reads the 1 published essay and 0 of 105
+  drafts, and holds no write privilege on any of the 14 tables; admin create/update/delete
+  round-trips; non-admin blocked everywhere; audit log append-only on both layers;
+  self-grant blocked; `(track_slug, sort_order)` uniqueness enforced.
+- **Moved the baseline to `supabase/migrations/`** with timestamps that encode dependency
+  order (commit `5810bc0`). The old `01/02/03/04` numbering was authoring order and
+  contradicted the real order (`01 → 03 → 02 → 04`, because `essays.module_id` has an FK
+  to `finance_modules`) — `supabase db reset`, which the live e2e suite depends on, would
+  have applied them wrongly. Plain sorted order now works and is verified.
+- **Wrote `docs/SCHEMA_PLAN.md`** (commit `587a057`) by introspecting the applied schema
+  rather than restating the drafts: 14 tables, 151 columns, 5 enums, 4 functions, 12
+  triggers, 3 buckets, the role model, FK actions with reasons, everything cut with
+  reasons, and the permanent losses. It corrects the drafts in two places — the initplan
+  performance rationale was overstated, and the privilege-layer claims were untrue until
+  the REVOKEs were added.
+- **Fixed a test that phase 1 left broken** (commit `8b696d9`). `tests/unit/council.test.ts`
+  failed to load at all — it read a migration path phase 1 had archived — so the suite
+  reported "138 passed" while a whole file silently never ran. It also asserted the
+  `has_role()` spelling the rebuild deliberately replaced with an inlined check. Now
+  17/17 files, **163 tests**.
+- **Type regeneration could not be done offline** (the CLI's `gen types` needs Docker),
+  but the diff was determined statically and is a clean swap: 25 cut table types
+  disappear and **no cut table is queried anywhere**; `essays.fundamental_id` disappears
+  and it appears **only inside `types.ts` itself**; nothing new appears.
+- **Verified green:** `tsc --noEmit` ✓, `vite build` ✓, 163 unit tests ✓, 66 route
+  declarations in `src/App.tsx` with every element resolving.
+
+## 2026-07-31 (session 1) — status at the time: stopped by the owner on credit cost
 No Supabase project was ever created, so no migration ran and the live site is unchanged
 (still broken at boot — its deployed bundle has no Supabase URL compiled in). All work is
 committed and pushed to `claude/dikagustiana-supabase-rebuild-ioiyd1`. Resume from this file.
 
-## NEXT ACTION
+### Session 1's next action (superseded by session 2's, above — kept for the record)
 **BLOCKED on the owner, one action:** delete the two paused 2025 Supabase projects
 (`fqayxopcfxlkuftglqbl`, `llqehykfmbgjnbwbijfs`) at https://supabase.com/dashboard. The
 owner approved this but the Supabase MCP exposes no `delete_project` tool, so it cannot be

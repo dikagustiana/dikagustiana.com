@@ -144,16 +144,41 @@ ON CONFLICT (slug) DO UPDATE SET
 --    finance essay INSERTs supply it; 20260219_004 solved that with a fixed
 --    UUID '0f111111-1111-4111-8111-111111111111' plus a column-level DEFAULT.
 --
---    We deliberately do NOT reuse either. section_id is resolved from
---    sections.slug and every essay below resolves category_id by subquery, so
---    this seed (a) carries no literal UUID, (b) does not depend on a DDL-level
---    DEFAULT the fresh baseline may not have shipped, and (c) still works if
---    the row already exists under a different id — e.g. created by the admin
---    UI before this ran.
+--    THE ID IS PINNED TO THAT SAME UUID, and this is the one place in this file
+--    where a literal UUID is correct rather than a smell. The draft generated a
+--    fresh id here on the theory that "no literal UUIDs" was the stronger rule.
+--    It is not — this particular id is referenced by name from three places that
+--    a generated id silently breaks:
+--      * public.essays.category_id's column DEFAULT (02_cms.sql) is exactly this
+--        literal. With a generated category id the default points at a row that
+--        does not exist, and every insert that omits a category — the Next Big
+--        Thing "Add Essay" dialog, a new Writer Studio draft, the e2e fixture —
+--        fails the FK instead of landing in General.
+--      * supabase/seed.sql:63 inserts its published fixture essay with no
+--        category_id at all, relying on that same default. `supabase db reset`
+--        is what the tests/live suite runs against.
+--      * the archived 20260219_004 is the schema of record for what production
+--        actually held; keeping the id identical means the archive and the live
+--        database agree, which is the whole point of reconstructing rather than
+--        reinventing.
+--    section_id is still resolved from sections.slug, and every essay below
+--    still resolves category_id by subquery rather than repeating the literal —
+--    so this file has exactly one hardcoded id, in the one place it is load-
+--    bearing.
+--
+--    ON CONFLICT arbitrates on the (section_id, slug) business key, which is
+--    what a re-run of this file collides with. DO NOTHING: an existing General
+--    category is fine and must not be renamed or re-parented by a re-run.
+--    Note the consequence — if a General category was created through the admin
+--    UI first, it keeps ITS id and this insert is skipped, leaving essays'
+--    column DEFAULT pointing at a row that does not exist. The assertion block
+--    in section 9 checks for exactly that and fails the transaction rather than
+--    letting it through, because the symptom would otherwise appear much later
+--    as an opaque FK error on someone's first uncategorised draft.
 -- =============================================================================
 
-INSERT INTO public.categories (name, slug, section_id, sort_order)
-SELECT 'General', 'finance-general', s.id, 0
+INSERT INTO public.categories (id, name, slug, section_id, sort_order)
+SELECT '0f111111-1111-4111-8111-111111111111'::uuid, 'General', 'finance-general', s.id, 0
 FROM public.sections s
 WHERE s.slug = 'finance'
 ON CONFLICT (section_id, slug) DO NOTHING;
@@ -638,6 +663,27 @@ ON CONFLICT (slug) DO NOTHING;
 --    It deliberately contains no finance analysis, no opinion, and nothing that
 --    reads as the owner's authored writing — only facts about the rebuild.
 --
+--    HONESTY PASS (the draft of this row was rated a blocker and rewritten).
+--    Four claims were removed because they were not true:
+--      * "That outline is intact." It is not. framing_content is gone for all 49
+--        modules, 11 of the 29 reconstructed modules have a NULL thesis, and the
+--        68 Fundamentals lesson stubs are not reseeded — the same file's own loss
+--        list said so three paragraphs earlier. Replaced with a paragraph that
+--        states each of those losses.
+--      * "49 modules and 105 lesson titles across Strategic Finance, Planning &
+--        Forecasting, and Financial Analytics." Those three tracks hold 29
+--        modules; the 105 lesson titles are theirs, but the 49 count only reaches
+--        49 by including Fundamentals' 20 — which contributes no lessons. The two
+--        numbers are now stated separately so neither is attributed to the wrong
+--        set.
+--      * "It is what you see below." Nothing renders below an essay body — the
+--        curriculum is on the finance track pages. Replaced with a pointer there.
+--      * The title asserted a loss date ("What Was Lost on 2026-07-31"). The
+--        rebuild establishes when the database was REBUILT, not when the content
+--        was lost; the last content-bearing migration is 2026-07-04 and anything
+--        authored after it left no trace at all. The date is now attached only to
+--        the rebuild, which is the fact that is actually known.
+--
 --    Column choice: the app renders essays.content (TipTap JSON stored as text,
 --    parsed by src/lib/tiptap/serialize.ts and rendered by ArticleBody).
 --    src/pages/FinanceEssayPage.tsx reads essay.content; content_json is not
@@ -666,11 +712,11 @@ INSERT INTO public.essays
 SELECT
   'finance',
   'site-rebuild-note',
-  $ttl$Site Rebuild Note: What Was Lost on 2026-07-31, and What Survived$ttl$,
+  $ttl$Site Rebuild Note: What Was Lost, and What Survived$ttl$,
   (SELECT c.id FROM public.categories c JOIN public.sections s ON s.id = c.section_id
     WHERE s.slug = 'finance' AND c.slug = 'finance-general'),
-  $snip$The database behind this site was rebuilt on 2026-07-31. Essays written through the CMS before that date were lost. The curriculum outline survived in version control and is being rewritten.$snip$,
-  $tiptap${"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"The database behind this site was rebuilt from scratch on 31 July 2026. The Supabase project that had been running it was deleted. Every essay written through this site's CMS was stored only in that database, so those essay bodies are gone. They were not in version control and there is no backup to restore them from."}]},{"type":"paragraph","content":[{"type":"text","text":"What survived is the structure, because the structure lived in migration files: the section taxonomy, the 24 FSLI reference pages, the four finance tracks, and the full curriculum outline of 49 modules and 105 lesson titles across Strategic Finance, Planning & Forecasting, and Financial Analytics. That outline is intact. It is what you see below."}]},{"type":"paragraph","content":[{"type":"text","text":"The lessons themselves are being rewritten. Each one is an unpublished draft until it is finished, so for now the curriculum shows its titles and not much else."}]},{"type":"paragraph","content":[{"type":"text","text":"This note is a placeholder. It will be deleted once the essays are back."}]}]}$tiptap$,
+  $snip$The database behind this site was rebuilt on 31 July 2026 and the essays written through its CMS were lost. The curriculum outline survived in version control as titles and ordering, and is being rewritten.$snip$,
+  $tiptap${"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"The database behind this site was rebuilt from scratch on 31 July 2026. The Supabase project that had been running it was deleted, and every essay written through this site's CMS was stored only in that database. Those essay bodies are gone. They were never in version control and there is no backup to restore them from."}]},{"type":"paragraph","content":[{"type":"text","text":"What survived is what lived in migration files: the section taxonomy, the 24 financial-statement reference pages, the four finance tracks, and the shape of the curriculum — 49 module titles, and 105 lesson titles across Strategic Finance, Planning and Forecasting, and Financial Analytics. The finance section lists all of it."}]},{"type":"paragraph","content":[{"type":"text","text":"That outline survived as titles and ordering, not intact. The framing text that introduced each of the 49 modules is gone. Eleven modules lost the one-line thesis that described them and are listed by title alone. The Fundamentals track kept its 20 module titles but not its lesson list. The reference pages kept their headers and figures; the commentary written under them did not. Neither did the book library."}]},{"type":"paragraph","content":[{"type":"text","text":"Every lesson is an unpublished draft until it is rewritten, so for now the curriculum shows titles and little else."}]},{"type":"paragraph","content":[{"type":"text","text":"This note is a placeholder. It will be deleted once the essays are back."}]}]}$tiptap$,
   'Dika Gustiana',
   '2026-07-31',
   '1 min read',
@@ -697,6 +743,18 @@ BEGIN
     JOIN public.sections s ON s.id = c.section_id
     WHERE s.slug = 'finance' AND c.slug = 'finance-general';
   IF n <> 1 THEN RAISE EXCEPTION 'seed: finance-general category missing (found %)', n; END IF;
+
+  -- The category must carry the PINNED id, because essays.category_id's column
+  -- DEFAULT is that literal. If a General category already existed under a
+  -- different id the insert above was skipped and the default now dangles:
+  -- every insert that omits a category would fail the FK. Fail here instead,
+  -- loudly, while the fix is still a one-line UPDATE.
+  SELECT count(*) INTO n FROM public.categories
+    WHERE id = '0f111111-1111-4111-8111-111111111111'::uuid;
+  IF n <> 1 THEN
+    RAISE EXCEPTION
+      'seed: finance-general is not pinned to 0f111111-1111-4111-8111-111111111111 — essays.category_id DEFAULT would dangle';
+  END IF;
 
   SELECT count(*) INTO n FROM public.fsli_pages;
   IF n < 24 THEN RAISE EXCEPTION 'seed: expected >= 24 fsli_pages, found %', n; END IF;

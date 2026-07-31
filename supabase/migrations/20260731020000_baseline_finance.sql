@@ -80,8 +80,14 @@ ALTER TABLE public.finance_sections ENABLE ROW LEVEL SECURITY;
 -- Table-level grants are stated explicitly rather than relying on Supabase's
 -- ALTER DEFAULT PRIVILEGES: a missing grant is the other way a public page
 -- dies with "permission denied", and RLS -- not the grant -- is what gates rows.
-GRANT SELECT ON public.finance_sections TO anon;
+-- REVOKE before GRANT. On managed Supabase, ALTER DEFAULT PRIVILEGES has already
+-- granted ALL on this table to anon and authenticated, and GRANT is additive --
+-- so the grant list below only becomes a real restriction after the revoke.
+-- Without it, "anon holds SELECT only" is an intention, not a fact.
+REVOKE ALL ON public.finance_sections FROM anon, authenticated;
+GRANT SELECT                         ON public.finance_sections TO anon;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.finance_sections TO authenticated;
+GRANT ALL                            ON public.finance_sections TO service_role;
 
 CREATE POLICY "Anon can read finance sections"
   ON public.finance_sections FOR SELECT TO anon USING (true);
@@ -160,13 +166,30 @@ CREATE TABLE public.finance_modules (
   -- Nullable with a '{}' default, matching types.ts (module_meta: Json | null).
   module_meta     jsonb       DEFAULT '{}'::jsonb,
   created_at      timestamptz NOT NULL DEFAULT now(),
-  updated_at      timestamptz NOT NULL DEFAULT now()
-);
+  updated_at      timestamptz NOT NULL DEFAULT now(),
 
--- Track listing pages read (track_slug, sort_order) together; the UNIQUE
--- constraint on slug already provides the by-slug index.
-CREATE INDEX idx_finance_modules_track_order
-  ON public.finance_modules (track_slug, sort_order);
+  -- (track_slug, sort_order) is UNIQUE, and this is a correctness constraint,
+  -- not a nicety. Every one of the 105 essay stubs in 04_seed.sql resolves its
+  -- module_id with a SCALAR subquery of the form
+  --   (SELECT id FROM public.finance_modules
+  --     WHERE track_slug = 'strategic-finance' AND sort_order = 7)
+  -- decoded from the essay's slug prefix (sf-07-03 = strategic-finance module
+  -- 07, essay 03). A scalar subquery that returns two rows does not pick one --
+  -- it raises "more than one row returned by a subquery used as an expression"
+  -- and aborts the entire seed transaction. The seed's own assertion block
+  -- checks that no stub ended up with a NULL module_id, but nothing there can
+  -- catch a duplicate before it throws. This constraint is what makes the
+  -- assumption those 105 subqueries rest on actually true, and it keeps it true
+  -- for anything added later through the admin UI.
+  -- Verified against the seed data before adding: all 49 modules are unique on
+  -- (track_slug, sort_order), numbered contiguously 1..N within each of the four
+  -- tracks (fundamentals 1-20, strategic-finance 1-13, planning 1-7,
+  -- analytics 1-9), so no existing row violates it.
+  -- Its backing index also serves the (track_slug, sort_order) listing reads, so
+  -- the separate idx_finance_modules_track_order it replaces is not recreated --
+  -- that would be a second index on the same leading columns for no read gain.
+  CONSTRAINT finance_modules_track_slug_sort_order_key UNIQUE (track_slug, sort_order)
+);
 
 CREATE TRIGGER update_finance_modules_updated_at
   BEFORE UPDATE ON public.finance_modules
@@ -174,8 +197,11 @@ CREATE TRIGGER update_finance_modules_updated_at
 
 ALTER TABLE public.finance_modules ENABLE ROW LEVEL SECURITY;
 
-GRANT SELECT ON public.finance_modules TO anon;
+-- REVOKE first -- see the note on Supabase default privileges above.
+REVOKE ALL ON public.finance_modules FROM anon, authenticated;
+GRANT SELECT                         ON public.finance_modules TO anon;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.finance_modules TO authenticated;
+GRANT ALL                            ON public.finance_modules TO service_role;
 
 CREATE POLICY "Anon can read finance modules"
   ON public.finance_modules FOR SELECT TO anon USING (true);
@@ -252,8 +278,11 @@ CREATE TRIGGER update_finance_models_updated_at
 
 ALTER TABLE public.finance_models ENABLE ROW LEVEL SECURITY;
 
-GRANT SELECT ON public.finance_models TO anon;
+-- REVOKE first -- see the note on Supabase default privileges above.
+REVOKE ALL ON public.finance_models FROM anon, authenticated;
+GRANT SELECT                         ON public.finance_models TO anon;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.finance_models TO authenticated;
+GRANT ALL                            ON public.finance_models TO service_role;
 
 -- Published gating, same lesson as historical failure (b) on essays: the
 -- original policy was USING (true), which exposed unpublished drafts through
@@ -328,8 +357,11 @@ CREATE TRIGGER update_finance_settings_updated_at
 
 ALTER TABLE public.finance_settings ENABLE ROW LEVEL SECURITY;
 
-GRANT SELECT ON public.finance_settings TO anon;
+-- REVOKE first -- see the note on Supabase default privileges above.
+REVOKE ALL ON public.finance_settings FROM anon, authenticated;
+GRANT SELECT                         ON public.finance_settings TO anon;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.finance_settings TO authenticated;
+GRANT ALL                            ON public.finance_settings TO service_role;
 
 CREATE POLICY "Anon can read finance settings"
   ON public.finance_settings FOR SELECT TO anon USING (true);
@@ -407,8 +439,11 @@ CREATE TRIGGER update_fsli_pages_updated_at
 
 ALTER TABLE public.fsli_pages ENABLE ROW LEVEL SECURITY;
 
-GRANT SELECT ON public.fsli_pages TO anon;
+-- REVOKE first -- see the note on Supabase default privileges above.
+REVOKE ALL ON public.fsli_pages FROM anon, authenticated;
+GRANT SELECT                         ON public.fsli_pages TO anon;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.fsli_pages TO authenticated;
+GRANT ALL                            ON public.fsli_pages TO service_role;
 
 CREATE POLICY "Anon can read FSLI pages"
   ON public.fsli_pages FOR SELECT TO anon USING (true);
@@ -477,8 +512,11 @@ CREATE TRIGGER update_fsli_sections_updated_at
 
 ALTER TABLE public.fsli_sections ENABLE ROW LEVEL SECURITY;
 
-GRANT SELECT ON public.fsli_sections TO anon;
+-- REVOKE first -- see the note on Supabase default privileges above.
+REVOKE ALL ON public.fsli_sections FROM anon, authenticated;
+GRANT SELECT                         ON public.fsli_sections TO anon;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.fsli_sections TO authenticated;
+GRANT ALL                            ON public.fsli_sections TO service_role;
 
 CREATE POLICY "Anon can read FSLI sections"
   ON public.fsli_sections FOR SELECT TO anon USING (true);
