@@ -1,0 +1,210 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Source+Sans+3:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Light theme matching dikagustiana.com */
+    --background: 0 0% 98%;
+    --foreground: 215 25% 17%;
+
+    --card: 200 40% 96%;
+    --card-foreground: 215 25% 20%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 25% 17%;
+
+    --primary: 215 28% 17%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 200 30% 94%;
+    --secondary-foreground: 215 25% 20%;
+
+    --muted: 200 20% 92%;
+    --muted-foreground: 215 15% 45%;
+
+    --accent: 142 71% 45%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 215 20% 88%;
+    --input: 215 20% 88%;
+    --ring: 142 71% 45%;
+
+    --radius: 0.5rem;
+
+    /* Custom colors */
+    --header-bg: 215 28% 17%;
+    --header-foreground: 0 0% 100%;
+    --card-light: 200 40% 96%;
+    --card-light-foreground: 215 25% 20%;
+    --link-primary: 142 71% 45%;
+    --nav-active: 142 71% 45%;
+    --button-dark: 215 30% 13%;
+    --button-dark-foreground: 0 0% 100%;
+
+    /* Sidebar */
+    --sidebar-background: 215 28% 17%;
+    --sidebar-foreground: 0 0% 95%;
+    --sidebar-primary: 142 71% 45%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 215 25% 22%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 215 25% 25%;
+    --sidebar-ring: 142 71% 45%;
+  }
+
+  .dark {
+    --background: 215 28% 12%;
+    --foreground: 0 0% 98%;
+
+    --card: 215 25% 16%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 215 25% 16%;
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 142 71% 45%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 215 20% 20%;
+    --secondary-foreground: 0 0% 90%;
+
+    --muted: 215 18% 22%;
+    --muted-foreground: 215 12% 55%;
+
+    --accent: 142 71% 45%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 215 20% 22%;
+    --input: 215 20% 22%;
+    --ring: 142 71% 45%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display font-semibold tracking-tight;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+@layer components {
+  .nav-link {
+    @apply px-3 py-2 text-sm font-medium text-white/80 transition-colors hover:text-white rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40;
+  }
+
+  .nav-link-active {
+    @apply text-white bg-white/10;
+  }
+
+  .hero-gradient {
+    background: linear-gradient(
+      to bottom,
+      hsl(var(--hero-overlay) / 0.7) 0%,
+      hsl(var(--hero-overlay) / 0.85) 100%
+    );
+  }
+
+  .card-feature {
+    @apply rounded-xl p-6 transition-all duration-300;
+    background: hsl(var(--card-light));
+    color: hsl(var(--card-light-foreground));
+  }
+
+  .card-feature:hover {
+    @apply shadow-lg;
+    transform: translateY(-2px);
+  }
+
+  .link-accent {
+    color: hsl(var(--link-primary));
+    @apply font-medium inline-flex items-center gap-1 transition-colors hover:opacity-80;
+  }
+
+  .section-container {
+    @apply container mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .editable-field {
+    @apply outline-none transition-all duration-200;
+  }
+
+  .editable-field:focus {
+    @apply ring-2 ring-primary/50 rounded px-1;
+  }
+
+  .admin-highlight {
+    @apply relative;
+  }
+
+  .admin-highlight::after {
+    content: '';
+    @apply absolute inset-0 border-2 border-dashed border-primary/30 rounded pointer-events-none opacity-0 transition-opacity;
+  }
+
+  .admin-highlight:hover::after {
+    @apply opacity-100;
+  }
+}
+
+/* ── Longform essay overrides (Noahpinion-style, finance-in-motion only) ── */
+@layer components {
+  .longform-body p {
+    @apply text-xl leading-loose text-foreground mb-6;
+  }
+
+  .longform-body h2 {
+    @apply text-3xl font-semibold text-foreground mt-16 mb-4;
+  }
+
+  .longform-body h3 {
+    @apply text-2xl font-semibold text-foreground mt-10 mb-3;
+  }
+
+  .longform-body blockquote {
+    @apply text-2xl font-semibold text-center my-12 border-none pl-0 not-italic;
+  }
+
+  .longform-body blockquote p {
+    @apply text-2xl font-semibold text-center;
+  }
+
+  .longform-body ul,
+  .longform-body ol {
+    @apply text-lg leading-relaxed my-6;
+  }
+
+  .longform-body table {
+    @apply border-collapse w-full text-sm my-8;
+  }
+
+  .longform-body table th,
+  .longform-body table td {
+    @apply border border-border px-3 py-2;
+  }
+}
