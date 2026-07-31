@@ -246,7 +246,35 @@ CREATE TABLE public.essays (
   sort_order         integer     DEFAULT 0,
   is_selected        boolean     NOT NULL DEFAULT false,
 
-  category_id        uuid        NOT NULL,
+  -- NOT NULL *with a DEFAULT*, restoring what the live schema actually had
+  -- (20260219_004 pinned the 'finance-general' category to this UUID and then
+  -- ran ALTER COLUMN category_id SET DEFAULT on exactly this value).
+  --
+  -- The default is load-bearing, not decoration. NOT NULL alone -- the shape the
+  -- draft shipped -- flips the generated essays.Insert.category_id from optional
+  -- to required and breaks every insert path that structurally cannot supply a
+  -- category:
+  --   * src/components/next-big-thing/EssayDialog.tsx:137 -- the admin "Add
+  --     Essay" dialog; its payload has no category field at all.
+  --   * src/components/writer/WriterEditor.tsx:346 -- "Attach category_id if
+  --     set", i.e. omitted entirely on a new draft with no category chosen.
+  --   * supabase/seed.sql:63 -- the e2e fixture essay.
+  --   * tests/live/adminGating.spec.ts:48 -- asserts an admin insert of
+  --     {section, slug, title, published} SUCCEEDS. With no default it fails,
+  --     and the test that proves admin writes work would be testing the wrong
+  --     thing.
+  -- Relaxing the constraint to nullable was rejected instead: docs/DECISIONS.md
+  -- records NOT NULL + FK RESTRICT as the "no orphan essays" guarantee, and the
+  -- Writer Studio validates category on every save on top of it. The default
+  -- keeps the guarantee and keeps the insert paths working -- an essay without
+  -- an explicit category lands in finance/finance-general rather than nowhere.
+  --
+  -- The referenced row is seeded (pinned to this same UUID) by 04_seed.sql. A
+  -- column default is not checked at DDL time, so ordering is fine; the FK is
+  -- only evaluated when a row is actually inserted, which cannot happen before
+  -- the seed in a fresh project.
+  category_id        uuid        NOT NULL
+                       DEFAULT '0f111111-1111-4111-8111-111111111111'::uuid,
   module_id          uuid,
 
   voice_role         text,
@@ -467,8 +495,16 @@ CREATE POLICY "essays_delete_admin"
 --    (select * order created_at desc limit 500). Both go through an
 --    `as unknown as` cast because the generated types predate the table -- so
 --    the column names below must match the insert payload exactly.
---    Append-only: there is no UPDATE and no DELETE policy, by design. An audit
---    trail an admin can rewrite is not an audit trail.
+--    Append-only, on TWO independent layers, by design -- an audit trail an
+--    admin can rewrite is not an audit trail:
+--      1. RLS: there is no UPDATE and no DELETE policy, so both are denied.
+--      2. Privileges: authenticated holds only SELECT and INSERT.
+--    Layer 2 only exists because the grant block at the bottom of this file
+--    REVOKEs first. Supabase's ALTER DEFAULT PRIVILEGES grants ALL on every new
+--    public table to anon and authenticated, and GRANT cannot subtract -- so
+--    without that REVOKE this table would have been UPDATE-able and DELETE-able
+--    at the privilege layer, leaving RLS as the sole barrier and the
+--    "second, independent barrier" claim untrue. Do not remove the REVOKE.
 -- =============================================================================
 
 CREATE TABLE public.admin_audit_log (
@@ -667,12 +703,30 @@ CREATE POLICY "books_uploads_delete_admin"
 -- =============================================================================
 -- 7. Table privileges
 --
--- Stated explicitly rather than left to Supabase's ALTER DEFAULT PRIVILEGES.
 -- RLS is only consulted AFTER the grant check: a table with perfect policies but
--- no GRANT returns "permission denied for table" from PostgREST. Being explicit
--- also means anon is never granted a write privilege at all -- a second,
--- independent barrier behind the "no anon write policy" rule above.
+-- no GRANT returns "permission denied for table" from PostgREST.
+--
+-- The REVOKE line is what makes the grant list mean anything. Supabase ships
+--   ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES
+--     TO postgres, anon, authenticated, service_role;
+-- so every table above was born with ALL already granted to anon and
+-- authenticated, and GRANT is additive -- it cannot take that away. The draft
+-- claimed these grants were "a second, independent barrier behind the no-anon-
+-- write-policy rule"; without the REVOKE that claim was false, because anon
+-- still held INSERT/UPDATE/DELETE underneath (RLS was the ONLY barrier, and
+-- admin_audit_log's append-only guarantee rested on the same illusion -- the
+-- table was UPDATE-able and DELETE-able at the privilege layer despite the
+-- deliberately absent policies). Revoking first makes the barrier real.
 -- =============================================================================
+
+REVOKE ALL ON
+    public.sections,
+    public.categories,
+    public.essays,
+    public.admin_audit_log,
+    public.council_sessions,
+    public.books_uploads
+  FROM anon, authenticated;
 
 GRANT SELECT                         ON public.sections        TO anon;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.sections        TO authenticated;
@@ -701,6 +755,11 @@ GRANT ALL                            ON public.books_uploads   TO service_role;
 -- Prerequisite for the inline admin checks above: the EXISTS subqueries run as
 -- the calling role, so `authenticated` must hold SELECT on user_roles AND
 -- user_roles' own RLS must let a user see their own rows. Restated here so this
--- file is not silently dependent on grant ordering. anon is deliberately NOT
--- granted -- no anon policy references user_roles.
+-- file is not silently dependent on grant ordering.
+--
+-- This is a GRANT and deliberately NOT part of the REVOKE list above:
+-- 01_foundation.sql owns user_roles' privilege set (anon keeps SELECT there on
+-- purpose, so that a policy inlining the user_roles EXISTS evaluates to false
+-- for anon instead of erroring with "permission denied for table user_roles").
+-- Re-revoking it here would silently undo that.
 GRANT SELECT ON public.user_roles TO authenticated;
