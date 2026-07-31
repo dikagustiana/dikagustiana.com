@@ -1,6 +1,6 @@
-# project_id is rewired to the rebuilt project once it exists; see
-# docs/SESSION_LOG.md. The old ref (rhwzvgklasvitocbbhvi) is a deleted project.
-project_id = "PENDING"
+# dikagustiana-com, created 2026-07-31 in ap-southeast-1 (Singapore).
+# The old ref (rhwzvgklasvitocbbhvi) is a deleted project.
+project_id = "asypkbkiebjvvpimewfp"
 
 # council-review is the only edge function left after the rebuild. The quant,
 # remora and personal-finance functions were cut with their modules.
