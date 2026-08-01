@@ -38,10 +38,13 @@ export function useFsliPage(slug: string) {
         .from('fsli_pages')
         .select('*')
         .eq('slug', slug)
-        .single();
+        // maybeSingle, not single: PostgREST answers `single()` with HTTP 406
+        // when no row matches, so an unknown slug surfaced as a swallowed
+        // request error behind a thin page instead of a "not found" state.
+        .maybeSingle();
 
       if (error) throw error;
-      return data as FsliPage;
+      return (data as FsliPage) ?? null;
     },
     enabled: !!slug,
   });

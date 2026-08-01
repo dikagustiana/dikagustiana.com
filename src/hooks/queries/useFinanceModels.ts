@@ -53,9 +53,10 @@ export const useFinanceModelBySlug = (slug: string) =>
         .from('finance_models')
         .select('*')
         .eq('slug', slug)
-        .single();
+        // maybeSingle, not single: `single()` returns HTTP 406 for zero rows.
+        .maybeSingle();
       if (error) throw error;
-      return data as FinanceModel;
+      return (data as FinanceModel) ?? null;
     },
     enabled: !!slug,
   });

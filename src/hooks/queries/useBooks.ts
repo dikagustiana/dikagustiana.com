@@ -50,10 +50,12 @@ export const useBook = (id: string) => {
         .from('books_uploads')
         .select('*')
         .eq('id', id)
-        .single();
+        // maybeSingle, not single: `single()` returns HTTP 406 for zero rows,
+        // which the reader saw as a failed request rather than "no such book".
+        .maybeSingle();
 
       if (error) throw error;
-      return data as Book;
+      return (data as Book) ?? null;
     },
     enabled: !!id,
   });
