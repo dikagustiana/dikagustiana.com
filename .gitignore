@@ -42,3 +42,4 @@ supabase/.branches
 
 # Archives — never track source-of-truth code inside zips again
 *.zip
+backups/
