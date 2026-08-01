@@ -7,8 +7,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { EssayEditor, getPlainTextFromHtml } from '@/components/editorial/EssayEditor';
 import { WriterPreview } from './WriterPreview';
-import { WriterValidation, ValidationResult, validateEssay } from './WriterValidation';
-import { WriterMetadata } from './WriterMetadata';
+import { ValidationResult, validateEssay } from './WriterValidation';
+import { PublishModal } from './PublishModal';
+import TextareaAutosize from 'react-textarea-autosize';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -23,17 +24,8 @@ import {
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import {
   ArrowLeft,
-  Save,
-  Eye,
-  EyeOff,
-  Send,
-  Clock,
   Loader2,
-  ExternalLink,
-  AlertTriangle,
-  CheckCircle,
   CloudOff,
-  Cloud,
   History,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -138,7 +130,10 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
   const { data: allFinanceModules = [] } = useAllFinanceModules();
 
   // Editor state
-  const [showPreview, setShowPreview] = useState(true);
+  // The canvas is the default. Preview is a deliberate detour, not the
+  // resting state — a split view means the writer is always half-reading.
+  const [showPreview, setShowPreview] = useState(false);
+  const [showPublish, setShowPublish] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(!!essayId || !!initialSlug);
   const [isDirty, setIsDirty] = useState(false);
@@ -320,10 +315,17 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
   // ── Autosave: debounced backup into essay_revisions ──
   // Deliberately does NOT write the essays row. A backup is not a save, and a
   // failed backup must never be able to touch what is already published.
+  // An essay that has never been live can autosave straight into its own row:
+  // there is no published page to damage, so "Saved" can be literally true.
+  // Once it is published, autosave drops back to backup-only and only an
+  // explicit Save touches the live row.
+  const persistDraftToEssay = status !== 'published';
+
   const {
     autosaveStatus,
     lastBackupAt,
     autosaveError,
+    lastSavedTo,
     recordRevision,
     flush: flushAutosave,
   } = useEssayAutosave({
@@ -334,7 +336,11 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
     snippet: deck || null,
     status,
     doc: contentJson,
-    enabled: !isLoading,
+    html: content,
+    persistToEssay: persistDraftToEssay,
+    // Never race a manual save: the two would write the same row with
+    // different column sets and the later one would win arbitrarily.
+    enabled: !isLoading && !isSaving,
   });
 
   // ── Recovery: an autosaved backup newer than the saved essay row ──
@@ -568,112 +574,75 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
   const isNew = !essayDbId;
 
   return (
-    <div className="h-screen flex flex-col bg-background">
-      {/* Header */}
-      <header className="flex-shrink-0 border-b border-border bg-card px-4 py-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={() => navigate(`/admin/writer/${section}`)}
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="font-display font-semibold">
-                  {isNew ? 'New Essay' : 'Edit Essay'}
-                </h1>
-                <Badge variant="outline" className="text-xs">
-                  {sectionLabel}
-                </Badge>
-                <Badge 
-                  variant={status === 'published' ? 'default' : 'secondary'}
-                  className="text-xs"
-                >
-                  {status}
-                </Badge>
-              </div>
-              {!isNew && slug && (
-                <p className="text-xs text-muted-foreground">{slug}</p>
-              )}
-            </div>
-          </div>
+    <div className="flex h-screen flex-col bg-background">
+      {/* ── The bar. Nearly invisible by design: back, state, and the two
+             things you do when you stop writing. Nothing else belongs here —
+             a word count in the corner is a number the writer will watch. ── */}
+      <header className="flex-shrink-0 border-b border-border/60 bg-background">
+        {/* The three groups shrink in a fixed order on a narrow screen: the
+            back label goes first, then the status chip truncates. The two
+            buttons on the right never shrink — they are the only things in
+            the bar you press. Without this the row simply overflowed at
+            375px and the page scrolled sideways. */}
+        <div className="mx-auto flex h-12 w-full max-w-[52rem] items-center justify-between gap-2 px-4 sm:gap-4">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="-ml-2 shrink-0 gap-1.5 px-2 text-muted-foreground hover:text-foreground sm:px-3"
+            onClick={() => navigate(`/admin/writer/${section}`)}
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span className="hidden sm:inline">Posts</span>
+            <span className="sr-only sm:hidden">Posts</span>
+          </Button>
 
-          <div className="flex items-center gap-3">
-            {/* Backup state. Distinct from "Saved": autosave writes a backup
-                revision, not the essay row, so the wording must not imply the
-                published essay changed. A failure is loud by design. */}
+          {/* Draft · Saved — and never "Saved" when the text lives only in a
+              backup. An unpublished essay autosaves into the essays row, so
+              the word is literally true there; a published one does not. */}
+          <span className="flex min-w-0 items-center gap-1.5 truncate text-xs text-muted-foreground">
+            <span>{status === 'published' ? 'Published' : 'Draft'}</span>
+            <span aria-hidden>·</span>
             {autosaveStatus === 'error' ? (
               <span
-                className="text-sm font-medium text-destructive flex items-center gap-1"
+                className="flex items-center gap-1 font-medium text-destructive"
                 title={autosaveError ?? undefined}
               >
-                <CloudOff className="h-4 w-4" />
-                Backup failed
+                <CloudOff className="h-3.5 w-3.5" />
+                {persistDraftToEssay ? 'Save failed' : 'Backup failed'}
               </span>
             ) : autosaveStatus === 'saving' ? (
-              <span className="text-sm text-muted-foreground flex items-center gap-1">
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                Backing up…
+              <span className="flex items-center gap-1">
+                <Loader2 className="h-3 w-3 animate-spin" />
+                {persistDraftToEssay ? 'Saving…' : 'Backing up…'}
               </span>
+            ) : isDirty && autosaveStatus === 'unsaved' ? (
+              <span>Unsaved</span>
             ) : lastBackupAt ? (
-              <span className="text-sm text-muted-foreground flex items-center gap-1">
-                <Cloud className="h-3.5 w-3.5" />
-                Backed up {lastBackupAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              <span className="truncate">
+                {lastSavedTo === 'essay' ? 'Saved' : 'Backed up'}
+                <span className="hidden sm:inline">
+                  {' '}
+                  {lastBackupAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </span>
               </span>
-            ) : null}
-
-            {isDirty && (
-              <span className="text-sm text-amber-600 flex items-center gap-1">
-                <span className="h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
-                Unsaved
-              </span>
+            ) : isDirty ? (
+              <span>Unsaved</span>
+            ) : (
+              <span>Saved</span>
             )}
+          </span>
 
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <Clock className="h-3.5 w-3.5" />
-              {readTime} • {wordCount} words
-            </div>
-
+          <div className="flex shrink-0 items-center gap-1">
             <Button
-              variant="outline"
+              variant="ghost"
               size="sm"
-              onClick={() => setShowPreview(!showPreview)}
+              className="px-2 text-muted-foreground hover:text-foreground sm:px-3"
+              onClick={() => setShowPreview(v => !v)}
             >
-              {showPreview ? <EyeOff className="h-4 w-4 mr-1" /> : <Eye className="h-4 w-4 mr-1" />}
-              {showPreview ? 'Focus' : 'Preview'}
+              {showPreview ? 'Write' : 'Preview'}
             </Button>
-
-            {status === 'published' && slug && (
-              <Button
-                variant="outline"
-                size="sm"
-                asChild
-              >
-                <a href={getPublicUrl()} target="_blank" rel="noopener noreferrer">
-                  <ExternalLink className="h-4 w-4 mr-1" />
-                  View
-                </a>
-              </Button>
-            )}
-
-            <Button
-              variant="outline"
-              onClick={() => handleSave('draft')}
-              disabled={isSaving}
-            >
-              {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4 mr-1" />}
-              Save Draft
-            </Button>
-
-            <Button
-              onClick={() => handleSave('published')}
-              disabled={isSaving || !validation.canPublish}
-            >
-              {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4 mr-1" />}
-              Publish
+            <Button size="sm" className="px-3" onClick={() => setShowPublish(true)}>
+              Continue
             </Button>
           </div>
         </div>
@@ -683,15 +652,14 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
           Offered, never applied — restoring and discarding are both the
           author's call, so neither version is destroyed behind their back. */}
       {recovery && (
-        <div className="flex-shrink-0 border-b border-border bg-amber-50 dark:bg-amber-950/30 px-4 py-3">
-          <Alert className="border-0 bg-transparent p-0">
+        <div className="flex-shrink-0 border-b border-border bg-amber-50 px-4 py-3 dark:bg-amber-950/30">
+          <Alert className="mx-auto max-w-[52rem] border-0 bg-transparent p-0">
             <History className="h-4 w-4" />
             <AlertTitle>Unsaved draft recovered from backup</AlertTitle>
             <AlertDescription className="flex flex-wrap items-center gap-3">
               <span>
-                An autosaved version from{' '}
-                {new Date(recovery.savedAt).toLocaleString()} differs from the saved essay.
-                It was probably captured after the last save.
+                An autosaved version from {new Date(recovery.savedAt).toLocaleString()} differs
+                from the saved essay. It was probably captured after the last save.
               </span>
               <span className="flex items-center gap-2">
                 <Button size="sm" onClick={handleRestoreRecovery}>
@@ -706,146 +674,108 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
         </div>
       )}
 
-      {/* Main Editor Area */}
-      <div className="flex-1 overflow-hidden">
+      {/* ── The canvas. One column, centred, and the rest of the screen left
+             deliberately empty. ── */}
+      <div className="flex-1 overflow-y-auto">
         {showPreview ? (
-          <ResizablePanelGroup direction="horizontal">
-            <ResizablePanel defaultSize={55} minSize={40}>
-              <div className="h-full overflow-y-auto p-6 space-y-6">
-                <WriterMetadata
-                  title={title}
-                  setTitle={setTitle}
-                  slug={slug}
-                  setSlug={setSlug}
-                  phase={phase}
-                  setPhase={setPhase}
-                  phaseOptions={PHASE_OPTIONS[section] || []}
-                  categoryId={categoryId}
-                  setCategoryId={setCategoryId}
-                  categories={categories}
-                  author={author}
-                  setAuthor={setAuthor}
-                  date={date}
-                  setDate={setDate}
-                  deck={deck}
-                  setDeck={setDeck}
-                  heroImageUrl={heroImageUrl}
-                  setHeroImageUrl={setHeroImageUrl}
-                  heroCaption={heroCaption}
-                  setHeroCaption={setHeroCaption}
-                  keyTakeaways={keyTakeaways}
-                  setKeyTakeaways={setKeyTakeaways}
-                  references={references}
-                  setReferences={setReferences}
-                  authorBio={authorBio}
-                  setAuthorBio={setAuthorBio}
-                  isNew={isNew}
-                  moduleId={moduleId}
-                  setModuleId={setModuleId}
-                  financeOrder={financeOrder}
-                  setFinanceOrder={setFinanceOrder}
-                  lessonType={lessonType}
-                  setLessonType={setLessonType}
-                  isFinanceSection={section === 'finance'}
-                />
-
-                {/* Body Editor with Figure Support */}
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Body Content</label>
-                  <EssayEditor
-                    content={content}
-                    onChange={setContent}
-                    onChangeJson={setContentJson}
-                    section={section as 'finance' | 'green-transition' | 'next-big-thing'}
-                    distractionFree={false}
-                    minHeight="400px"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Use H2 and H3 for headings. Click the image button to insert figures.
-                  </p>
-                </div>
-
-                {/* Validation Checklist */}
-                <WriterValidation validation={validation} />
-              </div>
-            </ResizablePanel>
-
-            <ResizableHandle withHandle />
-
-            <ResizablePanel defaultSize={45} minSize={30}>
-              <div className="h-full overflow-y-auto bg-muted/20">
-                <div className="sticky top-0 z-10 bg-muted/80 backdrop-blur px-4 py-2 text-xs uppercase tracking-wide text-muted-foreground font-medium border-b border-border">
-                  Live Preview (Aeon Style)
-                </div>
-                <WriterPreview
-                  title={title}
-                  deck={deck}
-                  author={author}
-                  date={date}
-                  readTime={readTime}
-                  phase={phase}
-                  phaseOptions={PHASE_OPTIONS[section]}
-                  heroImageUrl={heroImageUrl}
-                  heroCaption={heroCaption}
-                  content={content}
-                  keyTakeaways={keyTakeaways.filter(k => k.trim())}
-                  references={references.filter(r => r.label.trim())}
-                  authorBio={authorBio}
-                  section={section}
-                  updatedAt={updatedAt}
-                  createdAt={createdAt}
-                />
-              </div>
-            </ResizablePanel>
-          </ResizablePanelGroup>
+          <div className="mx-auto w-full max-w-[52rem] px-4 py-10">
+            <WriterPreview
+              title={title}
+              deck={deck}
+              author={author}
+              date={date}
+              readTime={readTime}
+              phase={phase}
+              phaseOptions={PHASE_OPTIONS[section]}
+              heroImageUrl={heroImageUrl}
+              heroCaption={heroCaption}
+              content={content}
+              keyTakeaways={keyTakeaways.filter(k => k.trim())}
+              references={references.filter(r => r.label.trim())}
+              authorBio={authorBio}
+              section={section}
+              updatedAt={updatedAt}
+              createdAt={createdAt}
+            />
+          </div>
         ) : (
-          /* Distraction-free mode */
-          <div className="h-full overflow-y-auto">
-            <div className="max-w-3xl mx-auto py-8 px-6 space-y-6">
-              {/* Title */}
-              <Input
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="Essay Title..."
-                className="text-3xl font-display font-bold border-0 border-b rounded-none px-0 focus-visible:ring-0 h-auto py-2"
-              />
+          // The left padding is the gutter the `+` lives in. It is 2.5rem even
+          // on the narrowest screen, because a button overlapping the text is
+          // worse than an asymmetric margin.
+          <div className="mx-auto w-full max-w-[52rem] pb-32 pl-10 pr-4 pt-12 sm:pl-16 sm:pr-4">
+            {/* Title and subtitle are the top of the document. Same database
+                fields as before — `title` and `snippet`/presentation.deck —
+                only the editing location has changed. They are inputs rather
+                than editor nodes on purpose: making them document nodes would
+                change the shape of every stored content_json. */}
+            <TextareaAutosize
+              value={title}
+              onChange={e => setTitle(e.target.value)}
+              placeholder="Title"
+              aria-label="Title"
+              rows={1}
+              className="w-full max-w-[680px] resize-none border-0 bg-transparent p-0 font-display text-4xl font-bold leading-tight text-foreground outline-none placeholder:text-muted-foreground/40 focus:ring-0"
+            />
+            <TextareaAutosize
+              value={deck}
+              onChange={e => setDeck(e.target.value)}
+              placeholder="Add a subtitle..."
+              aria-label="Subtitle"
+              rows={1}
+              className="mt-3 w-full max-w-[680px] resize-none border-0 bg-transparent p-0 text-xl leading-snug text-muted-foreground outline-none placeholder:text-muted-foreground/30 focus:ring-0"
+            />
 
-              {/* Deck */}
-              <Textarea
-                value={deck}
-                onChange={(e) => setDeck(e.target.value)}
-                placeholder="Write a one-sentence thesis (the deck line)..."
-                className="text-xl text-muted-foreground border-0 border-b rounded-none px-0 focus-visible:ring-0 resize-none min-h-[60px]"
-              />
-
-              {/* Body with Figure Support */}
+            <div className="mt-8">
               <EssayEditor
                 content={content}
                 onChange={setContent}
                 onChangeJson={setContentJson}
                 section={section as 'finance' | 'green-transition' | 'next-big-thing'}
-                distractionFree={true}
-                minHeight="500px"
+                minHeight="55vh"
               />
-
-              {/* Quick validation indicator */}
-              <div className="flex items-center gap-2 pt-4 border-t border-border">
-                {validation.canPublish ? (
-                  <span className="flex items-center gap-1 text-sm text-primary">
-                    <CheckCircle className="h-4 w-4" />
-                    Ready to publish
-                  </span>
-                ) : (
-                  <span className="flex items-center gap-1 text-sm text-amber-600">
-                    <AlertTriangle className="h-4 w-4" />
-                    {validation.errors.length} issue{validation.errors.length !== 1 ? 's' : ''} to fix
-                  </span>
-                )}
-              </div>
             </div>
           </div>
         )}
       </div>
+
+      <PublishModal
+        open={showPublish}
+        onOpenChange={setShowPublish}
+        isPublished={status === 'published'}
+        isFinanceSection={section === 'finance'}
+        modules={allFinanceModules}
+        moduleId={moduleId}
+        setModuleId={setModuleId}
+        financeOrder={financeOrder}
+        setFinanceOrder={setFinanceOrder}
+        lessonType={lessonType}
+        setLessonType={setLessonType}
+        categories={categories}
+        categoryId={categoryId}
+        setCategoryId={setCategoryId}
+        keyTakeaways={keyTakeaways}
+        setKeyTakeaways={setKeyTakeaways}
+        references={references}
+        setReferences={setReferences}
+        author={author}
+        setAuthor={setAuthor}
+        date={date}
+        setDate={setDate}
+        authorBio={authorBio}
+        setAuthorBio={setAuthorBio}
+        heroImageUrl={heroImageUrl}
+        setHeroImageUrl={setHeroImageUrl}
+        heroCaption={heroCaption}
+        setHeroCaption={setHeroCaption}
+        validation={validation}
+        isSaving={isSaving}
+        onPublish={() => {
+          void handleSave('published').then(() => setShowPublish(false));
+        }}
+        onSaveDraft={() => {
+          void handleSave('draft').then(() => setShowPublish(false));
+        }}
+      />
     </div>
   );
 }

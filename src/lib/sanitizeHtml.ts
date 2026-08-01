@@ -23,6 +23,9 @@ const ALLOWED_ATTR = [
   // Table geometry. Without colspan/rowspan a merged cell survives the
   // sanitizer as an ordinary one and the table silently loses its shape.
   'colspan', 'rowspan', 'colwidth', 'data-colwidth',
+  // Link-preview card. `data-type` above identifies it; this carries the
+  // payload so the block round-trips through HTML back into the editor.
+  'data-link-card',
 ];
 
 export function sanitizeHtml(html: string | null | undefined): string {

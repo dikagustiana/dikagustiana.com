@@ -1,5 +1,5 @@
 export { WriterEditor } from './WriterEditor';
-export { WriterMetadata } from './WriterMetadata';
+export { PublishModal } from './PublishModal';
 export { WriterPreview } from './WriterPreview';
 export { WriterValidation, validateEssay } from './WriterValidation';
 export { WriterList } from './WriterList';

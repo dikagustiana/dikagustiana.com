@@ -10,6 +10,7 @@
 
 import type { JSONContent } from '@tiptap/core';
 import type { FigureBlockData } from '@/components/editorial/FigureBlock';
+import { attrJsonAttribute } from './attrJson';
 
 // ---------------------------------------------------------------------------
 // Format detection
@@ -126,6 +127,25 @@ function renderNode(node: JSONContent): string {
     case 'figure':
       return renderFigureHtml(node.attrs as unknown as FigureBlockData);
 
+    case 'linkCard': {
+      const url = String(node.attrs?.url ?? '');
+      if (!url) return '';
+      // Escaped here, because this builds an HTML *string* — nothing downstream
+      // will escape it for us. `renderHTML` writes the same blob raw, because
+      // there the DOM does the escaping. See src/lib/tiptap/attrJson.ts.
+      const data = attrJsonAttribute({
+        url,
+        title: String(node.attrs?.title ?? ''),
+        description: String(node.attrs?.description ?? ''),
+      });
+      const label = String(node.attrs?.title ?? '') || url;
+      return (
+        `<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer" ` +
+        `data-type="link-card" data-link-card="${data}" class="link-card">` +
+        `<span class="link-card__title">${escapeHtml(label)}</span></a>`
+      );
+    }
+
     case 'image': {
       const src = String(node.attrs?.src ?? '');
       if (!src) return '';
@@ -180,7 +200,7 @@ function renderChildren(content?: JSONContent[]): string {
 function renderFigureHtml(attrs: FigureBlockData): string {
   if (!attrs) return '';
 
-  const jsonData = JSON.stringify(attrs).replace(/"/g, '&quot;');
+  const jsonData = attrJsonAttribute(attrs);
   const isWide = attrs.widthMode === 'wide';
   const wideClass = isWide ? ' figure-block--wide' : '';
 
@@ -316,6 +336,11 @@ function blockMarkdown(node: JSONContent): string {
       const src = String(node.attrs?.src ?? '');
       if (!src) return '';
       return `![${String(node.attrs?.alt ?? 'image')}](${src})`;
+    }
+    case 'linkCard': {
+      const url = String(node.attrs?.url ?? '');
+      if (!url) return '';
+      return `[${String(node.attrs?.title ?? '') || url}](${url})`;
     }
     case 'table': {
       const rows = (node.content ?? []).map(row =>

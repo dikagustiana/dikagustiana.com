@@ -1,6 +1,7 @@
 import { Node, mergeAttributes } from '@tiptap/core';
 import { ReactNodeViewRenderer, NodeViewWrapper, NodeViewProps } from '@tiptap/react';
 import { FigureBlock, FigureBlockData } from '@/components/editorial/FigureBlock';
+import { attrJsonRaw, parseAttrJson } from '@/lib/tiptap/attrJson';
 
 // TipTap Node View component for rendering figures in the editor
 function FigureNodeView({ node, deleteNode, selected }: NodeViewProps) {
@@ -52,15 +53,10 @@ export const FigureExtension = Node.create({
         getAttrs: (dom) => {
           if (typeof dom === 'string') return {};
           const element = dom as HTMLElement;
-          const dataFigure = element.getAttribute('data-figure');
-          if (dataFigure) {
-            try {
-              return JSON.parse(dataFigure);
-            } catch {
-              return {};
-            }
-          }
-          return {};
+          // Tolerant on purpose: everything written before this fix is in the
+          // database pre-escaped, and a strict parse threw and silently reset
+          // every attribute to its default — an image reloaded as src="".
+          return parseAttrJson<Record<string, unknown>>(element.getAttribute('data-figure')) ?? {};
         },
       },
     ];
@@ -68,8 +64,8 @@ export const FigureExtension = Node.create({
   
   renderHTML({ node }) {
     const attrs = node.attrs as FigureBlockData;
-    const jsonData = JSON.stringify(attrs)
-      .replace(/"/g, '&quot;');
+    // Raw: this builds real DOM, and the serialiser escapes it on the way out.
+    const jsonData = attrJsonRaw(attrs);
     
     return [
       'figure',

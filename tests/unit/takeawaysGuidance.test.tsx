@@ -7,12 +7,17 @@
  * unplaced finance essay sends `lessonType: null`, which `validateEssay` treats
  * strictly. Authors in those contexts were told the opposite of what the
  * Publish button would do.
+ *
+ * The guidance moved from the metadata panel to the publish modal when the
+ * writing surface was reshaped; the copy — and this test — followed it there,
+ * because the invariant is about the words next to the gate, not the panel
+ * that used to hold them.
  */
 
 import { describe, it, expect, vi } from 'vitest';
 import { screen } from '@testing-library/react';
 import { validateEssay } from '@/components/writer/WriterValidation';
-import { WriterMetadata } from '@/components/writer/WriterMetadata';
+import { PublishModal } from '@/components/writer/PublishModal';
 import { renderWithRouter } from './helpers/renderWithProviders';
 
 vi.mock('@/hooks/queries/useFinance', () => ({
@@ -68,29 +73,33 @@ describe('key-takeaways gate: strict unless the lesson type says otherwise', () 
   });
 });
 
-function renderMetadata(overrides: Partial<Parameters<typeof WriterMetadata>[0]>) {
+function renderMetadata(
+  overrides: Partial<Parameters<typeof PublishModal>[0]>,
+) {
   const noop = () => {};
   return renderWithRouter(
-    <WriterMetadata
-      title="" setTitle={noop}
-      slug="" setSlug={noop}
-      phase="" setPhase={noop}
-      phaseOptions={[]}
-      categoryId="" setCategoryId={noop}
-      categories={[]}
-      author="" setAuthor={noop}
-      date="" setDate={noop}
-      deck="" setDeck={noop}
-      heroImageUrl="" setHeroImageUrl={noop}
-      heroCaption="" setHeroCaption={noop}
-      keyTakeaways={['', '', '']} setKeyTakeaways={noop}
-      references={[]} setReferences={noop}
-      authorBio="" setAuthorBio={noop}
-      isNew={false}
+    <PublishModal
+      open
+      onOpenChange={noop}
+      isPublished={false}
+      isFinanceSection={false}
+      modules={[]}
       moduleId={null} setModuleId={noop}
       financeOrder={null} setFinanceOrder={noop}
       lessonType="concept" setLessonType={noop}
-      isFinanceSection={false}
+      categories={[]}
+      categoryId="" setCategoryId={noop}
+      keyTakeaways={['', '', '']} setKeyTakeaways={noop}
+      references={[]} setReferences={noop}
+      author="" setAuthor={noop}
+      date="" setDate={noop}
+      authorBio="" setAuthorBio={noop}
+      heroImageUrl="" setHeroImageUrl={noop}
+      heroCaption="" setHeroCaption={noop}
+      validation={{ canPublish: true, errors: [], warnings: [], figureCount: 0 }}
+      isSaving={false}
+      onPublish={noop}
+      onSaveDraft={noop}
       {...overrides}
     />,
   );

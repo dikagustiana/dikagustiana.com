@@ -215,6 +215,48 @@
 
 /* ── Longform essay overrides (Noahpinion-style, finance-in-motion only) ── */
 @layer components {
+  /* ── The reading surface ──────────────────────────────────────────────
+     `prose-editorial` was a class name with no rules: every measurement on
+     the published page came from per-element utility classes inside
+     ArticleBody, which is the same "inherited from nowhere in particular"
+     problem the writing canvas had. The measure, the type size and the
+     line-height are decisions, so they are written down here.
+
+     The measure matches the writing canvas (680px), so what the author sees
+     while writing is the line length the reader gets. */
+  .prose-editorial {
+    --measure: 680px;
+    --measure-wide: 780px;
+  }
+
+  .prose-editorial > p,
+  .prose-editorial > ul,
+  .prose-editorial > ol,
+  .prose-editorial > blockquote,
+  .prose-editorial > pre,
+  .prose-editorial > h2,
+  .prose-editorial > h3,
+  .prose-editorial > hr,
+  .prose-editorial > table {
+    max-width: var(--measure);
+    margin-inline: auto;
+  }
+
+  .prose-editorial > p {
+    font-size: 1.125rem;
+    line-height: 1.75;
+  }
+
+  /* Figures are allowed slightly wider than the text column — the reference
+     asks for it and a 680px-wide chart is hard to read. Clamped to the
+     viewport so the wider block can never introduce horizontal scroll. */
+  .prose-editorial > figure,
+  .prose-editorial > .figure-block,
+  .prose-editorial > div:has(> table) {
+    max-width: min(var(--measure-wide), calc(100vw - 2rem));
+    margin-inline: auto;
+  }
+
   .longform-body p {
     @apply text-xl leading-loose text-foreground mb-6;
   }
