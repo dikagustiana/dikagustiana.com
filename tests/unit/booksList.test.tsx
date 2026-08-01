@@ -11,6 +11,10 @@ vi.mock('@/components/layouts/PageLayout', () => ({
   PageLayout: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
 vi.mock('@/components/SEO', () => ({ SEO: () => null }));
+// The admin upload card carries auth context and its own mutation hook; it is
+// admin-only chrome from this page's point of view and has no bearing on the
+// list states under test.
+vi.mock('@/components/books/BookUploadCard', () => ({ BookUploadCard: () => null }));
 
 import BooksList from '@/pages/BooksList';
 
