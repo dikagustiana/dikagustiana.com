@@ -22,8 +22,6 @@ export interface Essay {
   prerequisites: string[] | null;
   learning_outcomes: string[] | null;
   presentation: EssayPresentation | null;
-  /** @deprecated legacy column, dropped by the staged _pending migration */
-  economist_fields?: EssayPresentation | null;
   fsli_slug: string | null;
   topic: string | null;
   finance_section: string | null;
@@ -98,7 +96,9 @@ export const useEssay = (slug: string, options: UseEssayOptions = {}) => {
         .from('essays')
         .select('*')
         .eq('slug', slug)
-        .single();
+        // maybeSingle: a row that does not exist is a not-found for the page
+        // to render, not a 406 from PostgREST behind a page that looks fine.
+        .maybeSingle();
 
       if (error) throw error;
       return data as Essay;

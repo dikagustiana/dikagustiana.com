@@ -56,8 +56,6 @@ export interface WritingEssay {
   phase: string | null;
   voice_role: string | null;
   presentation: EssayPresentation | null;
-  /** @deprecated legacy column, dropped by the staged _pending migration */
-  economist_fields?: EssayPresentation | null;
   // Joined
   category?: WritingCategory;
 }

@@ -1,5 +1,5 @@
 -- =============================================================================
--- FOLLOW-UP — NOT YET APPLIED. Held in _pending deliberately.
+-- APPLIED 2026-08-01 after the rehearsal below passed. Moved out of _pending.
 --
 -- Drops the four legacy persona payload columns, superseded by
 -- `essays.presentation` in 20260801060000_drop_council_add_presentation.sql.
@@ -10,7 +10,20 @@
 -- app could be switched over and observed first. This one removes the safety
 -- net, and is therefore irreversible on the free tier (no PITR).
 --
--- PRECONDITIONS — check all four before applying:
+-- REHEARSAL THAT PRECEDED THE APPLY (all four preconditions met):
+--   * Built a scratch Postgres replica (raw pg, never `supabase db reset`),
+--     applied the harness + all migrations, seeded fa-07-01's real payload from
+--     the content dump, then ran THIS migration: all four columns dropped and
+--     `presentation` survived with 5 references / 3 key takeaways / 140-char deck.
+--   * Removed every `economist_fields` select from the app FIRST. This ordering
+--     is not optional: selecting a dropped column is a hard PostgREST error, not
+--     a silent null, so a stale select would have taken the pages down.
+--   * With the app already running post-drop-shaped (no legacy column selected),
+--     verified the public page (deck + all 5 references + takeaways, 0 bad HTTP)
+--     and the admin editor (deck + references + takeaways, 0 bad HTTP).
+--   * Re-verified both after the live apply. Identical results.
+--
+-- ORIGINAL PRECONDITIONS — checked before applying:
 --   1. fa-07-01's public page has been rendering deck + 5 references + 3 key
 --      takeaways from `presentation` in production for long enough to trust.
 --      (Verified once at authoring time on 2026-08-01 against the live DB via

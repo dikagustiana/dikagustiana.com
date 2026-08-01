@@ -353,3 +353,115 @@ database is rebuilt fresh. Decisions below, newest first within this section.
   `HTTPS_PROXY` can. The relay keeps the test hitting the REAL project — real RLS, triggers,
   storage, edge function — which a mock would not. The relay is dev-only and never part of
   the app or deployment; `.env` is restored to production values.
+
+---
+
+## 2026-08-01 — The key-takeaways publish gate
+
+**Where it actually is:** `src/components/writer/WriterValidation.tsx:54-60`.
+
+```ts
+const filledTakeaways = keyTakeaways.filter(k => k.trim()).length;
+if (filledTakeaways < 3) {
+  errors.push({ field: 'keyTakeaways',
+    message: `At least 3 key takeaways required (${filledTakeaways}/3)` });
+}
+```
+
+Not in the deleted `src/lib/admin/publishValidation.ts` — that module was dead code imported
+only by its own test and was removed with the persona system. `WriterValidation.validateEssay`
+is the live gate: `WriterEditor` computes it into `validation.canPublish`, which disables the
+Publish button.
+
+### What it protects
+
+Something real. `KeyTakeaways` renders as a standing block in the article shell, and the
+Economist-style layout the site borrows treats it as part of the furniture rather than an
+optional extra. Three is the point below which the block stops reading as a summary and starts
+reading as a stray bullet — one takeaway is a sentence that belonged in the deck, two look like
+an unfinished list. The rule is really "if you are going to show this block, fill it", and it
+also functions as a forcing device: being made to state three claims before publishing is a
+cheap editorial check on whether the piece has a thesis.
+
+### What it costs
+
+It blocked a finished 3,246-word essay in a previous session. `fa-07-01` only satisfies it
+because three takeaways were authored into `economist_fields` by hand to get past the gate.
+That is the tell: a rule that gets satisfied by hand-editing the database is not shaping the
+writing, it is being routed around.
+
+The deeper mismatch is that it is a **uniform** rule over a **non-uniform** corpus. The
+curriculum is 161 lesson stubs. `lesson_type` currently reads `concept` on all 162 rows, but
+the enum already anticipates `framework`, `case-study`, `exercise`, `model-walkthrough`. An
+exercise or a model walkthrough has no natural "three key takeaways" — its takeaway is the
+worked artefact. Forcing three onto it produces filler, and filler in a standing block is worse
+than no block, because the reader learns to skip it.
+
+### Recommendation — scope per `lesson_type`, do not relax globally
+
+1. **Require 3 for the essay-shaped types** (`concept`, `framework`) — the pieces where the
+   block earns its place and the forcing function is worth having.
+2. **Advisory for the rest** (`case-study`, `exercise`, `model-walkthrough`) — surface it as a
+   warning in `WriterValidation`, not an error, so it never blocks Publish.
+3. **All-or-nothing within a type:** if takeaways are supplied at all, require the full three.
+   One or two should stay an error under every `lesson_type`, because a half-filled standing
+   block is the actual failure mode.
+
+Relaxing globally throws away a rule that is doing real work on the essays. Making it purely
+advisory has the same effect more slowly. Scoping keeps the pressure where it helps and lifts
+it where it manufactures filler.
+
+**Not implemented in this session** — recorded as a recommendation, per the mandate's
+instruction not to silently delete it.
+
+---
+
+## 2026-08-01 — Topic and Phase are required but redundant for curriculum essays
+
+### The finding, with counts from the live database
+
+| column | populated | of 162 |
+|---|---|---|
+| `topic` | **0** | 162 |
+| `phase` | 1 | 162 |
+| `module_id` | 161 | 162 |
+| `finance_order` | 161 | 162 |
+
+`topic` is NULL on **every single essay**. `phase` is set on exactly one. Meanwhile
+`module_id` is set on 161. The fields the author is asked to fill are empty; the field that
+actually locates the essay is populated.
+
+**The asterisk is already decorative.** `WriterMetadata.tsx:162` labels the control
+`Topic/Phase *`, but `WriterValidation.validateEssay` never checks either field — it validates
+title, category, deck, key takeaways, word count and figures. So the UI signals "required"
+while nothing enforces it. That is worse than either honest option: it trains the author to
+fill a field that does not matter and would not have been checked anyway.
+
+### Why they are redundant
+
+For a curriculum essay, placement already determines both. `module_id` → `finance_modules`
+gives `track_slug` and the module, and the essay's position is `finance_order`. The editorial
+`phase` is a parallel, weaker encoding of the same fact — which is exactly why the placement
+coherence trigger exists to stop the two trees disagreeing. Asking for three fields where one
+determines the others is an invitation for them to drift apart.
+
+### Recommendation — derive, do not ask
+
+1. **Make module the single placement input** for `section = 'finance'`. Choosing the module
+   sets `finance_section` (from `finance_modules.track_slug`) and `phase` (from the track), the
+   way `resolvePlacementFields` already does in the WriterStudio stack.
+2. **Hide Topic/Phase for curriculum essays.** Show it read-only as *"Derived from module:
+   Analytics · T4-M07"* so the author can see the consequence of their one choice without being
+   able to contradict it.
+3. **Keep it editable only where nothing derives it** — the editorial sections
+   (`green-transition`, `development-finance`, `critical-thinking`) where `phase` is the real
+   placement and there is no module.
+4. **Drop the asterisk** wherever the field is not actually validated. Either enforce it or do
+   not mark it required.
+
+`topic` is a separate concern: it is used by the accounting consolidation route
+(`/accounting/consolidation/:topic`) and by `useEssaysByTopic`, so it should stay in the schema
+— but it has no business being a required field on a finance curriculum essay, where zero rows
+use it.
+
+**Not implemented in this session** — recorded as a proposal.

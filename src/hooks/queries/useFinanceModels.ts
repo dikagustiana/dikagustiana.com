@@ -53,10 +53,11 @@ export const useFinanceModelBySlug = (slug: string) =>
         .from('finance_models')
         .select('*')
         .eq('slug', slug)
-        // maybeSingle, not single: `single()` returns HTTP 406 for zero rows.
+        // maybeSingle: a row that does not exist is a not-found for the page
+        // to render, not a 406 from PostgREST behind a page that looks fine.
         .maybeSingle();
       if (error) throw error;
-      return (data as FinanceModel) ?? null;
+      return data as FinanceModel;
     },
     enabled: !!slug,
   });
