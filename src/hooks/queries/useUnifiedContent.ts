@@ -17,6 +17,8 @@ export interface UnifiedContentItem {
   published: boolean;
   status: string | null;
   voice_role: string | null;
+  finance_section?: string | null;
+  finance_modules?: { slug: string; track_slug: string } | null;
   snippet: string | null;
   updated_at: string;
   created_at: string;
@@ -40,7 +42,13 @@ export function useUnifiedContent(filter: ContentFilter = {}) {
       if (filter.contentType !== 'fsli') {
         let essayQuery = supabase
           .from('essays')
-          .select('id, title, slug, section, phase, fsli_slug, topic, published, status, voice_role, snippet, updated_at, created_at')
+          // finance_section + the module join feed the canonical URL builder,
+          // so the admin "View public" link resolves for curriculum essays.
+          .select(`
+            id, title, slug, section, phase, fsli_slug, topic, published, status,
+            voice_role, snippet, updated_at, created_at, finance_section,
+            finance_modules!essays_module_id_fkey ( slug, track_slug )
+          `)
           .order('updated_at', { ascending: false });
 
         if (filter.section && filter.section !== 'all') {
@@ -72,6 +80,8 @@ export function useUnifiedContent(filter: ContentFilter = {}) {
             phase: essay.phase,
             fsli_slug: essay.fsli_slug,
             topic: essay.topic,
+            finance_section: essay.finance_section,
+            finance_modules: essay.finance_modules,
             published: essay.published ?? false,
             status: essay.status || (essay.published ? 'published' : 'draft'),
             voice_role: essay.voice_role,

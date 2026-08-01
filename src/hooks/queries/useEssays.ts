@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import type { EssayPresentation } from '@/lib/presentation';
 
 export interface Essay {
   id: string;
@@ -20,10 +21,9 @@ export interface Essay {
   voice_role: string | null;
   prerequisites: string[] | null;
   learning_outcomes: string[] | null;
-  manager_fields: Record<string, unknown> | null;
-  economist_fields: Record<string, unknown> | null;
-  educator_fields: Record<string, unknown> | null;
-  coach_fields: Record<string, unknown> | null;
+  presentation: EssayPresentation | null;
+  /** @deprecated legacy column, dropped by the staged _pending migration */
+  economist_fields?: EssayPresentation | null;
   fsli_slug: string | null;
   topic: string | null;
   finance_section: string | null;
@@ -91,19 +91,45 @@ export const useEssay = (slug: string, options: UseEssayOptions = {}) => {
   });
 };
 
+/**
+ * The narrow row a featured card needs — including the joined curriculum
+ * placement, without which no canonical finance URL can be built.
+ */
+export interface FeaturedEssay {
+  id: string;
+  slug: string;
+  title: string;
+  snippet: string | null;
+  section: string;
+  phase: string | null;
+  author: string | null;
+  read_time: string | null;
+  finance_section: string | null;
+  fsli_slug: string | null;
+  topic: string | null;
+  finance_modules: { slug: string; track_slug: string } | null;
+}
+
 export const useFeaturedEssays = (limit = 4) => {
   return useQuery({
     queryKey: ['essays', 'featured', limit],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('essays')
-        .select('id, slug, title, snippet, section, phase, author, read_time')
+        // module_id joins finance_modules for track + module slug. Without
+        // them essayUrl() cannot build /finance/:track/:moduleSlug/:slug and
+        // every finance card silently degrades to the universal route.
+        .select(`
+          id, slug, title, snippet, section, phase, author, read_time,
+          finance_section, fsli_slug, topic,
+          finance_modules!essays_module_id_fkey ( slug, track_slug )
+        `)
         .eq('published', true)
         .order('created_at', { ascending: false })
         .limit(limit);
 
       if (error) throw error;
-      return data as Essay[];
+      return data as unknown as FeaturedEssay[];
     },
   });
 };

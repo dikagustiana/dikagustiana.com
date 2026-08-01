@@ -1,3 +1,4 @@
+import { absoluteEssayUrl } from '@/lib/essayUrl';
 import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { PageLayout } from '@/components/layouts/PageLayout';
@@ -55,38 +56,6 @@ const sectionLabels: Record<string, string> = {
   tools: 'Tools',
 };
 
-// Public URL resolver
-const getPublicUrl = (section: string, slug: string, phase?: string, fsliSlug?: string, topic?: string) => {
-  const baseUrl = window.location.origin;
-  switch (section) {
-    case 'green-transition': {
-      const phaseUrlMap: Record<string, string> = {
-        'where-we-are-now': 'now',
-        'challenges-ahead': 'gaps',
-        'pathways-forward': 'future',
-      };
-      const phaseUrl = phase ? (phaseUrlMap[phase] || phase) : 'now';
-      return `${baseUrl}/green-transition/${phaseUrl}/${slug}`;
-    }
-    case 'next-big-thing':
-      return `${baseUrl}/the-next-big-thing/${slug}`;
-    case 'finance':
-      return `${baseUrl}/finance-101/essays/${slug}`;
-    case 'critical-thinking':
-      return `${baseUrl}/critical-thinking-research/${phase || 'clarify'}/${slug}`;
-    case 'accounting':
-      if (phase === 'fsli' && fsliSlug) return `${baseUrl}/accounting/fsli/${fsliSlug}`;
-      if (phase === 'consolidated-reporting' && topic) return `${baseUrl}/accounting/consolidation/${topic}`;
-      if (phase === 'statutory-reporting') return `${baseUrl}/accounting/statutory-reporting`;
-      return `${baseUrl}/accounting`;
-    case 'ielts':
-      return `${baseUrl}/english-ielts`;
-    case 'books':
-      return `${baseUrl}/books-academia`;
-    default:
-      return `${baseUrl}/${section}/${slug}`;
-  }
-};
 
 // Metadata warnings
 function getMetadataWarnings(item: {
@@ -404,7 +373,15 @@ export default function AdminContent() {
                       title="View public"
                     >
                       <a
-                        href={getPublicUrl(item.section, item.slug, item.phase || undefined, item.fsli_slug || undefined, item.topic || undefined)}
+                        href={absoluteEssayUrl({
+                          slug: item.slug,
+                          section: item.section,
+                          phase: item.phase,
+                          track: item.finance_modules?.track_slug ?? item.finance_section ?? null,
+                          moduleSlug: item.finance_modules?.slug ?? null,
+                          fsliSlug: item.fsli_slug,
+                          topic: item.topic,
+                        }) ?? undefined}
                         target="_blank"
                         rel="noopener noreferrer"
                       >

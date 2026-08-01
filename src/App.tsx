@@ -75,17 +75,17 @@ const WriterListPage = lazy(() => import("./pages/WriterListPage"));
 
 // Canonical Writer Studio (lazy-loaded)
 const WriterStudio = lazy(() => import("./domains/writing/WriterStudio"));
+// Universal essay resolver: /essays/:slug
+const EssayBySlug = lazy(() => import("./pages/EssayBySlug"));
 
 const queryClient = new QueryClient();
 
+// /finance-101/essays/:slug used to discard the slug and dump the reader at
+// /finance, losing the essay entirely. Hand it to the universal resolver, which
+// forwards to the canonical URL or renders the essay when it has no placement.
 const FinanceEssayLegacyRedirect = () => {
   const { slug } = useParams();
-
-  if (slug) {
-    return <Navigate to="/finance" replace />;
-  }
-
-  return <Navigate to="/finance" replace />;
+  return <Navigate to={slug ? `/essays/${slug}` : '/finance'} replace />;
 };
 
 const RouteFallback = () => (
@@ -137,6 +137,9 @@ const App = () => (
             <Route path="/finance-101/budgeting" element={<Navigate to="/finance/planning/budget-architecture" replace />} />
             <Route path="/finance-101/cfa-prep" element={<Navigate to="/finance/fundamentals" replace />} />
             <Route path="/finance-101/essays/:slug" element={<FinanceEssayLegacyRedirect />} />
+            {/* Universal essay route: canonical home for placement-less essays,
+                redirect to the canonical URL for everything else. */}
+            <Route path="/essays/:slug" element={<EssayBySlug />} />
 
             {/* Finance Workspace (admin-only) */}
             <Route path="/finance-workspace" element={<RequireAdmin><FinanceWorkspace /></RequireAdmin>} />

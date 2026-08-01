@@ -1,3 +1,4 @@
+import { EssayCardLink } from '@/components/EssayCardLink';
 import { PageLayout } from '@/components/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
 import { useSelectedEssays } from '@/hooks/queries/useSelectedEssays';
@@ -31,18 +32,6 @@ const phaseLabels: Record<string, string> = {
   'indonesia-capital-architecture': 'Indonesia\'s Capital Architecture',
 };
 
-const getEssayLink = (essay: { section: string; phase: string | null; slug: string }) => {
-  if (essay.section === 'green-transition' && essay.phase) {
-    return `/green-transition/${essay.phase}/${essay.slug}`;
-  }
-  if (essay.section === 'development-finance' && essay.phase) {
-    return `/development-finance/${essay.phase}/${essay.slug}`;
-  }
-  if (essay.section === 'next-big-thing') {
-    return `/the-next-big-thing/${essay.slug}`;
-  }
-  return `/essays/${essay.slug}`;
-};
 
 const readingStack = [
   {
@@ -147,9 +136,9 @@ export default function About() {
                 const colorClass = sectionColors[essay.section] || 'text-muted-foreground';
 
                 return (
-                  <Link
+                  <EssayCardLink
                     key={essay.id}
-                    to={getEssayLink(essay)}
+                    essay={essay}
                     className="block py-4 first:pt-0 last:pb-0 group"
                   >
                     <h3 className="font-semibold text-foreground group-hover:text-accent transition-colors mb-1">
@@ -161,7 +150,7 @@ export default function About() {
                         {formatDate(essay.date, essay.created_at)}
                       </span>
                     </div>
-                  </Link>
+                  </EssayCardLink>
                 );
               })}
             </div>

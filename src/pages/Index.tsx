@@ -1,3 +1,4 @@
+import { EssayCardLink } from '@/components/EssayCardLink';
 import { PageLayout } from '@/components/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
 import { Card, CardContent } from '@/components/ui/card';
@@ -59,15 +60,6 @@ const getSectionLabel = (section: string, phase: string | null) => {
   return section;
 };
 
-const getEssayLink = (essay: { section: string; phase: string | null; slug: string }) => {
-  if (essay.section === 'green-transition' && essay.phase) {
-    return `/green-transition/${essay.phase}/${essay.slug}`;
-  }
-  if (essay.section === 'next-big-thing') {
-    return `/the-next-big-thing/${essay.slug}`;
-  }
-  return `/essays/${essay.slug}`;
-};
 
 const Index = () => {
   const { data: featuredEssays, isLoading } = useFeaturedEssays(4);
@@ -97,7 +89,7 @@ const Index = () => {
 
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
               {featuredEssays.map((essay) => (
-                <Link key={essay.id} to={getEssayLink(essay)}>
+                <EssayCardLink key={essay.id} essay={essay}>
                   <Card className="h-full hover:shadow-lg transition-all hover:-translate-y-1 cursor-pointer group">
                     <CardContent className="p-5">
                       <Badge variant="secondary" className="mb-3 text-xs">
@@ -125,7 +117,7 @@ const Index = () => {
                       </div>
                     </CardContent>
                   </Card>
-                </Link>
+                </EssayCardLink>
               ))}
             </div>
           </div>
