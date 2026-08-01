@@ -7,7 +7,7 @@
 
 import NotFound from './NotFound';
 import { resolvePresentation, type EssayPresentation } from '@/lib/presentation';
-import { useParams, Navigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -114,7 +114,9 @@ export default function FinanceEssayPage() {
   });
 
   if (notFound || (!loading && !essay)) {
-    return <Navigate to="/finance" replace />;
+    // A bad slug is a wrong URL, not a reason to silently teleport the reader
+    // to the section index. NotFound says so and offers the nearest real essay.
+    return <NotFound />;
   }
 
   if (loading) {
