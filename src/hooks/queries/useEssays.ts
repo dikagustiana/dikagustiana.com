@@ -40,11 +40,27 @@ interface UseEssaysParams {
   limit?: number;
 }
 
+/**
+ * Columns a list/card view actually renders. Deliberately excludes `content`
+ * and `content_json`: a list of published essays with `select('*')` measured
+ * 58,043 bytes against the live database versus 1,116 with this list, because
+ * every row dragged its full body along. fa-07-01 alone is ~22k of HTML plus
+ * its JSON document.
+ *
+ * Detail pages select their own columns including the body — that is the one
+ * place it is wanted.
+ */
+export const ESSAY_CARD_COLUMNS = `
+  id, slug, title, snippet, section, phase, author, date, read_time,
+  thumbnail_url, published, status, sort_order, category_id, module_id,
+  finance_section, finance_order, fsli_slug, topic, created_at, updated_at
+`;
+
 export const useEssays = (params: UseEssaysParams = {}) => {
   return useQuery({
     queryKey: ['essays', params],
     queryFn: async () => {
-      let query = supabase.from('essays').select('*');
+      let query = supabase.from('essays').select(ESSAY_CARD_COLUMNS);
 
       if (params.section) {
         query = query.eq('section', params.section);
@@ -65,7 +81,7 @@ export const useEssays = (params: UseEssaysParams = {}) => {
       const { data, error } = await query.order('sort_order', { ascending: true });
 
       if (error) throw error;
-      return data as Essay[];
+      return data as unknown as Essay[];
     },
   });
 };
@@ -140,13 +156,13 @@ export const useEssaysByFsliSlug = (fsliSlug: string) => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('essays')
-        .select('*')
+        .select(ESSAY_CARD_COLUMNS)
         .eq('fsli_slug', fsliSlug)
         .eq('published', true)
         .order('sort_order', { ascending: true });
 
       if (error) throw error;
-      return data as Essay[];
+      return data as unknown as Essay[];
     },
     enabled: !!fsliSlug,
   });
@@ -158,14 +174,14 @@ export const useEssaysByTopic = (section: string, topic: string) => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('essays')
-        .select('*')
+        .select(ESSAY_CARD_COLUMNS)
         .eq('section', section)
         .eq('topic', topic)
         .eq('published', true)
         .order('sort_order', { ascending: true });
 
       if (error) throw error;
-      return data as Essay[];
+      return data as unknown as Essay[];
     },
     enabled: !!section && !!topic,
   });
@@ -185,7 +201,7 @@ export const useRelatedEssays = (currentId: string, section: string, limit = 3) 
         .limit(limit);
 
       if (error) throw error;
-      return data as Essay[];
+      return data as unknown as Essay[];
     },
     enabled: !!currentId && !!section,
   });

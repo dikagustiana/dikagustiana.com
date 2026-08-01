@@ -25,6 +25,13 @@ export interface EssayPresentation {
   references?: PresentationReference[];
   hero_caption?: string;
   author_bio?: string;
+  /**
+   * Declared by the admin preview but NOT populated by any write path — the
+   * hero image lives in the `essays.thumbnail_url` column, not in this
+   * payload. Kept optional so the type does not lie about what may appear in
+   * older rows; read it with `?? row.thumbnail_url`, never on its own.
+   */
+  hero_image_url?: string;
 }
 
 /**

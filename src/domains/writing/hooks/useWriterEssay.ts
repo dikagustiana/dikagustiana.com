@@ -1,3 +1,4 @@
+import type { EssayPresentation } from '@/lib/presentation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import type { WritingEssay, EssayStatus } from '../schema/types';
@@ -49,10 +50,9 @@ interface SaveEssayData {
   published?: boolean;
   date?: string | null;
   read_time?: string | null;
-  manager_fields?: Record<string, unknown> | null;
-  economist_fields?: Record<string, unknown> | null;
-  educator_fields?: Record<string, unknown> | null;
-  coach_fields?: Record<string, unknown> | null;
+  presentation?: EssayPresentation | null;
+  /** @deprecated legacy column, dropped by the staged _pending migration */
+  economist_fields?: EssayPresentation | null;
   module_id?: string | null;
   finance_section?: string | null;
   finance_order?: number | null;

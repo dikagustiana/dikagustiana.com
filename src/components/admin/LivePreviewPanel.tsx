@@ -6,6 +6,7 @@
  * Content updates are debounced to avoid lag while typing.
  */
 
+import { resolvePresentation, type EssayPresentation } from '@/lib/presentation';
 import { useMemo, useState, useEffect, useRef } from 'react';
 import type { JSONContent } from '@tiptap/core';
 import { ArticleHeader } from '@/components/editorial/ArticleHeader';
@@ -25,14 +26,15 @@ interface LivePreviewPanelProps {
   phase: string;
   sectionSlug: string | null;
   contentJson: JSONContent | null;
-  economistFields?: {
-    deck?: string;
-    hero_image_url?: string;
-    hero_caption?: string;
-    key_takeaways?: string[];
-    references?: { label: string; url?: string }[];
-    author_bio?: string;
-  };
+  /**
+   * The essay presentation payload. Was `economistFields` and was missed in
+   * the persona refactor — the staged column drop would have broken this
+   * preview while the public page kept working, which is the slowest kind of
+   * breakage to notice because only the author sees it, while writing.
+   */
+  presentation?: EssayPresentation | null;
+  /** essays.thumbnail_url — where the hero image actually lives. */
+  thumbnailUrl?: string | null;
   className?: string;
 }
 
@@ -47,7 +49,8 @@ export function LivePreviewPanel({
   phase,
   sectionSlug,
   contentJson,
-  economistFields,
+  presentation,
+  thumbnailUrl,
   className,
 }: LivePreviewPanelProps) {
   const [collapsed, setCollapsed] = useState(false);
@@ -73,12 +76,15 @@ export function LivePreviewPanel({
 
   const isEditorialSection = sectionSlug === 'next-big-thing' || sectionSlug === 'green-transition';
 
-  const deck = economistFields?.deck || snippet;
-  const heroImage = economistFields?.hero_image_url;
-  const heroCaption = economistFields?.hero_caption;
-  const keyTakeaways = economistFields?.key_takeaways || [];
-  const references = economistFields?.references || [];
-  const authorBio = economistFields?.author_bio;
+  const pres = resolvePresentation(presentation ? { presentation } : null);
+  const deck = pres.deck || snippet;
+  // hero_image_url is never written into the payload; thumbnail_url is the
+  // real source. Prefer the payload only for hypothetical legacy rows.
+  const heroImage = pres.hero_image_url ?? thumbnailUrl ?? undefined;
+  const heroCaption = pres.hero_caption;
+  const keyTakeaways = pres.key_takeaways || [];
+  const references = pres.references || [];
+  const authorBio = pres.author_bio;
 
   if (collapsed) {
     return (
