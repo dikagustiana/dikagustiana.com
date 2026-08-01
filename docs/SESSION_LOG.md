@@ -3,27 +3,54 @@
 Append-only. Newest entry first. A fresh session must be able to resume from this file.
 
 ## NEXT ACTION (single)
-**Finish GATE 1f, which is currently FAILED.** In all four essay pages
-(`FinanceEssayPage:117`, `GreenTransitionEssayPage`, `NextBigThingEssayPage`,
-`DevelopmentFinanceEssayPage`), replace the early `return <Navigate to="/finance" replace />`
-fired by the local `notFound` state with `return <NotFound />`. That early redirect runs
-*before* the `!essay` check, so the improved 404 is unreachable and a mistyped slug silently
-redirects to the track index. Then re-run `scratchpad/import/gate1ef.mjs` from a cold dev
-server — that same run also re-verifies GATE 1e, which was observed passing once and not
-reproduced.
+**Section 4 — the essay page itself.** In `LongformArticleShell.tsx` (currently one
+`max-w-[780px] mx-auto` column), move the table of contents into a sticky sidebar at `lg:`
+and up; keep the inline collapsible below `lg:` (`ArticleToc.tsx:49`). Give the sidebar a
+`max-h` with internal overflow (13 entries on `fa-07-01`), scroll the active entry within
+the sidebar container — not the page — respect `prefers-reduced-motion` for the
+`scrollIntoView({behavior:'smooth'})` at `ArticleToc.tsx:81`, and rAF-throttle
+`ReadingProgress.tsx`. GATE W4 is measured by scrolling: sidebar tracks to the final
+heading, 375px shows no h-scroll with `scrollWidth` recorded, reduced-motion jumps instead
+of gliding. Then Section 5 (ui-audit on reading surfaces; FSLI honest empty state; remove 5
+unused @tiptap deps). **At session end: delete `s7-admin@dikagustiana.com` and
+`s7-user@dikagustiana.com`** (session-namespaced test identities, mandate rule 6).
 
-Then: GATE 1b (curriculum counts — needs `module_meta.essay_count`), GATE 1c (rehearse the
-staged drop on a scratch DB, then apply), and Sections 2–7. `docs/GATE_LEDGER.md` is the
-authority on what is and is not verified.
+## 2026-08-01 (session 7) — writing an essay, and reading one: Sections 1–3
 
-## SESSION B NEXT ACTION (single)
+Branch `claude/writing-reading-s1`. `3c9f78b` (Section 1), `30763f4` (Sections 2–3).
+GATES W1, W2, W3 all **PASSED** — measurements in `docs/GATE_LEDGER.md`.
+
+- **Save path closed (W1).** Autosave re-observed after every save-path change (3,612 words
+  recovered); the orphaned tone trigger confirmed dropped and its migration mirrored into
+  the repo (`20260801125833` — applied live by a parallel session that never committed the
+  file); key-takeaways gate scoped per `lesson_type`, both arms observed on real stubs;
+  Topic/Phase/finance_section now derive from module placement — one field instead of three.
+- **Editor access (W2).** Admin: 4 pencil affordances, draft titles route to the editor, an
+  empty real stub (`sf-01-04`) opens the editor and saves. Non-admin and anon: zero pencils,
+  zero drafts, and anon `GET /essays?published=eq.false` → `content-range: */0` at PostgREST.
+- **Reading path (W3).** FinanceTrackIndex rows are real links (were plain text); the
+  hardcoded `Draft · Dika Gustiana` byline replaced with real status/author/read-time;
+  RelatedEssays + RelatedContent moved onto `essayUrl` (last two local builders);
+  `/finance/wrongtrack/wrongmodule/fa-07-01` now redirects to the canonical placement.
+  Route count reconciled: 66 `<Route path>` = 65 swept + `*` catch-all.
+- **Parallel-session interference, again.** Mid-run, the previous sweep test accounts were
+  deleted by an active parallel session (login started failing with `invalid_credentials`;
+  SQL showed only `import-admin` remained, freshly signed in). Re-minted session-namespaced
+  `s7-admin@` / `s7-user@` per the mandate's naming rule; probes then passed unmodified.
+  These identities must be deleted at session end.
+- **Harness.** The local CORS relay is hardened (`keepAliveTimeout=0`,
+  `maxRequestsPerSocket=1`, `Connection: close`) and runs as a managed background task —
+  the earlier `ERR_CONNECTION_RESET` failures under Playwright are gone.
+- **Explicitly NOT this session** (per mandate, unchanged from session 6 findings):
+  `books_uploads` / `finance_models` still have no insert path and `ModelAdminPanel` stays
+  unreachable by construction; curriculum Sections 05/06 have no data path; the six
+  zero-unique-commit branches remain (git proxy rejects delete-pushes — owner deletes in
+  the GitHub UI); GATE 7's verdicts still live in `docs/gates/GATES_5_7.md` and want
+  transplanting into the ledger.
+
+## SESSION B NEXT ACTION (single) — superseded; kept for history
 **Run GATE 6.1 — the 3,000-word autosave reload recovery — as soon as Session A records
-GATE 1 in a terminal state.** It is the only gate in Sections 5–7 not yet passed, and it is
-blocked rather than failed: Section 1 touches the save path, so measuring autosave before
-that lands measures a state about to change. The check is: paste 3,000+ words into
-`/admin/writer/finance/new`, hard-reload mid-edit, confirm the recovery banner offers the
-autosaved revision and that restoring it returns the text. `docs/gates/GATES_5_7.md` is the
-authority for Sections 5–7; `docs/GATE_LEDGER.md` remains the authority for 0–4.
+GATE 1 in a terminal state.** (Done in session 7: see GATE W1 — 3,612 words recovered.)
 
 ## 2026-08-01 (session 6, Session B) — Sections 5, 6.2 and 7
 
