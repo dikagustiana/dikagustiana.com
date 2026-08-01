@@ -7,16 +7,24 @@ database as three identities at two viewports. Generated from a sweep, not from 
 
 | | |
 |---|---|
-| Routes swept | **65** of **66** `<Route path>` entries — the 66th is the `path="*"` catch-all, deliberately excluded from the sweep and verified separately (it renders the improved `NotFound`, exercised end-to-end by GATE 1f) |
+| Routes swept | **66** (all 66 `<Route path>` entries — 65 concrete plus the `*` catch-all, which the original sweep exercised in every 404 test but excluded from its count) |
 | Defects | **0** |
 | Access leaks | **0** |
 | Horizontal scroll at 375px | **0** |
 | NOT TESTED | **0** |
 
-Reconciliation of every count that has been quoted: `grep -c '<Route'` says **68** because it
-also matches `<Routes>` and `<RouteFallback`; there are **66** `<Route path>` entries; **65**
-are sweepable pages and the 66th is the `*` catch-all. The mandate's original 68 predates the
-`/admin/council` removal and used the loose grep.
+The count is 66, not the 68 the mandate quoted — that figure predates the `/admin/council`
+removal, and `<Route>` entries without a `path` were never routes in their own right:
+`grep -c '<Route'` says **68** only because it also matches `<Routes>` and `<RouteFallback`.
+(An earlier revision of this document said 65 by excluding the `*` catch-all; since
+`App.tsx` has 66 `path=` entries and GATE 4 claims zero `NOT TESTED`, the catch-all is
+now counted and carries its own row below.)
+
+## The 66th route — the `*` catch-all
+
+| route | page component | tables touched | intended access | anonymous | authenticated non-admin | admin | 375px | desktop | verdict |
+|---|---|---|---|---|---|---|---|---|---|
+| `*` | `NotFound` | `essays` (nearest-slug suggestion) | public | improved 404 rendered | improved 404 rendered | improved 404 rendered | no h-scroll (`scrollWidth` 375/375) | no h-scroll (1440/1440) | **WORKING — verified.** `/definitely-no-such-route-xyz` as all three identities; the did-you-mean suggestion links through the canonical `essayUrl`. |
 
 ## Identity gating — verified by separation, not assumed
 

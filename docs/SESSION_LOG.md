@@ -3,14 +3,13 @@
 Append-only. Newest entry first. A fresh session must be able to resume from this file.
 
 ## NEXT ACTION (single)
-**Close out session 7: delete the test identities and open the PR.** Delete
-`s7-admin@dikagustiana.com` and `s7-user@dikagustiana.com` (session-namespaced, mandate
-rule 6), push `claude/writing-reading-s1`, and open a PR **based on `main`**. All five
-session gates (W1–W5) are PASSED in `docs/GATE_LEDGER.md`. Still outstanding from earlier
-sessions, untouched by design: GATE 7 verdicts live in `docs/gates/GATES_5_7.md` and want
-transplanting into the ledger; `books_uploads`/`finance_models` have no insert path;
-curriculum Sections 05/06 have no data path; six zero-unique-commit branches need the
-GitHub UI to delete.
+**Land the PR #11 ⇄ PR #10 reconciliation.** Two sessions independently implemented the
+"writing an essay, and reading one" mandate; PR #10 merged first, and PR #11's branch now
+carries the merge that reconciles them (one implementation per feature — see the merge
+commit message for which side won where). Remaining: post-merge re-verification results in
+the ledger stay green, PR #11 review comment addressed (takeaways guidance strict when
+lessonType is null), then merge PR #11. The s7-* test identities are already deleted;
+fresh namespaced identities used for post-merge re-checks must be deleted the same way.
 
 ## 2026-08-01 (session 7) — writing an essay, and reading one: Sections 1–5
 
@@ -61,6 +60,39 @@ measurements in `docs/GATE_LEDGER.md`.
   zero-unique-commit branches remain (git proxy rejects delete-pushes — owner deletes in
   the GitHub UI); GATE 7's verdicts still live in `docs/gates/GATES_5_7.md` and want
   transplanting into the ledger.
+
+## 2026-08-01 (session 7, Fable) — reconcile, close gate gaps, every title reaches its essay
+
+Single session, no parallel branch. All work on `claude/dikagustiana-sections-5-7-q0jja0`
+restarted from `main` (`a1c2e50`, the PR #9 merge — Section A's merge had already landed
+before this session began).
+
+- **P0 found and fixed: every essay save in production was dead.** The
+  `validate_essay_tone_fields` trigger still referenced all four dropped `*_fields`
+  columns, so since the column drop every INSERT/UPDATE on `essays` raised
+  `42703: record "new" has no field "manager_fields"` — reproduced, then trigger+function
+  dropped via `apply_migration`, then a real in-app Save Draft observed succeeding.
+  Nobody had re-run a save after the drop landed. Reads looked fine throughout.
+- **GATE A–G all PASSED** — evidence in the ledger. Headlines: autosave recovered
+  **3,200 of 3,200** words after a hard reload; track-index essay rows are now links with
+  real status/author (the hardcoded `Draft · Dika Gustiana` is gone); mismatched
+  track/module URLs redirect to the canonical essay URL; admins get a pencil into the
+  editor and drafts stay `content-range: */0` for everyone else; the ToC is a sticky
+  sidebar at `lg:` that tracks to the last heading, with reduced-motion respected
+  (root cause: `scroll-behavior: smooth` in CSS silently re-animated `behavior:'auto'`
+  jumps — now media-gated); books gained their missing insert path, observed end-to-end;
+  FSLI pages stopped wearing cash-equivalents prose and fake metadata.
+- **Route count reconciled:** 66 = 65 concrete + the `*` catch-all, which the sweep had
+  exercised but not counted. Swept in its own right, all three identities, both viewports.
+- **`ui-audit` does not exist in this environment** — manual consistency sweep recorded
+  in the ledger instead, including four things deliberately not fixed.
+- **Two more pre-canonical URL builders found and fixed** (`RelatedEssays`,
+  `RelatedContent` — their finance fallback emitted the TRACK route), and
+  `AdminDashboard`'s recent-essay lists linked to the retired studio route.
+- **Housekeeping done:** test accounts `testuser`, `route-sweep-tester`, `sweep-admin`
+  deleted (only `import-admin` remains — owner's item); 5 unreferenced test images and
+  the F.1 test PDF removed from storage; test revisions and the stub edit cleaned up
+  (`fa-02-01` keeps its correctly derived `phase`/`topic`).
 
 ## SESSION B NEXT ACTION (single) — superseded; kept for history
 **Run GATE 6.1 — the 3,000-word autosave reload recovery — as soon as Session A records

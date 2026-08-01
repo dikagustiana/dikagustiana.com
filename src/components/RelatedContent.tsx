@@ -1,7 +1,7 @@
-import { essayUrl } from '@/lib/essayUrl';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { essayUrl, essayUrlInputFromRow, universalEssayUrl } from '@/lib/essayUrl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ArrowRight, BookOpen, Layers, Link2 } from 'lucide-react';
@@ -129,9 +129,10 @@ export function RelatedContent({
     }
   };
 
-  // One canonical builder — a local shape here is how the homepage 404'd.
+  // The canonical builder, not a private one: the local fallback
+  // `/${section}/${slug}` matches no essay route for most sections.
   const getEssayUrl = (essay: RelatedEssay) =>
-    essayUrl({ slug: essay.slug, section: essay.section, phase: essay.phase }) ?? '#';
+    essayUrl(essayUrlInputFromRow(essay)) ?? universalEssayUrl(essay.slug);
 
   return (
     <Card className="mt-12">

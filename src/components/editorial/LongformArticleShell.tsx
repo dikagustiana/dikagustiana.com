@@ -13,6 +13,7 @@ import { Footer } from '@/components/Footer';
 import { ReadingProgress } from './ReadingProgress';
 import { ArticleToc } from './ArticleToc';
 import { ArticleBody } from './ArticleBody';
+import { contentToHtml } from '@/lib/tiptap/serialize';
 import { KeyTakeaways } from './KeyTakeaways';
 import { References } from './References';
 import { AuthorBox } from './AuthorBox';
@@ -91,6 +92,9 @@ export function LongformArticleShell({
       (1000 * 60 * 60 * 24);
     return diffDays >= 7;
   }, [updatedAt, createdAt]);
+
+  // ToC heading extraction parses HTML; the body may be stored as TipTap JSON.
+  const tocHtml = useMemo(() => contentToHtml(content), [content]);
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -178,8 +182,10 @@ export function LongformArticleShell({
           )}
 
           {/* Table of contents — inline collapsible below lg: only; the
-              sticky sidebar takes over at lg:+ */}
-          <ArticleToc className="lg:hidden" content={htmlContent || content} />
+              sticky sidebar takes over at lg:+. htmlContent is the caller's
+              precomputed HTML; tocHtml is the internal fallback so heading
+              extraction works even when only TipTap JSON was passed. */}
+          <ArticleToc className="lg:hidden" content={htmlContent || tocHtml} />
 
           {/* ── Body ── */}
           <div className="longform-body">
@@ -216,7 +222,7 @@ export function LongformArticleShell({
               scrolls internally. */}
           <aside className="hidden lg:block py-16">
             <div className="sticky top-24">
-              <ArticleToc variant="sidebar" content={htmlContent || content} />
+              <ArticleToc variant="sidebar" content={htmlContent || tocHtml} />
             </div>
           </aside>
         </div>

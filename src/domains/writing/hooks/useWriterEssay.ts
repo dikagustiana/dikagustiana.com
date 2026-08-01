@@ -19,7 +19,11 @@ export function useWriterEssay(slug: string, options?: { enabled?: boolean }) {
           )
         `)
         .eq('slug', slug)
-        .single();
+        // maybeSingle: a slug that matches nothing is a miss, not a 406.
+        // (This hook currently has no callers — only generateUniqueSlug is
+        // imported from this module — but the last miss-capable .single()
+        // should not sit in the tree waiting to be copied.)
+        .maybeSingle();
 
       if (error) throw error;
       return data as unknown as WritingEssay & {

@@ -8,7 +8,6 @@
  */
 
 import { useParams, Link } from 'react-router-dom';
-import { Pencil } from 'lucide-react';
 import { PageLayout } from '@/components/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -23,6 +22,7 @@ import {
 } from '@/hooks/queries/useFinance';
 import { useAuth } from '@/contexts/AuthContext';
 import { sanitizeHtml } from '@/lib/sanitizeHtml';
+import { EssayEditLink, essayEditorUrl } from '@/components/EssayEditLink';
 
 // ── Essay listing sub-component ──────────────────────────────────────────────
 
@@ -61,61 +61,53 @@ No lessons assigned to this module yet.
   return (
     <div>
       {essays.map((essay, index) => (
-        <Link
+        <div
           key={essay.id}
-          // A draft has no public page worth landing on; for the admin who can
-          // see it, the editor is the useful destination. Published essays go
-          // to their canonical URL for everyone.
-          to={!essay.published && isAdmin
-            ? `/admin/writer/finance/${essay.slug}`
-            : `/finance/${track}/${moduleSlug}/${essay.slug}`}
-          className="flex items-start gap-4 py-4 group border-b border-border last:border-b-0"
+          className="flex items-start gap-2 border-b border-border last:border-b-0"
         >
-          <span className="text-sm font-mono text-muted-foreground tabular-nums shrink-0 mt-0.5">
-            {String(moduleSortOrder).padStart(2, '0')}.{String(index + 1).padStart(2, '0')}
-          </span>
+          <Link
+            // A draft's public view is an empty page; for the admin filling in
+            // stubs, the row itself is the way into the editor. Published rows
+            // keep pointing at the reading experience.
+            to={
+              isAdmin && !essay.published
+                ? essayEditorUrl(essay.slug)
+                : `/finance/${track}/${moduleSlug}/${essay.slug}`
+            }
+            className="flex flex-1 min-w-0 items-start gap-4 py-4 group"
+          >
+            <span className="text-sm font-mono text-muted-foreground tabular-nums shrink-0 mt-0.5">
+              {String(moduleSortOrder).padStart(2, '0')}.{String(index + 1).padStart(2, '0')}
+            </span>
 
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
-              <h3 className="text-base font-medium text-foreground group-hover:text-primary transition-colors leading-snug">
-                {essay.title}
-              </h3>
-              {essay.lesson_type && essay.lesson_type !== 'concept' && (
-                <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground border border-border rounded px-1.5 py-0.5">
-                  {essay.lesson_type}
-                </span>
-              )}
-              {isAdmin && !essay.published && (
-                <Badge variant="secondary" className="text-[10px] uppercase tracking-wider">
-                  Draft
-                </Badge>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2">
+                <h3 className="text-base font-medium text-foreground group-hover:text-primary transition-colors leading-snug">
+                  {essay.title}
+                </h3>
+                {essay.lesson_type && essay.lesson_type !== 'concept' && (
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground border border-border rounded px-1.5 py-0.5">
+                    {essay.lesson_type}
+                  </span>
+                )}
+                {isAdmin && !essay.published && (
+                  <Badge variant="secondary" className="text-[10px] uppercase tracking-wider">
+                    Draft
+                  </Badge>
+                )}
+              </div>
+              {essay.snippet && (
+                <p className="text-sm text-muted-foreground mt-1 line-clamp-1">{essay.snippet}</p>
               )}
             </div>
-            {essay.snippet && (
-              <p className="text-sm text-muted-foreground mt-1 line-clamp-1">{essay.snippet}</p>
-            )}
-          </div>
 
-          {essay.read_time && (
-            <span className="text-xs text-muted-foreground shrink-0 mt-1">{essay.read_time}</span>
-          )}
-          {isAdmin && (
-            <span
-              role="link"
-              aria-label={`Edit ${essay.title}`}
-              title="Edit in writer"
-              onClick={(e) => {
-                // The row itself is a Link; this must not double-navigate.
-                e.preventDefault();
-                e.stopPropagation();
-                window.location.assign(`/admin/writer/finance/${essay.slug}`);
-              }}
-              className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-md text-muted-foreground opacity-0 group-hover:opacity-100 focus-visible:opacity-100 hover:bg-muted hover:text-foreground transition-[opacity,background-color,color] shrink-0 -my-2"
-            >
-              <Pencil className="h-4 w-4" />
-            </span>
-          )}
-        </Link>
+            {essay.read_time && (
+              <span className="text-xs text-muted-foreground shrink-0 mt-1">{essay.read_time}</span>
+            )}
+          </Link>
+          {/* Sibling of the row link, never nested inside it. */}
+          <EssayEditLink slug={essay.slug} className="mt-4" />
+        </div>
       ))}
     </div>
   );

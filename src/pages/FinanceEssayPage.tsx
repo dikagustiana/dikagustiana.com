@@ -7,6 +7,7 @@
 
 import NotFound from './NotFound';
 import { resolvePresentation, type EssayPresentation } from '@/lib/presentation';
+import { universalEssayUrl } from '@/lib/essayUrl';
 import { useParams, Navigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
@@ -36,6 +37,8 @@ interface Essay {
   created_at: string;
   updated_at: string;
   presentation: EssayPresentation | null;
+  /** The essay's actual module, joined — the URL's claim is checked against this. */
+  finance_modules: { slug: string; track_slug: string } | null;
 }
 
 interface EssayListItem {
@@ -64,10 +67,13 @@ export default function FinanceEssayPage() {
     setLoading(true);
     setNotFound(false);
     try {
-      // Fetch by globally unique slug
+      // Fetch by globally unique slug, joining the essay's ACTUAL module so the
+      // URL's track/module segments can be validated against real placement.
       const { data, error } = await supabase
         .from('essays')
         // The essay's OWN module, joined, is what canonicalises the URL below.
+        // FK-hinted like every other embed in the repo — the unhinted form
+        // breaks with an ambiguous-embed error if a second FK ever appears.
         .select('*, finance_modules!essays_module_id_fkey ( slug, track_slug )')
         .eq('slug', essaySlug!)
         .maybeSingle();
@@ -132,21 +138,24 @@ export default function FinanceEssayPage() {
   // NotFound also offers the nearest real essay for a near-miss slug.
   if (!essay) return <NotFound />;
 
-  // Lookup is by globally-unique slug, so without this check every essay was
-  // reachable at unlimited /finance/<anything>/<anything>/<slug> URLs. When
-  // the URL disagrees with the essay's real placement, redirect to canonical —
-  // we know exactly where it lives, mirroring /essays/:slug. An essay with no
-  // module has no four-segment home at all and lives at the universal route.
-  {
-    const realMod = (essay as unknown as {
-      finance_modules: { slug: string; track_slug: string } | null;
-    }).finance_modules;
-    if (realMod && (realMod.slug !== moduleSlug || realMod.track_slug !== track)) {
-      return <Navigate to={`/finance/${realMod.track_slug}/${realMod.slug}/${essay.slug}`} replace />;
-    }
-    if (!realMod) {
-      return <Navigate to={`/essays/${essay.slug}`} replace />;
-    }
+  // The slug is globally unique, so this page used to render the essay under
+  // ANY /finance/<x>/<y>/<slug> — every essay had unlimited working URLs. The
+  // URL's claim about placement is now checked against the essay's actual
+  // module, and a mismatch redirects to the one canonical URL rather than
+  // 404ing: the reader asked for a real essay, just at the wrong address.
+  const actualModule = essay.finance_modules;
+  if (actualModule && (actualModule.track_slug !== track || actualModule.slug !== moduleSlug)) {
+    return (
+      <Navigate
+        to={`/finance/${actualModule.track_slug}/${actualModule.slug}/${essay.slug}`}
+        replace
+      />
+    );
+  }
+  if (!actualModule) {
+    // No curriculum placement means no four-segment home — this URL shape was
+    // fabricated. The universal route renders unplaced essays.
+    return <Navigate to={universalEssayUrl(essay.slug)} replace />;
   }
 
   const currentIndex = siblings?.findIndex((e) => e.slug === essaySlug) ?? -1;

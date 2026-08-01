@@ -8,8 +8,7 @@
 
 import React, { useState } from 'react';
 import { Link, useParams, Navigate } from 'react-router-dom';
-import { ChevronDown, Pencil } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
+import { ChevronDown } from 'lucide-react';
 import { PageLayout } from '@/components/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -21,6 +20,9 @@ import {
   type FinanceModuleEssay,
 } from '@/hooks/queries/useFinance';
 import { useTrackEssayCounts, useTrackAllEssays } from '@/hooks/queries/useFinanceTrackEssays';
+import { useAuth } from '@/contexts/AuthContext';
+import { essayUrl } from '@/lib/essayUrl';
+import { EssayEditLink, essayEditorUrl } from '@/components/EssayEditLink';
 
 /* ─── Essay title split helper ─── */
 function splitTitle(title: string) {
@@ -35,55 +37,55 @@ function splitTitle(title: string) {
 /* ─── Essay row ─── */
 const EssayRow = React.memo(function EssayRow({
   essay,
-  track,
-  moduleSlug,
+  mod,
   isAdmin,
 }: {
   essay: FinanceModuleEssay;
-  track: string;
-  moduleSlug: string;
+  mod: FinanceModule;
   isAdmin: boolean;
 }) {
   const { line1, line2 } = splitTitle(essay.title);
+  const isPublished = essay.status === 'published';
 
-  // Real placement produces the real URL; nothing here invents a shape.
-  const publicUrl = `/finance/${track}/${moduleSlug}/${essay.slug}`;
-  const editUrl = `/admin/writer/finance/${essay.slug}`;
+  // The row used to render title, deck and byline with no <Link> at all — the
+  // one thing a reader would click was the one thing that did nothing.
+  const publicUrl = essayUrl({
+    slug: essay.slug,
+    section: 'finance',
+    track: mod.track_slug,
+    moduleSlug: mod.slug,
+  });
+  // Drafts are visible only to admins (RLS hides them from everyone else), and
+  // the public view of an empty stub is not worth landing on — for a draft the
+  // title goes straight to the editor.
+  const titleTo = isAdmin && !isPublished ? essayEditorUrl(essay.slug) : publicUrl;
 
-  // Drafts are only ever in this list for an admin (RLS hides them from
-  // everyone else), and the public view of an empty draft is not worth
-  // landing on — so a draft title goes straight to the editor.
-  const titleUrl = !essay.published && isAdmin ? editUrl : publicUrl;
+  const title = (
+    <>
+      <p className="text-[16px] font-semibold leading-snug">{line1}</p>
+      {line2 && <p className="text-[16px] leading-snug mt-0.5">{line2}</p>}
+    </>
+  );
 
   return (
-    <div className="flex items-start gap-2 py-5 pl-[3.5rem] group/row">
-      <Link to={titleUrl} className="block flex-1 min-w-0 group">
-        <p className="text-[16px] font-semibold text-foreground leading-snug group-hover:text-primary transition-colors">
-          {line1}
-        </p>
-        {line2 && (
-          <p className="text-[16px] text-foreground leading-snug mt-0.5 group-hover:text-primary/90 transition-colors">
-            {line2}
-          </p>
+    <div className="py-5 pl-[3.5rem] flex items-start gap-2">
+      <div className="min-w-0 flex-1">
+        {titleTo ? (
+          <Link to={titleTo} className="block text-foreground hover:text-primary transition-colors">
+            {title}
+          </Link>
+        ) : (
+          <div className="text-foreground">{title}</div>
         )}
-        {/* Real status and real author — this line was a hardcoded
-            "Draft · Dika Gustiana" even for published essays. */}
+        {/* Real status and real author from the row — this line was a hardcoded
+            "Draft · Dika Gustiana" even for the published essay. */}
         <p className="text-xs text-muted-foreground mt-2">
-          {essay.published ? 'Published' : 'Draft'}
+          {isPublished ? 'Published' : 'Draft'}
           {essay.author ? ` · ${essay.author}` : ''}
           {essay.read_time ? ` · ${essay.read_time}` : ''}
         </p>
-      </Link>
-      {isAdmin && (
-        <Link
-          to={editUrl}
-          aria-label={`Edit ${essay.title}`}
-          title="Edit in writer"
-          className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-md text-muted-foreground opacity-0 group-hover/row:opacity-100 focus-visible:opacity-100 hover:bg-muted hover:text-foreground transition-[opacity,background-color,color]"
-        >
-          <Pencil className="h-4 w-4" />
-        </Link>
-      )}
+      </div>
+      <EssayEditLink slug={essay.slug} className="mt-0.5" />
     </div>
   );
 });
@@ -95,7 +97,6 @@ const CollapsibleModuleRow = React.memo(function CollapsibleModuleRow({
   counts,
   isOpen,
   onToggle,
-  track,
   isAdmin,
 }: {
   mod: FinanceModule;
@@ -103,7 +104,6 @@ const CollapsibleModuleRow = React.memo(function CollapsibleModuleRow({
   counts: { published: number; total: number };
   isOpen: boolean;
   onToggle: () => void;
-  track: string;
   isAdmin: boolean;
 }) {
   return (
@@ -138,13 +138,7 @@ const CollapsibleModuleRow = React.memo(function CollapsibleModuleRow({
       {isOpen && essays.length > 0 && (
         <div className="divide-y divide-border/30">
           {essays.map((essay) => (
-            <EssayRow
-              key={essay.id}
-              essay={essay}
-              track={track}
-              moduleSlug={mod.slug}
-              isAdmin={isAdmin}
-            />
+            <EssayRow key={essay.id} essay={essay} mod={mod} isAdmin={isAdmin} />
           ))}
         </div>
       )}
@@ -305,7 +299,6 @@ function TrackContent({ track }: { track: string }) {
                     counts={counts}
                     isOpen={openModules.has(mod.id)}
                     onToggle={() => toggle(mod.id)}
-                    track={track}
                     isAdmin={!!isAdmin}
                   />
                 );

@@ -5,6 +5,62 @@ alternatives. Newest first.
 
 ---
 
+# 2026-08-01 — Fable session: reconcile + titles + defect verdicts
+
+## The orphaned tone-fields trigger is dropped, not repaired
+- **What it did today:** both branches of `validate_essay_tone_fields` referenced the four
+  dropped `*_fields` columns, so since the column drop every INSERT/UPDATE on `essays`
+  failed with `42703` before any row was touched. Before the drop, its draft branch was
+  also silently rewriting `status` to `tone_pending` (observed during GATE 5).
+- **Why drop rather than repair:** the persona system it validated is deleted; the live
+  publish gate is `WriterValidation.canPublish` plus the `presentation` payload. A trigger
+  that rewrites publication status is exactly the kind of magic that should not survive
+  the system it belonged to. `voice_validated_at` (its only output column) stays, inert,
+  for a later staged cleanup.
+- **Applied:** migration `drop_orphaned_tone_fields_trigger`; verified by re-running the
+  failing statement and by a real in-app Save Draft.
+
+## Mismatched placement URLs redirect to canonical, they do not 404
+- `/finance/<wrong-track>/<wrong-module>/<real-slug>` now redirects to the essay's one
+  canonical URL (from its joined module), and a fabricated four-segment URL for an
+  unplaced essay redirects to `/essays/:slug`.
+- **Why redirect:** the slug names a real essay; the reader is at a wrong address, not a
+  wrong destination. `/essays/:slug` already heals to canonical the same way, and a 404
+  here would punish stale links that used to work. A *wrong slug* still 404s (GATE 1f).
+
+## Draft titles route admins into the editor; published titles route everyone to the page
+- On curriculum indexes, an admin clicking a draft stub lands in the editor (the public
+  view of an empty essay is not worth landing on); published titles go to the reading
+  experience for everyone. A pencil affordance sits beside every row for admins, always a
+  sibling of the row's link — nested anchors are invalid HTML.
+
+## `books_uploads` gets its insert path; `finance_models` deliberately does not (yet)
+- **Books: built.** `useUploadBook` + an admin-only upload card on `/books/:category`.
+  RLS already made storage and table writes admin-only; the UI was the only missing piece.
+  Observed end-to-end and cleaned up.
+- **Models: written decision.** The 11 institutional models are the owner's framework
+  content (curriculum Section 06), and this session's mandate explicitly excludes
+  Sections 05/06 data. The surfaces stay: read, render, empty-state and edit paths all
+  work, and `ModelAdminPanel` becomes reachable the moment rows exist — via a future
+  seed migration from the framework, which is the owner's call. Recorded here precisely
+  so no third session rediscovers the gap.
+
+## Site-wide smooth scrolling is gated behind `prefers-reduced-motion: no-preference`
+- `index.css` set `scroll-behavior: smooth` on `html` unconditionally. Per spec,
+  `scrollIntoView({ behavior: 'auto' })` defers to that CSS property — so every "instant"
+  jump in the app was silently re-animated, including the ToC's reduced-motion branch.
+  The CSS is now media-gated and the ToC uses `'instant'` explicitly. Observed: a
+  10,433px jump completes within 120ms under emulated reduce.
+
+## `/admin/writer/:id` stays as a redirect (ROUTE CHANGES REQUESTED, disposition)
+- Deleting it was requested last round when `App.tsx` belonged to another session. Kept
+  instead: the `WriterStudio` redirect keeps `/admin/writer/new` (used by AdminDashboard)
+  and old bookmarks resolving, costs ~70 lines, and adds no authoring surface. The other
+  two requests: no Section 7 route removals (reaffirmed), breadcrumb `flex-wrap` (already
+  fixed by the parallel session, verified at 375px).
+
+---
+
 # 2026-08-01 — Section 5: the writing experience (Session B)
 
 ## The upload placeholder is a decoration, not a node

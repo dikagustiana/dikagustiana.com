@@ -1,9 +1,9 @@
-import { essayUrl } from '@/lib/essayUrl';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { ArrowRight, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { essayUrl, essayUrlInputFromRow } from '@/lib/essayUrl';
 
 interface RelatedEssaysProps {
   currentEssayId: string;
@@ -12,10 +12,6 @@ interface RelatedEssaysProps {
 }
 
 interface RelatedEssay {
-  finance_section?: string | null;
-  fsli_slug?: string | null;
-  topic?: string | null;
-  finance_modules?: { slug: string; track_slug: string } | null;
   id: string;
   slug: string;
   title: string;
@@ -24,6 +20,11 @@ interface RelatedEssay {
   read_time: string | null;
   thumbnail_url: string | null;
   author: string | null;
+  section: string | null;
+  finance_section: string | null;
+  fsli_slug: string | null;
+  topic: string | null;
+  finance_modules: { slug: string | null; track_slug: string | null } | null;
 }
 
 export function RelatedEssays({ currentEssayId, section, className }: RelatedEssaysProps) {
@@ -32,12 +33,14 @@ export function RelatedEssays({ currentEssayId, section, className }: RelatedEss
     queryFn: async () => {
       const { data, error } = await supabase
         .from('essays')
-        // finance_section + the module join let essayUrl build the four-segment
-        // curriculum URL; without them a related finance essay silently got a
-        // section/phase shape that only editorial sections actually serve.
+        // The module join is what lets finance essays build their canonical
+        // four-segment URL, and fsli_slug/topic let accounting essays link
+        // straight to their FSLI/consolidation homes instead of taking a
+        // redirect hop through /essays/:slug. FK-hinted like every other
+        // embed in the repo.
         .select(`
           id, slug, title, snippet, phase, read_time, thumbnail_url, author,
-          finance_section, fsli_slug, topic,
+          section, finance_section, fsli_slug, topic,
           finance_modules!essays_module_id_fkey ( slug, track_slug )
         `)
         .eq('section', section)
@@ -52,19 +55,20 @@ export function RelatedEssays({ currentEssayId, section, className }: RelatedEss
     enabled: !!currentEssayId && !!section,
   });
 
-  if (isLoading || !essays || essays.length === 0) return null;
+  if (isLoading || !essays) return null;
 
-  // One canonical builder — a local shape here is how the homepage 404'd.
-  const getEssayUrl = (essay: RelatedEssay) =>
-    essayUrl({
-      slug: essay.slug,
-      section,
-      phase: essay.phase,
-      track: essay.finance_modules?.track_slug ?? essay.finance_section ?? null,
-      moduleSlug: essay.finance_modules?.slug ?? null,
-      fsliSlug: essay.fsli_slug,
-      topic: essay.topic,
-    }) ?? '#';
+  // One canonical builder for the whole product. This component's private
+  // builder predated it and disagreed with it for finance essays. A card
+  // that cannot produce a URL is dropped — a dead related-card is worse
+  // than two cards instead of three.
+  const linkable = essays
+    .map((essay) => ({
+      essay,
+      href: essayUrl(essayUrlInputFromRow({ ...essay, section: essay.section ?? section })),
+    }))
+    .filter((e): e is { essay: RelatedEssay; href: string } => !!e.href);
+
+  if (linkable.length === 0) return null;
 
   return (
     <section className={cn("border-t border-border pt-10 mt-16", className)}>
@@ -72,10 +76,10 @@ export function RelatedEssays({ currentEssayId, section, className }: RelatedEss
         Continue Reading
       </h2>
       <div className="grid gap-6 md:grid-cols-3">
-        {essays.map((essay) => (
-          <Link 
-            key={essay.id} 
-            to={getEssayUrl(essay)}
+        {linkable.map(({ essay, href }) => (
+          <Link
+            key={essay.id}
+            to={href}
             className="group block"
           >
             {essay.thumbnail_url && (

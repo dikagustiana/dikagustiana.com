@@ -310,8 +310,9 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
       section,
       content,
       categoryId,
-      // Only curriculum essays carry a meaningful lesson type; editorial
-      // essays stay on the strict policy.
+      // Only MODULE-PLACED finance essays carry a meaningful lesson type;
+      // editorial essays and unplaced finance essays send null and stay on
+      // the strict three-takeaways policy.
       lessonType: section === 'finance' && moduleId ? lessonType : null,
     });
   }, [title, deck, keyTakeaways, wordCount, references, section, content, categoryId, lessonType, moduleId]);
@@ -407,12 +408,19 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
         author_bio: authorBio || null,
       };
 
+      // Placement-derived fields. For a finance essay with a module, phase and
+      // topic come from the module — one field set instead of three.
+      const derivedPhase =
+        section === 'finance' && selectedFinanceModule
+          ? TRACK_TO_PHASE[selectedFinanceModule.track_slug] ?? selectedFinanceModule.track_slug
+          : phase || null;
+
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const essayData: any = {
         title,
         slug: finalSlug,
         section,
-        phase: phase || null,
+        phase: derivedPhase,
         author,
         date: date || null,
         read_time: readTime || null,
@@ -429,16 +437,16 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
         lesson_type: lessonType || null,
       };
 
+      // topic mirrors the module slug for curriculum essays. Written only for
+      // finance-with-module so accounting essays' hand-set topics (which drive
+      // /accounting/consolidation/:topic) are never clobbered.
+      if (section === 'finance' && selectedFinanceModule) {
+        essayData.topic = selectedFinanceModule.slug;
+      }
+
       // Attach category_id if set
       if (categoryId) {
         essayData.category_id = categoryId;
-      }
-
-      // Curriculum essays: the module is the topic. Only set for
-      // module-placed finance essays so accounting's use of `topic` (its
-      // consolidation pages key on it) is never clobbered from this editor.
-      if (section === 'finance' && selectedFinanceModule) {
-        essayData.topic = selectedFinanceModule.slug;
       }
 
       // Only write content_json when we actually have a document. Sending null
@@ -512,9 +520,10 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
   useEffect(() => {
     if (section === 'finance' && selectedFinanceModule) {
       setFinanceSection(selectedFinanceModule.track_slug);
-      // Placement implies the editorial phase; deriving it here is what keeps
-      // the two trees from disagreeing on essays edited through this screen.
-      setPhase(TRACK_TO_PHASE[selectedFinanceModule.track_slug] ?? '');
+      // Derived, not asked for: the module decides the phase. Falls back to
+      // the raw track slug for an unknown track, matching the save-time
+      // derivedPhase computation so state and DB never disagree.
+      setPhase(TRACK_TO_PHASE[selectedFinanceModule.track_slug] ?? selectedFinanceModule.track_slug);
     }
   }, [section, selectedFinanceModule]);
 

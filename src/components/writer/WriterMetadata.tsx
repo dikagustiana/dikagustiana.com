@@ -361,9 +361,13 @@ export function WriterMetadata({
         <CardHeader className="pb-4">
           <CardTitle className="text-base">Key Takeaways</CardTitle>
           <CardDescription>
-            Three required for concept and framework lessons; optional (but all-or-nothing)
-            for case studies, exercises and model walkthroughs. They appear at the end of
-            the article.
+            {/* Mirror the gate exactly: the per-lesson-type relaxation only
+                applies when WriterEditor passes a real lesson type, which it
+                does only for module-placed finance lessons. Everywhere else
+                validateEssay runs strict, so the guidance must too. */}
+            {isFinanceSection && moduleId
+              ? 'Three required for concept and framework lessons; optional (but all-or-nothing) for case studies, exercises and model walkthroughs. They appear at the end of the article.'
+              : 'Three are required to publish. They appear at the end of the article.'}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">

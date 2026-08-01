@@ -70,7 +70,9 @@ export function validateEssay({
     errors.push({ field: 'deck', message: 'Deck line (thesis) is required' });
   }
 
-  // Key takeaways — scoped per lesson_type (policy above).
+  // Key takeaways — scoped per lesson_type (policy above). Fail-closed:
+  // a null, empty, or UNKNOWN lesson type stays strict — only the three
+  // explicitly artefact-shaped types relax to advisory.
   const filledTakeaways = keyTakeaways.filter(k => k.trim()).length;
   const takeawaysAdvisory = !!lessonType && TAKEAWAYS_ADVISORY_LESSON_TYPES.has(lessonType);
   if (filledTakeaways > 0 && filledTakeaways < 3) {
@@ -189,7 +191,9 @@ export function WriterValidation({ validation }: WriterValidationProps) {
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle className="h-4 w-4 text-primary" />
-              <span>3+ key takeaways</span>
+              {/* "3+" would be a lie for an artefact-shaped lesson publishing
+                  with none — the scoped rule is what actually passed. */}
+              <span>Key takeaways rule satisfied</span>
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle className="h-4 w-4 text-primary" />
