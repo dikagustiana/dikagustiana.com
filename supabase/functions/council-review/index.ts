@@ -26,9 +26,21 @@ function jsonResponse(body: unknown, status = 200): Response {
   });
 }
 
-/** One call to the Lovable AI gateway; surfaces 429/402 as typed errors. */
-async function callGateway(apiKey: string, model: string, messages: ChatMessage[]): Promise<string> {
-  const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+/**
+ * One call to an OpenAI-compatible chat-completions API; surfaces 429/402 as
+ * typed errors. Provider-agnostic: `baseUrl` is the API base (e.g.
+ * https://api.openai.com/v1) and `/chat/completions` is appended, so any
+ * OpenAI-shaped gateway works by configuration alone. A trailing slash on the
+ * base is tolerated.
+ */
+async function callGateway(
+  baseUrl: string,
+  apiKey: string,
+  model: string,
+  messages: ChatMessage[],
+): Promise<string> {
+  const endpoint = `${baseUrl.replace(/\/+$/, '')}/chat/completions`;
+  const response = await fetch(endpoint, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${apiKey}`,
@@ -76,9 +88,17 @@ serve(async (req) => {
       return jsonResponse({ error: 'Authorization required' }, 401);
     }
 
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    if (!LOVABLE_API_KEY) {
-      throw new Error('LOVABLE_API_KEY is not configured');
+    // Provider-agnostic AI gateway config. Both must be set as function secrets.
+    // When either is missing, return a structured "not configured" response
+    // (503) rather than throwing: the admin UI renders an explicit unconfigured
+    // state from this instead of surfacing a raw error.
+    const AI_GATEWAY_URL = Deno.env.get('AI_GATEWAY_URL');
+    const AI_GATEWAY_API_KEY = Deno.env.get('AI_GATEWAY_API_KEY');
+    if (!AI_GATEWAY_URL || !AI_GATEWAY_API_KEY) {
+      return jsonResponse({
+        error: 'council_not_configured',
+        message: 'The Writing Council AI gateway is not configured. Set AI_GATEWAY_URL and AI_GATEWAY_API_KEY in the edge function secrets.',
+      }, 503);
     }
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
@@ -127,7 +147,7 @@ serve(async (req) => {
     const advisorResponses: AdvisorResponse[] = await Promise.all(
       advisors.map(async (persona: AdvisorPersona) => {
         const model = persona.model ?? DEFAULT_MODEL;
-        const text = await callGateway(LOVABLE_API_KEY, model, buildAdvisorMessages(persona, framedInput));
+        const text = await callGateway(AI_GATEWAY_URL, AI_GATEWAY_API_KEY, model, buildAdvisorMessages(persona, framedInput));
         return { advisorId: persona.id, advisorName: persona.name, model, text };
       }),
     );
@@ -142,7 +162,8 @@ serve(async (req) => {
         advisors.map(async (persona: AdvisorPersona) => {
           const model = persona.model ?? DEFAULT_MODEL;
           const raw = await callGateway(
-            LOVABLE_API_KEY,
+            AI_GATEWAY_URL,
+            AI_GATEWAY_API_KEY,
             model,
             buildPeerReviewMessages(persona, framedInput, anonymized),
           );
@@ -153,7 +174,8 @@ serve(async (req) => {
     // ── Stage 4: chairman synthesis ──
     console.log('Stage 4: chairman synthesis');
     const chairmanRaw = await callGateway(
-      LOVABLE_API_KEY,
+      AI_GATEWAY_URL,
+      AI_GATEWAY_API_KEY,
       CHAIRMAN_PERSONA.model ?? DEFAULT_MODEL,
       buildChairmanMessages(
         CHAIRMAN_PERSONA.systemPrompt,

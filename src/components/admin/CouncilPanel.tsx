@@ -27,6 +27,7 @@ import {
   MessageSquareQuote,
   History,
   AlertCircle,
+  Settings,
   Sparkles,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -34,6 +35,7 @@ import {
   useRunCouncil,
   useCouncilSessions,
   sessionRowToTranscript,
+  CouncilNotConfiguredError,
   type CouncilMode,
   type CouncilTranscript,
   type CouncilPeerReview,
@@ -299,13 +301,28 @@ export function CouncilPanel({ mode, getContent, postId, topic, className }: Cou
       </div>
 
       {runCouncil.isError && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Council session failed</AlertTitle>
-          <AlertDescription>
-            {runCouncil.error instanceof Error ? runCouncil.error.message : 'Unknown error'}
-          </AlertDescription>
-        </Alert>
+        runCouncil.error instanceof CouncilNotConfiguredError ? (
+          <Alert>
+            <Settings className="h-4 w-4" />
+            <AlertTitle>Writing Council not configured</AlertTitle>
+            <AlertDescription>
+              The AI gateway has not been set up yet. An admin needs to set
+              <code className="mx-1 rounded bg-muted px-1 py-0.5 text-xs">AI_GATEWAY_URL</code>
+              and
+              <code className="mx-1 rounded bg-muted px-1 py-0.5 text-xs">AI_GATEWAY_API_KEY</code>
+              in the edge function secrets. Past sessions below still load; new runs stay
+              disabled until it is configured.
+            </AlertDescription>
+          </Alert>
+        ) : (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Council session failed</AlertTitle>
+            <AlertDescription>
+              {runCouncil.error instanceof Error ? runCouncil.error.message : 'Unknown error'}
+            </AlertDescription>
+          </Alert>
+        )
       )}
 
       {transcript && <CouncilTranscriptView transcript={transcript} />}

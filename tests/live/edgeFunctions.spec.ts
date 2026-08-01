@@ -10,7 +10,8 @@ import { anonClient, signedInClient, ADMIN, USER, LIVE } from './helpers';
  * remora and personal-finance functions were cut with their modules. It runs
  * verify_jwt = true and re-checks the admin role server-side, so the useful
  * assertions are about the auth boundary rather than model output: an actual
- * council run needs LOVABLE_API_KEY and spends an AI call.
+ * council run needs the AI gateway configured (AI_GATEWAY_URL /
+ * AI_GATEWAY_API_KEY) and spends an AI call.
  */
 const EDGE = LIVE && process.env.E2E_EDGE === '1';
 
@@ -35,7 +36,8 @@ test.describe('live: edge functions', () => {
     const { client } = await signedInClient(ADMIN);
     const res = await client.functions.invoke('council-review', { body: BODY });
     // Past the gate the call either returns a transcript or fails upstream on
-    // the AI provider / a missing LOVABLE_API_KEY. Either is "reachable and
+    // the AI provider / an unconfigured gateway (503 council_not_configured).
+    // Either is "reachable and
     // handled"; what must not happen is a 401 or 403.
     const message = res.error?.message ?? '';
     expect(message).not.toMatch(/401|403|Unauthorized|Admin access required/i);
