@@ -39,10 +39,13 @@ export const useFinanceSectionBySlug = (slug: string) => {
         .from('finance_sections')
         .select('*')
         .eq('slug', slug)
-        .single();
+        // maybeSingle: a missing track is a not-found, not an error. `.single()`
+        // makes PostgREST answer 406 on zero rows, which surfaced as a failed
+        // request behind a page that otherwise looked fine.
+        .maybeSingle();
 
       if (error) throw error;
-      return data as FinanceSection;
+      return data as FinanceSection | null;
     },
     enabled: !!slug,
   });
@@ -112,7 +115,8 @@ export const useFeaturedFinanceEssay = () => {
         .from('finance_settings')
         .select('value')
         .eq('key', 'featured_finance_essay_id')
-        .single();
+        // The setting is optional; absent is normal, not a 406.
+        .maybeSingle();
 
       if (settingsError || !settings?.value) return null;
 
@@ -124,7 +128,7 @@ export const useFeaturedFinanceEssay = () => {
           finance_section
         `)
         .eq('id', settings.value)
-        .single();
+        .maybeSingle();
 
       if (error) return null;
       return data;
@@ -302,10 +306,12 @@ export const useFinanceModuleBySlug = (slug: string) => {
         .select('*')
         .eq('slug', slug)
         .limit(1)
-        .single();
+        // A module slug that does not exist is a not-found for the page to
+        // handle, not a transport error.
+        .maybeSingle();
 
       if (error) throw error;
-      return data as FinanceModule;
+      return data as FinanceModule | null;
     },
     enabled: !!slug,
   });

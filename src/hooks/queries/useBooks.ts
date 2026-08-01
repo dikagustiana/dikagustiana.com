@@ -50,10 +50,12 @@ export const useBook = (id: string) => {
         .from('books_uploads')
         .select('*')
         .eq('id', id)
-        .single();
+        // books_uploads is currently empty, so every read hit 406. A missing
+        // book is a not-found for BookReader to render.
+        .maybeSingle();
 
       if (error) throw error;
-      return data as Book;
+      return data as Book | null;
     },
     enabled: !!id,
   });
