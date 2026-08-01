@@ -204,4 +204,23 @@ Worth reconciling before Gate 4 claims a verdict on "all 68".
 ### Requests to Session A
 
 - **Gate 3's `/admin/writer` 375px check should be deferred to Session B.** Section 3 requires observing `/admin/writer` at 375px while Section 5.2 was concurrently replacing the editor that renders it. Session B owns that surface and will measure it.
-- **Test-identity contention.** Session A reset `route-sweep-tester@dikagustiana.com`'s password at 10:00 UTC while Session B was mid-sweep, and created `sweep-admin@dikagustiana.com`. Session B has moved to `testuser@dikagustiana.com` (non-admin) and `import-admin@dikagustiana.com` (admin) to stay clear. All four accounts are temporary and are the owner's to delete.
+- **Test-identity contention.** Session A reset `route-sweep-tester@dikagustiana.com`'s password at 10:00 UTC while Session B was mid-sweep, and created `sweep-admin@dikagustiana.com`. Session B moved to `testuser@dikagustiana.com` (non-admin) plus its own `gateb-admin@dikagustiana.com`, which has since been **deleted** along with its `user_roles` row. All four remaining accounts are temporary and are the owner's to delete.
+
+### State this session changed outside the repository
+
+Recorded because a later session should not have to rediscover it:
+
+- **Passwords were reset** on `import-admin@dikagustiana.com` and
+  `testuser@dikagustiana.com` (and briefly `route-sweep-tester@dikagustiana.com`, which
+  Session A has since reset again). The gate requires observing three identities and the
+  original passwords were recorded nowhere. The new values are not written to any tracked
+  file. These are throwaway verification accounts already slated for deletion; the owner's
+  own account was never touched.
+- **`gateb-admin@dikagustiana.com` was created and then deleted.** Auth is back to the four
+  accounts that predate this session.
+- **`fa-07-01` was edited and restored.** Final state verified against the pre-session
+  measurement: `status: published`, `published: true`, 21,946 characters of `content`,
+  81 `content_json` blocks, 5 references, 3 key takeaways, no test marker present.
+- **Two objects remain in the `essay-images` bucket** under `drafts/` and `finance/` from
+  the upload verification. Harmless, unreferenced, and safe to delete.
+- **No migration was applied** and no schema changed.
