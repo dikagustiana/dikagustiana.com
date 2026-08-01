@@ -79,7 +79,7 @@ const EssayRow = React.memo(function EssayRow({
           to={editUrl}
           aria-label={`Edit ${essay.title}`}
           title="Edit in writer"
-          className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-md text-muted-foreground opacity-0 group-hover/row:opacity-100 focus-visible:opacity-100 hover:bg-muted hover:text-foreground transition-all"
+          className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-md text-muted-foreground opacity-0 group-hover/row:opacity-100 focus-visible:opacity-100 hover:bg-muted hover:text-foreground transition-[opacity,background-color,color]"
         >
           <Pencil className="h-4 w-4" />
         </Link>

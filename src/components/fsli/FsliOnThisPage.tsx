@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { Search, ChevronDown, ChevronUp, ArrowDown, ArrowUp } from 'lucide-react';
+import { Search, ChevronDown, ChevronUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { scrollBehavior } from '@/lib/motion';
 
 interface TocSection {
   id: string;
@@ -40,7 +40,8 @@ export function FsliOnThisPage({ sections, activeSection }: FsliOnThisPageProps)
       
       window.scrollTo({
         top: offsetPosition,
-        behavior: 'smooth'
+        // Jump, don't glide, for readers who asked for reduced motion.
+        behavior: scrollBehavior(),
       });
     }
   };
@@ -67,16 +68,6 @@ export function FsliOnThisPage({ sections, activeSection }: FsliOnThisPageProps)
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-9 h-9 text-sm"
           />
-        </div>
-
-        {/* Navigation buttons */}
-        <div className="flex gap-2 mb-4">
-          <Button variant="outline" size="sm" className="flex-1 h-8">
-            <ArrowDown className="h-4 w-4" />
-          </Button>
-          <Button variant="outline" size="sm" className="flex-1 h-8">
-            <ArrowUp className="h-4 w-4" />
-          </Button>
         </div>
 
         {/* TOC */}

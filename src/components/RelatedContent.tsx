@@ -143,7 +143,7 @@ export function RelatedContent({
         <div className="grid gap-4 md:grid-cols-3">
           {relatedEssays.map((essay) => (
             <Link key={essay.id} to={getEssayUrl(essay)}>
-              <div className="group p-4 rounded-lg border hover:border-primary/50 hover:bg-muted/50 transition-all">
+              <div className="group p-4 rounded-lg border hover:border-primary/50 hover:bg-muted/50 transition-colors">
                 <div className="flex items-center gap-2 mb-2">
                   <Badge variant="outline" className="text-xs gap-1">
                     {getMatchIcon(essay.matchType)}

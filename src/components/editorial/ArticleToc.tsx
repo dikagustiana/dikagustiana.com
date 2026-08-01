@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { ChevronDown, List } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { prefersReducedMotion } from '@/lib/motion';
 
 interface TocItem {
   id: string;
@@ -49,17 +50,6 @@ function extractHeadings(content: string): TocItem[] {
   }
 
   return items;
-}
-
-/**
- * Checked at interaction time, never cached: DevTools emulation and the OS
- * setting both change it while the page is open.
- */
-function prefersReducedMotion(): boolean {
-  return (
-    typeof window !== 'undefined' &&
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  );
 }
 
 export function ArticleToc({ content, className, variant = 'inline' }: ArticleTocProps) {

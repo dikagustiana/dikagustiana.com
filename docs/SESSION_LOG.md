@@ -3,22 +3,36 @@
 Append-only. Newest entry first. A fresh session must be able to resume from this file.
 
 ## NEXT ACTION (single)
-**Section 4 — the essay page itself.** In `LongformArticleShell.tsx` (currently one
-`max-w-[780px] mx-auto` column), move the table of contents into a sticky sidebar at `lg:`
-and up; keep the inline collapsible below `lg:` (`ArticleToc.tsx:49`). Give the sidebar a
-`max-h` with internal overflow (13 entries on `fa-07-01`), scroll the active entry within
-the sidebar container — not the page — respect `prefers-reduced-motion` for the
-`scrollIntoView({behavior:'smooth'})` at `ArticleToc.tsx:81`, and rAF-throttle
-`ReadingProgress.tsx`. GATE W4 is measured by scrolling: sidebar tracks to the final
-heading, 375px shows no h-scroll with `scrollWidth` recorded, reduced-motion jumps instead
-of gliding. Then Section 5 (ui-audit on reading surfaces; FSLI honest empty state; remove 5
-unused @tiptap deps). **At session end: delete `s7-admin@dikagustiana.com` and
-`s7-user@dikagustiana.com`** (session-namespaced test identities, mandate rule 6).
+**Close out session 7: delete the test identities and open the PR.** Delete
+`s7-admin@dikagustiana.com` and `s7-user@dikagustiana.com` (session-namespaced, mandate
+rule 6), push `claude/writing-reading-s1`, and open a PR **based on `main`**. All five
+session gates (W1–W5) are PASSED in `docs/GATE_LEDGER.md`. Still outstanding from earlier
+sessions, untouched by design: GATE 7 verdicts live in `docs/gates/GATES_5_7.md` and want
+transplanting into the ledger; `books_uploads`/`finance_models` have no insert path;
+curriculum Sections 05/06 have no data path; six zero-unique-commit branches need the
+GitHub UI to delete.
 
-## 2026-08-01 (session 7) — writing an essay, and reading one: Sections 1–3
+## 2026-08-01 (session 7) — writing an essay, and reading one: Sections 1–5
 
-Branch `claude/writing-reading-s1`. `3c9f78b` (Section 1), `30763f4` (Sections 2–3).
-GATES W1, W2, W3 all **PASSED** — measurements in `docs/GATE_LEDGER.md`.
+Branch `claude/writing-reading-s1`. `3c9f78b` (Section 1), `30763f4` (Sections 2–3),
+`e70d40f` (Section 4), plus the Section-5 commit. GATES W1–W5 all **PASSED** —
+measurements in `docs/GATE_LEDGER.md`.
+
+- **Essay page (W4).** Sticky ToC sidebar at lg:+ in both shells via an `ArticleToc`
+  sidebar variant (the mandate named `LongformArticleShell`, but readers actually hit
+  `ArticleShell` — no module has track_slug `finance-in-motion`; both got the pattern,
+  the gate was measured on the reachable one). Root cause found: unconditional
+  `html { scroll-behavior: smooth }` made even `behavior:'auto'` glide — now gated
+  behind `prefers-reduced-motion: no-preference`. ReadingProgress is rAF-coalesced and
+  compositor-only.
+- **Consistency (W5).** ui-audit on the reading surfaces: 12 findings, 11 fixed, 1
+  recorded — full table with dispositions in `docs/UI_AUDIT_READING.md`. The 24 FSLI
+  pages stopped lying: no more shared cash-equivalents boilerplate, stock photo, fake
+  key points, or `Updated 6 Sep 2025` — unwritten sections say "Not written yet." and
+  each page shows its own real reported figures. The five @tiptap deps were already
+  gone from package.json (removed in `c7e5d12`, merged via PR #9); what the lockfile
+  keeps are starter-kit's own transitive copies, which is exactly why the direct
+  declarations were redundant.
 
 - **Save path closed (W1).** Autosave re-observed after every save-path change (3,612 words
   recovered); the orphaned tone trigger confirmed dropped and its migration mirrored into

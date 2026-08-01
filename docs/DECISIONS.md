@@ -489,3 +489,21 @@ takeaways had Publish disabled.
   asterisk is gone: the field was labelled required while `validateEssay` never checked it.
 - `topic` is only ever written for module-placed finance essays, so accounting's use of the
   column (its consolidation pages key on it) cannot be clobbered from this editor.
+
+## 2026-08-01 (session 7) — FSLI empty state over seeded prose
+
+Mandate 5.2 offered two ways out of the 24-identical-placeholder defect: seed
+real sections or make the empty state honest. **Chosen: the honest empty
+state.** Seeding "real" prose would have meant this session inventing
+accounting doctrine for 24 line items and publishing it under the site's
+name — the same fabrication class the section exists to remove, at larger
+scale. Instead: unwritten sections say "Not written yet." in one quiet line,
+admins click straight into the existing inline editor to write them, and each
+page's header now carries the genuinely real per-item data it always had
+(reported figures for both years and the notes reference from `fsli_pages`).
+No schema change; `fsli_sections` remains the single source of section prose.
+
+Also decided: the shared section outline may not carry line-item-specific
+headings — "Bank Overdrafts Treatment" (true only for cash) became
+"Classification Boundary Cases"; the `section_key` stays `issues-overdrafts`
+so any rows written later still bind.

@@ -110,7 +110,7 @@ No lessons assigned to this module yet.
                 e.stopPropagation();
                 window.location.assign(`/admin/writer/finance/${essay.slug}`);
               }}
-              className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-md text-muted-foreground opacity-0 group-hover:opacity-100 focus-visible:opacity-100 hover:bg-muted hover:text-foreground transition-all shrink-0 -my-2"
+              className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-md text-muted-foreground opacity-0 group-hover:opacity-100 focus-visible:opacity-100 hover:bg-muted hover:text-foreground transition-[opacity,background-color,color] shrink-0 -my-2"
             >
               <Pencil className="h-4 w-4" />
             </span>
