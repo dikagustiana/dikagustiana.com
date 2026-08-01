@@ -176,6 +176,51 @@ of this container, not of the app.
 
 ---
 
+## Merge with `main` (Session A's PR #8) — re-verification
+
+Session A merged PR #8 (`5b2b1c9`) while this work was in flight. `main` was merged
+into this branch at **`5bdc5e4`** and every gate re-checked on the merged tree.
+
+**A correction to the evidence above.** Session A's PR #8 included
+*"fix(typecheck): tsc was checking zero files"*. The root `tsconfig.json` has
+`"files": []` and only project references, so the `npx tsc --noEmit` used repeatedly
+during Sections 5 and 7 **checked nothing** — every "typecheck clean" reported before
+the merge was vacuous. The real command is `npm run typecheck` (`tsc -b --force`).
+Re-run on the merged tree: **exit 0**, and `--listFilesOnly` confirms the new files
+(`imageUpload.ts`, `slashCommand.ts`, `uploadImage.ts`, `EssayEditor.tsx`) are in the
+compilation. Nothing was hidden, but the earlier checks were not evidence and are
+withdrawn as such. It is also a neat illustration of the mandate's own point: a green
+check that is not measuring anything is worse than no check.
+
+**Conflicts and how they were resolved.**
+
+- `scripts/dump-content.mjs` — **both sessions independently wrote a backup script.**
+  Session A's was taken: it covers eleven tables rather than two, guards against a
+  suspiciously small dump with per-table minimum floors, and is wired to
+  `npm run dump:content`. Session B's took a narrower view (authored layer only,
+  admin login rather than a service-role key) and its per-essay summary is the one
+  thing lost. GATE 6.2 was **re-verified against the surviving script**: it wrote
+  eleven files, reported "Dump looks complete", and `fa-07-01` inside `essays.json`
+  carries 21,954 bytes of `content`, 81 `content_json` blocks and a `presentation`
+  with 5 references and 3 key takeaways.
+- `useFsliPages.ts`, `useBooks.ts`, `useFinanceModels.ts` — **both sessions made the
+  identical `.single()` → `maybeSingle()` fix**, differing only in the comment. Session
+  A's wording was taken. Two sessions reaching the same fix independently is the
+  strongest evidence available that it was the right one.
+
+**Re-verified on the merged tree (`5bdc5e4`).**
+
+| Check | Result |
+|---|---|
+| `npm run typecheck` (the real one) | exit 0 |
+| `npm run build` | exit 0 |
+| `npm run test:unit` | 16 files, 165 tests, all passing |
+| Section 5 surfaces touched by the merge | **none** — `src/lib/tiptap/**`, `ArticleBody`, `EssayEditor`, `sanitizeHtml`, `WriterPreview`, `WriterStudio` are byte-identical to `c7e5d12`, so the GATE 5 evidence carries |
+| Editor on the merged build, as admin | mounts, **0** duplicate-extension warnings, **0** console errors |
+| Table insert (the bug that crashed the page) | editor survives, table present, no error boundary, table controls appear, **and the preview pane renders the table too** — parity intact |
+| Published page, anonymous | not 404, 10 `h2`, 76 paragraphs, 21,207 characters, key takeaways and references present, **0** console errors |
+| `fa-07-01` after the smoke test | unchanged — 21,946 characters, 81 blocks, published, no stray table or marker |
+
 ## ROUTE CHANGES REQUESTED
 
 `src/App.tsx` is Session A's file (Section 4 sweep). These are the changes
