@@ -153,8 +153,11 @@ export function WriterList({ section }: WriterListProps) {
 
       <div className="container max-w-5xl py-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
+        {/* Wraps at narrow widths — the two action buttons plus the title were
+            301px of unbreakable row and pushed /admin/writer/:section/list to
+            466px on a 375px screen. */}
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
+          <div className="flex items-center gap-4 min-w-0">
             <Button 
               variant="ghost" 
               size="icon" 
@@ -163,13 +166,13 @@ export function WriterList({ section }: WriterListProps) {
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div>
-              <h1 className="text-2xl font-display font-bold">{sectionLabel}</h1>
+              <h1 className="text-2xl font-display font-bold break-words">{sectionLabel}</h1>
               <p className="text-muted-foreground text-sm">
                 {essays?.length || 0} essays • {drafts.length} drafts • {published.length} published
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <Button variant="outline" asChild>
               <a href={sectionPath} target="_blank" rel="noopener noreferrer">
                 <Eye className="h-4 w-4 mr-2" />

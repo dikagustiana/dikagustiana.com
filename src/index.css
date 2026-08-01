@@ -1,4 +1,35 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Source+Sans+3:wght@300;400;500;600;700&display=swap');
+/* Display face stays a serif — the editorial contrast is deliberate.
+   @import must precede all other rules, hence its position here. */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap');
+
+/* Body/UI face: Plus Jakarta Sans, self-hosted.
+ *
+ * Self-hosted rather than @import'd from Google Fonts for two reasons: a
+ * webfont that fails to load falls back silently and the page still "works",
+ * which is exactly the class of failure this rebuild keeps hitting; and it
+ * removes a third-party request from every page load. One variable file per
+ * subset covers 400-800, 56K total.
+ *
+ * Exposed through the --font-sans / --font-display tokens below and consumed
+ * by tailwind.config.ts, so no component names a family directly.
+ */
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-weight: 400 800;           /* variable axis — one file covers the range */
+  font-display: swap;
+  src: url('/fonts/plus-jakarta-sans-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-weight: 400 800;           /* variable axis — one file covers the range */
+  font-display: swap;
+  src: url('/fonts/plus-jakarta-sans-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
 
 @tailwind base;
 @tailwind components;
@@ -6,6 +37,10 @@
 
 @layer base {
   :root {
+    /* Typography tokens — the single place a font family is named. */
+    --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --font-display: 'Playfair Display', Georgia, 'Times New Roman', serif;
+
     /* Light theme matching dikagustiana.com */
     --background: 0 0% 98%;
     --foreground: 215 25% 17%;

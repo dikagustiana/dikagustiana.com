@@ -54,5 +54,16 @@ export function resolvePresentation(row: PresentationSource | null | undefined):
   return row?.presentation ?? {};
 }
 
+/**
+ * Normalise a reference to object form.
+ *
+ * `PresentationReference` is `string | {label, url?}` because older rows stored
+ * a bare string. Renderers that reach straight for `.label`/`.url` break on
+ * those, so they go through this.
+ */
+export function normaliseReference(ref: PresentationReference): { label: string; url?: string } {
+  return typeof ref === 'string' ? { label: ref } : ref;
+}
+
 /** The columns an essay query must select for `resolvePresentation` to work. */
 export const PRESENTATION_COLUMNS = 'presentation';

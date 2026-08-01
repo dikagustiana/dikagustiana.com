@@ -53,7 +53,8 @@ export function MobileNav() {
           <Button
             variant="ghost"
             size="icon"
-            className="text-primary-foreground"
+            /* 44x44 minimum touch target — the icon button default is 40px. */
+            className="text-primary-foreground min-h-[44px] min-w-[44px]"
             aria-label="Open navigation menu"
           >
             <Menu className="h-6 w-6" />
@@ -87,7 +88,7 @@ export function MobileNav() {
                           <Link
                             to={section.basePath}
                             onClick={() => setIsOpen(false)}
-                            className="flex-1 py-3 px-4 text-left font-medium hover:bg-secondary rounded-l-lg transition-colors"
+                            className="flex flex-1 min-h-[44px] items-center py-3 px-4 text-left font-medium hover:bg-secondary rounded-l-lg transition-colors"
                           >
                             {section.label}
                           </Link>
@@ -101,7 +102,7 @@ export function MobileNav() {
                           onClick={() => toggleSection(section.label)}
                           aria-expanded={expandedSection === section.label}
                           aria-label={`Expand ${section.label} submenu`}
-                          className="p-3 hover:bg-secondary rounded-r-lg transition-colors"
+                          className="flex min-h-[44px] min-w-[44px] items-center justify-center p-3 hover:bg-secondary rounded-r-lg transition-colors"
                         >
                           <ChevronDown
                             className={cn(
@@ -119,7 +120,7 @@ export function MobileNav() {
                               to={item.path}
                               onClick={() => setIsOpen(false)}
                               className={cn(
-                                'block py-2 px-4 text-sm hover:bg-secondary rounded-lg transition-colors',
+                                'flex min-h-[44px] items-center py-2 px-4 text-sm hover:bg-secondary rounded-lg transition-colors',
                                 isItemActive(item.path) && 'bg-secondary text-primary font-medium'
                               )}
                             >
@@ -134,7 +135,7 @@ export function MobileNav() {
                       to={section.path!}
                       onClick={() => setIsOpen(false)}
                       className={cn(
-                        'block py-3 px-4 font-medium hover:bg-secondary rounded-lg transition-colors',
+                        'flex min-h-[44px] items-center py-3 px-4 font-medium hover:bg-secondary rounded-lg transition-colors',
                         isSectionActive(section) && 'bg-secondary text-primary'
                       )}
                     >
@@ -152,7 +153,7 @@ export function MobileNav() {
                   to="/finance-workspace"
                   onClick={() => setIsOpen(false)}
                   className={cn(
-                    'block py-3 px-4 font-medium text-accent hover:bg-secondary rounded-lg transition-colors',
+                    'flex min-h-[44px] items-center py-3 px-4 font-medium text-accent hover:bg-secondary rounded-lg transition-colors',
                     location.pathname.startsWith('/finance-workspace') && 'bg-secondary'
                   )}
                 >
@@ -162,7 +163,7 @@ export function MobileNav() {
                   to="/admin/dashboard"
                   onClick={() => setIsOpen(false)}
                   className={cn(
-                    'block py-3 px-4 font-medium text-accent hover:bg-secondary rounded-lg transition-colors',
+                    'flex min-h-[44px] items-center py-3 px-4 font-medium text-accent hover:bg-secondary rounded-lg transition-colors',
                     location.pathname.startsWith('/admin') && 'bg-secondary'
                   )}
                 >
@@ -188,8 +189,8 @@ export function MobileNav() {
                   </Button>
                 </div>
               ) : (
-                <Link to="/auth" onClick={() => setIsOpen(false)}>
-                  <Button variant="ghost" className="w-full justify-start">
+                <Link to="/auth" onClick={() => setIsOpen(false)} className="block">
+                  <Button variant="ghost" className="w-full min-h-[44px] justify-start">
                     Sign In
                   </Button>
                 </Link>

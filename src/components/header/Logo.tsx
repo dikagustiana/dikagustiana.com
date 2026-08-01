@@ -27,7 +27,7 @@ export function Logo() {
       <button
         type="button"
         onClick={() => setShowDropdown(!showDropdown)}
-        className="flex items-center gap-3 group cursor-pointer"
+        className="flex min-h-[44px] items-center gap-3 group cursor-pointer"
       >
         <img 
           src="/logo.png" 
