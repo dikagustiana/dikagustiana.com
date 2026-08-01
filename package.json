@@ -13,7 +13,8 @@
     "test:e2e": "playwright test",
     "test:e2e:live": "playwright test --config=playwright.live.config.ts",
     "test:unit": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "dump:content": "node scripts/dump-content.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

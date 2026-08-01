@@ -48,7 +48,7 @@ export const useCategory = (slug: string, sectionId?: string) => {
         query = query.eq('section_id', sectionId);
       }
 
-      const { data, error } = await query.single();
+      const { data, error } = await query.maybeSingle();
 
       if (error) throw error;
       return data as Category;

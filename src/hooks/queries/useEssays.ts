@@ -98,7 +98,9 @@ export const useEssay = (slug: string, options: UseEssayOptions = {}) => {
         .from('essays')
         .select('*')
         .eq('slug', slug)
-        .single();
+        // maybeSingle: a row that does not exist is a not-found for the page
+        // to render, not a 406 from PostgREST behind a page that looks fine.
+        .maybeSingle();
 
       if (error) throw error;
       return data as Essay;
