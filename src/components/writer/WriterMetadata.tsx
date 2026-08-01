@@ -159,8 +159,15 @@ export function WriterMetadata({
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="phase">Topic/Phase *</Label>
-              <Select value={phase} onValueChange={setPhase}>
+              {/* No asterisk: validateEssay never checked this field, so the
+                  "required" mark was decorative. For finance essays with a
+                  module it is derived from placement and locked. */}
+              <Label htmlFor="phase">Topic/Phase</Label>
+              <Select
+                value={phase}
+                onValueChange={setPhase}
+                disabled={isFinanceSection && !!moduleId}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select topic..." />
                 </SelectTrigger>
@@ -172,6 +179,11 @@ export function WriterMetadata({
                   ))}
                 </SelectContent>
               </Select>
+              {isFinanceSection && !!moduleId && (
+                <p className="text-xs text-muted-foreground">
+                  Derived from the module's track.
+                </p>
+              )}
             </div>
           </div>
 

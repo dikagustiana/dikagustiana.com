@@ -19,9 +19,19 @@ interface ValidateParams {
   section: string;
   content: string;
   categoryId?: string;
+  lessonType?: string | null;
 }
 
 const MIN_WORD_COUNT = 500;
+
+/**
+ * Lesson types where the Key Takeaways block earns its place and the
+ * three-claims forcing function is worth having (docs/DECISIONS.md,
+ * "The key-takeaways publish gate"). For the artefact-shaped types —
+ * case-study, exercise, model-walkthrough — the takeaway IS the worked
+ * artefact, and forcing three onto it produces filler in a standing block.
+ */
+const TAKEAWAY_REQUIRED_TYPES = new Set(['concept', 'framework']);
 
 export function validateEssay({
   title,
@@ -32,6 +42,7 @@ export function validateEssay({
   section,
   content,
   categoryId,
+  lessonType,
 }: ValidateParams): ValidationResult {
   const errors: { field: string; message: string }[] = [];
   const warnings: { field: string; message: string }[] = [];
@@ -51,12 +62,29 @@ export function validateEssay({
     errors.push({ field: 'deck', message: 'Deck line (thesis) is required' });
   }
 
-  // Required: At least 3 key takeaways
+  // Key takeaways — scoped per lesson_type, not relaxed globally:
+  //   * essay-shaped types (concept, framework): 3 required, blocking;
+  //   * artefact-shaped types: advisory when absent, never blocks Publish;
+  //   * all-or-nothing within any type: a 1–2 item block reads as an
+  //     unfinished list, so partial takeaways block everywhere.
   const filledTakeaways = keyTakeaways.filter(k => k.trim()).length;
-  if (filledTakeaways < 3) {
-    errors.push({ 
-      field: 'keyTakeaways', 
-      message: `At least 3 key takeaways required (${filledTakeaways}/3)` 
+  const takeawaysRequired = TAKEAWAY_REQUIRED_TYPES.has(lessonType ?? 'concept');
+  if (takeawaysRequired) {
+    if (filledTakeaways < 3) {
+      errors.push({
+        field: 'keyTakeaways',
+        message: `At least 3 key takeaways required (${filledTakeaways}/3)`,
+      });
+    }
+  } else if (filledTakeaways === 0) {
+    warnings.push({
+      field: 'keyTakeaways',
+      message: `No key takeaways — fine for a ${lessonType}; add all three if the piece has claims worth pinning`,
+    });
+  } else if (filledTakeaways < 3) {
+    errors.push({
+      field: 'keyTakeaways',
+      message: `Key takeaways are all-or-nothing: supply 3 or none (${filledTakeaways}/3)`,
     });
   }
 
@@ -156,7 +184,9 @@ export function WriterValidation({ validation }: WriterValidationProps) {
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle className="h-4 w-4 text-primary" />
-              <span>3+ key takeaways</span>
+              {/* "3+" would be a lie for an artefact-shaped lesson publishing
+                  with none — the scoped rule is what actually passed. */}
+              <span>Key takeaways rule satisfied</span>
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle className="h-4 w-4 text-primary" />

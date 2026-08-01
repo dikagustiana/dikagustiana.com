@@ -233,7 +233,7 @@ export default function AdminDashboard() {
                   {recentDrafts.map((draft) => (
                     <li key={draft.id}>
                       <Link
-                        to={`/admin/writer/${draft.slug}`}
+                        to={`/admin/writer/${draft.section || 'finance'}/${draft.slug}`}
                         className="flex items-center justify-between p-3 rounded-lg hover:bg-muted/50 transition-colors group"
                       >
                         <div className="flex-1 min-w-0">
@@ -286,7 +286,7 @@ export default function AdminDashboard() {
                   {recentPublished.map((essay) => (
                     <li key={essay.id}>
                       <Link
-                        to={`/admin/writer/${essay.slug}`}
+                        to={`/admin/writer/${essay.section || 'finance'}/${essay.slug}`}
                         className="flex items-center justify-between p-3 rounded-lg hover:bg-muted/50 transition-colors group"
                       >
                         <div className="flex-1 min-w-0">

@@ -79,7 +79,7 @@ export const useTrackAllEssays = (trackSlug: string) => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data: essays, error: essayErr } = await (supabase as any)
         .from('essays')
-        .select('id, slug, title, snippet, date, read_time, finance_order, lesson_type, created_at, published, status, module_id')
+        .select('id, slug, title, snippet, author, date, read_time, finance_order, lesson_type, created_at, published, status, module_id')
         .in('module_id', moduleIds)
         .order('finance_order', { ascending: true, nullsFirst: false })
         .order('created_at', { ascending: false });

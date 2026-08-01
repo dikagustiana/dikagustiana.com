@@ -11,7 +11,9 @@ import { ArrowLeft, User, Calendar, Clock } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { ReadingProgress } from './ReadingProgress';
+import { ArticleToc } from './ArticleToc';
 import { ArticleBody } from './ArticleBody';
+import { contentToHtml } from '@/lib/tiptap/serialize';
 import { KeyTakeaways } from './KeyTakeaways';
 import { References } from './References';
 import { AuthorBox } from './AuthorBox';
@@ -88,13 +90,21 @@ export function LongformArticleShell({
     return diffDays >= 7;
   }, [updatedAt, createdAt]);
 
+  // ToC heading extraction parses HTML; the body may be stored as TipTap JSON.
+  const tocHtml = useMemo(() => contentToHtml(content), [content]);
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
       <ReadingProgress />
 
       <main className="flex-1">
-        <article className="max-w-[780px] mx-auto px-6 lg:px-16 py-16 space-y-8">
+        {/* Two columns at lg: the reading column keeps its 780px measure, the
+            ToC sits in a sticky aside beside it. Below lg the aside does not
+            exist — a sidebar with no breakpoint would push the page past
+            375px, which is the horizontal scroll GATE 3 just eliminated. */}
+        <div className="mx-auto max-w-[780px] px-6 py-16 lg:grid lg:max-w-[1040px] lg:grid-cols-[minmax(0,1fr)_14rem] lg:gap-12 lg:px-8">
+        <article className="min-w-0 max-w-[780px] space-y-8">
           <SEO
             title={seoTitle}
             description={seoDescription}
@@ -168,6 +178,9 @@ export function LongformArticleShell({
             </figure>
           )}
 
+          {/* Inline collapsible ToC for viewports without the sidebar */}
+          <ArticleToc content={tocHtml} className="lg:hidden" />
+
           {/* ── Body ── */}
           <div className="longform-body">
             <ArticleBody content={content} />
@@ -197,6 +210,13 @@ export function LongformArticleShell({
             <RelatedEssays currentEssayId={currentEssayId} section={section} />
           )}
         </article>
+
+        <aside className="hidden lg:block">
+          <div className="sticky top-24">
+            <ArticleToc content={tocHtml} variant="sidebar" />
+          </div>
+        </aside>
+        </div>
       </main>
 
       <Footer />

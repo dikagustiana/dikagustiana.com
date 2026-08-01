@@ -20,6 +20,9 @@ import {
   type FinanceModuleEssay,
 } from '@/hooks/queries/useFinance';
 import { useTrackEssayCounts, useTrackAllEssays } from '@/hooks/queries/useFinanceTrackEssays';
+import { useAuth } from '@/contexts/AuthContext';
+import { essayUrl } from '@/lib/essayUrl';
+import { EssayEditLink, essayEditorUrl } from '@/components/EssayEditLink';
 
 /* ─── Essay title split helper ─── */
 function splitTitle(title: string) {
@@ -32,22 +35,57 @@ function splitTitle(title: string) {
 }
 
 /* ─── Essay row ─── */
-const EssayRow = React.memo(function EssayRow({ essay }: { essay: FinanceModuleEssay }) {
+const EssayRow = React.memo(function EssayRow({
+  essay,
+  mod,
+  isAdmin,
+}: {
+  essay: FinanceModuleEssay;
+  mod: FinanceModule;
+  isAdmin: boolean;
+}) {
   const { line1, line2 } = splitTitle(essay.title);
+  const isPublished = essay.status === 'published';
+
+  // The row used to render title, deck and byline with no <Link> at all — the
+  // one thing a reader would click was the one thing that did nothing.
+  const publicUrl = essayUrl({
+    slug: essay.slug,
+    section: 'finance',
+    track: mod.track_slug,
+    moduleSlug: mod.slug,
+  });
+  // Drafts are visible only to admins (RLS hides them from everyone else), and
+  // the public view of an empty stub is not worth landing on — for a draft the
+  // title goes straight to the editor.
+  const titleTo = isAdmin && !isPublished ? essayEditorUrl(essay.slug) : publicUrl;
+
+  const title = (
+    <>
+      <p className="text-[16px] font-semibold leading-snug">{line1}</p>
+      {line2 && <p className="text-[16px] leading-snug mt-0.5">{line2}</p>}
+    </>
+  );
 
   return (
-    <div className="py-5 pl-[3.5rem]">
-      <p className="text-[16px] font-semibold text-foreground leading-snug">
-        {line1}
-      </p>
-      {line2 && (
-        <p className="text-[16px] text-foreground leading-snug mt-0.5">
-          {line2}
+    <div className="py-5 pl-[3.5rem] flex items-start gap-2">
+      <div className="min-w-0 flex-1">
+        {titleTo ? (
+          <Link to={titleTo} className="block text-foreground hover:text-primary transition-colors">
+            {title}
+          </Link>
+        ) : (
+          <div className="text-foreground">{title}</div>
+        )}
+        {/* Real status and real author from the row — this line was a hardcoded
+            "Draft · Dika Gustiana" even for the published essay. */}
+        <p className="text-xs text-muted-foreground mt-2">
+          {isPublished ? 'Published' : 'Draft'}
+          {essay.author ? ` · ${essay.author}` : ''}
+          {essay.read_time ? ` · ${essay.read_time}` : ''}
         </p>
-      )}
-      <p className="text-xs text-muted-foreground mt-2">
-        Draft · Dika Gustiana
-      </p>
+      </div>
+      <EssayEditLink slug={essay.slug} className="mt-0.5" />
     </div>
   );
 });
@@ -59,12 +97,14 @@ const CollapsibleModuleRow = React.memo(function CollapsibleModuleRow({
   counts,
   isOpen,
   onToggle,
+  isAdmin,
 }: {
   mod: FinanceModule;
   essays: FinanceModuleEssay[];
   counts: { published: number; total: number };
   isOpen: boolean;
   onToggle: () => void;
+  isAdmin: boolean;
 }) {
   return (
     <div>
@@ -98,7 +138,7 @@ const CollapsibleModuleRow = React.memo(function CollapsibleModuleRow({
       {isOpen && essays.length > 0 && (
         <div className="divide-y divide-border/30">
           {essays.map((essay) => (
-            <EssayRow key={essay.id} essay={essay} />
+            <EssayRow key={essay.id} essay={essay} mod={mod} isAdmin={isAdmin} />
           ))}
         </div>
       )}
@@ -155,6 +195,7 @@ export default function FinanceTrackIndex() {
 }
 
 function TrackContent({ track }: { track: string }) {
+  const { isAdmin } = useAuth();
   const {
     data: section,
     isLoading: sectionLoading,
@@ -258,6 +299,7 @@ function TrackContent({ track }: { track: string }) {
                     counts={counts}
                     isOpen={openModules.has(mod.id)}
                     onToggle={() => toggle(mod.id)}
+                    isAdmin={!!isAdmin}
                   />
                 );
               }

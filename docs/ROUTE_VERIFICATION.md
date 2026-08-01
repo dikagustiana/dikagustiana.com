@@ -7,14 +7,23 @@ database as three identities at two viewports. Generated from a sweep, not from 
 
 | | |
 |---|---|
-| Routes swept | **65** (65 `<Route path>` entries; the `*` catch-all excluded) |
+| Routes swept | **66** (all 66 `<Route path>` entries — 65 concrete plus the `*` catch-all, which the original sweep exercised in every 404 test but excluded from its count) |
 | Defects | **0** |
 | Access leaks | **0** |
 | Horizontal scroll at 375px | **0** |
 | NOT TESTED | **0** |
 
-The count is 65, not the 68 the mandate quoted — that figure predates the `/admin/council`
+The count is 66, not the 68 the mandate quoted — that figure predates the `/admin/council`
 removal, and `<Route>` entries without a `path` were never routes in their own right.
+(An earlier revision of this document said 65 by excluding the `*` catch-all; since
+`App.tsx` has 66 `path=` entries and GATE 4 claims zero `NOT TESTED`, the catch-all is
+now counted and carries its own row below.)
+
+## The 66th route — the `*` catch-all
+
+| route | page component | tables touched | intended access | anonymous | authenticated non-admin | admin | 375px | desktop | verdict |
+|---|---|---|---|---|---|---|---|---|---|
+| `*` | `NotFound` | `essays` (nearest-slug suggestion) | public | improved 404 rendered | improved 404 rendered | improved 404 rendered | no h-scroll (`scrollWidth` 375/375) | no h-scroll (1440/1440) | **WORKING — verified.** `/definitely-no-such-route-xyz` as all three identities; the did-you-mean suggestion links through the canonical `essayUrl`. |
 
 ## Identity gating — verified by separation, not assumed
 

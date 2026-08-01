@@ -16,10 +16,25 @@ export function ReadingProgress({ className }: ReadingProgressProps) {
       setProgress(Math.min(100, Math.max(0, scrollPercent)));
     };
 
-    window.addEventListener('scroll', updateProgress, { passive: true });
+    // Reading scrollHeight forces a layout pass; on a 3,000-word page scroll
+    // events arrive far faster than frames are painted. One measurement per
+    // frame is all a progress bar can display anyway.
+    let frame = 0;
+    const onScroll = () => {
+      if (frame) return;
+      frame = requestAnimationFrame(() => {
+        frame = 0;
+        updateProgress();
+      });
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
     updateProgress();
 
-    return () => window.removeEventListener('scroll', updateProgress);
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      if (frame) cancelAnimationFrame(frame);
+    };
   }, []);
 
   return (
