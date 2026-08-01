@@ -1,9 +1,10 @@
 export * from './ContentTemplates';
 export * from './EssayTemplateForm';
 export * from './ContentHealthIndicator';
-export * from './InlineEssayEditor';
 export * from './TemplateSelector';
 export * from './DynamicListEditor';
-export * from './RichTextEditor';
 export * from './ContentPreview';
-export * from './WriterModeEditor';
+// InlineEssayEditor, WriterModeEditor, RichTextEditor and UnifiedEditor were
+// removed in Section 5.2. Essay bodies are edited by EssayEditor
+// (@/components/editorial), which is the only surface that builds its schema
+// from getEditorExtensions().

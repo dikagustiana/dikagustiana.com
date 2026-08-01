@@ -10,6 +10,7 @@ import { FsliMobileSidebar } from '@/components/fsli/FsliMobileSidebar';
 import { useFsliPage } from '@/hooks/queries/useFsliPages';
 import { useEssaysByFsliSlug } from '@/hooks/queries/useEssays';
 import { useAuth } from '@/contexts/AuthContext';
+import NotFound from './NotFound';
 import { ArticleBody } from '@/components/editorial/ArticleBody';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -121,8 +122,11 @@ export default function FsliDetail() {
     );
   }
 
+  // A slug that matches nothing is a wrong URL, not a reason to teleport the
+  // reader to the index and leave them wondering what happened to the page
+  // they asked for. Same correction as the essay pages (GATE 1f).
   if (!item || error) {
-    return <Navigate to="/accounting/fsli" replace />;
+    return <NotFound />;
   }
 
   const tocSections = buildTocSections();

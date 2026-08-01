@@ -8,6 +8,7 @@ import { useFinanceModelBySlug, useUpdateFinanceModel, type FinanceModel } from 
 import { useAllFinanceModules, type FinanceModule } from '@/hooks/queries/useFinance';
 import { useAuth } from '@/contexts/AuthContext';
 import { FinanceModelAdminPanel } from '@/components/finance-in-action/ModelAdminPanel';
+import NotFound from './NotFound';
 
 const depthLabel: Record<string, string> = {
   foundation: 'Foundation',
@@ -60,7 +61,9 @@ export default function FinanceModelDetail() {
   const { isAdmin } = useAuth();
 
   if (!modelSlug) return <Navigate to="/finance/finance-in-action" replace />;
-  if (!isLoading && isError) return <Navigate to="/finance/finance-in-action" replace />;
+  // An unknown model slug is a wrong URL. Redirecting to the index hid that
+  // and left the reader on a page they did not ask for (GATE 1f, same shape).
+  if (!isLoading && (isError || !model)) return <NotFound />;
 
   return (
     <PageLayout

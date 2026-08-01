@@ -5,6 +5,91 @@ alternatives. Newest first.
 
 ---
 
+# 2026-08-01 — Section 5: the writing experience (Session B)
+
+## The upload placeholder is a decoration, not a node
+- **Decision:** the "Uploading image…" block shown while a pasted image uploads is a
+  ProseMirror *widget decoration*, held in plugin state, not a node in the document.
+- **Why:** the gate requires that a rejected upload leave no dead placeholder. A
+  placeholder node would be part of the document, which means it can be serialized by
+  `getHTML()`, stored by autosave into `essay_revisions`, and recovered days later as a
+  permanent artefact of an upload that failed. Cleaning it up correctly on every failure
+  path — network error, RLS refusal, oversized file, the author deleting the surrounding
+  paragraph mid-flight — is a discipline you can forget. A decoration cannot be
+  serialized, cannot be saved, and disappears with the plugin state.
+- **Rejected:** an atom node with a `pending` attribute, filtered out at save time. That
+  puts the correctness burden on every future writer of a save path.
+- **Consequence:** if the anchor position is gone when the upload lands (the author
+  deleted that part of the text), the image is dropped rather than inserted at a guessed
+  position. Losing an upload the author can retry beats silently putting a picture
+  somewhere they did not ask for.
+
+## Pasted image files become `figure` nodes, not `image` nodes
+- **Decision:** two node types coexist. A pasted or dropped image *file* is uploaded and
+  inserted as a `figure`; a bare `<img>` (pasted markup, or legacy HTML in `essays.content`)
+  is parsed as an `image`.
+- **Why:** `figure` is the editorial primitive that already carries alt text, caption,
+  source attribution and width mode, and already round-trips through all four places of
+  the content contract. Routing uploads into it reuses a proven path. But `image` still has
+  to exist, because without it a bare `<img>` matches no node and ProseMirror discards it —
+  which is also why a legacy body containing `<img>` rendered as nothing.
+- **Rejected:** one node for both. Collapsing them would either strip captions from
+  uploads or fabricate empty figure furniture around every incidental image.
+
+## `Link` is configured inside StarterKit rather than beside it
+- **Decision:** `StarterKit.configure({ link: {...} })`, and `@tiptap/extension-link` is
+  no longer a direct dependency.
+- **Why:** StarterKit v3 bundles it. Registering a standalone copy alongside produced the
+  duplicate-extension warning and two competing definitions of the same mark. Verified by
+  reading the installed StarterKit's dependency list, not by assuming.
+- Five further `@tiptap/extension-*` packages were declared in `package.json` and imported
+  nowhere; removed.
+
+## `WriterStudio` becomes a redirect rather than a deletion
+- **Decision:** Stack B is retired by replacing `WriterStudio` with a component that
+  resolves the old `/admin/writer/:id` URL and forwards to `/admin/writer/:section/:slug`.
+- **Why:** the gate requires exactly one route that *authors* essays. Deleting the route
+  outright means editing `src/App.tsx`, which Session A owns and whose Gate 4 is not
+  terminal. A redirect satisfies the gate inside Session B's own surface, and keeps
+  bookmarks and the dashboard's "New Essay" link working. The route can be deleted later
+  with no further code change.
+
+## Preview renders through `ArticleBody`
+- **Decision:** `WriterPreview` no longer builds its own HTML; it renders the same
+  component the published page renders.
+- **Why:** two renderers means two lists of understood block types, so a block appearing
+  in the preview was never evidence it would appear when published — the same class of
+  failure as the homepage card that 404'd. One path, or the preview is decoration.
+
+---
+
+# 2026-08-01 — Section 7: the never-checked groups (Session B)
+
+## `.single()` is the wrong call for a lookup that can legitimately miss
+- **Decision:** `useFsliPage`, `useBook` and `useFinanceModelBySlug` use `maybeSingle()`.
+- **Why:** PostgREST answers `single()` with HTTP **406** when no row matches. The pages
+  swallowed it, so an unknown slug produced a thin shell and a red line in the console
+  instead of a "not found" page. `maybeSingle()` makes "no such row" ordinary data.
+
+## A miss renders `NotFound`, it does not redirect
+- **Decision:** `FsliDetail` and `FinanceModelDetail` render `<NotFound />` instead of
+  `<Navigate to={index} replace />`.
+- **Why:** consistency with the correction GATE 1f already made to the four essay pages.
+  A slug that matches nothing means the URL is wrong; moving the reader to an index they
+  did not ask for hides that and makes a typo indistinguishable from a working link.
+
+## Counts come from the table, or the page says it is empty
+- **Decision:** `BooksCategories` counts real `books_uploads` rows; with none, it shows an
+  empty state instead of four category cards.
+- **Why:** it previously advertised 12, 8, 15 and 10 books against a table with zero rows —
+  45 books that do not exist, each card leading to an empty list. Hardcoded counts are a
+  claim about data, and this one was false.
+- **Kept hardcoded:** the four category *titles*. Those are editorial taxonomy, not
+  measurements, and deriving them from an empty table would leave nothing to browse once
+  books exist.
+
+---
+
 # 2026-07-31 — Greenfield Supabase rebuild
 
 The old Supabase project (`rhwzvgklasvitocbbhvi`) is gone; the frontend stays; the
