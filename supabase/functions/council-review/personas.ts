@@ -20,6 +20,22 @@ export interface AdvisorPersona {
   model?: string;
 }
 
+// Model identifier sent to the configured AI gateway. This value
+// ('google/gemini-2.5-flash') is the model string used by the PREVIOUS AI
+// gateway provider and MUST be replaced with an identifier the newly configured
+// AI_GATEWAY_URL provider understands. It is left here — not silently swapped —
+// because the owner supplies the provider and model mapping.
+//
+// The council is deliberately multi-model: each persona may set its own `model`
+// to override this default, and responses are anonymised before peer review, so
+// different seats can run different models. Per-persona model overrides are
+// configuration, not hardcoded in the pipeline. Today every persona (and the
+// chairman) falls through to this single default.
+//
+// Model strings currently in use across this file:
+//   - DEFAULT_MODEL = 'google/gemini-2.5-flash'  (every advisor + chairman)
+// No persona sets an explicit override, so replacing DEFAULT_MODEL is
+// sufficient to re-point the whole council at a new provider.
 export const DEFAULT_MODEL = 'google/gemini-2.5-flash';
 
 const SHARED_ADVISOR_RULES = `

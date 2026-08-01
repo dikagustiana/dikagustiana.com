@@ -202,12 +202,69 @@ export type Database = {
           },
         ]
       }
+      essay_revisions: {
+        Row: {
+          change_summary: string | null
+          change_type: string
+          changed_by: string | null
+          content_json: Json | null
+          created_at: string
+          essay_id: string
+          id: string
+          layout_config: Json | null
+          revision_no: number
+          snippet: string | null
+          status: Database["public"]["Enums"]["content_status_enum"] | null
+          title: string | null
+          voice_role: string | null
+        }
+        Insert: {
+          change_summary?: string | null
+          change_type: string
+          changed_by?: string | null
+          content_json?: Json | null
+          created_at?: string
+          essay_id: string
+          id?: string
+          layout_config?: Json | null
+          revision_no: number
+          snippet?: string | null
+          status?: Database["public"]["Enums"]["content_status_enum"] | null
+          title?: string | null
+          voice_role?: string | null
+        }
+        Update: {
+          change_summary?: string | null
+          change_type?: string
+          changed_by?: string | null
+          content_json?: Json | null
+          created_at?: string
+          essay_id?: string
+          id?: string
+          layout_config?: Json | null
+          revision_no?: number
+          snippet?: string | null
+          status?: Database["public"]["Enums"]["content_status_enum"] | null
+          title?: string | null
+          voice_role?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "essay_revisions_essay_id_fkey"
+            columns: ["essay_id"]
+            isOneToOne: false
+            referencedRelation: "essays"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       essays: {
         Row: {
           author: string | null
           category_id: string
           coach_fields: Json | null
           content: string | null
+          content_json: Json | null
           created_at: string
           date: string | null
           economist_fields: Json | null
@@ -217,6 +274,7 @@ export type Database = {
           fsli_slug: string | null
           id: string
           is_selected: boolean
+          layout_config: Json | null
           learning_outcomes: string[] | null
           lesson_type: Database["public"]["Enums"]["lesson_type_enum"] | null
           manager_fields: Json | null
@@ -242,6 +300,7 @@ export type Database = {
           category_id?: string
           coach_fields?: Json | null
           content?: string | null
+          content_json?: Json | null
           created_at?: string
           date?: string | null
           economist_fields?: Json | null
@@ -251,6 +310,7 @@ export type Database = {
           fsli_slug?: string | null
           id?: string
           is_selected?: boolean
+          layout_config?: Json | null
           learning_outcomes?: string[] | null
           lesson_type?: Database["public"]["Enums"]["lesson_type_enum"] | null
           manager_fields?: Json | null
@@ -276,6 +336,7 @@ export type Database = {
           category_id?: string
           coach_fields?: Json | null
           content?: string | null
+          content_json?: Json | null
           created_at?: string
           date?: string | null
           economist_fields?: Json | null
@@ -285,6 +346,7 @@ export type Database = {
           fsli_slug?: string | null
           id?: string
           is_selected?: boolean
+          layout_config?: Json | null
           learning_outcomes?: string[] | null
           lesson_type?: Database["public"]["Enums"]["lesson_type_enum"] | null
           manager_fields?: Json | null

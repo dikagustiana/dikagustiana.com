@@ -2,6 +2,32 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import type { Json } from '@/integrations/supabase/types';
 
+/**
+ * Thrown when the council edge function reports its AI gateway is unconfigured
+ * (503 `council_not_configured`). The panel renders an explicit setup state for
+ * this rather than a generic failure alert.
+ */
+export class CouncilNotConfiguredError extends Error {
+  constructor(message?: string) {
+    super(message || 'The Writing Council is not configured.');
+    this.name = 'CouncilNotConfiguredError';
+  }
+}
+
+/** Read the JSON body out of a supabase-js FunctionsHttpError (best-effort). */
+async function readFunctionErrorBody(
+  error: unknown,
+): Promise<{ error?: string; message?: string } | null> {
+  const ctx = (error as { context?: unknown })?.context;
+  if (ctx instanceof Response) {
+    try { return await ctx.clone().json(); } catch { return null; }
+  }
+  if (ctx && typeof ctx === 'object' && 'error' in (ctx as object)) {
+    return ctx as { error?: string; message?: string };
+  }
+  return null;
+}
+
 // ---------------------------------------------------------------------------
 // Transcript types (mirror supabase/functions/council-review responses)
 // ---------------------------------------------------------------------------
@@ -85,8 +111,23 @@ export function useRunCouncil() {
       const { data, error } = await supabase.functions.invoke('council-review', {
         body: input,
       });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
+      // A non-2xx status (e.g. the 503 "not configured" response) arrives as a
+      // FunctionsHttpError whose body must be read from error.context. Parse it
+      // so the "council_not_configured" signal survives to the UI instead of
+      // collapsing into a generic "non-2xx status code" message.
+      if (error) {
+        const body = await readFunctionErrorBody(error);
+        if (body?.error === 'council_not_configured') {
+          throw new CouncilNotConfiguredError(body.message);
+        }
+        throw new Error(body?.message || body?.error || error.message);
+      }
+      if (data?.error) {
+        if (data.error === 'council_not_configured') {
+          throw new CouncilNotConfiguredError(data.message);
+        }
+        throw new Error(data.message || data.error);
+      }
       return data as CouncilTranscript;
     },
     onSuccess: () => {

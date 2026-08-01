@@ -2,27 +2,104 @@
 
 Append-only. Newest entry first. A fresh session must be able to resume from this file.
 
-## STATUS (session 3, 2026-07-31): LIVE PROJECT UP. Baseline + curriculum applied; one real essay imported end-to-end.
-Project `asypkbkiebjvvpimewfp` (dikagustiana-com, ap-southeast-1, free) created and wired.
-All migrations applied, types regenerated, council-review deployed. The T4-M07-1 essay is
-authored-through-the-editor, published, and anon-readable at
-`/finance/analytics/t4-m07/fa-07-01`. `tsc` ✓, build ✓, 163 tests ✓.
+## STATUS (session 4, 2026-08-01): LOVABLE REMOVED (0) + SAFETY-NET MIGRATION (1) + AUTOSAVE (2).
+**The blocking item is closed: a 3,612-word paste survives a hard reload with no manual save.**
+Project `asypkbkiebjvvpimewfp`. Phase 0: no Lovable anywhere in `src/`, `supabase/functions/`,
+`package.json`, `vite.config.ts`, `README.md`; `council-review` is provider-agnostic
+(`AI_GATEWAY_URL` + `AI_GATEWAY_API_KEY`, OpenAI chat-completions shape) and renders an explicit
+"not configured" state on a missing key (live invoke returns HTTP 503 `council_not_configured`).
+Phase 1: migration `20260801042530_content_json_layout_config_revisions` applied live —
+`essays.content_json`/`layout_config` added, `essay_revisions` table (admin-only every verb,
+anon no access). Both published essays backfilled `content_json` and verified block-for-block
+(fa-07-01 headings/list-items identical HTML→JSON→render; 81 top-level blocks); each seeded an
+initial `migration` revision. `tsc` ✓, build ✓, 163 tests ✓, security advisors: only the two
+documented pre-existing WARNs (`has_role` SECURITY DEFINER, leaked-password toggle).
 
 ## NEXT ACTION (single)
-**Owner must sign up + get admin, set two secrets, and deploy Vercel** — none doable from a session:
-1. **Owner signs up at `/auth`** with `dika.irawan@samb.co.id`, then a service-side
-   `INSERT INTO user_roles (user_id,'admin')` grants admin (self-grant is blocked by
-   design). A TEMPORARY admin (`import-admin@dikagustiana.com`) exists for the import test
-   and should be deleted once the owner's admin works.
-2. **Set `LOVABLE_API_KEY`** on the project's edge-function secrets (no MCP tool). Without
-   it `/admin/council` loads but a run errors. `council-review` is deployed, `verify_jwt=true`.
-3. **Vercel:** set `VITE_SUPABASE_URL` + `VITE_SUPABASE_PUBLISHABLE_KEY` on the project
-   serving `dikagustiana.com` and redeploy (Vite inlines env at build time). The reachable
-   Vercel team still has zero projects, so the owning account must do this or connect it.
+**Phase 3 — images in the body**: add the image/figure node through all four places of the
+four-place contract (extensions / serialize / ArticleBody / sanitizeHtml allowlist), plus a
+ProseMirror paste-drop plugin uploading to the `essay-images` bucket with placeholder swap and
+rejection handling. Verify the image survives to an anon read and that a non-admin is refused.
+
+### Owner blockers (carry forward — none doable from a session)
+1. **Owner signs up at `/auth`** then a service-side `INSERT INTO user_roles (user_id,'admin')`
+   grants admin (self-grant is blocked by design). The TEMPORARY `import-admin@dikagustiana.com`
+   admin stays until the owner's account works, then gets deleted.
+2. **Set `AI_GATEWAY_URL` + `AI_GATEWAY_API_KEY`** (renamed from `LOVABLE_API_KEY` in Phase 0)
+   on the edge-function secrets, plus the model mapping the owner chooses. Until then
+   `/admin/council` loads and shows the "not configured" state; runs stay disabled. Model
+   strings the code still carries (to be replaced by the owner's provider identifiers):
+   `DEFAULT_MODEL = 'google/gemini-2.5-flash'` in `supabase/functions/council-review/personas.ts`
+   (every advisor + chairman fall through to it; no per-persona override set).
+3. **Vercel:** set `VITE_SUPABASE_URL` + `VITE_SUPABASE_PUBLISHABLE_KEY` on the project serving
+   `dikagustiana.com` and redeploy (Vite inlines env at build time).
 
 Deferred (committed, not applied): `docs/db/pending/`-style full academic-mapping + deck
 enrichment for all 49 modules / 105 existing stubs — generated, held back to keep the
 applied migration reviewable.
+
+## 2026-08-01 (session 4) — remove Lovable, then make the editor safe to write in
+
+- **Phase 0 — Lovable out.** `grep -ri lovable src/ supabase/functions/ package.json
+  vite.config.ts README.md` is clean. Real `README.md` replaces the boilerplate;
+  `lovable-tagger` removed from `package.json` + `vite.config.ts` (plugins now `[react()]`,
+  `manualChunks` untouched). `council-review` made provider-agnostic: `callGateway(baseUrl,
+  apiKey, model, messages)` posts OpenAI chat-completions to `${baseUrl}/chat/completions`;
+  a missing `AI_GATEWAY_URL`/`AI_GATEWAY_API_KEY` returns 503 `council_not_configured`
+  (verified live), which the UI renders as a non-destructive "not configured" alert via a
+  new `CouncilNotConfiguredError`. Model strings surfaced, not chosen — the owner supplies
+  provider + mapping (see NEXT ACTION §2). Deployed as `council-review` v2. Committed `0b7959f`.
+- **Phase 1 — safety-net migration (one migration).** `20260801042530` adds
+  `essays.content_json` (canonical TipTap doc; legacy `content` HTML kept as fallback, not
+  dropped) + `essays.layout_config`, and the `essay_revisions` table (id, essay_id FK CASCADE,
+  revision_no UNIQUE per essay, change_type CHECK, title/snippet/content_json/layout_config/
+  status/voice_role/changed_by=auth.uid()/change_summary/created_at; two indexes; RLS admin-only
+  on every verb with inlined `user_roles` EXISTS, INSERT also requires `changed_by = auth.uid()`;
+  REVOKE-then-GRANT so anon gets nothing). Dry-run on a scratch Postgres before applying live.
+- **content_json backfill, measured not eyeballed.** Both published essays converted at the app
+  layer (HTML → `generateJSON(html, getEditorExtensions())`; JSON strings passed through) under
+  jsdom, round-trip asserted on heading/list-item counts, then PATCHed live (both 204).
+  fa-07-01: h2/h3/li identical before/after, 81 top-level blocks; site-rebuild-note: 5. Each
+  essay seeded an initial `change_type='migration'` revision as history's starting point.
+  One-off conversion scripts/tests were deleted after use (the recipe lives in the migration
+  header); `@tiptap/html` was reverted from `package.json` since no app code imports it yet.
+- **Found in Phase 1, deferred to Phase 5:** StarterKit v3 bundles `Link`, so
+  `getEditorExtensions()` adding a standalone Link logs a "Duplicate extension names: ['link']"
+  warning — fix when trimming StarterKit-redundant extensions.
+
+- **Phase 2 — autosave (the blocking item).** The import test's one hard failure is closed.
+  New `src/lib/revisions.ts` (pure decision logic) + `src/hooks/useEssayAutosave.ts` (Supabase
+  writes), wired into the WriterEditor stack. Design points that matter:
+  - **Autosave writes `essay_revisions`, never the `essays` row.** A backup is not a save, so a
+    failed backup can never touch what is already published, and the indicator says "Backed
+    up", never "Saved". Promoting a draft stays an explicit, validated action.
+  - **Rollup:** consecutive autosaves inside 60s UPDATE the revision this session last wrote
+    instead of appending, so a long session yields ~1 revision/minute rather than one per
+    keystroke-pause. It only ever rolls up *its own* row — another tab's backup and the
+    pre-reload state are never overwritten.
+  - **`canonicalJson` is load-bearing, not cosmetic.** Postgres `jsonb` does not preserve key
+    order, so a naive stringify comparison would call the document "changed" on every load and
+    the recovery prompt would fire forever. Comparison sorts keys; array order is kept.
+  - **Recovery is offered, never applied.** A banner with Restore / Keep-saved; neither side is
+    destroyed behind the author's back.
+  - `canAutosave` now has ONE definition (moved to `lib/revisions`, re-exported from
+    `domains/writing/schema/types` for the WriterStudio stack).
+  - `EssayEditor` now also emits `getJSON()` so `content_json` comes straight from the editor
+    rather than being reparsed out of HTML; manual save writes both, and only writes
+    `content_json` when a document exists (a title-only edit must not wipe the canonical body).
+- **Phase 2 verified live** (dev server → CORS relay → real project, admin session):
+  - 3,612-word paste + a later edit, **no Save clicked**, hard reload → backup indicator read
+    "Backed up 04:50 AM"; the essays row stayed empty (`updated_at` unchanged, 0 words in the
+    header); recovery banner appeared; Restore returned all 3,612 words including the second
+    edit. Both edits collapsed into **one** revision row (191 blocks) — rollup confirmed.
+  - **Loud failure:** intercepting `POST /rest/v1/essay_revisions` produced "Backup failed";
+    removing the intercept recovered to "Backed up" on the next edit.
+  - **RLS boundary, checked by simulating JWT claims in SQL:** anon refused at the GRANT level
+    (401, `permission denied`); non-admin authenticated sees 0 of the existing revisions;
+    non-admin INSERT refused; an admin forging `changed_by` as another user refused; admin
+    INSERT with the default `changed_by` allowed. Probe rows deleted afterwards.
+  - `tsc` ✓, build ✓, 184 tests ✓ (17 new `revisions` tests; the old `autosave.test.ts` was
+    folded into them).
 
 ## 2026-07-31 (session 3) — stand-up + framework-v2 import test
 

@@ -108,25 +108,11 @@ export function validateForPublish(state: EssayFormState): PublishValidationErro
 export type SaveStatus = 'idle' | 'unsaved' | 'saving' | 'saved' | 'error';
 
 /**
- * Silent autosave is only safe once the essay row exists and has the fields the
- * DB requires (title + section + category, since `essays.category_id` is a
- * NOT NULL FK). For brand-new, not-yet-created essays the admin saves manually
- * once; autosave then takes over. This keeps autosave from spamming failed
- * inserts or hijacking focus with a create-redirect mid-keystroke.
+ * Re-exported so both editor stacks share ONE definition of when silent
+ * autosave is safe. The implementation lives in `@/lib/revisions` alongside
+ * the rest of the autosave decision logic.
  */
-export function canAutosave(state: {
-  essayId: string | null;
-  title: string;
-  sectionId: string;
-  categoryId: string;
-}): boolean {
-  return (
-    !!state.essayId &&
-    state.title.trim().length > 0 &&
-    !!state.sectionId &&
-    !!state.categoryId
-  );
-}
+export { canAutosave } from '@/lib/revisions';
 
 export function slugify(text: string): string {
   return text

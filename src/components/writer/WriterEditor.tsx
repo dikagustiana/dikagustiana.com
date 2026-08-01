@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
+import type { JSONContent } from '@tiptap/core';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -20,6 +21,7 @@ import {
   ResizablePanel,
   ResizableHandle,
 } from '@/components/ui/resizable';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import {
   ArrowLeft,
   Save,
@@ -31,11 +33,16 @@ import {
   ExternalLink,
   AlertTriangle,
   CheckCircle,
+  CloudOff,
+  Cloud,
+  History,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useWriterSections, useWriterCategories } from '@/domains/writing/hooks';
 import { useAllFinanceModules } from '@/hooks/queries/useFinance';
 import { generateUniqueSlug } from '@/domains/writing/hooks/useWriterEssay';
+import { useEssayAutosave, useDraftRecovery } from '@/hooks/useEssayAutosave';
+import { tiptapJsonToHtml } from '@/lib/tiptap/serialize';
 
 interface WriterEditorProps {
   section: string;
@@ -139,6 +146,8 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
   const [heroImageUrl, setHeroImageUrl] = useState('');
   const [heroCaption, setHeroCaption] = useState('');
   const [content, setContent] = useState('');
+  // Canonical body. `content` (HTML) is kept in step as the legacy fallback.
+  const [contentJson, setContentJson] = useState<JSONContent | null>(null);
   const [keyTakeaways, setKeyTakeaways] = useState<string[]>(['', '', '']);
   const [references, setReferences] = useState<{ label: string; url: string }[]>([]);
   const [authorBio, setAuthorBio] = useState('');
@@ -189,6 +198,9 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
         setDeck(data.snippet || '');
         setHeroImageUrl(data.thumbnail_url || '');
         setContent(data.content || '');
+        // content_json is canonical; a null means this row predates the
+        // backfill and the legacy HTML in `content` is still the only body.
+        setContentJson((data.content_json as JSONContent | null) ?? null);
         setStatus(data.status === 'published' ? 'published' : 'draft');
         setCreatedAt(data.created_at);
         setUpdatedAt(data.updated_at);
@@ -284,6 +296,55 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
     });
   }, [title, deck, keyTakeaways, wordCount, references, section, content, categoryId]);
 
+  // ── Autosave: debounced backup into essay_revisions ──
+  // Deliberately does NOT write the essays row. A backup is not a save, and a
+  // failed backup must never be able to touch what is already published.
+  const {
+    autosaveStatus,
+    lastBackupAt,
+    autosaveError,
+    recordRevision,
+    flush: flushAutosave,
+  } = useEssayAutosave({
+    essayId: essayDbId,
+    title,
+    sectionId,
+    categoryId,
+    snippet: deck || null,
+    status,
+    doc: contentJson,
+    enabled: !isLoading,
+  });
+
+  // ── Recovery: an autosaved backup newer than the saved essay row ──
+  const { candidate: recovery, dismiss: dismissRecovery } = useDraftRecovery(
+    essayDbId,
+    contentJson,
+    !isLoading,
+  );
+
+  const handleRestoreRecovery = useCallback(() => {
+    const doc = recovery?.revision.content_json as JSONContent | null | undefined;
+    if (!doc) return;
+    // Restore both representations so the editor, the preview and the legacy
+    // fallback all agree. Nothing is persisted until the author saves.
+    setContentJson(doc);
+    setContent(tiptapJsonToHtml(doc));
+    setIsDirty(true);
+    dismissRecovery();
+    toast({
+      title: 'Draft recovered',
+      description: 'The autosaved version is loaded. Save to keep it.',
+    });
+  }, [recovery, dismissRecovery, toast]);
+
+  // Last line of defence: try to get a backup out as the tab goes away.
+  useEffect(() => {
+    const handler = () => flushAutosave();
+    window.addEventListener('pagehide', handler);
+    return () => window.removeEventListener('pagehide', handler);
+  }, [flushAutosave]);
+
   const handleSave = async (targetStatus: 'draft' | 'published' = status) => {
     // Block publishing if validation fails
     if (targetStatus === 'published' && !validation.canPublish) {
@@ -348,6 +409,16 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
         essayData.category_id = categoryId;
       }
 
+      // Only write content_json when we actually have a document. Sending null
+      // for a title-only edit would wipe the canonical body and silently demote
+      // the essay back to its legacy HTML.
+      if (contentJson) {
+        essayData.content_json = contentJson;
+      }
+
+      let savedId = essayDbId;
+      let revisionType: 'create' | 'manual_save' | 'publish' | 'unpublish' = 'manual_save';
+
       if (essayDbId) {
         // Update existing
         const { error } = await supabase
@@ -357,6 +428,8 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
 
         if (error) throw error;
         setUpdatedAt(new Date().toISOString());
+        if (targetStatus === 'published' && status !== 'published') revisionType = 'publish';
+        else if (targetStatus === 'draft' && status === 'published') revisionType = 'unpublish';
         toast({ title: targetStatus === 'published' ? 'Published!' : 'Saved!' });
       } else {
         // Create new
@@ -367,14 +440,28 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
           .single();
 
         if (error) throw error;
+        savedId = data.id;
         setEssayDbId(data.id);
         setCreatedAt(data.created_at);
+        revisionType = 'create';
         toast({ title: 'Essay created!' });
       }
 
       setSlug(finalSlug);
       setStatus(targetStatus);
       setIsDirty(false);
+
+      // Mark the save in history. Best-effort: the essay row is already
+      // written, so a failed revision must not report the save as failed —
+      // recordRevision surfaces it through the backup indicator instead.
+      if (savedId) {
+        void recordRevision(revisionType, {
+          essayId: savedId,
+          title,
+          snippet: deck || null,
+          status: targetStatus,
+        });
+      }
       await queryClient.invalidateQueries({ queryKey: ['finance-module-lesson-counts'] });
       await queryClient.invalidateQueries({ queryKey: ['essays-by-module-id'] });
     } catch (error: unknown) {
@@ -472,6 +559,29 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
           </div>
 
           <div className="flex items-center gap-3">
+            {/* Backup state. Distinct from "Saved": autosave writes a backup
+                revision, not the essay row, so the wording must not imply the
+                published essay changed. A failure is loud by design. */}
+            {autosaveStatus === 'error' ? (
+              <span
+                className="text-sm font-medium text-destructive flex items-center gap-1"
+                title={autosaveError ?? undefined}
+              >
+                <CloudOff className="h-4 w-4" />
+                Backup failed
+              </span>
+            ) : autosaveStatus === 'saving' ? (
+              <span className="text-sm text-muted-foreground flex items-center gap-1">
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                Backing up…
+              </span>
+            ) : lastBackupAt ? (
+              <span className="text-sm text-muted-foreground flex items-center gap-1">
+                <Cloud className="h-3.5 w-3.5" />
+                Backed up {lastBackupAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </span>
+            ) : null}
+
             {isDirty && (
               <span className="text-sm text-amber-600 flex items-center gap-1">
                 <span className="h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
@@ -526,6 +636,33 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
         </div>
       </header>
 
+      {/* Recovery: an autosaved backup that never made it into the essay row.
+          Offered, never applied — restoring and discarding are both the
+          author's call, so neither version is destroyed behind their back. */}
+      {recovery && (
+        <div className="flex-shrink-0 border-b border-border bg-amber-50 dark:bg-amber-950/30 px-4 py-3">
+          <Alert className="border-0 bg-transparent p-0">
+            <History className="h-4 w-4" />
+            <AlertTitle>Unsaved draft recovered from backup</AlertTitle>
+            <AlertDescription className="flex flex-wrap items-center gap-3">
+              <span>
+                An autosaved version from{' '}
+                {new Date(recovery.savedAt).toLocaleString()} differs from the saved essay.
+                It was probably captured after the last save.
+              </span>
+              <span className="flex items-center gap-2">
+                <Button size="sm" onClick={handleRestoreRecovery}>
+                  Restore backup
+                </Button>
+                <Button size="sm" variant="ghost" onClick={dismissRecovery}>
+                  Keep saved version
+                </Button>
+              </span>
+            </AlertDescription>
+          </Alert>
+        </div>
+      )}
+
       {/* Main Editor Area */}
       <div className="flex-1 overflow-hidden">
         {showPreview ? (
@@ -575,6 +712,7 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
                   <EssayEditor
                     content={content}
                     onChange={setContent}
+                    onChangeJson={setContentJson}
                     section={section as 'finance' | 'green-transition' | 'next-big-thing'}
                     distractionFree={false}
                     minHeight="400px"
@@ -641,6 +779,7 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
               <EssayEditor
                 content={content}
                 onChange={setContent}
+                onChangeJson={setContentJson}
                 section={section as 'finance' | 'green-transition' | 'next-big-thing'}
                 distractionFree={true}
                 minHeight="500px"

@@ -1,4 +1,5 @@
 import { useEditor, EditorContent, Editor } from '@tiptap/react';
+import type { JSONContent } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
 import Link from '@tiptap/extension-link';
@@ -38,6 +39,13 @@ import {
 interface EssayEditorProps {
   content: string;
   onChange: (content: string) => void;
+  /**
+   * Emits the TipTap document alongside the HTML. `content_json` is the
+   * canonical body format (writing-layout-spec §3.2) and autosave stores it,
+   * so it is taken straight from the editor rather than reparsed out of the
+   * HTML — the document is already in memory and the round-trip is lossy.
+   */
+  onChangeJson?: (json: JSONContent) => void;
   section: 'next-big-thing' | 'green-transition' | 'finance';
   placeholder?: string;
   className?: string;
@@ -323,6 +331,7 @@ function MenuBar({ editor, distractionFree, onInsertFigure }: MenuBarProps) {
 export function EssayEditor({
   content,
   onChange,
+  onChangeJson,
   section,
   placeholder = 'Start writing your essay...',
   className,
@@ -353,6 +362,7 @@ export function EssayEditor({
     content,
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML());
+      onChangeJson?.(editor.getJSON());
     },
     editorProps: {
       attributes: {
