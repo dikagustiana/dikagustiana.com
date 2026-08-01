@@ -2,17 +2,15 @@
 # The old ref (rhwzvgklasvitocbbhvi) is a deleted project.
 project_id = "asypkbkiebjvvpimewfp"
 
-# council-review is the only edge function left after the rebuild. The quant,
-# remora and personal-finance functions were cut with their modules.
+# No edge functions. `council-review` was the last one; it was removed on
+# 2026-08-01 with the Writing Council (design archived at
+# docs/archive/COUNCIL_DESIGN.md), and the quant, remora and personal-finance
+# functions were cut earlier with their modules. Nothing in the app calls an AI
+# provider any more, so there is no gateway URL or key to configure.
 #
-# verify_jwt = true: the platform rejects a missing or invalid JWT before the
-# function body runs. The body then re-checks the admin role against user_roles
-# server-side (index.ts:100-112), so the gate does not depend on the frontend
-# RequireAdmin guard. Both layers are deliberate.
-#
-# Historical note: the eight quant-* and remora-* functions ran verify_jwt =
-# false while each constructed a SUPABASE_SERVICE_ROLE_KEY client internally,
-# meaning any unauthenticated caller could drive service-role writes that bypass
-# RLS. Nothing in this project ships with verify_jwt = false.
-[functions.council-review]
-verify_jwt = true
+# If a function is ever added back it must run verify_jwt = true AND re-check
+# authorisation server-side rather than trusting a frontend guard. The eight
+# historical quant-* and remora-* functions ran verify_jwt = false while each
+# constructed a SUPABASE_SERVICE_ROLE_KEY client internally, meaning any
+# unauthenticated caller could drive service-role writes that bypass RLS.
+# Nothing in this project ships with verify_jwt = false.

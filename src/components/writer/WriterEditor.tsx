@@ -43,6 +43,7 @@ import { useAllFinanceModules } from '@/hooks/queries/useFinance';
 import { generateUniqueSlug } from '@/domains/writing/hooks/useWriterEssay';
 import { useEssayAutosave, useDraftRecovery } from '@/hooks/useEssayAutosave';
 import { tiptapJsonToHtml } from '@/lib/tiptap/serialize';
+import { resolvePresentation, type EssayPresentation } from '@/lib/presentation';
 
 interface WriterEditorProps {
   section: string;
@@ -66,13 +67,7 @@ interface EssayData {
   status: 'draft' | 'published';
   published: boolean;
   voice_role: string;
-  economist_fields: {
-    deck?: string;
-    key_takeaways?: string[];
-    references?: { label: string; url?: string }[];
-    hero_caption?: string;
-    author_bio?: string;
-  };
+  presentation: EssayPresentation;
   created_at?: string;
   updated_at?: string;
 }
@@ -214,14 +209,16 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
         setFinanceOrder(financeMeta.finance_order ?? null);
         setLessonType(financeMeta.lesson_type || 'concept');
 
-        // Economist fields
-        const ef = (data.economist_fields as EssayData['economist_fields']) || {};
-        setKeyTakeaways(ef.key_takeaways?.length ? ef.key_takeaways : ['', '', '']);
-        setReferences(ef.references?.map(r => 
+        // Presentation payload (deck / references / key takeaways / captions).
+        // resolvePresentation falls back to the legacy persona columns for any
+        // row the backfill missed, so an older essay still loads its references.
+        const pres = resolvePresentation(data);
+        setKeyTakeaways(pres.key_takeaways?.length ? pres.key_takeaways : ['', '', '']);
+        setReferences(pres.references?.map(r =>
           typeof r === 'string' ? { label: r, url: '' } : { label: r.label, url: r.url || '' }
         ) || []);
-        setHeroCaption(ef.hero_caption || '');
-        setAuthorBio(ef.author_bio || '');
+        setHeroCaption(pres.hero_caption || '');
+        setAuthorBio(pres.author_bio || '');
 
         setTimeout(() => {
           isInitialLoad.current = false;
@@ -371,7 +368,10 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
       // Ensure slug uniqueness
       const finalSlug = await generateUniqueSlug(slug, essayDbId || undefined);
 
-      const economistFields = {
+      // Single presentation payload. The four persona columns are legacy and
+      // deliberately no longer written; they are dropped in a follow-up
+      // migration once this read path is confirmed in production.
+      const presentation = {
         deck: deck || null,
         key_takeaways: keyTakeaways.filter(k => k.trim()),
         references: references.filter(r => r.label.trim()).map(r => ({
@@ -397,7 +397,7 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
         status: targetStatus,
         published: targetStatus === 'published',
         voice_role: 'economist',
-        economist_fields: economistFields,
+        presentation,
         module_id: moduleId,
         finance_section: financeSection || null,
         finance_order: financeOrder,

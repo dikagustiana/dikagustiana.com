@@ -223,12 +223,6 @@ export default function AdminContent() {
                 New Essay
               </Link>
             </Button>
-            <Button variant="outline" asChild>
-              <Link to="/admin/council">
-                <Users className="h-4 w-4 mr-2" />
-                Writing Council
-              </Link>
-            </Button>
             <Button variant="outline" size="icon" onClick={handleRefresh} title="Refresh">
               <RefreshCw className="h-4 w-4" />
             </Button>
