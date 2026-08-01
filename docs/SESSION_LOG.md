@@ -81,8 +81,9 @@ to its pre-session md5.
 
 **Skills.** `component-craft` was invoked and applied. `design-direction` and
 `full-output-enforcement` **do not exist in this environment** (`Unknown skill`), alongside
-the already-known-absent `ui-audit` — a manual pass was done instead and its findings are
-the six defects above.
+the already-known-absent `ui-audit`. The manual substitute pass is written up in
+`docs/UI_AUDIT_WRITING.md` — hierarchy, proportion, legibility and interaction, with a
+Before / After / Why row per finding and what was deliberately left alone.
 
 **Explicitly not this session, and still true:** `finance_models` has no insert path and
 `ModelAdminPanel` is unreachable by construction; curriculum Sections 05 and 06 have no
