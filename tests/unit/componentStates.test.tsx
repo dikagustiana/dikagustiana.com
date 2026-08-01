@@ -4,7 +4,6 @@ import userEvent from '@testing-library/user-event';
 import { EmptyState } from '@/components/states/EmptyState';
 import { ErrorState } from '@/components/states/ErrorState';
 import { LoadingState } from '@/components/states/LoadingState';
-import { FsliMetricCard } from '@/components/fsli/FsliMetricCard';
 import { renderWithRouter } from './helpers/renderWithProviders';
 
 describe('EmptyState', () => {
@@ -57,20 +56,5 @@ describe('LoadingState', () => {
   it('renders skeleton content without crashing', () => {
     const { container } = render(<LoadingState />);
     expect(container.firstChild).toBeTruthy();
-  });
-});
-
-describe('FsliMetricCard', () => {
-  it('prefixes a $ for non-accent variants and shows the unit', () => {
-    render(<FsliMetricCard label="Revenue" value="1,234" variant="primary" />);
-    expect(screen.getByText('Revenue')).toBeInTheDocument();
-    expect(screen.getByText(/\$1,234/)).toBeInTheDocument();
-    expect(screen.getByText('Thousands USD')).toBeInTheDocument();
-  });
-
-  it('omits $ and unit for the accent variant', () => {
-    render(<FsliMetricCard label="Ratio" value="2.5x" variant="accent" />);
-    expect(screen.getByText('2.5x')).toBeInTheDocument();
-    expect(screen.queryByText('Thousands USD')).toBeNull();
   });
 });

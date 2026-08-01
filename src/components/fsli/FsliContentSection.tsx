@@ -11,38 +11,39 @@ interface FsliContentSectionProps {
   sectionKey: string;
   title: string;
   subtitle?: string;
+  /**
+   * Saved prose from `fsli_sections`, fetched ONCE per page in FsliDetail —
+   * this component used to fire its own query, which made every FSLI page
+   * view cost ten single-row requests. Empty string means honestly empty:
+   * there is no placeholder fallback any more. Twenty-four line items were
+   * all rendering the same cash-equivalents boilerplate as if it were their
+   * content, which is worse than saying nothing.
+   */
+  content: string;
+  /** True while the sections query is still in flight. */
+  loading?: boolean;
 }
 
-export function FsliContentSection({ 
-  id, 
-  pageSlug, 
-  sectionKey, 
-  title, 
+export function FsliContentSection({
+  id,
+  pageSlug,
+  sectionKey,
+  title,
   subtitle,
+  content: savedContent,
+  loading,
 }: FsliContentSectionProps) {
   const { isAdmin } = useAuth();
   const { toast } = useToast();
-  const [content, setContent] = useState('');
+  const [content, setContent] = useState(savedContent);
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
+  // The page-level query resolves after first render; adopt what it found.
   useEffect(() => {
-    loadContent();
-  }, [pageSlug, sectionKey]);
-
-  const loadContent = async () => {
-    const { data } = await supabase
-      .from('fsli_sections')
-      .select('content')
-      .eq('page_slug', pageSlug)
-      .eq('section_key', sectionKey)
-      .maybeSingle();
-
-    if (data?.content) {
-      setContent(data.content);
-    }
-  };
+    setContent(savedContent);
+  }, [savedContent]);
 
   const handleEdit = () => {
     setEditValue(content);
@@ -82,7 +83,6 @@ export function FsliContentSection({
     setEditValue('');
   };
 
-
   return (
     <section id={id} className="py-8 border-b border-border last:border-0 scroll-mt-28">
       <div className="flex items-start justify-between mb-4">
@@ -95,7 +95,7 @@ export function FsliContentSection({
           )}
         </div>
         {isAdmin && !isEditing && (
-          <Button variant="ghost" size="sm" onClick={handleEdit}>
+          <Button variant="ghost" size="sm" onClick={handleEdit} aria-label={`Edit ${title}`}>
             <Pencil className="h-4 w-4" />
           </Button>
         )}
@@ -106,6 +106,7 @@ export function FsliContentSection({
           <textarea
             value={editValue}
             onChange={(e) => setEditValue(e.target.value)}
+            placeholder={`Write the ${title.toLowerCase()} section for this line item`}
             className="w-full min-h-[200px] p-4 bg-card border border-border rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none resize-y text-sm"
             disabled={isSaving}
           />
@@ -120,22 +121,27 @@ export function FsliContentSection({
             </Button>
           </div>
         </div>
+      ) : loading ? (
+        // Skeleton shaped like a short paragraph, not a spinner.
+        <div className="space-y-2" aria-hidden>
+          <div className="h-4 w-full rounded bg-muted animate-pulse" />
+          <div className="h-4 w-2/3 rounded bg-muted animate-pulse" />
+        </div>
       ) : content ? (
-        <div 
+        <div
           className={`text-muted-foreground leading-relaxed ${isAdmin ? 'cursor-pointer hover:bg-muted/30 p-3 -m-3 rounded-lg transition-colors' : ''}`}
           onClick={isAdmin ? handleEdit : undefined}
         >
           <p className="whitespace-pre-wrap">{content}</p>
         </div>
       ) : (
-        /* Honest empty state. All 24 FSLI pages used to fall back to prose
-           written about cash and cash equivalents — pages that LOOKED finished
-           while showing another line item's content. Unwritten is unwritten. */
+        // The honest empty state: one quiet line, sized like the absence it
+        // announces. Admins can click straight into writing it.
         <p
-          className={`text-sm italic text-muted-foreground/80 ${isAdmin ? 'cursor-pointer hover:text-foreground transition-colors' : ''}`}
+          className={`text-sm italic text-muted-foreground/70 ${isAdmin ? 'cursor-pointer hover:text-muted-foreground' : ''}`}
           onClick={isAdmin ? handleEdit : undefined}
         >
-          This section hasn't been written yet.{isAdmin ? ' Click to write it.' : ''}
+          Not written yet.
         </p>
       )}
     </section>

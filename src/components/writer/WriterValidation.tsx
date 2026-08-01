@@ -19,19 +19,27 @@ interface ValidateParams {
   section: string;
   content: string;
   categoryId?: string;
+  /** Curriculum lesson type; undefined/null for editorial essays. */
   lessonType?: string | null;
 }
 
-const MIN_WORD_COUNT = 500;
-
 /**
- * Lesson types where the Key Takeaways block earns its place and the
- * three-claims forcing function is worth having (docs/DECISIONS.md,
- * "The key-takeaways publish gate"). For the artefact-shaped types —
- * case-study, exercise, model-walkthrough — the takeaway IS the worked
- * artefact, and forcing three onto it produces filler in a standing block.
+ * Key-takeaways policy, per docs/DECISIONS.md (2026-08-01):
+ * scope per lesson_type rather than relax globally.
+ *
+ *  - Essay-shaped types (`concept`, `framework`) — and every editorial essay,
+ *    which is essay-shaped by definition — REQUIRE three. The block is part of
+ *    the article furniture and the forcing function is worth keeping.
+ *  - Artefact-shaped types (`case-study`, `exercise`, `model-walkthrough`)
+ *    get an ADVISORY warning instead: their takeaway is the worked artefact,
+ *    and forcing three onto them manufactures filler.
+ *  - All-or-nothing within every type: one or two takeaways is an error
+ *    everywhere, because a half-filled standing block is the real failure
+ *    mode — worse than no block at all.
  */
-const TAKEAWAY_REQUIRED_TYPES = new Set(['concept', 'framework']);
+const TAKEAWAYS_ADVISORY_LESSON_TYPES = new Set(['case-study', 'exercise', 'model-walkthrough']);
+
+const MIN_WORD_COUNT = 500;
 
 export function validateEssay({
   title,
@@ -62,30 +70,29 @@ export function validateEssay({
     errors.push({ field: 'deck', message: 'Deck line (thesis) is required' });
   }
 
-  // Key takeaways — scoped per lesson_type, not relaxed globally:
-  //   * essay-shaped types (concept, framework): 3 required, blocking;
-  //   * artefact-shaped types: advisory when absent, never blocks Publish;
-  //   * all-or-nothing within any type: a 1–2 item block reads as an
-  //     unfinished list, so partial takeaways block everywhere.
+  // Key takeaways — scoped per lesson_type (policy above). Fail-closed:
+  // a null, empty, or UNKNOWN lesson type stays strict — only the three
+  // explicitly artefact-shaped types relax to advisory.
   const filledTakeaways = keyTakeaways.filter(k => k.trim()).length;
-  const takeawaysRequired = TAKEAWAY_REQUIRED_TYPES.has(lessonType ?? 'concept');
-  if (takeawaysRequired) {
-    if (filledTakeaways < 3) {
-      errors.push({
-        field: 'keyTakeaways',
-        message: `At least 3 key takeaways required (${filledTakeaways}/3)`,
-      });
-    }
-  } else if (filledTakeaways === 0) {
-    warnings.push({
-      field: 'keyTakeaways',
-      message: `No key takeaways — fine for a ${lessonType}; add all three if the piece has claims worth pinning`,
-    });
-  } else if (filledTakeaways < 3) {
+  const takeawaysAdvisory = !!lessonType && TAKEAWAYS_ADVISORY_LESSON_TYPES.has(lessonType);
+  if (filledTakeaways > 0 && filledTakeaways < 3) {
+    // Half-filled is an error under EVERY type.
     errors.push({
       field: 'keyTakeaways',
-      message: `Key takeaways are all-or-nothing: supply 3 or none (${filledTakeaways}/3)`,
+      message: `Key takeaways are all-or-nothing: add ${3 - filledTakeaways} more or clear them (${filledTakeaways}/3)`,
     });
+  } else if (filledTakeaways === 0) {
+    if (takeawaysAdvisory) {
+      warnings.push({
+        field: 'keyTakeaways',
+        message: `No key takeaways. Optional for a ${lessonType}, but three sharpen the landing.`,
+      });
+    } else {
+      errors.push({
+        field: 'keyTakeaways',
+        message: 'At least 3 key takeaways required (0/3)',
+      });
+    }
   }
 
   // Required: Minimum word count

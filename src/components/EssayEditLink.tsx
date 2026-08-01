@@ -37,7 +37,9 @@ export function EssayEditLink({ slug, section = 'finance', className }: EssayEdi
       title="Edit essay"
       onClick={e => e.stopPropagation()}
       className={cn(
-        'inline-flex h-7 w-7 shrink-0 items-center justify-center rounded text-muted-foreground/70',
+        // 44px hit target (the tap-target floor GATE 3 established) with a
+        // negative margin so the visual footprint stays icon-sized.
+        'inline-flex h-11 w-11 -m-2 shrink-0 items-center justify-center rounded text-muted-foreground/70',
         'hover:bg-secondary hover:text-foreground transition-colors',
         className,
       )}

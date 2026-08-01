@@ -95,11 +95,14 @@ const PHASE_OPTIONS: Record<string, { id: string; label: string }[]> = {
 };
 
 /**
- * Track slug → phase id. Placement is one decision, not three: choosing the
- * module determines the track, and the track determines the phase, so both
- * are derived rather than asked for. `topic` likewise carries the module slug
- * for finance essays. (`phase` was set on 1 of 162 rows and `topic` on none —
- * nobody was ever going to fill three fields by hand 161 times.)
+ * Curriculum placement derives the editorial fields (DECISIONS.md 2026-08-01,
+ * "Topic and Phase are required but redundant for curriculum essays").
+ * The author sets ONE field — the module — and track/phase/topic follow:
+ *   finance_section = module.track_slug
+ *   phase           = the track, in the finance phase vocabulary
+ *   topic           = the module slug (the module IS the topic)
+ * fa-07-01 showed the drift this prevents: phase said 'fundamentals' while its
+ * module sat in the analytics track.
  */
 const TRACK_TO_PHASE: Record<string, string> = {
   fundamentals: 'fundamentals',
@@ -307,9 +310,12 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
       section,
       content,
       categoryId,
-      lessonType,
+      // Only MODULE-PLACED finance essays carry a meaningful lesson type;
+      // editorial essays and unplaced finance essays send null and stay on
+      // the strict three-takeaways policy.
+      lessonType: section === 'finance' && moduleId ? lessonType : null,
     });
-  }, [title, deck, keyTakeaways, wordCount, references, section, content, categoryId, lessonType]);
+  }, [title, deck, keyTakeaways, wordCount, references, section, content, categoryId, lessonType, moduleId]);
 
   // ── Autosave: debounced backup into essay_revisions ──
   // Deliberately does NOT write the essays row. A backup is not a save, and a
@@ -359,6 +365,8 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
     window.addEventListener('pagehide', handler);
     return () => window.removeEventListener('pagehide', handler);
   }, [flushAutosave]);
+
+  const selectedFinanceModule = useMemo(() => allFinanceModules.find(mod => mod.id === moduleId), [allFinanceModules, moduleId]);
 
   const handleSave = async (targetStatus: 'draft' | 'published' = status) => {
     // Block publishing if validation fails
@@ -508,12 +516,13 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
     }
   };
 
-  const selectedFinanceModule = useMemo(() => allFinanceModules.find(mod => mod.id === moduleId), [allFinanceModules, moduleId]);
 
   useEffect(() => {
     if (section === 'finance' && selectedFinanceModule) {
       setFinanceSection(selectedFinanceModule.track_slug);
-      // Derived, not asked for: the module decides the phase.
+      // Derived, not asked for: the module decides the phase. Falls back to
+      // the raw track slug for an unknown track, matching the save-time
+      // derivedPhase computation so state and DB never disagree.
       setPhase(TRACK_TO_PHASE[selectedFinanceModule.track_slug] ?? selectedFinanceModule.track_slug);
     }
   }, [section, selectedFinanceModule]);

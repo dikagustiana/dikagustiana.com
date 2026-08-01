@@ -129,10 +129,10 @@
     @apply border-border;
   }
 
-  /* Smooth scrolling only for readers who have not asked the OS to reduce
-     motion. This gate matters twice over: JS scrollIntoView with
-     behavior 'auto' defers to this property, so an unconditional `smooth`
-     here silently re-animates every "instant" jump in the app. */
+  /* Smooth anchor/programmatic scrolling — but never for readers who asked
+     for reduced motion. Unconditional `scroll-behavior: smooth` also hijacks
+     scrollIntoView({ behavior: 'auto' }), which resolves to the computed
+     scroll-behavior, so an intended jump silently became a glide. */
   @media (prefers-reduced-motion: no-preference) {
     html {
       scroll-behavior: smooth;

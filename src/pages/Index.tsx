@@ -90,7 +90,7 @@ const Index = () => {
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
               {featuredEssays.map((essay) => (
                 <EssayCardLink key={essay.id} essay={essay}>
-                  <Card className="h-full hover:shadow-lg transition-all hover:-translate-y-1 cursor-pointer group">
+                  <Card className="h-full hover:shadow-lg transition-[transform,box-shadow] hover:-translate-y-1 cursor-pointer group">
                     <CardContent className="p-5">
                       <Badge variant="secondary" className="mb-3 text-xs">
                         {getSectionLabel(essay.section, essay.phase)}
@@ -143,7 +143,7 @@ const Index = () => {
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
           {sections.map((section) => (
             <Link key={section.path} to={section.path}>
-              <Card className="h-full hover:shadow-lg transition-all hover:-translate-y-1 cursor-pointer group">
+              <Card className="h-full hover:shadow-lg transition-[transform,box-shadow] hover:-translate-y-1 cursor-pointer group">
                 <CardContent className="p-6">
                   <div className="flex items-start gap-4">
                     <div className={`p-3 rounded-lg bg-secondary ${section.accent}`}>
@@ -156,9 +156,11 @@ const Index = () => {
                       <p className="text-sm text-muted-foreground leading-relaxed mb-3">
                         {section.description}
                       </p>
-                      <span className="text-sm font-medium text-accent inline-flex items-center gap-1 group-hover:gap-2 transition-all">
+                      <span className="text-sm font-medium text-accent inline-flex items-center gap-1">
                         Enter
-                        <ArrowRight className="h-4 w-4" />
+                        {/* Nudge the arrow with a transform instead of
+                            animating the flex gap, which re-runs layout. */}
+                        <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
                       </span>
                     </div>
                   </div>

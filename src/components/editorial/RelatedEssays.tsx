@@ -22,6 +22,8 @@ interface RelatedEssay {
   author: string | null;
   section: string | null;
   finance_section: string | null;
+  fsli_slug: string | null;
+  topic: string | null;
   finance_modules: { slug: string | null; track_slug: string | null } | null;
 }
 
@@ -32,9 +34,15 @@ export function RelatedEssays({ currentEssayId, section, className }: RelatedEss
       const { data, error } = await supabase
         .from('essays')
         // The module join is what lets finance essays build their canonical
-        // four-segment URL. Without it the old local builder fell back to
-        // `/finance/<slug>` — which is the TRACK route, not an essay.
-        .select('id, slug, title, snippet, phase, read_time, thumbnail_url, author, section, finance_section, finance_modules(slug, track_slug)')
+        // four-segment URL, and fsli_slug/topic let accounting essays link
+        // straight to their FSLI/consolidation homes instead of taking a
+        // redirect hop through /essays/:slug. FK-hinted like every other
+        // embed in the repo.
+        .select(`
+          id, slug, title, snippet, phase, read_time, thumbnail_url, author,
+          section, finance_section, fsli_slug, topic,
+          finance_modules!essays_module_id_fkey ( slug, track_slug )
+        `)
         .eq('section', section)
         .eq('status', 'published')
         .neq('id', currentEssayId)

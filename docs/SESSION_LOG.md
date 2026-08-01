@@ -3,14 +3,63 @@
 Append-only. Newest entry first. A fresh session must be able to resume from this file.
 
 ## NEXT ACTION (single)
-**No gate is open.** Gates 0–7 and A–G are all terminal in `docs/GATE_LEDGER.md`. What
-remains is either the owner's (admin signup at `/auth` + grant + delete `import-admin`;
-deleting the five dead branches in the GitHub UI; leaked-password toggle;
-`supabase functions delete council-review`; domain attach; the framework doc's 55-vs-56
-Fundamentals count) or content (the 160 essay bodies; `fsli_sections` prose;
-`finance_models` seeding — curriculum Sections 05 and 06 still have no data path,
-deliberately). A new session should start from a new mandate, not from this file's
-backlog.
+**Land the PR #11 ⇄ PR #10 reconciliation.** Two sessions independently implemented the
+"writing an essay, and reading one" mandate; PR #10 merged first, and PR #11's branch now
+carries the merge that reconciles them (one implementation per feature — see the merge
+commit message for which side won where). Remaining: post-merge re-verification results in
+the ledger stay green, PR #11 review comment addressed (takeaways guidance strict when
+lessonType is null), then merge PR #11. The s7-* test identities are already deleted;
+fresh namespaced identities used for post-merge re-checks must be deleted the same way.
+
+## 2026-08-01 (session 7) — writing an essay, and reading one: Sections 1–5
+
+Branch `claude/writing-reading-s1`. `3c9f78b` (Section 1), `30763f4` (Sections 2–3),
+`e70d40f` (Section 4), plus the Section-5 commit. GATES W1–W5 all **PASSED** —
+measurements in `docs/GATE_LEDGER.md`.
+
+- **Essay page (W4).** Sticky ToC sidebar at lg:+ in both shells via an `ArticleToc`
+  sidebar variant (the mandate named `LongformArticleShell`, but readers actually hit
+  `ArticleShell` — no module has track_slug `finance-in-motion`; both got the pattern,
+  the gate was measured on the reachable one). Root cause found: unconditional
+  `html { scroll-behavior: smooth }` made even `behavior:'auto'` glide — now gated
+  behind `prefers-reduced-motion: no-preference`. ReadingProgress is rAF-coalesced and
+  compositor-only.
+- **Consistency (W5).** ui-audit on the reading surfaces: 12 findings, 11 fixed, 1
+  recorded — full table with dispositions in `docs/UI_AUDIT_READING.md`. The 24 FSLI
+  pages stopped lying: no more shared cash-equivalents boilerplate, stock photo, fake
+  key points, or `Updated 6 Sep 2025` — unwritten sections say "Not written yet." and
+  each page shows its own real reported figures. The five @tiptap deps were already
+  gone from package.json (removed in `c7e5d12`, merged via PR #9); what the lockfile
+  keeps are starter-kit's own transitive copies, which is exactly why the direct
+  declarations were redundant.
+
+- **Save path closed (W1).** Autosave re-observed after every save-path change (3,612 words
+  recovered); the orphaned tone trigger confirmed dropped and its migration mirrored into
+  the repo (`20260801125833` — applied live by a parallel session that never committed the
+  file); key-takeaways gate scoped per `lesson_type`, both arms observed on real stubs;
+  Topic/Phase/finance_section now derive from module placement — one field instead of three.
+- **Editor access (W2).** Admin: 4 pencil affordances, draft titles route to the editor, an
+  empty real stub (`sf-01-04`) opens the editor and saves. Non-admin and anon: zero pencils,
+  zero drafts, and anon `GET /essays?published=eq.false` → `content-range: */0` at PostgREST.
+- **Reading path (W3).** FinanceTrackIndex rows are real links (were plain text); the
+  hardcoded `Draft · Dika Gustiana` byline replaced with real status/author/read-time;
+  RelatedEssays + RelatedContent moved onto `essayUrl` (last two local builders);
+  `/finance/wrongtrack/wrongmodule/fa-07-01` now redirects to the canonical placement.
+  Route count reconciled: 66 `<Route path>` = 65 swept + `*` catch-all.
+- **Parallel-session interference, again.** Mid-run, the previous sweep test accounts were
+  deleted by an active parallel session (login started failing with `invalid_credentials`;
+  SQL showed only `import-admin` remained, freshly signed in). Re-minted session-namespaced
+  `s7-admin@` / `s7-user@` per the mandate's naming rule; probes then passed unmodified.
+  These identities must be deleted at session end.
+- **Harness.** The local CORS relay is hardened (`keepAliveTimeout=0`,
+  `maxRequestsPerSocket=1`, `Connection: close`) and runs as a managed background task —
+  the earlier `ERR_CONNECTION_RESET` failures under Playwright are gone.
+- **Explicitly NOT this session** (per mandate, unchanged from session 6 findings):
+  `books_uploads` / `finance_models` still have no insert path and `ModelAdminPanel` stays
+  unreachable by construction; curriculum Sections 05/06 have no data path; the six
+  zero-unique-commit branches remain (git proxy rejects delete-pushes — owner deletes in
+  the GitHub UI); GATE 7's verdicts still live in `docs/gates/GATES_5_7.md` and want
+  transplanting into the ledger.
 
 ## 2026-08-01 (session 7, Fable) — reconcile, close gate gaps, every title reaches its essay
 
@@ -45,14 +94,9 @@ before this session began).
   the F.1 test PDF removed from storage; test revisions and the stub edit cleaned up
   (`fa-02-01` keeps its correctly derived `phase`/`topic`).
 
-## SESSION B NEXT ACTION (single)
+## SESSION B NEXT ACTION (single) — superseded; kept for history
 **Run GATE 6.1 — the 3,000-word autosave reload recovery — as soon as Session A records
-GATE 1 in a terminal state.** It is the only gate in Sections 5–7 not yet passed, and it is
-blocked rather than failed: Section 1 touches the save path, so measuring autosave before
-that lands measures a state about to change. The check is: paste 3,000+ words into
-`/admin/writer/finance/new`, hard-reload mid-edit, confirm the recovery banner offers the
-autosaved revision and that restoring it returns the text. `docs/gates/GATES_5_7.md` is the
-authority for Sections 5–7; `docs/GATE_LEDGER.md` remains the authority for 0–4.
+GATE 1 in a terminal state.** (Done in session 7: see GATE W1 — 3,612 words recovered.)
 
 ## 2026-08-01 (session 6, Session B) — Sections 5, 6.2 and 7
 

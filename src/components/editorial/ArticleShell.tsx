@@ -122,20 +122,18 @@ export function ArticleShell({
       <main className="flex-1">
         {/* Reader controls bar */}
         <div className="sticky top-16 z-30 bg-background/95 backdrop-blur border-b border-border">
-          <div className="container max-w-3xl py-2 flex justify-end">
+          <div className="container max-w-3xl lg:max-w-[64rem] py-2 flex justify-end">
             <FontSizeToggle fontSize={fontSize} onChange={changeFontSize} />
           </div>
         </div>
 
-        {/* Article content column.
-            At lg: a two-column grid puts the ToC in a sticky aside beside the
-            reading column; the reading column itself keeps max-w-3xl so line
-            length does not change. Below lg the aside does not exist and the
-            inline collapsible ToC carries on — a sidebar with no breakpoint
-            would reintroduce the horizontal scroll GATE 3 eliminated. */}
+        {/* Article content column. Below lg: the single centred column it has
+            always been. At lg:+ a two-column grid — reading column plus a
+            sticky table-of-contents rail. 48rem + 3rem gap + 13rem = 64rem,
+            so the reading column keeps its max-w-3xl measure. */}
         <div className={cn('container py-8 md:py-12', className)}>
-          <div className="mx-auto max-w-3xl lg:grid lg:max-w-[62rem] lg:grid-cols-[minmax(0,1fr)_14rem] lg:gap-12">
-          <div className={cn('min-w-0 lg:max-w-3xl', fontSizeClass)}>
+          <div className="mx-auto max-w-3xl lg:max-w-[64rem] lg:grid lg:grid-cols-[minmax(0,1fr)_13rem] lg:gap-12">
+            <div className={cn('min-w-0', fontSizeClass)}>
             <SEO
               title={seoTitle}
               description={seoDescription}
@@ -166,9 +164,9 @@ export function ArticleShell({
               heroCaption={heroCaption}
             />
 
-            {/* Table of contents — inline collapsible below lg only; at lg the
-                sticky sidebar instance takes over. */}
-            <ArticleToc content={htmlContent || content} className="lg:hidden" />
+            {/* Table of contents — inline collapsible below lg: only; the
+                sticky sidebar takes over at lg:+ */}
+            <ArticleToc className="lg:hidden" content={htmlContent || content} />
 
             {/* Optional extra content before body */}
             {children}
@@ -209,16 +207,16 @@ export function ArticleShell({
                 section={section}
               />
             )}
-          </div>
-
-          {/* Sticky ToC sidebar — spans the full article height so the sticky
-              box tracks the reader to the last heading. top offset clears the
-              fixed header plus the reader-controls bar. */}
-          <aside className="hidden lg:block">
-            <div className="sticky top-32">
-              <ArticleToc content={htmlContent || content} variant="sidebar" />
             </div>
-          </aside>
+
+            {/* Sticky ToC rail, lg:+ only. top-32 clears the fixed header
+                (4rem) and the sticky reader-controls bar. The list inside
+                caps its own height and scrolls internally. */}
+            <aside className="hidden lg:block">
+              <div className="sticky top-32">
+                <ArticleToc variant="sidebar" content={htmlContent || content} />
+              </div>
+            </aside>
           </div>
         </div>
       </main>

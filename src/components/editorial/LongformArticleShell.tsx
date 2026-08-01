@@ -36,6 +36,8 @@ export interface LongformArticleShellProps {
   heroImage?: string | null;
   heroCaption?: string | null;
   content: string;
+  /** Pre-rendered HTML for TOC extraction (optional, avoids double-conversion) */
+  htmlContent?: string;
   keyTakeaways?: string[];
   references?: (string | { label: string; url?: string })[];
   authorBio?: string | null;
@@ -73,6 +75,7 @@ export function LongformArticleShell({
   heroImage,
   heroCaption,
   content,
+  htmlContent,
   keyTakeaways,
   references,
   authorBio,
@@ -99,12 +102,12 @@ export function LongformArticleShell({
       <ReadingProgress />
 
       <main className="flex-1">
-        {/* Two columns at lg: the reading column keeps its 780px measure, the
-            ToC sits in a sticky aside beside it. Below lg the aside does not
-            exist — a sidebar with no breakpoint would push the page past
-            375px, which is the horizontal scroll GATE 3 just eliminated. */}
-        <div className="mx-auto max-w-[780px] px-6 py-16 lg:grid lg:max-w-[1040px] lg:grid-cols-[minmax(0,1fr)_14rem] lg:gap-12 lg:px-8">
-        <article className="min-w-0 max-w-[780px] space-y-8">
+        {/* Below lg: the single centred longform column. At lg:+ a two-column
+            grid — reading column plus a sticky table-of-contents rail.
+            justify-center keeps the pair centred when the viewport is wider
+            than the tracks. */}
+        <div className="mx-auto max-w-[780px] lg:max-w-none lg:grid lg:grid-cols-[minmax(0,48rem)_13rem] lg:justify-center lg:gap-12 lg:px-8">
+          <article className="min-w-0 px-6 lg:px-0 py-16 space-y-8">
           <SEO
             title={seoTitle}
             description={seoDescription}
@@ -178,8 +181,11 @@ export function LongformArticleShell({
             </figure>
           )}
 
-          {/* Inline collapsible ToC for viewports without the sidebar */}
-          <ArticleToc content={tocHtml} className="lg:hidden" />
+          {/* Table of contents — inline collapsible below lg: only; the
+              sticky sidebar takes over at lg:+. htmlContent is the caller's
+              precomputed HTML; tocHtml is the internal fallback so heading
+              extraction works even when only TipTap JSON was passed. */}
+          <ArticleToc className="lg:hidden" content={htmlContent || tocHtml} />
 
           {/* ── Body ── */}
           <div className="longform-body">
@@ -209,13 +215,16 @@ export function LongformArticleShell({
           {currentEssayId && section && (
             <RelatedEssays currentEssayId={currentEssayId} section={section} />
           )}
-        </article>
+          </article>
 
-        <aside className="hidden lg:block">
-          <div className="sticky top-24">
-            <ArticleToc content={tocHtml} variant="sidebar" />
-          </div>
-        </aside>
+          {/* Sticky ToC rail, lg:+ only. top-24 clears the fixed header and
+              the reading-progress bar; the list caps its own height and
+              scrolls internally. */}
+          <aside className="hidden lg:block py-16">
+            <div className="sticky top-24">
+              <ArticleToc variant="sidebar" content={htmlContent || tocHtml} />
+            </div>
+          </aside>
         </div>
       </main>
 

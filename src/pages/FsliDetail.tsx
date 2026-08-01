@@ -1,13 +1,12 @@
-import { useParams, Navigate, Link } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import { useState, useEffect, useMemo } from 'react';
 import { PageLayout } from '@/components/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
 import { FsliRelatedItems } from '@/components/fsli/FsliRelatedItems';
 import { FsliOnThisPage } from '@/components/fsli/FsliOnThisPage';
-import { FsliHeroSection } from '@/components/fsli/FsliHeroSection';
 import { FsliContentSection } from '@/components/fsli/FsliContentSection';
 import { FsliMobileSidebar } from '@/components/fsli/FsliMobileSidebar';
-import { useFsliPage } from '@/hooks/queries/useFsliPages';
+import { useFsliPage, useFsliSections } from '@/hooks/queries/useFsliPages';
 import { useEssaysByFsliSlug } from '@/hooks/queries/useEssays';
 import { useAuth } from '@/contexts/AuthContext';
 import NotFound from './NotFound';
@@ -15,33 +14,28 @@ import { ArticleBody } from '@/components/editorial/ArticleBody';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { LoadingState } from '@/components/states';
+import { scrollBehavior } from '@/lib/motion';
 import { RefreshCw, ChevronRight, Pencil } from 'lucide-react';
 
-// Content sections configuration
+// The page's fixed outline. Section PROSE lives in fsli_sections and is
+// empty until written — there is deliberately no placeholder text here.
+// All 24 line items used to render the same cash-equivalents boilerplate
+// as if it were their own content.
 const contentSections = [
   {
     key: 'definition',
     title: 'Definition',
-    subtitle: 'Understanding the fundamental concepts and requirements for classification.'
+    subtitle: 'Understanding the fundamental concepts and requirements for classification.',
   },
-  {
-    key: 'recognition',
-    title: 'Recognition Criteria'
-  },
-  {
-    key: 'measurement',
-    title: 'Measurement Principles'
-  },
-  {
-    key: 'presentation',
-    title: 'Presentation and Disclosure'
-  },
+  { key: 'recognition', title: 'Recognition Criteria' },
+  { key: 'measurement', title: 'Measurement Principles' },
+  { key: 'presentation', title: 'Presentation and Disclosure' },
 ];
 
 // Issues subsections
 const issueSections = [
   { key: 'issues-common', title: 'Common Implementation Issues' },
-  { key: 'issues-overdrafts', title: 'Bank Overdrafts Treatment' },
+  { key: 'issues-overdrafts', title: 'Classification Boundary Cases' },
   { key: 'issues-currency', title: 'Foreign Currency Considerations' },
 ];
 
@@ -71,6 +65,18 @@ const buildTocSections = () => [
   },
 ];
 
+function formatDate(dateStr: string) {
+  try {
+    return new Date(dateStr).toLocaleDateString('en-US', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    });
+  } catch {
+    return dateStr;
+  }
+}
+
 export default function FsliDetail() {
   const { slug } = useParams<{ slug: string }>();
   const [activeSection, setActiveSection] = useState<string>('definition');
@@ -78,11 +84,24 @@ export default function FsliDetail() {
   const { data: item, isLoading, error } = useFsliPage(slug || '');
   const { data: linkedEssays } = useEssaysByFsliSlug(slug || '');
 
-  // Track active section on scroll
-  useEffect(() => {
-    const handleScroll = () => {
-      const sections = [...contentSections, ...issueSections, ...exampleSections];
+  // ONE query for all section prose. FsliContentSection used to fetch its own
+  // row, costing ten single-row requests per page view.
+  const { data: sectionRows, isLoading: sectionsLoading } = useFsliSections(slug || '');
+  const contentByKey = useMemo(() => {
+    const map: Record<string, string> = {};
+    for (const row of sectionRows ?? []) {
+      if (row.content) map[row.section_key] = row.content;
+    }
+    return map;
+  }, [sectionRows]);
 
+  // Track active section on scroll — rAF-coalesced so the ten
+  // getBoundingClientRect reads happen once per frame, not once per event.
+  useEffect(() => {
+    let raf = 0;
+    const measure = () => {
+      raf = 0;
+      const sections = [...contentSections, ...issueSections, ...exampleSections];
       for (const section of sections) {
         const element = document.getElementById(section.key);
         if (element) {
@@ -94,9 +113,15 @@ export default function FsliDetail() {
         }
       }
     };
+    const handleScroll = () => {
+      if (!raf) raf = requestAnimationFrame(measure);
+    };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (raf) cancelAnimationFrame(raf);
+    };
   }, []);
 
   if (isLoading) {
@@ -117,8 +142,14 @@ export default function FsliDetail() {
   }
 
   const tocSections = buildTocSections();
-  // The hero says what is true for THIS line item — its subtitle — or nothing.
-  const heroDescription = item.subtitle || '';
+
+  // The real, per-item facts this page actually has today: the reported
+  // figures and notes reference from the statement it was seeded from.
+  const figures = [
+    { label: '31 Dec 2024', value: item.dec_2024 },
+    { label: '31 Dec 2023', value: item.dec_2023 },
+    { label: 'Notes ref.', value: item.notes_ref },
+  ].filter((f) => f.value);
 
   return (
     <PageLayout variant="content" role="manager">
@@ -160,7 +191,7 @@ export default function FsliDetail() {
                     type="button"
                     size="sm"
                     variant="outline"
-                    onClick={() => document.getElementById('definition')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+                    onClick={() => document.getElementById('definition')?.scrollIntoView({ behavior: scrollBehavior(), block: 'start' })}
                   >
                     Ke Definition
                   </Button>
@@ -169,29 +200,38 @@ export default function FsliDetail() {
 
               {/* Title Section */}
               <div className="mb-6">
-                <h1 className="text-2xl md:text-3xl font-display font-bold text-primary mb-3">
+                <h1 className="text-2xl md:text-3xl font-display font-bold text-primary mb-2">
                   {item.title}
                 </h1>
-                {/* Real timestamp from the row. The previous "Updated 6 Sep
-                    2025 · 6 min read" was a hardcoded string on all 24 pages. */}
+                {item.subtitle && (
+                  <p className="text-muted-foreground mb-3">{item.subtitle}</p>
+                )}
                 <div className="flex items-center gap-4 text-sm text-muted-foreground">
                   <span className="flex items-center gap-1.5">
                     <RefreshCw className="h-4 w-4" />
-                    Updated{' '}
-                    {new Date(item.updated_at).toLocaleDateString('en-US', {
-                      day: 'numeric',
-                      month: 'short',
-                      year: 'numeric',
-                    })}
+                    Updated {formatDate(item.updated_at)}
                   </span>
                 </div>
               </div>
 
-              {/* Hero Section */}
-              <FsliHeroSection
-                title={item.title}
-                description={heroDescription}
-              />
+              {/* Reported figures — the one thing every line item genuinely
+                  has. Replaces a hero that showed a stock photo and
+                  cash-equivalents "key points" on all 24 pages. */}
+              {figures.length > 0 && (
+                <div className="mb-2 grid max-w-xl grid-cols-2 gap-4 sm:grid-cols-3">
+                  {figures.map((f) => (
+                    <div key={f.label} className="rounded-lg border border-border bg-card p-4">
+                      <div className="text-xs text-muted-foreground mb-1">{f.label}</div>
+                      <div className="text-lg font-semibold text-foreground tabular-nums">{f.value}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {figures.length > 0 && (
+                <p className="text-xs text-muted-foreground mb-6">
+                  Figures as reported in the source financial statements.
+                </p>
+              )}
 
               {/* Divider */}
               <hr className="border-border my-8" />
@@ -205,6 +245,8 @@ export default function FsliDetail() {
                   sectionKey={section.key}
                   title={section.title}
                   subtitle={section.subtitle}
+                  content={contentByKey[section.key] ?? ''}
+                  loading={sectionsLoading}
                 />
               ))}
 
@@ -221,6 +263,8 @@ export default function FsliDetail() {
                   pageSlug={slug!}
                   sectionKey={section.key}
                   title={section.title}
+                  content={contentByKey[section.key] ?? ''}
+                  loading={sectionsLoading}
                 />
               ))}
 
@@ -237,6 +281,8 @@ export default function FsliDetail() {
                   pageSlug={slug!}
                   sectionKey={section.key}
                   title={section.title}
+                  content={contentByKey[section.key] ?? ''}
+                  loading={sectionsLoading}
                 />
               ))}
 

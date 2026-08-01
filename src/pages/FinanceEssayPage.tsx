@@ -71,7 +71,10 @@ export default function FinanceEssayPage() {
       // URL's track/module segments can be validated against real placement.
       const { data, error } = await supabase
         .from('essays')
-        .select('*, finance_modules(slug, track_slug)')
+        // The essay's OWN module, joined, is what canonicalises the URL below.
+        // FK-hinted like every other embed in the repo — the unhinted form
+        // breaks with an ambiguous-embed error if a second FK ever appears.
+        .select('*, finance_modules!essays_module_id_fkey ( slug, track_slug )')
         .eq('slug', essaySlug!)
         .maybeSingle();
 
@@ -120,6 +123,7 @@ export default function FinanceEssayPage() {
     // to the section index. NotFound says so and offers the nearest real essay.
     return <NotFound />;
   }
+
 
   if (loading) {
     return (
@@ -184,6 +188,7 @@ export default function FinanceEssayPage() {
     heroImage: essay.thumbnail_url,
     heroCaption: presentation.hero_caption,
     content: essay.content || '',
+    htmlContent,
     keyTakeaways: presentation.key_takeaways,
     references: presentation.references,
     authorBio: presentation.author_bio,
@@ -202,7 +207,6 @@ export default function FinanceEssayPage() {
     <ArticleShell
       {...sharedProps}
       topic={topic}
-      htmlContent={htmlContent}
     />
   );
 }

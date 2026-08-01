@@ -1,6 +1,7 @@
-import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { ChevronDown, List } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { prefersReducedMotion } from '@/lib/motion';
 
 interface TocItem {
   id: string;
@@ -12,9 +13,9 @@ interface ArticleTocProps {
   content: string;
   className?: string;
   /**
-   * `inline` (default) — the collapsible box above the body, kept for
-   * viewports below `lg` where a sidebar would reintroduce horizontal scroll.
-   * `sidebar` — an always-open list for the sticky aside at `lg:` and above.
+   * 'inline'  — collapsible box above the body. The only mode below lg:,
+   *             where a sidebar would reintroduce horizontal scroll.
+   * 'sidebar' — always-expanded list for the sticky aside at lg: and up.
    */
   variant?: 'inline' | 'sidebar';
 }
@@ -51,21 +52,6 @@ function extractHeadings(content: string): TocItem[] {
   return items;
 }
 
-/**
- * Smooth scrolling is the largest motion on the page and a nausea trigger for
- * readers who have asked the OS to reduce motion. Their preference wins.
- *
- * 'instant', not 'auto': per spec, behavior 'auto' defers to the CSS
- * `scroll-behavior` property, and the stylesheet sets `smooth` on `html` —
- * so 'auto' would quietly re-animate the very jump this exists to prevent.
- */
-function scrollBehavior(): ScrollBehavior {
-  return typeof window !== 'undefined' &&
-    window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
-    ? ('instant' as ScrollBehavior)
-    : 'smooth';
-}
-
 export function ArticleToc({ content, className, variant = 'inline' }: ArticleTocProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeId, setActiveId] = useState<string>('');
@@ -79,7 +65,12 @@ export function ArticleToc({ content, className, variant = 'inline' }: ArticleTo
 
     const observer = new IntersectionObserver(
       (entries) => {
-        const visible = entries.filter((e) => e.isIntersecting);
+        // Entries arrive in observation order, not document order — pick the
+        // topmost visible heading so a fast scroll past several sections does
+        // not leave a lower one highlighted.
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
         if (visible.length > 0) {
           setActiveId(visible[0].target.id);
         }
@@ -95,61 +86,74 @@ export function ArticleToc({ content, className, variant = 'inline' }: ArticleTo
     return () => observer.disconnect();
   }, [headings]);
 
-  // Keep the active entry visible INSIDE the sidebar list. On a long essay the
-  // reader scrolls past entries that sit below the sidebar's own fold, and a
-  // highlight outside the visible list is invisible exactly when it matters.
-  // scrollTop is adjusted directly — scrollIntoView would also scroll the page.
+  // Keep the active entry visible inside the sidebar's OWN scroll container.
+  // The page must not move — the reader's scroll position is the thing being
+  // tracked — so this adjusts list.scrollTo only. scrollIntoView is wrong
+  // here: it walks up and scrolls every scrollable ancestor, page included.
   useEffect(() => {
     if (variant !== 'sidebar' || !activeId) return;
     const list = listRef.current;
     if (!list) return;
-    const item = list.querySelector<HTMLElement>(`[data-toc-id="${activeId}"]`);
+    const item = list.querySelector<HTMLElement>(
+      `[data-toc-id="${CSS.escape(activeId)}"]`
+    );
     if (!item) return;
 
-    const listRect = list.getBoundingClientRect();
-    const itemRect = item.getBoundingClientRect();
-    if (itemRect.top < listRect.top) {
-      list.scrollTop += itemRect.top - listRect.top - 8;
-    } else if (itemRect.bottom > listRect.bottom) {
-      list.scrollTop += itemRect.bottom - listRect.bottom + 8;
+    const above = item.offsetTop < list.scrollTop;
+    const below =
+      item.offsetTop + item.offsetHeight > list.scrollTop + list.clientHeight;
+    if (above || below) {
+      list.scrollTo({
+        top: Math.max(
+          0,
+          item.offsetTop - list.clientHeight / 2 + item.offsetHeight / 2
+        ),
+        behavior: prefersReducedMotion() ? 'auto' : 'smooth',
+      });
     }
-  }, [activeId, variant]);
+  }, [variant, activeId]);
 
-  const handleClick = useCallback((id: string) => {
+  if (headings.length < 3) return null;
+
+  const handleClick = (id: string) => {
     const el = document.getElementById(id);
     if (el) {
-      el.scrollIntoView({ behavior: scrollBehavior(), block: 'start' });
+      // The largest motion on the page honours the reader's setting: jump,
+      // don't glide, under prefers-reduced-motion. 'instant', not 'auto' —
+      // 'auto' defers to the computed scroll-behavior, which is smooth here.
+      el.scrollIntoView({
+        behavior: prefersReducedMotion() ? 'instant' : 'smooth',
+        block: 'start',
+      });
       setActiveId(id);
     }
     setIsOpen(false);
-  }, []);
-
-  if (headings.length < 3) return null;
+  };
 
   if (variant === 'sidebar') {
     return (
       <nav className={cn('text-sm', className)} aria-label="Table of contents">
-        <p className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          <List className="h-3.5 w-3.5" />
-          Contents
+        <p className="mb-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+          On this page
         </p>
-        {/* The list scrolls inside itself: 13 entries on a short viewport would
-            otherwise truncate with no way to reach the tail. */}
+        {/* max-h + internal overflow: 13 entries on a short viewport must
+            scroll inside the rail, not truncate below the fold. `relative` so
+            entry offsetTop is measured against this list for the auto-scroll. */}
         <ul
           ref={listRef}
-          className="mt-3 max-h-[calc(100vh-11rem)] space-y-0.5 overflow-y-auto pr-1"
+          className="relative max-h-[calc(100vh-12rem)] overflow-y-auto border-l border-border"
         >
           {headings.map((heading) => (
-            <li key={heading.id}>
+            <li key={heading.id} data-toc-id={heading.id}>
               <button
-                data-toc-id={heading.id}
                 onClick={() => handleClick(heading.id)}
+                aria-current={activeId === heading.id ? 'location' : undefined}
                 className={cn(
-                  'block w-full rounded px-2 py-1 text-left text-[13px] leading-snug transition-colors hover:bg-muted/50',
-                  heading.level === 'h3' && 'pl-5',
+                  '-ml-px block w-full border-l-2 py-1.5 pr-2 text-left leading-snug transition-colors rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                  heading.level === 'h3' ? 'pl-7' : 'pl-4',
                   activeId === heading.id
-                    ? 'text-primary font-medium bg-muted/40'
-                    : 'text-muted-foreground'
+                    ? 'border-primary font-medium text-primary'
+                    : 'border-transparent text-muted-foreground hover:border-muted-foreground/40 hover:text-foreground'
                 )}
               >
                 {heading.text}

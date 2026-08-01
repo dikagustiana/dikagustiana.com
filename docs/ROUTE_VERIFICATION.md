@@ -14,7 +14,8 @@ database as three identities at two viewports. Generated from a sweep, not from 
 | NOT TESTED | **0** |
 
 The count is 66, not the 68 the mandate quoted — that figure predates the `/admin/council`
-removal, and `<Route>` entries without a `path` were never routes in their own right.
+removal, and `<Route>` entries without a `path` were never routes in their own right:
+`grep -c '<Route'` says **68** only because it also matches `<Routes>` and `<RouteFallback`.
 (An earlier revision of this document said 65 by excluding the `*` catch-all; since
 `App.tsx` has 66 `path=` entries and GATE 4 claims zero `NOT TESTED`, the catch-all is
 now counted and carries its own row below.)
