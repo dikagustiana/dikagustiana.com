@@ -179,6 +179,7 @@ export default function FinanceEssayPage() {
     heroImage: essay.thumbnail_url,
     heroCaption: presentation.hero_caption,
     content: essay.content || '',
+    htmlContent,
     keyTakeaways: presentation.key_takeaways,
     references: presentation.references,
     authorBio: presentation.author_bio,
@@ -197,7 +198,6 @@ export default function FinanceEssayPage() {
     <ArticleShell
       {...sharedProps}
       topic={topic}
-      htmlContent={htmlContent}
     />
   );
 }

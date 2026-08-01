@@ -129,8 +129,14 @@
     @apply border-border;
   }
 
-  html {
-    scroll-behavior: smooth;
+  /* Smooth anchor/programmatic scrolling — but never for readers who asked
+     for reduced motion. Unconditional `scroll-behavior: smooth` also hijacks
+     scrollIntoView({ behavior: 'auto' }), which resolves to the computed
+     scroll-behavior, so an intended jump silently became a glide. */
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
   }
 
   body {

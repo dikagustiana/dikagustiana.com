@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
 
 interface ReadingProgressProps {
@@ -6,37 +6,66 @@ interface ReadingProgressProps {
 }
 
 export function ReadingProgress({ className }: ReadingProgressProps) {
-  const [progress, setProgress] = useState(0);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const barRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const updateProgress = () => {
-      const scrollTop = window.scrollY;
-      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-      const scrollPercent = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
-      setProgress(Math.min(100, Math.max(0, scrollPercent)));
+    let raf = 0;
+
+    // One layout read per FRAME, not per scroll event: the handler only
+    // schedules; the rAF callback does the scrollHeight read and the write.
+    // No React state either — a re-render per scroll event is the same cost
+    // wearing a different hat.
+    const update = () => {
+      raf = 0;
+      const docHeight =
+        document.documentElement.scrollHeight - window.innerHeight;
+      const progress =
+        docHeight > 0 ? Math.min(1, Math.max(0, window.scrollY / docHeight)) : 0;
+      if (barRef.current) {
+        // scaleX, not width: transform skips layout and paint entirely.
+        barRef.current.style.transform = `scaleX(${progress})`;
+      }
+      if (trackRef.current) {
+        trackRef.current.setAttribute(
+          'aria-valuenow',
+          String(Math.round(progress * 100))
+        );
+      }
     };
 
-    window.addEventListener('scroll', updateProgress, { passive: true });
-    updateProgress();
+    const schedule = () => {
+      if (!raf) raf = requestAnimationFrame(update);
+    };
 
-    return () => window.removeEventListener('scroll', updateProgress);
+    window.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('resize', schedule, { passive: true });
+    update();
+
+    return () => {
+      window.removeEventListener('scroll', schedule);
+      window.removeEventListener('resize', schedule);
+      if (raf) cancelAnimationFrame(raf);
+    };
   }, []);
 
   return (
     <div
+      ref={trackRef}
       className={cn(
-        "sticky top-16 left-0 right-0 h-0.5 z-40 bg-muted/30",
+        'sticky top-16 left-0 right-0 h-0.5 z-40 bg-muted/30',
         className
       )}
       role="progressbar"
-      aria-valuenow={Math.round(progress)}
+      aria-valuenow={0}
       aria-valuemin={0}
       aria-valuemax={100}
       aria-label="Reading progress"
     >
       <div
-        className="h-full bg-primary transition-all duration-100 ease-out"
-        style={{ width: `${progress}%` }}
+        ref={barRef}
+        className="h-full w-full origin-left bg-primary"
+        style={{ transform: 'scaleX(0)' }}
       />
     </div>
   );

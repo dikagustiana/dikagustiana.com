@@ -11,6 +11,7 @@ import { ArrowLeft, User, Calendar, Clock } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { ReadingProgress } from './ReadingProgress';
+import { ArticleToc } from './ArticleToc';
 import { ArticleBody } from './ArticleBody';
 import { KeyTakeaways } from './KeyTakeaways';
 import { References } from './References';
@@ -34,6 +35,8 @@ export interface LongformArticleShellProps {
   heroImage?: string | null;
   heroCaption?: string | null;
   content: string;
+  /** Pre-rendered HTML for TOC extraction (optional, avoids double-conversion) */
+  htmlContent?: string;
   keyTakeaways?: string[];
   references?: (string | { label: string; url?: string })[];
   authorBio?: string | null;
@@ -71,6 +74,7 @@ export function LongformArticleShell({
   heroImage,
   heroCaption,
   content,
+  htmlContent,
   keyTakeaways,
   references,
   authorBio,
@@ -94,7 +98,12 @@ export function LongformArticleShell({
       <ReadingProgress />
 
       <main className="flex-1">
-        <article className="max-w-[780px] mx-auto px-6 lg:px-16 py-16 space-y-8">
+        {/* Below lg: the single centred longform column. At lg:+ a two-column
+            grid — reading column plus a sticky table-of-contents rail.
+            justify-center keeps the pair centred when the viewport is wider
+            than the tracks. */}
+        <div className="mx-auto max-w-[780px] lg:max-w-none lg:grid lg:grid-cols-[minmax(0,48rem)_13rem] lg:justify-center lg:gap-12 lg:px-8">
+          <article className="min-w-0 px-6 lg:px-0 py-16 space-y-8">
           <SEO
             title={seoTitle}
             description={seoDescription}
@@ -168,6 +177,10 @@ export function LongformArticleShell({
             </figure>
           )}
 
+          {/* Table of contents — inline collapsible below lg: only; the
+              sticky sidebar takes over at lg:+ */}
+          <ArticleToc className="lg:hidden" content={htmlContent || content} />
+
           {/* ── Body ── */}
           <div className="longform-body">
             <ArticleBody content={content} />
@@ -196,7 +209,17 @@ export function LongformArticleShell({
           {currentEssayId && section && (
             <RelatedEssays currentEssayId={currentEssayId} section={section} />
           )}
-        </article>
+          </article>
+
+          {/* Sticky ToC rail, lg:+ only. top-24 clears the fixed header and
+              the reading-progress bar; the list caps its own height and
+              scrolls internally. */}
+          <aside className="hidden lg:block py-16">
+            <div className="sticky top-24">
+              <ArticleToc variant="sidebar" content={htmlContent || content} />
+            </div>
+          </aside>
+        </div>
       </main>
 
       <Footer />
