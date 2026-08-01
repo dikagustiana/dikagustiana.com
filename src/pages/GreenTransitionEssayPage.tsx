@@ -1,3 +1,4 @@
+import { resolvePresentation, type EssayPresentation } from '@/lib/presentation';
 import { useParams, Navigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
@@ -23,13 +24,9 @@ interface Essay {
   category_id: string | null;
   created_at: string;
   updated_at: string;
-  economist_fields: {
-    deck?: string;
-    key_takeaways?: string[];
-    references?: (string | { label: string; url?: string })[];
-    hero_caption?: string;
-    author_bio?: string;
-  } | null;
+  presentation: EssayPresentation | null;
+  /** @deprecated legacy column, read only as a fallback until it is dropped */
+  economist_fields: EssayPresentation | null;
 }
 
 interface EssayListItem {
@@ -131,8 +128,8 @@ export default function GreenTransitionEssayPage() {
 
   const getEssayUrl = (essaySlug: string) => `/green-transition/${phase}/${essaySlug}`;
 
-  const economistFields = essay.economist_fields || {};
-  const deck = economistFields.deck || essay.snippet;
+  const presentation = resolvePresentation(essay);
+  const deck = presentation.deck || essay.snippet;
   const htmlContent = contentToHtml(essay.content || '');
 
   return (
@@ -153,12 +150,12 @@ export default function GreenTransitionEssayPage() {
       readTime={essay.read_time}
       topic={phaseLabel}
       heroImage={essay.thumbnail_url}
-      heroCaption={economistFields.hero_caption}
+      heroCaption={presentation.hero_caption}
       content={essay.content || ''}
       htmlContent={htmlContent}
-      keyTakeaways={economistFields.key_takeaways}
-      references={economistFields.references}
-      authorBio={economistFields.author_bio}
+      keyTakeaways={presentation.key_takeaways}
+      references={presentation.references}
+      authorBio={presentation.author_bio}
       previous={previous}
       next={next}
       getEssayUrl={getEssayUrl}

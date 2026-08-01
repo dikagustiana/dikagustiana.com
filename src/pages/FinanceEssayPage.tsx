@@ -5,6 +5,7 @@
  * Route: /finance/:track/:moduleSlug/:essaySlug
  */
 
+import { resolvePresentation, type EssayPresentation } from '@/lib/presentation';
 import { useParams, Navigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
@@ -33,13 +34,9 @@ interface Essay {
   module_id: string | null;
   created_at: string;
   updated_at: string;
-  economist_fields: {
-    deck?: string;
-    key_takeaways?: string[];
-    references?: (string | { label: string; url?: string })[];
-    hero_caption?: string;
-    author_bio?: string;
-  } | null;
+  presentation: EssayPresentation | null;
+  /** @deprecated legacy column, read only as a fallback until it is dropped */
+  economist_fields: EssayPresentation | null;
 }
 
 interface EssayListItem {
@@ -138,8 +135,8 @@ export default function FinanceEssayPage() {
 
   const getEssayUrl = (slug: string) => `/finance/${track}/${moduleSlug}/${slug}`;
 
-  const economistFields = essay.economist_fields || {};
-  const deck = economistFields.deck || essay.snippet;
+  const presentation = resolvePresentation(essay);
+  const deck = presentation.deck || essay.snippet;
   const topic = module?.title ?? essay.phase ?? 'Finance';
   const htmlContent = contentToHtml(essay.content || '');
   const isLongform = track === 'finance-in-motion';
@@ -157,11 +154,11 @@ export default function FinanceEssayPage() {
     createdAt: essay.created_at,
     readTime: essay.read_time,
     heroImage: essay.thumbnail_url,
-    heroCaption: economistFields.hero_caption,
+    heroCaption: presentation.hero_caption,
     content: essay.content || '',
-    keyTakeaways: economistFields.key_takeaways,
-    references: economistFields.references,
-    authorBio: economistFields.author_bio,
+    keyTakeaways: presentation.key_takeaways,
+    references: presentation.references,
+    authorBio: presentation.author_bio,
     previous,
     next,
     getEssayUrl,

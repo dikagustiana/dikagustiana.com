@@ -291,7 +291,7 @@ function inlineMarkdownFromListItem(item: JSONContent): string {
 
 /**
  * Convert a TipTap JSON document to Markdown-flavoured plain text.
- * Used to hand drafts to the Writing Council (and other text-only consumers).
+ * Used by text-only consumers (exports, plain-text extraction).
  */
 export function tiptapJsonToMarkdown(doc: JSONContent | null | undefined): string {
   if (!doc || !doc.content) return '';

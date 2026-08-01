@@ -155,53 +155,6 @@ export type Database = {
           },
         ]
       }
-      council_sessions: {
-        Row: {
-          advisor_responses: Json
-          advisors_config: Json
-          created_at: string
-          created_by: string
-          id: string
-          input_snapshot: string
-          mode: string
-          peer_reviews: Json
-          post_id: string | null
-          verdict: Json
-        }
-        Insert: {
-          advisor_responses: Json
-          advisors_config: Json
-          created_at?: string
-          created_by?: string
-          id?: string
-          input_snapshot: string
-          mode: string
-          peer_reviews: Json
-          post_id?: string | null
-          verdict: Json
-        }
-        Update: {
-          advisor_responses?: Json
-          advisors_config?: Json
-          created_at?: string
-          created_by?: string
-          id?: string
-          input_snapshot?: string
-          mode?: string
-          peer_reviews?: Json
-          post_id?: string | null
-          verdict?: Json
-        }
-        Relationships: [
-          {
-            foreignKeyName: "council_sessions_post_id_fkey"
-            columns: ["post_id"]
-            isOneToOne: false
-            referencedRelation: "essays"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       essay_revisions: {
         Row: {
           change_summary: string | null
@@ -281,6 +234,7 @@ export type Database = {
           module_id: string | null
           phase: string | null
           prerequisites: string[] | null
+          presentation: Json | null
           published: boolean | null
           read_time: string | null
           section: string
@@ -317,6 +271,7 @@ export type Database = {
           module_id?: string | null
           phase?: string | null
           prerequisites?: string[] | null
+          presentation?: Json | null
           published?: boolean | null
           read_time?: string | null
           section: string
@@ -353,6 +308,7 @@ export type Database = {
           module_id?: string | null
           phase?: string | null
           prerequisites?: string[] | null
+          presentation?: Json | null
           published?: boolean | null
           read_time?: string | null
           section?: string
