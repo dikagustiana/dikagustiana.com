@@ -6,7 +6,7 @@
  * Content updates are debounced to avoid lag while typing.
  */
 
-import { resolvePresentation, type EssayPresentation } from '@/lib/presentation';
+import { resolvePresentation, normaliseReference, type EssayPresentation } from '@/lib/presentation';
 import { useMemo, useState, useEffect, useRef } from 'react';
 import type { JSONContent } from '@tiptap/core';
 import { ArticleHeader } from '@/components/editorial/ArticleHeader';
@@ -163,22 +163,25 @@ export function LivePreviewPanel({
                 <h3 className="font-semibold text-foreground">References</h3>
               </div>
               <ol className="space-y-2 text-sm list-decimal list-inside">
-                {references.map((ref, idx) => (
-                  <li key={idx} className="text-muted-foreground">
-                    {ref.url ? (
-                      <a
-                        href={ref.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="hover:text-foreground transition-colors underline"
-                      >
-                        {ref.label}
-                      </a>
-                    ) : (
-                      ref.label
-                    )}
-                  </li>
-                ))}
+                {references.map((raw, idx) => {
+                  const ref = normaliseReference(raw);
+                  return (
+                    <li key={idx} className="text-muted-foreground">
+                      {ref.url ? (
+                        <a
+                          href={ref.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="hover:text-foreground transition-colors underline"
+                        >
+                          {ref.label}
+                        </a>
+                      ) : (
+                        ref.label
+                      )}
+                    </li>
+                  );
+                })}
               </ol>
             </div>
           )}

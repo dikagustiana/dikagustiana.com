@@ -124,7 +124,7 @@ export const useFeaturedFinanceEssay = () => {
         .from('essays')
         .select(`
           id, slug, title, snippet, author, date, read_time, thumbnail_url,
-          presentation, economist_fields,
+          presentation,
           finance_section
         `)
         .eq('id', settings.value)
@@ -203,7 +203,7 @@ export interface FinanceModule {
   thesis: string | null;
   sort_order: number;
   framing_content: string | null;
-  module_meta: { variant?: string; icon?: string; color_accent?: string } | null;
+  module_meta: { variant?: string; icon?: string; color_accent?: string; display_label?: string; essay_count?: number } | null;
   created_at: string;
   updated_at: string;
 }
@@ -234,41 +234,58 @@ export const useFinanceModulesByTrack = (trackSlug: string) => {
   });
 };
 
+/**
+ * Published-vs-planned lesson counts for a track.
+ *
+ * Two things were wrong before. It ran 1 + 2N queries (99 sequential requests
+ * for a 49-module track), and it derived the *planned* total by counting rows
+ * in `essays` — which RLS correctly hides from anonymous visitors, so the index
+ * rendered "0/0 lessons" for every module. The data was right; the interface
+ * was lying.
+ *
+ * The planned count now comes from `module_meta.essay_count`, which is
+ * anon-readable, and the published count from a single query over published
+ * essays. Two requests total, and an anonymous visitor sees "0 of 3 published"
+ * without any draft being exposed.
+ */
 export const useModuleLessonCounts = (trackSlug: string) => {
   return useQuery({
     queryKey: ['finance-module-lesson-counts', trackSlug],
     staleTime: 5 * 60 * 1000,
     queryFn: async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data: modules, error: modError } = await (supabase as any)
+      const { data: modules, error: modError } = await supabase
         .from('finance_modules')
-        .select('id, slug')
+        .select('id, slug, module_meta')
         .eq('track_slug', trackSlug);
 
       if (modError) throw modError;
       if (!modules || modules.length === 0) return {};
 
-      const counts: Record<string, { published: number; total: number }> = {};
-      for (const mod of modules as { id: string; slug: string }[]) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { count: pubCount, error: pubErr } = await (supabase as any)
-          .from('essays')
-          .select('id', { count: 'exact', head: true })
-          .eq('module_id', mod.id)
-          .eq('published', true);
+      const ids = modules.map(m => m.id);
+      const { data: published, error: pubErr } = await supabase
+        .from('essays')
+        .select('module_id')
+        .in('module_id', ids)
+        .eq('published', true);
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { count: totalCount, error: totalErr } = await (supabase as any)
-          .from('essays')
-          .select('id', { count: 'exact', head: true })
-          .eq('module_id', mod.id);
+      if (pubErr) throw pubErr;
 
-        counts[mod.slug] = {
-          published: pubErr ? 0 : (pubCount || 0),
-          total: totalErr ? 0 : (totalCount || 0),
-        };
+      const publishedByModule = new Map<string, number>();
+      for (const row of published ?? []) {
+        const k = (row as { module_id: string | null }).module_id;
+        if (k) publishedByModule.set(k, (publishedByModule.get(k) ?? 0) + 1);
       }
 
+      const counts: Record<string, { published: number; total: number }> = {};
+      for (const mod of modules) {
+        const meta = mod.module_meta as { essay_count?: number } | null;
+        counts[mod.slug] = {
+          published: publishedByModule.get(mod.id) ?? 0,
+          // Planned, from the framework. Never derived from a row count the
+          // reader may not be allowed to see.
+          total: meta?.essay_count ?? 0,
+        };
+      }
       return counts;
     },
     enabled: !!trackSlug,

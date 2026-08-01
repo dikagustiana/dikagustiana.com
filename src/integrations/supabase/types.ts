@@ -215,13 +215,10 @@ export type Database = {
         Row: {
           author: string | null
           category_id: string
-          coach_fields: Json | null
           content: string | null
           content_json: Json | null
           created_at: string
           date: string | null
-          economist_fields: Json | null
-          educator_fields: Json | null
           finance_order: number | null
           finance_section: string | null
           fsli_slug: string | null
@@ -230,7 +227,6 @@ export type Database = {
           layout_config: Json | null
           learning_outcomes: string[] | null
           lesson_type: Database["public"]["Enums"]["lesson_type_enum"] | null
-          manager_fields: Json | null
           module_id: string | null
           phase: string | null
           prerequisites: string[] | null
@@ -252,13 +248,10 @@ export type Database = {
         Insert: {
           author?: string | null
           category_id?: string
-          coach_fields?: Json | null
           content?: string | null
           content_json?: Json | null
           created_at?: string
           date?: string | null
-          economist_fields?: Json | null
-          educator_fields?: Json | null
           finance_order?: number | null
           finance_section?: string | null
           fsli_slug?: string | null
@@ -267,7 +260,6 @@ export type Database = {
           layout_config?: Json | null
           learning_outcomes?: string[] | null
           lesson_type?: Database["public"]["Enums"]["lesson_type_enum"] | null
-          manager_fields?: Json | null
           module_id?: string | null
           phase?: string | null
           prerequisites?: string[] | null
@@ -289,13 +281,10 @@ export type Database = {
         Update: {
           author?: string | null
           category_id?: string
-          coach_fields?: Json | null
           content?: string | null
           content_json?: Json | null
           created_at?: string
           date?: string | null
-          economist_fields?: Json | null
-          educator_fields?: Json | null
           finance_order?: number | null
           finance_section?: string | null
           fsli_slug?: string | null
@@ -304,7 +293,6 @@ export type Database = {
           layout_config?: Json | null
           learning_outcomes?: string[] | null
           lesson_type?: Database["public"]["Enums"]["lesson_type_enum"] | null
-          manager_fields?: Json | null
           module_id?: string | null
           phase?: string | null
           prerequisites?: string[] | null

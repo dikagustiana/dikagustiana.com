@@ -22,8 +22,6 @@ export interface Essay {
   prerequisites: string[] | null;
   learning_outcomes: string[] | null;
   presentation: EssayPresentation | null;
-  /** @deprecated legacy column, dropped by the staged _pending migration */
-  economist_fields?: EssayPresentation | null;
   fsli_slug: string | null;
   topic: string | null;
   finance_section: string | null;

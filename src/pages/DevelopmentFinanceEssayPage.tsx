@@ -32,8 +32,6 @@ interface Essay {
   created_at: string;
   updated_at: string;
   presentation: EssayPresentation | null;
-  /** @deprecated legacy column, read only as a fallback until it is dropped */
-  economist_fields: EssayPresentation | null;
 }
 
 export default function DevelopmentFinanceEssayPage() {

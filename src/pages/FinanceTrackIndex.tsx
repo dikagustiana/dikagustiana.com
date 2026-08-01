@@ -56,13 +56,13 @@ const EssayRow = React.memo(function EssayRow({ essay }: { essay: FinanceModuleE
 const CollapsibleModuleRow = React.memo(function CollapsibleModuleRow({
   mod,
   essays,
-  essayCount,
+  counts,
   isOpen,
   onToggle,
 }: {
   mod: FinanceModule;
   essays: FinanceModuleEssay[];
-  essayCount: number;
+  counts: { published: number; total: number };
   isOpen: boolean;
   onToggle: () => void;
 }) {
@@ -78,8 +78,13 @@ const CollapsibleModuleRow = React.memo(function CollapsibleModuleRow({
         <span className="text-base font-semibold text-foreground group-hover:text-primary transition-colors leading-snug">
           {mod.title}
         </span>
+        {/* "n of N published" — N is the framework's planned count, readable
+            without seeing drafts. A bare "0 essays" told the reader the module
+            was empty when it has lessons planned and written. */}
         <span className="text-xs text-muted-foreground tabular-nums shrink-0">
-          {essayCount} {essayCount === 1 ? 'essay' : 'essays'}
+          {counts.total > 0
+            ? `${counts.published} of ${counts.total} published`
+            : `${counts.published} published`}
         </span>
         <ChevronDown
           size={14}
@@ -129,8 +134,14 @@ const SimpleModuleRow = React.memo(function SimpleModuleRow({
           </p>
         )}
       </div>
+      {/* Planned count comes from module_meta.essay_count (anon-readable);
+          published comes from a query RLS scopes. "0 of 3 published" is the
+          truth for a visitor. "0/0 lessons" was not — it counted drafts the
+          reader is not allowed to see and got zero. */}
       <span className="text-xs text-muted-foreground tabular-nums shrink-0">
-        {lessonCount.published}/{lessonCount.total} lessons
+        {lessonCount.total > 0
+          ? `${lessonCount.published} of ${lessonCount.total} published`
+          : 'Not yet planned'}
       </span>
     </Link>
   );
@@ -244,7 +255,7 @@ function TrackContent({ track }: { track: string }) {
                     key={mod.id}
                     mod={mod}
                     essays={allEssays?.[mod.id] || []}
-                    essayCount={counts.total}
+                    counts={counts}
                     isOpen={openModules.has(mod.id)}
                     onToggle={() => toggle(mod.id)}
                   />

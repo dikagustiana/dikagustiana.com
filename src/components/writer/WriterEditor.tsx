@@ -212,7 +212,11 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
         // Presentation payload (deck / references / key takeaways / captions).
         // resolvePresentation falls back to the legacy persona columns for any
         // row the backfill missed, so an older essay still loads its references.
-        const pres = resolvePresentation(data);
+        // `data.presentation` is typed Json by the generated client; narrow it
+        // at the boundary rather than widening EssayPresentation to accept Json.
+        const pres = resolvePresentation({
+          presentation: (data.presentation ?? null) as EssayPresentation | null,
+        });
         setKeyTakeaways(pres.key_takeaways?.length ? pres.key_takeaways : ['', '', '']);
         setReferences(pres.references?.map(r =>
           typeof r === 'string' ? { label: r, url: '' } : { label: r.label, url: r.url || '' }

@@ -16,8 +16,10 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ["'Source Sans 3'", "system-ui", "sans-serif"],
-        display: ["'Playfair Display'", "Georgia", "serif"],
+        // Read from CSS custom properties so the family is defined once, in
+        // src/index.css, and never named inside a component.
+        sans: ["var(--font-sans)"],
+        display: ["var(--font-display)"],
       },
       colors: {
         border: "hsl(var(--border))",

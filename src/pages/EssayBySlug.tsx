@@ -42,8 +42,6 @@ interface Row {
   created_at: string;
   updated_at: string;
   presentation: EssayPresentation | null;
-  /** @deprecated legacy column, read only as a fallback until it is dropped */
-  economist_fields: EssayPresentation | null;
   finance_modules: { slug: string; track_slug: string } | null;
 }
 
@@ -59,7 +57,7 @@ export default function EssayBySlug() {
         .select(`
           id, slug, title, snippet, author, date, read_time, thumbnail_url,
           content, section, phase, finance_section, fsli_slug, topic,
-          published, created_at, updated_at, presentation, economist_fields,
+          published, created_at, updated_at, presentation,
           finance_modules!essays_module_id_fkey ( slug, track_slug )
         `)
         .eq('slug', slug!)
