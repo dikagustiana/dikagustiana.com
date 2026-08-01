@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { ChevronDown, List } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -11,6 +11,12 @@ interface TocItem {
 interface ArticleTocProps {
   content: string;
   className?: string;
+  /**
+   * `inline` (default) — the collapsible box above the body, kept for
+   * viewports below `lg` where a sidebar would reintroduce horizontal scroll.
+   * `sidebar` — an always-open list for the sticky aside at `lg:` and above.
+   */
+  variant?: 'inline' | 'sidebar';
 }
 
 function extractHeadings(content: string): TocItem[] {
@@ -45,9 +51,25 @@ function extractHeadings(content: string): TocItem[] {
   return items;
 }
 
-export function ArticleToc({ content, className }: ArticleTocProps) {
+/**
+ * Smooth scrolling is the largest motion on the page and a nausea trigger for
+ * readers who have asked the OS to reduce motion. Their preference wins.
+ *
+ * 'instant', not 'auto': per spec, behavior 'auto' defers to the CSS
+ * `scroll-behavior` property, and the stylesheet sets `smooth` on `html` —
+ * so 'auto' would quietly re-animate the very jump this exists to prevent.
+ */
+function scrollBehavior(): ScrollBehavior {
+  return typeof window !== 'undefined' &&
+    window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+    ? ('instant' as ScrollBehavior)
+    : 'smooth';
+}
+
+export function ArticleToc({ content, className, variant = 'inline' }: ArticleTocProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeId, setActiveId] = useState<string>('');
+  const listRef = useRef<HTMLUListElement>(null);
 
   const headings = useMemo(() => extractHeadings(content), [content]);
 
@@ -73,16 +95,71 @@ export function ArticleToc({ content, className }: ArticleTocProps) {
     return () => observer.disconnect();
   }, [headings]);
 
-  if (headings.length < 3) return null;
+  // Keep the active entry visible INSIDE the sidebar list. On a long essay the
+  // reader scrolls past entries that sit below the sidebar's own fold, and a
+  // highlight outside the visible list is invisible exactly when it matters.
+  // scrollTop is adjusted directly — scrollIntoView would also scroll the page.
+  useEffect(() => {
+    if (variant !== 'sidebar' || !activeId) return;
+    const list = listRef.current;
+    if (!list) return;
+    const item = list.querySelector<HTMLElement>(`[data-toc-id="${activeId}"]`);
+    if (!item) return;
 
-  const handleClick = (id: string) => {
+    const listRect = list.getBoundingClientRect();
+    const itemRect = item.getBoundingClientRect();
+    if (itemRect.top < listRect.top) {
+      list.scrollTop += itemRect.top - listRect.top - 8;
+    } else if (itemRect.bottom > listRect.bottom) {
+      list.scrollTop += itemRect.bottom - listRect.bottom + 8;
+    }
+  }, [activeId, variant]);
+
+  const handleClick = useCallback((id: string) => {
     const el = document.getElementById(id);
     if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      el.scrollIntoView({ behavior: scrollBehavior(), block: 'start' });
       setActiveId(id);
     }
     setIsOpen(false);
-  };
+  }, []);
+
+  if (headings.length < 3) return null;
+
+  if (variant === 'sidebar') {
+    return (
+      <nav className={cn('text-sm', className)} aria-label="Table of contents">
+        <p className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          <List className="h-3.5 w-3.5" />
+          Contents
+        </p>
+        {/* The list scrolls inside itself: 13 entries on a short viewport would
+            otherwise truncate with no way to reach the tail. */}
+        <ul
+          ref={listRef}
+          className="mt-3 max-h-[calc(100vh-11rem)] space-y-0.5 overflow-y-auto pr-1"
+        >
+          {headings.map((heading) => (
+            <li key={heading.id}>
+              <button
+                data-toc-id={heading.id}
+                onClick={() => handleClick(heading.id)}
+                className={cn(
+                  'block w-full rounded px-2 py-1 text-left text-[13px] leading-snug transition-colors hover:bg-muted/50',
+                  heading.level === 'h3' && 'pl-5',
+                  activeId === heading.id
+                    ? 'text-primary font-medium bg-muted/40'
+                    : 'text-muted-foreground'
+                )}
+              >
+                {heading.text}
+              </button>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    );
+  }
 
   return (
     <nav

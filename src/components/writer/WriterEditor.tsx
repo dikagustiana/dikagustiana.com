@@ -94,6 +94,20 @@ const PHASE_OPTIONS: Record<string, { id: string; label: string }[]> = {
   ],
 };
 
+/**
+ * Track slug → phase id. Placement is one decision, not three: choosing the
+ * module determines the track, and the track determines the phase, so both
+ * are derived rather than asked for. `topic` likewise carries the module slug
+ * for finance essays. (`phase` was set on 1 of 162 rows and `topic` on none —
+ * nobody was ever going to fill three fields by hand 161 times.)
+ */
+const TRACK_TO_PHASE: Record<string, string> = {
+  fundamentals: 'fundamentals',
+  'strategic-finance': 'strategic-finance',
+  planning: 'financial-planning',
+  analytics: 'financial-analytics',
+};
+
 function calculateReadTime(text: string): string {
   const wordsPerMinute = 200;
   const words = text.trim().split(/\s+/).filter(Boolean).length;
@@ -293,8 +307,9 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
       section,
       content,
       categoryId,
+      lessonType,
     });
-  }, [title, deck, keyTakeaways, wordCount, references, section, content, categoryId]);
+  }, [title, deck, keyTakeaways, wordCount, references, section, content, categoryId, lessonType]);
 
   // ── Autosave: debounced backup into essay_revisions ──
   // Deliberately does NOT write the essays row. A backup is not a save, and a
@@ -385,12 +400,19 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
         author_bio: authorBio || null,
       };
 
+      // Placement-derived fields. For a finance essay with a module, phase and
+      // topic come from the module — one field set instead of three.
+      const derivedPhase =
+        section === 'finance' && selectedFinanceModule
+          ? TRACK_TO_PHASE[selectedFinanceModule.track_slug] ?? selectedFinanceModule.track_slug
+          : phase || null;
+
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const essayData: any = {
         title,
         slug: finalSlug,
         section,
-        phase: phase || null,
+        phase: derivedPhase,
         author,
         date: date || null,
         read_time: readTime || null,
@@ -406,6 +428,13 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
         finance_order: financeOrder,
         lesson_type: lessonType || null,
       };
+
+      // topic mirrors the module slug for curriculum essays. Written only for
+      // finance-with-module so accounting essays' hand-set topics (which drive
+      // /accounting/consolidation/:topic) are never clobbered.
+      if (section === 'finance' && selectedFinanceModule) {
+        essayData.topic = selectedFinanceModule.slug;
+      }
 
       // Attach category_id if set
       if (categoryId) {
@@ -484,6 +513,8 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
   useEffect(() => {
     if (section === 'finance' && selectedFinanceModule) {
       setFinanceSection(selectedFinanceModule.track_slug);
+      // Derived, not asked for: the module decides the phase.
+      setPhase(TRACK_TO_PHASE[selectedFinanceModule.track_slug] ?? selectedFinanceModule.track_slug);
     }
   }, [section, selectedFinanceModule]);
 

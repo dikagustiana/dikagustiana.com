@@ -15,45 +15,41 @@ import { ArticleBody } from '@/components/editorial/ArticleBody';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { LoadingState } from '@/components/states';
-import { RefreshCw, Clock, ChevronRight, Pencil } from 'lucide-react';
+import { RefreshCw, ChevronRight, Pencil } from 'lucide-react';
 
 // Content sections configuration
 const contentSections = [
   {
     key: 'definition',
     title: 'Definition',
-    subtitle: 'Understanding the fundamental concepts and requirements for classification.',
-    placeholder: 'Cash and cash equivalents represent the most liquid assets that an entity possesses. According to IAS 7 Statement of Cash Flows, cash comprises cash on hand and demand deposits. Cash equivalents are short-term, highly liquid investments that are readily convertible to known amounts of cash and which are subject to an insignificant risk of changes in value.'
+    subtitle: 'Understanding the fundamental concepts and requirements for classification.'
   },
   {
     key: 'recognition',
-    title: 'Recognition Criteria',
-    placeholder: 'Recognition requires the asset to be readily convertible to cash and subject to insignificant risk of value changes. The entity must have control over the resource and expect future economic benefits.'
+    title: 'Recognition Criteria'
   },
   {
     key: 'measurement',
-    title: 'Measurement Principles',
-    placeholder: 'Cash and cash equivalents are typically measured at their face value or nominal amount. Foreign currency cash holdings are translated using the closing rate at the reporting date.'
+    title: 'Measurement Principles'
   },
   {
     key: 'presentation',
-    title: 'Presentation and Disclosure',
-    placeholder: 'Proper presentation and disclosure are essential for transparency in financial reporting. The components of cash and cash equivalents should be disclosed in the notes to the financial statements.'
+    title: 'Presentation and Disclosure'
   },
 ];
 
 // Issues subsections
 const issueSections = [
-  { key: 'issues-common', title: 'Common Implementation Issues', placeholder: 'Common issues include misclassification of restricted cash, improper treatment of bank overdrafts, and incorrect foreign currency translation.' },
-  { key: 'issues-overdrafts', title: 'Bank Overdrafts Treatment', placeholder: 'Bank overdrafts that are repayable on demand and form an integral part of an entity\'s cash management may be included as a component of cash and cash equivalents.' },
-  { key: 'issues-currency', title: 'Foreign Currency Considerations', placeholder: 'Cash and cash equivalents denominated in foreign currencies must be translated at the closing exchange rate, with translation differences recognized appropriately.' },
+  { key: 'issues-common', title: 'Common Implementation Issues' },
+  { key: 'issues-overdrafts', title: 'Bank Overdrafts Treatment' },
+  { key: 'issues-currency', title: 'Foreign Currency Considerations' },
 ];
 
 // Example subsections
 const exampleSections = [
-  { key: 'examples-practical', title: 'Practical Examples', placeholder: 'Example: A company holds USD 1,000,000 in checking accounts, USD 500,000 in money market funds maturing in 60 days, and USD 200,000 in 3-month treasury bills.' },
-  { key: 'examples-journal', title: 'Journal Entry Examples', placeholder: 'Dr. Cash 100,000\nCr. Revenue 100,000\n(To record cash receipt from customer)' },
-  { key: 'examples-implementation', title: 'Implementation Steps', placeholder: '1. Identify all cash holdings\n2. Evaluate each investment for cash equivalent criteria\n3. Document the assessment\n4. Prepare appropriate disclosures' },
+  { key: 'examples-practical', title: 'Practical Examples' },
+  { key: 'examples-journal', title: 'Journal Entry Examples' },
+  { key: 'examples-implementation', title: 'Implementation Steps' },
 ];
 
 // Build TOC structure for right sidebar
@@ -74,15 +70,6 @@ const buildTocSections = () => [
     children: exampleSections.map(s => ({ id: s.key, title: s.title }))
   },
 ];
-
-// Generate key points based on item
-const getKeyPoints = () => {
-  return [
-    'Include currency, bank deposits, and highly liquid investments with original maturities of three months or less',
-    'Recognition requires the asset to be readily convertible to cash and subject to insignificant risk of value changes',
-    'Proper presentation and disclosure are essential for transparency in financial reporting'
-  ];
-};
 
 export default function FsliDetail() {
   const { slug } = useParams<{ slug: string }>();
@@ -130,8 +117,8 @@ export default function FsliDetail() {
   }
 
   const tocSections = buildTocSections();
-  const keyPoints = getKeyPoints();
-  const heroDescription = `${item.title} represent important components on a company's balance sheet`;
+  // The hero says what is true for THIS line item — its subtitle — or nothing.
+  const heroDescription = item.subtitle || '';
 
   return (
     <PageLayout variant="content" role="manager">
@@ -185,14 +172,17 @@ export default function FsliDetail() {
                 <h1 className="text-2xl md:text-3xl font-display font-bold text-primary mb-3">
                   {item.title}
                 </h1>
+                {/* Real timestamp from the row. The previous "Updated 6 Sep
+                    2025 · 6 min read" was a hardcoded string on all 24 pages. */}
                 <div className="flex items-center gap-4 text-sm text-muted-foreground">
                   <span className="flex items-center gap-1.5">
                     <RefreshCw className="h-4 w-4" />
-                    Updated 6 Sep 2025
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <Clock className="h-4 w-4" />
-                    6 min read
+                    Updated{' '}
+                    {new Date(item.updated_at).toLocaleDateString('en-US', {
+                      day: 'numeric',
+                      month: 'short',
+                      year: 'numeric',
+                    })}
                   </span>
                 </div>
               </div>
@@ -201,7 +191,6 @@ export default function FsliDetail() {
               <FsliHeroSection
                 title={item.title}
                 description={heroDescription}
-                keyPoints={keyPoints}
               />
 
               {/* Divider */}
@@ -216,7 +205,6 @@ export default function FsliDetail() {
                   sectionKey={section.key}
                   title={section.title}
                   subtitle={section.subtitle}
-                  placeholder={section.placeholder}
                 />
               ))}
 
@@ -233,7 +221,6 @@ export default function FsliDetail() {
                   pageSlug={slug!}
                   sectionKey={section.key}
                   title={section.title}
-                  placeholder={section.placeholder}
                 />
               ))}
 
@@ -250,7 +237,6 @@ export default function FsliDetail() {
                   pageSlug={slug!}
                   sectionKey={section.key}
                   title={section.title}
-                  placeholder={section.placeholder}
                 />
               ))}
 

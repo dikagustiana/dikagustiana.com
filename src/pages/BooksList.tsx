@@ -6,6 +6,7 @@ import { useBooks } from '@/hooks/queries/useBooks';
 import { LoadingState } from '@/components/states/LoadingState';
 import { ErrorState } from '@/components/states/ErrorState';
 import { EmptyState } from '@/components/states/EmptyState';
+import { BookUploadCard } from '@/components/books/BookUploadCard';
 
 const formatTitle = (s: string) =>
   s?.split('-').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') || 'Category';
@@ -35,6 +36,9 @@ export default function BooksList() {
         <div className="mb-8">
           <h1 className="text-3xl font-display font-bold">{heading}</h1>
         </div>
+
+        {/* Admin-only insert path; renders nothing for readers. */}
+        <BookUploadCard category={category || 'uncategorised'} />
 
         {isLoading ? (
           <LoadingState />

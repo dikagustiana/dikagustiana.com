@@ -11,7 +11,6 @@ interface FsliContentSectionProps {
   sectionKey: string;
   title: string;
   subtitle?: string;
-  placeholder: string;
 }
 
 export function FsliContentSection({ 
@@ -20,7 +19,6 @@ export function FsliContentSection({
   sectionKey, 
   title, 
   subtitle,
-  placeholder 
 }: FsliContentSectionProps) {
   const { isAdmin } = useAuth();
   const { toast } = useToast();
@@ -47,7 +45,7 @@ export function FsliContentSection({
   };
 
   const handleEdit = () => {
-    setEditValue(content || placeholder);
+    setEditValue(content);
     setIsEditing(true);
   };
 
@@ -84,7 +82,6 @@ export function FsliContentSection({
     setEditValue('');
   };
 
-  const displayContent = content || placeholder;
 
   return (
     <section id={id} className="py-8 border-b border-border last:border-0 scroll-mt-28">
@@ -123,13 +120,23 @@ export function FsliContentSection({
             </Button>
           </div>
         </div>
-      ) : (
+      ) : content ? (
         <div 
           className={`text-muted-foreground leading-relaxed ${isAdmin ? 'cursor-pointer hover:bg-muted/30 p-3 -m-3 rounded-lg transition-colors' : ''}`}
           onClick={isAdmin ? handleEdit : undefined}
         >
-          <p className="whitespace-pre-wrap">{displayContent}</p>
+          <p className="whitespace-pre-wrap">{content}</p>
         </div>
+      ) : (
+        /* Honest empty state. All 24 FSLI pages used to fall back to prose
+           written about cash and cash equivalents — pages that LOOKED finished
+           while showing another line item's content. Unwritten is unwritten. */
+        <p
+          className={`text-sm italic text-muted-foreground/80 ${isAdmin ? 'cursor-pointer hover:text-foreground transition-colors' : ''}`}
+          onClick={isAdmin ? handleEdit : undefined}
+        >
+          This section hasn't been written yet.{isAdmin ? ' Click to write it.' : ''}
+        </p>
       )}
     </section>
   );

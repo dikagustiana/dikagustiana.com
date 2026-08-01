@@ -7,7 +7,8 @@
 
 import NotFound from './NotFound';
 import { resolvePresentation, type EssayPresentation } from '@/lib/presentation';
-import { useParams } from 'react-router-dom';
+import { universalEssayUrl } from '@/lib/essayUrl';
+import { useParams, Navigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -36,6 +37,8 @@ interface Essay {
   created_at: string;
   updated_at: string;
   presentation: EssayPresentation | null;
+  /** The essay's actual module, joined — the URL's claim is checked against this. */
+  finance_modules: { slug: string; track_slug: string } | null;
 }
 
 interface EssayListItem {
@@ -64,10 +67,11 @@ export default function FinanceEssayPage() {
     setLoading(true);
     setNotFound(false);
     try {
-      // Fetch by globally unique slug
+      // Fetch by globally unique slug, joining the essay's ACTUAL module so the
+      // URL's track/module segments can be validated against real placement.
       const { data, error } = await supabase
         .from('essays')
-        .select('*')
+        .select('*, finance_modules(slug, track_slug)')
         .eq('slug', essaySlug!)
         .maybeSingle();
 
@@ -129,6 +133,26 @@ export default function FinanceEssayPage() {
   // with a blank middle, which reads as a broken site rather than a wrong URL.
   // NotFound also offers the nearest real essay for a near-miss slug.
   if (!essay) return <NotFound />;
+
+  // The slug is globally unique, so this page used to render the essay under
+  // ANY /finance/<x>/<y>/<slug> — every essay had unlimited working URLs. The
+  // URL's claim about placement is now checked against the essay's actual
+  // module, and a mismatch redirects to the one canonical URL rather than
+  // 404ing: the reader asked for a real essay, just at the wrong address.
+  const actualModule = essay.finance_modules;
+  if (actualModule && (actualModule.track_slug !== track || actualModule.slug !== moduleSlug)) {
+    return (
+      <Navigate
+        to={`/finance/${actualModule.track_slug}/${actualModule.slug}/${essay.slug}`}
+        replace
+      />
+    );
+  }
+  if (!actualModule) {
+    // No curriculum placement means no four-segment home — this URL shape was
+    // fabricated. The universal route renders unplaced essays.
+    return <Navigate to={universalEssayUrl(essay.slug)} replace />;
+  }
 
   const currentIndex = siblings?.findIndex((e) => e.slug === essaySlug) ?? -1;
   const previous = currentIndex > 0 ? siblings![currentIndex - 1] : null;

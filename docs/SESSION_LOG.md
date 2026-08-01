@@ -3,18 +3,47 @@
 Append-only. Newest entry first. A fresh session must be able to resume from this file.
 
 ## NEXT ACTION (single)
-**Finish GATE 1f, which is currently FAILED.** In all four essay pages
-(`FinanceEssayPage:117`, `GreenTransitionEssayPage`, `NextBigThingEssayPage`,
-`DevelopmentFinanceEssayPage`), replace the early `return <Navigate to="/finance" replace />`
-fired by the local `notFound` state with `return <NotFound />`. That early redirect runs
-*before* the `!essay` check, so the improved 404 is unreachable and a mistyped slug silently
-redirects to the track index. Then re-run `scratchpad/import/gate1ef.mjs` from a cold dev
-server — that same run also re-verifies GATE 1e, which was observed passing once and not
-reproduced.
+**No gate is open.** Gates 0–7 and A–G are all terminal in `docs/GATE_LEDGER.md`. What
+remains is either the owner's (admin signup at `/auth` + grant + delete `import-admin`;
+deleting the five dead branches in the GitHub UI; leaked-password toggle;
+`supabase functions delete council-review`; domain attach; the framework doc's 55-vs-56
+Fundamentals count) or content (the 160 essay bodies; `fsli_sections` prose;
+`finance_models` seeding — curriculum Sections 05 and 06 still have no data path,
+deliberately). A new session should start from a new mandate, not from this file's
+backlog.
 
-Then: GATE 1b (curriculum counts — needs `module_meta.essay_count`), GATE 1c (rehearse the
-staged drop on a scratch DB, then apply), and Sections 2–7. `docs/GATE_LEDGER.md` is the
-authority on what is and is not verified.
+## 2026-08-01 (session 7, Fable) — reconcile, close gate gaps, every title reaches its essay
+
+Single session, no parallel branch. All work on `claude/dikagustiana-sections-5-7-q0jja0`
+restarted from `main` (`a1c2e50`, the PR #9 merge — Section A's merge had already landed
+before this session began).
+
+- **P0 found and fixed: every essay save in production was dead.** The
+  `validate_essay_tone_fields` trigger still referenced all four dropped `*_fields`
+  columns, so since the column drop every INSERT/UPDATE on `essays` raised
+  `42703: record "new" has no field "manager_fields"` — reproduced, then trigger+function
+  dropped via `apply_migration`, then a real in-app Save Draft observed succeeding.
+  Nobody had re-run a save after the drop landed. Reads looked fine throughout.
+- **GATE A–G all PASSED** — evidence in the ledger. Headlines: autosave recovered
+  **3,200 of 3,200** words after a hard reload; track-index essay rows are now links with
+  real status/author (the hardcoded `Draft · Dika Gustiana` is gone); mismatched
+  track/module URLs redirect to the canonical essay URL; admins get a pencil into the
+  editor and drafts stay `content-range: */0` for everyone else; the ToC is a sticky
+  sidebar at `lg:` that tracks to the last heading, with reduced-motion respected
+  (root cause: `scroll-behavior: smooth` in CSS silently re-animated `behavior:'auto'`
+  jumps — now media-gated); books gained their missing insert path, observed end-to-end;
+  FSLI pages stopped wearing cash-equivalents prose and fake metadata.
+- **Route count reconciled:** 66 = 65 concrete + the `*` catch-all, which the sweep had
+  exercised but not counted. Swept in its own right, all three identities, both viewports.
+- **`ui-audit` does not exist in this environment** — manual consistency sweep recorded
+  in the ledger instead, including four things deliberately not fixed.
+- **Two more pre-canonical URL builders found and fixed** (`RelatedEssays`,
+  `RelatedContent` — their finance fallback emitted the TRACK route), and
+  `AdminDashboard`'s recent-essay lists linked to the retired studio route.
+- **Housekeeping done:** test accounts `testuser`, `route-sweep-tester`, `sweep-admin`
+  deleted (only `import-admin` remains — owner's item); 5 unreferenced test images and
+  the F.1 test PDF removed from storage; test revisions and the stub edit cleaned up
+  (`fa-02-01` keeps its correctly derived `phase`/`topic`).
 
 ## SESSION B NEXT ACTION (single)
 **Run GATE 6.1 — the 3,000-word autosave reload recovery — as soon as Session A records

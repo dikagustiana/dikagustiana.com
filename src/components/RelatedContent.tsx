@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { essayUrl, essayUrlInputFromRow, universalEssayUrl } from '@/lib/essayUrl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ArrowRight, BookOpen, Layers, Link2 } from 'lucide-react';
@@ -128,12 +129,10 @@ export function RelatedContent({
     }
   };
 
-  const getEssayUrl = (essay: RelatedEssay) => {
-    if (essay.phase) {
-      return `/${essay.section}/${essay.phase}/${essay.slug}`;
-    }
-    return `/${essay.section}/${essay.slug}`;
-  };
+  // The canonical builder, not a private one: the local fallback
+  // `/${section}/${slug}` matches no essay route for most sections.
+  const getEssayUrl = (essay: RelatedEssay) =>
+    essayUrl(essayUrlInputFromRow(essay)) ?? universalEssayUrl(essay.slug);
 
   return (
     <Card className="mt-12">

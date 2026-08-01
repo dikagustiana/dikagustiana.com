@@ -127,9 +127,15 @@ export function ArticleShell({
           </div>
         </div>
 
-        {/* Article content column */}
-        <div className={cn('container max-w-3xl py-8 md:py-12', className)}>
-          <div className={fontSizeClass}>
+        {/* Article content column.
+            At lg: a two-column grid puts the ToC in a sticky aside beside the
+            reading column; the reading column itself keeps max-w-3xl so line
+            length does not change. Below lg the aside does not exist and the
+            inline collapsible ToC carries on — a sidebar with no breakpoint
+            would reintroduce the horizontal scroll GATE 3 eliminated. */}
+        <div className={cn('container py-8 md:py-12', className)}>
+          <div className="mx-auto max-w-3xl lg:grid lg:max-w-[62rem] lg:grid-cols-[minmax(0,1fr)_14rem] lg:gap-12">
+          <div className={cn('min-w-0 lg:max-w-3xl', fontSizeClass)}>
             <SEO
               title={seoTitle}
               description={seoDescription}
@@ -160,8 +166,9 @@ export function ArticleShell({
               heroCaption={heroCaption}
             />
 
-            {/* Table of contents */}
-            <ArticleToc content={htmlContent || content} />
+            {/* Table of contents — inline collapsible below lg only; at lg the
+                sticky sidebar instance takes over. */}
+            <ArticleToc content={htmlContent || content} className="lg:hidden" />
 
             {/* Optional extra content before body */}
             {children}
@@ -202,6 +209,16 @@ export function ArticleShell({
                 section={section}
               />
             )}
+          </div>
+
+          {/* Sticky ToC sidebar — spans the full article height so the sticky
+              box tracks the reader to the last heading. top offset clears the
+              fixed header plus the reader-controls bar. */}
+          <aside className="hidden lg:block">
+            <div className="sticky top-32">
+              <ArticleToc content={htmlContent || content} variant="sidebar" />
+            </div>
+          </aside>
           </div>
         </div>
       </main>
