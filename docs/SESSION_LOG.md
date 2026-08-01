@@ -16,6 +16,54 @@ Then: GATE 1b (curriculum counts — needs `module_meta.essay_count`), GATE 1c (
 staged drop on a scratch DB, then apply), and Sections 2–7. `docs/GATE_LEDGER.md` is the
 authority on what is and is not verified.
 
+## SESSION B NEXT ACTION (single)
+**Run GATE 6.1 — the 3,000-word autosave reload recovery — as soon as Session A records
+GATE 1 in a terminal state.** It is the only gate in Sections 5–7 not yet passed, and it is
+blocked rather than failed: Section 1 touches the save path, so measuring autosave before
+that lands measures a state about to change. The check is: paste 3,000+ words into
+`/admin/writer/finance/new`, hard-reload mid-edit, confirm the recovery banner offers the
+autosaved revision and that restoring it returns the text. `docs/gates/GATES_5_7.md` is the
+authority for Sections 5–7; `docs/GATE_LEDGER.md` remains the authority for 0–4.
+
+## 2026-08-01 (session 6, Session B) — Sections 5, 6.2 and 7
+
+Ran concurrently with Session A. Surface split observed throughout: `src/App.tsx`,
+`Index.tsx`, `About.tsx`, `AdminContent.tsx`, `LivePreviewPanel.tsx` and the design-token
+layer were not touched, and route changes are recorded under `ROUTE CHANGES REQUESTED` in
+`docs/gates/GATES_5_7.md` rather than applied.
+
+- **GATE 5 PASSED** at `c7e5d12`, all eight requirements observed on `vite build` +
+  `vite preview` against the live project. An image pasted into the body uploads, survives
+  save → reload → publish, and is readable anonymously at
+  `/finance/analytics/t4-m07/fa-07-01` with the image decoding at 160×100. A non-admin
+  upload is refused (403 RLS, observed for both anonymous and authenticated non-admin).
+  Text, headings, a link, a figure and a table all survive the round trip, verified per
+  block. Preview and published agree because they are now the same component. One
+  authoring route. Zero duplicate-extension warnings.
+- **The bug the gate existed to catch:** inserting a table crashed the page with a React
+  `insertBefore` error and destroyed the editor. It passed `tsc --noEmit` and passed
+  `vite build`. Only inserting a table in a browser found it.
+- **Four editors deleted** (`WriterModeEditor`, `InlineEssayEditor`, `EssayBodyEditor`,
+  `RichTextEditor`) plus `UnifiedEditor`; `WriterStudio` became a redirect so the second
+  authoring stack is gone without editing `App.tsx`. Note the mandate's map was one editor
+  short — `RichTextEditor` was also configuring StarterKit inline.
+- **GATE 6.2 PASSED.** `scripts/dump-content.mjs` written, run, and its output inspected;
+  `fa-07-01`'s body (21,954 B / 81 blocks) and presentation (5 references, 3 key takeaways)
+  confirmed present. The restore path was then exercised for real — `fa-07-01` was modified
+  by the Section 5 verification and restored from this dump.
+- **GATE 6.1 BLOCKED** — Session A GATE 1 not terminal (1b pending, 1c CODED-NOT-VERIFIED).
+- **GATE 7 PASSED.** All five groups have a verdict, none left unlooked-at. Three swallowed
+  PostgREST 406s fixed (`.single()` → `maybeSingle()` plus a real `NotFound`), and
+  `BooksCategories` stopped advertising 45 books that do not exist. Two features —
+  `books_uploads` and `finance_models` — are half-built: they have read, render and
+  empty-state paths but **nothing anywhere can create a row**, so `ModelAdminPanel` is
+  unreachable by construction. All 24 FSLI detail pages render the same cash-equivalents
+  placeholder prose because `fsli_sections` is empty.
+- **For Session A's Gate 3:** the only 375px horizontal overflow found is caused by
+  `src/components/Breadcrumb.tsx:15` lacking `flex-wrap`. One word, affects every page with
+  four or more breadcrumb items.
+- **For Session A's Gate 4:** `src/App.tsx` contains **66** `<Route>` entries, not 68.
+
 ## 2026-08-01 (session 5) — gated completion sweep, Section 0 + most of Section 1
 
 - **GATE 0 PASSED.** PR #5 merged (`1d6c7f4`); verified by reading `src/lib/presentation.ts`

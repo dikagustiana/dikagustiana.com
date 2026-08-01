@@ -83,7 +83,96 @@ the rows back through PostgREST with an admin session.
 
 ## GATE 7 — The five never-checked module groups
 
-_Filled in below once the three-identity sweep completes._
+**Commit: `b589d9a`.** Every row below was observed on `vite build` + `vite preview`
+against the live project, as all three identities, plus a 375px pass. `badApi`
+counts non-2xx Supabase calls made by the page — a page that looks fine while
+swallowing a 406 is a defect, not a pass.
+
+Two of the mandate's five groups turned out to be one surface: **`FinanceWorkspace`
+is the finance curriculum admin**, and it is what `/finance-workspace` mounts. It is
+reported once, under both names.
+
+### Verdicts in Gate 4's column format
+
+| route | page component | tables touched | intended access | anonymous | authenticated non-admin | admin | 375px | desktop | verdict |
+|---|---|---|---|---|---|---|---|---|---|
+| `/finance-workspace` | `FinanceWorkspace` | `finance_settings`, `finance_sections`, `finance_modules`, `essays` | admin only | → `/auth` (507 ch) | → `/` (1,941 ch), VIEWER badge | renders (1,069 ch), 0 errors | no h-scroll | OK | **WORKING — verified.** Both non-admin identities are correctly bounced by `RequireAdmin`. Admin gets the featured-essay selector, section metadata editor and module list, all backed by real writes (`finance_sections.update`, `finance_settings.update`). |
+| `/accounting/fsli` | `FsliList` | `fsli_pages` | public | renders (3,053 ch) | renders (3,060 ch) | renders (3,093 ch) | no h-scroll | OK | **WORKING — verified.** Lists the 24 rows. |
+| `/accounting/fsli/:slug` | `FsliDetail` | `fsli_pages`, `fsli_sections`, `essays` | public | renders (3,611 ch) | renders (3,618 ch) | renders (3,814 ch) | no h-scroll | OK | **WORKING, CONTENT IS BOILERPLATE — see finding F1.** Renders, but `fsli_sections` has 0 rows so all 24 pages show the same hardcoded placeholder prose. |
+| `/accounting/fsli/<unknown>` | `FsliDetail` | `fsli_pages` | public | **404** (96 ch), badApi 0 | **404**, badApi 0 | **404**, badApi 0 | no h-scroll | OK | **FIXED.** Was: two swallowed **406**s and a 459-char shell, then a silent redirect to the index. |
+| `/books-academia` | `BooksAcademia` | `books_uploads` | public | renders (765 ch) | renders (772 ch) | renders (805 ch) | no h-scroll | OK | **WORKING (empty state).** `EmptyState` when there are no categories — intentional, not a break. |
+| `/books/categories` | `BooksCategories` | `books_uploads` | public | renders (663 ch) | renders (670 ch) | renders (703 ch) | no h-scroll | OK | **FIXED.** Was: four cards advertising 12/8/15/10 books against a table with **0 rows**, every card leading to an empty list. Now counts real rows and shows "The library is empty" — observed. |
+| `/books/:category` | `BooksList` | `books_uploads` | public | renders (590 ch) | renders (597 ch) | renders (630 ch) | **h-scroll — F2** | OK | **WORKING (empty state), one layout defect.** `EmptyState` "No books yet" is correct for an empty table. Overflows horizontally at 375px (F2). |
+| `/books/:category/:bookId/read` | `BookReader` | `books_uploads`, storage `books` | public | renders (590 ch), badApi 0 | renders (597 ch), badApi 0 | renders (630 ch), badApi 0 | **h-scroll — F2** | OK | **FIXED, but the feature is unreachable — F3.** The swallowed 406 is gone and an unknown id now shows "Book not found". Nothing in the codebase can create a book, so no valid id exists. |
+| `/finance/finance-in-action` | `FinanceInActionIndex` | `finance_models` | public | renders (642 ch) | renders (649 ch) | renders (682 ch) | no h-scroll | OK | **WORKING (empty state).** "No models configured yet." — intentional. |
+| `/finance/finance-in-action/:modelSlug` | `FinanceModelDetail` + `ModelAdminPanel` | `finance_models`, `finance_modules`, storage `finance-models` | public page, admin panel | **404** (114 ch), badApi 0 | **404**, badApi 0 | **404**, badApi 0 | no h-scroll | OK | **FIXED, but the feature is unreachable — F3.** Was: two swallowed **406**s plus a silent redirect to the index. Nothing can create a model, so no valid slug exists and `ModelAdminPanel` can never be reached. |
+
+**Every group has a verdict. None is left in the "never looked" state.**
+
+### Findings
+
+**F1 — All 24 FSLI detail pages show the same placeholder prose.**
+`FsliContentSection` computes `displayContent = content || placeholder`, reading
+content from `fsli_sections`, which has **0 rows**. The placeholders in
+`FsliDetail` are written specifically about cash and cash equivalents ("According
+to IAS 7…", "Bank overdrafts that are repayable on demand…"). So every FSLI —
+inventories, right-of-use assets, deferred tax — currently renders ten sections of
+cash-equivalents text, plus a `getKeyPoints()` that returns the same three points
+for every line item and a templated hero line. The pages *look* finished, which is
+what makes this worth writing down. **Repair:** author `fsli_sections` rows (the
+inline admin editor already writes them), or drop the placeholders so an unwritten
+section renders as visibly empty rather than as someone else's content.
+Coverage is also partial: the 24 rows are `current_assets` (11) and
+`non_current_assets` (13) only — no liabilities, equity, or P&L lines.
+
+**F2 — Breadcrumbs overflow horizontally at 375px.**
+`/books/:category` and `/books/:category/:bookId/read` are the only two routes in
+this sweep with `hScroll=true`, for anonymous and admin alike. They are also the
+only two with **four** breadcrumb items; the routes with two or three do not
+overflow. Cause: `src/components/Breadcrumb.tsx:15` is
+`<nav className="flex items-center gap-2 …">` with **no `flex-wrap`**. The unused
+shadcn `src/components/ui/breadcrumb.tsx` does have `flex-wrap` — the custom
+component is the odd one out. **Not fixed here:** this is shared layout used by
+most pages, and it belongs to Session A's Gate 3 (375px, no horizontal scroll).
+The fix is adding `flex-wrap` to that one class list, and it will clear every
+4-item breadcrumb on the site, not just these two routes.
+
+**F3 — `books_uploads` and `finance_models` are features with no way in.**
+Both tables hold **0 rows**, and grepping the whole of `src` for writes:
+
+- `books_uploads` — **nothing inserts it.** The only references are three
+  `select`s in `useBooks.ts`. There is no upload UI anywhere, despite a public
+  `books` storage bucket existing for the files.
+- `finance_models` — `useFinanceModels.ts` has `select`, `select`, `update`. **No
+  insert.** `ModelAdminPanel` can only edit a model that already exists, and it is
+  rendered *inside* `/finance/finance-in-action/:modelSlug`, the detail page of a
+  model that cannot be created. The admin panel is unreachable by construction.
+
+So both are half-built: read paths, render paths, empty states and (for models) an
+edit path all exist, and the one thing that would let any of it run — a create
+path — was never built. **What repair would take:** for books, an admin upload
+form writing `books_uploads` alongside a storage upload (the `FigureUploader`
+pattern applies almost directly). For models, a create form and an index-level
+"New model" action; the framework's Section 06 is 11 institutional models, so
+there is a known list to seed, and seeding via migration would make
+`ModelAdminPanel` reachable immediately. **Neither is a route to delete** — the
+routes behave correctly for the data that exists, and deleting them would throw
+away working read and render paths for a feature that is simply unfinished.
+
+**F4 — Curriculum Sections 05 and 06 confirmed to have no data path.**
+`finance_sections` holds 5 rows: `fundamentals`, `strategic-finance`, `planning`,
+`analytics`, `capital-allocation`. Section 05 is `capital-allocation` (the
+framework marks it TBD). Section 06 has **no row at all** — it is the 11
+institutional models, which is `finance_models` territory and therefore blocked
+behind F3.
+
+**F5 — No raw PostgREST text, error boundary or blank screen anywhere.**
+Across all 50 observations: 0 error boundaries, 0 raw PostgREST/RLS messages
+leaked to the page, 0 blank screens, 0 infinite spinners. After the fixes,
+**0 non-2xx Supabase calls** on any route as any identity. The only remaining
+console error is `net::ERR_CONNECTION_RESET` from a request the sandboxed browser
+cannot reach; it appears on every page including the homepage and is an artefact
+of this container, not of the app.
 
 ---
 
@@ -93,8 +182,9 @@ _Filled in below once the three-identity sweep completes._
 Session B needs; they are recorded rather than applied because Session A's
 GATE 4 is not yet terminal.
 
-1. **Delete the `/admin/writer/:id` route** (currently `<RequireAdmin><WriterStudio /></RequireAdmin>`), and the `WriterStudio` lazy import with it. Section 5.2 retired that stack; `src/domains/writing/WriterStudio.tsx` is now only a redirect that keeps old URLs resolving, and it can be deleted along with the route. **Not urgent** — the redirect is correct and the file is small. If the route is kept, nothing breaks.
-2. See the Section 7 table for route removals, once it is filled in.
+1. **Delete the `/admin/writer/:id` route** (currently `<RequireAdmin><WriterStudio /></RequireAdmin>`), and the `WriterStudio` lazy import with it. Section 5.2 retired that stack; `src/domains/writing/WriterStudio.tsx` is now only a redirect that keeps old URLs resolving, and it can be deleted along with the route. **Not urgent** — the redirect is correct and the file is small. If the route is kept, nothing breaks. Note `AdminDashboard` links to `/admin/writer/new`, which the redirect forwards to `/admin/writer/finance/new`; if the route is deleted, that link needs updating in the same change.
+2. **No route removals from Section 7.** All ten routes swept behave correctly for the data that exists. The two unreachable features (F3) have working read, render and empty-state paths and are missing only a create path — deleting their routes would throw away working code for something unfinished rather than broken.
+3. **One-word fix that belongs to Gate 3, not to us:** add `flex-wrap` to the `nav` class list at `src/components/Breadcrumb.tsx:15`. It is the cause of the only horizontal overflow found at 375px in this sweep (finding F2) and it affects every page with four or more breadcrumb items.
 
 **Note for Session A's Gate 4, not a request:** `src/App.tsx` at `c7e5d12`
 contains **66** `<Route>` entries, not the 68 the mandate's fact block states.
