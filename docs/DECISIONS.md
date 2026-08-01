@@ -202,3 +202,69 @@ database is rebuilt fresh. Decisions below, newest first within this section.
   data loss that overstates what survived is the worst possible first impression, and the
   same migration's own loss list contradicted it three paragraphs earlier. Every number in
   the replacement was re-counted against the seed data.
+
+---
+
+# 2026-07-31 (session 3) — live project, framework-v2 taxonomy, import test
+
+## Slug scheme: the framework's own cross-reference convention (t4-m07)
+- **Decision:** `finance_modules.slug` = lowercase of the framework's cross-ref tokens:
+  `t1-m07`, `t4-m07`, `t1-m08a`, `t4-qm3`.
+- **Rationale:** `slug` is globally UNIQUE and "Module 07" exists in four sections, so
+  `module-07` inserts once then fails. The framework document already writes its own
+  cross-references as `T1-M09 / T3-M01 / T4-M07`, treating that as the canonical id. Any
+  other scheme disagrees with the source of record across 160 rows.
+- **Rejected:** `section-module-07` style (verbose, and still not what the document uses);
+  a synthetic integer id (loses the human-meaningful track/module encoding the slug URLs
+  expose).
+
+## sort_order stays integer; the display label moves to module_meta
+- **Decision:** `sort_order` is the integer ordinal position within the track; the label a
+  reader sees (`07`, `08A`, `QM1`) lives in `module_meta.display_label`.
+- **Rationale:** three consumers already depend on `sort_order` being a clean integer — the
+  `UNIQUE (track_slug, sort_order)`, the essay-stub `module_id` subqueries, and track
+  ordering. `08A`/`08B` occupy ordinals 8/9 uncoerced. Coercing `08A`→8 and `08B`→8 would
+  collide on the UNIQUE and silently merge two modules.
+
+## Heading levels: title is H1, body demotes by one
+- **Decision:** on import, H1→H2 and H2→H3; the essay title is the page's only H1.
+- **Rationale:** the editor's StarterKit allows only `heading: [2,3]`, and an
+  unrepresentable node is dropped silently — the highest-risk content-loss path. Demotion
+  keeps the full hierarchy inside the allowed range without touching the editor schema, and
+  one-H1-per-document is correct anyway. Verified: zero headings dropped end to end.
+
+## ANCHORS → References; Post-Flight → body; equations stay bold text
+- **ANCHORS USED** is bibliographic metadata → the `References` component
+  (`economist_fields.references`), which the app already renders.
+- **Post-Flight** is authored prose with no metadata home → body content (demoted headings).
+- **Display equations** are plain-text arithmetic (`x` as multiplier), not LaTeX → kept as
+  bold paragraphs. A KaTeX math block would be a new node type needing the full four-place
+  contract for no rendering gain on this content. Revisit if real LaTeX appears later.
+
+## Cross-tree placement coherence via trigger, not CHECK
+- **Decision:** a BEFORE INSERT/UPDATE trigger refuses an essay that carries a curriculum
+  `module_id` but an editorial (non-finance) `category_id` or section cache.
+- **Rationale:** the two taxonomy trees share one `essays` table with nothing keeping them
+  coherent. A CHECK constraint cannot reference another table (the category's section is two
+  joins away); a trigger can. The route `/admin/writer/:section/:slug` already asserts which
+  tree an essay lives in, so the constraint just makes the DB agree with the URL. Verified
+  live: an incoherent UPDATE was refused with ERRCODE 23514, fail-closed even when the
+  category doesn't resolve.
+- **Deliberately NOT enforced:** the denormalised `essays.section` cache going stale when a
+  category changes — owned by the writing-experience workstream, not this trigger.
+
+## Count reconciliation: seed to the module detail, not the overview
+- **Decision:** seed 161 essay stubs (56 Fundamentals), not the overview table's 160.
+- **Rationale:** the framework is internally inconsistent — its overview claims 55
+  Fundamentals essays, its module-by-module lists sum to 56. The enumerated module lists are
+  the authoritative side; the overview is a roll-up that undercounts by one. Reported as a
+  finding rather than quietly matching either number.
+
+## Local CORS relay for the browser import test (dev-only)
+- **Decision:** run the editor import test through a local relay
+  (`127.0.0.1:8787` → the real project via Node fetch) rather than mocking Supabase.
+- **Rationale:** the in-container Chromium cannot complete TLS to `*.supabase.co` through
+  the egress gateway (connection reset at the fingerprint layer), but Node fetch through
+  `HTTPS_PROXY` can. The relay keeps the test hitting the REAL project — real RLS, triggers,
+  storage, edge function — which a mock would not. The relay is dev-only and never part of
+  the app or deployment; `.env` is restored to production values.
