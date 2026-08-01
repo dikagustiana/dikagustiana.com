@@ -126,6 +126,38 @@ function renderNode(node: JSONContent): string {
     case 'figure':
       return renderFigureHtml(node.attrs as unknown as FigureBlockData);
 
+    case 'image': {
+      const src = String(node.attrs?.src ?? '');
+      if (!src) return '';
+      const title = node.attrs?.title
+        ? ` title="${escapeHtml(String(node.attrs.title))}"`
+        : '';
+      return `<img src="${escapeHtml(src)}" alt="${escapeHtml(
+        String(node.attrs?.alt ?? ''),
+      )}"${title} loading="lazy" class="w-full h-auto rounded-md">`;
+    }
+
+    // TipTap's table model has no thead/tbody split — rows carry either header
+    // or data cells — so every row is emitted inside a single <tbody>, which
+    // is what the browser would infer anyway.
+    case 'table':
+      return `<table><tbody>${renderChildren(node.content)}</tbody></table>`;
+
+    case 'tableRow':
+      return `<tr>${renderChildren(node.content)}</tr>`;
+
+    case 'tableHeader':
+    case 'tableCell': {
+      const tag = node.type === 'tableHeader' ? 'th' : 'td';
+      const span = (name: 'colspan' | 'rowspan') => {
+        const value = Number(node.attrs?.[name] ?? 1);
+        return value > 1 ? ` ${name}="${value}"` : '';
+      };
+      return `<${tag}${span('colspan')}${span('rowspan')}>${renderChildren(
+        node.content,
+      )}</${tag}>`;
+    }
+
     case 'text': {
       const escaped = escapeHtml(node.text ?? '');
       return renderMarks(
@@ -279,6 +311,26 @@ function blockMarkdown(node: JSONContent): string {
       if (!attrs?.src) return '';
       const caption = attrs.caption || attrs.altText || 'figure';
       return `![${caption}](${attrs.src})`;
+    }
+    case 'image': {
+      const src = String(node.attrs?.src ?? '');
+      if (!src) return '';
+      return `![${String(node.attrs?.alt ?? 'image')}](${src})`;
+    }
+    case 'table': {
+      const rows = (node.content ?? []).map(row =>
+        (row.content ?? []).map(cell => inlineMarkdownFromListItem(cell).replace(/\|/g, '\\|')),
+      );
+      if (rows.length === 0) return '';
+      // A GFM table needs the separator directly under the first row, so the
+      // header is whatever row leads — matching how the editor renders it.
+      const [head, ...body] = rows;
+      const line = (cells: string[]) => `| ${cells.join(' | ')} |`;
+      return [
+        line(head),
+        `| ${head.map(() => '---').join(' | ')} |`,
+        ...body.map(line),
+      ].join('\n');
     }
     default:
       return (node.content ?? []).map(blockMarkdown).filter(Boolean).join('\n\n');

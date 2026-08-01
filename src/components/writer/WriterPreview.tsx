@@ -1,9 +1,7 @@
 import { useMemo } from 'react';
 import { User, Calendar, Clock, Tag } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
-import { contentToHtml } from '@/lib/tiptap/serialize';
-import { sanitizeHtml } from '@/lib/sanitizeHtml';
+import { ArticleBody } from '@/components/editorial/ArticleBody';
 
 interface WriterPreviewProps {
   title: string;
@@ -140,25 +138,19 @@ export function WriterPreview({
         )}
       </header>
 
-      {/* Content */}
-      <div 
-        className={cn(
-          "prose prose-lg max-w-none",
-          "prose-headings:font-display prose-headings:font-semibold prose-headings:text-foreground",
-          "prose-h2:text-xl prose-h2:mt-10 prose-h2:mb-4",
-          "prose-h3:text-lg prose-h3:mt-8 prose-h3:mb-3",
-          "prose-p:text-muted-foreground prose-p:leading-relaxed prose-p:mb-6",
-          "prose-strong:text-foreground prose-strong:font-semibold",
-          "prose-blockquote:border-l-4 prose-blockquote:border-primary prose-blockquote:pl-6 prose-blockquote:py-2 prose-blockquote:my-8 prose-blockquote:italic prose-blockquote:text-xl prose-blockquote:text-muted-foreground",
-          "prose-ul:list-disc prose-ul:list-outside prose-ul:ml-6 prose-ul:space-y-2 prose-ul:my-6",
-          "prose-ol:list-decimal prose-ol:list-outside prose-ol:ml-6 prose-ol:space-y-2 prose-ol:my-6",
-          "prose-li:text-muted-foreground",
-          "prose-a:text-primary prose-a:underline prose-a:underline-offset-4 prose-a:hover:text-primary/80",
-        )}
-        dangerouslySetInnerHTML={{
-          __html: sanitizeHtml(contentToHtml(content)) || '<p class="text-muted-foreground italic">Start writing to see your content here...</p>'
-        }}
-      />
+      {/* Content.
+          Rendered by ArticleBody — the same component the published page uses,
+          taking the same `content` string. The preview previously went through
+          contentToHtml + sanitizeHtml into dangerouslySetInnerHTML, a second
+          renderer with its own list of understood block types, so a block the
+          preview showed was not evidence the published page would show it. */}
+      {content?.trim() ? (
+        <ArticleBody content={content} />
+      ) : (
+        <p className="text-muted-foreground italic">
+          Start writing to see your content here...
+        </p>
+      )}
 
       {/* Key Takeaways */}
       {keyTakeaways.length > 0 && (

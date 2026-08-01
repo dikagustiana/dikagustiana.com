@@ -172,6 +172,65 @@ function renderJsonNode(
       return null;
     }
 
+    case 'image': {
+      const src = String(node.attrs?.src ?? '');
+      if (!src) return null;
+      return (
+        <img
+          key={key}
+          src={src}
+          alt={String(node.attrs?.alt ?? '')}
+          title={node.attrs?.title ? String(node.attrs.title) : undefined}
+          loading="lazy"
+          className="w-full h-auto rounded-md my-8"
+        />
+      );
+    }
+
+    // The wrapper scrolls, not the page. A wide table inside the article flow
+    // would otherwise push the whole body sideways on a phone.
+    case 'table':
+      return (
+        <div key={key} className="my-8 -mx-4 px-4 overflow-x-auto sm:mx-0 sm:px-0">
+          {/* Cell content is paragraphs; the body's 1.5rem paragraph margin
+              would otherwise pad out every cell. */}
+          <table className="w-full border-collapse text-sm [&_p]:mb-0">
+            <tbody>{renderJsonChildren(node.content, headingCounter)}</tbody>
+          </table>
+        </div>
+      );
+
+    case 'tableRow':
+      return (
+        <tr key={key} className="border-b border-border last:border-b-0">
+          {renderJsonChildren(node.content, headingCounter)}
+        </tr>
+      );
+
+    case 'tableHeader':
+      return (
+        <th
+          key={key}
+          colSpan={Number(node.attrs?.colspan ?? 1) || undefined}
+          rowSpan={Number(node.attrs?.rowspan ?? 1) || undefined}
+          className="border border-border bg-muted/50 px-3 py-2 text-left align-top font-semibold text-foreground"
+        >
+          {renderJsonChildren(node.content, headingCounter)}
+        </th>
+      );
+
+    case 'tableCell':
+      return (
+        <td
+          key={key}
+          colSpan={Number(node.attrs?.colspan ?? 1) || undefined}
+          rowSpan={Number(node.attrs?.rowspan ?? 1) || undefined}
+          className="border border-border px-3 py-2 align-top text-muted-foreground"
+        >
+          {renderJsonChildren(node.content, headingCounter)}
+        </td>
+      );
+
     default:
       return renderJsonChildren(node.content, headingCounter) || null;
   }
@@ -272,6 +331,63 @@ function renderLegacyHtml(htmlContent: string): ReactNode {
 
     if (tagName === 'hr') return <hr key={key} className="border-border my-8" />;
     if (tagName === 'pre') return <pre key={key} className="bg-muted rounded-md p-4 overflow-x-auto my-6 text-sm">{processChildren(element)}</pre>;
+
+    // A bare <img> in a legacy body previously fell through to processChildren,
+    // which returns null for a void element — the image rendered as nothing.
+    if (tagName === 'img') {
+      const src = element.getAttribute('src');
+      if (!src) return null;
+      return (
+        <img
+          key={key}
+          src={src}
+          alt={element.getAttribute('alt') || ''}
+          loading="lazy"
+          className="w-full h-auto rounded-md my-8"
+        />
+      );
+    }
+
+    if (tagName === 'table') {
+      return (
+        <div key={key} className="my-8 -mx-4 px-4 overflow-x-auto sm:mx-0 sm:px-0">
+          <table className="w-full border-collapse text-sm [&_p]:mb-0">
+            {processChildren(element)}
+          </table>
+        </div>
+      );
+    }
+    if (tagName === 'thead') return <thead key={key}>{processChildren(element)}</thead>;
+    if (tagName === 'tbody') return <tbody key={key}>{processChildren(element)}</tbody>;
+    if (tagName === 'tr') {
+      return (
+        <tr key={key} className="border-b border-border last:border-b-0">
+          {processChildren(element)}
+        </tr>
+      );
+    }
+    if (tagName === 'th' || tagName === 'td') {
+      const Cell = tagName === 'th' ? 'th' : 'td';
+      const span = (name: string) => {
+        const value = Number(element.getAttribute(name) ?? 1);
+        return Number.isFinite(value) && value > 1 ? value : undefined;
+      };
+      return (
+        <Cell
+          key={key}
+          colSpan={span('colspan')}
+          rowSpan={span('rowspan')}
+          className={cn(
+            'border border-border px-3 py-2 align-top',
+            tagName === 'th'
+              ? 'bg-muted/50 text-left font-semibold text-foreground'
+              : 'text-muted-foreground',
+          )}
+        >
+          {processChildren(element)}
+        </Cell>
+      );
+    }
 
     return processChildren(element);
   };
