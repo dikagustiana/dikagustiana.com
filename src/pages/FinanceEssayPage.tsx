@@ -5,6 +5,7 @@
  * Route: /finance/:track/:moduleSlug/:essaySlug
  */
 
+import NotFound from './NotFound';
 import { resolvePresentation, type EssayPresentation } from '@/lib/presentation';
 import { useParams, Navigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
@@ -124,7 +125,10 @@ export default function FinanceEssayPage() {
     );
   }
 
-  if (!essay) return null;
+  // A valid route shape with a bad slug used to render nothing — page chrome
+  // with a blank middle, which reads as a broken site rather than a wrong URL.
+  // NotFound also offers the nearest real essay for a near-miss slug.
+  if (!essay) return <NotFound />;
 
   const currentIndex = siblings?.findIndex((e) => e.slug === essaySlug) ?? -1;
   const previous = currentIndex > 0 ? siblings![currentIndex - 1] : null;

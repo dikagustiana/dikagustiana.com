@@ -2,6 +2,60 @@
 
 Append-only. Newest entry first. A fresh session must be able to resume from this file.
 
+## NEXT ACTION (single)
+**Finish GATE 1f, which is currently FAILED.** In all four essay pages
+(`FinanceEssayPage:117`, `GreenTransitionEssayPage`, `NextBigThingEssayPage`,
+`DevelopmentFinanceEssayPage`), replace the early `return <Navigate to="/finance" replace />`
+fired by the local `notFound` state with `return <NotFound />`. That early redirect runs
+*before* the `!essay` check, so the improved 404 is unreachable and a mistyped slug silently
+redirects to the track index. Then re-run `scratchpad/import/gate1ef.mjs` from a cold dev
+server — that same run also re-verifies GATE 1e, which was observed passing once and not
+reproduced.
+
+Then: GATE 1b (curriculum counts — needs `module_meta.essay_count`), GATE 1c (rehearse the
+staged drop on a scratch DB, then apply), and Sections 2–7. `docs/GATE_LEDGER.md` is the
+authority on what is and is not verified.
+
+## 2026-08-01 (session 5) — gated completion sweep, Section 0 + most of Section 1
+
+- **GATE 0 PASSED.** PR #5 merged (`1d6c7f4`); verified by reading `src/lib/presentation.ts`
+  back from `refs/heads/main` via the API, not by trusting the merge response. The four
+  legacy persona columns still exist in `information_schema`, so the `_pending` drop is
+  correctly unapplied. `@tiptap/html` confirmed absent from `package.json` and the lockfile.
+- **GATE 0b BLOCKED.** Both dead branches have 0 unique commits, but the git proxy rejects
+  delete-pushes (3 attempts) and no delete-branch tool exists. Needs the GitHub UI.
+- **GATE 1a PASSED.** One canonical URL builder (`src/lib/essayUrl.ts`) replaces the four
+  that disagreed. The homepage card now emits `/finance/analytics/t4-m07/fa-07-01`; it
+  previously emitted `/essays/fa-07-01`, which matched no route. All 16 link targets on `/`
+  and `/about` render a real page; zero render the 404 fallback. `tests/unit/essayUrl.test.ts`
+  parses the route table out of `App.tsx` and asserts every branch against it, so a
+  plausible-looking URL that matches nothing fails the suite.
+  - **Finding:** `site-rebuild-note` was published and reachable at *no working URL at all* —
+    the homepage linked it to a 404 and `/finance-101/essays/:slug` discarded the slug and
+    dumped the reader at `/finance`. `/essays/:slug` now exists: it redirects to the canonical
+    URL when placement produces one, and renders the essay when it does not.
+- **GATE 1d PASSED.** Published list `select('*')` 58,043 → 1,116 bytes (−98.1%); admin list
+  219,390 → 84,164 bytes (−61.6%). Measured against the live REST API, same rows both times.
+- **GATE 1c CODED-NOT-VERIFIED.** The thing the gate exists to catch was found: `LivePreviewPanel`
+  still read `economistFields` and would have broken the admin preview on the drop while the
+  public page kept working. Fixed. `hero_image_url` turns out to be written by nothing — the
+  hero image lives in `essays.thumbnail_url`. The scratch-DB rehearsal has not run; the drop
+  stays unapplied.
+- **GATE 1e CODED-NOT-VERIFIED.** Canonical View-live URL observed once, not reproduced on a
+  second run. Not claimed as passed.
+- **GATE 1f FAILED, reported not worked around.** A wrong slug inside a *valid* route shape
+  never reaches the catch-all, so the improved 404 is unreachable. Two defects surfaced:
+  all four essay pages rendered a blank middle for a missing essay (fixed), and an earlier
+  `Navigate to="/finance"` still preempts the fix (not fixed — see NEXT ACTION).
+
+### Owner actions (unchanged, none blocking)
+Admin signup at `/auth` then the grant, then delete `import-admin@dikagustiana.com`; the Auth
+leaked-password toggle; deleting the two dead branches; `supabase functions delete
+council-review` (410 tombstone still deployed); attaching the domain; and the framework
+document's overview table claiming 55 Fundamentals essays where its own module lists sum to 56
+(module detail is authoritative, the seed is correct at 161).
+
+
 ## STATUS (session 4, 2026-08-01): LOVABLE REMOVED (0) + SAFETY-NET MIGRATION (1) + AUTOSAVE (2).
 **The blocking item is closed: a 3,612-word paste survives a hard reload with no manual save.**
 Project `asypkbkiebjvvpimewfp`. Phase 0: no Lovable anywhere in `src/`, `supabase/functions/`,
