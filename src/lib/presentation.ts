@@ -40,38 +40,19 @@ export interface EssayPresentation {
  */
 export interface PresentationSource {
   presentation?: EssayPresentation | null;
-  /** @deprecated legacy column, retained until the follow-up drop migration */
-  economist_fields?: EssayPresentation | null;
-  /** @deprecated legacy column, never populated */
-  manager_fields?: EssayPresentation | null;
-  /** @deprecated legacy column, never populated */
-  educator_fields?: EssayPresentation | null;
-  /** @deprecated legacy column, never populated */
-  coach_fields?: EssayPresentation | null;
 }
 
 /**
  * Resolve the presentation payload for an essay.
  *
- * `presentation` wins. The legacy columns are consulted only when it is null,
- * which is deliberate belt-and-braces for the window between this change and
- * the migration that drops them: a row the backfill somehow missed still
- * renders its references rather than silently losing them.
- *
- * When the legacy columns are dropped, delete the fallback chain and the
- * `@deprecated` fields above — nothing else needs to change.
+ * The fallback chain to the four persona columns was removed when they were
+ * dropped (migration 20260802000000). Selecting a dropped column is a hard
+ * PostgREST error, not a silent null, so the selects had to be cleaned before
+ * the drop rather than after.
  */
 export function resolvePresentation(row: PresentationSource | null | undefined): EssayPresentation {
-  if (!row) return {};
-  return (
-    row.presentation ??
-    row.economist_fields ??
-    row.manager_fields ??
-    row.educator_fields ??
-    row.coach_fields ??
-    {}
-  );
+  return row?.presentation ?? {};
 }
 
 /** The columns an essay query must select for `resolvePresentation` to work. */
-export const PRESENTATION_COLUMNS = 'presentation, economist_fields';
+export const PRESENTATION_COLUMNS = 'presentation';

@@ -124,7 +124,7 @@ export const useFeaturedFinanceEssay = () => {
         .from('essays')
         .select(`
           id, slug, title, snippet, author, date, read_time, thumbnail_url,
-          presentation, economist_fields,
+          presentation,
           finance_section
         `)
         .eq('id', settings.value)

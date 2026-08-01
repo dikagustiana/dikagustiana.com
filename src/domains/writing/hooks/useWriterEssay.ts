@@ -51,8 +51,6 @@ interface SaveEssayData {
   date?: string | null;
   read_time?: string | null;
   presentation?: EssayPresentation | null;
-  /** @deprecated legacy column, dropped by the staged _pending migration */
-  economist_fields?: EssayPresentation | null;
   module_id?: string | null;
   finance_section?: string | null;
   finance_order?: number | null;
