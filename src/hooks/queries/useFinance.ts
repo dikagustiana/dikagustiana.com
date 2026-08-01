@@ -341,6 +341,7 @@ export interface FinanceModuleEssay {
   slug: string;
   title: string;
   snippet: string | null;
+  author: string | null;
   date: string | null;
   read_time: string | null;
   finance_order: number | null;
@@ -358,7 +359,7 @@ export const useEssaysByModuleId = (moduleId: string | undefined, includeUnpubli
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let query = (supabase as any)
         .from('essays')
-        .select('id, slug, title, snippet, date, read_time, finance_order, lesson_type, created_at, published, status')
+        .select('id, slug, title, snippet, author, date, read_time, finance_order, lesson_type, created_at, published, status')
         .eq('module_id', moduleId!)
         .order('finance_order', { ascending: true, nullsFirst: false })
         .order('created_at', { ascending: false });

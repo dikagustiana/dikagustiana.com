@@ -1,3 +1,4 @@
+import { essayUrl } from '@/lib/essayUrl';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -11,6 +12,10 @@ interface RelatedEssaysProps {
 }
 
 interface RelatedEssay {
+  finance_section?: string | null;
+  fsli_slug?: string | null;
+  topic?: string | null;
+  finance_modules?: { slug: string; track_slug: string } | null;
   id: string;
   slug: string;
   title: string;
@@ -27,7 +32,14 @@ export function RelatedEssays({ currentEssayId, section, className }: RelatedEss
     queryFn: async () => {
       const { data, error } = await supabase
         .from('essays')
-        .select('id, slug, title, snippet, phase, read_time, thumbnail_url, author')
+        // finance_section + the module join let essayUrl build the four-segment
+        // curriculum URL; without them a related finance essay silently got a
+        // section/phase shape that only editorial sections actually serve.
+        .select(`
+          id, slug, title, snippet, phase, read_time, thumbnail_url, author,
+          finance_section, fsli_slug, topic,
+          finance_modules!essays_module_id_fkey ( slug, track_slug )
+        `)
         .eq('section', section)
         .eq('status', 'published')
         .neq('id', currentEssayId)
@@ -42,15 +54,17 @@ export function RelatedEssays({ currentEssayId, section, className }: RelatedEss
 
   if (isLoading || !essays || essays.length === 0) return null;
 
-  const getEssayUrl = (essay: RelatedEssay) => {
-    if (section === 'next-big-thing') {
-      return `/the-next-big-thing/${essay.slug}`;
-    }
-    if (essay.phase) {
-      return `/${section}/${essay.phase}/${essay.slug}`;
-    }
-    return `/${section}/${essay.slug}`;
-  };
+  // One canonical builder — a local shape here is how the homepage 404'd.
+  const getEssayUrl = (essay: RelatedEssay) =>
+    essayUrl({
+      slug: essay.slug,
+      section,
+      phase: essay.phase,
+      track: essay.finance_modules?.track_slug ?? essay.finance_section ?? null,
+      moduleSlug: essay.finance_modules?.slug ?? null,
+      fsliSlug: essay.fsli_slug,
+      topic: essay.topic,
+    }) ?? '#';
 
   return (
     <section className={cn("border-t border-border pt-10 mt-16", className)}>

@@ -8,6 +8,7 @@
  */
 
 import { useParams, Link } from 'react-router-dom';
+import { Pencil } from 'lucide-react';
 import { PageLayout } from '@/components/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -62,7 +63,12 @@ No lessons assigned to this module yet.
       {essays.map((essay, index) => (
         <Link
           key={essay.id}
-          to={`/finance/${track}/${moduleSlug}/${essay.slug}`}
+          // A draft has no public page worth landing on; for the admin who can
+          // see it, the editor is the useful destination. Published essays go
+          // to their canonical URL for everyone.
+          to={!essay.published && isAdmin
+            ? `/admin/writer/finance/${essay.slug}`
+            : `/finance/${track}/${moduleSlug}/${essay.slug}`}
           className="flex items-start gap-4 py-4 group border-b border-border last:border-b-0"
         >
           <span className="text-sm font-mono text-muted-foreground tabular-nums shrink-0 mt-0.5">
@@ -92,6 +98,22 @@ No lessons assigned to this module yet.
 
           {essay.read_time && (
             <span className="text-xs text-muted-foreground shrink-0 mt-1">{essay.read_time}</span>
+          )}
+          {isAdmin && (
+            <span
+              role="link"
+              aria-label={`Edit ${essay.title}`}
+              title="Edit in writer"
+              onClick={(e) => {
+                // The row itself is a Link; this must not double-navigate.
+                e.preventDefault();
+                e.stopPropagation();
+                window.location.assign(`/admin/writer/finance/${essay.slug}`);
+              }}
+              className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-md text-muted-foreground opacity-0 group-hover:opacity-100 focus-visible:opacity-100 hover:bg-muted hover:text-foreground transition-all shrink-0 -my-2"
+            >
+              <Pencil className="h-4 w-4" />
+            </span>
           )}
         </Link>
       ))}

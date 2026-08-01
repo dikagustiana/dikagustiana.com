@@ -7,14 +7,16 @@ database as three identities at two viewports. Generated from a sweep, not from 
 
 | | |
 |---|---|
-| Routes swept | **65** (65 `<Route path>` entries; the `*` catch-all excluded) |
+| Routes swept | **65** of **66** `<Route path>` entries — the 66th is the `path="*"` catch-all, deliberately excluded from the sweep and verified separately (it renders the improved `NotFound`, exercised end-to-end by GATE 1f) |
 | Defects | **0** |
 | Access leaks | **0** |
 | Horizontal scroll at 375px | **0** |
 | NOT TESTED | **0** |
 
-The count is 65, not the 68 the mandate quoted — that figure predates the `/admin/council`
-removal, and `<Route>` entries without a `path` were never routes in their own right.
+Reconciliation of every count that has been quoted: `grep -c '<Route'` says **68** because it
+also matches `<Routes>` and `<RouteFallback`; there are **66** `<Route path>` entries; **65**
+are sweepable pages and the 66th is the `*` catch-all. The mandate's original 68 predates the
+`/admin/council` removal and used the loose grep.
 
 ## Identity gating — verified by separation, not assumed
 

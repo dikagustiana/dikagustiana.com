@@ -7,7 +7,7 @@
 
 import NotFound from './NotFound';
 import { resolvePresentation, type EssayPresentation } from '@/lib/presentation';
-import { useParams } from 'react-router-dom';
+import { useParams, Navigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -67,7 +67,8 @@ export default function FinanceEssayPage() {
       // Fetch by globally unique slug
       const { data, error } = await supabase
         .from('essays')
-        .select('*')
+        // The essay's OWN module, joined, is what canonicalises the URL below.
+        .select('*, finance_modules!essays_module_id_fkey ( slug, track_slug )')
         .eq('slug', essaySlug!)
         .maybeSingle();
 
@@ -117,6 +118,7 @@ export default function FinanceEssayPage() {
     return <NotFound />;
   }
 
+
   if (loading) {
     return (
       <ArticleLayout>
@@ -129,6 +131,23 @@ export default function FinanceEssayPage() {
   // with a blank middle, which reads as a broken site rather than a wrong URL.
   // NotFound also offers the nearest real essay for a near-miss slug.
   if (!essay) return <NotFound />;
+
+  // Lookup is by globally-unique slug, so without this check every essay was
+  // reachable at unlimited /finance/<anything>/<anything>/<slug> URLs. When
+  // the URL disagrees with the essay's real placement, redirect to canonical —
+  // we know exactly where it lives, mirroring /essays/:slug. An essay with no
+  // module has no four-segment home at all and lives at the universal route.
+  {
+    const realMod = (essay as unknown as {
+      finance_modules: { slug: string; track_slug: string } | null;
+    }).finance_modules;
+    if (realMod && (realMod.slug !== moduleSlug || realMod.track_slug !== track)) {
+      return <Navigate to={`/finance/${realMod.track_slug}/${realMod.slug}/${essay.slug}`} replace />;
+    }
+    if (!realMod) {
+      return <Navigate to={`/essays/${essay.slug}`} replace />;
+    }
+  }
 
   const currentIndex = siblings?.findIndex((e) => e.slug === essaySlug) ?? -1;
   const previous = currentIndex > 0 ? siblings![currentIndex - 1] : null;

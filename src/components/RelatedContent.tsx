@@ -1,3 +1,4 @@
+import { essayUrl } from '@/lib/essayUrl';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -128,12 +129,9 @@ export function RelatedContent({
     }
   };
 
-  const getEssayUrl = (essay: RelatedEssay) => {
-    if (essay.phase) {
-      return `/${essay.section}/${essay.phase}/${essay.slug}`;
-    }
-    return `/${essay.section}/${essay.slug}`;
-  };
+  // One canonical builder — a local shape here is how the homepage 404'd.
+  const getEssayUrl = (essay: RelatedEssay) =>
+    essayUrl({ slug: essay.slug, section: essay.section, phase: essay.phase }) ?? '#';
 
   return (
     <Card className="mt-12">
