@@ -2,7 +2,8 @@
 
 Append-only. Newest entry first. A fresh session must be able to resume from this file.
 
-## STATUS (session 4, 2026-08-01): LOVABLE REMOVED (Phase 0) + SAFETY-NET MIGRATION LIVE (Phase 1).
+## STATUS (session 4, 2026-08-01): LOVABLE REMOVED (0) + SAFETY-NET MIGRATION (1) + AUTOSAVE (2).
+**The blocking item is closed: a 3,612-word paste survives a hard reload with no manual save.**
 Project `asypkbkiebjvvpimewfp`. Phase 0: no Lovable anywhere in `src/`, `supabase/functions/`,
 `package.json`, `vite.config.ts`, `README.md`; `council-review` is provider-agnostic
 (`AI_GATEWAY_URL` + `AI_GATEWAY_API_KEY`, OpenAI chat-completions shape) and renders an explicit
@@ -15,9 +16,10 @@ initial `migration` revision. `tsc` ✓, build ✓, 163 tests ✓, security advi
 documented pre-existing WARNs (`has_role` SECURITY DEFINER, leaked-password toggle).
 
 ## NEXT ACTION (single)
-**Phase 2 — real autosave to `essay_revisions`** in the WriterEditor stack: port `canAutosave`,
-debounced writes, recovery-on-load without clobbering either side, a loud failed-save state;
-verify a 3,000-word paste survives a hard reload mid-paste.
+**Phase 3 — images in the body**: add the image/figure node through all four places of the
+four-place contract (extensions / serialize / ArticleBody / sanitizeHtml allowlist), plus a
+ProseMirror paste-drop plugin uploading to the `essay-images` bucket with placeholder swap and
+rejection handling. Verify the image survives to an anon read and that a non-admin is refused.
 
 ### Owner blockers (carry forward — none doable from a session)
 1. **Owner signs up at `/auth`** then a service-side `INSERT INTO user_roles (user_id,'admin')`
@@ -64,6 +66,40 @@ applied migration reviewable.
 - **Found in Phase 1, deferred to Phase 5:** StarterKit v3 bundles `Link`, so
   `getEditorExtensions()` adding a standalone Link logs a "Duplicate extension names: ['link']"
   warning — fix when trimming StarterKit-redundant extensions.
+
+- **Phase 2 — autosave (the blocking item).** The import test's one hard failure is closed.
+  New `src/lib/revisions.ts` (pure decision logic) + `src/hooks/useEssayAutosave.ts` (Supabase
+  writes), wired into the WriterEditor stack. Design points that matter:
+  - **Autosave writes `essay_revisions`, never the `essays` row.** A backup is not a save, so a
+    failed backup can never touch what is already published, and the indicator says "Backed
+    up", never "Saved". Promoting a draft stays an explicit, validated action.
+  - **Rollup:** consecutive autosaves inside 60s UPDATE the revision this session last wrote
+    instead of appending, so a long session yields ~1 revision/minute rather than one per
+    keystroke-pause. It only ever rolls up *its own* row — another tab's backup and the
+    pre-reload state are never overwritten.
+  - **`canonicalJson` is load-bearing, not cosmetic.** Postgres `jsonb` does not preserve key
+    order, so a naive stringify comparison would call the document "changed" on every load and
+    the recovery prompt would fire forever. Comparison sorts keys; array order is kept.
+  - **Recovery is offered, never applied.** A banner with Restore / Keep-saved; neither side is
+    destroyed behind the author's back.
+  - `canAutosave` now has ONE definition (moved to `lib/revisions`, re-exported from
+    `domains/writing/schema/types` for the WriterStudio stack).
+  - `EssayEditor` now also emits `getJSON()` so `content_json` comes straight from the editor
+    rather than being reparsed out of HTML; manual save writes both, and only writes
+    `content_json` when a document exists (a title-only edit must not wipe the canonical body).
+- **Phase 2 verified live** (dev server → CORS relay → real project, admin session):
+  - 3,612-word paste + a later edit, **no Save clicked**, hard reload → backup indicator read
+    "Backed up 04:50 AM"; the essays row stayed empty (`updated_at` unchanged, 0 words in the
+    header); recovery banner appeared; Restore returned all 3,612 words including the second
+    edit. Both edits collapsed into **one** revision row (191 blocks) — rollup confirmed.
+  - **Loud failure:** intercepting `POST /rest/v1/essay_revisions` produced "Backup failed";
+    removing the intercept recovered to "Backed up" on the next edit.
+  - **RLS boundary, checked by simulating JWT claims in SQL:** anon refused at the GRANT level
+    (401, `permission denied`); non-admin authenticated sees 0 of the existing revisions;
+    non-admin INSERT refused; an admin forging `changed_by` as another user refused; admin
+    INSERT with the default `changed_by` allowed. Probe rows deleted afterwards.
+  - `tsc` ✓, build ✓, 184 tests ✓ (17 new `revisions` tests; the old `autosave.test.ts` was
+    folded into them).
 
 ## 2026-07-31 (session 3) — stand-up + framework-v2 import test
 
