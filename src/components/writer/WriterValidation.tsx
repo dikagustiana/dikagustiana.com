@@ -19,7 +19,25 @@ interface ValidateParams {
   section: string;
   content: string;
   categoryId?: string;
+  /** Curriculum lesson type; undefined/null for editorial essays. */
+  lessonType?: string | null;
 }
+
+/**
+ * Key-takeaways policy, per docs/DECISIONS.md (2026-08-01):
+ * scope per lesson_type rather than relax globally.
+ *
+ *  - Essay-shaped types (`concept`, `framework`) — and every editorial essay,
+ *    which is essay-shaped by definition — REQUIRE three. The block is part of
+ *    the article furniture and the forcing function is worth keeping.
+ *  - Artefact-shaped types (`case-study`, `exercise`, `model-walkthrough`)
+ *    get an ADVISORY warning instead: their takeaway is the worked artefact,
+ *    and forcing three onto them manufactures filler.
+ *  - All-or-nothing within every type: one or two takeaways is an error
+ *    everywhere, because a half-filled standing block is the real failure
+ *    mode — worse than no block at all.
+ */
+const TAKEAWAYS_ADVISORY_LESSON_TYPES = new Set(['case-study', 'exercise', 'model-walkthrough']);
 
 const MIN_WORD_COUNT = 500;
 
@@ -32,6 +50,7 @@ export function validateEssay({
   section,
   content,
   categoryId,
+  lessonType,
 }: ValidateParams): ValidationResult {
   const errors: { field: string; message: string }[] = [];
   const warnings: { field: string; message: string }[] = [];
@@ -51,13 +70,27 @@ export function validateEssay({
     errors.push({ field: 'deck', message: 'Deck line (thesis) is required' });
   }
 
-  // Required: At least 3 key takeaways
+  // Key takeaways — scoped per lesson_type (policy above).
   const filledTakeaways = keyTakeaways.filter(k => k.trim()).length;
-  if (filledTakeaways < 3) {
-    errors.push({ 
-      field: 'keyTakeaways', 
-      message: `At least 3 key takeaways required (${filledTakeaways}/3)` 
+  const takeawaysAdvisory = !!lessonType && TAKEAWAYS_ADVISORY_LESSON_TYPES.has(lessonType);
+  if (filledTakeaways > 0 && filledTakeaways < 3) {
+    // Half-filled is an error under EVERY type.
+    errors.push({
+      field: 'keyTakeaways',
+      message: `Key takeaways are all-or-nothing: add ${3 - filledTakeaways} more or clear them (${filledTakeaways}/3)`,
     });
+  } else if (filledTakeaways === 0) {
+    if (takeawaysAdvisory) {
+      warnings.push({
+        field: 'keyTakeaways',
+        message: `No key takeaways. Optional for a ${lessonType}, but three sharpen the landing.`,
+      });
+    } else {
+      errors.push({
+        field: 'keyTakeaways',
+        message: 'At least 3 key takeaways required (0/3)',
+      });
+    }
   }
 
   // Required: Minimum word count

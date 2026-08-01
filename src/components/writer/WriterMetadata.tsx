@@ -159,19 +159,41 @@ export function WriterMetadata({
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="phase">Topic/Phase *</Label>
-              <Select value={phase} onValueChange={setPhase}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select topic..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {phaseOptions.map((opt) => (
-                    <SelectItem key={opt.id} value={opt.id}>
-                      {opt.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              {/* For a curriculum essay the module determines this, so it is
+                  shown derived and read-only — one field set instead of three
+                  (DECISIONS.md 2026-08-01). The old asterisk is gone from the
+                  editable variant too: validateEssay never checked the field,
+                  so "required" was decorative — the worst of both options. */}
+              {isFinanceSection && moduleId ? (
+                <>
+                  <Label>Topic/Phase</Label>
+                  <div className="flex h-10 items-center rounded-md border border-input bg-muted/40 px-3 text-sm text-muted-foreground">
+                    {(() => {
+                      const mod = allFinanceModules.find(m => m.id === moduleId);
+                      const label = phaseOptions.find(o => o.id === phase)?.label ?? phase ?? '—';
+                      return mod
+                        ? `Derived from module: ${label} · ${mod.slug.toUpperCase()}`
+                        : `Derived from module: ${label}`;
+                    })()}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <Label htmlFor="phase">Topic/Phase</Label>
+                  <Select value={phase} onValueChange={setPhase}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select topic..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {phaseOptions.map((opt) => (
+                        <SelectItem key={opt.id} value={opt.id}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </>
+              )}
             </div>
           </div>
 
@@ -337,9 +359,11 @@ export function WriterMetadata({
       {/* Key Takeaways */}
       <Card>
         <CardHeader className="pb-4">
-          <CardTitle className="text-base">Key Takeaways *</CardTitle>
+          <CardTitle className="text-base">Key Takeaways</CardTitle>
           <CardDescription>
-            At least 3 required. These appear at the end of the article.
+            Three required for concept and framework lessons; optional (but all-or-nothing)
+            for case studies, exercises and model walkthroughs. They appear at the end of
+            the article.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">

@@ -465,3 +465,27 @@ determines the others is an invitation for them to drift apart.
 use it.
 
 **Not implemented in this session** — recorded as a proposal.
+
+---
+
+## 2026-08-01 (session 7) — Both Section-2 recommendations applied
+
+**Key-takeaways gate, scoped per `lesson_type`** (was: recommendation of 2026-08-01, now
+implemented in `WriterValidation.tsx`):
+- `concept` / `framework` — and every editorial essay — still require three (error).
+- `case-study` / `exercise` / `model-walkthrough` — zero takeaways is an advisory warning.
+- One or two takeaways is an error under **every** type: a half-filled standing block is the
+  real failure mode.
+Observed live on real stubs: an `exercise` with 0 takeaways published; a `concept` with 0
+takeaways had Publish disabled.
+
+**Topic and Phase derived from placement** (was: proposal, now implemented in
+`WriterEditor.tsx` + `WriterMetadata.tsx`):
+- Choosing the module sets `finance_section` (= track), `phase` (track mapped to the finance
+  phase vocabulary via `TRACK_TO_PHASE`) and `topic` (= module slug — the module *is* the
+  topic).
+- The Topic/Phase control is read-only for curriculum essays — *"Derived from module:
+  Strategic Finance · T2-M01"* — and editable only where nothing derives it. The decorative
+  asterisk is gone: the field was labelled required while `validateEssay` never checked it.
+- `topic` is only ever written for module-placed finance essays, so accounting's use of the
+  column (its consolidation pages key on it) cannot be clobbered from this editor.

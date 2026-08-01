@@ -1,0 +1,46 @@
+-- =============================================================================
+-- Repo mirror of a migration already applied to asypkbkiebjvvpimewfp as
+-- 20260801125833_drop_orphaned_tone_fields_trigger. The apply happened in a
+-- parallel session that never committed the file; this restores the rule that
+-- every applied migration has a repo copy. Verified against the live catalog
+-- before writing: pg_trigger has no validate_essay_tone_fields_trigger on
+-- essays, and pg_proc has no validate_essay_tone_fields.
+--
+-- WHAT THE TRIGGER DID (source: baseline_cms.sql:383-433, BEFORE INSERT OR
+-- UPDATE ... FOR EACH ROW on public.essays)
+--
+--   IF NEW.status = 'published':
+--       one arm per persona, e.g.
+--         IF NEW.voice_role = 'economist' AND (NEW.economist_fields IS NULL
+--            OR NEW.economist_fields = '{}'::jsonb) THEN
+--           RAISE EXCEPTION 'Economist essays require economist_fields ...';
+--       then NEW.voice_validated_at = now();
+--
+--   IF NEW.status = 'draft'  ("auto-promote draft -> tone_pending"):
+--         IF (... any persona's *_fields non-empty ...) OR
+--            (NEW.voice_role = 'hybrid') THEN
+--           NEW.status = 'tone_pending';
+--
+-- WHY IT HAD TO GO
+--
+--   1. It rewrote publication status as a schema-level side effect. Saving a
+--      draft whose payload was populated silently became `tone_pending` — a
+--      status the app's editor does not set and its status filter treats as
+--      not-draft-not-published. This fired in practice: it knocked fa-07-01
+--      into tone_pending during a verification pass, which is how it was
+--      caught. Publication state belongs to the editor and its validation
+--      (WriterValidation), not to a trigger.
+--
+--   2. After 20260801101520 dropped the four persona columns, the trigger
+--      became actively destructive rather than merely wrong: plpgsql resolves
+--      NEW.<field> against the table's current row type, so every arm
+--      referencing NEW.manager_fields / economist_fields / educator_fields /
+--      coach_fields raised `record "new" has no field ...` at runtime. Any
+--      essay save with status published or draft would hard-error.
+--
+--   3. The workflow it guarded — persona tone review — was deleted with the
+--      persona system (see docs/DECISIONS.md, 2026-08-01).
+--
+-- Dropped rather than repaired: there is nothing left for it to validate.
+DROP TRIGGER IF EXISTS validate_essay_tone_fields_trigger ON public.essays;
+DROP FUNCTION IF EXISTS public.validate_essay_tone_fields();

@@ -94,6 +94,23 @@ const PHASE_OPTIONS: Record<string, { id: string; label: string }[]> = {
   ],
 };
 
+/**
+ * Curriculum placement derives the editorial fields (DECISIONS.md 2026-08-01,
+ * "Topic and Phase are required but redundant for curriculum essays").
+ * The author sets ONE field — the module — and track/phase/topic follow:
+ *   finance_section = module.track_slug
+ *   phase           = the track, in the finance phase vocabulary
+ *   topic           = the module slug (the module IS the topic)
+ * fa-07-01 showed the drift this prevents: phase said 'fundamentals' while its
+ * module sat in the analytics track.
+ */
+const TRACK_TO_PHASE: Record<string, string> = {
+  fundamentals: 'fundamentals',
+  'strategic-finance': 'strategic-finance',
+  planning: 'financial-planning',
+  analytics: 'financial-analytics',
+};
+
 function calculateReadTime(text: string): string {
   const wordsPerMinute = 200;
   const words = text.trim().split(/\s+/).filter(Boolean).length;
@@ -293,8 +310,11 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
       section,
       content,
       categoryId,
+      // Only curriculum essays carry a meaningful lesson type; editorial
+      // essays stay on the strict policy.
+      lessonType: section === 'finance' && moduleId ? lessonType : null,
     });
-  }, [title, deck, keyTakeaways, wordCount, references, section, content, categoryId]);
+  }, [title, deck, keyTakeaways, wordCount, references, section, content, categoryId, lessonType, moduleId]);
 
   // ── Autosave: debounced backup into essay_revisions ──
   // Deliberately does NOT write the essays row. A backup is not a save, and a
@@ -344,6 +364,8 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
     window.addEventListener('pagehide', handler);
     return () => window.removeEventListener('pagehide', handler);
   }, [flushAutosave]);
+
+  const selectedFinanceModule = useMemo(() => allFinanceModules.find(mod => mod.id === moduleId), [allFinanceModules, moduleId]);
 
   const handleSave = async (targetStatus: 'draft' | 'published' = status) => {
     // Block publishing if validation fails
@@ -410,6 +432,13 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
       // Attach category_id if set
       if (categoryId) {
         essayData.category_id = categoryId;
+      }
+
+      // Curriculum essays: the module is the topic. Only set for
+      // module-placed finance essays so accounting's use of `topic` (its
+      // consolidation pages key on it) is never clobbered from this editor.
+      if (section === 'finance' && selectedFinanceModule) {
+        essayData.topic = selectedFinanceModule.slug;
       }
 
       // Only write content_json when we actually have a document. Sending null
@@ -479,11 +508,13 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
     }
   };
 
-  const selectedFinanceModule = useMemo(() => allFinanceModules.find(mod => mod.id === moduleId), [allFinanceModules, moduleId]);
 
   useEffect(() => {
     if (section === 'finance' && selectedFinanceModule) {
       setFinanceSection(selectedFinanceModule.track_slug);
+      // Placement implies the editorial phase; deriving it here is what keeps
+      // the two trees from disagreeing on essays edited through this screen.
+      setPhase(TRACK_TO_PHASE[selectedFinanceModule.track_slug] ?? '');
     }
   }, [section, selectedFinanceModule]);
 
