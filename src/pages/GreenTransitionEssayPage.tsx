@@ -1,5 +1,6 @@
+import NotFound from './NotFound';
 import { resolvePresentation, type EssayPresentation } from '@/lib/presentation';
-import { useParams, Navigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -106,7 +107,9 @@ export default function GreenTransitionEssayPage() {
   const phaseLabel = phase ? phaseLabels[phase] || phase : '';
 
   if (notFound || (!loading && !essay)) {
-    return <Navigate to={`/green-transition/${phase || ''}`} replace />;
+    // A bad slug is a wrong URL, not a reason to silently teleport the reader
+    // to the section index. NotFound says so and offers the nearest real essay.
+    return <NotFound />;
   }
 
   if (loading) {
@@ -117,7 +120,10 @@ export default function GreenTransitionEssayPage() {
     );
   }
 
-  if (!essay) return null;
+  // A valid route shape with a bad slug used to render nothing — page chrome
+  // with a blank middle, which reads as a broken site rather than a wrong URL.
+  // NotFound also offers the nearest real essay for a near-miss slug.
+  if (!essay) return <NotFound />;
 
   const currentIndex = siblings?.findIndex((e) => e.slug === slug) ?? -1;
   const previous = currentIndex > 0 ? siblings![currentIndex - 1] : null;

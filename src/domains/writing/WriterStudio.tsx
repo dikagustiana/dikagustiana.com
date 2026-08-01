@@ -467,7 +467,7 @@ export default function WriterStudio() {
                   phase={getPhaseFromCategory()}
                   sectionSlug={getSectionSlug()}
                   contentJson={contentJson}
-                  economistFields={null}
+                  presentation={null}
                 />
               </div>
             </div>

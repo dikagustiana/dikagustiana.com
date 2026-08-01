@@ -1,3 +1,4 @@
+import type { EssayPresentation } from '@/lib/presentation';
 /**
  * Canonical types for the writing domain.
  *
@@ -54,10 +55,9 @@ export interface WritingEssay {
   section: string;
   phase: string | null;
   voice_role: string | null;
-  manager_fields: Record<string, unknown> | null;
-  economist_fields: Record<string, unknown> | null;
-  educator_fields: Record<string, unknown> | null;
-  coach_fields: Record<string, unknown> | null;
+  presentation: EssayPresentation | null;
+  /** @deprecated legacy column, dropped by the staged _pending migration */
+  economist_fields?: EssayPresentation | null;
   // Joined
   category?: WritingCategory;
 }

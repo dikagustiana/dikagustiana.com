@@ -1,3 +1,4 @@
+import { essayUrl } from '@/lib/essayUrl';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -39,6 +40,11 @@ interface Essay {
   status: string | null;
   phase: string | null;
   category_id: string | null;
+  section: string | null;
+  finance_section: string | null;
+  fsli_slug: string | null;
+  topic: string | null;
+  finance_modules: { slug: string; track_slug: string } | null;
   updated_at: string;
   created_at: string;
 }
@@ -53,12 +59,19 @@ export function WriterList({ section }: WriterListProps) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('essays')
-        .select('id, slug, title, snippet, author, date, read_time, status, phase, category_id, updated_at, created_at')
+        // Placement columns + the module join are what let essayUrl build the
+        // four-segment finance URL for the View-live button.
+        .select(`
+          id, slug, title, snippet, author, date, read_time, status, phase,
+          category_id, section, finance_section, fsli_slug, topic,
+          updated_at, created_at,
+          finance_modules!essays_module_id_fkey ( slug, track_slug )
+        `)
         .eq('section', section)
         .order('updated_at', { ascending: false });
 
       if (error) throw error;
-      return data as Essay[];
+      return data as unknown as Essay[];
     },
   });
 
@@ -90,18 +103,19 @@ export function WriterList({ section }: WriterListProps) {
   const sectionLabel = sectionLabelMap[section] || section;
   const sectionPath = sectionPathMap[section] || `/${section}`;
 
-  const getPublicUrl = (essay: Essay) => {
-    if (section === 'next-big-thing') {
-      return `/the-next-big-thing/${essay.slug}`;
-    }
-    if (section === 'finance') {
-      return `/finance-101/essays/${essay.slug}`;
-    }
-    if (essay.phase) {
-      return `/${section}/${essay.phase}/${essay.slug}`;
-    }
-    return `/${section}/${essay.slug}`;
-  };
+  // One canonical builder — see src/lib/essayUrl.ts. Returns null when no
+  // real route can be produced, and the card then hides its View-live link
+  // rather than offering a dead one.
+  const getPublicUrl = (essay: Essay) =>
+    essayUrl({
+      slug: essay.slug,
+      section: essay.section ?? section,
+      phase: essay.phase,
+      track: essay.finance_modules?.track_slug ?? essay.finance_section ?? null,
+      moduleSlug: essay.finance_modules?.slug ?? null,
+      fsliSlug: essay.fsli_slug,
+      topic: essay.topic,
+    });
 
   const formatDate = (dateStr: string) => {
     try {
@@ -254,11 +268,12 @@ export function WriterList({ section }: WriterListProps) {
 interface EssayCardProps {
   essay: Essay;
   section: string;
-  getPublicUrl: (essay: Essay) => string;
+  getPublicUrl: (essay: Essay) => string | null;
   formatDate: (dateStr: string) => string;
 }
 
 function EssayCard({ essay, section, getPublicUrl, formatDate }: EssayCardProps) {
+  const publicUrl = getPublicUrl(essay);
   const navigate = useNavigate();
   const isPublished = essay.status === 'published';
 
@@ -314,14 +329,18 @@ function EssayCard({ essay, section, getPublicUrl, formatDate }: EssayCardProps)
             >
               <Edit3 className="h-4 w-4" />
             </Button>
-            {isPublished && (
+            {/* View live. Rendered only when a real canonical URL exists —
+                offering the button and landing on a 404 is worse than not
+                offering it. */}
+            {isPublished && publicUrl && (
               <Button
                 variant="ghost"
                 size="icon"
                 asChild
                 onClick={(e) => e.stopPropagation()}
+                title={`View live: ${publicUrl}`}
               >
-                <a href={getPublicUrl(essay)} target="_blank" rel="noopener noreferrer">
+                <a href={publicUrl} target="_blank" rel="noopener noreferrer">
                   <ExternalLink className="h-4 w-4" />
                 </a>
               </Button>

@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import type { EssayPresentation } from '@/lib/presentation';
 
 export interface Essay {
   id: string;
@@ -20,10 +21,9 @@ export interface Essay {
   voice_role: string | null;
   prerequisites: string[] | null;
   learning_outcomes: string[] | null;
-  manager_fields: Record<string, unknown> | null;
-  economist_fields: Record<string, unknown> | null;
-  educator_fields: Record<string, unknown> | null;
-  coach_fields: Record<string, unknown> | null;
+  presentation: EssayPresentation | null;
+  /** @deprecated legacy column, dropped by the staged _pending migration */
+  economist_fields?: EssayPresentation | null;
   fsli_slug: string | null;
   topic: string | null;
   finance_section: string | null;
@@ -40,11 +40,27 @@ interface UseEssaysParams {
   limit?: number;
 }
 
+/**
+ * Columns a list/card view actually renders. Deliberately excludes `content`
+ * and `content_json`: a list of published essays with `select('*')` measured
+ * 58,043 bytes against the live database versus 1,116 with this list, because
+ * every row dragged its full body along. fa-07-01 alone is ~22k of HTML plus
+ * its JSON document.
+ *
+ * Detail pages select their own columns including the body — that is the one
+ * place it is wanted.
+ */
+export const ESSAY_CARD_COLUMNS = `
+  id, slug, title, snippet, section, phase, author, date, read_time,
+  thumbnail_url, published, status, sort_order, category_id, module_id,
+  finance_section, finance_order, fsli_slug, topic, created_at, updated_at
+`;
+
 export const useEssays = (params: UseEssaysParams = {}) => {
   return useQuery({
     queryKey: ['essays', params],
     queryFn: async () => {
-      let query = supabase.from('essays').select('*');
+      let query = supabase.from('essays').select(ESSAY_CARD_COLUMNS);
 
       if (params.section) {
         query = query.eq('section', params.section);
@@ -65,7 +81,7 @@ export const useEssays = (params: UseEssaysParams = {}) => {
       const { data, error } = await query.order('sort_order', { ascending: true });
 
       if (error) throw error;
-      return data as Essay[];
+      return data as unknown as Essay[];
     },
   });
 };
@@ -91,19 +107,45 @@ export const useEssay = (slug: string, options: UseEssayOptions = {}) => {
   });
 };
 
+/**
+ * The narrow row a featured card needs — including the joined curriculum
+ * placement, without which no canonical finance URL can be built.
+ */
+export interface FeaturedEssay {
+  id: string;
+  slug: string;
+  title: string;
+  snippet: string | null;
+  section: string;
+  phase: string | null;
+  author: string | null;
+  read_time: string | null;
+  finance_section: string | null;
+  fsli_slug: string | null;
+  topic: string | null;
+  finance_modules: { slug: string; track_slug: string } | null;
+}
+
 export const useFeaturedEssays = (limit = 4) => {
   return useQuery({
     queryKey: ['essays', 'featured', limit],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('essays')
-        .select('id, slug, title, snippet, section, phase, author, read_time')
+        // module_id joins finance_modules for track + module slug. Without
+        // them essayUrl() cannot build /finance/:track/:moduleSlug/:slug and
+        // every finance card silently degrades to the universal route.
+        .select(`
+          id, slug, title, snippet, section, phase, author, read_time,
+          finance_section, fsli_slug, topic,
+          finance_modules!essays_module_id_fkey ( slug, track_slug )
+        `)
         .eq('published', true)
         .order('created_at', { ascending: false })
         .limit(limit);
 
       if (error) throw error;
-      return data as Essay[];
+      return data as unknown as FeaturedEssay[];
     },
   });
 };
@@ -114,13 +156,13 @@ export const useEssaysByFsliSlug = (fsliSlug: string) => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('essays')
-        .select('*')
+        .select(ESSAY_CARD_COLUMNS)
         .eq('fsli_slug', fsliSlug)
         .eq('published', true)
         .order('sort_order', { ascending: true });
 
       if (error) throw error;
-      return data as Essay[];
+      return data as unknown as Essay[];
     },
     enabled: !!fsliSlug,
   });
@@ -132,14 +174,14 @@ export const useEssaysByTopic = (section: string, topic: string) => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('essays')
-        .select('*')
+        .select(ESSAY_CARD_COLUMNS)
         .eq('section', section)
         .eq('topic', topic)
         .eq('published', true)
         .order('sort_order', { ascending: true });
 
       if (error) throw error;
-      return data as Essay[];
+      return data as unknown as Essay[];
     },
     enabled: !!section && !!topic,
   });
@@ -159,7 +201,7 @@ export const useRelatedEssays = (currentId: string, section: string, limit = 3) 
         .limit(limit);
 
       if (error) throw error;
-      return data as Essay[];
+      return data as unknown as Essay[];
     },
     enabled: !!currentId && !!section,
   });
