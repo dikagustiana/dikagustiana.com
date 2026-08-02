@@ -5,6 +5,15 @@
  * takeaways and the cover image are all decisions about a finished piece, so
  * they live here rather than in a sidebar competing with the prose.
  *
+ * Placement is ONE control that switches on the essay's section (fixed by
+ * the route the writer entered through, never chosen here):
+ *   - finance    → track/module/order/lesson type (the curriculum tree)
+ *   - accounting → the FSLI line item the essay renders on
+ *   - editorial  → the category, which also decides the URL's theme segment
+ * The writer picks a destination once; WriterEditor derives the dependent
+ * columns (phase/topic/finance_section) for whichever tree that destination
+ * lives in.
+ *
  * It is also where validation is allowed to speak. While drafting the editor
  * says nothing — an empty new essay greeting its author with "5 issues to
  * fix" is a scold for not having written yet. The rules are unchanged; only
@@ -38,6 +47,8 @@ import { AlertTriangle, CheckCircle2, Loader2, Plus, Send, Trash2, XCircle } fro
 import type { FinanceModule } from '@/hooks/queries/useFinance';
 import type { ValidationResult } from './WriterValidation';
 import { cn } from '@/lib/utils';
+import { essayUrl } from '@/lib/essayUrl';
+import { derivePhase } from '@/domains/writing/schema/placement';
 
 export interface PublishModalProps {
   open: boolean;
@@ -47,6 +58,8 @@ export interface PublishModalProps {
   isPublished: boolean;
 
   /* Placement */
+  /** The essay's section (from the route) — decides which placement path renders. */
+  sectionSlug: string;
   isFinanceSection: boolean;
   /* Accounting placement: FSLI prose is authored here as essays, never
      edited inline on the public page. */
@@ -97,6 +110,7 @@ export function PublishModal({
   open,
   onOpenChange,
   isPublished,
+  sectionSlug,
   isFinanceSection,
   isAccountingSection = false,
   fsliPages = [],
@@ -158,6 +172,25 @@ export function PublishModal({
   );
 
   const selectedModule = modules.find(m => m.id === moduleId) ?? null;
+
+  // Editorial placement: the category is the one placement choice, and the
+  // theme segment of the essay's URL follows from it. A loaded essay can
+  // carry the DB's catch-all default (finance-general), which belongs to
+  // another section and is deliberately NOT in this list — the select then
+  // shows its placeholder and validation keeps asking for a real category.
+  const isEditorialSection = !isFinanceSection && !isAccountingSection;
+  const selectedEditorialCategory = isEditorialSection
+    ? categories.find(c => c.id === categoryId) ?? null
+    : null;
+  // Preview through the ONE canonical builder, so this line can never
+  // disagree with the URL the essay actually publishes to.
+  const editorialUrlPreview = selectedEditorialCategory
+    ? essayUrl({
+        slug: '…',
+        section: sectionSlug,
+        phase: derivePhase(sectionSlug, selectedEditorialCategory.slug),
+      })
+    : null;
 
   const setTakeaway = (index: number, value: string) => {
     const next = [...keyTakeaways];
@@ -358,7 +391,43 @@ export function PublishModal({
             </div>
           )}
 
-          {categories.length > 0 && (
+          {/* ── Editorial placement: the category is the destination ── */}
+          {isEditorialSection && categories.length > 0 && (
+            <div className="space-y-4">
+              <div>
+                <Label className="text-base">Placement</Label>
+                <p className="text-sm text-muted-foreground">
+                  The category decides where the essay appears on the section
+                  page — and the theme segment of its URL.
+                </p>
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="publish-category">Category</Label>
+                <Select value={categoryId} onValueChange={setCategoryId}>
+                  <SelectTrigger id="publish-category">
+                    <SelectValue placeholder="Select a category…" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map(cat => (
+                      <SelectItem key={cat.id} value={cat.id}>
+                        {cat.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              {editorialUrlPreview && (
+                <p className="text-xs text-muted-foreground">
+                  Publishes to <code className="font-mono">{editorialUrlPreview}</code>
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* Category select for the non-editorial paths (finance today:
+              one General category, still required by the database). The
+              editorial paths carry it inside their Placement block above. */}
+          {!isEditorialSection && categories.length > 0 && (
             <div className="space-y-1.5">
               <Label htmlFor="publish-category">Category</Label>
               <Select value={categoryId} onValueChange={setCategoryId}>

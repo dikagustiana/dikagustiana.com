@@ -11,6 +11,11 @@ describe('derivePhase', () => {
     expect(derivePhase('green-transition', 'green-transition-where-we-are-now')).toBe('where-we-are-now');
     expect(derivePhase('critical-thinking', 'critical-thinking-clarify')).toBe('clarify');
   });
+  it('maps the five live next-big-thing category slugs to the theme ids the reader filters on', () => {
+    for (const theme of ['technology', 'economy', 'society', 'environment', 'governance']) {
+      expect(derivePhase('next-big-thing', `next-big-thing-${theme}`)).toBe(theme);
+    }
+  });
   it('returns the slug unchanged when there is no prefix', () => {
     expect(derivePhase('development-finance', 'sovereign-wealth-funds')).toBe('sovereign-wealth-funds');
   });
@@ -127,7 +132,17 @@ describe('buildCanonicalUrl — placement maps to the real public route', () => 
     ).toBe('/critical-thinking-research/analyze/c');
   });
 
-  it('next-big-thing → /the-next-big-thing/:slug', () => {
+  it('next-big-thing with a category → /the-next-big-thing/:theme/:slug (agrees with essayUrl)', () => {
+    expect(
+      buildCanonicalUrl({
+        sectionSlug: 'next-big-thing',
+        slug: 'agi',
+        categorySlug: 'next-big-thing-technology',
+      }),
+    ).toBe('/the-next-big-thing/technology/agi');
+  });
+
+  it('next-big-thing without a category keeps the two-segment resolver shape', () => {
     expect(buildCanonicalUrl({ sectionSlug: 'next-big-thing', slug: 'agi' })).toBe('/the-next-big-thing/agi');
   });
 

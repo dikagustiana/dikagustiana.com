@@ -88,7 +88,10 @@ function canonicalPath(row) {
     case 'development-finance':
       return row.phase ? `/development-finance/${row.phase}/${row.slug}` : `/essays/${row.slug}`;
     case 'next-big-thing':
-      return `/the-next-big-thing/${row.slug}`;
+      // Theme (the category, cached as phase) is the third segment; a
+      // theme-less essay keeps the two-segment resolver shape, which renders
+      // it directly. Mirrors essayUrl's next-big-thing branch.
+      return row.phase ? `/the-next-big-thing/${row.phase}/${row.slug}` : `/the-next-big-thing/${row.slug}`;
     case 'critical-thinking':
     case 'critical-thinking-research':
       return `/critical-thinking-research/${row.phase || 'clarify'}/${row.slug}`;

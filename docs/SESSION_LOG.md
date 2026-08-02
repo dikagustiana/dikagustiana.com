@@ -3,13 +3,50 @@
 Append-only. Newest entry first. A fresh session must be able to resume from this file.
 
 ## NEXT ACTION (single)
-**Merge the six-areas PR, then let Vercel deploy — the live DB already speaks the new
-URLs.** The slug migration is applied to the live project (fa-07-01 is
-`driver-tree-construction`; the deployed OLD code still resolves it only through
-`/essays/:slug`-shaped lookups), so the window between "DB renamed" and "new router
-deployed" should stay short. After that, the standing item unchanged: set the two backup
-secrets (`VITE_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`) and flip the backup workflow's
-first run green — still the only mitigation of free-tier Supabase having no PITR.
+**Merge the editorial-taxonomy PR (branch `claude/blissful-archimedes-ltp5rb`) and let
+Vercel deploy.** The live DB already carries the five next-big-thing categories and one
+published editorial essay; the DEPLOYED router still predates the three-segment
+editorial canonical, so today the essay serves at the two-segment shape and the
+canonical URL only activates on deploy — keep that window short. After that, the
+standing item unchanged: set the two backup secrets (`VITE_SUPABASE_URL`,
+`SUPABASE_SERVICE_ROLE_KEY`) and flip the backup workflow's first run green — still the
+only mitigation of free-tier Supabase having no PITR.
+
+## 2026-08-02 (editorial-taxonomy session) — GATE E: The Next Big Thing opens
+
+Branch `claude/blissful-archimedes-ltp5rb`, base `main` @ `b38a135`. **GATE E PASSED**,
+all seven clauses measured — evidence in `docs/GATE_LEDGER.md`; six decisions in
+`docs/DECISIONS.md`.
+
+**What changed.** (1) Five categories under `next-big-thing`
+(`next-big-thing-technology` … `-governance`), seeded by migration
+`20260802131648`, slugs following the one existing row's convention — which
+`derivePhase()` already encoded. (2) The publish modal placement is one control
+switching on the section: editorial essays pick a category, and phase/section/URL
+derive from that one choice; finance and accounting blocks untouched. (3) The
+editorial canonical URL is three segments — `/the-next-big-thing/:theme/:slug` —
+matching every other placed section; the two-segment shape resolves and redirects; the
+finance-shaped gap in `EssayUrlInput` (no way to pass an editorial placement) is
+closed in both URL builders. (4) `validate_essay_placement` gained the editorial
+direction (migration `20260802131711`), rejections observed live in both directions
+plus on the gate essay. (5) The landing's taxonomy-dodging quick-add dialog is deleted;
+the ?theme= tabs filter for real now (state lives in the URL). (6) First editorial
+essay live: "The Agentic Finance Function", written and published through the studio,
+observed anonymously at its canonical URL, on the landing, and in its category listing
+by clicking the tabs.
+
+**Findings.** fa-07-01 diverged from the mandate's baseline BEFORE this session touched
+anything (owner revisions 6–13 today 12:38–12:50 UTC; session-start measurement
+26,932 / 82 / `f8e0dcfa…` held byte-identical to session end — no reversion, the
+mandate's numbers were simply stale). The NBT essay page fetched by slug with no
+section check (any essay rendered in its shell — fixed by the canonical redirect).
+Report on opening the six remaining sections delivered in the session report.
+
+**Hygiene.** 163 essays (162 finance unchanged + 1 next-big-thing); 0 probe rows;
+0 tables without RLS; probe admin deleted (owner's account is again the only one);
+256 tests / 24 files green, guard floor 245 → 253; eslint 0 errors; `tsc -b --force`
+clean; build + prerender green. Migrations via `apply_migration` only, mirrored into
+`supabase/migrations/`. Servers backgrounded with PIDs recorded, killed at teardown.
 
 ## 2026-08-02 (six-areas session) — identity, URLs, curation, studio, weight, defects
 

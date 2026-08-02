@@ -31,6 +31,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useWriterSections, useWriterCategories } from '@/domains/writing/hooks';
+import { derivePhase } from '@/domains/writing/schema/placement';
 import { useAllFinanceModules } from '@/hooks/queries/useFinance';
 import { useFsliPages } from '@/hooks/queries/useFsliPages';
 import { generateUniqueSlug } from '@/domains/writing/hooks/useWriterEssay';
@@ -313,6 +314,21 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
     return getWordCount(plainText);
   }, [content]);
 
+  // Editorial sections place by category; finance places by module and
+  // accounting by FSLI leaf. The two flags below are the modal's fork.
+  const isEditorialSection = section !== 'finance' && section !== 'accounting';
+  const selectedCategory = useMemo(
+    () => categories.find(c => c.id === categoryId) ?? null,
+    [categories, categoryId],
+  );
+  // essays.category_id defaults to finance-general at the DB, so a loaded
+  // editorial essay can carry a category from ANOTHER section (the tolerated
+  // catch-all for sections without categories). Once a section has its own
+  // categories, only one of them satisfies "Category is required" — the
+  // catch-all must not quietly pass an essay the modal would file nowhere.
+  const categoryBelongsToSection =
+    categories.length === 0 || categories.some(c => c.id === categoryId);
+
   // Validation
   const validation = useMemo<ValidationResult>(() => {
     return validateEssay({
@@ -323,13 +339,13 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
       references: references.filter(r => r.label.trim()),
       section,
       content,
-      categoryId,
+      categoryId: categoryBelongsToSection ? categoryId : '',
       // Only MODULE-PLACED finance essays carry a meaningful lesson type;
       // editorial essays and unplaced finance essays send null and stay on
       // the strict three-takeaways policy.
       lessonType: section === 'finance' && moduleId ? lessonType : null,
     });
-  }, [title, deck, keyTakeaways, wordCount, references, section, content, categoryId, lessonType, moduleId]);
+  }, [title, deck, keyTakeaways, wordCount, references, section, content, categoryId, categoryBelongsToSection, lessonType, moduleId]);
 
   // ── Autosave: debounced backup into essay_revisions ──
   // Deliberately does NOT write the essays row. A backup is not a save, and a
@@ -435,11 +451,16 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
       };
 
       // Placement-derived fields. For a finance essay with a module, phase and
-      // topic come from the module — one field set instead of three.
+      // topic come from the module; for an editorial essay, the theme comes
+      // from the category (its slug minus the section prefix — the convention
+      // derivePhase encodes and the reading side filters on). One choice, the
+      // rest follows.
       const derivedPhase =
         section === 'finance' && selectedFinanceModule
           ? TRACK_TO_PHASE[selectedFinanceModule.track_slug] ?? selectedFinanceModule.track_slug
-          : phase || null;
+          : isEditorialSection && selectedCategory
+            ? derivePhase(section, selectedCategory.slug)
+            : phase || null;
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const essayData: any = {
@@ -581,6 +602,15 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
       setPhase(TRACK_TO_PHASE[selectedFinanceModule.track_slug] ?? selectedFinanceModule.track_slug);
     }
   }, [section, selectedFinanceModule]);
+
+  // The editorial mirror of the module effect above: the category decides the
+  // theme. Mirrored into state so the preview's topic chip and the modal's
+  // URL line agree with what save will write.
+  useEffect(() => {
+    if (isEditorialSection && selectedCategory) {
+      setPhase(derivePhase(section, selectedCategory.slug) ?? '');
+    }
+  }, [isEditorialSection, section, selectedCategory]);
 
   // NOTE: a local getPublicUrl() used to live here, duplicating
   // src/lib/essayUrl.ts — with a fallback (`/finance/${slug}`) that is not
@@ -796,6 +826,7 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
         open={showPublish}
         onOpenChange={setShowPublish}
         isPublished={status === 'published'}
+        sectionSlug={section}
         isFinanceSection={section === 'finance'}
         isAccountingSection={section === 'accounting'}
         fsliPages={fsliPages}

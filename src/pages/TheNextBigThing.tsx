@@ -3,10 +3,9 @@ import { SEO } from '@/components/SEO';
 import { EditorialFeed } from '@/components/editorial';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
-import { useState } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
-import { EssayDialog } from '@/components/next-big-thing/EssayDialog';
+import { PenLine } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { essayUrl } from '@/lib/essayUrl';
 
 const TOPICS = [
   { id: 'technology', label: 'Technology' },
@@ -26,10 +25,13 @@ const NEXT_BIG_THING_TABS = [
 
 export default function TheNextBigThing() {
   const { isAdmin } = useAuth();
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const queryClient = useQueryClient();
 
-  const getEssayUrl = (essay: { slug: string }) => `/the-next-big-thing/${essay.slug}`;
+  // One canonical builder — the local `/the-next-big-thing/${slug}` copy this
+  // replaced was a second URL convention, and it flattened the theme out of
+  // the address.
+  const getEssayUrl = (essay: { slug: string; phase: string | null }) =>
+    essayUrl({ slug: essay.slug, section: 'next-big-thing', phase: essay.phase }) ??
+    `/the-next-big-thing/${essay.slug}`;
 
   return (
     <PageLayout
@@ -48,7 +50,7 @@ export default function TheNextBigThing() {
       />
 
       {/* Hero Section */}
-      <div 
+      <div
         className="relative h-[40vh] min-h-[280px] flex items-center justify-center bg-cover bg-center"
         style={{
           backgroundImage: 'url(https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1920&q=80)',
@@ -60,7 +62,7 @@ export default function TheNextBigThing() {
             What's the next big thing that will reshape industries?
           </h1>
           <p className="mt-6 text-white/80 text-lg max-w-2xl mx-auto">
-            Speculative but reasoned essays on emerging forces in industry, finance, and policy. 
+            Speculative but reasoned essays on emerging forces in industry, finance, and policy.
             Critical questions, not predictions.
           </p>
         </div>
@@ -70,8 +72,8 @@ export default function TheNextBigThing() {
       <div className="bg-muted/30 py-8 border-b border-border">
         <div className="container max-w-3xl">
           <p className="text-muted-foreground text-center">
-            This is an ideas laboratory—not a blog, not a prediction service. The goal is to think 
-            seriously about forces that might reshape how we work, invest, and organize. Some ideas 
+            This is an ideas laboratory—not a blog, not a prediction service. The goal is to think
+            seriously about forces that might reshape how we work, invest, and organize. Some ideas
             will be wrong. The value is in the reasoning, not the conclusions.
           </p>
         </div>
@@ -88,11 +90,18 @@ export default function TheNextBigThing() {
               Explorations of technology shifts, policy experiments, and market structure changes.
             </p>
           </div>
-          
+
+          {/* Writing happens in the studio — the one authoring surface with
+              validation, revisions and the placement modal. The quick-add
+              dialog this replaced inserted rows that dodged the category
+              taxonomy (essays.category_id silently defaulted to
+              finance-general). */}
           {isAdmin && (
-            <Button onClick={() => setDialogOpen(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Essay
+            <Button asChild>
+              <Link to="/admin/writer/next-big-thing/new">
+                <PenLine className="h-4 w-4 mr-2" />
+                Write essay
+              </Link>
             </Button>
           )}
         </div>
@@ -103,16 +112,6 @@ export default function TheNextBigThing() {
           getEssayUrl={getEssayUrl}
         />
       </div>
-
-      {/* Admin dialog */}
-      <EssayDialog
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
-        essay={null}
-        onSuccess={() => {
-          void queryClient.invalidateQueries({ queryKey: ['editorial-feed', 'next-big-thing'] });
-        }}
-      />
     </PageLayout>
   );
 }

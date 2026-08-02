@@ -71,7 +71,12 @@ describe('essayUrl — every branch resolves to a real route', () => {
       expected: '/development-finance/blended/d1',
     },
     {
-      name: 'next big thing',
+      name: 'next big thing with a theme: three segments, the editorial equivalent of /finance/:track/:slug',
+      input: { slug: 'n1', section: 'next-big-thing', phase: 'technology' },
+      expected: '/the-next-big-thing/technology/n1',
+    },
+    {
+      name: 'next big thing without a theme falls back to the two-segment resolver route',
       input: { slug: 'n1', section: 'next-big-thing' },
       expected: '/the-next-big-thing/n1',
     },
