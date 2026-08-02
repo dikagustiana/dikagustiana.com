@@ -169,9 +169,16 @@ export function EditorToolbar({ editor, insertOptions, className }: EditorToolba
 
   const openLinkPopover = useCallback(() => {
     if (!editor) return;
+    const existingHref = (editor.getAttributes('link').href as string | undefined) ?? '';
+    // A caret sitting inside an existing link edits the WHOLE link. Without
+    // this expansion the captured range is collapsed, initialText is empty,
+    // and submitting inserts the URL as new text mid-link instead of
+    // updating the link it sits in.
+    if (existingHref) {
+      editor.chain().extendMarkRange('link').run();
+    }
     const { from, to } = editor.state.selection;
     const coords = editor.view.coordsAtPos(from);
-    const existingHref = (editor.getAttributes('link').href as string | undefined) ?? '';
     setLinkState({
       from,
       to,

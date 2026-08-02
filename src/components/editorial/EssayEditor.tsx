@@ -194,9 +194,11 @@ export function EssayEditor({
   const insertFootnoteFlow = useCallback(() => {
     const ed = editorRef.current;
     if (!ed) return;
+    // Nothing is written until the dialog saves — inserting a provisional
+    // empty marker here would survive Cancel/Escape, get autosaved, and
+    // publish as a blank footnote entry.
     const pos = ed.state.selection.from;
-    ed.chain().focus().insertFootnote({ text: '' }).run();
-    setFootnoteState({ pos, text: '' });
+    setFootnoteState({ pos, text: '', insert: true });
   }, []);
 
   // ONE options object feeds the slash menu, the gutter `+` and (via

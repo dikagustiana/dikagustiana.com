@@ -21,6 +21,12 @@ import { Textarea } from '@/components/ui/textarea';
 export interface FootnoteDialogState {
   pos: number;
   text: string;
+  /**
+   * Insert mode: no marker exists in the document yet — `pos` is where one
+   * will be inserted on Save. Cancel/Escape/outside-click must leave the
+   * document untouched, which is only possible if nothing was written first.
+   */
+  insert?: boolean;
 }
 
 interface FootnoteDialogProps {
@@ -40,7 +46,16 @@ export function FootnoteDialog({ editor, state, onClose }: FootnoteDialogProps) 
 
   const save = () => {
     const trimmed = text.trim();
-    if (!trimmed) {
+    if (state.insert) {
+      if (trimmed) {
+        editor
+          .chain()
+          .focus()
+          .insertContentAt(state.pos, { type: 'footnote', attrs: { text: trimmed } })
+          .run();
+      }
+      // An empty note in insert mode writes nothing — same outcome as Cancel.
+    } else if (!trimmed) {
       editor.chain().focus().deleteFootnote(state.pos).run();
     } else {
       editor.chain().focus().updateFootnote(state.pos, trimmed).run();
@@ -49,7 +64,9 @@ export function FootnoteDialog({ editor, state, onClose }: FootnoteDialogProps) 
   };
 
   const remove = () => {
-    editor.chain().focus().deleteFootnote(state.pos).run();
+    if (!state.insert) {
+      editor.chain().focus().deleteFootnote(state.pos).run();
+    }
     onClose();
   };
 
@@ -74,14 +91,16 @@ export function FootnoteDialog({ editor, state, onClose }: FootnoteDialogProps) 
         />
 
         <DialogFooter>
-          <Button
-            type="button"
-            variant="ghost"
-            className="mr-auto text-muted-foreground hover:text-destructive"
-            onClick={remove}
-          >
-            Remove
-          </Button>
+          {!state.insert && (
+            <Button
+              type="button"
+              variant="ghost"
+              className="mr-auto text-muted-foreground hover:text-destructive"
+              onClick={remove}
+            >
+              Remove
+            </Button>
+          )}
           <Button type="button" variant="ghost" onClick={onClose}>
             Cancel
           </Button>
