@@ -154,6 +154,13 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
   const [content, setContent] = useState('');
   // Canonical body. `content` (HTML) is kept in step as the legacy fallback.
   const [contentJson, setContentJson] = useState<JSONContent | null>(null);
+  // The row's updated_at as this tab last saw it, maintained across load,
+  // manual save and autosave. Every essays UPDATE is guarded with
+  // .eq('updated_at', <this>): if another tab or device wrote in between, the
+  // guard matches zero rows and the write STOPS — loudly — instead of
+  // overwriting newer work with older. (updated_at is trigger-maintained
+  // server-side, so it moves on every successful write.)
+  const serverUpdatedAtRef = useRef<string | null>(null);
   const [keyTakeaways, setKeyTakeaways] = useState<string[]>(['', '', '']);
   const [references, setReferences] = useState<{ label: string; url: string }[]>([]);
   const [authorBio, setAuthorBio] = useState('');
@@ -210,6 +217,7 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
         setStatus(data.status === 'published' ? 'published' : 'draft');
         setCreatedAt(data.created_at);
         setUpdatedAt(data.updated_at);
+        serverUpdatedAtRef.current = data.updated_at;
         const financeMeta = data as typeof data & {
           finance_section?: string | null;
           finance_order?: number | null;
@@ -338,6 +346,7 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
     doc: contentJson,
     html: content,
     persistToEssay: persistDraftToEssay,
+    serverUpdatedAtRef,
     // Never race a manual save: the two would write the same row with
     // different column sets and the later one would win arbitrarily.
     enabled: !isLoading && !isSaving,
@@ -466,14 +475,31 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
       let revisionType: 'create' | 'manual_save' | 'publish' | 'unpublish' = 'manual_save';
 
       if (essayDbId) {
-        // Update existing
-        const { error } = await supabase
+        // Update existing — guarded. If the row's updated_at is no longer the
+        // one this tab loaded/last wrote, someone else wrote in between; zero
+        // rows match and nothing is overwritten.
+        let update = supabase
           .from('essays')
           .update({ ...essayData, updated_at: new Date().toISOString() })
           .eq('id', essayDbId);
+        if (serverUpdatedAtRef.current) {
+          update = update.eq('updated_at', serverUpdatedAtRef.current);
+        }
+        const { data: updated, error } = await update.select('updated_at');
 
         if (error) throw error;
-        setUpdatedAt(new Date().toISOString());
+        if (!updated || updated.length === 0) {
+          toast({
+            title: 'Not saved — this essay changed somewhere else',
+            description:
+              'Another tab or device saved a newer version. Reload to get it; your text here is untouched until you do.',
+            variant: 'destructive',
+          });
+          setIsSaving(false);
+          return;
+        }
+        serverUpdatedAtRef.current = updated[0].updated_at;
+        setUpdatedAt(updated[0].updated_at);
         if (targetStatus === 'published' && status !== 'published') revisionType = 'publish';
         else if (targetStatus === 'draft' && status === 'published') revisionType = 'unpublish';
         toast({ title: targetStatus === 'published' ? 'Published!' : 'Saved!' });
@@ -489,6 +515,7 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
         savedId = data.id;
         setEssayDbId(data.id);
         setCreatedAt(data.created_at);
+        serverUpdatedAtRef.current = data.updated_at;
         revisionType = 'create';
         toast({ title: 'Essay created!' });
         // Leave /new for the essay's own URL. Staying at /new meant a reload

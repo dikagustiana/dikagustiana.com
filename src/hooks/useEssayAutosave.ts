@@ -147,6 +147,14 @@ interface UseEssayAutosaveArgs {
    * `essays` row itself, not just a backup.
    */
   persistToEssay?: boolean;
+  /**
+   * Owned by WriterEditor: the row's updated_at as this tab last saw it.
+   * The row-persisting write is guarded on it so a stale tab's autosave can
+   * never overwrite newer work from another tab or device — the write matches
+   * zero rows instead, and the failure is loud. Updated here after each
+   * successful guarded write; updated by WriterEditor on load and manual save.
+   */
+  serverUpdatedAtRef?: { current: string | null };
 }
 
 /** Where the last successful write landed — the chip must not overstate it. */
@@ -190,6 +198,7 @@ export function useEssayAutosave({
   enabled,
   html,
   persistToEssay = false,
+  serverUpdatedAtRef,
 }: UseEssayAutosaveArgs): UseEssayAutosaveResult {
   const [autosaveStatus, setAutosaveStatus] = useState<AutosaveStatus>('idle');
   const [lastBackupAt, setLastBackupAt] = useState<Date | null>(null);
@@ -204,9 +213,11 @@ export function useEssayAutosave({
   // Latest values, so the debounced callback never closes over stale state.
   const latestArgs = useRef({
     essayId, title, snippet, status, doc, sectionId, categoryId, html, persistToEssay,
+    serverUpdatedAtRef,
   });
   latestArgs.current = {
     essayId, title, snippet, status, doc, sectionId, categoryId, html, persistToEssay,
+    serverUpdatedAtRef,
   };
 
   const runAutosave = useCallback(async () => {
@@ -238,7 +249,7 @@ export function useEssayAutosave({
       // The column set is deliberately narrow: no slug (autosave has none and
       // must never race generateUniqueSlug), no status, no published.
       if (args.persistToEssay) {
-        const { error: rowError } = await supabase
+        let rowUpdate = supabase
           .from('essays')
           .update({
             title: args.title,
@@ -250,7 +261,21 @@ export function useEssayAutosave({
           .eq('id', args.essayId!)
           // Belt and braces: never touch a row that has gone live since load.
           .eq('published', false);
+        // Optimistic concurrency: a stale tab must fail, not win. If another
+        // tab or device wrote after this one loaded, the guard matches zero
+        // rows; the revision above still captured this tab's text, so nothing
+        // is lost — it is just not allowed to overwrite the newer row.
+        const known = args.serverUpdatedAtRef?.current ?? null;
+        if (known) rowUpdate = rowUpdate.eq('updated_at', known);
+        const { data: rows, error: rowError } = await rowUpdate.select('updated_at');
         if (rowError) throw rowError;
+        if (!rows || rows.length === 0) {
+          throw new Error(
+            'This essay was changed in another tab or on another device. ' +
+            'Reload to get the newest version — this tab\'s text is backed up, not saved.',
+          );
+        }
+        if (args.serverUpdatedAtRef) args.serverUpdatedAtRef.current = rows[0].updated_at;
       }
 
       backedUpDoc.current = args.doc;
