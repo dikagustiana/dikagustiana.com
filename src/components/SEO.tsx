@@ -2,7 +2,8 @@ import { Helmet } from 'react-helmet-async';
 
 interface SEOProps {
   title: string;
-  description: string;
+  /** Falls back to the site-wide description (same text as index.html). */
+  description?: string;
   type?: 'article' | 'website';
   image?: string;
   url?: string;
@@ -18,7 +19,7 @@ const DEFAULT_IMAGE = '/logo.png';
 
 export function SEO({
   title,
-  description,
+  description = 'Finance, accounting, and green transition economics. Research and analysis by Dika Gustiana.',
   type = 'website',
   image = DEFAULT_IMAGE,
   url,
