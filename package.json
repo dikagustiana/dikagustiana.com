@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && node scripts/prerender.mjs",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "typecheck": "tsc -b --force",
@@ -14,7 +14,8 @@
     "test:e2e:live": "playwright test --config=playwright.live.config.ts",
     "test:unit": "vitest run",
     "test:watch": "vitest",
-    "dump:content": "node scripts/dump-content.mjs"
+    "dump:content": "node scripts/dump-content.mjs",
+    "prerender": "node scripts/prerender.mjs"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.11",

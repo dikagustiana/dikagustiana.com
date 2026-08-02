@@ -19,6 +19,7 @@ import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { ReadingProgress } from './ReadingProgress';
 import { FontSizeToggle, useFontSize } from './FontSizeToggle';
+import { ShareButton } from './ShareButton';
 import { ArticleHeader } from './ArticleHeader';
 import { ArticleToc } from './ArticleToc';
 import { ArticleBody } from './ArticleBody';
@@ -131,7 +132,8 @@ export function ArticleShell({
       <main id="article-content" tabIndex={-1} className="flex-1 outline-none">
         {/* Reader controls bar */}
         <div className="sticky top-16 z-30 bg-background/95 backdrop-blur border-b border-border">
-          <div className="container max-w-3xl lg:max-w-[64rem] py-2 flex justify-end">
+          <div className="container max-w-3xl lg:max-w-[64rem] py-2 flex items-center justify-end gap-2">
+            <ShareButton title={title} />
             <FontSizeToggle fontSize={fontSize} onChange={changeFontSize} />
           </div>
         </div>
@@ -143,11 +145,16 @@ export function ArticleShell({
         <div className={cn('container py-8 md:py-12', className)}>
           <div className="mx-auto max-w-3xl lg:max-w-[64rem] lg:grid lg:grid-cols-[minmax(0,1fr)_13rem] lg:gap-12">
             <div className={cn('min-w-0', fontSizeClass)}>
+            {/* image + dates were missing here, so per-essay share cards
+                (once pre-rendered) would have had no picture and no dates. */}
             <SEO
               title={seoTitle}
               description={seoDescription}
               type="article"
               author={seoAuthor || author || 'Dika Gustiana'}
+              image={heroImage || undefined}
+              publishedTime={publishedAt || createdAt || undefined}
+              modifiedTime={updatedAt || undefined}
             />
 
             {/* Back link */}

@@ -1013,3 +1013,92 @@ matters — and brace-expansion: 11 → 8. The remaining 8 sit behind breaking
 upgrades (`--force`), which this session did not churn mid-refactor; same
 posture as the audit-triage session, now with the count lower and the
 security-critical package current.
+
+---
+
+## 2026-08-02 — Corrections + additions session
+
+### The hero artwork is a deliberate KEEP — the deletion was a misread instruction
+The six-areas mandate said "delete all three hero images"; the owner's actual
+instruction kept the manga texture. Restored from git history. The performance
+goal survives with the method corrected: the weight was the FORMAT (1.1 MB
+lossless PNG for a colour illustration) and two zero-importer files (2.2 MB),
+not the artwork. The texture now ships as a 156 KB WebP at the same 1536×1024
+— transferred bytes measured 1,141,612 → 160,412. `min-h` 520px and
+`max-w-[55%]` stay; they exist to accommodate the artwork. Fallback: WebP is
+the one asset (src/assets holds exactly one file); if it ever fails to load,
+the paper background keeps the hero readable — every browser that runs this
+ES2020 app decodes WebP, so a second full-size fallback file would be pure
+repo weight of exactly the kind this correction removes.
+
+### Sign In on logo-hover is presentation, not security
+Sign In left the top-level nav (an item only the owner uses) and sits beside
+the logo, revealed on hover AND keyboard focus. Hiding the link does not make
+/auth harder to find and is not meant to: RLS and the admin role are the
+boundary. The value is a header that does not advertise internal tooling to
+readers. Two guardrails written into the component: the logo stays a Link
+(the original defect was a button-that-opened-a-dropdown), and the reveal has
+`focus-visible` + `group-focus-within` — a hover-only control is invisible to
+keyboard users, defect 6.6's exact class. Touch has no hover; the mobile
+drawer carries its own Sign In.
+
+### The barrel lesson (written down because it will recur)
+The mandate asked to "lazy-load KaTeX"; the real cause was upstream:
+`components/editorial/index.ts` re-exported `EssayEditor`, so EVERY public
+reading page importing `ArticleShell` from the barrel dragged the entire
+editing graph — TipTap, ProseMirror, KaTeX — into its static bundle. The
+pattern to watch for: **a barrel file that mixes reading components with
+editing components couples every reader to the editor.** Rule adopted: the
+editorial barrel exports reading components only; editing surfaces are
+imported by direct path; `tests/unit/readingPathWeight.test.ts` pins it.
+Related trap, same family: a CSS-only dynamic import gets hoisted by Vite
+into the importing chunk — lazy CSS must ride inside a lazy JS module.
+
+### The test-count guard, and why "vitest failed" was not enough
+Chosen mechanism: CI runs vitest with a JSON report and
+`scripts/assert-test-count.mjs` fails the build when the total drops below a
+floor (245) or any suite fails. The floor is raised when tests are added and
+lowered only in the commit that deliberately deletes tests, naming them.
+Two lessons from proving it: (1) vitest does exit non-zero on an
+import-crashed suite, but a piped `tail` swallowed that exit — the guard is
+belt-and-braces against every way the signal can be lost, including future
+reporter/config changes; (2) an unused NAMED import of a nonexistent module
+is silently type-elided by esbuild and never resolves — the intentional break
+in a guard proof must be a bare side-effect import.
+
+### Session practice: never hang on a non-terminating command
+Recorded for every future session: `vitest run`, never watch mode; dev and
+preview servers always backgrounded with their PID recorded for cleanup,
+never run in the foreground. This session's container restart killed exactly
+such background servers — the work survived because nothing interactive was
+holding the terminal.
+
+### Pre-rendered cards go stale until a redeploy — a real limitation, named
+Found by review, and true: publishing or editing an essay in the writer
+studio changes Supabase only. Nothing rebuilds the site, so the pre-rendered
+`dist/<path>/index.html` for a NEW essay does not exist (it shares the
+generic card) and for an EDITED essay keeps the old title/description/dates
+until the next deploy. JavaScript-capable visitors always see the current
+page — this affects crawlers only, which is exactly the audience the feature
+was built for, so it is not cosmetic.
+
+Deliberately NOT fixed in the client: the obvious shortcut is to POST a
+Vercel deploy hook from the publish flow, but that URL would ship inside the
+public admin bundle, and anyone who loaded it could trigger unlimited
+rebuilds. The correct remedies, both owner-side and server-side:
+1. A Supabase Database Webhook on `essays` (UPDATE where `published`) →
+   the Vercel deploy hook URL. The secret stays in Supabase, never the
+   browser. One-time setup; publishing then refreshes cards on its own.
+2. Or simply hit "Redeploy" in Vercel after a publishing session.
+Recorded rather than half-built, because option 1 needs a hook URL that only
+the owner can mint.
+
+### Accounting essays are skipped by the prerender, and say so
+Accounting rows canonicalise to PAGE-level URLs — `/accounting/fsli/:slug`,
+`/accounting/consolidation/:topic`, `/accounting/statutory-reporting` — that
+inline several essays. Writing one essay's `og:title` there would let an
+arbitrary essay speak for the whole page (last writer wins); writing it at
+`/essays/:slug` instead would advertise a doorway that redirects. Both are
+wrong, so those rows are skipped and NAMED in the build log, along with any
+two essays that collide on one path (which fails the build). Page-level
+cards for the FSLI surfaces are separate work on a separate object.

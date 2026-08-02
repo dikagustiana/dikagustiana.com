@@ -11,12 +11,20 @@
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
+    <!-- Crawlers (WhatsApp's included) do not execute JavaScript, so THESE
+         tags are the share card for every route that is not pre-rendered.
+         og:image must be ABSOLUTE (crawlers reject relative URLs) and
+         1200×630 (summary_large_image renders a square logo as a tiny
+         thumbnail). Published essay routes get their own tags from
+         scripts/prerender.mjs at build time. -->
     <meta property="og:title" content="Dika Gustiana" />
     <meta property="og:description" content="Finance, accounting, and green transition economics. Research and analysis by Dika Gustiana." />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="/logo.png" />
+    <meta property="og:url" content="https://dikagustiana.com/" />
+    <meta property="og:image" content="https://dikagustiana.com/og-image.png" />
 
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="https://dikagustiana.com/og-image.png" />
   </head>
 
   <body>

@@ -1,4 +1,5 @@
 import { Helmet } from 'react-helmet-async';
+import { SITE_ORIGIN, absoluteUrl } from '@/lib/siteOrigin';
 
 interface SEOProps {
   title: string;
@@ -15,7 +16,10 @@ interface SEOProps {
 }
 
 const SITE_NAME = "Dika Gustiana";
-const DEFAULT_IMAGE = '/logo.png';
+// 1200×630 share card (generated from the logo at build of this feature).
+// The square /logo.png rendered as a small thumbnail under
+// twitter:card=summary_large_image, which expects ~1200×630.
+const DEFAULT_IMAGE = '/og-image.png';
 
 export function SEO({
   title,
@@ -32,16 +36,19 @@ export function SEO({
   const truncatedDescription = description.length > 160
     ? description.substring(0, 157) + '...'
     : description;
-  // Canonicalise to origin + path (no query/hash) when no explicit url is given.
+  // Crawlers reject relative og:image URLs — absolute, always.
+  const absoluteImage = absoluteUrl(image);
+  // Canonicalise to the PRODUCTION origin + path (no query/hash) — using
+  // window.location.origin baked preview hostnames into canonical/og:url.
   const canonicalUrl =
-    url ?? (typeof window !== 'undefined' ? window.location.origin + window.location.pathname : undefined);
+    url ?? (typeof window !== 'undefined' ? SITE_ORIGIN + window.location.pathname : undefined);
 
   const jsonLd = type === 'article' ? {
     '@context': 'https://schema.org',
     '@type': 'Article',
     headline: title,
     description: truncatedDescription,
-    image,
+    image: absoluteImage,
     author: author ? {
       '@type': 'Person',
       name: author,
@@ -71,7 +78,7 @@ export function SEO({
       <meta property="og:type" content={type} />
       <meta property="og:title" content={fullTitle} />
       <meta property="og:description" content={truncatedDescription} />
-      <meta property="og:image" content={image} />
+      <meta property="og:image" content={absoluteImage} />
       {canonicalUrl && <meta property="og:url" content={canonicalUrl} />}
       <meta property="og:site_name" content={SITE_NAME} />
 
@@ -79,7 +86,7 @@ export function SEO({
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={fullTitle} />
       <meta name="twitter:description" content={truncatedDescription} />
-      <meta name="twitter:image" content={image} />
+      <meta name="twitter:image" content={absoluteImage} />
 
       {/* Article specific */}
       {type === 'article' && author && (

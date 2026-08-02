@@ -1,7 +1,6 @@
 import { Logo } from './header/Logo';
 import { MainNav } from './header/MainNav';
 import { MobileNav } from './header/MobileNav';
-import { AuthControl } from './header/AuthControl';
 
 export function Header() {
   return (
@@ -10,7 +9,6 @@ export function Header() {
         <Logo />
         <div className="flex items-center gap-1">
           <MainNav />
-          <AuthControl />
           <MobileNav />
         </div>
       </div>
