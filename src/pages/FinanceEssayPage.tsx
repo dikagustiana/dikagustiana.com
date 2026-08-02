@@ -13,7 +13,7 @@ import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { LoadingState } from '@/components/states';
+import { LoadingState, ErrorState } from '@/components/states';
 import { ArticleShell, ArticleLayout } from '@/components/editorial';
 import { LongformArticleShell } from '@/components/editorial/LongformArticleShell';
 import { contentToHtml } from '@/lib/tiptap/serialize';
@@ -56,6 +56,10 @@ export default function FinanceEssayPage() {
   const [essay, setEssay] = useState<Essay | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  // A failed FETCH is not a missing essay. Rendering 404 on a network error
+  // tells the owner their essay is gone when it is fine — the panic-then-
+  // recreate path that forks work. Errors get a retry, not a tombstone.
+  const [loadError, setLoadError] = useState(false);
 
   const { data: module } = useFinanceModuleBySlug(moduleSlug!);
 
@@ -66,6 +70,7 @@ export default function FinanceEssayPage() {
   const loadEssay = async () => {
     setLoading(true);
     setNotFound(false);
+    setLoadError(false);
     try {
       // Fetch by globally unique slug, joining the essay's ACTUAL module so the
       // URL's track/module segments can be validated against real placement.
@@ -92,7 +97,7 @@ export default function FinanceEssayPage() {
         setNotFound(true);
       }
     } catch {
-      setNotFound(true);
+      setLoadError(true);
     } finally {
       setLoading(false);
     }
@@ -117,6 +122,18 @@ export default function FinanceEssayPage() {
     },
     enabled: !!(essay as any)?.module_id,
   });
+
+  if (loadError && !loading) {
+    return (
+      <div className="container min-h-[60vh] flex items-center justify-center py-16">
+        <ErrorState
+          title="Couldn't load this essay"
+          message="The essay is still there — this page just couldn't reach the database. Check your connection and try again."
+          onRetry={loadEssay}
+        />
+      </div>
+    );
+  }
 
   if (notFound || (!loading && !essay)) {
     // A bad slug is a wrong URL, not a reason to silently teleport the reader
