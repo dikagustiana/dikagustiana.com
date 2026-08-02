@@ -1,0 +1,47 @@
+# The only backup this project has. Free-tier Supabase has no point-in-time
+# recovery and no automated backups; until this workflow existed, the sole copy
+# of every essay lived in the production database, guarded by a manual script
+# nobody was scheduled to run.
+#
+# Daily at 20:17 UTC (03:17 WIB). The dump is uploaded as a workflow artifact
+# with 90-day retention — ~90 rolling copies of all content.
+#
+# REQUIRED SECRETS (set in GitHub → Settings → Secrets and variables → Actions):
+#   VITE_SUPABASE_URL           — the project URL (not secret, but kept together)
+#   SUPABASE_SERVICE_ROLE_KEY   — service-role key, needed so RLS does not
+#                                 silently hide the ~160 draft essays from the
+#                                 dump. An anon dump would "succeed" while
+#                                 backing up almost nothing; the script refuses
+#                                 to run without it for exactly that reason.
+#
+# Until those secrets are set, this workflow fails loudly on schedule — which
+# is the correct behaviour for a backup that is not actually happening.
+name: Content backup
+
+on:
+  schedule:
+    - cron: '17 20 * * *'
+  workflow_dispatch:
+
+jobs:
+  dump:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Dump all content
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: node scripts/dump-content.mjs
+      - name: Upload dump artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: content-dump-${{ github.run_id }}
+          path: backups/
+          retention-days: 90
+          if-no-files-found: error

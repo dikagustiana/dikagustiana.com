@@ -31,16 +31,15 @@ export function HeroSection() {
               className="text-3xl sm:text-4xl md:text-5xl lg:text-[3.5rem] font-sans font-bold tracking-tight mb-8"
               style={{ color: '#0F172A', lineHeight: 1.22 }}
             >
-              Let's be insane and delusional.
-              <br />
-              We never know how many doors will open.
+              Finance, explained from first principles.
             </h1>
 
             <p
               className="text-base sm:text-lg font-sans font-normal leading-relaxed mb-12 max-w-lg"
               style={{ color: '#334155', letterSpacing: '0.025em' }}
             >
-              Bridging finance, strategy, and data to create impact.
+              Essays and a structured curriculum on corporate finance, accounting,
+              and the economics of the green transition — by Dika Gustiana.
             </p>
 
             <Link

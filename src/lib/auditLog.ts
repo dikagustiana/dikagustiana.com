@@ -4,6 +4,8 @@ export type AuditAction =
   | 'create'
   | 'update'
   | 'delete'
+  | 'archive'
+  | 'restore'
   | 'publish'
   | 'unpublish'
   | 'bulk_publish'

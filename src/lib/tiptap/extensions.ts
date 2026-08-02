@@ -25,6 +25,7 @@ import Placeholder from '@tiptap/extension-placeholder';
 import Image from '@tiptap/extension-image';
 import { Table, TableCell, TableHeader, TableRow } from '@tiptap/extension-table';
 import { Blockquote } from '@tiptap/extension-blockquote';
+import type { Node as ProseMirrorNode } from '@tiptap/pm/model';
 import { TextStyle, Color, BackgroundColor } from '@tiptap/extension-text-style';
 import Superscript from '@tiptap/extension-superscript';
 import Subscript from '@tiptap/extension-subscript';
@@ -116,7 +117,7 @@ function baseExtensions(interactive: EditorExtensionOptions | null) {
     BlockMath.configure(
       interactive?.onEditMath
         ? {
-            onClick: (node, pos) =>
+            onClick: (node: ProseMirrorNode, pos: number) =>
               interactive.onEditMath?.({ pos, latex: String(node.attrs.latex ?? ''), display: true }),
           }
         : {},
@@ -124,7 +125,7 @@ function baseExtensions(interactive: EditorExtensionOptions | null) {
     InlineMath.configure(
       interactive?.onEditMath
         ? {
-            onClick: (node, pos) =>
+            onClick: (node: ProseMirrorNode, pos: number) =>
               interactive.onEditMath?.({ pos, latex: String(node.attrs.latex ?? ''), display: false }),
           }
         : {},

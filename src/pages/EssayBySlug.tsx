@@ -16,7 +16,7 @@
 import { useParams, Navigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { LoadingState } from '@/components/states';
+import { LoadingState, ErrorState } from '@/components/states';
 import { ArticleShell } from '@/components/editorial';
 import { contentToHtml } from '@/lib/tiptap/serialize';
 import { resolvePresentation, type EssayPresentation } from '@/lib/presentation';
@@ -48,7 +48,7 @@ interface Row {
 export default function EssayBySlug() {
   const { slug } = useParams<{ slug: string }>();
 
-  const { data: essay, isLoading } = useQuery({
+  const { data: essay, isLoading, isError, refetch } = useQuery({
     queryKey: ['essay-by-slug', slug],
     enabled: !!slug,
     queryFn: async () => {
@@ -69,6 +69,17 @@ export default function EssayBySlug() {
   });
 
   if (isLoading) return <LoadingState />;
+  // A failed fetch is not a missing essay — an outage rendered as 404 tells
+  // the reader (and the owner) the essay is gone when it is fine.
+  if (isError) {
+    return (
+      <ErrorState
+        title="Couldn't load this essay"
+        message="The essay is still there — this page just couldn't reach the database. Check your connection and try again."
+        onRetry={() => refetch()}
+      />
+    );
+  }
   // RLS hides drafts from anonymous readers, so "not found" here covers both
   // "no such essay" and "not published for you" — deliberately the same answer.
   if (!essay) return <NotFound />;

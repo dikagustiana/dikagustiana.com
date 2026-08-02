@@ -35,7 +35,7 @@ export function Logo() {
           className="h-8 w-8 object-contain"
         />
         <span className="hidden sm:block text-lg font-semibold text-header-foreground group-hover:opacity-80 transition-opacity">
-          Friendly learning buddy
+          Dika Gustiana
         </span>
       </button>
 

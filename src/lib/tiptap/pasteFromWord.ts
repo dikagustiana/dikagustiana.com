@@ -203,7 +203,7 @@ export function normalizeWordHtml(html: string): string {
   //    whitespace or a non-breaking space is not content the author typed.
   body.querySelectorAll('p').forEach(p => {
     if (p.querySelector('img, table, a, br')) return;
-    const text = (p.textContent || '').replace(/ /g, ' ').trim();
+    const text = (p.textContent || '').replace(/\u00a0/g, ' ').trim();
     if (text === '') p.remove();
   });
 

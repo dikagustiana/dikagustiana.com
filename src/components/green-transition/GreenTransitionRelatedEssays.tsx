@@ -22,6 +22,7 @@ export function GreenTransitionRelatedEssays({ phase, currentSlug }: GreenTransi
 
   const loadRelatedEssays = async () => {
     try {
+      if (!phase) return; // no phase, no query — .eq('phase', undefined) matches nothing useful
       const { data } = await supabase
         .from('essays')
         .select('slug, title')

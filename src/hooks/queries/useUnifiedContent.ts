@@ -281,10 +281,24 @@ export function useDeleteContent() {
           .select('title, slug, section')
           .eq('id', id)
           .maybeSingle();
-        const { error } = await supabase.from('essays').delete().eq('id', id);
+        // Archive, never delete. A hard delete used to CASCADE into
+        // essay_revisions — the essay and its entire history gone from one
+        // confirm() click, on a database with no point-in-time recovery. An
+        // archived essay is invisible to readers (published=false), visible in
+        // the admin list with an "archived" badge, and restorable. The row and
+        // its revisions stay. (The FK is now ON DELETE RESTRICT as well, so
+        // even a raw SQL delete cannot silently take the history with it.)
+        const { error } = await supabase
+          .from('essays')
+          .update({
+            status: 'archived',
+            published: false,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', id);
         if (error) throw error;
         await logAuditEvent({
-          action: 'delete',
+          action: 'archive',
           table_name: 'essays',
           record_id: id,
           record_title: target?.title ?? null,
@@ -314,6 +328,40 @@ export function useDeleteContent() {
       queryClient.invalidateQueries({ queryKey: ['content-stats'] });
       queryClient.invalidateQueries({ queryKey: ['essays'] });
       queryClient.invalidateQueries({ queryKey: ['fsli-pages'] });
+    },
+  });
+}
+
+/** Bring an archived essay back as a draft. The other half of archive-not-delete. */
+export function useRestoreContent() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id }: { id: string }) => {
+      const { data: target } = await supabase
+        .from('essays')
+        .select('title, slug, section')
+        .eq('id', id)
+        .maybeSingle();
+      const { error } = await supabase
+        .from('essays')
+        .update({ status: 'draft', published: false, updated_at: new Date().toISOString() })
+        .eq('id', id)
+        .eq('status', 'archived');
+      if (error) throw error;
+      await logAuditEvent({
+        action: 'restore',
+        table_name: 'essays',
+        record_id: id,
+        record_title: target?.title ?? null,
+        record_slug: target?.slug ?? null,
+        record_section: target?.section ?? null,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['unified-content'] });
+      queryClient.invalidateQueries({ queryKey: ['content-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['essays'] });
     },
   });
 }

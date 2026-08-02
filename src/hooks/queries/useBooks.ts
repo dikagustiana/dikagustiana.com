@@ -80,7 +80,7 @@ export const useUploadBook = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ file, category, title, author, year }: UploadBookInput) => {
-      const safeName = file.name.replace(/[^\w.\-]+/g, '_');
+      const safeName = file.name.replace(/[^\w.-]+/g, '_');
       const filepath = `${category}/${Date.now()}-${safeName}`;
 
       const { error: uploadError } = await supabase.storage

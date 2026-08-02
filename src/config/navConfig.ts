@@ -16,11 +16,20 @@ export const accountingItems: NavItem[] = [
   { label: 'Statutory Reporting', path: '/accounting/statutory-reporting' },
 ];
 
+/**
+ * Track paths must use the SLUGS FROM `finance_sections` — fundamentals,
+ * strategic-finance, planning, analytics (+ capital-allocation, deliberately
+ * absent below until it has modules). These used to say
+ * `/finance/planning-forecasting` and `/finance/financial-analytics`: readable
+ * labels, nonexistent tracks, and the two menu items rendered empty indexes
+ * while the route sweep stayed green — it opened canonical URLs directly and
+ * never clicked the nav. tests/unit/navConfig.test.ts now pins every path.
+ */
 export const financeItems: NavItem[] = [
   { label: 'Fundamentals', path: '/finance/fundamentals' },
   { label: 'Strategic Finance', path: '/finance/strategic-finance' },
-  { label: 'Planning & Forecasting', path: '/finance/planning-forecasting' },
-  { label: 'Financial Analytics', path: '/finance/financial-analytics' },
+  { label: 'Planning & Forecasting', path: '/finance/planning' },
+  { label: 'Financial Analytics', path: '/finance/analytics' },
   { label: 'Finance in Action', path: '/finance/finance-in-action' },
 ];
 

@@ -9,6 +9,55 @@ alternatives. Newest first.
 
 ---
 
+---
+
+# 2026-08-02 — Audit triage: what was deliberately not done, and why
+
+## Archive, not soft-delete-with-a-new-column
+`essays.status` already contains `archived`; the delete flow uses it instead of a new
+`deleted_at` column. No schema change to `essays`, no RLS churn, the admin UI already
+rendered the badge — the smallest change that makes deletion reversible. The FK to
+`essay_revisions` is `ON DELETE RESTRICT`, so even a deliberate SQL purge must delete the
+history explicitly first.
+
+## The publication-state trigger, despite the last trigger disaster
+`validate_essay_tone_fields` died referencing columns another migration dropped.
+`sync_essays_publication` references only `status` and `published` on its own NEW/OLD row
+— it cannot outlive its columns without failing the very migration that drops them. A DB
+trigger (not a client fix alone) because the divergence had two live writers and PostgREST
+is open to any future one; the guard has to sit below all of them.
+
+## `capital-allocation` stays out of the nav
+It is a real `finance_sections` row but has 0 modules and 0 essays. A nav item pointing at
+an empty track index advertises nothing. Add it back the day it has content —
+`tests/unit/navConfig.test.ts` documents the deliberate absence.
+
+## Findings not acted on this session, with reasons
+- **#3 client-side audit log** — with one admin, the log audits the auditor; and the
+  destructive action it existed to catch (hard delete) no longer exists in the UI. The
+  real fix — server-side trigger logging — becomes worth it the day a second admin
+  exists. Accepted for now.
+- **#13 CSP report-only with no endpoint** — a header reporting to nowhere is decoration,
+  but *enforcing* a CSP on this SPA untested risks breaking the site for no live attacker
+  model (one author, no user-generated content from non-admins). Deferred as a scoped
+  task: enforce with a tested policy, or remove the noise.
+- **#16/#17/#18 (FSLI publish flow, text-typed financials, model versioning)** — verified
+  again this session: `finance_models` 0 rows, `fsli_sections` 0 rows, and no insert path
+  exists (`ModelAdminPanel` unreachable by construction). Governance for unwritable
+  tables is premature. These resurface the day an insert path is built — and #17's
+  parseFloat(...)||0 must be fixed BEFORE data entry starts, not after.
+- **No framework migration** — agree with the owner. Two published essays do not justify
+  a rewrite; the proportionate SEO items (sitemap, robots, absolute OG, honest 404
+  signalling) are ranked and waiting (#14, not reached this session).
+- **Dependency vulnerabilities** — measured: 11 total (2 critical, 3 high), **5 in
+  production dependencies** (2 high). `npm audit fix` without `--force` does not clear
+  them; the rest are major-version bumps (vite 5→6 class). Deliberately not churned at
+  the end of a session that touched save paths; scoped upgrade next session, with CI now
+  in place to catch fallout.
+- **#12 unsafe URLs, #14 proportionate SEO, #9 canonical redirects, #10 cache-on-logout,
+  #11 role race, hero-texture compression** — not reached; ranked and estimated in
+  docs/AUDIT_TRIAGE.md so the next session starts from the list, not from scratch.
+
 # 2026-08-02 — Branch naming, the table of contents, and the embed
 
 ## Branches are named for the work they contain, and a merged name is never reused
