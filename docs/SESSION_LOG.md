@@ -4,6 +4,8 @@ Append-only. Newest entry first. A fresh session must be able to resume from thi
 
 ## NEXT ACTION (single)
 **Re-baseline the `fa-07-01` invariant, then decide whether revision 12 was intended.**
+(The previous next action — merge the editorial-taxonomy PR — is **done**: it landed as
+PR #20, `a85ffaa`, and this branch is merged up to it.)
 The mandated fingerprint (21,946 chars / 81 blocks / md5 `b36b8ba5…`) no longer matches any
 row. `fa-07-01` is `driver-tree-construction` and now measures **26,932 chars / 82 blocks /
 md5 `f8e0dcfa8ecc9cc5cd8a811d644ea0b5`**, because it was edited in the writer studio today
@@ -11,6 +13,10 @@ between 12:21 and 12:50 UTC (`essay_revisions` 4-8 at 81 blocks; 12 and 13 at 82
 edit was intended, update the invariant to the new fingerprint so future sessions have a
 true target; if it was not, `essay_revisions` revision 8 is the 81-block state. Either way
 the invariant as written cannot be satisfied and should not be carried forward unchanged.
+**Independently corroborated:** the parallel editorial-taxonomy session (below) measured
+`26,932 / 82 / f8e0dcfa…` at *its* session start and byte-identical at its end, so the
+divergence predates both sessions and neither caused it. Two sessions have now spent effort
+proving the same stale number — that is the cost of not re-baselining it.
 After that, the standing item unchanged: set the two backup secrets (`VITE_SUPABASE_URL`,
 `SUPABASE_SERVICE_ROLE_KEY`) and flip the backup workflow's first run green — still the only
 mitigation of free-tier Supabase having no PITR.
@@ -76,6 +82,42 @@ The homepage manga artwork is untouched and was confirmed present.
 CLI migration command was run. RLS re-verified regardless: **14 public tables, 14 with RLS,
 0 without a policy.** Test count held at **23 files / 248 tests**; typecheck exit 0; eslint
 0 errors. Preview server ran detached as PID 8717; `test:watch` never run.
+
+## 2026-08-02 (editorial-taxonomy session) — GATE E: The Next Big Thing opens
+
+Branch `claude/blissful-archimedes-ltp5rb`, base `main` @ `b38a135`. **GATE E PASSED**,
+all seven clauses measured — evidence in `docs/GATE_LEDGER.md`; six decisions in
+`docs/DECISIONS.md`.
+
+**What changed.** (1) Five categories under `next-big-thing`
+(`next-big-thing-technology` … `-governance`), seeded by migration
+`20260802131648`, slugs following the one existing row's convention — which
+`derivePhase()` already encoded. (2) The publish modal placement is one control
+switching on the section: editorial essays pick a category, and phase/section/URL
+derive from that one choice; finance and accounting blocks untouched. (3) The
+editorial canonical URL is three segments — `/the-next-big-thing/:theme/:slug` —
+matching every other placed section; the two-segment shape resolves and redirects; the
+finance-shaped gap in `EssayUrlInput` (no way to pass an editorial placement) is
+closed in both URL builders. (4) `validate_essay_placement` gained the editorial
+direction (migration `20260802131711`), rejections observed live in both directions
+plus on the gate essay. (5) The landing's taxonomy-dodging quick-add dialog is deleted;
+the ?theme= tabs filter for real now (state lives in the URL). (6) First editorial
+essay live: "The Agentic Finance Function", written and published through the studio,
+observed anonymously at its canonical URL, on the landing, and in its category listing
+by clicking the tabs.
+
+**Findings.** fa-07-01 diverged from the mandate's baseline BEFORE this session touched
+anything (owner revisions 6–13 today 12:38–12:50 UTC; session-start measurement
+26,932 / 82 / `f8e0dcfa…` held byte-identical to session end — no reversion, the
+mandate's numbers were simply stale). The NBT essay page fetched by slug with no
+section check (any essay rendered in its shell — fixed by the canonical redirect).
+Report on opening the six remaining sections delivered in the session report.
+
+**Hygiene.** 163 essays (162 finance unchanged + 1 next-big-thing); 0 probe rows;
+0 tables without RLS; probe admin deleted (owner's account is again the only one);
+256 tests / 24 files green, guard floor 245 → 253; eslint 0 errors; `tsc -b --force`
+clean; build + prerender green. Migrations via `apply_migration` only, mirrored into
+`supabase/migrations/`. Servers backgrounded with PIDs recorded, killed at teardown.
 
 ## 2026-08-02 (six-areas session) — identity, URLs, curation, studio, weight, defects
 

@@ -1,6 +1,6 @@
 import NotFound from './NotFound';
 import { resolvePresentation, type EssayPresentation } from '@/lib/presentation';
-import { useParams } from 'react-router-dom';
+import { Navigate, useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -8,6 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { LoadingState, ErrorState } from '@/components/states';
 import { ArticleShell, ArticleLayout } from '@/components/editorial';
 import { contentToHtml } from '@/lib/tiptap/serialize';
+import { essayUrl } from '@/lib/essayUrl';
 
 interface Essay {
   id: string;
@@ -19,6 +20,7 @@ interface Essay {
   read_time: string | null;
   thumbnail_url: string | null;
   content: string | null;
+  section: string | null;
   phase: string | null;
   status: string | null;
   published: boolean | null;
@@ -42,7 +44,10 @@ const categoryLabels: Record<string, string> = {
 };
 
 export default function NextBigThingEssayPage() {
-  const { slug } = useParams<{ slug: string }>();
+  // Two route shapes land here: the canonical three segments
+  // (/the-next-big-thing/:theme/:slug) and the two-segment resolver
+  // (/the-next-big-thing/:slug). `theme` is undefined on the second.
+  const { theme, slug } = useParams<{ theme?: string; slug: string }>();
   const { isAdmin } = useAuth();
   const [essay, setEssay] = useState<Essay | null>(null);
   const [loading, setLoading] = useState(true);
@@ -137,6 +142,25 @@ export default function NextBigThingEssayPage() {
   // NotFound also offers the nearest real essay for a near-miss slug.
   if (!essay) return <NotFound />;
 
+  // The slug names a real essay, so a mismatched address redirects to the one
+  // canonical URL rather than 404ing (the same correction GATE 1f made for
+  // finance). This covers: the two-segment shape for an essay that has a
+  // theme, a wrong theme segment, a theme segment on a theme-less essay — and,
+  // because the builder starts from the ROW's section, a non-NBT essay
+  // reached through this route goes home to its own section instead of
+  // rendering inside the wrong shell.
+  const canonical = essayUrl({
+    slug: essay.slug,
+    section: essay.section ?? 'next-big-thing',
+    phase: essay.phase,
+  });
+  const currentPath = theme
+    ? `/the-next-big-thing/${theme}/${slug}`
+    : `/the-next-big-thing/${slug}`;
+  if (canonical && canonical !== currentPath) {
+    return <Navigate to={canonical} replace />;
+  }
+
   const currentIndex = siblings?.findIndex((e) => e.slug === slug) ?? -1;
   const previous = currentIndex > 0 ? siblings![currentIndex - 1] : null;
   const next =
@@ -144,7 +168,10 @@ export default function NextBigThingEssayPage() {
       ? siblings[currentIndex + 1]
       : null;
 
-  const getEssayUrl = (essaySlug: string) => `/the-next-big-thing/${essaySlug}`;
+  // Siblings share this essay's category, so they share its theme segment.
+  const getEssayUrl = (essaySlug: string) =>
+    essayUrl({ slug: essaySlug, section: 'next-big-thing', phase: essay.phase }) ??
+    `/the-next-big-thing/${essaySlug}`;
 
   const presentation = resolvePresentation(essay);
   const deck = presentation.deck || essay.snippet;

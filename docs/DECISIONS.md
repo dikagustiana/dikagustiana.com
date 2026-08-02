@@ -106,6 +106,90 @@ that `DevelopmentFinance.tsx` carries four.
 
 ---
 
+# 2026-08-02 — Opening the editorial taxonomy: next-big-thing
+
+## Category slugs: `<section-slug>-<name>`, because one row and one function already agreed
+
+The five categories are `next-big-thing-technology`, `next-big-thing-economy`,
+`next-big-thing-society`, `next-big-thing-environment`, `next-big-thing-governance`
+(Technology · Economy · Society · Environment · Governance, sort order = navigation
+order). The convention was read, not invented: the single existing row is
+`finance-general` under `finance`, and `derivePhase()` in
+`src/domains/writing/schema/placement.ts` — with tests — already strips
+`"<sectionSlug>-"` from a category slug to produce the phase/theme. So the slug scheme,
+the derivation function and the reading side's filter values (`essays.phase` =
+`technology` …) are one convention, not three. A section wanting differently-shaped
+category slugs would break `derivePhase`'s assumption and should change the function
+and its tests in the same commit.
+
+## The modal is ONE placement control that switches on the section
+
+Chosen over two separate flows. The section is fixed before the modal ever opens — the
+writer entered through `/admin/writer/:section/...` — so the modal renders exactly one
+placement block: finance → track/module/order/lesson-type (untouched), accounting →
+FSLI line item (untouched), editorial → category. The writer makes one choice and
+`WriterEditor` derives the dependent columns the same way it already derived finance's
+(`phase` from the category via `derivePhase`, mirroring `phase`/`topic` from the
+module). The modal's URL line renders through `essayUrl` itself (with `…` as the slug),
+so the preview can never disagree with the canonical builder. The writer never learns
+which taxonomy tree they are in — which was the point.
+
+Guard worth naming: `essays.category_id` defaults to `finance-general` at the DB, so a
+loaded editorial essay can carry a category from another section. Once a section has
+its own categories, that catch-all no longer satisfies "Category is required"
+(`categoryBelongsToSection` in WriterEditor) and is deliberately not offered in the
+list — otherwise the default would quietly publish essays the section page files
+nowhere.
+
+## The editorial canonical URL is three segments: /the-next-big-thing/:theme/:slug
+
+The finance decision (Section 2, six-areas session) put the STABLE placement axis in
+the address and kept the volatile one out: `/finance/:track/:slug`. The editorial
+equivalent fell out of the route table itself: green-transition, development-finance
+and critical-thinking essays already live at `/section/:phase/:slug` — next-big-thing
+was the one placed section whose essay URL dropped its axis. Its five themes mirror the
+navigation and are as stable as finance's tracks. So: theme (= category slug minus
+section prefix, cached as `essays.phase`) is the middle segment;
+`/the-next-big-thing/:slug` stays as a resolver that redirects to canonical when a
+theme exists and renders directly when none does (no NBT essay existed before today, so
+there are no old links to break — but the deployed bundle mints two-segment links until
+the next deploy, and they heal). What was finance-shaped about the builder, recorded as
+a finding: `EssayUrlInput` had fields for finance and accounting placement but no way
+to even RECEIVE an editorial one, and both URL builders (`essayUrl` and placement.ts's
+`buildCanonicalUrl` — still two, still kept in lockstep by tests) flattened NBT to two
+segments.
+
+## The placement trigger gained the editorial direction; the catch-all hole stays open, named
+
+`validate_essay_placement` now also refuses an essay whose category belongs to a
+NON-finance section when `essays.section` disagrees (23514, verified live both
+directions). The reverse hole — a non-finance essay holding `finance-general` — is
+still legal, deliberately: accounting, books, ielts and tools have no categories of
+their own, and while `category_id` is NOT NULL with that default, the catch-all is
+their only legal value (the original migration's design note tolerates exactly this).
+The hole closes per-section: each section that opens gets its own categories, at which
+point its essays stop being satisfiable by the catch-all (the UI already refuses; the
+trigger can tighten fully once every section has categories).
+
+## The landing's quick-add dialog is deleted, not fixed
+
+`EssayDialog` on the NBT landing inserted essays with `phase` but no `category_id` —
+the DB default filed them under finance-general, dodging the taxonomy this session
+exists to open, with no validation, no revisions and no `content_json`. The same
+one-authoring-surface rule that retired the FSLI inline editor applies: deleted (with
+the never-imported `EssayModule`), and the admin button now links to
+`/admin/writer/next-big-thing/new`.
+
+## The ?theme= tabs now actually filter
+
+The section subnav's five tabs linked to `?theme=<topic>` and nothing read the
+parameter — dead navigation, the exact class the 65-route sweep missed because it never
+clicked the nav. The feed's topic filter state now IS the URL parameter (single source
+of truth, shareable filtered views); the dropdown writes it with `replace` so the back
+button is not spammed. Verified by clicking the tabs anonymously, not by opening URLs.
+
+---
+
 ---
 
 ---

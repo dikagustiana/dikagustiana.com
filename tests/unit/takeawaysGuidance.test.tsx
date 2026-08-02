@@ -82,6 +82,7 @@ function renderMetadata(
       open
       onOpenChange={noop}
       isPublished={false}
+      sectionSlug="next-big-thing"
       isFinanceSection={false}
       modules={[]}
       moduleId={null} setModuleId={noop}
@@ -112,12 +113,12 @@ describe('key-takeaways guidance copy matches the gate', () => {
   });
 
   it('says three are required for a finance essay with no module', () => {
-    renderMetadata({ isFinanceSection: true, moduleId: null });
+    renderMetadata({ sectionSlug: 'finance', isFinanceSection: true, moduleId: null });
     expect(screen.getByText(/Three are required to publish/i)).toBeInTheDocument();
   });
 
   it('explains the per-lesson-type rule only for a module-placed finance lesson', () => {
-    renderMetadata({ isFinanceSection: true, moduleId: 'mod-1' });
+    renderMetadata({ sectionSlug: 'finance', isFinanceSection: true, moduleId: 'mod-1' });
     expect(screen.getByText(/optional \(but all-or-nothing\) for case studies/i)).toBeInTheDocument();
   });
 });

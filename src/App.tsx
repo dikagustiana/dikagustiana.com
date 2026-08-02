@@ -217,8 +217,15 @@ const App = () => (
             {/* Legacy admin editor routes → redirect to Writer Studio */}
             <Route path="/admin/content/:id" element={<RequireAdmin><AdminEditorRedirect /></RequireAdmin>} />
 
-            {/* Public essay pages */}
+            {/* The Next Big Thing. The essay's canonical URL is three
+                segments — /the-next-big-thing/:theme/:slug — the editorial
+                equivalent of /finance/:track/:slug (the theme is the
+                category, cached on the row as `phase`). The two-segment
+                shape stays as a resolver: it renders the essay when it has
+                no theme and redirects to canonical when it does, so links
+                minted before the taxonomy opened keep working. */}
             <Route path="/the-next-big-thing" element={<TheNextBigThing />} />
+            <Route path="/the-next-big-thing/:theme/:slug" element={<NextBigThingEssayPage />} />
             <Route path="/the-next-big-thing/:slug" element={<NextBigThingEssayPage />} />
 
             {/* Not Found */}

@@ -295,6 +295,119 @@ published/status rows; `auth.users` back to one account (the owner's) after the
 `s10-gate` deletion. Zero schema changes beyond the two mandated migrations; RLS and
 auth untouched.
 
+## Editorial-taxonomy session (2026-08-02) — GATE E: The Next Big Thing opens
+
+Mandate: build the category taxonomy for `next-big-thing`, give the publish modal an
+editorial placement path, and prove the first non-finance essay end to end. Branch
+`claude/blissful-archimedes-ltp5rb`. Local build (new code) served at 127.0.0.1:4173
+against the LIVE database through the dev-only CORS relay — the same verification
+surface every prior live gate used.
+
+### GATE E — PASSED, all seven clauses measured
+
+**E1 — The five categories exist under `next-big-thing`, slugs per the existing
+convention.** Migration `20260802131648_next_big_thing_categories` (applied via
+`apply_migration`, mirrored in the repo). The one pre-existing row (`finance-general` =
+`<section>-<name>`) set the convention, which `derivePhase()` and its tests already
+assumed; the five rows measured back from the live DB:
+`next-big-thing-technology` (Technology, 1) · `next-big-thing-economy` (Economy, 2) ·
+`next-big-thing-society` (Society, 3) · `next-big-thing-environment` (Environment, 4) ·
+`next-big-thing-governance` (Governance, 5). RLS: the categories table already carries
+the full five-policy set; per-table policies cover new rows — 0 public tables without
+RLS at session end.
+
+**E2 — An essay created through the writer studio, not by SQL.** "The Agentic Finance
+Function", written in `/admin/writer/next-big-thing/new` by a Playwright-driven probe
+admin (deleted after): title, subtitle and nine paragraphs typed into the canvas, then
+Post settings. **Set by hand: title, subtitle/deck, body, ONE placement choice (category
+= Technology), three key takeaways.** Derived by the modal/editor, not asked for:
+`slug` (from the title), `phase` = `technology` (from the category slug),
+`section` (from the route), `read_time`, author and date defaults, and every curriculum
+column left NULL. Row measured after publish: `section=next-big-thing`,
+`phase=technology`, `category=next-big-thing-technology`, `module_id` NULL,
+`finance_section` NULL, `finance_order` NULL, `topic` NULL, `fsli_slug` NULL,
+`status=published`. Screenshot: modal previewing
+`Publishes to /the-next-big-thing/technology/…` before the click.
+
+**E3 — Anonymous reader at the canonical URL.** Fresh browser context, no auth:
+`GET /the-next-big-thing/technology/the-agentic-finance-function` → **HTTP 200**, essay
+renders (title, TECHNOLOGY chip, deck, body, takeaways). On the DEPLOYED site the old
+bundle serves the essay at the two-segment shape today (200, renders — its router
+predates the theme segment); the three-segment canonical activates on the next deploy,
+and the anonymous REST query the deployed reader uses already returns the row.
+
+**E4 — Section landing and category listing, observed by clicking, not by URL.**
+Landing lists the essay with `href=/the-next-big-thing/technology/the-agentic-finance-function`.
+**Clicking the Technology tab** filtered the feed (URL `?theme=technology`, essay
+present, count "1 essay", the topic select itself reading Technology); **clicking the
+Governance tab** correctly showed "No essays found". Before this session those five
+tabs were dead links — they navigated and nothing filtered; the feed's topic state now
+lives in the URL param. Deep link `?theme=technology` filters on load. Screenshots
+05–08.
+
+**E5 — Finance placement undisturbed, proven through the same modal.** A probe finance
+essay created and published in `/admin/writer/finance/new`: track `analytics` → module
+`07` → order `99` → category General. Row measured: `module_id` → `t4-m07`,
+`finance_section=analytics`, `finance_order=99`, `phase=financial-analytics`,
+`topic=t4-m07` — the exact pre-session column behaviour. Rendered anonymously at
+`/finance/analytics/placement-regression-probe-gate-e` (200) — then deleted with its
+revisions (0 probe rows at session end). fa-07-01 also re-rendered at its canonical.
+
+**E6 — The trigger still rejects incoherent placement, attempted directly.** Three
+rejections recorded against the live DB, all ERRCODE 23514, none mutating a row:
+(a) fa-07-01 (module-placed) given category `next-big-thing-technology` → "carries a
+curriculum module_id but an editorial category (section next-big-thing)";
+(b) site-rebuild-note (module-less finance) given that category → "carries a category
+from section next-big-thing but section cache says finance" (the NEW editorial-direction
+rule added by `20260802131711_essay_placement_editorial_coherence`);
+(c) the published gate essay given `module_id=t4-m07` → rejected (a).
+
+**E7 — The canonical URL builder handles both paths.** What was finance-shaped about
+it: `EssayUrlInput` carried placement fields for finance (`track`, `moduleSlug`) and
+accounting (`fsliSlug`, `topic`) but had NO way to receive an editorial placement, and
+the `next-big-thing` branch flattened to two segments while every other placed section
+(`finance`, `green-transition`, `development-finance`, `critical-thinking`) carries its
+placement axis as the middle segment. Fixed in `essayUrl` AND its parallel copy
+`buildCanonicalUrl` (placement.ts) — both branches now emit
+`/the-next-big-thing/:theme/:slug` when the theme (cached as `phase`) exists, falling
+back to the two-segment resolver when it does not; both pinned by tests
+(`essayUrl.test.ts` asserts against the real route table in App.tsx).
+
+### Found on the way
+
+- **fa-07-01 no longer matches the mandate's stated baseline — before this session
+  touched anything.** Mandate said 21,946 chars / 81 blocks / md5 `b36b8ba5…`; measured
+  at session START: **26,932 / 82 / `f8e0dcfa8ecc9cc5cd8a811d644ea0b5`**, with studio
+  revisions 6–13 (autosaves + manual saves) timestamped 2026-08-02 12:38–12:50 UTC —
+  the owner wrote today after the mandate's numbers were taken. This session's
+  obligation is byte-identity against session start, and that is what was measured:
+  **identical at session end (26,932 / 82 / `f8e0dcfa…`), re-verified after every gate.**
+  No reversion attempted — reverting would have destroyed the owner's newest work.
+- **The NBT landing's "Add Essay" dialog was a second creation path that dodged the
+  taxonomy**: it inserted `section='next-big-thing'` with `phase` but no `category_id`,
+  so the DB default filed the essay under `finance-general` — no validation, no
+  revisions, no `content_json`. Deleted (with the unused `EssayModule`); the landing's
+  admin button now links into the writer studio.
+- **The essay page fetched by slug with no section check**, so any essay's slug
+  rendered inside the NBT shell. The canonical redirect now starts from the ROW's
+  section, sending strays home instead of dressing them in the wrong chrome.
+- The robot's first pass left the two created essays with **zero revision rows** — the
+  fire-and-forget `recordRevision` was killed by an immediate full-page navigation.
+  Re-tested at human speed: "Update published post" wrote revision 1 (`manual_save`).
+  Harness artefact, not an app defect; noted because a zero where history should be is
+  worth explaining.
+
+### Session hygiene
+
+fa-07-01 byte-identical to session start (26,932 / 82 / md5 `f8e0dcfa…`). 163 essays =
+162 finance (count unchanged) + 1 next-big-thing; 0 probe rows; 0 public tables without
+RLS or policies; `auth.users` back to the owner's single account after the
+`gate-e-probe` deletion. Two migrations applied via `apply_migration` only, both
+mirrored in `supabase/migrations/`. Checks: eslint 0 errors (30 warnings, cap 35),
+`tsc -b --force` clean, **256 tests / 24 files green** (guard floor raised 245 → 253),
+build + prerender green. Servers were backgrounded with PIDs recorded and killed at
+teardown; `vitest run` only, never watch mode.
+
 ## Notes
 
 ### `tsc --noEmit` was checking ZERO files (found 2026-08-01, fixed)
@@ -364,8 +477,29 @@ the feed pages). Observed rather than assumed: opening the Sort select on
 rgb(255,255,255)` — **8.95:1**, reading like a native select highlight. Under the emerald
 this surface was white-on-green at 2.30:1, so it improved too.
 
-**Preview server:** started detached as PID **8717** (`vite preview --host 127.0.0.1 --port
-4173`), never in the foreground; `test:watch` was not run.
+**Re-verified after merging `origin/main` (PR #20, `a85ffaa`).** That PR landed in exactly
+this session's blast radius — it rebuilt `TheNextBigThing.tsx` on `EditorialFeed`, made the
+`?theme=` tabs filter for real, and **deleted `EssayModule.tsx` and `EssayDialog.tsx`
+outright**, independently confirming this session's finding that `EssayModule` was dead code.
+The merge conflicted on that file (deleted there, modified here — their deletion accepted)
+and on the page's hero block (their restored stock-photo hero vs this session's text header —
+the text header kept, since removing the hot-link is the point). Every gate was then re-run
+against the merged tree rather than assumed: greps still 0 / 0, raw palette still 102,
+accent still 8.22 / 8.58 / 8.58 / 8.95, both headers still text with `scrollWidth ==
+clientWidth` at 1440 and 375, no-thumbnail card still 0 images / 0 placeholder boxes / 126px,
+CTA still "Read the essays" with its focus ring and `:active` rule, reduced-motion still
+jumps while no-preference still glides, hero artwork still present. Tests on the merged tree:
+**24 files / 256 tests**, clearing the guard floor `assert-test-count.mjs` raised to 253.
+
+**`fa-07-01` — independently corroborated.** The parallel session's own ledger entry records
+it measured `26,932 / 82 / f8e0dcfa…` at its session start and byte-identical at its end,
+and attributes the divergence to owner revisions 6-13 earlier that day. Two sessions reached
+the same conclusion from different evidence: the mandate's fingerprint is stale, not
+regressed. It stays **BLOCKED** here because the gate as written cannot be satisfied.
+
+**Preview server:** started detached as PID **8717** (and PID **6919** for the post-merge
+re-run) (`vite preview --host 127.0.0.1 --port 4173`), never in the
+foreground; `test:watch` was not run.
 
 **Not done, deliberately, per the brief's exclusions:** navigation not restructured,
 container widths not consolidated, the `.dark` token block not touched, no landing page

@@ -1,5 +1,5 @@
-import { useState, useEffect, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useMemo } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Input } from '@/components/ui/input';
@@ -33,7 +33,23 @@ interface EditorialFeedProps {
 export function EditorialFeed({ section, topics = [], getEssayUrl }: EditorialFeedProps) {
   const { isAdmin } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedTopic, setSelectedTopic] = useState('all');
+  // The topic filter lives in the URL (?theme=technology), not in component
+  // state: the section's sub-navigation tabs link to exactly those URLs, and
+  // before this they were dead links — the page navigated, nothing filtered.
+  // One source of truth also makes a filtered view shareable.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const selectedTopic = searchParams.get('theme') ?? 'all';
+  const setSelectedTopic = (topic: string) => {
+    setSearchParams(
+      prev => {
+        const next = new URLSearchParams(prev);
+        if (topic === 'all') next.delete('theme');
+        else next.set('theme', topic);
+        return next;
+      },
+      { replace: true },
+    );
+  };
   const [sortBy, setSortBy] = useState('newest');
 
   const { data: essays, isLoading } = useQuery({
