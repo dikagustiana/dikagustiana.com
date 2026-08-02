@@ -27,7 +27,10 @@ export default defineConfig(() => ({
           // No "charts" chunk: recharts/d3/victory-vendor are removed — their
           // one importer (ui/chart.tsx) was itself imported by nothing.
           if (id.includes("@tiptap") || id.includes("prosemirror")) return "editor";
-          if (id.includes("katex")) return "katex";
+          // No manualChunk for katex: forcing it into a named chunk made
+          // Rollup emit STATIC imports of that chunk from every page that
+          // might lazily need it, defeating the lazy load. Left alone,
+          // Rollup gives the dynamic import its own async chunk.
           if (id.includes("@supabase")) return "supabase";
           if (id.includes("@tanstack")) return "query";
           if (

@@ -931,3 +931,85 @@ dashed box plus "Uploading…", with the completion toast as the feedback.
 Deliberately NOT animated anywhere: the save-state chip (a chip that animates
 300 times a day is an interruption), and the toolbar chevrons' appearance
 (they appear during a scroll; animation would lag the hand).
+
+---
+
+## 2026-08-02 — Six-areas session
+
+### The footer name scope (owner decision, applied)
+The name appears only where LinkedIn or email is attached. Applied: the
+standalone name heading (`Footer.tsx` brand block) is gone, and the © line now
+reads "dikagustiana.com" — a bare name with neither link attached would have
+violated the same rule the heading did. The contact line "Dika Gustiana
+Irawan · LinkedIn" stays. **Reversal is one line:** restore a name `<span>`
+beside the footer logo link. The hero byline ("By Dika Gustiana.") is the
+owner's copy, verbatim, and stays. Author-attribution values and SEO strings
+elsewhere are essay metadata, not chrome — itemised in the ledger's GATE 1 row.
+
+### Human slugs derive from the pre-colon head of the title
+Titles follow a "Head: long subtitle" convention and run to ~180 characters;
+slugifying the whole title would mint URLs nobody can read aloud. The slug is
+the pre-colon head, slugified, capped at 60 characters, deduped by numeric
+suffix — `fa-07-01` became `driver-tree-construction`. Pre-checked on all 161
+rows before applying: 0 empty, 0 collisions, 0 clashes with existing slugs.
+The curriculum code moved to `essays.code` (partial unique index) and remains
+the internal identifier — rendered and searchable in the writer list.
+
+### The featuring model kept: `essays.is_selected`
+Three mechanisms existed; `is_selected` won because it already existed, already
+had a query, and is a per-essay fact rather than a settings row pointing at an
+id. Deleted: `useFeaturedEssays` (created_at recency — recency is what promoted
+the database-rebuild notice) and `finance_settings.featured_finance_essay_id`
+(a third path for one page, whose card also linked to `/essay/:slug`, a route
+that does not exist). The homepage, About and the Finance landing all read the
+one flag; the admin UI is a star per essay in Admin → Content, audit-logged.
+
+### Zero selected → hide the section (owner decision, applied)
+No recency fallback: a fallback is exactly what surfaced the rebuild note. With
+nothing selected the homepage and Finance landing sections are absent, not
+empty-looking — observed both ways. To keep day one from being blank,
+`is_selected = true` was seeded on fa-07-01 in the migration. **Reversal is one
+UPDATE** (or one star click in Admin → Content).
+
+### FSLI prose is authored as essays, not in a second editor
+The inline `fsli_sections` textarea wrote straight into rows anonymous readers
+see — no draft, no publish boundary, no history, no autosave (the audit's
+editing-public-data finding). Deleted, not hidden. FSLI prose is now accounting
+essays linked by `fsli_slug` (picker in Post settings, prefilled by the FSLI
+page's "Write in Studio" link), which inherits the entire finance flow for
+free — the alternative was building draft/revision machinery a second time,
+the duplication this project has paid for repeatedly. Legacy `fsli_sections`
+content still renders read-only, so nothing written disappears.
+
+### Font subsets dropped, and the one kept
+Removed all FIVE latin-ext files (the brief counted four: 4 Spectral +
+1 Plus Jakarta Sans) with their `@font-face` blocks: the content is English
+and Indonesian, neither uses those glyph ranges, and `unicode-range` meant the
+files were never fetched — repo weight, not wire weight (240 KB → 128 KB).
+KEPT `spectral-italic-700-latin` (24 KB): the toolbar produces real
+bold-italic, and browsers synthesize a fake one when the face is missing —
+a smeared faux-bold inside a typography system that was measured to the pixel.
+
+### All @tiptap packages pin ONE exact version
+The lockfile carried react/starter-kit at 3.19.0 with core hoisted to 3.29.2 —
+two ProseMirror graphs, and a clean install crashed the entire writer studio
+while every check stayed green (details in the ledger). All twelve packages now
+pin `3.29.2` exactly, no caret, and a unit test fails if any @tiptap version
+ever differs from the others. Caret ranges on a lockstep-released family are
+how this happened.
+
+### The editor is not exported from the editorial barrel
+`components/editorial/index.ts` re-exported `EssayEditor`, which pulled
+TipTap, ProseMirror and KaTeX into the static bundle of every PUBLIC essay
+page — readers downloaded the writing surface to read. The barrel now carries
+reading components only; the studio imports the editor by direct path. Pinned
+by test. KaTeX itself loads through one lazy `katexLoader` module (JS + CSS
+together — a CSS-only dynamic import gets hoisted by Vite and defeats the
+split).
+
+### Dependency vulnerabilities: 8 remain, deliberately
+`npm audit fix` (semver-safe) patched dompurify — the sanitizer, the one that
+matters — and brace-expansion: 11 → 8. The remaining 8 sit behind breaking
+upgrades (`--force`), which this session did not churn mid-refactor; same
+posture as the audit-triage session, now with the count lower and the
+security-critical package current.

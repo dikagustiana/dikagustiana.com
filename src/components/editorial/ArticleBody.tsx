@@ -54,15 +54,14 @@ interface RenderCtx {
 // component shows the raw LaTeX source — content, not a spinner.
 // ---------------------------------------------------------------------------
 
-type KatexModule = typeof import('katex')['default'];
+type KatexModule = typeof import('@/lib/katexLoader')['default'];
 let katexPromise: Promise<KatexModule> | null = null;
 
 function loadKatex(): Promise<KatexModule> {
   if (!katexPromise) {
-    katexPromise = Promise.all([
-      import('katex'),
-      import('katex/dist/katex.min.css'),
-    ]).then(([mod]) => mod.default);
+    // One module owns katex AND its CSS (see katexLoader.ts for why the
+    // CSS must not be dynamically imported on its own).
+    katexPromise = import('@/lib/katexLoader').then(mod => mod.default);
   }
   return katexPromise;
 }

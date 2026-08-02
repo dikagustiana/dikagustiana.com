@@ -3,7 +3,42 @@
 Append-only. Newest entry first. A fresh session must be able to resume from this file.
 
 ## NEXT ACTION (single)
-**Set the two backup secrets, then flip the backup workflow's first run green.** The daily
+**Merge the six-areas PR, then let Vercel deploy — the live DB already speaks the new
+URLs.** The slug migration is applied to the live project (fa-07-01 is
+`driver-tree-construction`; the deployed OLD code still resolves it only through
+`/essays/:slug`-shaped lookups), so the window between "DB renamed" and "new router
+deployed" should stay short. After that, the standing item unchanged: set the two backup
+secrets (`VITE_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`) and flip the backup workflow's
+first run green — still the only mitigation of free-tier Supabase having no PITR.
+
+## 2026-08-02 (six-areas session) — identity, URLs, curation, studio, weight, defects
+
+Branch `identity-urls-curation-weight`, base `main` @ `8468bd1`. All six gates **PASSED**,
+measured — evidence in `docs/GATE_LEDGER.md`; eight decisions in `docs/DECISIONS.md`.
+
+**What changed, in the mandated order.** (1) The wordmark left the header; the logo is a
+home link; Sign In moved right; favicon/apple-touch-icon derive from the one logo image;
+the hero and footer carry the owner's copy verbatim; 3.3 MB of hero imagery deleted.
+(2) `essays.slug` is UNIQUE (proven by a rejected duplicate insert), the curriculum code
+lives in `essays.code`, human slugs derive from titles, and the canonical essay URL is
+three segments — `/finance/:track/:essaySlug` — with every old shape redirecting.
+(3) `essays.is_selected` is the ONE featuring mechanism; the homepage is curated, not
+recent; a star in Admin → Content toggles it; empty means hidden. (4) FSLI prose is
+authored in the writer studio as linked accounting essays — the inline
+edit-public-rows path is deleted; placement targeting proven by publishing into one
+module, observing all three surfaces anonymously, then moving modules with the URL
+unchanged. (5) Homepage cold load 1,440 → 412 KB, essay 740 → 542 KB; KaTeX loads only
+when math renders; 22 dependencies and 24 dead components gone; dompurify patched.
+(6) All eight defects fixed and measured (anchor 128 vs 122 chrome, one #main-content,
+skip link, 4.98:1, progress 100%, focus-visible, radiogroup, 28×44 + focus restore).
+
+**The find of the session:** the writer studio crashed on a CLEAN install of `main`'s own
+lockfile — a mixed @tiptap tree (3.19 + 3.29) recorded since the math extensions landed,
+masked by every container's older node_modules. Typecheck, build and 247 tests were green
+throughout. Pinned to one exact version, effect guarded, regression test added.
+
+**Hygiene:** fa-07-01 byte-identical under its new slug (21,946 / 81 / md5 `b36b8ba5…`);
+0 probe rows; 0 tables without RLS; gate identity deleted; 248 tests / 23 files green.
 content backup (`.github/workflows/backup.yml`) is the only mitigation of free-tier
 Supabase having no PITR, and it fails loudly until `VITE_SUPABASE_URL` and
 `SUPABASE_SERVICE_ROLE_KEY` exist as GitHub Actions secrets (Settings → Secrets and

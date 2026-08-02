@@ -3,7 +3,6 @@ import { render, screen, within } from '@testing-library/react';
 import { AccountRow } from '@/components/consolidation/AccountRow';
 import { KeyConceptCard } from '@/components/consolidation/KeyConceptCard';
 import { CapitalLayerCard } from '@/components/finance/CapitalLayerCard';
-import { FormulaBlock } from '@/components/finance/FormulaBlock';
 import { WhatChangedPanel } from '@/components/tracker/WhatChangedPanel';
 
 function tableWrap(ui: React.ReactElement) {
@@ -56,22 +55,9 @@ describe('CapitalLayerCard (Finance)', () => {
   });
 });
 
-describe('FormulaBlock (math rendering)', () => {
-  it('renders KaTeX output for a block formula with a label', () => {
-    const { container } = render(<FormulaBlock formula="a^2 + b^2 = c^2" label="Pythagoras" />);
-    expect(screen.getByText('Pythagoras')).toBeInTheDocument();
-    expect(container.querySelector('.katex')).toBeTruthy();
-  });
-
-  it('renders inline without the bordered wrapper', () => {
-    const { container } = render(<FormulaBlock formula="x" inline />);
-    expect(container.querySelector('span .katex, span.katex')).toBeTruthy();
-  });
-
-  it('does not throw on invalid LaTeX (throwOnError=false)', () => {
-    expect(() => render(<FormulaBlock formula="\\frac{" />)).not.toThrow();
-  });
-});
+// FormulaBlock tests removed with the component: it had ONE importer
+// (AnalyticsSidebar), which itself had zero importers, and its static
+// `import katex` was part of what defeated the lazy KaTeX load.
 
 describe('WhatChangedPanel (Green Transition tracker)', () => {
   it('shows the first-issue message when there is no previous reading', () => {
