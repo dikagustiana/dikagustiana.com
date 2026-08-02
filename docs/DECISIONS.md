@@ -5,6 +5,56 @@ alternatives. Newest first.
 
 ---
 
+# 2026-08-02 — The hero drops its third paragraph, and with it the only byline
+
+The hero is now **exactly two text blocks and then the CTA**: the h1, one paragraph, "Read
+the essays". The third paragraph — "Essays and a curriculum on corporate finance,
+accounting, and the economics of the green transition. By Dika Gustiana." — is deleted.
+The hero stops after "…and the probability of the future."
+
+**The consequence is deliberate and is the point, not a side effect.** That paragraph was
+the only place the owner's name appeared in the hero. After this change the name appears in
+**one** rendered place on the site: the footer contact line, next to the LinkedIn link and
+the email address. That is the standing rule — the name appears where LinkedIn or email is
+attached — and it is the same rule that removed the standalone name heading from the footer
+in an earlier session. This is that rule reaching the hero.
+
+`mb-12` moved from the deleted paragraph up onto the surviving one, so the CTA keeps its
+spacing rather than collapsing to the `mb-6` the second paragraph carried.
+
+**What this costs, recorded so the trade is visible rather than discovered later.** The
+deleted sentence was also the hero's only statement of *scope* — the only place above the
+fold that named what the site is about. A reader now learns the subject matter from the
+Sections grid below, not from the hero. The design audit had separately flagged that
+sentence as understating the corpus (it named three subjects while the site ships six
+sections, omitting development finance). Deleting it resolves that finding by removing the
+claim rather than correcting it. If a scope line is ever wanted back, it belongs **without**
+a byline.
+
+**Name occurrences that remain in `src/` after this change, and why each stays.** The gate
+asked for the footer contact line only; that is true of *rendered body copy*, and these are
+the rest, none of which is a hero byline:
+
+| Location | Kind | Disposition |
+|---|---|---|
+| `Footer.tsx:24` | rendered contact line, beside LinkedIn | **the one intended occurrence** |
+| `SEO.tsx:18` `SITE_NAME` | `<meta>` / `og:site_name` / JSON-LD `publisher` | **kept** — machine-readable identity |
+| `SEO.tsx:26`, `Index.tsx:77` | default meta description | **kept** — the search snippet |
+| `ArticleShell.tsx:154`, `LongformArticleShell.tsx:115`, `CriticalThinkingEssay.tsx:91` | `author=` fallback into JSON-LD | **kept** — article authorship |
+| `ArticleHeader.tsx:62` | rendered essay byline | **kept** — an essay states its author |
+| `CapitalConditionCard.tsx:27` | rendered card byline | **kept**, but see below |
+| `WriterEditor.tsx:69` `DEFAULT_AUTHOR` | admin default for new essays | **kept** — never public |
+| `Auth.tsx:46`, `FinanceTrackIndex.tsx:81` | `noindex` page description; a code comment | **kept** — neither is public body copy |
+
+Stripping the name from meta descriptions, `og:site_name` or article JSON-LD would be
+actively harmful for a site whose whole job is being found and attributed by people
+assessing the author — so the rule is read as governing **rendered body copy**, not
+structured metadata or per-essay authorship. If it is meant to be absolute, the two rendered
+bylines (`ArticleHeader.tsx:62` and `CapitalConditionCard.tsx:27`) are the ones to revisit,
+and that is a separate decision from this one.
+
+---
+
 # 2026-08-02 — The site accent is navy, and green now has exactly two jobs
 
 ## The accent is `hsl(215 60% 32%)` — navy, not emerald

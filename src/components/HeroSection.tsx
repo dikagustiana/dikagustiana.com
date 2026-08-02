@@ -14,6 +14,10 @@ import { scrollBehavior } from '@/lib/motion';
  *
  * min-h 520px and max-w-[55%] on the text exist to accommodate the artwork.
  * Do not reclaim that space while the artwork stays.
+ *
+ * SHAPE: exactly two text blocks (h1, then one paragraph) and then the CTA.
+ * The owner's name does NOT appear here — it belongs where LinkedIn or email
+ * is attached, which is the footer contact line. Do not reintroduce a byline.
  */
 export function HeroSection() {
   return (
@@ -45,20 +49,20 @@ export function HeroSection() {
               Let&rsquo;s get insanely, damn good at numbers.
             </h1>
 
+            {/* The hero is exactly two text blocks and then the CTA. A third
+                paragraph — "Essays and a curriculum on corporate finance,
+                accounting, and the economics of the green transition. By Dika
+                Gustiana." — was removed deliberately, not lost. It carried the
+                only occurrence of the owner's name in the hero; the rule is
+                that the name appears where LinkedIn or email is attached, and
+                that is the footer contact line. `mb-12` moved up from that
+                paragraph so the CTA keeps its spacing. See docs/DECISIONS.md. */}
             <p
-              className="text-lg sm:text-xl font-sans font-normal leading-relaxed mb-6"
+              className="text-lg sm:text-xl font-sans font-normal leading-relaxed mb-12"
               style={{ color: '#0F172A', letterSpacing: '0.01em' }}
             >
               Not just on paper &mdash; it should drive everything. How numbers tell us
               the past &mdash; and the probability of the future.
-            </p>
-
-            <p
-              className="text-base sm:text-lg font-sans font-normal leading-relaxed mb-12 max-w-xl"
-              style={{ color: '#334155', letterSpacing: '0.025em' }}
-            >
-              Essays and a curriculum on corporate finance, accounting, and the
-              economics of the green transition. By Dika Gustiana.
             </p>
 
             {/* Hover/press/focus are Tailwind classes, not mutated inline
