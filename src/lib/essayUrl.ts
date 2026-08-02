@@ -98,6 +98,17 @@ export function essayUrl(essay: EssayUrlInput): string | null {
         : universalEssayUrl(slug);
 
     case 'next-big-thing':
+      // Three segments, like every other placed section: the theme (the
+      // category, with the section prefix stripped — 'technology', 'economy',
+      // …) is the stable placement axis, cached on the row as `phase`. The
+      // two-segment shape was the finance-era anomaly: NBT was the only
+      // section whose essay URL dropped its placement. /the-next-big-thing/
+      // :slug remains a real route that redirects here, so old links heal.
+      if (phase) {
+        return `/the-next-big-thing/${phase}/${slug}`;
+      }
+      // No theme (legacy or uncategorised): the two-segment route still
+      // resolves by slug alone.
       return `/the-next-big-thing/${slug}`;
 
     case 'critical-thinking':

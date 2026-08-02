@@ -105,8 +105,13 @@ export function buildCanonicalUrl(input: PlacementInput): string {
       const phase = derivePhase(sectionSlug, input.categorySlug) || 'clarify';
       return `/critical-thinking-research/${phase}/${slug}`;
     }
-    case 'next-big-thing':
-      return `/the-next-big-thing/${slug}`;
+    case 'next-big-thing': {
+      // Kept in lockstep with src/lib/essayUrl.ts: the theme (category slug
+      // minus the section prefix, cached as essays.phase) is the third
+      // segment; without one the two-segment resolver route still works.
+      const phase = derivePhase(sectionSlug, input.categorySlug);
+      return phase ? `/the-next-big-thing/${phase}/${slug}` : `/the-next-big-thing/${slug}`;
+    }
     default:
       return `/${sectionSlug}/${slug}`;
   }
