@@ -107,19 +107,49 @@
     --muted: 200 20% 92%;
     --muted-foreground: 215 15% 45%;
 
-    --accent: 142 71% 45%;
+    /* ── The site accent. ──────────────────────────────────────────────
+       Was the brand emerald (142 71% 45%). It failed WCAG AA in three
+       separate roles at once — 2.12:1 as text on --card, 2.20:1 as text on
+       --background, 2.20:1 as --ring against --background — and the earlier
+       remedy (a second, darker --accent-text token) was only ever applied to
+       one call site, so links, card-title hovers, icons and bullets kept
+       shipping at 2.12:1. A brand colour that cannot be used at brand
+       strength is not a brand colour; the fix is the value, not a patch.
+
+       Navy hsl(215 60% 32%) = rgb(33,73,131). Measured (WCAG 2.x, sRGB):
+         as text on --card (200 40% 96%) ......... 8.20:1   (AA needs 4.5:1)
+         as text on --background (0 0% 98%) ...... 8.55:1   (AA needs 4.5:1)
+         as --ring against --background .......... 8.55:1   (AA needs 3:1)
+         --accent-foreground (white) on it ....... 8.92:1   (AA needs 4.5:1)
+       It shares the 215 hue family with --primary/--foreground, so it reads
+       as the same system rather than a second brand, and it is institutional
+       rather than eco-startup — the register this site's readers expect.
+
+       Green is NOT retired from the product, only from the accent role. It
+       now means exactly two things and nothing else: the Green Transition
+       section's own identity (--section-green) and success states. */
+    --accent: 215 60% 32%;
     --accent-foreground: 0 0% 100%;
-    /* Accent as TEXT on light surfaces. The brand green at L45 measures
-       2.12:1 against the pale card — a WCAG AA failure; L28 measures 4.98:1
-       on the card and 4.83:1 on white. Backgrounds keep --accent. */
-    --accent-text: 142 71% 28%;
+    /* Retained as an alias, not a second colour: --accent now passes AA as
+       text on its own, so this is redundant by value. Kept so the existing
+       `text-accent-text` call sites keep working and can be collapsed into
+       `text-accent` in a later, separate pass. */
+    --accent-text: 215 60% 32%;
+
+    /* The Green Transition section's identity, and success states. The only
+       two jobs green has. Not an accent — never use it for links, focus
+       rings, buttons or generic hover. */
+    --section-green: 142 71% 45%;
 
     --destructive: 0 62% 50%;
     --destructive-foreground: 0 0% 100%;
 
     --border: 215 20% 88%;
     --input: 215 20% 88%;
-    --ring: 142 71% 45%;
+    /* The focus ring. At the old emerald this measured 2.20:1 against
+       --background — below the 3:1 non-text minimum — so keyboard focus was
+       effectively invisible site-wide. Navy measures 8.55:1. */
+    --ring: 215 60% 32%;
 
     --radius: 0.5rem;
 
@@ -128,20 +158,20 @@
     --header-foreground: 0 0% 100%;
     --card-light: 200 40% 96%;
     --card-light-foreground: 215 25% 20%;
-    --link-primary: 142 71% 45%;
-    --nav-active: 142 71% 45%;
+    --link-primary: 215 60% 32%;
+    --nav-active: 215 60% 32%;
     --button-dark: 215 30% 13%;
     --button-dark-foreground: 0 0% 100%;
 
     /* Sidebar */
     --sidebar-background: 215 28% 17%;
     --sidebar-foreground: 0 0% 95%;
-    --sidebar-primary: 142 71% 45%;
+    --sidebar-primary: 215 60% 32%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 215 25% 22%;
     --sidebar-accent-foreground: 0 0% 95%;
     --sidebar-border: 215 25% 25%;
-    --sidebar-ring: 142 71% 45%;
+    --sidebar-ring: 215 60% 32%;
   }
 
   .dark {

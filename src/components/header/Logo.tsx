@@ -56,7 +56,12 @@ export function Logo() {
         <div className="hidden lg:flex items-center gap-2">
           <Badge
             className={`text-xs font-bold uppercase tracking-wide ${
-              isAdmin ? 'bg-accent text-accent-foreground' : 'bg-muted/50 text-muted-foreground'
+              // Same reason as MainNav: a navy chip on the dark slate header
+              // is 1.64:1 and reads as a hole. Inverted instead — light chip,
+              // dark type — which is legible on the header at any accent.
+              isAdmin
+                ? 'bg-primary-foreground text-primary'
+                : 'bg-muted/50 text-muted-foreground'
             }`}
           >
             {isAdmin ? 'Admin' : 'Viewer'}

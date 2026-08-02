@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import heroTexture from '@/assets/hero-manga-texture.webp';
+import { scrollBehavior } from '@/lib/motion';
 
 /**
  * The hero: the owner's statement, verbatim, over the manga ink texture.
@@ -60,29 +61,28 @@ export function HeroSection() {
               economics of the green transition. By Dika Gustiana.
             </p>
 
+            {/* Hover/press/focus are Tailwind classes, not mutated inline
+                style. The previous version set style.backgroundColor from
+                onMouseEnter/onMouseLeave, which meant: no focus ring at all
+                (so the homepage's only CTA was invisible to keyboard users),
+                no active state, and a hover tint that could stick on touch
+                because mouseleave does not reliably fire there. */}
             <Link
               to="#sections"
-              className="inline-block px-11 py-4 text-sm font-medium rounded transition-[background-color,color,box-shadow] duration-300"
-              style={{
-                color: '#0F172A',
-                border: '2px solid #0F172A',
-                backgroundColor: 'transparent',
-                letterSpacing: '0.04em',
-              }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.backgroundColor = 'rgba(15, 23, 42, 0.06)';
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent';
-              }}
+              className="inline-block rounded border-2 border-[#0F172A] px-11 py-4 text-sm font-medium tracking-[0.04em] text-[#0F172A] transition-colors duration-200 hover:bg-[#0F172A]/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0F172A] focus-visible:ring-offset-2 focus-visible:ring-offset-[#F8F7F4] active:bg-[#0F172A]/[0.12]"
               onClick={(e) => {
                 e.preventDefault();
                 document
                   .getElementById('sections')
-                  ?.scrollIntoView({ behavior: 'smooth' });
+                  // NOT a hard-coded 'smooth'. An explicit behavior argument
+                  // overrides the computed scroll-behavior, so it bypasses the
+                  // prefers-reduced-motion gate in src/index.css:189-193 that
+                  // the CSS rule is under. scrollBehavior() returns 'instant'
+                  // for readers who asked for reduced motion.
+                  ?.scrollIntoView({ behavior: scrollBehavior() });
               }}
             >
-              Enter the Think Tank
+              Read the essays
             </Link>
           </div>
         </div>

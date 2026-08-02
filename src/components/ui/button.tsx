@@ -11,9 +11,15 @@ const buttonVariants = cva(
       variant: {
         default: "bg-primary text-primary-foreground hover:bg-primary/90",
         destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
-        outline: "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
+        // `ghost` and `outline` want a QUIET hover surface. Stock shadcn uses
+        // --accent for that because in stock shadcn --accent is a light
+        // neutral; here --accent is the brand colour, so `hover:bg-accent`
+        // flooded every ghost and outline button with saturated brand on
+        // hover (~80 usages). --secondary is this project's light neutral —
+        // secondary-foreground on secondary measures 11.58:1.
+        outline: "border border-input bg-background hover:bg-secondary hover:text-secondary-foreground",
         secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
+        ghost: "hover:bg-secondary hover:text-secondary-foreground",
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {

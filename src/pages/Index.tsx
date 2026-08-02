@@ -9,48 +9,52 @@ import { useSelectedEssays } from '@/hooks/queries/useSelectedEssays';
 import { LoadingState } from '@/components/states/LoadingState';
 import { HeroSection } from '@/components/HeroSection';
 
+/**
+ * The section cards. There is deliberately NO per-section `accent` field.
+ *
+ * This array used to assign each card its own hue — blue-500, purple-500,
+ * the brand emerald, amber-500, green-500, sky-500 — which put six accents in
+ * one grid, including two greens two cards apart and two near-identical
+ * blues. Distinctness between sections comes from order and typography, not
+ * from hue; every icon renders in one muted colour and picks up the accent
+ * only on hover, alongside its title.
+ */
 const sections = [
   {
     icon: BarChart3,
     title: 'Finance',
     description: 'How to calculate, analyze, and support decisions. Not theory—procedure.',
     path: '/finance-101',
-    accent: 'text-blue-500',
   },
   {
     icon: BookOpen,
     title: 'Accounting',
     description: 'Consolidation, policy choices, PSAK application. What you check, what you calculate.',
     path: '/accounting',
-    accent: 'text-purple-500',
   },
   {
     icon: Leaf,
     title: 'Green Transition',
     description: 'The economics of decarbonization. Who pays, who benefits, what trade-offs exist.',
     path: '/green-transition',
-    accent: 'text-accent',
   },
   {
     icon: Lightbulb,
     title: 'The Next Big Thing',
     description: 'Rigorous speculation about structural shifts. Winners, losers, second-order effects.',
     path: '/the-next-big-thing',
-    accent: 'text-amber-500',
   },
   {
     icon: GraduationCap,
     title: 'IELTS Preparation',
     description: 'Band 7+ methodology. Time limits, task protocols, scoring criteria.',
     path: '/english-ielts',
-    accent: 'text-green-500',
   },
   {
     icon: Landmark,
     title: 'Development Finance',
     description: 'Sovereign funds, multilateral lenders, and blended finance. How public capital shapes economies.',
     path: '/development-finance',
-    accent: 'text-sky-500',
   },
 ];
 
@@ -151,7 +155,7 @@ const Index = () => {
               <Card className="h-full hover:shadow-lg transition-[transform,box-shadow] hover:-translate-y-1 cursor-pointer group">
                 <CardContent className="p-6">
                   <div className="flex items-start gap-4">
-                    <div className={`p-3 rounded-lg bg-secondary ${section.accent}`}>
+                    <div className="p-3 rounded-lg bg-secondary text-muted-foreground group-hover:text-accent transition-colors">
                       <section.icon className="h-5 w-5" />
                     </div>
                     <div className="flex-1">

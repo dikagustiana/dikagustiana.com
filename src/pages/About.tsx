@@ -3,15 +3,6 @@ import { PageLayout } from '@/components/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
 import { useSelectedEssays } from '@/hooks/queries/useSelectedEssays';
 import { Link } from 'react-router-dom';
-import { cn } from '@/lib/utils';
-
-const sectionColors: Record<string, string> = {
-  'green-transition': 'text-accent',
-  'development-finance': 'text-sky-500',
-  finance: 'text-blue-500',
-  accounting: 'text-purple-500',
-  'next-big-thing': 'text-amber-500',
-};
 
 const sectionLabels: Record<string, string> = {
   'green-transition': 'Green Transition',
@@ -133,7 +124,6 @@ export default function About() {
                 const sectionLabel = sectionLabels[essay.section] || essay.section;
                 const pLabel = essay.phase ? phaseLabels[essay.phase] : null;
                 const label = pLabel ? `${sectionLabel} · ${pLabel}` : sectionLabel;
-                const colorClass = sectionColors[essay.section] || 'text-muted-foreground';
 
                 return (
                   <EssayCardLink
@@ -145,7 +135,10 @@ export default function About() {
                       {essay.title}
                     </h3>
                     <div className="flex items-center gap-3 text-sm">
-                      <span className={cn('font-medium', colorClass)}>{label}</span>
+                      {/* One colour for every section label. The per-section
+                          hue map that used to live here was the same six-hue
+                          rainbow as the homepage grid. */}
+                      <span className="font-medium text-muted-foreground">{label}</span>
                       <span className="text-muted-foreground">
                         {formatDate(essay.date, essay.created_at)}
                       </span>
@@ -168,7 +161,7 @@ export default function About() {
             {readingStack.map((item) => (
               <div
                 key={item.title}
-                className="border-l-2 border-sky-500/40 pl-4 py-1"
+                className="border-l-2 border-border pl-4 py-1"
               >
                 <h3 className="font-medium text-foreground text-sm leading-snug">
                   {item.title}

@@ -76,8 +76,12 @@ export function MainNav() {
       {isAdmin && (
         <Link
           to="/admin/dashboard"
+          // No accent tint here. The accent is navy (215 60% 32%) and this
+          // link sits on the dark slate header, where navy measures 1.64:1 —
+          // invisible. `.nav-link` is white/80 at 9.89:1 on the header, and
+          // `.nav-link-active` already marks the active state.
           className={cn(
-            'nav-link text-accent',
+            'nav-link',
             location.pathname.startsWith('/admin') && 'nav-link-active'
           )}
         >

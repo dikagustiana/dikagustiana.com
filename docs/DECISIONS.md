@@ -5,6 +5,107 @@ alternatives. Newest first.
 
 ---
 
+# 2026-08-02 — The site accent is navy, and green now has exactly two jobs
+
+## The accent is `hsl(215 60% 32%)` — navy, not emerald
+
+The brand accent was `--accent: 142 71% 45%`, a saturated emerald. It failed WCAG AA in
+three separate roles simultaneously, and the repo already knew: the comment at
+`src/index.css:112-114` recorded the 2.12:1 figure and a second token, `--accent-text` at
+L28, was created as the remedy. That remedy was applied to **one** call site. Links, card
+title hovers, section icons and list bullets kept shipping at 2.12:1, and
+`group-hover:text-accent` made text *harder* to read on hover than at rest.
+
+A brand colour that cannot be used at brand strength is not a brand colour. So the fix is
+the value, not a fourth patch on top of three.
+
+**Measured, in Chromium, from the rendered CSS variables** (not computed by hand — the
+script read `getComputedStyle` and applied the WCAG 2.x sRGB formula):
+
+| Role | Threshold | Emerald `142 71% 45%` | Navy `215 60% 32%` |
+|---|---|---|---|
+| as text on `--card` | 4.5:1 | 2.12:1 **FAIL** | **8.22:1 PASS** |
+| as text on `--background` | 4.5:1 | 2.20:1 **FAIL** | **8.58:1 PASS** |
+| as `--ring` on `--background` | 3.0:1 | 2.20:1 **FAIL** | **8.58:1 PASS** |
+| `--accent-foreground` on it | 4.5:1 | 2.30:1 **FAIL** | **8.95:1 PASS** |
+
+Navy renders as `rgb(33,73,131)`. Two reasons for this hue rather than another:
+
+1. **It shares the 215 hue family with `--primary` (215 28% 17%) and `--foreground`
+   (215 25% 17%)**, so it reads as the same system tightening rather than a second brand
+   arriving. `FinanceLanding.tsx` — the page the rest should converge on — already uses
+   `text-primary` for exactly this job, so this is that page's decision generalised.
+2. **It is institutional rather than eco-startup.** The readers are scholarship panels and
+   finance/infrastructure contacts. Emerald is the universal success/growth/eco hue; on a
+   corporate-finance site it read as a template default.
+
+**Rejected: promoting `--primary` (215 28% 17%) directly to accent.** It measures ~14:1, so
+contrast was never the objection. The problem is that `--primary` is within a hair of
+`--foreground`, so links would have become indistinguishable from body text and the accent
+would have stopped doing the one job an accent has. Navy keeps ~1.6:1 of separation from
+body ink while staying in the same family.
+
+`--accent-text` is now redundant by value and is kept as an alias of `--accent` so existing
+`text-accent-text` call sites keep working. Collapsing the two is a later, mechanical pass.
+
+## `ghost` and `outline` buttons no longer use `--accent` as their hover surface
+
+This was the same root cause wearing a different hat. Stock shadcn gives `ghost` and
+`outline` `hover:bg-accent`, and in stock shadcn `--accent` is a **light neutral hover
+surface**. This project repurposed the token as a saturated brand colour but left the
+variants pointing at it, so ~80 ghost and outline buttons flooded with brand on hover.
+
+Repointing them at navy would have been just as wrong — a ghost button should not become a
+solid dark block. They now use `--secondary` (200 30% 94%), which is this project's actual
+light neutral; `--secondary-foreground` on it measures 11.58:1.
+
+## Green is reserved. Two jobs, nothing else
+
+Green is **not** retired from the product, only from the accent role. It is now
+`--section-green: 142 71% 45%` and it means exactly two things:
+
+1. **The Green Transition section's own identity** — currently the concept icons and the
+   callout on `/green-transition/climate-finance`.
+2. **Success states** — `SectionIntro.tsx:142`.
+
+It is never a link, a focus ring, a button, or a generic hover. Anything else that wants to
+be green should be navy or `--muted-foreground` instead.
+
+## Two dark-header call sites had to move off the accent entirely
+
+A consequence worth recording because it is not obvious: navy on the dark slate header
+(`--header-bg: 215 28% 17%`) measures **1.64:1** — worse than the emerald it replaced,
+which measured 6.37:1 there. Both affected sites are admin-only, but leaving them would
+have been a knowingly-introduced regression:
+
+- `MainNav.tsx` Writer's Studio link — dropped the tint; `.nav-link` is white/80 at 9.89:1
+  on the header, and `.nav-link-active` already marks the active state.
+- `Logo.tsx` Admin badge — inverted to `bg-primary-foreground text-primary` (light chip,
+  dark type), which stays legible on the header regardless of what the accent is.
+
+**The general rule this establishes: the accent is a light-surface colour.** On the dark
+header, use the white/slate pair, not the accent.
+
+## The six-hue section rainbow is gone
+
+`Index.tsx` gave each of the six section cards its own hue (blue-500, purple-500, the
+emerald, amber-500, green-500, sky-500) — including two greens two cards apart and two
+near-identical blues — and `About.tsx` repeated the same map for essay labels. Both arrays
+are deleted. Section icons render in `text-muted-foreground` and pick up the accent on
+hover alongside their title; About's section labels are all `text-muted-foreground`.
+
+Distinctness between sections comes from order and typography, not hue.
+
+**Correction to the brief this session worked from:** it stated the raw-palette pollution
+was "concentrated in those two arrays, not scattered". It is not. The two arrays were 10 of
+112 occurrences; the remaining 102 are spread across 22 files, the largest being
+`CapitalConditionDetail.tsx` (22) and `SectionIntro.tsx` (12, a second independent
+"voice role" colour axis that tints a full-width band under the header on public section
+pages). Both are out of this session's scope and neither was touched. The brief was right
+that `DevelopmentFinance.tsx` carries four.
+
+---
+
 # 2026-08-02 — Opening the editorial taxonomy: next-big-thing
 
 ## Category slugs: `<section-slug>-<name>`, because one row and one function already agreed

@@ -47,10 +47,14 @@ export default {
         accent: {
           DEFAULT: "hsl(var(--accent))",
           foreground: "hsl(var(--accent-foreground))",
-          // Accent used AS text on light surfaces — darkened to clear WCAG
-          // AA (4.98:1 on the card vs 2.12:1 for the default).
+          // Alias of DEFAULT since the accent became navy — the accent now
+          // clears AA as text on its own (8.20:1 on the card). See the note
+          // in src/index.css.
           text: "hsl(var(--accent-text))",
         },
+        // Green, reserved for exactly two jobs: the Green Transition
+        // section's identity and success states. Never an accent.
+        "section-green": "hsl(var(--section-green))",
         // The editorial accent — one token, five roles (blockquote rail,
         // link-popover focus ring, popover primary buttons, "New" badge,
         // palette THEME swatches). See src/index.css.
