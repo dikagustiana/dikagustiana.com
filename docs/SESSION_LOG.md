@@ -3,13 +3,19 @@
 Append-only. Newest entry first. A fresh session must be able to resume from this file.
 
 ## NEXT ACTION (single)
-**Decide the two open recommendations in `docs/DECISIONS.md`: Financial chart (defer —
-recommended second after Template ▾) and Poetry (recommended drop, permanently).** Both
-are owner calls on More ▾ scope; everything else on the writing surface is built and
-gate-verified. Behind them in the queue, unchanged from before: re-run the Word-paste
-gate against a real `.docx`, and the Embed scope fork stays deliberately unbuilt
-(real oEmbed/OG needs an edge function **and** a widened `sanitizeHtml` allowlist — the
-one change whose mistake becomes a security issue).
+**Commit the owner's `.docx` to the repo so GATE S6 can be closed against the real file.**
+It was described as attached and is **not present in this environment** — an exhaustive
+filesystem search found no Office document except one that ships with the OS. The Word-paste
+transform is verified against a synthetic Word-clipboard fixture and against nine unit tests,
+but not against what this specific Word version and template actually emit, so the 10 H1 →
+`h2` / 3 H2 → `h3` / 89 body-block target in `docs/IMPORT_TEST_T4M07.md` is still unmeasured.
+Put the file anywhere in the repo (`docs/fixtures/` is fine); LibreOffice is installed here,
+so it can be unzipped for its real `word/document.xml` structure and converted independently.
+Behind that, two more owner calls wait in `docs/DECISIONS.md`: the More ▾ recommendations —
+Financial chart (defer; recommended second, after Template ▾) and Poetry (recommended drop,
+permanently). The Embed scope fork stays deliberately unbuilt (real oEmbed/OG needs an edge
+function **and** a widened `sanitizeHtml` allowlist — the one change whose mistake becomes a
+security issue).
 
 ## 2026-08-02 (Substack-replication session) — the reversal, the toolbar, and the type system
 
@@ -45,6 +51,76 @@ More ▾ from one source.
 **Hygiene:** `fa-07-01` re-measured byte-identical (21,946 chars, 81 blocks, both md5s);
 `fa-01-01` restored to draft/null; probe images deleted; the session's namespaced identity
 deleted; zero migrations — schema, RLS and auth untouched.
+
+## 2026-08-02 (follow-up) — merge, then settle the open questions
+
+Branch `docs/design-handoff-and-byline-verification`, based on `main` @ `8dbd238`.
+
+**The writing surface is on `main`.** PR #12 opened from
+`claude/dikagustiana-sections-5-7-q0jja0` with base `main` and merged as `8dbd238`.
+Confirmed by reading `src/lib/tiptap/attrJson.ts` — a file that commit introduced — back
+from `refs/heads/main` via the GitHub API, not from the branch. It is there, blob
+`dd225d22`.
+
+**Two decisions recorded, not just taken** (`docs/DECISIONS.md`):
+
+- **The table of contents stays.** The specification has none because the reference's posts
+  run 800–1,500 words with few headings; `fa-07-01` carries 13 headings across 81 blocks. At
+  that length the reader is navigating, not just reading, and the sidebar is already
+  gate-verified tracking to the final heading. Matching the reference on the surface is not
+  worth discarding verified work.
+- **Embed stays a client-side link card.** Widening `sanitizeHtml` to permit `iframe` is the
+  one change on the list whose mistake becomes a vulnerability rather than a broken block —
+  arbitrary same-origin frames are a clickjacking and phishing surface. There is also no
+  demand: these essays cite papers, they do not embed video. Recorded with the door left
+  open: a narrow, host-scoped, sandboxed allowlist plus an edge function, asked for as
+  scoped work — not a general `iframe` permit.
+
+**A naming convention, because this is the third time a name outlived its meaning.**
+The writing-surface work landed on a branch named for a merged branch from two rounds
+earlier, describing a mandate section it had nothing to do with. Recorded in
+`docs/DECISIONS.md`: branches are named for the work they contain, a merged branch's name is
+never reused, and the same applies to documents. This session follows it —
+`docs/design-handoff-and-byline-verification`. **Note the conflict:** the standing harness
+instruction is to restart the *designated* branch under its old name after a merge; the
+owner's convention overrides it, and this entry is where the divergence is on record.
+
+**Two numbers checked rather than assumed** (ledger rows V1 and V2):
+
+- **`essay_revisions` held 18 rows, and none of them were this work's.** Every row predates
+  17:00 UTC; the writing-surface session's browser work ran 17:36–19:00. Two are the seeded
+  `migration` revisions; the other 16 are *earlier* sessions' gate runs the same day — 15 on
+  `fa-07-01` between 09:43 and 13:13, and one `manual_save` on `sf-01-04` with an **empty**
+  document. So the cleanup claim held; the premise that the table previously held 2 is what
+  was off. Removed them anyway — gate residue, not authored history, and every one carried
+  the same `content_json` md5 as the seeded revision, so nothing recoverable was lost. Back
+  to 2 rows.
+- **The publish modal's byline fields do reach the database.** Set through the real UI on
+  `ff-02-01`, saved, and read back: `author = 'Dika Gustiana Irawan'`, `date = '2026-03-14'`,
+  `presentation->>'author_bio'` = the bio string. After a hard reload the modal showed all
+  three again, so the read path works too. This needed a temporary admin identity —
+  `import-admin` was deleted last session and the owner's password is not available in this
+  environment — created and deleted within the session, `auth.users` back to one account.
+
+**GATE S6 is now a split verdict, and the second half FAILED to run.** The owner's `.docx`
+was described as attached and **is not in this environment**. `find / -iname '*.docx' -o
+-iname '*.doc' -o -iname '*.odt' -o -iname '*.rtf'` returns exactly one hit — a LibreOffice
+template that ships with the OS. The synthetic half stands as measured; the real-file half is
+recorded **BLOCKED**, not passed, because a synthetic fixture cannot reproduce what a
+specific Word version and template emit and saying otherwise would be the false all-clear
+this session exists to avoid.
+
+**`docs/HANDOFF_DESIGN.md` written for the next account** — the typographic values already
+fixed and where they live, what the manual `ui-audit` pass found and what it deliberately
+left alone, the six things that are gate-verified and must not be undone by accident, the six
+bugs the gates caught (particularly that `content` and `content_json` diverge silently if a
+node's HTML round trip is unstable), and the content contract at its current five places.
+
+**End state, measured:** `fa-07-01` **21,946 chars / 81 blocks / md5
+`b36b8ba5e4593c80e3727f07006e7f15`** — byte-identical. `essay_revisions` 2 rows.
+`auth.users` 1 account. **0** public tables without an RLS policy. Six branches with zero
+unique commits stay **BLOCKED** — the git proxy rejects delete-pushes and this session did
+not retry. `archive/pre-rebuild-history` untouched.
 
 ## 2026-08-01 (writing-surface session) — the canvas, the menus, and the publish modal
 

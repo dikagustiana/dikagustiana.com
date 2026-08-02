@@ -7,6 +7,73 @@ alternatives. Newest first.
 
 ---
 
+---
+
+# 2026-08-02 — Branch naming, the table of contents, and the embed
+
+## Branches are named for the work they contain, and a merged name is never reused
+
+The writing-surface refactor landed on a branch called
+`claude/dikagustiana-sections-5-7-q0jja0` — the name of a branch from two rounds
+earlier that had already been merged, describing "sections 5–7" of a mandate the
+work had nothing to do with. Anyone reading the history has to open the diff to
+find out what the branch was for, and the reused name makes two distinct pieces
+of work look like one.
+
+This is the third time a name has outlived its meaning here, after
+`RUNBOOK_phase2.md` and the reuse of `phase-2-w564rz`. Names cannot be changed
+retroactively once merged, so this is a convention, not a repair:
+
+1. **A branch is named for the work it contains**, not for the mandate section,
+   sprint, or session that produced it. `docs/design-handoff-and-byline-verification`,
+   not `claude/sections-5-7`.
+2. **A merged branch's name is never reused.** A merged pull request is finished;
+   a second branch wearing its name makes the history ambiguous and can make new
+   commits look like they belong to a closed review.
+3. The same applies to documents. A file called `RUNBOOK_phase2.md` outlives
+   "phase 2" and then misleads. Name it for what it is about.
+
+## The reader keeps its table of contents
+
+The specification has none, and the sidebar stays anyway. **Owner-decided, with
+the reasoning on record so it is not relitigated:**
+
+- The reference's posts run 800–1,500 words with few headings, where a table of
+  contents is overhead. These are 3,000-word curriculum lessons: `fa-07-01` alone
+  carries **13 headings** across 81 blocks. At that length the reader is
+  navigating, not just reading, and a list of sections is the difference between
+  finding the driver-tree worked example and scrolling for it.
+- The sidebar is already gate-verified — it tracks to the final heading, is
+  inline-collapsible below `lg`, and honours `prefers-reduced-motion`.
+- Matching the reference on the surface is not worth discarding verified work.
+  The specification is a description of the target, not a list of things to
+  remove.
+
+## Embed stays a client-side link card
+
+**Decision, with the door left open.** The block ships as a card built from the
+URL alone — hostname, title, optional description, linking out. Real oEmbed /
+Open Graph metadata is not built. Three reasons, in the order they matter:
+
+1. **Widening the sanitizer is the one change on the list whose mistake becomes a
+   vulnerability rather than a broken block.** `sanitizeHtml` forbids `iframe`
+   (`FORBID_TAGS`, line 34). Allowing arbitrary iframes on this domain is a
+   clickjacking and phishing surface — an attacker with any content-write path
+   gets a same-origin frame to overlay or impersonate with. Every other block in
+   this menu fails safe; this one would fail open.
+2. **There is no demand for it.** These essays cite BIS papers, IMF working
+   papers and textbooks. They link to sources; they do not embed video. A clean
+   labelled card is what a reader of a 3,000-word finance lesson actually wants
+   from a citation.
+3. **The cost is a server, not a component.** The browser cannot read another
+   origin's `<meta>` tags, so real metadata needs an edge function that fetches,
+   parses, caches and rate-limits, and handles the sites that block bots.
+
+**The door:** if a specific need appears — a named source whose preview genuinely
+helps — the work is an edge function plus a *narrow* allowlist (specific hosts,
+`sandbox` attribute, no `allow-top-navigation`), not a general `iframe` permit.
+Ask for it as scoped work; do not widen `FORBID_TAGS`.
+
 # 2026-08-01 — Writing-surface session: what the insert menu offers, and why
 
 ## The insert menu ships five items, and only five
