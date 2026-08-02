@@ -3,16 +3,48 @@
 Append-only. Newest entry first. A fresh session must be able to resume from this file.
 
 ## NEXT ACTION (single)
-**Answer the table-of-contents question, then re-run GATE S6 against a real `.docx`.**
-The reader specification has no table of contents; a sticky ToC sidebar was built last
-session at the owner's request and has been **kept**. These are 3,000-word curriculum
-pieces, not newsletter posts, so it probably still earns its place — the owner needs to
-say keep or drop. Second, the Word-paste gate passed against a *synthetic* Word-clipboard
-fixture (no `.docx` exists in the repo); it should be re-run against one of the owner's
-actual documents before the workflow is trusted. Third, the Embed scope fork is open and
-deliberately unbuilt: the shipped block is a client-side link card, and real oEmbed/Open
-Graph metadata would need a new edge function **and** a widened `sanitizeHtml` allowlist —
-see `docs/DECISIONS.md`.
+**Decide the two open recommendations in `docs/DECISIONS.md`: Financial chart (defer —
+recommended second after Template ▾) and Poetry (recommended drop, permanently).** Both
+are owner calls on More ▾ scope; everything else on the writing surface is built and
+gate-verified. Behind them in the queue, unchanged from before: re-run the Word-paste
+gate against a real `.docx`, and the Embed scope fork stays deliberately unbuilt
+(real oEmbed/OG needs an edge function **and** a widened `sanitizeHtml` allowlist — the
+one change whose mistake becomes a security issue).
+
+## 2026-08-02 (Substack-replication session) — the reversal, the toolbar, and the type system
+
+Branch `substack-writing-surface`, based on `main` @ `8dbd238`. Gates 1–6 all **PASSED**;
+measurements in `docs/GATE_LEDGER.md`, including the reconciliation table for the rows the
+reversal supersedes. Ten decisions recorded in `docs/DECISIONS.md`.
+
+**The mandate reversed course.** Last session's selection-only bubble menu was replaced by
+a persistent Substack-style toolbar — owner-directed, superseding GATE S2 (which passed
+against the spec it was given; it is not broken). Seven separator groups, ~20 items, More ▾
+overflow, chevrons when clipped, every item exercised through author → save → publish →
+anonymous read.
+
+**What changed under the words.** The type system is now Spectral (self-hosted, 8 faces),
+19px/30.4px body on a **width-locked 728px** column — the measured Substack values, exact
+to the RGB step on both the canvas and the published page (HSL tokens quantise one step
+off; the inks are exact-value tokens now). New structural nodes: LaTeX (inline + display,
+KaTeX rendered client-side *after* sanitization so its output never transits the
+sanitizer) and footnotes (CSS-counter numbering in the editor, numbered section with
+backlinks when published). The insert list grew to 7 items and still feeds `+`, `/`, and
+More ▾ from one source.
+
+**Three bugs the gates found that reading code would not have.**
+1. **Every toolbar mark command silently no-oped** — button mousedown collapsed the
+   selection before the command ran; blocks still landed (caret-positional), so the
+   surface half-worked convincingly. All 21 controls now preserve selection on mousedown.
+2. **The footnote node came back as a Superscript mark** on every reload — mark parse
+   rules gather before node rules at equal priority, the same class as the historic
+   linkCard bug. `priority: 100`.
+3. **The published page scrolled horizontally at 375px** because no prose surface had any
+   word-breaking; one long unbreakable token was enough. `overflow-wrap: break-word`.
+
+**Hygiene:** `fa-07-01` re-measured byte-identical (21,946 chars, 81 blocks, both md5s);
+`fa-01-01` restored to draft/null; probe images deleted; the session's namespaced identity
+deleted; zero migrations — schema, RLS and auth untouched.
 
 ## 2026-08-01 (writing-surface session) — the canvas, the menus, and the publish modal
 

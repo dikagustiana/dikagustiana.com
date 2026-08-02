@@ -501,7 +501,12 @@ export function EssayEditor({
         }
         .essay-prose.resize-cursor { cursor: col-resize; }
 
-        /* Upload placeholder — a decoration, never part of the document. */
+        /* Upload placeholder — a decoration, never part of the document.
+           Deliberately STATIC: the old 0.7s spinner looped forever on the
+           writing canvas, and motion on a writing surface is unusually
+           costly — the gate caps canvas animation at 200ms, and a 200ms/rev
+           spinner is frantic. The dashed box + text is the feedback; the
+           toast confirms completion. */
         .essay-image-uploading {
           display: flex;
           align-items: center;
@@ -513,18 +518,6 @@ export function EssayEditor({
           background: hsl(var(--muted) / 0.4);
           color: hsl(var(--muted-foreground));
           font-size: 0.875rem;
-        }
-        .essay-image-uploading::before {
-          content: "";
-          width: 0.875rem;
-          height: 0.875rem;
-          border-radius: 9999px;
-          border: 2px solid hsl(var(--muted-foreground) / 0.3);
-          border-top-color: hsl(var(--primary));
-          animation: essay-image-spin 0.7s linear infinite;
-        }
-        @keyframes essay-image-spin {
-          to { transform: rotate(360deg); }
         }
 
         /* Slash-command menu */

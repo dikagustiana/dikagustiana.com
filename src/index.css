@@ -238,6 +238,27 @@
   }
 }
 
+/* ── Reduced motion: everything degrades to NOTHING — including CSS.
+   The trap already found on this project: a `scroll-behavior: smooth` CSS
+   rule silently re-animated a `behavior: 'auto'` scroll, so a JS-only gate
+   is a hole. JS paths ask prefersReducedMotion() (src/lib/motion.ts); this
+   block covers every CSS transition and keyframe, INCLUDING the ones
+   component libraries (Radix/tailwindcss-animate) attach via data-state.
+   Note: motion-craft's guidance is to keep colour/opacity transitions under
+   reduce ("gentler, not zero"); the mandate's hard boundary says absent —
+   the boundary wins, recorded in docs/DECISIONS.md. ── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 @layer components {
   .nav-link {
     @apply px-3 py-2 text-sm font-medium text-white/80 transition-colors hover:text-white rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40;
