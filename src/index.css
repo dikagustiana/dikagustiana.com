@@ -117,10 +117,11 @@
        focus ring, primary buttons in popovers, the "New" badge, and the
        THEME swatches in the colour palette. Value is Substack's #ff6719;
        swapping the whole scheme to a house accent is this one line. */
-    --accent-editorial: 20 100% 55%;
-    /* Body ink rgb(54,55,55) and the muted subtitle grey rgb(119,119,119). */
-    --prose-fg: 180 1% 21%;
-    --prose-muted: 0 0% 47%;
+    --accent-editorial: 20.4 100% 54.9%;   /* = #ff6719 exactly */
+    /* Body ink and the muted subtitle grey — exact values, because the
+       measured table is exact and HSL triplets round one RGB step off. */
+    --prose-ink: rgb(54, 55, 55);
+    --prose-muted-ink: rgb(119, 119, 119);
     /* Divider rule rgb(230,230,230). */
     --prose-rule: 0 0% 90%;
 
@@ -330,7 +331,11 @@
     font-family: var(--font-serif);
     font-size: 19px;
     line-height: 1.6;
-    color: hsl(var(--prose-fg));
+    color: var(--prose-ink);
+    /* An unbreakable token — a long URL, an unhyphenated formula word — must
+       wrap rather than push the page sideways. Measured: a 30-character
+       token in an h1 at 375px produced 712px of page scrollWidth. */
+    overflow-wrap: break-word;
   }
 
   .prose-editorial p,
@@ -350,7 +355,7 @@
   .prose-editorial h6, .essay-prose h6 {
     font-family: var(--font-sans);
     font-weight: 700;
-    color: hsl(var(--prose-fg));
+    color: var(--prose-ink);
     letter-spacing: normal;
     margin: 1em 0 0.625em;
   }
@@ -488,14 +493,14 @@
     font-size: 32px;
     line-height: 36px;
     font-weight: 700;
-    color: hsl(var(--prose-fg));
+    color: var(--prose-ink);
   }
   .editorial-subtitle {
     font-family: var(--font-serif);
     font-size: 18px;
     line-height: 24px;
     font-weight: 400;
-    color: hsl(var(--prose-muted));
+    color: var(--prose-muted-ink);
   }
 
   /* The column pattern: an explicit width on a CONTAINER, centred by margin

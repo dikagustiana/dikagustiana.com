@@ -184,6 +184,14 @@ export function EditorToolbar({ editor, insertOptions, className }: EditorToolba
 
   if (!editor || !state) return null;
 
+  // Formatting must act on the selection the writer made. Letting a button
+  // take focus collapses that selection before the command runs — the gate
+  // probe measured exactly that: every block command landed, every mark
+  // command silently did nothing. preventDefault on mousedown keeps focus
+  // (and the live selection) in the editor for pointer users; keyboard
+  // users still reach every control by Tab, which never collapses it.
+  const keepSelection = (e: React.MouseEvent) => e.preventDefault();
+
   const iconButton = 'h-8 w-8 shrink-0 text-foreground/80';
   const active = 'bg-secondary text-foreground';
   const chevronButton =
@@ -215,6 +223,7 @@ export function EditorToolbar({ editor, insertOptions, className }: EditorToolba
     >
       {clip.left && (
         <button
+          onMouseDown={keepSelection}
           type="button"
           aria-label="Scroll toolbar left"
           className={cn(chevronButton, 'left-1')}
@@ -225,6 +234,7 @@ export function EditorToolbar({ editor, insertOptions, className }: EditorToolba
       )}
       {clip.right && (
         <button
+          onMouseDown={keepSelection}
           type="button"
           aria-label="Scroll toolbar right"
           className={cn(chevronButton, 'right-1')}
@@ -240,6 +250,7 @@ export function EditorToolbar({ editor, insertOptions, className }: EditorToolba
       >
         {/* ══ History ══ */}
         <Button
+          onMouseDown={keepSelection}
           type="button"
           variant="ghost"
           size="icon"
@@ -251,6 +262,7 @@ export function EditorToolbar({ editor, insertOptions, className }: EditorToolba
           <Undo2 className="h-4 w-4" />
         </Button>
         <Button
+          onMouseDown={keepSelection}
           type="button"
           variant="ghost"
           size="icon"
@@ -268,6 +280,7 @@ export function EditorToolbar({ editor, insertOptions, className }: EditorToolba
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
+              onMouseDown={keepSelection}
               type="button"
               variant="ghost"
               size="sm"
@@ -307,6 +320,7 @@ export function EditorToolbar({ editor, insertOptions, className }: EditorToolba
             Code is mutually exclusive with B/I/S: while it is active the
             three become DISABLED, not merely inactive. */}
         <Button
+          onMouseDown={keepSelection}
           type="button"
           variant="ghost"
           size="icon"
@@ -318,6 +332,7 @@ export function EditorToolbar({ editor, insertOptions, className }: EditorToolba
           <Bold className="h-4 w-4" />
         </Button>
         <Button
+          onMouseDown={keepSelection}
           type="button"
           variant="ghost"
           size="icon"
@@ -329,6 +344,7 @@ export function EditorToolbar({ editor, insertOptions, className }: EditorToolba
           <Italic className="h-4 w-4" />
         </Button>
         <Button
+          onMouseDown={keepSelection}
           type="button"
           variant="ghost"
           size="icon"
@@ -340,6 +356,7 @@ export function EditorToolbar({ editor, insertOptions, className }: EditorToolba
           <Strikethrough className="h-4 w-4" />
         </Button>
         <Button
+          onMouseDown={keepSelection}
           type="button"
           variant="ghost"
           size="icon"
@@ -359,6 +376,7 @@ export function EditorToolbar({ editor, insertOptions, className }: EditorToolba
           onClear={() => editor.chain().focus().unsetColor().run()}
           trigger={
             <Button
+              onMouseDown={keepSelection}
               type="button"
               variant="ghost"
               size="icon"
@@ -369,7 +387,7 @@ export function EditorToolbar({ editor, insertOptions, className }: EditorToolba
                 <Baseline className="h-4 w-4" />
                 <span
                   className="mt-0.5 h-[3px] w-4 rounded-sm"
-                  style={{ backgroundColor: state.color ?? 'hsl(var(--prose-fg))' }}
+                  style={{ backgroundColor: state.color ?? 'var(--prose-ink)' }}
                 />
               </span>
             </Button>
@@ -384,6 +402,7 @@ export function EditorToolbar({ editor, insertOptions, className }: EditorToolba
           onClear={() => editor.chain().focus().unsetBackgroundColor().run()}
           trigger={
             <Button
+              onMouseDown={keepSelection}
               type="button"
               variant="ghost"
               size="icon"
@@ -405,6 +424,7 @@ export function EditorToolbar({ editor, insertOptions, className }: EditorToolba
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
+              onMouseDown={keepSelection}
               type="button"
               variant="ghost"
               size="icon"
@@ -437,6 +457,7 @@ export function EditorToolbar({ editor, insertOptions, className }: EditorToolba
         </DropdownMenu>
 
         <Button
+          onMouseDown={keepSelection}
           type="button"
           variant="ghost"
           size="icon"
@@ -455,6 +476,7 @@ export function EditorToolbar({ editor, insertOptions, className }: EditorToolba
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
+              onMouseDown={keepSelection}
               type="button"
               variant="ghost"
               size="icon"
@@ -477,6 +499,7 @@ export function EditorToolbar({ editor, insertOptions, className }: EditorToolba
 
         {/* ══ List & align ══ */}
         <Button
+          onMouseDown={keepSelection}
           type="button"
           variant="ghost"
           size="icon"
@@ -487,6 +510,7 @@ export function EditorToolbar({ editor, insertOptions, className }: EditorToolba
           <List className="h-4 w-4" />
         </Button>
         <Button
+          onMouseDown={keepSelection}
           type="button"
           variant="ghost"
           size="icon"
@@ -500,6 +524,7 @@ export function EditorToolbar({ editor, insertOptions, className }: EditorToolba
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
+              onMouseDown={keepSelection}
               type="button"
               variant="ghost"
               size="icon"
@@ -530,6 +555,7 @@ export function EditorToolbar({ editor, insertOptions, className }: EditorToolba
         {state.inList && (
           <>
             <Button
+              onMouseDown={keepSelection}
               type="button"
               variant="ghost"
               size="icon"
@@ -541,6 +567,7 @@ export function EditorToolbar({ editor, insertOptions, className }: EditorToolba
               <Outdent className="h-4 w-4" />
             </Button>
             <Button
+              onMouseDown={keepSelection}
               type="button"
               variant="ghost"
               size="icon"
@@ -560,6 +587,7 @@ export function EditorToolbar({ editor, insertOptions, className }: EditorToolba
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
+              onMouseDown={keepSelection}
               type="button"
               variant="ghost"
               size="icon"
@@ -600,6 +628,7 @@ export function EditorToolbar({ editor, insertOptions, className }: EditorToolba
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
+              onMouseDown={keepSelection}
               type="button"
               variant="ghost"
               size="icon"

@@ -6,9 +6,14 @@ type FontSize = 'small' | 'medium' | 'large';
 const STORAGE_KEY = 'editorial-font-size';
 
 const fontSizeClasses: Record<FontSize, string> = {
-  small: 'text-base leading-relaxed',
-  medium: 'text-lg leading-relaxed',
-  large: 'text-xl leading-loose',
+  // Medium is the editorial default — NO utility class, so the measured
+  // 19px/1.6 from .prose-editorial (src/index.css) applies untouched. A
+  // `text-lg` here silently overrode the type system: same specificity,
+  // later in the built stylesheet. S and L scale around the default; the
+  // em-based heading scale follows the root size automatically.
+  small: 'text-[17px] leading-[1.6]',
+  medium: '',
+  large: 'text-[21px] leading-[1.6]',
 };
 
 export function useFontSize() {

@@ -52,8 +52,8 @@ export default {
         // link-popover focus ring, popover primary buttons, "New" badge,
         // palette THEME swatches). See src/index.css.
         "accent-editorial": "hsl(var(--accent-editorial))",
-        "prose-fg": "hsl(var(--prose-fg))",
-        "prose-muted": "hsl(var(--prose-muted))",
+        "prose-fg": "var(--prose-ink)",
+        "prose-muted": "var(--prose-muted-ink)",
         popover: {
           DEFAULT: "hsl(var(--popover))",
           foreground: "hsl(var(--popover-foreground))",
