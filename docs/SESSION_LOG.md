@@ -3,15 +3,70 @@
 Append-only. Newest entry first. A fresh session must be able to resume from this file.
 
 ## NEXT ACTION (single)
-**Commit the owner's `.docx` to the repo so GATE S6 can be closed against the real file.**
-It was described as attached and is **not present in this environment** — an exhaustive
-filesystem search found no Office document except one that ships with the OS. The Word-paste
-transform is verified against a synthetic Word-clipboard fixture and against nine unit tests,
-but not against what this specific Word version and template actually emit, so the 10 H1 →
-`h2` / 3 H2 → `h3` / 89 body-block target in `docs/IMPORT_TEST_T4M07.md` is still unmeasured.
-Put the file anywhere in the repo (`docs/fixtures/` is fine); LibreOffice is installed here,
-so it can be unzipped for its real `word/document.xml` structure and converted independently.
-After that, the design session picks up from `docs/HANDOFF_DESIGN.md`.
+**Set the two backup secrets, then flip the backup workflow's first run green.** The daily
+content backup (`.github/workflows/backup.yml`) is the only mitigation of free-tier
+Supabase having no PITR, and it fails loudly until `VITE_SUPABASE_URL` and
+`SUPABASE_SERVICE_ROLE_KEY` exist as GitHub Actions secrets (Settings → Secrets and
+variables → Actions). One manual `workflow_dispatch` after that proves the net is real —
+the ledger's A3 row stays half-BLOCKED until someone has seen a green run with a dump
+artifact attached. After that: the un-reached audit tail in ranked order —
+#12 unsafe URLs, #14 sitemap/robots/OG/404, #9 canonical redirects — from
+`docs/AUDIT_TRIAGE.md`.
+
+## 2026-08-02 (audit-triage session) — eighteen findings, ranked and executed
+
+Branch `audit/data-loss-guards-ci-nav`, base `main` @ `03662e8`. The ranked plan is
+`docs/AUDIT_TRIAGE.md`; the criterion: expected loss of the work the owner is about to
+create, weighted by irreversibility, then cost. Gates A1–A9 in `docs/GATE_LEDGER.md`,
+every one measured on running software.
+
+**Reached and PASSED (ranks 1–9 of the plan, plus rank 12):**
+- **Deleting an essay can no longer destroy it** — archive-not-delete in the UI (with
+  Restore), `essay_revisions` FK now ON DELETE RESTRICT; a raw SQL delete with history
+  fails with 23503, observed.
+- **`published=true, status='draft'` is unreachable** — a sync trigger below every
+  writer; full matrix + the legacy dialog's exact PATCH measured both directions;
+  divergent rows 0. The dialog also stops making invisible edits (clears stale
+  `content_json` when it rewrites the HTML body).
+- **CI exists and was observed green on the PR** — lint (0 errors, warning cap 35),
+  `tsc -b --force`, tests pinned to a non-UTC zone, build. Fixed on the way: two lint
+  errors and a real product bug (`formatDate` showed every essay date a day early west
+  of UTC).
+- **Backup workflow shipped, BLOCKED on repo secrets** — fails loudly daily until the
+  owner sets `VITE_SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY`. That is the correct
+  behaviour for a backup that is not happening.
+- **The nav reaches all four content-bearing tracks** — `planning`/`analytics` slugs
+  fixed; the click-path test that the route sweep never had now pins nav paths to routes
+  AND track segments to the `finance_sections` slug set.
+- **Creating an essay leaves `/new`** — reload shows the essay, not a blank editor; no
+  duplicate-insert trap.
+- **A stale tab cannot overwrite newer work** — optimistic concurrency on every editor
+  row-write; two-tab gate observed: stale tab failed loudly, newer text survived, stale
+  text still offered from backup. Nobody loses a word.
+- **An outage renders retry, never 404** — all five essay pages; outage → error + Try
+  again → full essay after recovery; wrong slugs still 404.
+- **One identity** — "Friendly learning buddy", the letter-F logo block, and "Let's be
+  insane and delusional" are gone; the site says Dika Gustiana everywhere, and the hero
+  says what the site is.
+- **`strict: true`** — measured first (3 errors total across 249 files, all real latent
+  bugs), fixed, enabled, all green under CI.
+
+**Corrections to the audit/briefing, verified:** lint had 2 errors, not 1;
+`/finance/finance-in-action` was already a real route; `finance_sections` does hold five
+slugs but `capital-allocation` has 0 modules (kept out of the nav deliberately); the
+timezone-dependent test was a shipping product bug, not flake.
+
+**Not reached, honestly:** #12 unsafe URLs through persisted JSON (ranked 10),
+#14 sitemap/robots/absolute-OG/404 signalling (11), #9 canonical redirects (13),
+#10 cache-on-logout (14), #11 role race (15), hero-texture compression, dependency
+upgrades (11 vulns measured, 5 prod — recorded in DECISIONS with the reason they were
+not churned today). #3, #13, #16–18 closed as decisions, not code — reasons in
+DECISIONS.
+
+**End state, measured:** `fa-07-01` 21,946 chars / 81 blocks / md5 `b36b8ba5…` —
+byte-identical. 162 essays, 2 revisions, 1 account (the owner's), divergent rows 0,
+tables without RLS 0. Temp gate admin deleted. 229 tests, typecheck clean under
+`strict: true`, lint 0 errors, build green.
 
 ## 2026-08-02 (follow-up) — merge, then settle the open questions
 

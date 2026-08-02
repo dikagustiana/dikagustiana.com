@@ -78,3 +78,10 @@ explicitly not-reached.
 End-of-session invariants to measure, not assume: `fa-07-01` at 21,946 chars / 81
 blocks / md5 `b36b8ba5…`; zero tables without RLS; any probe identities and rows
 removed.
+
+## Outcome (written at session end)
+
+Ranks 1–9 and 12: **done and gate-PASSED** (ledger rows A1–A9). Rank 3's backup half is
+BLOCKED on the two repo secrets only the owner can set. Ranks 10, 11, 13, 14, 15 and the
+hero-texture/dependency hygiene: **not reached** — the estimates above stand for the next
+session. Ranks 16–18: closed as recorded decisions, not code.
