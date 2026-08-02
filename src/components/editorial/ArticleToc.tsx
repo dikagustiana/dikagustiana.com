@@ -20,32 +20,41 @@ interface ArticleTocProps {
   variant?: 'inline' | 'sidebar';
 }
 
-function extractHeadings(content: string): TocItem[] {
+// Exported for the unit test that pins these ids to the ones ArticleBody
+// actually renders — the two counters must walk the same heading set.
+export function extractHeadings(content: string): TocItem[] {
   if (!content) return [];
   const items: TocItem[] = [];
   let headingCounter = 0;
 
-  // Try parsing as HTML
+  // The counter MUST advance over every h1–h6, because ArticleBody numbers
+  // its `section-N-…` ids over all six levels. Counting only the listed
+  // levels here would desync every anchor the moment an h1/h4/h5/h6
+  // precedes an h2 — the ToC still LISTS only h2/h3.
   try {
     const doc = new DOMParser().parseFromString(content, 'text/html');
-    const headings = doc.querySelectorAll('h2, h3');
+    const headings = doc.querySelectorAll('h1, h2, h3, h4, h5, h6');
     headings.forEach((heading) => {
       headingCounter++;
-      const text = heading.textContent || '';
-      const level = heading.tagName.toLowerCase() as 'h2' | 'h3';
-      const id = `section-${headingCounter}-${text.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 50)}`;
-      items.push({ id, text, level });
+      const level = heading.tagName.toLowerCase();
+      if (level === 'h2' || level === 'h3') {
+        const text = heading.textContent || '';
+        const id = `section-${headingCounter}-${text.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 50)}`;
+        items.push({ id, text, level });
+      }
     });
   } catch {
     // If parsing fails, try regex fallback
-    const regex = /<(h2|h3)[^>]*>(.*?)<\/\1>/gi;
+    const regex = /<(h[1-6])[^>]*>(.*?)<\/\1>/gi;
     let match;
     while ((match = regex.exec(content)) !== null) {
       headingCounter++;
-      const level = match[1].toLowerCase() as 'h2' | 'h3';
-      const text = match[2].replace(/<[^>]*>/g, '');
-      const id = `section-${headingCounter}-${text.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 50)}`;
-      items.push({ id, text, level });
+      const level = match[1].toLowerCase();
+      if (level === 'h2' || level === 'h3') {
+        const text = match[2].replace(/<[^>]*>/g, '');
+        const id = `section-${headingCounter}-${text.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 50)}`;
+        items.push({ id, text, level });
+      }
     }
   }
 
