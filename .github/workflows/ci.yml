@@ -29,7 +29,12 @@ jobs:
       # tsc -b --force: the root tsconfig is solution-style ("files": []), so a
       # bare `tsc --noEmit` compiles NOTHING and exits 0. Do not "simplify" this.
       - run: npm run typecheck
-      - run: npx vitest run
+      # JSON report + count floor: a test file that throws during IMPORT
+      # contributes zero tests — the total shrinks without a red. The
+      # assert step fails the build when the count drops below the floor
+      # in scripts/assert-test-count.mjs.
+      - run: npx vitest run --reporter=default --reporter=json --outputFile=vitest-report.json
         env:
           TZ: America/Chicago
+      - run: node scripts/assert-test-count.mjs vitest-report.json
       - run: npm run build
