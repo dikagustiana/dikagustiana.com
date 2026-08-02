@@ -1,165 +1,93 @@
 /**
- * Slash-command menu.
+ * Slash-command entry point to the insert menu.
  *
- * TipTap ships no official slash-command extension, only the `@tiptap/suggestion`
- * primitive it would be built on, so this is that build.
+ * TipTap ships no slash-command extension, only the `@tiptap/suggestion`
+ * primitive it would be built on, so this is that build. The item list is NOT
+ * defined here — it comes from `insertMenu.ts`, shared with the gutter `+`, so
+ * the two entry points cannot drift.
+ *
+ * Formatting items (headings, lists, quote) used to live here. They moved to
+ * the bubble menu: the selection toolbar formats, this menu inserts.
  *
  * The popup is plain DOM positioned from `coordsAtPos`. A React portal would
- * mean pulling in a floating-element library for one menu; the menu is a list
- * of buttons and does not earn the dependency.
+ * mean a floating-element library for one menu, which it does not earn.
  */
 
 import { Extension } from '@tiptap/core';
-import type { Editor, Range } from '@tiptap/core';
 import Suggestion from '@tiptap/suggestion';
+import {
+  buildInsertItems,
+  filterInsertItems,
+  type InsertMenuItem,
+  type InsertMenuOptions,
+} from './insertMenu';
 
-export interface SlashCommandOptions {
-  /** Opens the Insert Figure dialog. Omit and the Figure item is hidden. */
-  onInsertFigure?: () => void;
-}
+export type SlashCommandOptions = InsertMenuOptions;
 
-interface SlashItem {
-  title: string;
-  hint: string;
-  keywords: string[];
-  run: (editor: Editor, range: Range) => void;
-}
-
-function buildItems(options: SlashCommandOptions): SlashItem[] {
-  const items: SlashItem[] = [
-    {
-      title: 'Heading 2',
-      hint: 'Section heading',
-      keywords: ['h2', 'heading', 'title', 'section'],
-      run: (editor, range) =>
-        editor.chain().focus().deleteRange(range).setNode('heading', { level: 2 }).run(),
-    },
-    {
-      title: 'Heading 3',
-      hint: 'Sub-heading',
-      keywords: ['h3', 'heading', 'subheading'],
-      run: (editor, range) =>
-        editor.chain().focus().deleteRange(range).setNode('heading', { level: 3 }).run(),
-    },
-    {
-      title: 'Bullet list',
-      hint: 'Unordered list',
-      keywords: ['ul', 'bullet', 'list', 'unordered'],
-      run: (editor, range) =>
-        editor.chain().focus().deleteRange(range).toggleBulletList().run(),
-    },
-    {
-      title: 'Numbered list',
-      hint: 'Ordered list',
-      keywords: ['ol', 'number', 'ordered', 'list'],
-      run: (editor, range) =>
-        editor.chain().focus().deleteRange(range).toggleOrderedList().run(),
-    },
-    {
-      title: 'Quote',
-      hint: 'Pull quote',
-      keywords: ['quote', 'blockquote', 'pull'],
-      run: (editor, range) =>
-        editor.chain().focus().deleteRange(range).toggleBlockquote().run(),
-    },
-    {
-      title: 'Code block',
-      hint: 'Monospaced block',
-      keywords: ['code', 'pre', 'snippet'],
-      run: (editor, range) =>
-        editor.chain().focus().deleteRange(range).toggleCodeBlock().run(),
-    },
-    {
-      title: 'Table',
-      hint: '3 × 3 with header row',
-      keywords: ['table', 'grid', 'rows', 'columns'],
-      run: (editor, range) =>
-        editor
-          .chain()
-          .focus()
-          .deleteRange(range)
-          .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
-          .run(),
-    },
-    {
-      title: 'Divider',
-      hint: 'Horizontal rule',
-      keywords: ['hr', 'divider', 'rule', 'separator'],
-      run: (editor, range) =>
-        editor.chain().focus().deleteRange(range).setHorizontalRule().run(),
-    },
-  ];
-
-  if (options.onInsertFigure) {
-    items.push({
-      title: 'Figure',
-      hint: 'Image with caption and source',
-      keywords: ['image', 'figure', 'picture', 'photo', 'graph', 'chart'],
-      run: (editor, range) => {
-        editor.chain().focus().deleteRange(range).run();
-        options.onInsertFigure?.();
-      },
-    });
-  }
-
-  return items;
-}
-
-/** Renders the menu and keeps the DOM in step with the selected index. */
 function createMenu() {
   const el = document.createElement('div');
   el.className = 'tiptap-slash-menu';
   el.setAttribute('role', 'listbox');
+  el.setAttribute('aria-label', 'Insert block');
   document.body.appendChild(el);
   return el;
 }
 
+/**
+ * Place the menu near the caret, flipping above when the caret sits low in the
+ * viewport. Measured after paint — reading offsetHeight before the rows exist
+ * returns 0 and the flip never triggers, which is how a menu opened on the
+ * last line ends up clipped off the bottom of the screen.
+ */
 function positionMenu(el: HTMLElement, rect: DOMRect | null) {
   if (!rect) return;
   const margin = 8;
-  const height = el.offsetHeight || 260;
-  // Flip above the caret when there is not enough room below it.
-  const below = rect.bottom + margin;
-  const fitsBelow = below + height < window.innerHeight;
-  el.style.left = `${Math.min(rect.left, window.innerWidth - el.offsetWidth - margin)}px`;
-  el.style.top = fitsBelow ? `${below}px` : `${Math.max(margin, rect.top - height - margin)}px`;
+  const height = el.offsetHeight;
+  const width = el.offsetWidth;
+  const fitsBelow = rect.bottom + margin + height < window.innerHeight;
+  const top = fitsBelow
+    ? rect.bottom + margin
+    : Math.max(margin, rect.top - height - margin);
+  el.style.top = `${Math.min(top, Math.max(margin, window.innerHeight - height - margin))}px`;
+  el.style.left = `${Math.max(margin, Math.min(rect.left, window.innerWidth - width - margin))}px`;
 }
 
 export const SlashCommand = Extension.create<SlashCommandOptions>({
   name: 'slashCommand',
 
   addOptions() {
-    return { onInsertFigure: undefined };
+    return { onInsertFigure: undefined, onInsertLinkCard: undefined };
   },
 
   addProseMirrorPlugins() {
     const extensionOptions = this.options;
 
     return [
-      Suggestion<SlashItem>({
+      Suggestion<InsertMenuItem>({
         editor: this.editor,
         char: '/',
-        startOfLine: false,
+        // Only at the start of a block: mid-sentence slashes are ordinary
+        // punctuation ("and/or", a URL) and should never open a menu.
+        startOfLine: true,
         allowSpaces: false,
 
-        items: ({ query }) => {
-          const all = buildItems(extensionOptions);
-          const q = query.trim().toLowerCase();
-          if (!q) return all;
-          return all.filter(
-            item =>
-              item.title.toLowerCase().includes(q) ||
-              item.keywords.some(k => k.startsWith(q)),
-          );
+        // …and never inside a code block, where a slash is a slash. A code
+        // block is one textblock containing newlines, so `startOfLine` alone
+        // does not stop the menu opening on its second and later lines.
+        allow: ({ state, range }) => {
+          const $from = state.doc.resolve(range.from);
+          return !$from.parent.type.spec.code;
         },
+
+        items: ({ query }) => filterInsertItems(buildInsertItems(extensionOptions), query),
 
         command: ({ editor, range, props }) => props.run(editor, range),
 
         render: () => {
           let el: HTMLElement | null = null;
-          let items: SlashItem[] = [];
+          let items: InsertMenuItem[] = [];
           let selected = 0;
-          let onPick: (item: SlashItem) => void = () => undefined;
+          let onPick: (item: InsertMenuItem) => void = () => undefined;
 
           const paint = () => {
             if (!el) return;
@@ -201,6 +129,11 @@ export const SlashCommand = Extension.create<SlashCommandOptions>({
             });
           };
 
+          const close = () => {
+            el?.remove();
+            el = null;
+          };
+
           return {
             onStart: props => {
               items = props.items;
@@ -213,10 +146,11 @@ export const SlashCommand = Extension.create<SlashCommandOptions>({
 
             onUpdate: props => {
               items = props.items;
-              selected = 0;
+              selected = Math.min(selected, Math.max(0, items.length - 1));
               onPick = item => props.command(item);
+              if (!el) el = createMenu();
               paint();
-              if (el) positionMenu(el, props.clientRect?.() ?? null);
+              positionMenu(el, props.clientRect?.() ?? null);
             },
 
             onKeyDown: props => {
@@ -224,8 +158,9 @@ export const SlashCommand = Extension.create<SlashCommandOptions>({
               const { key } = props.event;
 
               if (key === 'Escape') {
-                el.remove();
-                el = null;
+                // Close only. The `/` the author typed stays in the document —
+                // swallowing it would delete a character they may have meant.
+                close();
                 return true;
               }
               if (key === 'ArrowDown') {
@@ -247,10 +182,7 @@ export const SlashCommand = Extension.create<SlashCommandOptions>({
               return false;
             },
 
-            onExit: () => {
-              el?.remove();
-              el = null;
-            },
+            onExit: close,
           };
         },
       }),

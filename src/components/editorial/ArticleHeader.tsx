@@ -53,15 +53,15 @@ export function ArticleHeader({
 
   return (
     <header className={cn("mb-10", className)}>
-      {/* Topic badge */}
-      {topic && (
-        <div className="mb-4">
-          <Badge variant="secondary" className="text-xs uppercase tracking-wide">
-            <Tag className="h-3 w-3 mr-1" />
-            {topic}
-          </Badge>
-        </div>
-      )}
+      {/* Publication masthead, per the reader specification: the name of the
+          publication, then the title. The topic badge used to sit here and
+          competed with the title for the top of the page; it moves into the
+          meta row below, where it is still available and no longer shouts. */}
+      <div className="mb-6 border-b border-border pb-3">
+        <span className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+          Dika Gustiana
+        </span>
+      </div>
 
       {/* Title */}
       <h1 className="text-3xl md:text-4xl lg:text-5xl font-display font-bold text-foreground leading-tight mb-4">
@@ -75,8 +75,15 @@ export function ArticleHeader({
         </p>
       )}
 
-      {/* Meta row */}
+      {/* Meta row: author, then date · read time, then the divider — the
+          order the specification asks for. */}
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground border-b border-border pb-6 mb-8">
+        {topic && (
+          <Badge variant="secondary" className="text-xs uppercase tracking-wide">
+            <Tag className="h-3 w-3 mr-1" />
+            {topic}
+          </Badge>
+        )}
         {author && (
           <span className="flex items-center gap-1.5">
             <User className="h-4 w-4" />

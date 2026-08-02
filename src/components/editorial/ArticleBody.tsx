@@ -11,8 +11,10 @@
 import { ReactNode, useMemo } from 'react';
 import { LinkableHeading } from './LinkableHeading';
 import { FigureBlock, FigureBlockData } from './FigureBlock';
+import { LinkCardBlock } from './LinkCardBlock';
 import { cn } from '@/lib/utils';
 import { parseTiptapJson, isLegacyHtmlContent } from '@/lib/tiptap/serialize';
+import { parseAttrJson } from '@/lib/tiptap/attrJson';
 import type { JSONContent } from '@tiptap/core';
 
 interface ArticleBodyProps {
@@ -172,6 +174,21 @@ function renderJsonNode(
       return null;
     }
 
+    case 'linkCard': {
+      const url = String(node.attrs?.url ?? '');
+      if (!url) return null;
+      return (
+        <LinkCardBlock
+          key={key}
+          data={{
+            url,
+            title: String(node.attrs?.title ?? ''),
+            description: String(node.attrs?.description ?? ''),
+          }}
+        />
+      );
+    }
+
     case 'image': {
       const src = String(node.attrs?.src ?? '');
       if (!src) return null;
@@ -268,18 +285,8 @@ function renderLegacyHtml(htmlContent: string): ReactNode {
     const key = `${tagName}-${index}`;
 
     if (tagName === 'figure' && element.getAttribute('data-type') === 'figure-block') {
-      const dataFigure = element.getAttribute('data-figure');
-      if (dataFigure) {
-        try {
-          const figureData = JSON.parse(
-            dataFigure.replace(/&quot;/g, '"').replace(/&amp;/g, '&')
-          ) as FigureBlockData;
-          return <FigureBlock key={key} data={figureData} />;
-        } catch {
-          return null;
-        }
-      }
-      return null;
+      const figureData = parseAttrJson<FigureBlockData>(element.getAttribute('data-figure'));
+      return figureData ? <FigureBlock key={key} data={figureData} /> : null;
     }
 
     if (tagName === 'h2' || tagName === 'h3') {
@@ -315,8 +322,34 @@ function renderLegacyHtml(htmlContent: string): ReactNode {
     if (tagName === 'em' || tagName === 'i') return <em key={key}>{processChildren(element)}</em>;
     if (tagName === 'code') return <code key={key} className="bg-muted px-1 py-0.5 rounded text-sm">{processChildren(element)}</code>;
 
+    // Inline tags the sanitizer allows and the editor can produce. Without
+    // these the fall-through at the bottom returns the children unwrapped, so
+    // the words survive and the formatting quietly does not — which is the
+    // failure mode this project keeps hitting. Strikethrough is one of the
+    // eight actions in the bubble menu; it was reaching the database and
+    // disappearing on the way to the reader.
+    if (tagName === 's' || tagName === 'strike' || tagName === 'del') return <s key={key}>{processChildren(element)}</s>;
+    if (tagName === 'u') return <u key={key}>{processChildren(element)}</u>;
+    if (tagName === 'sup') return <sup key={key}>{processChildren(element)}</sup>;
+    if (tagName === 'sub') return <sub key={key}>{processChildren(element)}</sub>;
+    if (tagName === 'br') return <br key={key} />;
+
     if (tagName === 'a') {
       const href = element.getAttribute('href') || '';
+
+      // A link card stored as HTML must come back as a card, not as a bare
+      // link — otherwise the block degrades every time content round-trips
+      // through the `content` column.
+      if (element.getAttribute('data-type') === 'link-card') {
+        const stored = parseAttrJson<Partial<{ url: string; title: string; description: string }>>(
+          element.getAttribute('data-link-card'),
+        );
+        const data = stored
+          ? { url: href, title: '', description: '', ...stored }
+          : { url: href, title: element.textContent ?? '', description: '' };
+        return data.url ? <LinkCardBlock key={key} data={data} /> : null;
+      }
+
       const isExternal = href.startsWith('http');
       return (
         <a key={key} href={href}

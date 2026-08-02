@@ -3,13 +3,91 @@
 Append-only. Newest entry first. A fresh session must be able to resume from this file.
 
 ## NEXT ACTION (single)
-**Land the PR #11 ⇄ PR #10 reconciliation.** Two sessions independently implemented the
-"writing an essay, and reading one" mandate; PR #10 merged first, and PR #11's branch now
-carries the merge that reconciles them (one implementation per feature — see the merge
-commit message for which side won where). Remaining: post-merge re-verification results in
-the ledger stay green, PR #11 review comment addressed (takeaways guidance strict when
-lessonType is null), then merge PR #11. The s7-* test identities are already deleted;
-fresh namespaced identities used for post-merge re-checks must be deleted the same way.
+**Answer the table-of-contents question, then re-run GATE S6 against a real `.docx`.**
+The reader specification has no table of contents; a sticky ToC sidebar was built last
+session at the owner's request and has been **kept**. These are 3,000-word curriculum
+pieces, not newsletter posts, so it probably still earns its place — the owner needs to
+say keep or drop. Second, the Word-paste gate passed against a *synthetic* Word-clipboard
+fixture (no `.docx` exists in the repo); it should be re-run against one of the owner's
+actual documents before the workflow is trusted. Third, the Embed scope fork is open and
+deliberately unbuilt: the shipped block is a client-side link card, and real oEmbed/Open
+Graph metadata would need a new edge function **and** a widened `sanitizeHtml` allowlist —
+see `docs/DECISIONS.md`.
+
+## 2026-08-01 (writing-surface session) — the canvas, the menus, and the publish modal
+
+Branch `claude/dikagustiana-sections-5-7-q0jja0`, based on `main` @ `31a560e`.
+Gates S1–S8 all **PASSED**; measurements in `docs/GATE_LEDGER.md`. Nothing was claimed
+that was not observed on `vite preview` against the live project.
+
+**What the surface is now.** A 48px-high bar carrying only `← Posts`, `Draft · Saved`,
+`Preview` and `Continue`. Title and subtitle at the top of the canvas as large grey
+placeholders. A 680px measure set explicitly — `font-size: 1.125rem`, `line-height: 1.75`
+— rather than inherited from nowhere in particular. Formatting appears on selection and
+nowhere else: the persistent toolbar is deleted, and the bubble menu carries exactly the
+eight specified actions. Insertion is a `+` in the left gutter and `/` at the start of a
+line, both reading one list from `src/lib/tiptap/insertMenu.ts` so they cannot drift. Every
+non-writing decision — placement, lesson type, references, key takeaways, byline, cover —
+moved into a `Post settings` modal, which is also the only place validation speaks. An
+empty stub now greets its author with nothing to fix.
+
+**Four bugs the gates found that nothing else would have.** Each was invisible to
+typecheck, build and the 180 tests that were passing at the time.
+
+1. **Strikethrough silently stopped rendering on publish.** Published pages pass the
+   HTML column to `ArticleBody`, so its "legacy" branch is the live path — and it named
+   `strong`, `em` and `code` but not `s`, `u`, `sup`, `sub` or `br`. Unnamed tags fell
+   through and returned their children unwrapped: the words survived, the formatting did
+   not. Fixed; `tests/unit/articleBodyInline.test.tsx` now covers every inline tag the
+   sanitizer allows.
+2. **A figure reloaded with `src=""`.** `figure` and `linkCard` pre-escaped their
+   `data-*` JSON before handing it to `renderHTML`, which builds DOM that escapes
+   attribute values again. `JSON.parse` threw on every reload and every attribute fell
+   back to its default. Fixed by `src/lib/tiptap/attrJson.ts` — escape once, at the layer
+   that needs it — with a tolerant read so rows already written still open.
+3. **A link card became an ordinary link on reload, and corrupted the row on the way.**
+   The card renders as an `<a>`, which StarterKit's Link mark claims; ProseMirror gathers
+   every mark rule before any node rule, so at equal priority the mark won. Worse, the
+   resulting round-trip instability meant `EssayEditor` kept re-parsing its own output —
+   `content` advanced while `content_json` froze, and the row held two documents that
+   disagreed. Fixed with `priority: 100` on the parse rule and an echo guard on the HTML
+   mirror. `tests/unit/editorHtmlRoundTrip.test.ts` now asserts round-trip stability for
+   every block the insert menu can produce — treat that as the fifth place of the content
+   contract.
+4. **Word lists pasted as paragraphs with a stray "·".** Attribute stripping ran before
+   list detection, so every test for `mso-list` / `MsoListParagraph` read an
+   already-emptied attribute; and the block walk iterated `body.children`, which for Word
+   clipboard HTML is the single `<div class=WordSection1>` wrapper. Both fixed;
+   `tests/unit/pasteFromWord.test.ts` covers the transform.
+
+Plus two smaller ones, both found by a gate refusing to run: the thin bar overflowed at
+375px once the status chip grew, and the gutter `+` sat on top of the first 28px of the
+current line and swallowed clicks meant for the text.
+
+**Dropped deliberately, with reasons in `docs/DECISIONS.md`:** Paywall, Poll, send-as-email,
+the reader-side reaction row, Button (no subscriptions — it would go nowhere), Audio and
+Video (neither trivial; both need sanitizer changes). **Kept and argued:** the code block,
+because the curriculum is full of driver equations and model formulas.
+
+**Housekeeping.** `import-admin@dikagustiana.com` deleted — `auth.users` now lists one
+account, the owner's, confirmed and with the admin role (GATE S8). Section 8.2 closed: the
+admin browser identity pass was blocked on there being no usable admin identity, and there
+is one now. Section 8.3 stays **BLOCKED** — the git proxy still rejects delete-pushes, so
+the eight zero-unique-commit branches need the GitHub UI; `archive/pre-rebuild-history` is
+untouched. Everything the gates created was removed and the removal measured: probe essay
+deleted, four stubs restored to their curriculum-seed state, gate revisions deleted, eight
+one-pixel probe images removed through the Storage API. `fa-07-01`'s body is byte-identical
+to its pre-session md5.
+
+**Skills.** `component-craft` was invoked and applied. `design-direction` and
+`full-output-enforcement` **do not exist in this environment** (`Unknown skill`), alongside
+the already-known-absent `ui-audit`. The manual substitute pass is written up in
+`docs/UI_AUDIT_WRITING.md` — hierarchy, proportion, legibility and interaction, with a
+Before / After / Why row per finding and what was deliberately left alone.
+
+**Explicitly not this session, and still true:** `finance_models` has no insert path and
+`ModelAdminPanel` is unreachable by construction; curriculum Sections 05 and 06 have no
+data path; the 160 placeholder bodies are the owner's to write.
 
 ## 2026-08-01 (session 7) — writing an essay, and reading one: Sections 1–5
 

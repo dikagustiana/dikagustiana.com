@@ -5,6 +5,121 @@ alternatives. Newest first.
 
 ---
 
+---
+
+# 2026-08-01 — Writing-surface session: what the insert menu offers, and why
+
+## The insert menu ships five items, and only five
+
+The owner's specification lists eight (Image, Video, Audio, Embed/link preview,
+Poll, Button, Divider, Paywall). Each was resolved on its own terms rather than
+ported.
+
+- **Image — kept, named for what the writer wants.** There is exactly one
+  image-ish node in the schema, `figure`. "Image" and "Figure" are the same
+  thing; shipping both would be two names for one node. The item is called
+  **Image**, because that is the word in the writer's head, and it opens the
+  figure uploader — an image plus an optional caption is the whole feature.
+- **Divider — kept.** Trivial, already in the schema, in the specification.
+- **Table — kept.** An insertion, not a reformat, so this menu is where it
+  belongs. It was built and gate-verified last round.
+- **Code block — kept, and this was a genuine call.** The specification's option
+  set is deliberately small and a code block is not in it. But the curriculum is
+  financial analysis: driver equations, model formulas, SQL against a ledger.
+  Those want a monospaced block that will not be reflowed or smart-quoted, and
+  the alternative — pasting them as ordinary paragraphs — loses that silently.
+  It is an insertion, the node already exists in the schema, and it costs one
+  row. Kept.
+- **Embed / link preview — built as the client-side card. The other version was
+  not built, and needs a decision from the owner.** `sanitizeHtml` forbids
+  `iframe` outright (`FORBID_TAGS: ['script','style','iframe','object','embed','form']`).
+  So the version people usually mean by "embed" — a YouTube or Twitter iframe —
+  would render perfectly in the editor and be stripped on publish: the exact
+  silent-vanish failure this project keeps hitting. What shipped is a card built
+  from the URL alone: hostname, title, optional description, linking out. It
+  fetches nothing and embeds nothing, and every tag and attribute it emits is
+  already in the sanitizer allowlist, so it survives publish unchanged —
+  measured anonymously on a published page.
+  **The fork, stated rather than picked silently:** real oEmbed / Open Graph
+  metadata needs a server round trip, because the browser cannot read another
+  origin's `<meta>` tags. That is a new Supabase edge function (fetch, parse,
+  cache, rate-limit, and handle the sites that block bots), plus a widened
+  sanitizer allowlist if the result is ever to be an iframe. Two changes, one of
+  them security-relevant. **Recommendation: leave it as the card.** For
+  curriculum essays citing BIS, IMF and textbook sources, a clean labelled link
+  is what a reader wants; an embedded tweet is not. If the owner wants true
+  embeds, that is a scoped piece of work to ask for, not to assume.
+- **Button — dropped.** In the reference it is a subscribe call-to-action. There
+  are no subscriptions, no email list and no paid tier here, so the honest answer
+  to "what would it do on this site?" is *link somewhere* — which is what a link
+  already does, with less ceremony. Shipping a button that goes nowhere is worse
+  than not shipping one.
+- **Audio and Video — dropped.** The owner declined audio earlier. Neither is
+  trivial: both need an upload path with size limits, a poster frame, a player
+  with accessible controls, and `<video>`/`<audio>` added to the sanitizer
+  allowlist — that is place four of the contract, where blocks vanish. Neither
+  is in the curriculum's way today. Noted here, not built.
+- **Poll and Paywall — not built, as instructed.** No polling infrastructure, no
+  paid tier. Paywall in particular is the most Substack-specific element in the
+  reference and the least relevant here.
+
+## Escape once, at the layer that needs it
+
+`figure` and `linkCard` both stored a JSON blob in a `data-*` attribute, and both
+pre-escaped it (`JSON.stringify(attrs).replace(/"/g, '&quot;')`) before handing
+it to `renderHTML` — which builds real DOM, which escapes attribute values
+itself. Escaped twice on the way out, so `JSON.parse` threw on the way back in,
+and every attribute fell back to its default: **a figure reloaded with `src=""`**.
+Nothing errored.
+
+The rule is now in one place, `src/lib/tiptap/attrJson.ts`: raw for `renderHTML`
+(the DOM escapes it), escaped for the string-building serializer (nothing else
+will), and a read that tries the raw form first and falls back to the legacy
+doubly-escaped form, so rows already written still open.
+
+## A node whose HTML does not round-trip corrupts the row silently
+
+`EssayEditor` mirrors the document into React state as HTML and pushes external
+changes back in with `setContent`. If a node's `renderHTML` output does not
+survive being parsed and re-serialised byte-for-byte, that mirror never settles:
+the editor re-parses its own output, `content` advances, `content_json` freezes,
+and the row ends up holding two documents that disagree. `linkCard` did exactly
+this — its `<a>` was claimed by StarterKit's Link mark on re-parse, because
+ProseMirror gathers every mark rule before any node rule.
+
+Two fixes and a guard: `priority: 100` on the card's parse rule; the HTML mirror
+now ignores its own echo instead of re-parsing it; and
+`tests/unit/editorHtmlRoundTrip.test.ts` asserts round-trip stability for every
+block the insert menu can produce. Treat round-trip stability as the fifth place
+of the content contract.
+
+## Autosave says "Saved" only when it is true
+
+Owner-decided and now implemented: an essay that has never been published
+autosaves into the `essays` row itself, so `Draft · Saved` is literally true and
+a crashed tab loses nothing — there is no published page to damage. An essay that
+is already live writes a revision only, and the chip says **`Published · Backed
+up HH:MM`**. It never says "Saved" for content that lives only in
+`essay_revisions`. A failed write is loud: `Save failed` / `Backup failed` in
+destructive colour with the error as its tooltip.
+
+## The gutter `+` lives in the gutter
+
+It was positioned at `left-0` of the editor container, which is the text's left
+edge — so it sat on top of the first ~28px of the current line and swallowed
+clicks meant for the text. The canvas now reserves 2.5rem of left padding at
+every width (4rem from `sm:`), and the button pulls into it at `-left-8`. An
+asymmetric margin on a phone is a smaller cost than a button the writer has to
+click around.
+
+## Open question for the owner: the table of contents
+
+The reader specification has no table of contents. A sticky ToC sidebar was built
+and gate-verified last session at the owner's request. These are 3,000-word
+curriculum pieces rather than newsletter posts, so it probably still earns its
+place — **it has been kept, and this is the ask**: keep it, or drop it to match
+the specification exactly?
+
 # 2026-08-01 — Fable session: reconcile + titles + defect verdicts
 
 ## The orphaned tone-fields trigger is dropped, not repaired

@@ -1,11 +1,18 @@
 /**
- * useEssayAutosave — debounced backup of the working draft into
- * `essay_revisions`, plus the load-time recovery check.
+ * useEssayAutosave — debounced persistence of the working draft, plus the
+ * load-time recovery check.
  *
- * What it does NOT do: touch the `essays` row. Autosave is a backup, not a
- * save; promoting a draft to the live row (and to `published`) stays an
- * explicit, validated action. That separation is why a failed autosave can
- * never corrupt what is already published.
+ * It behaves differently depending on whether the essay has ever been live,
+ * because the risk is not the same in both cases:
+ *
+ *   - **Never published** (`persistToEssay`): the draft IS the essay. Autosave
+ *     writes a revision AND updates the `essays` row, so "Saved" is literally
+ *     true and a crashed tab loses nothing. There is no published page to
+ *     damage.
+ *   - **Already published**: autosave writes a revision ONLY. Nothing
+ *     overwrites a live page without an explicit action, so the chip must say
+ *     "Backed up", never "Saved" — the content lives in `essay_revisions`
+ *     until the author saves.
  *
  * Failures are surfaced, never swallowed — a backup you believe in but that
  * is not happening is worse than no backup at all.
@@ -130,12 +137,31 @@ interface UseEssayAutosaveArgs {
   doc: JSONContent | null;
   /** False while the essay is still loading, to keep load from looking like an edit. */
   enabled: boolean;
+  /**
+   * HTML mirror of `doc`, written to `essays.content` alongside `content_json`
+   * when persisting. Only read when `persistToEssay` is true.
+   */
+  html?: string;
+  /**
+   * True for an essay that has never been published: autosave then writes the
+   * `essays` row itself, not just a backup.
+   */
+  persistToEssay?: boolean;
 }
+
+/** Where the last successful write landed — the chip must not overstate it. */
+export type AutosaveTarget = 'essay' | 'revision';
 
 export interface UseEssayAutosaveResult {
   autosaveStatus: AutosaveStatus;
   lastBackupAt: Date | null;
   autosaveError: string | null;
+  /**
+   * Where the last successful write landed. `'essay'` means the essays row
+   * itself holds the text; `'revision'` means only the backup does. The status
+   * chip reads this so it can never claim "Saved" for a backup.
+   */
+  lastSavedTo: AutosaveTarget | null;
   /**
    * Write a non-autosave revision immediately (manual save, publish…).
    *
@@ -162,10 +188,13 @@ export function useEssayAutosave({
   status,
   doc,
   enabled,
+  html,
+  persistToEssay = false,
 }: UseEssayAutosaveArgs): UseEssayAutosaveResult {
   const [autosaveStatus, setAutosaveStatus] = useState<AutosaveStatus>('idle');
   const [lastBackupAt, setLastBackupAt] = useState<Date | null>(null);
   const [autosaveError, setAutosaveError] = useState<string | null>(null);
+  const [lastSavedTo, setLastSavedTo] = useState<AutosaveTarget | null>(null);
 
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const ownRevisionId = useRef<string | null>(null);
@@ -173,8 +202,12 @@ export function useEssayAutosave({
   const backedUpDoc = useRef<unknown>(null);
   const inFlight = useRef(false);
   // Latest values, so the debounced callback never closes over stale state.
-  const latestArgs = useRef({ essayId, title, snippet, status, doc, sectionId, categoryId });
-  latestArgs.current = { essayId, title, snippet, status, doc, sectionId, categoryId };
+  const latestArgs = useRef({
+    essayId, title, snippet, status, doc, sectionId, categoryId, html, persistToEssay,
+  });
+  latestArgs.current = {
+    essayId, title, snippet, status, doc, sectionId, categoryId, html, persistToEssay,
+  };
 
   const runAutosave = useCallback(async () => {
     const args = latestArgs.current;
@@ -198,8 +231,31 @@ export function useEssayAutosave({
         ownRevisionId.current,
       );
       ownRevisionId.current = id;
+
+      // For an essay that has never been live, the draft IS the essay: write
+      // the row too, so a hard reload finds the text where the reader would.
+      // The backup goes first — if this second write fails we still have it.
+      // The column set is deliberately narrow: no slug (autosave has none and
+      // must never race generateUniqueSlug), no status, no published.
+      if (args.persistToEssay) {
+        const { error: rowError } = await supabase
+          .from('essays')
+          .update({
+            title: args.title,
+            snippet: args.snippet,
+            content: args.html ?? null,
+            content_json: args.doc as never,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', args.essayId!)
+          // Belt and braces: never touch a row that has gone live since load.
+          .eq('published', false);
+        if (rowError) throw rowError;
+      }
+
       backedUpDoc.current = args.doc;
       setLastBackupAt(new Date());
+      setLastSavedTo(args.persistToEssay ? 'essay' : 'revision');
       setAutosaveError(null);
       setAutosaveStatus('saved');
     } catch (error: unknown) {
@@ -263,6 +319,8 @@ export function useEssayAutosave({
         ownRevisionId.current = id;
         backedUpDoc.current = nextDoc;
         setLastBackupAt(new Date());
+        // An explicit save always wrote the essays row before calling this.
+        setLastSavedTo('essay');
         setAutosaveError(null);
         setAutosaveStatus('saved');
       } catch (error: unknown) {
@@ -280,9 +338,10 @@ export function useEssayAutosave({
     setAutosaveStatus('idle');
     setAutosaveError(null);
     setLastBackupAt(null);
+    setLastSavedTo(null);
   }, [essayId]);
 
-  return { autosaveStatus, lastBackupAt, autosaveError, recordRevision, flush };
+  return { autosaveStatus, lastBackupAt, autosaveError, lastSavedTo, recordRevision, flush };
 }
 
 // ---------------------------------------------------------------------------

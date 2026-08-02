@@ -22,6 +22,7 @@ import Placeholder from '@tiptap/extension-placeholder';
 import Image from '@tiptap/extension-image';
 import { Table, TableCell, TableHeader, TableRow } from '@tiptap/extension-table';
 import { FigureExtension } from '@/components/editorial/FigureExtension';
+import { LinkCardExtension } from './linkCard';
 import { ImageUpload, type ImageUploadOptions } from './imageUpload';
 import { SlashCommand, type SlashCommandOptions } from './slashCommand';
 
@@ -71,6 +72,9 @@ export function getEditorExtensions(options: EditorExtensionOptions = {}) {
     // Editorial figure: image plus caption, alt text and source attribution.
     FigureExtension,
 
+    // Link preview card. Client-side, no iframe — see linkCard.ts.
+    LinkCardExtension,
+
     Table.configure({ resizable: true, allowTableNodeSelection: true }),
     TableRow,
     TableHeader,
@@ -94,6 +98,7 @@ export function getSchemaExtensions() {
     }),
     Image.configure({ inline: false, allowBase64: false }),
     FigureExtension,
+    LinkCardExtension,
     Table.configure({ resizable: false }),
     TableRow,
     TableHeader,

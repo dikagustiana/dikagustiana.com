@@ -1,21 +1,24 @@
 /**
- * EssayEditor — the essay body editor.
+ * EssayEditor — the essay body, and the only editor in the product.
  *
- * The one editing surface for essay bodies. Three others (WriterModeEditor,
- * InlineEssayEditor, EssayBodyEditor, all built on RichTextEditor, plus the
- * WriterStudio/UnifiedEditor stack) have been removed: each configured its own
- * extension list, so a block written in one could be silently discarded by
- * another.
+ * Two things this deliberately does NOT have:
  *
- * Extensions come from `getEditorExtensions()` and are not configured here.
- * See src/lib/tiptap/extensions.ts for the four-place content contract.
+ *   1. A persistent formatting toolbar. Formatting appears on selection and
+ *      nowhere else. A standing toolbar and a selection toolbar are two
+ *      surfaces competing for one job, and the standing one wins the writer's
+ *      attention while they are trying to write.
+ *   2. Its own extension list. Node types come from `getEditorExtensions()`;
+ *      see src/lib/tiptap/extensions.ts for the four-place content contract.
+ *
+ * Insertion is the gutter `+` and `/` at the start of a line — the same menu
+ * from the same list (src/lib/tiptap/insertMenu.ts), never two lists.
  */
 
 import { useEditor, useEditorState, EditorContent, Editor } from '@tiptap/react';
 import { BubbleMenu } from '@tiptap/react/menus';
 import DragHandle from '@tiptap/extension-drag-handle-react';
 import type { JSONContent } from '@tiptap/core';
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -28,26 +31,22 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { getEditorExtensions } from '@/lib/tiptap/extensions';
+import { transformPastedHTML } from '@/lib/tiptap/pasteFromWord';
 import { FigureUploader } from './FigureUploader';
 import { FigureBlockData } from './FigureBlock';
+import { LinkCardDialog } from './LinkCardDialog';
+import { InsertMenuButton } from './InsertMenuButton';
+import type { LinkCardData } from './LinkCardBlock';
 import {
   Bold,
   Italic,
   Strikethrough,
-  Code,
   Heading2,
   Heading3,
   List,
-  ListOrdered,
   Quote,
-  Undo,
-  Redo,
   Link as LinkIcon,
   Unlink,
-  Minus,
-  ImagePlus,
-  MoreHorizontal,
-  Table as TableIcon,
   Trash2,
   GripVertical,
   Columns3,
@@ -59,16 +58,15 @@ interface EssayEditorProps {
   onChange: (content: string) => void;
   /**
    * Emits the TipTap document alongside the HTML. `content_json` is the
-   * canonical body format (writing-layout-spec §3.2) and autosave stores it,
-   * so it is taken straight from the editor rather than reparsed out of the
-   * HTML — the document is already in memory and the round-trip is lossy.
+   * canonical body format and autosave stores it, so it is taken straight from
+   * the editor rather than reparsed out of the HTML — the document is already
+   * in memory and the round-trip is lossy.
    */
   onChangeJson?: (json: JSONContent) => void;
   section: 'next-big-thing' | 'green-transition' | 'finance';
   placeholder?: string;
   className?: string;
   minHeight?: string;
-  distractionFree?: boolean;
 }
 
 /** Prompt for a URL and apply it to the current selection. */
@@ -88,293 +86,12 @@ function useSetLink(editor: Editor | null) {
 }
 
 // ---------------------------------------------------------------------------
-// Toolbar
-// ---------------------------------------------------------------------------
-
-interface MenuBarProps {
-  editor: Editor | null;
-  distractionFree?: boolean;
-  onInsertFigure: () => void;
-}
-
-function MenuBar({ editor, distractionFree, onInsertFigure }: MenuBarProps) {
-  const setLink = useSetLink(editor);
-
-  if (!editor) return null;
-
-  const buttonClass = cn('h-8 w-8 p-0 hover:bg-secondary', distractionFree && 'h-9 w-9');
-  const activeClass = 'bg-secondary text-foreground';
-
-  return (
-    <div
-      className={cn(
-        'flex flex-wrap items-center gap-1 p-2 border-b border-border bg-muted/30 rounded-t-md',
-        distractionFree && 'justify-center py-3 bg-card border-muted',
-      )}
-    >
-      {/* Text formatting */}
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon"
-        className={cn(buttonClass, editor.isActive('bold') && activeClass)}
-        onClick={() => editor.chain().focus().toggleBold().run()}
-        title="Bold (Ctrl+B)"
-      >
-        <Bold className="h-4 w-4" />
-      </Button>
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon"
-        className={cn(buttonClass, editor.isActive('italic') && activeClass)}
-        onClick={() => editor.chain().focus().toggleItalic().run()}
-        title="Italic (Ctrl+I)"
-      >
-        <Italic className="h-4 w-4" />
-      </Button>
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon"
-        className={cn(buttonClass, editor.isActive('strike') && activeClass)}
-        onClick={() => editor.chain().focus().toggleStrike().run()}
-        title="Strikethrough"
-      >
-        <Strikethrough className="h-4 w-4" />
-      </Button>
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon"
-        className={cn(buttonClass, editor.isActive('code') && activeClass)}
-        onClick={() => editor.chain().focus().toggleCode().run()}
-        title="Inline code"
-      >
-        <Code className="h-4 w-4" />
-      </Button>
-
-      <Separator orientation="vertical" className="h-6 mx-1" />
-
-      {/* Headings — only H2 and H3 in an essay body */}
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon"
-        className={cn(buttonClass, editor.isActive('heading', { level: 2 }) && activeClass)}
-        onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-        title="Heading 2"
-      >
-        <Heading2 className="h-4 w-4" />
-      </Button>
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon"
-        className={cn(buttonClass, editor.isActive('heading', { level: 3 }) && activeClass)}
-        onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-        title="Heading 3"
-      >
-        <Heading3 className="h-4 w-4" />
-      </Button>
-
-      <Separator orientation="vertical" className="h-6 mx-1" />
-
-      {/* Lists */}
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon"
-        className={cn(buttonClass, editor.isActive('bulletList') && activeClass)}
-        onClick={() => editor.chain().focus().toggleBulletList().run()}
-        title="Bullet list"
-      >
-        <List className="h-4 w-4" />
-      </Button>
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon"
-        className={cn(buttonClass, editor.isActive('orderedList') && activeClass)}
-        onClick={() => editor.chain().focus().toggleOrderedList().run()}
-        title="Numbered list"
-      >
-        <ListOrdered className="h-4 w-4" />
-      </Button>
-
-      <Separator orientation="vertical" className="h-6 mx-1" />
-
-      {/* Blocks */}
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon"
-        className={cn(buttonClass, editor.isActive('blockquote') && activeClass)}
-        onClick={() => editor.chain().focus().toggleBlockquote().run()}
-        title="Quote"
-      >
-        <Quote className="h-4 w-4" />
-      </Button>
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon"
-        className={buttonClass}
-        onClick={() => editor.chain().focus().setHorizontalRule().run()}
-        title="Horizontal rule"
-      >
-        <Minus className="h-4 w-4" />
-      </Button>
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon"
-        className={cn(buttonClass, editor.isActive('table') && activeClass)}
-        onClick={() =>
-          editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()
-        }
-        title="Insert table"
-      >
-        <TableIcon className="h-4 w-4" />
-      </Button>
-
-      <Separator orientation="vertical" className="h-6 mx-1" />
-
-      {/* The one distinguished action in the toolbar: everything else is a
-          formatting toggle, this one opens a dialog and adds content. */}
-      <Button
-        type="button"
-        variant="secondary"
-        size="sm"
-        className={cn('h-8 px-3 gap-2', distractionFree && 'h-9')}
-        onClick={onInsertFigure}
-        title="Insert figure"
-      >
-        <ImagePlus className="h-4 w-4" />
-        <span className="hidden sm:inline">Insert Figure</span>
-      </Button>
-
-      <Separator orientation="vertical" className="h-6 mx-1" />
-
-      {/* Links */}
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon"
-        className={cn(buttonClass, editor.isActive('link') && activeClass)}
-        onClick={setLink}
-        title="Add link"
-      >
-        <LinkIcon className="h-4 w-4" />
-      </Button>
-      {editor.isActive('link') && (
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          className={buttonClass}
-          onClick={() => editor.chain().focus().unsetLink().run()}
-          title="Remove link"
-        >
-          <Unlink className="h-4 w-4" />
-        </Button>
-      )}
-
-      <Separator orientation="vertical" className="h-6 mx-1" />
-
-      {/* History */}
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon"
-        className={buttonClass}
-        onClick={() => editor.chain().focus().undo().run()}
-        disabled={!editor.can().undo()}
-        title="Undo (Ctrl+Z)"
-      >
-        <Undo className="h-4 w-4" />
-      </Button>
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon"
-        className={buttonClass}
-        onClick={() => editor.chain().focus().redo().run()}
-        disabled={!editor.can().redo()}
-        title="Redo (Ctrl+Shift+Z)"
-      >
-        <Redo className="h-4 w-4" />
-      </Button>
-
-      <Separator orientation="vertical" className="h-6 mx-1" />
-
-      {/* Overflow — keeps Insert Figure and links reachable on a narrow toolbar */}
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button type="button" variant="ghost" size="icon" className={buttonClass} title="More">
-            <MoreHorizontal className="h-4 w-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="min-w-56">
-          <DropdownMenuItem
-            onSelect={e => {
-              e.preventDefault();
-              onInsertFigure();
-            }}
-            className="gap-2"
-          >
-            <ImagePlus className="h-4 w-4" />
-            Insert figure
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onSelect={e => {
-              e.preventDefault();
-              editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
-            }}
-            className="gap-2"
-          >
-            <TableIcon className="h-4 w-4" />
-            Insert table
-          </DropdownMenuItem>
-
-          <DropdownMenuSeparator />
-
-          <DropdownMenuItem
-            onSelect={e => {
-              e.preventDefault();
-              setLink();
-            }}
-            className="gap-2"
-          >
-            <LinkIcon className="h-4 w-4" />
-            Add link
-          </DropdownMenuItem>
-          {editor.isActive('link') && (
-            <DropdownMenuItem
-              onSelect={e => {
-                e.preventDefault();
-                editor.chain().focus().unsetLink().run();
-              }}
-              className="gap-2"
-            >
-              <Unlink className="h-4 w-4" />
-              Remove link
-            </DropdownMenuItem>
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Table controls — shown only while the caret is inside a table
+// Table controls — contextual, only while the caret is inside a table
 // ---------------------------------------------------------------------------
 
 function TableControls({ editor }: { editor: Editor }) {
-  const item = 'gap-2';
   return (
-    <div className="flex flex-wrap items-center gap-1 border-b border-border bg-muted/50 px-2 py-1.5">
+    <div className="mb-4 flex flex-wrap items-center gap-1 rounded-md border border-border bg-muted/40 px-2 py-1.5">
       <span className="px-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">
         Table
       </span>
@@ -387,14 +104,14 @@ function TableControls({ editor }: { editor: Editor }) {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start">
-          <DropdownMenuItem className={item} onSelect={() => editor.chain().focus().addColumnBefore().run()}>
+          <DropdownMenuItem onSelect={() => editor.chain().focus().addColumnBefore().run()}>
             Insert left
           </DropdownMenuItem>
-          <DropdownMenuItem className={item} onSelect={() => editor.chain().focus().addColumnAfter().run()}>
+          <DropdownMenuItem onSelect={() => editor.chain().focus().addColumnAfter().run()}>
             Insert right
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem className={item} onSelect={() => editor.chain().focus().deleteColumn().run()}>
+          <DropdownMenuItem onSelect={() => editor.chain().focus().deleteColumn().run()}>
             Delete column
           </DropdownMenuItem>
         </DropdownMenuContent>
@@ -408,17 +125,17 @@ function TableControls({ editor }: { editor: Editor }) {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start">
-          <DropdownMenuItem className={item} onSelect={() => editor.chain().focus().addRowBefore().run()}>
+          <DropdownMenuItem onSelect={() => editor.chain().focus().addRowBefore().run()}>
             Insert above
           </DropdownMenuItem>
-          <DropdownMenuItem className={item} onSelect={() => editor.chain().focus().addRowAfter().run()}>
+          <DropdownMenuItem onSelect={() => editor.chain().focus().addRowAfter().run()}>
             Insert below
           </DropdownMenuItem>
-          <DropdownMenuItem className={item} onSelect={() => editor.chain().focus().toggleHeaderRow().run()}>
+          <DropdownMenuItem onSelect={() => editor.chain().focus().toggleHeaderRow().run()}>
             Toggle header row
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem className={item} onSelect={() => editor.chain().focus().deleteRow().run()}>
+          <DropdownMenuItem onSelect={() => editor.chain().focus().deleteRow().run()}>
             Delete row
           </DropdownMenuItem>
         </DropdownMenuContent>
@@ -435,7 +152,7 @@ function TableControls({ editor }: { editor: Editor }) {
       </Button>
 
       <div className="ml-auto">
-        {/* Destructive, so it sits apart and stays ghost-weight until pressed. */}
+        {/* Destructive, so it stays ghost-weight until pressed. */}
         <Button
           type="button"
           variant="ghost"
@@ -460,15 +177,17 @@ export function EssayEditor({
   onChange,
   onChangeJson,
   section,
-  placeholder = 'Start writing your essay...',
+  placeholder = 'Start writing...',
   className,
-  minHeight = '400px',
-  distractionFree = false,
+  minHeight = '60vh',
 }: EssayEditorProps) {
   const [showFigureUploader, setShowFigureUploader] = useState(false);
+  const [showLinkCard, setShowLinkCard] = useState(false);
+  const canvasRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
   const openFigureUploader = useCallback(() => setShowFigureUploader(true), []);
+  const openLinkCard = useCallback(() => setShowLinkCard(true), []);
 
   // Rebuilding the extension list would tear down and recreate the editor,
   // losing the selection and the undo history on every render.
@@ -482,45 +201,59 @@ export function EssayEditor({
             toast({ title: 'Upload failed', description: message, variant: 'destructive' }),
           onSuccess: () => toast({ title: 'Image added' }),
         },
-        slash: { onInsertFigure: openFigureUploader },
+        slash: { onInsertFigure: openFigureUploader, onInsertLinkCard: openLinkCard },
       }),
-    [placeholder, section, toast, openFigureUploader],
+    [placeholder, section, toast, openFigureUploader, openLinkCard],
   );
+
+  // The last HTML this editor emitted. The parent mirrors the document as an
+  // HTML string and can also push a new one in (load, recovery restore), so the
+  // sync effect below has to tell those two apart. Comparing against
+  // `editor.getHTML()` is not enough: if any node's HTML does not survive a
+  // parse/serialise round trip byte-for-byte, the comparison never settles, the
+  // editor re-parses its own output on every keystroke, and — because that
+  // re-parse is deliberately silent — `content` advances while `content_json`
+  // freezes. That is not hypothetical: it is how a saved essay ended up with an
+  // HTML column and a JSON column describing different documents.
+  const lastEmittedHtml = useRef<string | null>(null);
 
   const editor = useEditor(
     {
       extensions,
       content,
       onUpdate: ({ editor }) => {
-        onChange(editor.getHTML());
+        const html = editor.getHTML();
+        lastEmittedHtml.current = html;
+        onChange(html);
         onChangeJson?.(editor.getJSON());
       },
       editorProps: {
+        // The owner writes in Word and pastes in. Without this, Word's
+        // MsoNormal spans and inline styles reach ProseMirror, which keeps
+        // what it recognises and drops the rest without a word.
+        transformPastedHTML,
         attributes: {
-          class: cn(
-            'prose prose-sm sm:prose max-w-none focus:outline-none',
-            'prose-headings:font-display prose-headings:font-semibold',
-            'prose-h2:text-xl prose-h3:text-lg',
-            'prose-p:text-foreground prose-p:leading-relaxed',
-            'prose-strong:text-foreground prose-strong:font-semibold',
-            'prose-blockquote:border-l-primary prose-blockquote:text-muted-foreground',
-            'prose-code:bg-muted prose-code:px-1 prose-code:rounded prose-code:text-sm',
-            'prose-pre:bg-muted prose-pre:text-foreground',
-            'prose-li:text-foreground',
-            distractionFree && 'prose-lg',
-          ),
+          class: 'essay-prose focus:outline-none',
         },
       },
     },
     [extensions],
   );
 
-  // Sync external content changes
+  // Sync content that came from OUTSIDE — the essay loading, a recovered draft
+  // being restored. An echo of what this editor just emitted is ignored.
   useEffect(() => {
-    if (editor && content !== editor.getHTML()) {
-      editor.commands.setContent(content, { emitUpdate: false });
-    }
-  }, [content, editor]);
+    if (!editor) return;
+    if (content === lastEmittedHtml.current) return;
+    if (content === editor.getHTML()) return;
+
+    lastEmittedHtml.current = content;
+    editor.commands.setContent(content, { emitUpdate: false });
+    // `emitUpdate: false` keeps this from looking like an edit, but it also
+    // means the parent's JSON mirror would keep the document it had. Push the
+    // fresh one so the two representations cannot disagree.
+    onChangeJson?.(editor.getJSON());
+  }, [content, editor, onChangeJson]);
 
   const handleInsertFigure = useCallback(
     (data: FigureBlockData) => {
@@ -531,38 +264,44 @@ export function EssayEditor({
     [editor],
   );
 
+  const handleInsertLinkCard = useCallback(
+    (data: LinkCardData) => {
+      if (!editor) return;
+      editor.chain().focus().insertLinkCard(data).run();
+      setShowLinkCard(false);
+    },
+    [editor],
+  );
+
   const setLink = useSetLink(editor);
 
-  // `editor.isActive()` is read from the current state and does not re-render
-  // on its own; without subscribing, the table controls would appear only when
-  // some unrelated state change happened to repaint this component.
+  // `editor.isActive()` reads current state and does not re-render on its own;
+  // without subscribing, the table controls would appear only when some
+  // unrelated state change happened to repaint this component.
   const inTable = useEditorState({
     editor,
     selector: ({ editor: e }) => !!e?.isActive('table'),
   });
 
+  const bubbleButton = 'h-7 w-7';
+
   return (
-    <div
-      className={cn(
-        'border border-border rounded-md overflow-hidden bg-background',
-        distractionFree && 'border-0 shadow-none',
-        className,
-      )}
-    >
-      <MenuBar
+    <div className={cn('group/canvas relative', className)} ref={canvasRef}>
+      {/* The insert affordance lives in the gutter beside the current line,
+          not in a toolbar. `/` at the start of a line opens the same menu. */}
+      <InsertMenuButton
         editor={editor}
-        distractionFree={distractionFree}
+        containerRef={canvasRef}
         onInsertFigure={openFigureUploader}
+        onInsertLinkCard={openLinkCard}
       />
 
       {/* Contextual: table actions are meaningless outside a table, and a row
           of permanently-disabled buttons reads as broken rather than inactive.
-
-          The wrapper is always rendered even when empty. ProseMirror mutates
-          the DOM underneath this subtree, so a sibling that appears and
-          disappears changes the child list React is reconciling against and
-          throws "insertBefore … not a child of this node" — which is exactly
-          what inserting a table used to do. */}
+          The wrapper is always mounted — a sibling that appears and disappears
+          changes the child list React reconciles against and throws
+          "insertBefore … not a child of this node", which is exactly what
+          inserting a table used to do. */}
       <div data-editor-slot="table-controls">
         {editor && inTable ? <TableControls editor={editor} /> : null}
       </div>
@@ -571,19 +310,22 @@ export function EssayEditor({
         <BubbleMenu
           editor={editor}
           className="flex items-center gap-0.5 rounded-md border border-border bg-popover p-1 shadow-md"
-          // Text selections only — a selected figure or table gets its own
-          // affordances and does not want a bold/italic bar over it.
+          // Text selections only — a selected figure, image or link card has
+          // its own affordances and does not want a bold/italic bar over it.
           shouldShow={({ editor: e, from, to }) =>
-            from !== to && !e.isActive('figure') && !e.isActive('image')
+            from !== to &&
+            !e.isActive('figure') &&
+            !e.isActive('image') &&
+            !e.isActive('linkCard')
           }
         >
           <Button
             type="button"
             variant="ghost"
             size="icon"
-            className={cn('h-7 w-7', editor.isActive('bold') && 'bg-secondary')}
+            className={cn(bubbleButton, editor.isActive('bold') && 'bg-secondary')}
             onClick={() => editor.chain().focus().toggleBold().run()}
-            title="Bold"
+            title="Bold (Ctrl+B)"
           >
             <Bold className="h-3.5 w-3.5" />
           </Button>
@@ -591,9 +333,9 @@ export function EssayEditor({
             type="button"
             variant="ghost"
             size="icon"
-            className={cn('h-7 w-7', editor.isActive('italic') && 'bg-secondary')}
+            className={cn(bubbleButton, editor.isActive('italic') && 'bg-secondary')}
             onClick={() => editor.chain().focus().toggleItalic().run()}
-            title="Italic"
+            title="Italic (Ctrl+I)"
           >
             <Italic className="h-3.5 w-3.5" />
           </Button>
@@ -601,7 +343,7 @@ export function EssayEditor({
             type="button"
             variant="ghost"
             size="icon"
-            className={cn('h-7 w-7', editor.isActive('strike') && 'bg-secondary')}
+            className={cn(bubbleButton, editor.isActive('strike') && 'bg-secondary')}
             onClick={() => editor.chain().focus().toggleStrike().run()}
             title="Strikethrough"
           >
@@ -611,45 +353,9 @@ export function EssayEditor({
             type="button"
             variant="ghost"
             size="icon"
-            className={cn('h-7 w-7', editor.isActive('code') && 'bg-secondary')}
-            onClick={() => editor.chain().focus().toggleCode().run()}
-            title="Inline code"
-          >
-            <Code className="h-3.5 w-3.5" />
-          </Button>
-
-          <Separator orientation="vertical" className="mx-0.5 h-5" />
-
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className={cn('h-7 w-7', editor.isActive('heading', { level: 2 }) && 'bg-secondary')}
-            onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-            title="Heading 2"
-          >
-            <Heading2 className="h-3.5 w-3.5" />
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className={cn('h-7 w-7', editor.isActive('heading', { level: 3 }) && 'bg-secondary')}
-            onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-            title="Heading 3"
-          >
-            <Heading3 className="h-3.5 w-3.5" />
-          </Button>
-
-          <Separator orientation="vertical" className="mx-0.5 h-5" />
-
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className={cn('h-7 w-7', editor.isActive('link') && 'bg-secondary')}
+            className={cn(bubbleButton, editor.isActive('link') && 'bg-secondary')}
             onClick={setLink}
-            title="Add link"
+            title="Link"
           >
             <LinkIcon className="h-3.5 w-3.5" />
           </Button>
@@ -658,20 +364,66 @@ export function EssayEditor({
               type="button"
               variant="ghost"
               size="icon"
-              className="h-7 w-7"
+              className={bubbleButton}
               onClick={() => editor.chain().focus().unsetLink().run()}
               title="Remove link"
             >
               <Unlink className="h-3.5 w-3.5" />
             </Button>
           )}
+
+          <Separator orientation="vertical" className="mx-0.5 h-5" />
+
+          {/* The body allows two heading levels. They are the schema's h2 and
+              h3 — h1 is the essay title, which is a database field, not a
+              body block — so these are labelled by role, not by tag number. */}
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className={cn(bubbleButton, editor.isActive('heading', { level: 2 }) && 'bg-secondary')}
+            onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+            title="Heading"
+          >
+            <Heading2 className="h-3.5 w-3.5" />
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className={cn(bubbleButton, editor.isActive('heading', { level: 3 }) && 'bg-secondary')}
+            onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+            title="Subheading"
+          >
+            <Heading3 className="h-3.5 w-3.5" />
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className={cn(bubbleButton, editor.isActive('blockquote') && 'bg-secondary')}
+            onClick={() => editor.chain().focus().toggleBlockquote().run()}
+            title="Quote"
+          >
+            <Quote className="h-3.5 w-3.5" />
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className={cn(bubbleButton, editor.isActive('bulletList') && 'bg-secondary')}
+            onClick={() => editor.chain().focus().toggleBulletList().run()}
+            title="List"
+          >
+            <List className="h-3.5 w-3.5" />
+          </Button>
         </BubbleMenu>
       )}
 
       {editor && (
         <DragHandle editor={editor}>
           <div
-            className="flex h-6 w-5 cursor-grab items-center justify-center rounded text-muted-foreground/60 transition-colors hover:bg-secondary hover:text-foreground active:cursor-grabbing"
+            className="flex h-6 w-5 cursor-grab items-center justify-center rounded text-muted-foreground/50 opacity-0 transition-opacity hover:bg-secondary hover:text-foreground group-hover/canvas:opacity-100 active:cursor-grabbing"
             aria-label="Drag to reorder block"
           >
             <GripVertical className="h-4 w-4" />
@@ -680,7 +432,7 @@ export function EssayEditor({
       )}
 
       {showFigureUploader && (
-        <div className="p-4 border-b border-border">
+        <div className="mb-4">
           <FigureUploader
             section={section}
             onInsert={handleInsertFigure}
@@ -689,119 +441,153 @@ export function EssayEditor({
         </div>
       )}
 
-      <div
-        className={cn('p-4 overflow-y-auto', distractionFree && 'px-8 py-6')}
-        style={{ minHeight }}
-      >
-        <EditorContent editor={editor} />
-      </div>
+      <LinkCardDialog
+        open={showLinkCard}
+        onOpenChange={setShowLinkCard}
+        onInsert={handleInsertLinkCard}
+      />
 
-      {/* Editor styles */}
+      <EditorContent editor={editor} />
+
       <style>{`
-        .ProseMirror {
+        .essay-prose {
           min-height: ${minHeight};
         }
-        .ProseMirror:focus {
+        .essay-prose:focus {
           outline: none;
         }
-        .ProseMirror p.is-editor-empty:first-child::before {
+
+        /* The measure. Set explicitly rather than inherited from a prose
+           class, so the writing column is a decision instead of an accident. */
+        .essay-prose,
+        .essay-prose p,
+        .essay-prose h2,
+        .essay-prose h3,
+        .essay-prose ul,
+        .essay-prose ol,
+        .essay-prose blockquote,
+        .essay-prose pre {
+          max-width: 680px;
+        }
+        .essay-prose p {
+          font-size: 1.125rem;
+          line-height: 1.75;
+          margin-bottom: 1.25rem;
+          color: hsl(var(--foreground));
+        }
+        .essay-prose p.is-empty:first-child::before,
+        .essay-prose p.is-editor-empty:first-child::before {
           content: attr(data-placeholder);
           float: left;
-          color: hsl(var(--muted-foreground));
+          color: hsl(var(--muted-foreground) / 0.6);
           pointer-events: none;
           height: 0;
         }
-        .ProseMirror h2 {
+        .essay-prose h2 {
+          font-family: var(--font-display, inherit);
+          font-size: 1.625rem;
+          line-height: 1.3;
+          font-weight: 650;
+          margin-top: 2.5rem;
+          margin-bottom: 0.75rem;
+        }
+        .essay-prose h3 {
+          font-family: var(--font-display, inherit);
           font-size: 1.25rem;
-          margin-top: 1.5rem;
+          line-height: 1.4;
+          font-weight: 650;
+          margin-top: 2rem;
           margin-bottom: 0.5rem;
         }
-        .ProseMirror h3 {
-          font-size: 1.125rem;
-          margin-top: 1.25rem;
-          margin-bottom: 0.5rem;
-        }
-        .ProseMirror p {
-          margin-bottom: 0.75rem;
-        }
-        .ProseMirror ul,
-        .ProseMirror ol {
+        .essay-prose ul,
+        .essay-prose ol {
           padding-left: 1.5rem;
-          margin-bottom: 0.75rem;
+          margin-bottom: 1.25rem;
+          font-size: 1.125rem;
+          line-height: 1.75;
         }
-        .ProseMirror blockquote {
+        .essay-prose ul { list-style: disc; }
+        .essay-prose ol { list-style: decimal; }
+        .essay-prose li { margin-bottom: 0.35rem; }
+        .essay-prose a {
+          color: hsl(var(--primary));
+          text-decoration: underline;
+          text-underline-offset: 3px;
+        }
+        .essay-prose strong { font-weight: 650; }
+        .essay-prose blockquote {
           border-left: 3px solid hsl(var(--primary));
-          padding-left: 1rem;
-          margin-left: 0;
+          padding-left: 1.25rem;
+          margin: 1.75rem 0;
           font-style: italic;
           color: hsl(var(--muted-foreground));
         }
-        .ProseMirror pre {
+        .essay-prose pre {
           background: hsl(var(--muted));
-          padding: 0.75rem 1rem;
+          padding: 0.875rem 1rem;
           border-radius: 0.375rem;
           overflow-x: auto;
+          font-size: 0.9375rem;
+          margin: 1.5rem 0;
         }
-        .ProseMirror code {
+        .essay-prose code {
           background: hsl(var(--muted));
           padding: 0.125rem 0.25rem;
           border-radius: 0.25rem;
           font-size: 0.875em;
         }
-        .ProseMirror hr {
+        .essay-prose pre code { background: none; padding: 0; }
+        .essay-prose hr {
           border: none;
           border-top: 1px solid hsl(var(--border));
-          margin: 1.5rem 0;
+          margin: 2rem 0;
         }
-        .ProseMirror img {
+        .essay-prose img {
           max-width: 100%;
           height: auto;
           border-radius: 0.375rem;
         }
-        .ProseMirror .figure-block {
-          margin: 2rem 0;
-        }
-        .ProseMirror figure[data-type="figure-block"] {
-          margin: 0;
-        }
-        .ProseMirror figure[data-type="figure-block"].ProseMirror-selectednode {
+        .essay-prose .figure-block { margin: 2rem 0; }
+        .essay-prose figure[data-type="figure-block"] { margin: 0; }
+        .essay-prose figure[data-type="figure-block"].ProseMirror-selectednode {
           outline: 2px solid hsl(var(--primary));
           outline-offset: 2px;
           border-radius: 0.5rem;
         }
+        .essay-prose .link-card { text-decoration: none; }
 
         /* Tables */
-        .ProseMirror table {
+        .essay-prose table {
           border-collapse: collapse;
           table-layout: fixed;
           width: 100%;
-          margin: 1.5rem 0;
+          max-width: 680px;
+          margin: 1.75rem 0;
           overflow: hidden;
+          font-size: 1rem;
         }
-        .ProseMirror table td,
-        .ProseMirror table th {
+        .essay-prose table td,
+        .essay-prose table th {
           border: 1px solid hsl(var(--border));
           padding: 0.5rem 0.75rem;
           vertical-align: top;
           position: relative;
           min-width: 3rem;
         }
-        .ProseMirror table th {
+        .essay-prose table th {
           background: hsl(var(--muted));
           font-weight: 600;
           text-align: left;
         }
-        .ProseMirror table p {
-          margin-bottom: 0;
-        }
-        .ProseMirror table .selectedCell:after {
+        .essay-prose table p { margin-bottom: 0; font-size: 1rem; }
+        .essay-prose table .selectedCell:after {
           content: "";
           position: absolute;
           inset: 0;
           background: hsl(var(--primary) / 0.12);
           pointer-events: none;
         }
-        .ProseMirror .column-resize-handle {
+        .essay-prose .column-resize-handle {
           position: absolute;
           right: -2px;
           top: 0;
@@ -810,9 +596,7 @@ export function EssayEditor({
           background: hsl(var(--primary));
           pointer-events: none;
         }
-        .ProseMirror.resize-cursor {
-          cursor: col-resize;
-        }
+        .essay-prose.resize-cursor { cursor: col-resize; }
 
         /* Upload placeholder — a decoration, never part of the document. */
         .essay-image-uploading {
@@ -845,6 +629,10 @@ export function EssayEditor({
           position: fixed;
           z-index: 60;
           min-width: 15rem;
+          /* Never wider than the screen it is clamped into — on a phone the
+             min-width plus a long hint would otherwise push the page
+             sideways. */
+          max-width: calc(100vw - 1rem);
           max-height: 18rem;
           overflow-y: auto;
           padding: 0.25rem;
@@ -871,14 +659,8 @@ export function EssayEditor({
         .tiptap-slash-item[data-selected="true"] {
           background: hsl(var(--secondary));
         }
-        .tiptap-slash-title {
-          font-size: 0.875rem;
-          font-weight: 500;
-        }
-        .tiptap-slash-hint {
-          font-size: 0.75rem;
-          color: hsl(var(--muted-foreground));
-        }
+        .tiptap-slash-title { font-size: 0.875rem; font-weight: 500; }
+        .tiptap-slash-hint { font-size: 0.75rem; color: hsl(var(--muted-foreground)); }
         .tiptap-slash-empty {
           padding: 0.5rem 0.55rem;
           font-size: 0.8125rem;
