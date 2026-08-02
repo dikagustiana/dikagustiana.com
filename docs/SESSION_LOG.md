@@ -3,13 +3,79 @@
 Append-only. Newest entry first. A fresh session must be able to resume from this file.
 
 ## NEXT ACTION (single)
-**Merge the six-areas PR, then let Vercel deploy — the live DB already speaks the new
-URLs.** The slug migration is applied to the live project (fa-07-01 is
-`driver-tree-construction`; the deployed OLD code still resolves it only through
-`/essays/:slug`-shaped lookups), so the window between "DB renamed" and "new router
-deployed" should stay short. After that, the standing item unchanged: set the two backup
-secrets (`VITE_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`) and flip the backup workflow's
-first run green — still the only mitigation of free-tier Supabase having no PITR.
+**Re-baseline the `fa-07-01` invariant, then decide whether revision 12 was intended.**
+The mandated fingerprint (21,946 chars / 81 blocks / md5 `b36b8ba5…`) no longer matches any
+row. `fa-07-01` is `driver-tree-construction` and now measures **26,932 chars / 82 blocks /
+md5 `f8e0dcfa8ecc9cc5cd8a811d644ea0b5`**, because it was edited in the writer studio today
+between 12:21 and 12:50 UTC (`essay_revisions` 4-8 at 81 blocks; 12 and 13 at 82). If that
+edit was intended, update the invariant to the new fingerprint so future sessions have a
+true target; if it was not, `essay_revisions` revision 8 is the 81-block state. Either way
+the invariant as written cannot be satisfied and should not be carried forward unchanged.
+After that, the standing item unchanged: set the two backup secrets (`VITE_SUPABASE_URL`,
+`SUPABASE_SERVICE_ROLE_KEY`) and flip the backup workflow's first run green — still the only
+mitigation of free-tier Supabase having no PITR.
+
+## 2026-08-02 (design-audit session) — retire emerald, strip the decorative layer
+
+Branch `claude/dikagustiana-design-audit-xp3vp2`, base `main` @ `b38a135`. Both clusters
+landed. **13 of 14 gates PASSED, measured; one BLOCKED** — evidence in
+`docs/GATE_LEDGER.md`, the colour decision with its four measured ratios in
+`docs/DECISIONS.md`.
+
+**Cluster 1 — the accent.** `--accent` moved from emerald `142 71% 45%` to navy
+`215 60% 32%`. Measured in Chromium from the rendered variables: **8.22:1** as text on
+`--card`, **8.58:1** as text on `--background`, **8.58:1** as `--ring`, **8.95:1** for white
+on it. The emerald measured 2.12 / 2.20 / 2.20 / 2.30 — four failures, and the focus ring
+being one of them meant keyboard focus was effectively invisible site-wide. The repo had
+already diagnosed this correctly in a comment and shipped `--accent-text` as the remedy; the
+remedy had reached one call site. `--accent-text` is now an alias, kept so existing call
+sites keep working.
+
+Same root cause, second symptom: shadcn's `ghost` and `outline` variants use `hover:bg-accent`
+because in stock shadcn that token is a light neutral. Here it was the brand colour, so ~80
+buttons flooded with brand on hover. They now use `--secondary`. Both variants were hovered
+in the shipped DOM and land on `rgb(235,241,244)`.
+
+Green is not retired, it is **reserved** — `--section-green`, for the Green Transition
+section's identity and success states, nothing else.
+
+Two consequences worth knowing: navy on the dark slate header measures **1.64:1** (the
+emerald measured 6.37:1 there), so the Writer's Studio nav link and the Admin badge moved
+off the accent entirely. **The accent is a light-surface colour**; on the header, use the
+white/slate pair. Both sites are admin-only, but leaving them would have been a knowingly
+introduced regression.
+
+The six-hue section rainbow is gone from both arrays. Raw palette classes **112 → 102**
+(excluding `ui/`).
+
+**Cluster 2 — the decorative layer.** Three runtime stock-photo hot-links removed; two
+40vh photo heroes replaced with text headers in the `FinanceLanding.tsx:40-50` shape, both
+verified at 1440px and 375px with `scrollWidth == clientWidth`. The hero CTA lost "Think
+Tank" (it now reads "Read the essays"), gained a real focus ring and active state — it
+previously had **no focus treatment at all**, because hover was applied by mutating
+`style.backgroundColor` — and its `scrollIntoView` now goes through `scrollBehavior()`
+instead of a hard-coded `'smooth'` that overrode the reduced-motion gate. Verified both
+ways: under `reduce` it arrives in one frame, under `no-preference` it genuinely glides.
+The homepage manga artwork is untouched and was confirmed present.
+
+**Three things the brief got wrong, corrected rather than worked around.**
+1. It said the palette pollution was "concentrated in those two arrays, not scattered". The
+   arrays were 10 of 112; the other 102 are across 22 files, largest
+   `CapitalConditionDetail.tsx` (22) and `SectionIntro.tsx` (12 — a second, independent
+   "voice role" colour axis). Out of scope, untouched, now recorded.
+2. `EssayModule.tsx` — one of the three named hot-link sites — is **imported by nothing**.
+   The live Next Big Thing page renders `EditorialFeed`, which already gated on
+   `thumbnail_url`. That third hot-link never reached a reader. Removed anyway; the gate was
+   then run against the component that actually ships.
+3. The `fa-07-01` invariant cannot be satisfied — see NEXT ACTION. Not caused here: this
+   session made **zero database writes**, and `essay_revisions` plus `admin_audit_log` show
+   the change came from the writer studio under the owner's own account while the read-only
+   audit was running.
+
+**No schema changes**, so no migration was needed — `apply_migration` was not called and no
+CLI migration command was run. RLS re-verified regardless: **14 public tables, 14 with RLS,
+0 without a policy.** Test count held at **23 files / 248 tests**; typecheck exit 0; eslint
+0 errors. Preview server ran detached as PID 8717; `test:watch` never run.
 
 ## 2026-08-02 (six-areas session) — identity, URLs, curation, studio, weight, defects
 

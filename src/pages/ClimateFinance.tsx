@@ -97,7 +97,10 @@ export default function ClimateFinance() {
               return (
                 <Card key={concept.title} className="h-full">
                   <CardContent className="p-6">
-                    <Icon className="h-6 w-6 text-accent mb-3" />
+                    {/* Green here is the Green Transition section's own
+                        identity — one of the two jobs green keeps. It is not
+                        the site accent (navy); see src/index.css. */}
+                    <Icon className="h-6 w-6 text-section-green mb-3" />
                     <h3 className="font-semibold text-foreground mb-2">{concept.title}</h3>
                     <p className="text-sm text-muted-foreground">{concept.description}</p>
                   </CardContent>
@@ -108,7 +111,7 @@ export default function ClimateFinance() {
         </section>
 
         {/* Callout */}
-        <div className="bg-accent/5 border border-accent/20 rounded-lg py-6 px-6 mb-12">
+        <div className="bg-section-green/5 border border-section-green/20 rounded-lg py-6 px-6 mb-12">
           <p className="text-muted-foreground italic text-center">
             Indonesia's green transition requires ~$25B/year in climate investment through 2030.
             This track examines who provides it, on what terms, and what it achieves.

@@ -47,32 +47,24 @@ export default function TheNextBigThing() {
         description="Speculative but reasoned essays on emerging forces in industry, finance, and policy. Critical questions, not predictions. Winners, losers, and second-order effects."
       />
 
-      {/* Hero Section */}
-      <div 
-        className="relative h-[40vh] min-h-[280px] flex items-center justify-center bg-cover bg-center"
-        style={{
-          backgroundImage: 'url(https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1920&q=80)',
-        }}
-      >
-        <div className="absolute inset-0 bg-primary/70" />
-        <div className="relative z-10 text-center px-4 max-w-3xl">
-          <h1 className="text-2xl md:text-4xl lg:text-5xl font-display font-light text-white leading-tight italic">
-            What's the next big thing that will reshape industries?
-          </h1>
-          <p className="mt-6 text-white/80 text-lg max-w-2xl mx-auto">
-            Speculative but reasoned essays on emerging forces in industry, finance, and policy. 
-            Critical questions, not predictions.
+      {/* Page header. Was a 40vh third-party stock photograph, hot-linked at
+          runtime, under a 70% scrim — and it was the SAME photograph
+          EssayModule used as its default card thumbnail, so this page showed
+          one image as its hero and again on every essay card below it.
+          Replaced with the text header FinanceLanding.tsx:40-50 uses. */}
+      <div className="py-8 container max-w-3xl">
+        <h1 className="text-3xl md:text-4xl font-display font-bold mb-2">
+          The Next Big Thing
+        </h1>
+        <div className="mb-2 max-w-2xl">
+          <p className="text-base text-muted-foreground leading-relaxed">
+            Speculative but reasoned essays on emerging forces in industry,
+            finance, and policy. Critical questions, not predictions.
           </p>
-        </div>
-      </div>
-
-      {/* Intro section */}
-      <div className="bg-muted/30 py-8 border-b border-border">
-        <div className="container max-w-3xl">
-          <p className="text-muted-foreground text-center">
-            This is an ideas laboratory—not a blog, not a prediction service. The goal is to think 
-            seriously about forces that might reshape how we work, invest, and organize. Some ideas 
-            will be wrong. The value is in the reasoning, not the conclusions.
+          <p className="text-base text-muted-foreground mt-3">
+            The goal is to think seriously about forces that might reshape how
+            we work, invest, and organize. Some ideas will be wrong. The value
+            is in the reasoning, not the conclusions.
           </p>
         </div>
       </div>

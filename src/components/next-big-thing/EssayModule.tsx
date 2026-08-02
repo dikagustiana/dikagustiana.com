@@ -35,7 +35,11 @@ const CATEGORIES = [
   { id: 'governance', label: 'Governance' },
 ];
 
-const defaultThumbnail = 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=600&q=80';
+// No default thumbnail. This used to hot-link a third-party stock photograph
+// at runtime — the same one TheNextBigThing used as its hero — so every essay
+// without its own image showed an identical picture, and a page of them read
+// as a wall of the same photo. A card with no thumbnail now renders without
+// one. Do not reintroduce a placeholder image here.
 
 export function EssayModule() {
   const { isAdmin } = useAuth();
@@ -240,15 +244,20 @@ export function EssayModule() {
                 </div>
               )}
 
-              {/* Thumbnail */}
-              <div className="aspect-[16/10] bg-muted overflow-hidden">
-                <img 
-                  src={essay.thumbnail_url || defaultThumbnail}
-                  alt={essay.title}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              
+              {/* Thumbnail — only when the essay actually has one. The whole
+                  block is omitted otherwise; no placeholder, no stock stand-in.
+                  alt="" because the title sits directly below it, so the image
+                  is decorative and announcing it would just repeat the heading. */}
+              {essay.thumbnail_url && (
+                <div className="aspect-[16/10] bg-muted overflow-hidden">
+                  <img
+                    src={essay.thumbnail_url}
+                    alt=""
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
+
               <CardContent className="p-5 flex flex-col flex-1">
                 {/* Badges */}
                 <div className="flex items-center gap-2 mb-2">
