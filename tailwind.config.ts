@@ -19,6 +19,7 @@ export default {
         // Read from CSS custom properties so the family is defined once, in
         // src/index.css, and never named inside a component.
         sans: ["var(--font-sans)"],
+        serif: ["var(--font-serif)"],
         display: ["var(--font-display)"],
       },
       colors: {
@@ -47,6 +48,12 @@ export default {
           DEFAULT: "hsl(var(--accent))",
           foreground: "hsl(var(--accent-foreground))",
         },
+        // The editorial accent — one token, five roles (blockquote rail,
+        // link-popover focus ring, popover primary buttons, "New" badge,
+        // palette THEME swatches). See src/index.css.
+        "accent-editorial": "hsl(var(--accent-editorial))",
+        "prose-fg": "var(--prose-ink)",
+        "prose-muted": "var(--prose-muted-ink)",
         popover: {
           DEFAULT: "hsl(var(--popover))",
           foreground: "hsl(var(--popover-foreground))",

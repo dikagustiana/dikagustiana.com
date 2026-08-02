@@ -11,7 +11,46 @@ but not against what this specific Word version and template actually emit, so t
 `h2` / 3 H2 → `h3` / 89 body-block target in `docs/IMPORT_TEST_T4M07.md` is still unmeasured.
 Put the file anywhere in the repo (`docs/fixtures/` is fine); LibreOffice is installed here,
 so it can be unzipped for its real `word/document.xml` structure and converted independently.
-After that, the design session picks up from `docs/HANDOFF_DESIGN.md`.
+Behind that, two more owner calls wait in `docs/DECISIONS.md`: the More ▾ recommendations —
+Financial chart (defer; recommended second, after Template ▾) and Poetry (recommended drop,
+permanently). The Embed scope fork stays deliberately unbuilt (real oEmbed/OG needs an edge
+function **and** a widened `sanitizeHtml` allowlist — the one change whose mistake becomes a
+security issue).
+
+## 2026-08-02 (Substack-replication session) — the reversal, the toolbar, and the type system
+
+Branch `substack-writing-surface`, based on `main` @ `8dbd238`. Gates 1–6 all **PASSED**;
+measurements in `docs/GATE_LEDGER.md`, including the reconciliation table for the rows the
+reversal supersedes. Ten decisions recorded in `docs/DECISIONS.md`.
+
+**The mandate reversed course.** Last session's selection-only bubble menu was replaced by
+a persistent Substack-style toolbar — owner-directed, superseding GATE S2 (which passed
+against the spec it was given; it is not broken). Seven separator groups, ~20 items, More ▾
+overflow, chevrons when clipped, every item exercised through author → save → publish →
+anonymous read.
+
+**What changed under the words.** The type system is now Spectral (self-hosted, 8 faces),
+19px/30.4px body on a **width-locked 728px** column — the measured Substack values, exact
+to the RGB step on both the canvas and the published page (HSL tokens quantise one step
+off; the inks are exact-value tokens now). New structural nodes: LaTeX (inline + display,
+KaTeX rendered client-side *after* sanitization so its output never transits the
+sanitizer) and footnotes (CSS-counter numbering in the editor, numbered section with
+backlinks when published). The insert list grew to 7 items and still feeds `+`, `/`, and
+More ▾ from one source.
+
+**Three bugs the gates found that reading code would not have.**
+1. **Every toolbar mark command silently no-oped** — button mousedown collapsed the
+   selection before the command ran; blocks still landed (caret-positional), so the
+   surface half-worked convincingly. All 21 controls now preserve selection on mousedown.
+2. **The footnote node came back as a Superscript mark** on every reload — mark parse
+   rules gather before node rules at equal priority, the same class as the historic
+   linkCard bug. `priority: 100`.
+3. **The published page scrolled horizontally at 375px** because no prose surface had any
+   word-breaking; one long unbreakable token was enough. `overflow-wrap: break-word`.
+
+**Hygiene:** `fa-07-01` re-measured byte-identical (21,946 chars, 81 blocks, both md5s);
+`fa-01-01` restored to draft/null; probe images deleted; the session's namespaced identity
+deleted; zero migrations — schema, RLS and auth untouched.
 
 ## 2026-08-02 (follow-up) — merge, then settle the open questions
 
