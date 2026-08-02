@@ -491,6 +491,11 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
         setCreatedAt(data.created_at);
         revisionType = 'create';
         toast({ title: 'Essay created!' });
+        // Leave /new for the essay's own URL. Staying at /new meant a reload
+        // showed a blank editor — the just-created essay looked gone — and
+        // typing into that blank editor inserted a second row. `replace`
+        // keeps Back from returning to the trap.
+        navigate(`/admin/writer/${section}/${finalSlug}`, { replace: true });
       }
 
       setSlug(finalSlug);
@@ -533,26 +538,12 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
     }
   }, [section, selectedFinanceModule]);
 
-  const getPublicUrl = () => {
-    if (section === 'next-big-thing') {
-      return `/the-next-big-thing/${slug}`;
-    }
-    if (section === 'finance' && moduleId && selectedFinanceModule) {
-      return `/finance/${financeSection || selectedFinanceModule.track_slug}/${selectedFinanceModule.slug}/${slug}`;
-    }
-    if (section === 'finance') {
-      return `/finance/${slug}`;
-    }
-    if (phase) {
-      return `/${section}/${phase}/${slug}`;
-    }
-    return `/${section}/${slug}`;
-  };
-
-  const getPreviewUrl = () => {
-    // Draft preview uses same URL but protected by auth
-    return getPublicUrl();
-  };
+  // NOTE: a local getPublicUrl() used to live here, duplicating
+  // src/lib/essayUrl.ts — with a fallback (`/finance/${slug}`) that is not
+  // even a route shape. Neither it nor its only caller was referenced by any
+  // render path, so both are deleted rather than repaired. URL building has
+  // exactly one home: `essayUrl` / `absoluteEssayUrl`, whose every branch is
+  // asserted against the route list in tests/unit/essayUrl.test.ts.
 
   if (isLoading) {
     return (

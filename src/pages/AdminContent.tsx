@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { PageLayout } from '@/components/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
 import { useAuth } from '@/contexts/AuthContext';
-import { useUnifiedContent, useContentStats, useBulkPublishContent, useDeleteContent, useTogglePublishContent, ContentType } from '@/hooks/queries/useUnifiedContent';
+import { useUnifiedContent, useContentStats, useBulkPublishContent, useDeleteContent, useRestoreContent, useTogglePublishContent, ContentType } from '@/hooks/queries/useUnifiedContent';
 import { useSections } from '@/hooks/queries/useSections';
 import { LoadingState, ErrorState, EmptyState } from '@/components/states';
 import {
@@ -29,6 +29,7 @@ import {
   Eye,
   EyeOff,
   Trash2,
+  RotateCcw,
   FileText,
   RefreshCw,
   Plus,
@@ -101,6 +102,7 @@ export default function AdminContent() {
   const { data: stats, refetch: refetchStats } = useContentStats();
   const togglePublish = useTogglePublishContent();
   const deleteContent = useDeleteContent();
+  const restoreContent = useRestoreContent();
 
   // Apply "needs work" filter
   const filteredItems = useMemo(() => {
@@ -145,13 +147,33 @@ export default function AdminContent() {
   };
 
   const handleDelete = async (id: string, type: ContentType, title: string) => {
-    if (!confirm(`Delete "${title}"? This cannot be undone.`)) return;
+    // Essays are archived, never hard-deleted: the row and its whole revision
+    // history stay, invisible to readers and restorable from this list. The
+    // old wording ("cannot be undone") was true and is exactly why it changed.
+    const message =
+      type === 'essay'
+        ? `Archive "${title}"? It disappears from the site but keeps its history, and you can restore it here.`
+        : `Delete "${title}"? This cannot be undone.`;
+    if (!confirm(message)) return;
     try {
       await deleteContent.mutateAsync({ id, type });
-      toast({ title: 'Deleted', description: `"${title}" removed.` });
+      toast({
+        title: type === 'essay' ? 'Archived' : 'Deleted',
+        description: type === 'essay' ? `"${title}" is archived and restorable.` : `"${title}" removed.`,
+      });
       refetchStats();
     } catch {
-      toast({ title: 'Error', description: 'Failed to delete.', variant: 'destructive' });
+      toast({ title: 'Error', description: 'Failed.', variant: 'destructive' });
+    }
+  };
+
+  const handleRestore = async (id: string, title: string) => {
+    try {
+      await restoreContent.mutateAsync({ id });
+      toast({ title: 'Restored', description: `"${title}" is a draft again.` });
+      refetchStats();
+    } catch {
+      toast({ title: 'Error', description: 'Failed to restore.', variant: 'destructive' });
     }
   };
 
@@ -388,15 +410,26 @@ export default function AdminContent() {
                         <ExternalLink className="h-4 w-4" />
                       </a>
                     </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-destructive hover:text-destructive"
-                      onClick={() => handleDelete(item.id, item.type, item.title)}
-                      title="Delete"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    {isEssay && item.status === 'archived' ? (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        title="Restore"
+                        onClick={() => handleRestore(item.id, item.title)}
+                      >
+                        <RotateCcw className="h-4 w-4" />
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-destructive hover:text-destructive"
+                        onClick={() => handleDelete(item.id, item.type, item.title)}
+                        title={isEssay ? 'Archive' : 'Delete'}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    )}
                   </div>
                 </div>
               );

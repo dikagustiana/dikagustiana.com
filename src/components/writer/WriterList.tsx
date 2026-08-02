@@ -85,7 +85,10 @@ export function WriterList({ section }: WriterListProps) {
     );
   });
 
-  const drafts = filteredEssays?.filter(e => e.status !== 'published') || [];
+  // Archived essays are deliberately absent here: this list is the working
+  // set. They stay visible — with a badge and a Restore button — in
+  // /admin/content, which is the full inventory.
+  const drafts = filteredEssays?.filter(e => e.status !== 'published' && e.status !== 'archived') || [];
   const published = filteredEssays?.filter(e => e.status === 'published') || [];
 
   const sectionLabelMap: Record<string, string> = {

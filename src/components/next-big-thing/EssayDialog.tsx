@@ -110,6 +110,14 @@ export function EssayDialog({ open, onOpenChange, essay, onSuccess }: EssayDialo
 
     try {
       if (isEditing && essay) {
+        // This dialog edits the HTML column only. If the essay also carries
+        // content_json (the WriterEditor's canonical format), the reader
+        // prefers the JSON — so an edit made here would be invisible on the
+        // published page. When the body actually changed, clear content_json
+        // so the fresh HTML is what renders; an untouched body leaves it
+        // alone. (`status` is kept coherent with `published` by the
+        // sync_essays_publication trigger, whichever editor writes.)
+        const contentChanged = (formData.content || null) !== (essay.content || null);
         const { error } = await supabase
           .from('essays')
           .update({
@@ -123,6 +131,7 @@ export function EssayDialog({ open, onOpenChange, essay, onSuccess }: EssayDialo
             phase: formData.phase,
             published: formData.published,
             content: formData.content || null,
+            ...(contentChanged ? { content_json: null } : {}),
           })
           .eq('id', essay.id);
 

@@ -1,0 +1,35 @@
+# Every check in this repository's history ran only when someone remembered to
+# run it — and the audit trail shows what that costs: a typecheck that compiled
+# zero files for months, a lint that had been failing, a test whose result
+# depended on the machine's timezone. This workflow is the memory.
+#
+# Tests run with TZ pinned to America/Chicago — deliberately NOT UTC, so any
+# code that quietly assumes UTC fails here first (the formatDate bug shipped
+# because every check ran in UTC).
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      # --max-warnings holds the line at the current count (35). New warnings
+      # fail; paying warnings down lowers the ceiling deliberately, not silently.
+      - run: npx eslint . --max-warnings=35
+      # tsc -b --force: the root tsconfig is solution-style ("files": []), so a
+      # bare `tsc --noEmit` compiles NOTHING and exits 0. Do not "simplify" this.
+      - run: npm run typecheck
+      - run: npx vitest run
+        env:
+          TZ: America/Chicago
+      - run: npm run build
