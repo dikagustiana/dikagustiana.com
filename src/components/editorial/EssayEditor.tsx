@@ -1,27 +1,26 @@
 /**
  * EssayEditor — the essay body, and the only editor in the product.
  *
- * Two things this deliberately does NOT have:
+ * Formatting lives in the PERSISTENT TOOLBAR (EditorToolbar), mounted by the
+ * page above this canvas. This deliberately reverses the earlier
+ * selection-only bubble menu: the owner directed a Substack replication, and
+ * Substack formats from a standing toolbar. The reversal is recorded in
+ * docs/DECISIONS.md and supersedes the old GATE S2 (docs/GATE_LEDGER.md).
  *
- *   1. A persistent formatting toolbar. Formatting appears on selection and
- *      nowhere else. A standing toolbar and a selection toolbar are two
- *      surfaces competing for one job, and the standing one wins the writer's
- *      attention while they are trying to write.
- *   2. Its own extension list. Node types come from `getEditorExtensions()`;
- *      see src/lib/tiptap/extensions.ts for the four-place content contract.
+ * Block insertion has two entry points sharing ONE list
+ * (src/lib/tiptap/insertMenu.ts): the gutter `+` / `/` slash menu, and the
+ * toolbar's More ▾ menu. Never two lists — two lists drift.
  *
- * Insertion is the gutter `+` and `/` at the start of a line — the same menu
- * from the same list (src/lib/tiptap/insertMenu.ts), never two lists.
+ * Node types come from `getEditorExtensions()`; see
+ * src/lib/tiptap/extensions.ts for the five-place content contract.
  */
 
 import { useEditor, useEditorState, EditorContent, Editor } from '@tiptap/react';
-import { BubbleMenu } from '@tiptap/react/menus';
 import DragHandle from '@tiptap/extension-drag-handle-react';
 import type { JSONContent } from '@tiptap/core';
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import {
   DropdownMenu,
@@ -31,27 +30,28 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { getEditorExtensions } from '@/lib/tiptap/extensions';
+import type { InsertMenuOptions } from '@/lib/tiptap/insertMenu';
 import { transformPastedHTML } from '@/lib/tiptap/pasteFromWord';
 import { FigureUploader } from './FigureUploader';
 import { FigureBlockData } from './FigureBlock';
 import { LinkCardDialog } from './LinkCardDialog';
 import { InsertMenuButton } from './InsertMenuButton';
+import { MathDialog, type MathDialogState } from './toolbar/MathDialog';
+import { FootnoteDialog, type FootnoteDialogState } from './toolbar/FootnoteDialog';
 import type { LinkCardData } from './LinkCardBlock';
+import 'katex/dist/katex.min.css';
 import {
-  Bold,
-  Italic,
-  Strikethrough,
-  Heading2,
-  Heading3,
-  List,
-  Quote,
-  Link as LinkIcon,
-  Unlink,
   Trash2,
   GripVertical,
   Columns3,
   Rows3,
 } from 'lucide-react';
+
+/** What the page needs to mount the toolbar above this canvas. */
+export interface EditorSurface {
+  editor: Editor;
+  insertOptions: InsertMenuOptions;
+}
 
 interface EssayEditorProps {
   content: string;
@@ -63,26 +63,12 @@ interface EssayEditorProps {
    * in memory and the round-trip is lossy.
    */
   onChangeJson?: (json: JSONContent) => void;
+  /** The live editor + insert callbacks, for the page-level toolbar. */
+  onSurfaceChange?: (surface: EditorSurface | null) => void;
   section: 'next-big-thing' | 'green-transition' | 'finance';
   placeholder?: string;
   className?: string;
   minHeight?: string;
-}
-
-/** Prompt for a URL and apply it to the current selection. */
-function useSetLink(editor: Editor | null) {
-  return useCallback(() => {
-    if (!editor) return;
-    const previousUrl = editor.getAttributes('link').href;
-    const url = window.prompt('URL', previousUrl);
-
-    if (url === null) return;
-    if (url === '') {
-      editor.chain().focus().extendMarkRange('link').unsetLink().run();
-      return;
-    }
-    editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
-  }, [editor]);
 }
 
 // ---------------------------------------------------------------------------
@@ -176,6 +162,7 @@ export function EssayEditor({
   content,
   onChange,
   onChangeJson,
+  onSurfaceChange,
   section,
   placeholder = 'Start writing...',
   className,
@@ -183,11 +170,46 @@ export function EssayEditor({
 }: EssayEditorProps) {
   const [showFigureUploader, setShowFigureUploader] = useState(false);
   const [showLinkCard, setShowLinkCard] = useState(false);
+  const [mathState, setMathState] = useState<MathDialogState | null>(null);
+  const [footnoteState, setFootnoteState] = useState<FootnoteDialogState | null>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
+  // The dialog callbacks are wired into the extension list, which must not
+  // rebuild when a dialog opens — rebuilding tears down the editor and loses
+  // the selection and undo history. They read the live editor through a ref.
+  const editorRef = useRef<Editor | null>(null);
+
   const openFigureUploader = useCallback(() => setShowFigureUploader(true), []);
   const openLinkCard = useCallback(() => setShowLinkCard(true), []);
+  const openMathInsert = useCallback(() => setMathState({ latex: '', display: true }), []);
+  const openMathEdit = useCallback(
+    (params: { pos: number; latex: string; display: boolean }) => setMathState(params),
+    [],
+  );
+  const openFootnoteEdit = useCallback(
+    (pos: number, text: string) => setFootnoteState({ pos, text }),
+    [],
+  );
+  const insertFootnoteFlow = useCallback(() => {
+    const ed = editorRef.current;
+    if (!ed) return;
+    const pos = ed.state.selection.from;
+    ed.chain().focus().insertFootnote({ text: '' }).run();
+    setFootnoteState({ pos, text: '' });
+  }, []);
+
+  // ONE options object feeds the slash menu, the gutter `+` and (via
+  // onSurfaceChange) the toolbar's More ▾ — the single-list guarantee.
+  const insertOptions = useMemo<InsertMenuOptions>(
+    () => ({
+      onInsertFigure: openFigureUploader,
+      onInsertLinkCard: openLinkCard,
+      onInsertMath: openMathInsert,
+      onInsertFootnote: insertFootnoteFlow,
+    }),
+    [openFigureUploader, openLinkCard, openMathInsert, insertFootnoteFlow],
+  );
 
   // Rebuilding the extension list would tear down and recreate the editor,
   // losing the selection and the undo history on every render.
@@ -201,9 +223,11 @@ export function EssayEditor({
             toast({ title: 'Upload failed', description: message, variant: 'destructive' }),
           onSuccess: () => toast({ title: 'Image added' }),
         },
-        slash: { onInsertFigure: openFigureUploader, onInsertLinkCard: openLinkCard },
+        slash: insertOptions,
+        onEditMath: openMathEdit,
+        onEditFootnote: openFootnoteEdit,
       }),
-    [placeholder, section, toast, openFigureUploader, openLinkCard],
+    [placeholder, section, toast, insertOptions, openMathEdit, openFootnoteEdit],
   );
 
   // The last HTML this editor emitted. The parent mirrors the document as an
@@ -240,6 +264,18 @@ export function EssayEditor({
     [extensions],
   );
 
+  useEffect(() => {
+    editorRef.current = editor;
+  }, [editor]);
+
+  // Hand the live editor and the shared insert list to the page, which
+  // mounts the persistent toolbar above this canvas.
+  useEffect(() => {
+    if (!editor) return;
+    onSurfaceChange?.({ editor, insertOptions });
+    return () => onSurfaceChange?.(null);
+  }, [editor, insertOptions, onSurfaceChange]);
+
   // Sync content that came from OUTSIDE — the essay loading, a recovered draft
   // being restored. An echo of what this editor just emitted is ignored.
   useEffect(() => {
@@ -273,8 +309,6 @@ export function EssayEditor({
     [editor],
   );
 
-  const setLink = useSetLink(editor);
-
   // `editor.isActive()` reads current state and does not re-render on its own;
   // without subscribing, the table controls would appear only when some
   // unrelated state change happened to repaint this component.
@@ -283,17 +317,17 @@ export function EssayEditor({
     selector: ({ editor: e }) => !!e?.isActive('table'),
   });
 
-  const bubbleButton = 'h-7 w-7';
-
   return (
     <div className={cn('group/canvas relative', className)} ref={canvasRef}>
-      {/* The insert affordance lives in the gutter beside the current line,
-          not in a toolbar. `/` at the start of a line opens the same menu. */}
+      {/* The insert affordance lives in the gutter beside the current line;
+          `/` at the start of a line opens the same menu. */}
       <InsertMenuButton
         editor={editor}
         containerRef={canvasRef}
         onInsertFigure={openFigureUploader}
         onInsertLinkCard={openLinkCard}
+        onInsertMath={openMathInsert}
+        onInsertFootnote={insertFootnoteFlow}
       />
 
       {/* Contextual: table actions are meaningless outside a table, and a row
@@ -305,120 +339,6 @@ export function EssayEditor({
       <div data-editor-slot="table-controls">
         {editor && inTable ? <TableControls editor={editor} /> : null}
       </div>
-
-      {editor && (
-        <BubbleMenu
-          editor={editor}
-          className="flex items-center gap-0.5 rounded-md border border-border bg-popover p-1 shadow-md"
-          // Text selections only — a selected figure, image or link card has
-          // its own affordances and does not want a bold/italic bar over it.
-          shouldShow={({ editor: e, from, to }) =>
-            from !== to &&
-            !e.isActive('figure') &&
-            !e.isActive('image') &&
-            !e.isActive('linkCard')
-          }
-        >
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className={cn(bubbleButton, editor.isActive('bold') && 'bg-secondary')}
-            onClick={() => editor.chain().focus().toggleBold().run()}
-            title="Bold (Ctrl+B)"
-          >
-            <Bold className="h-3.5 w-3.5" />
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className={cn(bubbleButton, editor.isActive('italic') && 'bg-secondary')}
-            onClick={() => editor.chain().focus().toggleItalic().run()}
-            title="Italic (Ctrl+I)"
-          >
-            <Italic className="h-3.5 w-3.5" />
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className={cn(bubbleButton, editor.isActive('strike') && 'bg-secondary')}
-            onClick={() => editor.chain().focus().toggleStrike().run()}
-            title="Strikethrough"
-          >
-            <Strikethrough className="h-3.5 w-3.5" />
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className={cn(bubbleButton, editor.isActive('link') && 'bg-secondary')}
-            onClick={setLink}
-            title="Link"
-          >
-            <LinkIcon className="h-3.5 w-3.5" />
-          </Button>
-          {editor.isActive('link') && (
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className={bubbleButton}
-              onClick={() => editor.chain().focus().unsetLink().run()}
-              title="Remove link"
-            >
-              <Unlink className="h-3.5 w-3.5" />
-            </Button>
-          )}
-
-          <Separator orientation="vertical" className="mx-0.5 h-5" />
-
-          {/* The body allows two heading levels. They are the schema's h2 and
-              h3 — h1 is the essay title, which is a database field, not a
-              body block — so these are labelled by role, not by tag number. */}
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className={cn(bubbleButton, editor.isActive('heading', { level: 2 }) && 'bg-secondary')}
-            onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-            title="Heading"
-          >
-            <Heading2 className="h-3.5 w-3.5" />
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className={cn(bubbleButton, editor.isActive('heading', { level: 3 }) && 'bg-secondary')}
-            onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-            title="Subheading"
-          >
-            <Heading3 className="h-3.5 w-3.5" />
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className={cn(bubbleButton, editor.isActive('blockquote') && 'bg-secondary')}
-            onClick={() => editor.chain().focus().toggleBlockquote().run()}
-            title="Quote"
-          >
-            <Quote className="h-3.5 w-3.5" />
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className={cn(bubbleButton, editor.isActive('bulletList') && 'bg-secondary')}
-            onClick={() => editor.chain().focus().toggleBulletList().run()}
-            title="List"
-          >
-            <List className="h-3.5 w-3.5" />
-          </Button>
-        </BubbleMenu>
-      )}
 
       {editor && (
         <DragHandle editor={editor}>
@@ -447,6 +367,11 @@ export function EssayEditor({
         onInsert={handleInsertLinkCard}
       />
 
+      {editor && <MathDialog editor={editor} state={mathState} onClose={() => setMathState(null)} />}
+      {editor && (
+        <FootnoteDialog editor={editor} state={footnoteState} onClose={() => setFootnoteState(null)} />
+      )}
+
       <EditorContent editor={editor} />
 
       <style>{`
@@ -457,24 +382,10 @@ export function EssayEditor({
           outline: none;
         }
 
-        /* The measure. Set explicitly rather than inherited from a prose
-           class, so the writing column is a decision instead of an accident. */
-        .essay-prose,
-        .essay-prose p,
-        .essay-prose h2,
-        .essay-prose h3,
-        .essay-prose ul,
-        .essay-prose ol,
-        .essay-prose blockquote,
-        .essay-prose pre {
-          max-width: 680px;
-        }
-        .essay-prose p {
-          font-size: 1.125rem;
-          line-height: 1.75;
-          margin-bottom: 1.25rem;
-          color: hsl(var(--foreground));
-        }
+        /* Typography, measure and rhythm come from the shared editorial type
+           system in src/index.css — the SAME rules the published page reads
+           (.prose-editorial), so the two surfaces cannot drift. Everything
+           below is editor-only chrome. */
         .essay-prose p.is-empty:first-child::before,
         .essay-prose p.is-editor-empty:first-child::before {
           content: attr(data-placeholder);
@@ -483,64 +394,10 @@ export function EssayEditor({
           pointer-events: none;
           height: 0;
         }
-        .essay-prose h2 {
-          font-family: var(--font-display, inherit);
-          font-size: 1.625rem;
-          line-height: 1.3;
-          font-weight: 650;
-          margin-top: 2.5rem;
-          margin-bottom: 0.75rem;
-        }
-        .essay-prose h3 {
-          font-family: var(--font-display, inherit);
-          font-size: 1.25rem;
-          line-height: 1.4;
-          font-weight: 650;
-          margin-top: 2rem;
-          margin-bottom: 0.5rem;
-        }
-        .essay-prose ul,
-        .essay-prose ol {
-          padding-left: 1.5rem;
-          margin-bottom: 1.25rem;
-          font-size: 1.125rem;
-          line-height: 1.75;
-        }
-        .essay-prose ul { list-style: disc; }
-        .essay-prose ol { list-style: decimal; }
-        .essay-prose li { margin-bottom: 0.35rem; }
         .essay-prose a {
           color: hsl(var(--primary));
           text-decoration: underline;
           text-underline-offset: 3px;
-        }
-        .essay-prose strong { font-weight: 650; }
-        .essay-prose blockquote {
-          border-left: 3px solid hsl(var(--primary));
-          padding-left: 1.25rem;
-          margin: 1.75rem 0;
-          font-style: italic;
-          color: hsl(var(--muted-foreground));
-        }
-        .essay-prose pre {
-          background: hsl(var(--muted));
-          padding: 0.875rem 1rem;
-          border-radius: 0.375rem;
-          overflow-x: auto;
-          font-size: 0.9375rem;
-          margin: 1.5rem 0;
-        }
-        .essay-prose code {
-          background: hsl(var(--muted));
-          padding: 0.125rem 0.25rem;
-          border-radius: 0.25rem;
-          font-size: 0.875em;
-        }
-        .essay-prose pre code { background: none; padding: 0; }
-        .essay-prose hr {
-          border: none;
-          border-top: 1px solid hsl(var(--border));
-          margin: 2rem 0;
         }
         .essay-prose img {
           max-width: 100%;
@@ -556,12 +413,58 @@ export function EssayEditor({
         }
         .essay-prose .link-card { text-decoration: none; }
 
+        /* Math node views (KaTeX renders inside them). */
+        .essay-prose .tiptap-mathematics-render {
+          border-radius: 0.25rem;
+        }
+        .essay-prose .tiptap-mathematics-render--editable {
+          cursor: pointer;
+        }
+        .essay-prose .tiptap-mathematics-render--editable:hover {
+          background: hsl(var(--secondary));
+        }
+        .essay-prose div.tiptap-mathematics-render {
+          display: block;
+          text-align: center;
+          margin: 24px 0;
+          overflow-x: auto;
+        }
+        .essay-prose span.tiptap-mathematics-render {
+          display: inline-block;
+          padding: 0 1px;
+        }
+        .essay-prose .block-math-error,
+        .essay-prose .inline-math-error {
+          color: hsl(var(--destructive));
+          font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+          font-size: 0.875em;
+        }
+
+        /* Footnote markers: numbering is a CSS counter over document order,
+           so a marker can never disagree with its position. The published
+           page renders real numbers (ArticleBody), same visual result. */
+        .essay-prose {
+          counter-reset: editorial-footnote;
+        }
+        .essay-prose sup[data-type="footnote"] {
+          counter-increment: editorial-footnote;
+        }
+        .essay-prose sup[data-type="footnote"]::after {
+          content: counter(editorial-footnote);
+        }
+        .essay-prose sup[data-type="footnote"]:hover {
+          text-decoration: underline;
+        }
+        .essay-prose sup[data-type="footnote"].ProseMirror-selectednode {
+          outline: 2px solid hsl(var(--accent-editorial));
+          border-radius: 2px;
+        }
+
         /* Tables */
         .essay-prose table {
           border-collapse: collapse;
           table-layout: fixed;
           width: 100%;
-          max-width: 680px;
           margin: 1.75rem 0;
           overflow: hidden;
           font-size: 1rem;

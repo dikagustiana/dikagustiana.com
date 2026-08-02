@@ -1,7 +1,3 @@
-/* Display face stays a serif — the editorial contrast is deliberate.
-   @import must precede all other rules, hence its position here. */
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap');
-
 /* Body/UI face: Plus Jakarta Sans, self-hosted.
  *
  * Self-hosted rather than @import'd from Google Fonts for two reasons: a
@@ -30,6 +26,77 @@
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
+/* Editorial serif: Spectral, self-hosted for the same reason as Plus Jakarta
+ * Sans — a webfont that fails to load falls back silently. Four variants
+ * (400/700, upright/italic), two subsets each. Spectral ships no variable
+ * font, so these are static files. Replaces the Google-hosted Playfair
+ * Display @import: one serif family for the whole product, zero third-party
+ * font requests. */
+@font-face {
+  font-family: 'Spectral';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/spectral-italic-400-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Spectral';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/spectral-italic-400-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Spectral';
+  font-style: italic;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/spectral-italic-700-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Spectral';
+  font-style: italic;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/spectral-italic-700-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Spectral';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/spectral-normal-400-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Spectral';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/spectral-normal-400-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Spectral';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/spectral-normal-700-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Spectral';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/spectral-normal-700-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
 
 @tailwind base;
 @tailwind components;
@@ -39,7 +106,23 @@
   :root {
     /* Typography tokens — the single place a font family is named. */
     --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
-    --font-display: 'Playfair Display', Georgia, 'Times New Roman', serif;
+    --font-serif: 'Spectral', Georgia, 'Times New Roman', serif;
+    /* Display face = the serif. Playfair Display (Google-hosted) is gone;
+       Spectral covers both editorial prose and display headings, so the
+       product carries exactly two families: Spectral and Plus Jakarta Sans. */
+    --font-display: 'Spectral', Georgia, 'Times New Roman', serif;
+
+    /* ── Editorial tokens (Substack-derived, measured not estimated) ──
+       One accent token for its five roles: blockquote rail, link-input
+       focus ring, primary buttons in popovers, the "New" badge, and the
+       THEME swatches in the colour palette. Value is Substack's #ff6719;
+       swapping the whole scheme to a house accent is this one line. */
+    --accent-editorial: 20 100% 55%;
+    /* Body ink rgb(54,55,55) and the muted subtitle grey rgb(119,119,119). */
+    --prose-fg: 180 1% 21%;
+    --prose-muted: 0 0% 47%;
+    /* Divider rule rgb(230,230,230). */
+    --prose-rule: 0 0% 90%;
 
     /* Light theme matching dikagustiana.com */
     --background: 0 0% 98%;
@@ -213,47 +296,214 @@
   }
 }
 
-/* ── Longform essay overrides (Noahpinion-style, finance-in-motion only) ── */
-@layer components {
-  /* ── The reading surface ──────────────────────────────────────────────
-     `prose-editorial` was a class name with no rules: every measurement on
-     the published page came from per-element utility classes inside
-     ArticleBody, which is the same "inherited from nowhere in particular"
-     problem the writing canvas had. The measure, the type size and the
-     line-height are decisions, so they are written down here.
+/* ═══════════════════════════════════════════════════════════════════════
+   The editorial type system — ONE source for BOTH surfaces.
 
-     The measure matches the writing canvas (680px), so what the author sees
-     while writing is the line length the reader gets. */
-  .prose-editorial {
-    --measure: 680px;
-    --measure-wide: 780px;
+   `.essay-prose` is the writing canvas (ProseMirror content element);
+   `.prose-editorial` is the published page (ArticleBody). They share every
+   rule below, so what the author sees while writing is byte-for-byte the
+   typography the reader gets. Values are getComputedStyle readings from
+   Substack's writing surface, not estimates:
+
+     body       Spectral 400   19px / 30.4px (1.6)   rgb(54,55,55)
+     h1 in-body sans     700   38px / 44.08 (1.16)
+     h2 in-body sans     700   30.875px / 35.815 (1.16)
+     p rhythm   margin 0 0 20px · li margin-top 8px · ul margin-bottom 19px
+     hr         1px rgb(230,230,230), margin 32px 0
+     blockquote 4px accent rail, margin 20px 0, NOT italic, 19px
+
+   The column: an explicit `width: 728px` centred by margin, NOT max-width
+   on the text elements — max-width:100% below exists only as the sub-768px
+   overflow guard and never bites at desktop. h3–h6 are not in the measured
+   table; they follow the same em-based ratio downward (1.3 / 1.125 / 1 /
+   0.875) and are recorded as chosen, not measured. The 20px gap between a
+   blockquote's rail and its text is likewise an assumption — the measured
+   properties (border, padding-left: 0, margin) are verbatim, the inner gap
+   was not in the table and Substack itself is unreachable from this
+   environment. ══════════════════════════════════════════════════════════ */
+@layer components {
+  .prose-editorial,
+  .essay-prose {
+    width: 728px;
+    max-width: 100%;
+    margin-inline: auto;
+    font-family: var(--font-serif);
+    font-size: 19px;
+    line-height: 1.6;
+    color: hsl(var(--prose-fg));
   }
 
-  .prose-editorial > p,
-  .prose-editorial > ul,
-  .prose-editorial > ol,
-  .prose-editorial > blockquote,
-  .prose-editorial > pre,
-  .prose-editorial > h2,
-  .prose-editorial > h3,
-  .prose-editorial > hr,
-  .prose-editorial > table {
-    max-width: var(--measure);
+  .prose-editorial p,
+  .essay-prose p {
+    margin: 0 0 20px;
+  }
+
+  /* In-body headings are the sans face at 700 — the Substack pattern is
+     serif prose under sans headings. Plus Jakarta Sans stands in for SF Pro
+     Display (Apple-licensed, not shippable); it is already self-hosted and
+     gate-verified as loading. */
+  .prose-editorial h1, .essay-prose h1,
+  .prose-editorial h2, .essay-prose h2,
+  .prose-editorial h3, .essay-prose h3,
+  .prose-editorial h4, .essay-prose h4,
+  .prose-editorial h5, .essay-prose h5,
+  .prose-editorial h6, .essay-prose h6 {
+    font-family: var(--font-sans);
+    font-weight: 700;
+    color: hsl(var(--prose-fg));
+    letter-spacing: normal;
+    margin: 1em 0 0.625em;
+  }
+  .prose-editorial h1, .essay-prose h1 { font-size: 2em;      line-height: 1.16; }
+  .prose-editorial h2, .essay-prose h2 { font-size: 1.625em;  line-height: 1.16; }
+  .prose-editorial h3, .essay-prose h3 { font-size: 1.3em;    line-height: 1.2;  }
+  .prose-editorial h4, .essay-prose h4 { font-size: 1.125em;  line-height: 1.25; }
+  .prose-editorial h5, .essay-prose h5 { font-size: 1em;      line-height: 1.3;  }
+  .prose-editorial h6, .essay-prose h6 { font-size: 0.875em;  line-height: 1.3;  }
+
+  .prose-editorial ul, .essay-prose ul,
+  .prose-editorial ol, .essay-prose ol {
+    margin: 0 0 19px;
+    padding-left: 1.75rem;
+  }
+  .prose-editorial ul, .essay-prose ul { list-style: disc; }
+  .prose-editorial ol, .essay-prose ol { list-style: decimal; }
+  .prose-editorial li, .essay-prose li { margin-top: 8px; }
+  .prose-editorial li p, .essay-prose li p { margin-bottom: 0; }
+
+  .prose-editorial hr, .essay-prose hr {
+    border: 0;
+    height: 1px;
+    background: hsl(var(--prose-rule));
+    margin: 32px 0;
+  }
+
+  /* Block quote: the accent rail. Deliberately NOT italic — the original's
+     choice. Font size unchanged at 19px. */
+  .prose-editorial blockquote, .essay-prose blockquote {
+    border-left: 4px solid hsl(var(--accent-editorial));
+    padding-left: 0;
+    margin: 20px 0;
+    font-size: inherit;
+    font-style: normal;
+    color: inherit;
+  }
+  .prose-editorial blockquote > *, .essay-prose blockquote > * {
+    margin-left: 20px;
+  }
+
+  /* Pull quote: no rail, larger, centred — a display variant of the same
+     node (blockquote[data-variant="pull"]), so it costs no new schema. */
+  .prose-editorial blockquote[data-variant='pull'],
+  .essay-prose blockquote[data-variant='pull'] {
+    border-left: 0;
+    margin: 32px 0;
+    text-align: center;
+    font-size: 1.375em;
+    line-height: 1.45;
+  }
+  .prose-editorial blockquote[data-variant='pull'] > *,
+  .essay-prose blockquote[data-variant='pull'] > * {
+    margin-left: 0;
+  }
+
+  /* Callout: a tinted box for asides. */
+  .prose-editorial div[data-type='callout'],
+  .essay-prose div[data-type='callout'] {
+    background: hsl(var(--accent-editorial) / 0.08);
+    border-radius: 0.5rem;
+    padding: 1rem 1.25rem;
+    margin: 20px 0;
+  }
+  .prose-editorial div[data-type='callout'] > :last-child,
+  .essay-prose div[data-type='callout'] > :last-child {
+    margin-bottom: 0;
+  }
+
+  /* Inline code: monospace at the body's 19px, colour unchanged, transparent
+     background, no padding, no radius. No pill treatment — deliberate. */
+  .prose-editorial code, .essay-prose code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: inherit;
+    color: inherit;
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+  }
+  .prose-editorial pre, .essay-prose pre {
+    background: hsl(var(--muted));
+    padding: 0.875rem 1rem;
+    border-radius: 0.375rem;
+    overflow-x: auto;
+    margin: 0 0 20px;
+  }
+  .prose-editorial pre code, .essay-prose pre code {
+    font-size: 0.8125em;
+    line-height: 1.55;
+  }
+
+  /* Text colour / highlight marks arrive as inline styles on spans; nothing
+     here to override them. Alignment arrives as text-align on the block. */
+
+  /* Math nodes (KaTeX renders client-side from data-latex). */
+  .prose-editorial [data-type='block-math'],
+  .essay-prose [data-type='block-math'] {
+    display: block;
+    text-align: center;
+    margin: 24px 0;
+    overflow-x: auto;
+  }
+  .prose-editorial [data-type='inline-math'],
+  .essay-prose [data-type='inline-math'] {
+    display: inline-block;
+  }
+
+  /* Footnote markers. */
+  .prose-editorial sup[data-type='footnote'],
+  .essay-prose sup[data-type='footnote'] {
+    color: hsl(var(--accent-editorial));
+    font-family: var(--font-sans);
+    font-size: 0.75em;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  /* Figures are allowed slightly wider than the text column — a 728px-wide
+     chart is hard to read. Clamped to the viewport so the wider block can
+     never introduce horizontal scroll. */
+  .prose-editorial > figure,
+  .prose-editorial > .figure-block,
+  .essay-prose > figure,
+  .essay-prose > .figure-block {
+    max-width: min(780px, calc(100vw - 2rem));
     margin-inline: auto;
   }
 
-  .prose-editorial > p {
-    font-size: 1.125rem;
-    line-height: 1.75;
+  /* ── Title and subtitle — same class on the writer's inputs and the
+     published header, so the two surfaces cannot drift. Measured: title
+     Spectral 700 32px/36px rgb(54,55,55); subtitle Spectral 400 18px/24px
+     rgb(119,119,119). ── */
+  .editorial-title {
+    font-family: var(--font-serif);
+    font-size: 32px;
+    line-height: 36px;
+    font-weight: 700;
+    color: hsl(var(--prose-fg));
+  }
+  .editorial-subtitle {
+    font-family: var(--font-serif);
+    font-size: 18px;
+    line-height: 24px;
+    font-weight: 400;
+    color: hsl(var(--prose-muted));
   }
 
-  /* Figures are allowed slightly wider than the text column — the reference
-     asks for it and a 680px-wide chart is hard to read. Clamped to the
-     viewport so the wider block can never introduce horizontal scroll. */
-  .prose-editorial > figure,
-  .prose-editorial > .figure-block,
-  .prose-editorial > div:has(> table) {
-    max-width: min(var(--measure-wide), calc(100vw - 2rem));
+  /* The column pattern: an explicit width on a CONTAINER, centred by margin
+     — never max-width on the text element. max-width:100% is only the
+     sub-768px overflow guard. */
+  .editorial-column {
+    width: 728px;
+    max-width: 100%;
     margin-inline: auto;
   }
 

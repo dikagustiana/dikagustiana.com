@@ -37,10 +37,15 @@ function roundTrip(html: string): string {
 const CASES: Record<string, string> = {
   paragraph: '<p>Ordinary text with <strong>bold</strong> and a <a href="https://example.com">link</a>.</p>',
   heading: '<h2>A heading</h2><h3>A subheading</h3>',
+  headingAllLevels: '<h1>One</h1><h2>Two</h2><h3>Three</h3><h4>Four</h4><h5>Five</h5><h6>Six</h6>',
   list: '<ul><li><p>One</p></li><li><p>Two</p></li></ul>',
   blockquote: '<blockquote><p>Quoted.</p></blockquote>',
+  pullQuote: '<blockquote data-variant="pull"><p>Pulled.</p></blockquote>',
+  callout: '<div data-type="callout"><p>An aside worth a box.</p></div>',
   divider: '<p>Before</p><hr><p>After</p>',
   codeBlock: '<pre><code>const x = 1;</code></pre>',
+  superSub: '<p>x<sup>2</sup> and H<sub>2</sub>O</p>',
+  inlineCode: '<p>Mixing <code>WACC</code> into prose.</p>',
   table:
     '<table><tbody><tr><th colspan="1" rowspan="1"><p>H</p></th></tr>' +
     '<tr><td colspan="1" rowspan="1"><p>C</p></td></tr></tbody></table>',
@@ -90,5 +95,75 @@ describe('editor HTML round-trip', () => {
     editor.destroy();
 
     expect(roundTrip(once)).toBe(once);
+  });
+
+  // ── The Substack-toolbar additions. Each new node/mark is the fifth place
+  //    of the content contract for itself: parse(render(x)) must be
+  //    byte-stable or `content` advances while `content_json` freezes. ──
+
+  it('text colour and highlight (one textStyle span) survive a round trip', () => {
+    const editor = editorWith('<p>Plain</p>');
+    editor.chain().setContent('<p>coloured</p>').selectAll().setColor('#980000').run();
+    editor.chain().selectAll().setBackgroundColor('#ffff00').run();
+    const once = editor.getHTML();
+    editor.destroy();
+
+    const twice = roundTrip(once);
+    expect(twice).toBe(once);
+
+    // …and both attrs read back on the SAME mark.
+    const reparsed = editorWith(once);
+    const textNode = reparsed.getJSON().content?.[0]?.content?.[0];
+    reparsed.destroy();
+    const textStyle = (textNode?.marks ?? []).find(m => m.type === 'textStyle');
+    expect(textStyle?.attrs?.color).toBeTruthy();
+    expect(textStyle?.attrs?.backgroundColor).toBeTruthy();
+  });
+
+  it('alignment on paragraph and heading survives a round trip', () => {
+    for (const html of [
+      '<p style="text-align: center">Centred</p>',
+      '<h2 style="text-align: right">Right heading</h2>',
+    ]) {
+      const once = roundTrip(html);
+      expect(roundTrip(once)).toBe(once);
+      expect(once).toContain('text-align');
+    }
+  });
+
+  it('inline and block math survive a round trip with hostile LaTeX', () => {
+    const editor = editorWith('<p></p>');
+    editor.commands.insertBlockMath({ latex: 'x = \\frac{-b \\pm \\sqrt{b^2-4ac}}{2a} & "quoted" < 1' });
+    const once = editor.getHTML();
+    editor.destroy();
+
+    const twice = roundTrip(once);
+    expect(twice).toBe(once);
+
+    const reparsed = editorWith(once);
+    const node = reparsed.getJSON().content?.find(n => n.type === 'blockMath');
+    reparsed.destroy();
+    expect(node?.attrs?.latex).toBe('x = \\frac{-b \\pm \\sqrt{b^2-4ac}}{2a} & "quoted" < 1');
+
+    const inlineOnce = roundTrip('<p>Where <span data-type="inline-math" data-latex="\\beta &gt; 1"></span> holds.</p>');
+    expect(roundTrip(inlineOnce)).toBe(inlineOnce);
+  });
+
+  it('footnote survives a round trip and keeps its note text', () => {
+    const editor = editorWith('<p>Claim.</p>');
+    editor.commands.insertFootnote({ text: 'See BIS Quarterly, "Q1 2024" & annexes <3' });
+    const once = editor.getHTML();
+    editor.destroy();
+
+    const twice = roundTrip(once);
+    expect(twice).toBe(once);
+
+    const reparsed = editorWith(once);
+    let noteText: string | undefined;
+    reparsed.state.doc.descendants(n => {
+      if (n.type.name === 'footnote') noteText = String(n.attrs.text);
+    });
+    reparsed.destroy();
+    expect(noteText).toBe('See BIS Quarterly, "Q1 2024" & annexes <3');
   });
 });

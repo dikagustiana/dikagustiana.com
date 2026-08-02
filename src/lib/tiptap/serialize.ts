@@ -76,6 +76,27 @@ function renderMarks(text: string, marks?: Array<{ type: string; attrs?: Record<
       case 'code':
         result = `<code>${result}</code>`;
         break;
+      case 'superscript':
+        result = `<sup>${result}</sup>`;
+        break;
+      case 'subscript':
+        result = `<sub>${result}</sub>`;
+        break;
+      // Text colour and highlight both live on the single textStyle mark —
+      // `color` and `backgroundColor` attrs — and serialize as one span.
+      // The style attribute survives the sanitizer only for these two
+      // properties (see sanitizeHtml.ts).
+      case 'textStyle': {
+        const declarations: string[] = [];
+        const color = mark.attrs?.color ? String(mark.attrs.color) : '';
+        const bg = mark.attrs?.backgroundColor ? String(mark.attrs.backgroundColor) : '';
+        if (color) declarations.push(`color: ${color}`);
+        if (bg) declarations.push(`background-color: ${bg}`);
+        if (declarations.length > 0) {
+          result = `<span style="${escapeHtml(declarations.join('; '))}">${result}</span>`;
+        }
+        break;
+      }
       case 'link': {
         const href = escapeHtml(String(mark.attrs?.href ?? ''));
         const target = mark.attrs?.target ? ` target="${escapeHtml(String(mark.attrs.target))}"` : '';
@@ -88,6 +109,13 @@ function renderMarks(text: string, marks?: Array<{ type: string; attrs?: Record<
   return result;
 }
 
+/** Alignment arrives as a node attr; only non-default values are emitted. */
+function alignStyle(node: JSONContent): string {
+  const align = node.attrs?.textAlign;
+  if (!align || align === 'left') return '';
+  return ` style="text-align: ${escapeHtml(String(align))}"`;
+}
+
 function renderNode(node: JSONContent): string {
   if (!node) return '';
 
@@ -96,11 +124,11 @@ function renderNode(node: JSONContent): string {
       return renderChildren(node.content);
 
     case 'paragraph':
-      return `<p>${renderChildren(node.content)}</p>`;
+      return `<p${alignStyle(node)}>${renderChildren(node.content)}</p>`;
 
     case 'heading': {
       const level = node.attrs?.level ?? 2;
-      return `<h${level}>${renderChildren(node.content)}</h${level}>`;
+      return `<h${level}${alignStyle(node)}>${renderChildren(node.content)}</h${level}>`;
     }
 
     case 'bulletList':
@@ -112,8 +140,34 @@ function renderNode(node: JSONContent): string {
     case 'listItem':
       return `<li>${renderChildren(node.content)}</li>`;
 
-    case 'blockquote':
-      return `<blockquote>${renderChildren(node.content)}</blockquote>`;
+    case 'blockquote': {
+      const variant =
+        node.attrs?.variant === 'pull' ? ' data-variant="pull"' : '';
+      return `<blockquote${variant}>${renderChildren(node.content)}</blockquote>`;
+    }
+
+    case 'callout':
+      return `<div data-type="callout">${renderChildren(node.content)}</div>`;
+
+    // Math: the stored HTML carries only the LaTeX source in data-latex;
+    // KaTeX renders it client-side on both surfaces. KaTeX's own output
+    // markup never enters the database or the sanitizer.
+    case 'blockMath':
+      return `<div data-type="block-math" data-latex="${escapeHtml(
+        String(node.attrs?.latex ?? ''),
+      )}"></div>`;
+
+    case 'inlineMath':
+      return `<span data-type="inline-math" data-latex="${escapeHtml(
+        String(node.attrs?.latex ?? ''),
+      )}"></span>`;
+
+    // Footnote: the note text lives in the attribute; numbering is positional
+    // (a CSS counter / render-time index), never stored.
+    case 'footnote':
+      return `<sup data-type="footnote" data-footnote="${escapeHtml(
+        String(node.attrs?.text ?? ''),
+      )}"></sup>`;
 
     case 'codeBlock':
       return `<pre><code>${renderChildren(node.content)}</code></pre>`;

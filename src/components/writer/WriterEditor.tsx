@@ -5,7 +5,8 @@ import type { JSONContent } from '@tiptap/core';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { EssayEditor, getPlainTextFromHtml } from '@/components/editorial/EssayEditor';
+import { EssayEditor, getPlainTextFromHtml, type EditorSurface } from '@/components/editorial/EssayEditor';
+import { EditorToolbar } from '@/components/editorial/toolbar/EditorToolbar';
 import { WriterPreview } from './WriterPreview';
 import { ValidationResult, validateEssay } from './WriterValidation';
 import { PublishModal } from './PublishModal';
@@ -134,6 +135,9 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
   // resting state — a split view means the writer is always half-reading.
   const [showPreview, setShowPreview] = useState(false);
   const [showPublish, setShowPublish] = useState(false);
+  // The live editor + insert callbacks, surfaced by EssayEditor so the
+  // persistent toolbar can mount here, page-wide under the top bar.
+  const [surface, setSurface] = useState<EditorSurface | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(!!essayId || !!initialSlug);
   const [isDirty, setIsDirty] = useState(false);
@@ -648,6 +652,17 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
         </div>
       </header>
 
+      {/* ── The persistent formatting toolbar — Substack's pattern, replacing
+             the selection-only bubble menu (reversal recorded in
+             docs/DECISIONS.md). Hidden in preview: preview is for reading. ── */}
+      {!showPreview && surface && (
+        <EditorToolbar
+          editor={surface.editor}
+          insertOptions={surface.insertOptions}
+          className="flex-shrink-0"
+        />
+      )}
+
       {/* Recovery: an autosaved backup that never made it into the essay row.
           Offered, never applied — restoring and discarding are both the
           author's call, so neither version is destroyed behind their back. */}
@@ -708,28 +723,36 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
                 only the editing location has changed. They are inputs rather
                 than editor nodes on purpose: making them document nodes would
                 change the shape of every stored content_json. */}
-            <TextareaAutosize
-              value={title}
-              onChange={e => setTitle(e.target.value)}
-              placeholder="Title"
-              aria-label="Title"
-              rows={1}
-              className="w-full max-w-[680px] resize-none border-0 bg-transparent p-0 font-display text-4xl font-bold leading-tight text-foreground outline-none placeholder:text-muted-foreground/40 focus:ring-0"
-            />
-            <TextareaAutosize
-              value={deck}
-              onChange={e => setDeck(e.target.value)}
-              placeholder="Add a subtitle..."
-              aria-label="Subtitle"
-              rows={1}
-              className="mt-3 w-full max-w-[680px] resize-none border-0 bg-transparent p-0 text-xl leading-snug text-muted-foreground outline-none placeholder:text-muted-foreground/30 focus:ring-0"
-            />
+            {/* The 728px column: width on the container, centred by margin —
+                the same .editorial-column the body uses, so the title, the
+                subtitle and the first body line share one left edge. Type
+                comes from .editorial-title / .editorial-subtitle, the same
+                classes the published header wears. */}
+            <div className="editorial-column">
+              <TextareaAutosize
+                value={title}
+                onChange={e => setTitle(e.target.value)}
+                placeholder="Title"
+                aria-label="Title"
+                rows={1}
+                className="editorial-title w-full resize-none border-0 bg-transparent p-0 outline-none placeholder:text-muted-foreground/40 focus:ring-0"
+              />
+              <TextareaAutosize
+                value={deck}
+                onChange={e => setDeck(e.target.value)}
+                placeholder="Add a subtitle..."
+                aria-label="Subtitle"
+                rows={1}
+                className="editorial-subtitle mt-3 w-full resize-none border-0 bg-transparent p-0 outline-none placeholder:text-muted-foreground/30 focus:ring-0"
+              />
+            </div>
 
             <div className="mt-8">
               <EssayEditor
                 content={content}
                 onChange={setContent}
                 onChangeJson={setContentJson}
+                onSurfaceChange={setSurface}
                 section={section as 'finance' | 'green-transition' | 'next-big-thing'}
                 minHeight="55vh"
               />
