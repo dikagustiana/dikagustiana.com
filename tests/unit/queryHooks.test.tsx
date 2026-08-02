@@ -10,7 +10,6 @@ vi.mock('@/integrations/supabase/client', () => ({
 }));
 
 import { useBooks } from '@/hooks/queries/useBooks';
-import '@/components/finance/FormulaBlock'; // TEMP: guard proof — revert follows
 import { useSelectedEssays } from '@/hooks/queries/useSelectedEssays';
 
 function wrapper() {
