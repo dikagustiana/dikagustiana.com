@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
 import { ArrowRight, BarChart3, BookOpen, Leaf, Lightbulb, Clock, User, GraduationCap, Landmark } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { useFeaturedEssays } from '@/hooks/queries/useEssays';
+import { useSelectedEssays } from '@/hooks/queries/useSelectedEssays';
 import { LoadingState } from '@/components/states/LoadingState';
 import { HeroSection } from '@/components/HeroSection';
 
@@ -62,7 +62,9 @@ const getSectionLabel = (section: string, phase: string | null) => {
 
 
 const Index = () => {
-  const { data: featuredEssays, isLoading } = useFeaturedEssays(4);
+  // Manual curation, not recency — recency is what put a database-rebuild
+  // notice on the homepage. Zero selected essays hides the section entirely.
+  const { data: featuredEssays, isLoading } = useSelectedEssays(4);
 
   return (
     <PageLayout role="hybrid">
@@ -80,10 +82,10 @@ const Index = () => {
           <div className="container">
             <div className="mb-8">
               <h2 className="text-xl font-display font-semibold text-foreground mb-2">
-                Recent Analysis
+                Selected Analysis
               </h2>
               <p className="text-sm text-muted-foreground">
-                Latest essays across sections.
+                Hand-picked essays across sections.
               </p>
             </div>
 
@@ -132,8 +134,11 @@ const Index = () => {
         </section>
       )}
 
-      {/* Sections Grid */}
-      <section id="main-content" className="py-16 container">
+      {/* Sections Grid. id="sections", NOT "main-content": PageLayout's
+          <main> already owns that id (the skip-link target), and the
+          duplicate made the hero CTA resolve to the page top — it scrolled
+          nowhere. */}
+      <section id="sections" className="py-16 container">
         <div className="max-w-4xl mx-auto mb-12">
           <h2 className="text-2xl font-display font-semibold text-foreground mb-4 text-center">
             Sections
@@ -156,7 +161,7 @@ const Index = () => {
                       <p className="text-sm text-muted-foreground leading-relaxed mb-3">
                         {section.description}
                       </p>
-                      <span className="text-sm font-medium text-accent inline-flex items-center gap-1">
+                      <span className="text-sm font-medium text-accent-text inline-flex items-center gap-1">
                         Enter
                         {/* Nudge the arrow with a transform instead of
                             animating the flex gap, which re-runs layout. */}

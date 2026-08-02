@@ -83,11 +83,10 @@ export function buildCanonicalUrl(input: PlacementInput): string {
 
   switch (sectionSlug) {
     case 'finance': {
-      if (input.moduleTrackSlug && input.moduleSlug) {
-        return `/finance/${input.moduleTrackSlug}/${input.moduleSlug}/${slug}`;
-      }
-      if (input.financeSection) return `/finance/${input.financeSection}/${slug}`;
-      return `/finance/${slug}`;
+      // Three segments — the module is navigation, not part of the address.
+      const track = input.moduleTrackSlug || input.financeSection;
+      if (track) return `/finance/${track}/${slug}`;
+      return `/essays/${slug}`;
     }
     case 'accounting': {
       if (input.fsliSlug) return `/accounting/fsli/${input.fsliSlug}`;

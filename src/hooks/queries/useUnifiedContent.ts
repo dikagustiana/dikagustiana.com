@@ -16,6 +16,8 @@ export interface UnifiedContentItem {
   topic?: string | null;
   published: boolean;
   status: string | null;
+  /** The ONE featuring flag — drives homepage, About and Finance landing. */
+  is_selected?: boolean;
   voice_role: string | null;
   finance_section?: string | null;
   finance_modules?: { slug: string; track_slug: string } | null;
@@ -46,7 +48,7 @@ export function useUnifiedContent(filter: ContentFilter = {}) {
           // so the admin "View public" link resolves for curriculum essays.
           .select(`
             id, title, slug, section, phase, fsli_slug, topic, published, status,
-            voice_role, snippet, updated_at, created_at, finance_section,
+            is_selected, voice_role, snippet, updated_at, created_at, finance_section,
             finance_modules!essays_module_id_fkey ( slug, track_slug )
           `)
           .order('updated_at', { ascending: false });
@@ -84,6 +86,7 @@ export function useUnifiedContent(filter: ContentFilter = {}) {
             finance_modules: essay.finance_modules,
             published: essay.published ?? false,
             status: essay.status || (essay.published ? 'published' : 'draft'),
+            is_selected: essay.is_selected ?? false,
             voice_role: essay.voice_role,
             snippet: essay.snippet,
             updated_at: essay.updated_at,
@@ -266,6 +269,47 @@ export function useTogglePublishContent() {
       queryClient.invalidateQueries({ queryKey: ['unified-content'] });
       queryClient.invalidateQueries({ queryKey: ['content-stats'] });
       queryClient.invalidateQueries({ queryKey: ['essays'] });
+    },
+  });
+}
+
+/**
+ * Toggle `is_selected` — the ONE featuring mechanism. Before this existed the
+ * flag had no UI anywhere and the only way to change it was raw SQL.
+ */
+export function useToggleSelectContent() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, currentlySelected }: { id: string; currentlySelected: boolean }) => {
+      const newSelected = !currentlySelected;
+      const { error } = await supabase
+        .from('essays')
+        .update({ is_selected: newSelected })
+        .eq('id', id);
+      if (error) throw error;
+
+      const { data: target } = await supabase
+        .from('essays')
+        .select('title, slug, section')
+        .eq('id', id)
+        .maybeSingle();
+
+      await logAuditEvent({
+        action: newSelected ? 'feature' : 'unfeature',
+        table_name: 'essays',
+        record_id: id,
+        record_title: target?.title ?? null,
+        record_slug: target?.slug ?? null,
+        record_section: target?.section ?? null,
+      });
+
+      return { is_selected: newSelected };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['unified-content'] });
+      queryClient.invalidateQueries({ queryKey: ['essays'] });
+      queryClient.invalidateQueries({ queryKey: ['finance-featured-essay'] });
     },
   });
 }

@@ -72,7 +72,7 @@ No lessons assigned to this module yet.
             to={
               isAdmin && !essay.published
                 ? essayEditorUrl(essay.slug)
-                : `/finance/${track}/${moduleSlug}/${essay.slug}`
+                : `/finance/${track}/${essay.slug}`
             }
             className="flex flex-1 min-w-0 items-start gap-4 py-4 group"
           >
@@ -116,7 +116,11 @@ No lessons assigned to this module yet.
 // ── Page component ────────────────────────────────────────────────────────────
 
 export default function FinanceModulePage() {
-  const { track, moduleSlug } = useParams<{ track: string; moduleSlug: string }>();
+  // Rendered via FinanceTrackChild, whose route param is :slug; the old
+  // :moduleSlug name is kept as a fallback for direct use.
+  const params = useParams<{ track: string; slug?: string; moduleSlug?: string }>();
+  const track = params.track;
+  const moduleSlug = params.moduleSlug ?? params.slug;
 
   const { data: section, isLoading: sectionLoading } = useFinanceSectionBySlug(track || '');
   const { data: module, isLoading: moduleLoading } = useFinanceModuleBySlug(moduleSlug || '');

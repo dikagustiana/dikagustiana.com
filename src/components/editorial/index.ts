@@ -21,5 +21,9 @@ export type { ImageBlockData } from './ImageBlock';
 // New FigureBlock system
 export { FigureBlock, serializeFigureBlock, parseFigureBlock } from './FigureBlock';
 export { FigureUploader } from './FigureUploader';
-export { EssayEditor, getPlainTextFromHtml } from './EssayEditor';
+// EssayEditor is deliberately NOT exported here. This barrel is imported by
+// every public reading page (ArticleShell &c.), and re-exporting the editor
+// pulled the ENTIRE TipTap graph — extensions, ProseMirror, KaTeX — into the
+// static bundle of every essay a reader opens. Import it directly from
+// './EssayEditor' (the writer studio already does).
 export type { FigureBlockData } from './FigureBlock';

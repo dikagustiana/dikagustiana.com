@@ -107,48 +107,9 @@ export const useEssay = (slug: string, options: UseEssayOptions = {}) => {
   });
 };
 
-/**
- * The narrow row a featured card needs — including the joined curriculum
- * placement, without which no canonical finance URL can be built.
- */
-export interface FeaturedEssay {
-  id: string;
-  slug: string;
-  title: string;
-  snippet: string | null;
-  section: string;
-  phase: string | null;
-  author: string | null;
-  read_time: string | null;
-  finance_section: string | null;
-  fsli_slug: string | null;
-  topic: string | null;
-  finance_modules: { slug: string; track_slug: string } | null;
-}
-
-export const useFeaturedEssays = (limit = 4) => {
-  return useQuery({
-    queryKey: ['essays', 'featured', limit],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('essays')
-        // module_id joins finance_modules for track + module slug. Without
-        // them essayUrl() cannot build /finance/:track/:moduleSlug/:slug and
-        // every finance card silently degrades to the universal route.
-        .select(`
-          id, slug, title, snippet, section, phase, author, read_time,
-          finance_section, fsli_slug, topic,
-          finance_modules!essays_module_id_fkey ( slug, track_slug )
-        `)
-        .eq('published', true)
-        .order('created_at', { ascending: false })
-        .limit(limit);
-
-      if (error) throw error;
-      return data as unknown as FeaturedEssay[];
-    },
-  });
-};
+// useFeaturedEssays (created_at-recency promotion) is deleted: recency is
+// what put a database-rebuild notice on the homepage. The ONE featuring
+// mechanism is essays.is_selected — see useSelectedEssays.
 
 export const useEssaysByFsliSlug = (fsliSlug: string) => {
   return useQuery({
@@ -163,6 +124,41 @@ export const useEssaysByFsliSlug = (fsliSlug: string) => {
 
       if (error) throw error;
       return data as unknown as Essay[];
+    },
+    enabled: !!fsliSlug,
+  });
+};
+
+/**
+ * FSLI page prose: the PUBLISHED essays linked to a line item, bodies
+ * included. This is the read side of the FSLI authoring path — prose is
+ * written in the writer studio (draft → publish → revisions → autosave),
+ * and only `published = true` rows ever reach this query, so a draft edit
+ * is invisible to readers until the Publish click.
+ */
+export const useFsliEssayBodies = (fsliSlug: string) => {
+  return useQuery({
+    queryKey: ['essays', 'fsli-bodies', fsliSlug],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('essays')
+        .select('id, slug, title, snippet, author, read_time, content, presentation, updated_at')
+        .eq('fsli_slug', fsliSlug)
+        .eq('published', true)
+        .order('sort_order', { ascending: true });
+
+      if (error) throw error;
+      return data as unknown as Array<{
+        id: string;
+        slug: string;
+        title: string;
+        snippet: string | null;
+        author: string | null;
+        read_time: string | null;
+        content: string | null;
+        presentation: unknown;
+        updated_at: string;
+      }>;
     },
     enabled: !!fsliSlug,
   });

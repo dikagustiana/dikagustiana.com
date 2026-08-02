@@ -9,14 +9,9 @@
  * Exposed through the --font-sans / --font-display tokens below and consumed
  * by tailwind.config.ts, so no component names a family directly.
  */
-@font-face {
-  font-family: 'Plus Jakarta Sans';
-  font-style: normal;
-  font-weight: 400 800;           /* variable axis — one file covers the range */
-  font-display: swap;
-  src: url('/fonts/plus-jakarta-sans-latin-ext.woff2') format('woff2');
-  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
-}
+/* latin-ext subsets removed (this file and Spectral's four): the content is
+ * English and Indonesian, neither of which uses those glyph ranges, so with
+ * unicode-range in place the files were never fetched — pure repo weight. */
 @font-face {
   font-family: 'Plus Jakarta Sans';
   font-style: normal;
@@ -43,26 +38,10 @@
 @font-face {
   font-family: 'Spectral';
   font-style: italic;
-  font-weight: 400;
-  font-display: swap;
-  src: url('/fonts/spectral-italic-400-latin-ext.woff2') format('woff2');
-  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
-}
-@font-face {
-  font-family: 'Spectral';
-  font-style: italic;
   font-weight: 700;
   font-display: swap;
   src: url('/fonts/spectral-italic-700-latin.woff2') format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
-@font-face {
-  font-family: 'Spectral';
-  font-style: italic;
-  font-weight: 700;
-  font-display: swap;
-  src: url('/fonts/spectral-italic-700-latin-ext.woff2') format('woff2');
-  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 @font-face {
   font-family: 'Spectral';
@@ -75,26 +54,10 @@
 @font-face {
   font-family: 'Spectral';
   font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url('/fonts/spectral-normal-400-latin-ext.woff2') format('woff2');
-  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
-}
-@font-face {
-  font-family: 'Spectral';
-  font-style: normal;
   font-weight: 700;
   font-display: swap;
   src: url('/fonts/spectral-normal-700-latin.woff2') format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
-@font-face {
-  font-family: 'Spectral';
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url('/fonts/spectral-normal-700-latin-ext.woff2') format('woff2');
-  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 
 
@@ -146,6 +109,10 @@
 
     --accent: 142 71% 45%;
     --accent-foreground: 0 0% 100%;
+    /* Accent as TEXT on light surfaces. The brand green at L45 measures
+       2.12:1 against the pale card — a WCAG AA failure; L28 measures 4.98:1
+       on the card and 4.83:1 on white. Backgrounds keep --accent. */
+    --accent-text: 142 71% 28%;
 
     --destructive: 0 62% 50%;
     --destructive-foreground: 0 0% 100%;
@@ -198,6 +165,8 @@
 
     --accent: 142 71% 45%;
     --accent-foreground: 0 0% 100%;
+    /* On dark cards the L45 green already passes; keep it for text. */
+    --accent-text: 142 71% 45%;
 
     --destructive: 0 62% 50%;
     --destructive-foreground: 0 0% 100%;

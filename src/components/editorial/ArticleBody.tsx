@@ -18,9 +18,7 @@
  * editor — the project's signature failure.
  */
 
-import { ReactNode, useMemo } from 'react';
-import katex from 'katex';
-import 'katex/dist/katex.min.css';
+import { ReactNode, useEffect, useMemo, useState } from 'react';
 import { LinkableHeading, type LinkableHeadingLevel } from './LinkableHeading';
 import { FigureBlock, FigureBlockData } from './FigureBlock';
 import { LinkCardBlock } from './LinkCardBlock';
@@ -49,18 +47,47 @@ interface RenderCtx {
 // here, after sanitization, from a plain-text attribute. KaTeX escapes its
 // input, and throwOnError:false renders bad input as visible red source
 // rather than throwing mid-page.
+//
+// LAZY: katex (and its CSS) load only when a math node actually renders.
+// A static import here put ~270 KB of JS on every reader's critical path
+// for math that no published essay contains. While the chunk loads the
+// component shows the raw LaTeX source — content, not a spinner.
 // ---------------------------------------------------------------------------
 
-function renderKatex(latex: string, displayMode: boolean): string | null {
-  try {
-    return katex.renderToString(latex, { throwOnError: false, displayMode });
-  } catch {
-    return null;
+type KatexModule = typeof import('@/lib/katexLoader')['default'];
+let katexPromise: Promise<KatexModule> | null = null;
+
+function loadKatex(): Promise<KatexModule> {
+  if (!katexPromise) {
+    // One module owns katex AND its CSS (see katexLoader.ts for why the
+    // CSS must not be dynamically imported on its own).
+    katexPromise = import('@/lib/katexLoader').then(mod => mod.default);
   }
+  return katexPromise;
+}
+
+function useKatexHtml(latex: string, displayMode: boolean): string | null {
+  const [html, setHtml] = useState<string | null>(null);
+  useEffect(() => {
+    if (!latex) return;
+    let alive = true;
+    loadKatex().then(katex => {
+      if (!alive) return;
+      try {
+        setHtml(katex.renderToString(latex, { throwOnError: false, displayMode }));
+      } catch {
+        setHtml(null);
+      }
+    });
+    return () => {
+      alive = false;
+    };
+  }, [latex, displayMode]);
+  return html;
 }
 
 export function MathInline({ latex }: { latex: string }) {
-  const html = useMemo(() => renderKatex(latex, false), [latex]);
+  const html = useKatexHtml(latex, false);
   if (!latex) return null;
   if (html == null) return <code>{latex}</code>;
   return (
@@ -73,7 +100,7 @@ export function MathInline({ latex }: { latex: string }) {
 }
 
 export function MathBlock({ latex }: { latex: string }) {
-  const html = useMemo(() => renderKatex(latex, true), [latex]);
+  const html = useKatexHtml(latex, true);
   if (!latex) return null;
   if (html == null) return <pre><code>{latex}</code></pre>;
   return (

@@ -32,6 +32,7 @@ import {
 import { cn } from '@/lib/utils';
 import { useWriterSections, useWriterCategories } from '@/domains/writing/hooks';
 import { useAllFinanceModules } from '@/hooks/queries/useFinance';
+import { useFsliPages } from '@/hooks/queries/useFsliPages';
 import { generateUniqueSlug } from '@/domains/writing/hooks/useWriterEssay';
 import { useEssayAutosave, useDraftRecovery } from '@/hooks/useEssayAutosave';
 import { tiptapJsonToHtml } from '@/lib/tiptap/serialize';
@@ -129,6 +130,9 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
   const sectionId = sectionObj?.id || '';
   const { data: categories = [] } = useWriterCategories(sectionId || undefined);
   const { data: allFinanceModules = [] } = useAllFinanceModules();
+  // FSLI line items for accounting placement. FSLI prose is authored HERE —
+  // as essays with fsli_slug — never edited inline on the public page.
+  const { data: fsliPages = [] } = useFsliPages();
 
   // Editor state
   // The canvas is the default. Preview is a deliberate detour, not the
@@ -175,6 +179,8 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
   const [financeSection, setFinanceSection] = useState('');
   const [financeOrder, setFinanceOrder] = useState<number | null>(null);
   const [lessonType, setLessonType] = useState<string>('concept');
+  // Accounting placement: which FSLI page this essay renders on.
+  const [fsliSlug, setFsliSlug] = useState<string>(searchParams.get('fsli') || '');
 
   // Load existing essay
   useEffect(() => {
@@ -231,6 +237,7 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
         setFinanceSection(financeMeta.finance_section || '');
         setFinanceOrder(financeMeta.finance_order ?? null);
         setLessonType(financeMeta.lesson_type || 'concept');
+        setFsliSlug(data.fsli_slug || '');
 
         // Presentation payload (deck / references / key takeaways / captions).
         // resolvePresentation falls back to the legacy persona columns for any
@@ -266,7 +273,7 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
   useEffect(() => {
     if (isInitialLoad.current) return;
     setIsDirty(true);
-  }, [title, slug, phase, categoryId, author, date, deck, heroImageUrl, heroCaption, content, keyTakeaways, references, authorBio, moduleId, financeOrder, lessonType]);
+  }, [title, slug, phase, categoryId, author, date, deck, heroImageUrl, heroCaption, content, keyTakeaways, references, authorBio, moduleId, financeOrder, lessonType, fsliSlug]);
 
   // Auto-generate slug from title
   useEffect(() => {
@@ -461,6 +468,12 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
       // /accounting/consolidation/:topic) are never clobbered.
       if (section === 'finance' && selectedFinanceModule) {
         essayData.topic = selectedFinanceModule.slug;
+      }
+
+      // Accounting placement: the FSLI page this essay renders on. Written
+      // only for accounting so other sections' rows are never touched.
+      if (section === 'accounting') {
+        essayData.fsli_slug = fsliSlug || null;
       }
 
       // Attach category_id if set
@@ -784,6 +797,10 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
         onOpenChange={setShowPublish}
         isPublished={status === 'published'}
         isFinanceSection={section === 'finance'}
+        isAccountingSection={section === 'accounting'}
+        fsliPages={fsliPages}
+        fsliSlug={fsliSlug}
+        setFsliSlug={setFsliSlug}
         modules={allFinanceModules}
         moduleId={moduleId}
         setModuleId={setModuleId}

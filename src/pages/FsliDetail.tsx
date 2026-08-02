@@ -7,14 +7,13 @@ import { FsliOnThisPage } from '@/components/fsli/FsliOnThisPage';
 import { FsliContentSection } from '@/components/fsli/FsliContentSection';
 import { FsliMobileSidebar } from '@/components/fsli/FsliMobileSidebar';
 import { useFsliPage, useFsliSections } from '@/hooks/queries/useFsliPages';
-import { useEssaysByFsliSlug } from '@/hooks/queries/useEssays';
+import { useFsliEssayBodies } from '@/hooks/queries/useEssays';
 import { useAuth } from '@/contexts/AuthContext';
 import NotFound from './NotFound';
 import { ArticleBody } from '@/components/editorial/ArticleBody';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { LoadingState } from '@/components/states';
-import { scrollBehavior } from '@/lib/motion';
 import { RefreshCw, ChevronRight, Pencil } from 'lucide-react';
 
 // The page's fixed outline. Section PROSE lives in fsli_sections and is
@@ -82,7 +81,9 @@ export default function FsliDetail() {
   const [activeSection, setActiveSection] = useState<string>('definition');
   const { isAdmin, isLoading: authLoading } = useAuth();
   const { data: item, isLoading, error } = useFsliPage(slug || '');
-  const { data: linkedEssays } = useEssaysByFsliSlug(slug || '');
+  // Published essays linked to this line item, bodies included — the read
+  // side of the FSLI authoring path (written in the studio, published here).
+  const { data: linkedEssays } = useFsliEssayBodies(slug || '');
 
   // ONE query for all section prose. FsliContentSection used to fetch its own
   // row, costing ten single-row requests per page view.
@@ -179,21 +180,22 @@ export default function FsliDetail() {
               {/* Mobile Sidebar */}
               <FsliMobileSidebar />
 
-              {/* Admin Banner */}
+              {/* Admin Banner — FSLI prose is authored in the writer studio
+                  as accounting essays linked to this line item. The inline
+                  editor that wrote straight into public rows is deleted. */}
               {!authLoading && isAdmin && (
                 <div className="bg-primary/10 border border-primary/20 rounded-lg p-3 mb-6 flex flex-col md:flex-row md:items-center gap-3">
                   <Badge variant="outline" className="bg-primary/20">Admin</Badge>
                   <span className="text-sm text-muted-foreground flex items-center gap-2 flex-1">
                     <Pencil className="h-4 w-4" />
-                    Scroll ke section di bawah (Definition, Recognition, dst.) lalu klik ikon pensil atau teksnya untuk edit. (Judul & Key points belum editable.)
+                    This page's prose is written in the studio — draft, publish,
+                    revision history and autosave included. Link an accounting
+                    essay to this line item in Post settings.
                   </span>
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    onClick={() => document.getElementById('definition')?.scrollIntoView({ behavior: scrollBehavior(), block: 'start' })}
-                  >
-                    Ke Definition
+                  <Button type="button" size="sm" variant="outline" asChild>
+                    <Link to={`/admin/writer/accounting/new?fsli=${slug}`}>
+                      Write in Studio
+                    </Link>
                   </Button>
                 </div>
               )}
@@ -241,8 +243,6 @@ export default function FsliDetail() {
                 <FsliContentSection
                   key={section.key}
                   id={section.key}
-                  pageSlug={slug!}
-                  sectionKey={section.key}
                   title={section.title}
                   subtitle={section.subtitle}
                   content={contentByKey[section.key] ?? ''}
@@ -260,8 +260,6 @@ export default function FsliDetail() {
                 <FsliContentSection
                   key={section.key}
                   id={section.key}
-                  pageSlug={slug!}
-                  sectionKey={section.key}
                   title={section.title}
                   content={contentByKey[section.key] ?? ''}
                   loading={sectionsLoading}
@@ -278,8 +276,6 @@ export default function FsliDetail() {
                 <FsliContentSection
                   key={section.key}
                   id={section.key}
-                  pageSlug={slug!}
-                  sectionKey={section.key}
                   title={section.title}
                   content={contentByKey[section.key] ?? ''}
                   loading={sectionsLoading}
