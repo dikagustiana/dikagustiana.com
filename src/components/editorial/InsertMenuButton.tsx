@@ -120,6 +120,11 @@ export function InsertMenuButton({ editor, containerRef, ...options }: InsertMen
                   <span className="text-sm leading-tight">{item.title}</span>
                   <span className="text-xs leading-tight text-muted-foreground">{item.hint}</span>
                 </span>
+                {item.isNew && (
+                  <span className="ml-auto rounded-full bg-accent-editorial px-1.5 py-px text-[10px] font-semibold uppercase text-white">
+                    New
+                  </span>
+                )}
               </DropdownMenuItem>
             );
           })}

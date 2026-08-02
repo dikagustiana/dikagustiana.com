@@ -142,6 +142,14 @@ const CollapsibleModuleRow = React.memo(function CollapsibleModuleRow({
           ))}
         </div>
       )}
+      {/* An anonymous reader can open a module whose lessons are all drafts
+          (RLS hides them) — expanding to NOTHING reads as broken. Say what
+          the state is, in one quiet line sized like the absence it announces. */}
+      {isOpen && essays.length === 0 && (
+        <p className="px-4 pb-4 pl-14 text-sm italic text-muted-foreground/80 sm:pl-16">
+          Nothing published in this module yet.
+        </p>
+      )}
     </div>
   );
 });

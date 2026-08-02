@@ -18,6 +18,8 @@ import {
   Minus,
   Code2,
   Link2,
+  Sigma,
+  MessageSquareQuote,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -28,6 +30,8 @@ export interface InsertMenuItem {
   hint: string;
   icon: LucideIcon;
   keywords: string[];
+  /** Shows the "New" pill in menus — the original's new-feature affordance. */
+  isNew?: boolean;
   /**
    * `range` is the `/query` text to remove when invoked from the slash menu.
    * The gutter `+` passes null — there is nothing to delete.
@@ -40,6 +44,10 @@ export interface InsertMenuOptions {
   onInsertFigure?: () => void;
   /** Opens the link-card dialog. */
   onInsertLinkCard?: () => void;
+  /** Opens the LaTeX dialog (inline / display choice lives in the dialog). */
+  onInsertMath?: () => void;
+  /** Inserts a footnote marker and opens its edit dialog. */
+  onInsertFootnote?: () => void;
 }
 
 /** Clear the `/query` text before acting, so the command never leaves it behind. */
@@ -109,6 +117,36 @@ export function buildInsertItems(options: InsertMenuOptions = {}): InsertMenuIte
       run: (editor, range) => chainAt(editor, range).setHorizontalRule().run(),
     },
   );
+
+  if (options.onInsertMath) {
+    items.push({
+      id: 'latex',
+      title: 'LaTeX',
+      hint: 'An equation, inline or on its own line',
+      icon: Sigma,
+      keywords: ['latex', 'math', 'equation', 'formula', 'katex'],
+      isNew: true,
+      run: (editor, range) => {
+        chainAt(editor, range).run();
+        options.onInsertMath?.();
+      },
+    });
+  }
+
+  if (options.onInsertFootnote) {
+    items.push({
+      id: 'footnote',
+      title: 'Footnote',
+      hint: 'A numbered citation at the essay’s foot',
+      icon: MessageSquareQuote,
+      keywords: ['footnote', 'citation', 'note', 'reference', 'cite'],
+      isNew: true,
+      run: (editor, range) => {
+        chainAt(editor, range).run();
+        options.onInsertFootnote?.();
+      },
+    });
+  }
 
   return items;
 }

@@ -63,14 +63,16 @@ export function ArticleHeader({
         </span>
       </div>
 
-      {/* Title */}
-      <h1 className="text-3xl md:text-4xl lg:text-5xl font-display font-bold text-foreground leading-tight mb-4">
+      {/* Title — .editorial-title is the same class the writer's title input
+          wears (Spectral 700 32/36), so the published page and the canvas
+          cannot drift apart. */}
+      <h1 className="editorial-title mb-4">
         {title}
       </h1>
 
-      {/* Deck line (one sentence thesis) */}
+      {/* Deck line (one sentence thesis) — Spectral 400 18/24, muted. */}
       {deck && (
-        <p className="text-xl md:text-2xl text-muted-foreground leading-relaxed font-light mb-6">
+        <p className="editorial-subtitle mb-6">
           {deck}
         </p>
       )}

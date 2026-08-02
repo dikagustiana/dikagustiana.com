@@ -794,3 +794,140 @@ Also decided: the shared section outline may not carry line-item-specific
 headings — "Bank Overdrafts Treatment" (true only for cash) became
 "Classification Boundary Cases"; the `section_key` stays `issues-overdrafts`
 so any rows written later still bind.
+
+## 2026-08-02 (Substack replication) — The toolbar reversal
+
+The owner reversed a verified decision, and this entry is the record the
+mandate requires. The previous session removed the persistent formatting
+toolbar and moved formatting into a selection-only bubble menu with eight
+actions; that work passed its gate and is PASSED in `docs/GATE_LEDGER.md`
+(S2). The owner has since directed a Substack replication, and Substack
+formats from a persistent toolbar — roughly twenty items in seven separator
+groups, horizontally scrollable, with a More menu as semantic overflow.
+
+**The bubble menu is deleted; the persistent toolbar
+(`src/components/editorial/toolbar/EditorToolbar.tsx`) replaces it.** The
+earlier gate is *superseded, not broken*: the behaviour it verified was real
+and correct against its specification, and the specification changed. The
+affected ledger rows now point here. What survives from the old design:
+insertion and formatting stay distinguishable (the toolbar formats and
+inserts; `/` and the gutter `+` handle block insertion from ONE list that the
+toolbar's More ▾ also reads), and zero validation while drafting.
+
+## 2026-08-02 — Heading levels: widened to H1–H6
+
+The schema allowed only h2/h3; the Style ▾ menu offers Normal + Heading 1–6,
+and a menu item that silently does nothing was forbidden. Chosen: **widen the
+schema to the full six levels** rather than trim the menu. The measured
+tables include in-body H1 (38px) and H2 (30.875px), so at minimum H1 had to
+become real; H3–H6 follow the same em-based ratio downward (1.3 / 1.125 / 1 /
+0.875 — chosen, not measured; the source table stops at H2). All six pass the
+five-place contract and the round-trip test covers all six. The essay title
+remains a database field, not a body block; an in-body H1 (38px) rendering
+larger than the page title (32px) is faithful to the original, not a bug.
+
+## 2026-08-02 — SF Pro Display substitute: Plus Jakarta Sans
+
+SF Pro Display cannot be licensed for general web use. The substitute for
+in-body headings at 700 is **Plus Jakarta Sans** — already self-hosted,
+already gate-verified as loading, and already the UI face of every control on
+the page. The honest trade-off: PJS at 700 is rounder than SF Pro's
+neo-grotesque; Inter or Archivo would be metrically closer. But shipping a
+third family for headings alone means two sans faces in one product — a
+cohesion failure worse than the metric gap — and no stack that silently
+resolves to a system fallback was acceptable. `document.fonts.check` proves
+PJS 700 loads at 38px on both surfaces.
+
+## 2026-08-02 — Spectral in, Playfair Display out; where Plus Jakarta Sans remains
+
+Spectral (Google Font, OFL) is self-hosted — eight static woff2 files, 400/700
+upright+italic, latin + latin-ext — for the same reason PJS is: a webfont that
+fails to load falls back silently. It takes three roles: editorial prose
+(19px/1.6 body), title/subtitle (32/36, 18/24), and `--font-display`
+sitewide, which **removes the Google-hosted Playfair Display @import** — the
+last third-party font request. Plus Jakarta Sans remains the sans: UI chrome,
+navigation, and in-body headings. Two families total. Spectral does NOT
+replace PJS wholesale: the owner's instruction was the Substack pattern
+(serif prose under sans headings), and re-skinning every UI surface to a
+serif was neither asked for nor sensible.
+
+## 2026-08-02 — The editorial accent is Substack's #ff6719, in one token
+
+`--accent-editorial: 20.4 100% 54.9%` (exactly #ff6719) carries all five
+measured roles: the blockquote rail, the link-popover focus ring, primary
+buttons in popovers/dialogs, the "New" badge and dot, and the THEME swatches
+in the colour palette. The mandate left the value to the owner and required
+the pattern; matching the measured value was the default consistent with
+"match it, do not reinterpret". Swapping to a house accent is a one-line
+change in `src/index.css` — that is the point of the token. The site-wide
+`--accent` (green) is untouched.
+
+## 2026-08-02 — Button ▾ dropped; Template ▾ scoped, not built
+
+**Button ▾** (Subscribe / Share / Comment / Send in the original) is dropped
+entirely. There are no subscriptions, no comments table, no email
+infrastructure — all four buttons would go nowhere, and the mandate's own
+rule applied: do not ship buttons that go nowhere. Nothing was repurposed.
+
+**Template ▾** is genuinely worth building — 161 essays across five lesson
+types is exactly the case templates exist for — but it is real scope: a
+`templates` table (schema change, forbidden this session), an editor flow to
+save a document as a template and instantiate one, and list/rename/delete
+management. Recommendation: build it as its own piece of work when the
+schema freeze lifts; a lesson-type-shaped starting document would save the
+owner real time 160 times. Not built silently.
+
+## 2026-08-02 — More ▾ contents; Financial chart and Poetry recommendations
+
+Kept in More ▾ (which reads the same list as the slash command): Link
+preview, Table, Code block, Divider, LaTeX (new), Footnote (new). Dropped
+entirely — absent from the UI, not present-and-broken: Poll, Prediction
+market, Recipe, Audience-specific content, Paywall, Stock photos, Generate
+image, Audio, Video.
+
+**Financial chart — recommend deferring, second in queue after Template.**
+The curriculum will eventually want real charts (Recharts is already a
+dependency), but a chart node needs a data model inside the document, a
+chart-type picker, and an editing surface — plus all five places of the
+content contract. An interim path already exists: charts as figures.
+**Poetry — recommend dropping permanently.** A finance curriculum for senior
+professionals has no use for a poetry block; carrying it would be replication
+for its own sake.
+
+## 2026-08-02 — Footnotes are point citations; the references list stays
+
+Footnotes and `presentation.references` coexist because they do different
+jobs: a footnote is a point citation inside the argument (the sentence that
+needs the page number), the references list is the end-of-essay reading list
+("ANCHORS USED" in fa-07-01). Nothing is migrated. Mechanics: the note text
+lives in a `data-footnote` attribute (no nested rich content — a second
+document inside the document is round-trip surface for nothing the
+curriculum needs), numbering is positional and never stored (a CSS counter in
+the editor, render-time indices plus a numbered end-of-essay section with
+backlinks on the published page).
+
+## 2026-08-02 — KaTeX renders after sanitization, never through it
+
+Math nodes store only their LaTeX source (`data-latex`); KaTeX renders
+client-side on both surfaces from that attribute. KaTeX's output markup
+never enters the database or passes through `sanitizeHtml` — so the
+sanitizer's allowlist gains two data attributes, not KaTeX's element zoo.
+The `style` attribute is now allowed but filtered by a DOMPurify hook to
+exactly three properties with tight value patterns (`color`,
+`background-color`, `text-align`); position/z-index/url() and friends are
+stripped, unit-tested.
+
+## 2026-08-02 — Motion: the boundary beat the skill, and the spinner died
+
+Two recorded conflicts. (1) motion-craft's reduced-motion guidance is
+"gentler, not zero — keep colour/opacity transitions"; the mandate's boundary
+is "everything degrades to nothing, including CSS transitions". The boundary
+won: a global `@media (prefers-reduced-motion: reduce)` block zeroes every
+animation and transition, including Radix/tailwindcss-animate data-state
+animations that no JS gate could reach. (2) The upload placeholder's 0.7s
+looping spinner sat on the writing canvas; the gate caps canvas animation at
+200ms and a 200ms/rev spinner is frantic, so the placeholder is now static —
+dashed box plus "Uploading…", with the completion toast as the feedback.
+Deliberately NOT animated anywhere: the save-state chip (a chip that animates
+300 times a day is an interruption), and the toolbar chevrons' appearance
+(they appear during a scroll; animation would lag the hand).

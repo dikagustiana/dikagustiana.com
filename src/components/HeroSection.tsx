@@ -44,7 +44,7 @@ export function HeroSection() {
 
             <Link
               to="#main-content"
-              className="inline-block px-11 py-4 text-sm font-medium rounded transition-all duration-300"
+              className="inline-block px-11 py-4 text-sm font-medium rounded transition-[background-color,color,box-shadow] duration-300"
               style={{
                 color: '#0F172A',
                 border: '2px solid #0F172A',
