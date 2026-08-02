@@ -243,10 +243,19 @@ export function EssayEditor({
   // HTML column and a JSON column describing different documents.
   const lastEmittedHtml = useRef<string | null>(null);
 
+  // TipTap ≥3.29 hands out the Editor before its view mounts (isDestroyed
+  // reports true until then) and nulls the schema when an instance is torn
+  // down — so any effect that reads the document must wait for onCreate and
+  // guard against a destroyed instance. Without this, `editor.getHTML()` in
+  // the sync effect crashed the whole editor page on a clean install:
+  // "Cannot read properties of null (reading 'cached')".
+  const [editorReady, setEditorReady] = useState(0);
+
   const editor = useEditor(
     {
       extensions,
       content,
+      onCreate: () => setEditorReady(v => v + 1),
       onUpdate: ({ editor }) => {
         const html = editor.getHTML();
         lastEmittedHtml.current = html;
@@ -280,8 +289,10 @@ export function EssayEditor({
 
   // Sync content that came from OUTSIDE — the essay loading, a recovered draft
   // being restored. An echo of what this editor just emitted is ignored.
+  // `editorReady` re-runs this once the view mounts; the isDestroyed guard
+  // skips pre-mount and torn-down instances (see the note above useEditor).
   useEffect(() => {
-    if (!editor) return;
+    if (!editor || editor.isDestroyed) return;
     if (content === lastEmittedHtml.current) return;
     if (content === editor.getHTML()) return;
 
@@ -291,7 +302,7 @@ export function EssayEditor({
     // means the parent's JSON mirror would keep the document it had. Push the
     // fresh one so the two representations cannot disagree.
     onChangeJson?.(editor.getJSON());
-  }, [content, editor, onChangeJson]);
+  }, [content, editor, editorReady, onChangeJson]);
 
   const handleInsertFigure = useCallback(
     (data: FigureBlockData) => {
