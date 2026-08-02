@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { PageLayout } from '@/components/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
 import { useAuth } from '@/contexts/AuthContext';
-import { useUnifiedContent, useContentStats, useBulkPublishContent, useDeleteContent, useRestoreContent, useTogglePublishContent, ContentType } from '@/hooks/queries/useUnifiedContent';
+import { useUnifiedContent, useContentStats, useBulkPublishContent, useDeleteContent, useRestoreContent, useTogglePublishContent, useToggleSelectContent, ContentType } from '@/hooks/queries/useUnifiedContent';
 import { useSections } from '@/hooks/queries/useSections';
 import { LoadingState, ErrorState, EmptyState } from '@/components/states';
 import {
@@ -43,6 +43,7 @@ import {
   CheckCircle2,
   Inbox,
   Users,
+  Star,
 } from 'lucide-react';
 
 // Section labels
@@ -101,6 +102,7 @@ export default function AdminContent() {
   });
   const { data: stats, refetch: refetchStats } = useContentStats();
   const togglePublish = useTogglePublishContent();
+  const toggleSelect = useToggleSelectContent();
   const deleteContent = useDeleteContent();
   const restoreContent = useRestoreContent();
 
@@ -143,6 +145,20 @@ export default function AdminContent() {
       toast({ title: result.published ? 'Published' : 'Unpublished', description: `"${title}" is now ${result.status}.` });
     } catch {
       toast({ title: 'Error', description: 'Failed to toggle.', variant: 'destructive' });
+    }
+  };
+
+  const handleToggleSelect = async (id: string, currentlySelected: boolean, title: string) => {
+    try {
+      const result = await toggleSelect.mutateAsync({ id, currentlySelected });
+      toast({
+        title: result.is_selected ? 'Featured' : 'Unfeatured',
+        description: result.is_selected
+          ? `"${title}" now appears in the selected sections (if published).`
+          : `"${title}" removed from the selected sections.`,
+      });
+    } catch {
+      toast({ title: 'Error', description: 'Failed to toggle featuring.', variant: 'destructive' });
     }
   };
 
@@ -370,6 +386,26 @@ export default function AdminContent() {
                       </div>
                     )}
                   </div>
+
+                  {/* Featured star — the is_selected toggle. Stays visible
+                      when on (state must be readable without hovering);
+                      appears on hover when off. */}
+                  {isEssay && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      aria-pressed={!!item.is_selected}
+                      title={item.is_selected ? 'Remove from Selected' : 'Feature in Selected'}
+                      className={
+                        item.is_selected
+                          ? 'text-amber-500 hover:text-amber-600'
+                          : 'opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity'
+                      }
+                      onClick={() => handleToggleSelect(item.id, !!item.is_selected, item.title)}
+                    >
+                      <Star className={`h-4 w-4 ${item.is_selected ? 'fill-current' : ''}`} />
+                    </Button>
+                  )}
 
                   {/* Actions */}
                   <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">

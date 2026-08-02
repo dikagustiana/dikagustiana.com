@@ -99,7 +99,6 @@ export const useUpdateFinanceSetting = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['finance-settings'] });
-      queryClient.invalidateQueries({ queryKey: ['finance-featured-essay'] });
     },
   });
 };
@@ -110,24 +109,22 @@ export const useFeaturedFinanceEssay = () => {
   return useQuery({
     queryKey: ['finance-featured-essay'],
     queryFn: async () => {
-      // Get setting
-      const { data: settings, error: settingsError } = await supabase
-        .from('finance_settings')
-        .select('value')
-        .eq('key', 'featured_finance_essay_id')
-        // The setting is optional; absent is normal, not a 406.
-        .maybeSingle();
-
-      if (settingsError || !settings?.value) return null;
-
+      // ONE featuring mechanism sitewide: essays.is_selected. This used to
+      // read finance_settings.featured_finance_essay_id — a third path for
+      // one page. The landing shows the most recently selected finance
+      // essay, or nothing at all when none is selected.
       const { data, error } = await supabase
         .from('essays')
         .select(`
           id, slug, title, snippet, author, date, read_time, thumbnail_url,
-          presentation,
-          finance_section
+          presentation, section, phase, finance_section, fsli_slug, topic,
+          finance_modules!essays_module_id_fkey ( slug, track_slug )
         `)
-        .eq('id', settings.value)
+        .eq('section', 'finance')
+        .eq('is_selected', true)
+        .eq('published', true)
+        .order('created_at', { ascending: false })
+        .limit(1)
         .maybeSingle();
 
       if (error) return null;
@@ -175,23 +172,8 @@ export const useFinanceSectionEssays = (routeSlugOrDbKey: string) => {
   });
 };
 
-// ── Finance essays for admin (all statuses) ──
-
-export const useFinanceEssaysForAdmin = () => {
-  return useQuery({
-    queryKey: ['finance-essays-admin'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('essays')
-        .select('id, slug, title, snippet, status, published, finance_section, finance_order')
-        .eq('section', 'finance')
-        .order('title', { ascending: true });
-
-      if (error) throw error;
-      return data;
-    },
-  });
-};
+// useFinanceEssaysForAdmin was deleted with the featured-essay selector —
+// its only caller. Featuring is essays.is_selected, toggled in Admin → Content.
 
 // ── Finance Modules ──
 

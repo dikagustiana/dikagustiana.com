@@ -48,6 +48,12 @@ export interface PublishModalProps {
 
   /* Placement */
   isFinanceSection: boolean;
+  /* Accounting placement: FSLI prose is authored here as essays, never
+     edited inline on the public page. */
+  isAccountingSection?: boolean;
+  fsliPages?: { slug: string; title: string }[];
+  fsliSlug?: string;
+  setFsliSlug?: (v: string) => void;
   modules: FinanceModule[];
   moduleId: string | null;
   setModuleId: (v: string | null) => void;
@@ -92,6 +98,10 @@ export function PublishModal({
   onOpenChange,
   isPublished,
   isFinanceSection,
+  isAccountingSection = false,
+  fsliPages = [],
+  fsliSlug = '',
+  setFsliSlug,
   modules,
   moduleId,
   setModuleId,
@@ -304,7 +314,45 @@ export function PublishModal({
 
               {selectedModule && (
                 <p className="text-xs text-muted-foreground">
-                  Publishes to <code className="font-mono">/finance/{selectedModule.track_slug}/{selectedModule.slug}/…</code>
+                  {/* Three segments — the module is navigation, not address. */}
+                  Publishes to <code className="font-mono">/finance/{selectedModule.track_slug}/…</code>
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* ── Accounting placement: the FSLI line item this essay renders on ── */}
+          {isAccountingSection && setFsliSlug && (
+            <div className="space-y-4">
+              <div>
+                <Label className="text-base">Placement</Label>
+                <p className="text-sm text-muted-foreground">
+                  Link this essay to a financial-statement line item. Published,
+                  it renders on that FSLI page; as a draft only you see it.
+                </p>
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="publish-fsli">FSLI line item</Label>
+                <Select
+                  value={fsliSlug || '__none__'}
+                  onValueChange={v => setFsliSlug(v === '__none__' ? '' : v)}
+                >
+                  <SelectTrigger id="publish-fsli">
+                    <SelectValue placeholder="Select a line item…" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">— No line item —</SelectItem>
+                    {fsliPages.map(page => (
+                      <SelectItem key={page.slug} value={page.slug}>
+                        {page.title}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              {fsliSlug && (
+                <p className="text-xs text-muted-foreground">
+                  Publishes to <code className="font-mono">/accounting/fsli/{fsliSlug}</code>
                 </p>
               )}
             </div>

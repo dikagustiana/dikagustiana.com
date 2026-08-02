@@ -32,6 +32,8 @@ interface WriterListProps {
 interface Essay {
   id: string;
   slug: string;
+  /** Curriculum code (fa-07-01 …) — the internal identifier, not the address. */
+  code: string | null;
   title: string;
   snippet: string | null;
   author: string | null;
@@ -62,7 +64,7 @@ export function WriterList({ section }: WriterListProps) {
         // Placement columns + the module join are what let essayUrl build the
         // four-segment finance URL for the View-live button.
         .select(`
-          id, slug, title, snippet, author, date, read_time, status, phase,
+          id, slug, code, title, snippet, author, date, read_time, status, phase,
           category_id, section, finance_section, fsli_slug, topic,
           updated_at, created_at,
           finance_modules!essays_module_id_fkey ( slug, track_slug )
@@ -81,6 +83,7 @@ export function WriterList({ section }: WriterListProps) {
     return (
       essay.title.toLowerCase().includes(query) ||
       essay.slug.toLowerCase().includes(query) ||
+      (essay.code && essay.code.toLowerCase().includes(query)) ||
       (essay.snippet && essay.snippet.toLowerCase().includes(query))
     );
   });
@@ -292,6 +295,14 @@ function EssayCard({ essay, section, getPublicUrl, formatDate }: EssayCardProps)
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
+              {/* The curriculum code stays the production identifier even
+                  though it left the URL — this is where the owner manages
+                  161 stubs by code. */}
+              {essay.code && (
+                <span className="text-xs font-mono text-muted-foreground shrink-0">
+                  {essay.code}
+                </span>
+              )}
               <h3 className="font-semibold text-foreground truncate group-hover:text-primary transition-colors">
                 {essay.title || 'Untitled'}
               </h3>

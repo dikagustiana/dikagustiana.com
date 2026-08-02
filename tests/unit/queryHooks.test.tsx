@@ -10,7 +10,7 @@ vi.mock('@/integrations/supabase/client', () => ({
 }));
 
 import { useBooks } from '@/hooks/queries/useBooks';
-import { useFeaturedEssays } from '@/hooks/queries/useEssays';
+import { useSelectedEssays } from '@/hooks/queries/useSelectedEssays';
 
 function wrapper() {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -54,8 +54,8 @@ describe('useBooks', () => {
   });
 });
 
-describe('useFeaturedEssays', () => {
-  it('queries the essays table and returns published rows', async () => {
+describe('useSelectedEssays — the one featuring mechanism', () => {
+  it('queries the essays table and returns selected rows', async () => {
     const essay = {
       id: 'e1',
       slug: 's',
@@ -67,7 +67,7 @@ describe('useFeaturedEssays', () => {
       read_time: '5 min',
     };
     fromMock.mockReturnValue(makeQueryResult([essay]));
-    const { result } = renderHook(() => useFeaturedEssays(4), { wrapper: wrapper() });
+    const { result } = renderHook(() => useSelectedEssays(4), { wrapper: wrapper() });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(fromMock).toHaveBeenCalledWith('essays');

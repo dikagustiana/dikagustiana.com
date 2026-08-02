@@ -47,6 +47,9 @@ export default {
         accent: {
           DEFAULT: "hsl(var(--accent))",
           foreground: "hsl(var(--accent-foreground))",
+          // Accent used AS text on light surfaces — darkened to clear WCAG
+          // AA (4.98:1 on the card vs 2.12:1 for the default).
+          text: "hsl(var(--accent-text))",
         },
         // The editorial accent — one token, five roles (blockquote rail,
         // link-popover focus ring, popover primary buttons, "New" badge,

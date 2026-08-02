@@ -73,7 +73,7 @@ describe('resolvePlacementFields — section isolation', () => {
 });
 
 describe('buildCanonicalUrl — placement maps to the real public route', () => {
-  it('finance via module → /finance/:track/:module/:slug', () => {
+  it('finance via module → three segments, module NOT in the address', () => {
     expect(
       buildCanonicalUrl({
         sectionSlug: 'finance',
@@ -82,13 +82,15 @@ describe('buildCanonicalUrl — placement maps to the real public route', () => 
         moduleTrackSlug: 'fundamentals',
         moduleSlug: 'cost-of-capital',
       }),
-    ).toBe('/finance/fundamentals/cost-of-capital/wacc');
+    ).toBe('/finance/fundamentals/wacc');
   });
 
-  it('finance without module falls back to track or flat', () => {
+  it('finance without module uses the row track; no track → universal route', () => {
     expect(buildCanonicalUrl({ sectionSlug: 'finance', slug: 'wacc', financeSection: 'analytics' }))
       .toBe('/finance/analytics/wacc');
-    expect(buildCanonicalUrl({ sectionSlug: 'finance', slug: 'wacc' })).toBe('/finance/wacc');
+    // `/finance/<slug>` is the TRACK INDEX route — emitting it for an essay
+    // was a dead link. The universal route resolves placement-less essays.
+    expect(buildCanonicalUrl({ sectionSlug: 'finance', slug: 'wacc' })).toBe('/essays/wacc');
   });
 
   it('accounting via FSLI leaf → /accounting/fsli/:slug', () => {

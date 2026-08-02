@@ -61,14 +61,13 @@ const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const AdminAuditLog = lazy(() => import("./pages/AdminAuditLog"));
 const TheNextBigThing = lazy(() => import("./pages/TheNextBigThing"));
 const NextBigThingEssayPage = lazy(() => import("./pages/NextBigThingEssayPage"));
-const FinanceEssayPage = lazy(() => import("./pages/FinanceEssayPage"));
+const FinanceTrackChild = lazy(() => import("./pages/FinanceTrackChild"));
 const FinanceLanding = lazy(() => import("./pages/FinanceLanding"));
 const FinanceInMotion = lazy(() => import("./pages/FinanceInMotion"));
 const CapitalConditionDetail = lazy(() => import("./pages/CapitalConditionDetail"));
 const FinanceTrackIndex = lazy(() => import("./pages/FinanceTrackIndex"));
 const FinanceInActionIndex = lazy(() => import("./pages/FinanceInActionIndex"));
 const FinanceModelDetail = lazy(() => import("./pages/FinanceModelDetail"));
-const FinanceModulePage = lazy(() => import("./pages/FinanceModulePage"));
 const AdminEditorRedirect = lazy(() => import("./pages/AdminEditorRedirect"));
 const WriterEditorPage = lazy(() => import("./pages/WriterEditorPage"));
 const WriterListPage = lazy(() => import("./pages/WriterListPage"));
@@ -86,6 +85,14 @@ const queryClient = new QueryClient();
 const FinanceEssayLegacyRedirect = () => {
   const { slug } = useParams();
   return <Navigate to={slug ? `/essays/${slug}` : '/finance'} replace />;
+};
+
+// The pre-rename canonical shape (/finance/:track/:module/:essay). The module
+// left the address; the universal resolver forwards to the three-segment
+// canonical URL and understands old curriculum-code slugs.
+const FourSegmentEssayRedirect = () => {
+  const { essaySlug } = useParams();
+  return <Navigate to={essaySlug ? `/essays/${essaySlug}` : '/finance'} replace />;
 };
 
 const RouteFallback = () => (
@@ -126,8 +133,14 @@ const App = () => (
             <Route path="/finance/finance-in-action" element={<FinanceInActionIndex />} />
             <Route path="/finance/finance-in-action/:modelSlug" element={<FinanceModelDetail />} />
             <Route path="/finance/:track" element={<FinanceTrackIndex />} />
-            <Route path="/finance/:track/:moduleSlug" element={<FinanceModulePage />} />
-            <Route path="/finance/:track/:moduleSlug/:essaySlug" element={<FinanceEssayPage />} />
+            {/* One route owns /finance/:track/:slug — module page or essay,
+                decided by lookup (the two shapes are indistinguishable to the
+                router). The essay's canonical URL is these three segments. */}
+            <Route path="/finance/:track/:slug" element={<FinanceTrackChild />} />
+            {/* The old four-segment address redirects through the universal
+                resolver, which forwards to canonical (and understands old
+                curriculum-code slugs). */}
+            <Route path="/finance/:track/:moduleSlug/:essaySlug" element={<FourSegmentEssayRedirect />} />
 
             {/* Legacy redirects */}
             <Route path="/finance-101" element={<Navigate to="/finance" replace />} />

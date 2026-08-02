@@ -116,10 +116,19 @@ export function ArticleShell({
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      {/* Skip link: ArticleShell renders its own chrome (it does not use
+          PageLayout), and the longest pages on the site had no way past the
+          header for keyboard users. */}
+      <a
+        href="#article-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:text-primary-foreground"
+      >
+        Skip to content
+      </a>
       <Header />
       <ReadingProgress />
 
-      <main className="flex-1">
+      <main id="article-content" tabIndex={-1} className="flex-1 outline-none">
         {/* Reader controls bar */}
         <div className="sticky top-16 z-30 bg-background/95 backdrop-blur border-b border-border">
           <div className="container max-w-3xl lg:max-w-[64rem] py-2 flex justify-end">

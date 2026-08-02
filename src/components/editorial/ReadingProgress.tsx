@@ -3,9 +3,18 @@ import { cn } from '@/lib/utils';
 
 interface ReadingProgressProps {
   className?: string;
+  /**
+   * Selector for the element the bar measures. Defaults to the prose body:
+   * measuring the whole document counted end matter and footer as "reading",
+   * so the bar sat at ~88% when the article itself was already finished.
+   */
+  targetSelector?: string;
 }
 
-export function ReadingProgress({ className }: ReadingProgressProps) {
+export function ReadingProgress({
+  className,
+  targetSelector = 'article.prose-editorial',
+}: ReadingProgressProps) {
   const trackRef = useRef<HTMLDivElement>(null);
   const barRef = useRef<HTMLDivElement>(null);
 
@@ -18,10 +27,27 @@ export function ReadingProgress({ className }: ReadingProgressProps) {
     // wearing a different hat.
     const update = () => {
       raf = 0;
-      const docHeight =
-        document.documentElement.scrollHeight - window.innerHeight;
-      const progress =
-        docHeight > 0 ? Math.min(1, Math.max(0, window.scrollY / docHeight)) : 0;
+      // Scope to the article: 100% means the END OF THE ARTICLE has entered
+      // the viewport, not the end of the footer. Falls back to the document
+      // when no article exists (defensive; every consumer renders one).
+      const target = document.querySelector<HTMLElement>(targetSelector);
+      let progress: number;
+      if (target) {
+        const rect = target.getBoundingClientRect();
+        const top = rect.top + window.scrollY;
+        const end = top + rect.height - window.innerHeight;
+        progress =
+          end > top
+            ? Math.min(1, Math.max(0, (window.scrollY - top) / (end - top)))
+            : window.scrollY >= top
+              ? 1
+              : 0;
+      } else {
+        const docHeight =
+          document.documentElement.scrollHeight - window.innerHeight;
+        progress =
+          docHeight > 0 ? Math.min(1, Math.max(0, window.scrollY / docHeight)) : 0;
+      }
       if (barRef.current) {
         // scaleX, not width: transform skips layout and paint entirely.
         barRef.current.style.transform = `scaleX(${progress})`;
@@ -47,7 +73,7 @@ export function ReadingProgress({ className }: ReadingProgressProps) {
       window.removeEventListener('resize', schedule);
       if (raf) cancelAnimationFrame(raf);
     };
-  }, []);
+  }, [targetSelector]);
 
   return (
     <div

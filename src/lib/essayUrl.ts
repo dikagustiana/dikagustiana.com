@@ -23,7 +23,7 @@
  * various queries select different subsets — but a finance curriculum essay
  * needs BOTH `track` and `moduleSlug`, which do not live on the essays row
  * (`module_slug` comes from a join on finance_modules). A query feeding this
- * must select them; that is why `useFeaturedEssays` joins the module.
+ * must select them; that is why `useSelectedEssays` joins the module.
  */
 export interface EssayUrlInput {
   slug: string | null | undefined;
@@ -73,15 +73,16 @@ export function essayUrl(essay: EssayUrlInput): string | null {
 
   switch (section) {
     case 'finance': {
-      // Curriculum lessons live four segments deep. Both parts are required —
-      // a track without a module (or vice versa) does not match the route, so
-      // fall through to the universal route rather than emit a broken path.
-      if (essay.track && essay.moduleSlug) {
-        return `/finance/${essay.track}/${essay.moduleSlug}/${slug}`;
+      // Three segments: /finance/:track/:essaySlug. The module left the
+      // address deliberately — essays move between modules while the
+      // curriculum is being designed, and a URL encoding module membership
+      // breaks on every reorganisation. The module stays navigation and
+      // metadata; the track (five thesis areas, rarely changing) stays.
+      if (essay.track) {
+        return `/finance/${essay.track}/${slug}`;
       }
-      // Finance essays with no curriculum placement (e.g. site notes) have no
-      // four-segment home. `/finance-101/essays/:slug` is NOT usable here: it
-      // discards the slug and redirects to /finance, losing the essay.
+      // Finance essays with no track placement (e.g. site notes) fall to the
+      // universal route, which exists and resolves.
       return universalEssayUrl(slug);
     }
 

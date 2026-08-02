@@ -1,8 +1,12 @@
 /**
  * FinanceEssayPage — Renders finance essays using the canonical ArticleShell.
  *
- * Same reading experience as Next Big Thing and Green Transition essays.
- * Route: /finance/:track/:moduleSlug/:essaySlug
+ * Route: /finance/:track/:essaySlug (three segments — rendered through
+ * FinanceTrackChild, which owns /finance/:track/:slug and decides
+ * module-vs-essay by lookup). The module is navigation and metadata, not
+ * part of the address: essays move between modules while the curriculum is
+ * designed, and a URL that encodes module membership breaks on every
+ * reorganisation.
  */
 
 import NotFound from './NotFound';
@@ -17,7 +21,6 @@ import { LoadingState, ErrorState } from '@/components/states';
 import { ArticleShell, ArticleLayout } from '@/components/editorial';
 import { LongformArticleShell } from '@/components/editorial/LongformArticleShell';
 import { contentToHtml } from '@/lib/tiptap/serialize';
-import { useFinanceModuleBySlug } from '@/hooks/queries/useFinance';
 
 interface Essay {
   id: string;
@@ -34,11 +37,12 @@ interface Essay {
   published: boolean | null;
   category_id: string | null;
   module_id: string | null;
+  finance_section: string | null;
   created_at: string;
   updated_at: string;
   presentation: EssayPresentation | null;
-  /** The essay's actual module, joined — the URL's claim is checked against this. */
-  finance_modules: { slug: string; track_slug: string } | null;
+  /** The essay's actual module, joined — the URL's track is checked against this. */
+  finance_modules: { slug: string; track_slug: string; title: string | null } | null;
 }
 
 interface EssayListItem {
@@ -46,22 +50,28 @@ interface EssayListItem {
   title: string;
 }
 
+const ESSAY_SELECT =
+  // The essay's OWN module, joined, is what canonicalises the URL below.
+  // FK-hinted like every other embed in the repo — the unhinted form
+  // breaks with an ambiguous-embed error if a second FK ever appears.
+  '*, finance_modules!essays_module_id_fkey ( slug, track_slug, title )';
+
 export default function FinanceEssayPage() {
-  const { track, moduleSlug, essaySlug } = useParams<{
-    track: string;
-    moduleSlug: string;
-    essaySlug: string;
-  }>();
+  const params = useParams<{ track: string; slug?: string; essaySlug?: string }>();
+  const track = params.track;
+  // Rendered via FinanceTrackChild (:slug) — :essaySlug kept for safety.
+  const essaySlug = params.slug ?? params.essaySlug;
   const { isAdmin } = useAuth();
   const [essay, setEssay] = useState<Essay | null>(null);
+  // Reached by curriculum code (fa-07-01)? Then the address is legacy and
+  // must redirect to the canonical human slug even if the track matches.
+  const [foundByCode, setFoundByCode] = useState(false);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   // A failed FETCH is not a missing essay. Rendering 404 on a network error
   // tells the owner their essay is gone when it is fine — the panic-then-
   // recreate path that forks work. Errors get a retry, not a tombstone.
   const [loadError, setLoadError] = useState(false);
-
-  const { data: module } = useFinanceModuleBySlug(moduleSlug!);
 
   useEffect(() => {
     if (essaySlug) loadEssay();
@@ -71,19 +81,29 @@ export default function FinanceEssayPage() {
     setLoading(true);
     setNotFound(false);
     setLoadError(false);
+    setFoundByCode(false);
     try {
-      // Fetch by globally unique slug, joining the essay's ACTUAL module so the
-      // URL's track/module segments can be validated against real placement.
-      const { data, error } = await supabase
+      // Fetch by globally UNIQUE slug (constraint added with this route shape).
+      const bySlug = await supabase
         .from('essays')
-        // The essay's OWN module, joined, is what canonicalises the URL below.
-        // FK-hinted like every other embed in the repo — the unhinted form
-        // breaks with an ambiguous-embed error if a second FK ever appears.
-        .select('*, finance_modules!essays_module_id_fkey ( slug, track_slug )')
+        .select(ESSAY_SELECT)
         .eq('slug', essaySlug!)
         .maybeSingle();
+      if (bySlug.error) throw bySlug.error;
 
-      if (error) throw error;
+      let data = bySlug.data;
+      if (!data) {
+        // Old addresses used the curriculum code, which now lives in its own
+        // column. Resolve it so every pre-rename link redirects, not 404s.
+        const byCode = await supabase
+          .from('essays')
+          .select(ESSAY_SELECT)
+          .eq('code', essaySlug!)
+          .maybeSingle();
+        if (byCode.error) throw byCode.error;
+        data = byCode.data;
+        if (data) setFoundByCode(true);
+      }
 
       if (data) {
         const isPublished = data.status === 'published';
@@ -155,38 +175,34 @@ export default function FinanceEssayPage() {
   // NotFound also offers the nearest real essay for a near-miss slug.
   if (!essay) return <NotFound />;
 
-  // The slug is globally unique, so this page used to render the essay under
-  // ANY /finance/<x>/<y>/<slug> — every essay had unlimited working URLs. The
-  // URL's claim about placement is now checked against the essay's actual
-  // module, and a mismatch redirects to the one canonical URL rather than
-  // 404ing: the reader asked for a real essay, just at the wrong address.
+  // The URL's track claim is checked against the essay's actual placement
+  // (joined module first, the row's own finance_section as fallback), and a
+  // mismatch — or an address using the old curriculum code — redirects to
+  // the one canonical three-segment URL rather than 404ing: the reader asked
+  // for a real essay, just at the wrong address.
   const actualModule = essay.finance_modules;
-  if (actualModule && (actualModule.track_slug !== track || actualModule.slug !== moduleSlug)) {
-    return (
-      <Navigate
-        to={`/finance/${actualModule.track_slug}/${actualModule.slug}/${essay.slug}`}
-        replace
-      />
-    );
-  }
-  if (!actualModule) {
-    // No curriculum placement means no four-segment home — this URL shape was
-    // fabricated. The universal route renders unplaced essays.
+  const canonicalTrack = actualModule?.track_slug ?? essay.finance_section ?? null;
+  if (!canonicalTrack) {
+    // No track placement means no /finance home — the universal route
+    // renders unplaced essays.
     return <Navigate to={universalEssayUrl(essay.slug)} replace />;
   }
+  if (canonicalTrack !== track || foundByCode) {
+    return <Navigate to={`/finance/${canonicalTrack}/${essay.slug}`} replace />;
+  }
 
-  const currentIndex = siblings?.findIndex((e) => e.slug === essaySlug) ?? -1;
+  const currentIndex = siblings?.findIndex((e) => e.slug === essay.slug) ?? -1;
   const previous = currentIndex > 0 ? siblings![currentIndex - 1] : null;
   const next =
     siblings && currentIndex >= 0 && currentIndex < siblings.length - 1
       ? siblings[currentIndex + 1]
       : null;
 
-  const getEssayUrl = (slug: string) => `/finance/${track}/${moduleSlug}/${slug}`;
+  const getEssayUrl = (slug: string) => `/finance/${track}/${slug}`;
 
   const presentation = resolvePresentation(essay);
   const deck = presentation.deck || essay.snippet;
-  const topic = module?.title ?? essay.phase ?? 'Finance';
+  const topic = actualModule?.title ?? essay.phase ?? 'Finance';
   const htmlContent = contentToHtml(essay.content || '');
   const isLongform = track === 'finance-in-motion';
 
@@ -194,7 +210,9 @@ export default function FinanceEssayPage() {
     seoTitle: essay.title,
     seoDescription: deck || 'Finance knowledge for decision-making.',
     seoAuthor: essay.author || undefined,
-    backLink: { label: 'Back to lessons', path: `/finance/${track}/${moduleSlug}` },
+    backLink: actualModule
+      ? { label: 'Back to lessons', path: `/finance/${track}/${actualModule.slug}` }
+      : { label: 'Back to track', path: `/finance/${track}` },
     title: essay.title,
     deck,
     author: essay.author,

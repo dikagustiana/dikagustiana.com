@@ -8,6 +8,8 @@ export type AuditAction =
   | 'restore'
   | 'publish'
   | 'unpublish'
+  | 'feature'
+  | 'unfeature'
   | 'bulk_publish'
   | 'bulk_unpublish';
 

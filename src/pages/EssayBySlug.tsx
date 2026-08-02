@@ -45,28 +45,44 @@ interface Row {
   finance_modules: { slug: string; track_slug: string } | null;
 }
 
+const ROW_SELECT = `
+  id, slug, title, snippet, author, date, read_time, thumbnail_url,
+  content, section, phase, finance_section, fsli_slug, topic,
+  published, created_at, updated_at, presentation,
+  finance_modules!essays_module_id_fkey ( slug, track_slug )
+`;
+
 export default function EssayBySlug() {
   const { slug } = useParams<{ slug: string }>();
 
-  const { data: essay, isLoading, isError, refetch } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['essay-by-slug', slug],
     enabled: !!slug,
     queryFn: async () => {
-      const { data, error } = await supabase
+      const bySlug = await supabase
         .from('essays')
-        .select(`
-          id, slug, title, snippet, author, date, read_time, thumbnail_url,
-          content, section, phase, finance_section, fsli_slug, topic,
-          published, created_at, updated_at, presentation,
-          finance_modules!essays_module_id_fkey ( slug, track_slug )
-        `)
+        .select(ROW_SELECT)
         .eq('slug', slug!)
         .maybeSingle();
-
-      if (error) throw error;
-      return data as unknown as Row | null;
+      if (bySlug.error) throw bySlug.error;
+      if (bySlug.data) {
+        return { row: bySlug.data as unknown as Row, byCode: false };
+      }
+      // Old addresses used the curriculum code (fa-07-01), which now lives in
+      // its own column. Every pre-rename link lands here eventually — the
+      // legacy four-segment route and /finance-101/essays both forward to
+      // /essays/:slug — so this ONE fallback is the general redirect shape.
+      const byCode = await supabase
+        .from('essays')
+        .select(ROW_SELECT)
+        .eq('code', slug!)
+        .maybeSingle();
+      if (byCode.error) throw byCode.error;
+      return byCode.data ? { row: byCode.data as unknown as Row, byCode: true } : null;
     },
   });
+  const essay = data?.row ?? null;
+  const foundByCode = data?.byCode ?? false;
 
   if (isLoading) return <LoadingState />;
   // A failed fetch is not a missing essay — an outage rendered as 404 tells
@@ -96,9 +112,14 @@ export default function EssayBySlug() {
 
   // A placement-bearing essay belongs at its canonical URL; this route is only
   // ever a doorway to it. The guard against redirecting to ourselves is what
-  // stops an infinite loop for placement-less essays.
+  // stops an infinite loop for placement-less essays. An essay reached by its
+  // old curriculum code redirects even without placement — /essays/<code> is
+  // never an address, /essays/<slug> is.
   if (canonical && canonical !== universalEssayUrl(essay.slug)) {
     return <Navigate to={canonical} replace />;
+  }
+  if (foundByCode) {
+    return <Navigate to={universalEssayUrl(essay.slug)} replace />;
   }
 
   const presentation = resolvePresentation(essay);

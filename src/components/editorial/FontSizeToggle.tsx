@@ -48,11 +48,22 @@ export function FontSizeToggle({ fontSize, onChange, className }: FontSizeToggle
   ];
 
   return (
-    <div className={cn("flex items-center gap-1 bg-muted rounded-lg p-1", className)}>
-      <span className="text-xs text-muted-foreground px-2 hidden sm:inline">Text</span>
+    // radiogroup semantics: exactly one of three mutually-exclusive options
+    // is active; without aria-pressed/checked a screen reader announced
+    // three identical buttons with no way to tell which size is on.
+    <div
+      role="radiogroup"
+      aria-label="Font size"
+      className={cn("flex items-center gap-1 bg-muted rounded-lg p-1", className)}
+    >
+      <span className="text-xs text-muted-foreground px-2 hidden sm:inline" aria-hidden>
+        Text
+      </span>
       {sizes.map((size) => (
         <button
           key={size.value}
+          role="radio"
+          aria-checked={fontSize === size.value}
           onClick={() => onChange(size.value)}
           className={cn(
             "px-3 py-1.5 text-sm font-medium rounded transition-colors",

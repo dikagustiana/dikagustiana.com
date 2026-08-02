@@ -36,9 +36,14 @@ describe('route table sanity', () => {
 describe('essayUrl — every branch resolves to a real route', () => {
   const cases: Array<{ name: string; input: Parameters<typeof essayUrl>[0]; expected: string }> = [
     {
-      name: 'finance curriculum lesson (four segments)',
-      input: { slug: 'fa-07-01', section: 'finance', track: 'analytics', moduleSlug: 't4-m07' },
-      expected: '/finance/analytics/t4-m07/fa-07-01',
+      name: 'finance curriculum lesson (three segments — module is not part of the address)',
+      input: {
+        slug: 'driver-tree-construction',
+        section: 'finance',
+        track: 'analytics',
+        moduleSlug: 't4-m07',
+      },
+      expected: '/finance/analytics/driver-tree-construction',
     },
     {
       name: 'finance essay with no curriculum placement',
@@ -46,9 +51,9 @@ describe('essayUrl — every branch resolves to a real route', () => {
       expected: '/essays/site-rebuild-note',
     },
     {
-      name: 'finance with a track but no module still must not emit a broken path',
+      name: 'finance with a track but no module: track alone is a full address now',
       input: { slug: 'x', section: 'finance', track: 'analytics' },
-      expected: '/essays/x',
+      expected: '/finance/analytics/x',
     },
     {
       name: 'green transition, long phase slug is canonicalised',
@@ -97,12 +102,22 @@ describe('essayUrl — every branch resolves to a real route', () => {
 
   it('never emits the old dead /essays/ shape for a curriculum essay', () => {
     const url = essayUrl({
-      slug: 'fa-07-01',
+      slug: 'driver-tree-construction',
       section: 'finance',
       track: 'analytics',
       moduleSlug: 't4-m07',
     });
-    expect(url).not.toBe('/essays/fa-07-01');
+    expect(url).not.toBe('/essays/driver-tree-construction');
+  });
+
+  it('never emits the retired four-segment shape', () => {
+    const url = essayUrl({
+      slug: 'driver-tree-construction',
+      section: 'finance',
+      track: 'analytics',
+      moduleSlug: 't4-m07',
+    });
+    expect(url!.split('/').filter(Boolean)).toHaveLength(3);
   });
 
   it('returns null with no slug, so the caller renders a non-link', () => {
@@ -129,17 +144,17 @@ describe('essayUrlInputFromRow', () => {
     expect(got.moduleSlug).toBeNull();
   });
 
-  it('produces a resolvable URL for the real fa-07-01 row shape', () => {
+  it('produces a resolvable URL for the real driver-tree-construction row shape', () => {
     const url = essayUrl(
       essayUrlInputFromRow({
-        slug: 'fa-07-01',
+        slug: 'driver-tree-construction',
         section: 'finance',
         phase: 'fundamentals',
         finance_section: 'analytics',
         finance_modules: { slug: 't4-m07', track_slug: 'analytics' },
       }),
     );
-    expect(url).toBe('/finance/analytics/t4-m07/fa-07-01');
+    expect(url).toBe('/finance/analytics/driver-tree-construction');
     expect(matchesARoute(url!)).toBe(true);
   });
 });

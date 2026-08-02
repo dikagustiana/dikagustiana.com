@@ -38,13 +38,19 @@ export function LinkableHeading({ id, level, children, className, textAlign }: L
   return (
     <Tag
       id={id}
-      className={cn('group scroll-mt-20', className)}
+      // scroll-mt-32 (128px): the fixed header (64px) plus the sticky reader
+      // controls (~58px) occupy ~122px, so the old scroll-mt-20 (80px) put
+      // every clicked heading underneath the bar.
+      className={cn('group scroll-mt-32', className)}
       style={textAlign && textAlign !== 'left' ? { textAlign: textAlign as 'center' | 'right' | 'justify' } : undefined}
     >
       <span>{children}</span>
       <button
         onClick={handleCopyLink}
-        className="ml-2 inline-flex p-1.5 rounded align-middle opacity-0 group-hover:opacity-100 transition-opacity hover:bg-muted"
+        // focus-visible:opacity-100: the button is keyboard-focusable, so it
+        // must be VISIBLE when tabbed to — hover-only opacity made keyboard
+        // focus land on an invisible control.
+        className="ml-2 inline-flex p-1.5 rounded align-middle opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity hover:bg-muted"
         aria-label="Copy link to heading"
       >
         {copied ? (

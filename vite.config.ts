@@ -24,9 +24,8 @@ export default defineConfig(() => ({
       output: {
         manualChunks(id) {
           if (!id.includes("node_modules")) return undefined;
-          if (id.includes("recharts") || id.includes("/d3-") || id.includes("victory-vendor")) {
-            return "charts";
-          }
+          // No "charts" chunk: recharts/d3/victory-vendor are removed — their
+          // one importer (ui/chart.tsx) was itself imported by nothing.
           if (id.includes("@tiptap") || id.includes("prosemirror")) return "editor";
           if (id.includes("katex")) return "katex";
           if (id.includes("@supabase")) return "supabase";

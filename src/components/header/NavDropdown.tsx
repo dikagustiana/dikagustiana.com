@@ -22,6 +22,7 @@ export function NavDropdown({ label, items, width = 'w-56', basePath }: NavDropd
   const containerRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLDivElement>(null);
+  const chevronRef = useRef<HTMLButtonElement>(null);
   const itemRefs = useRef<(HTMLAnchorElement | null)[]>([]);
 
   const isActive = basePath
@@ -47,12 +48,15 @@ export function NavDropdown({ label, items, width = 'w-56', basePath }: NavDropd
     return () => document.removeEventListener('mousedown', handleClick);
   }, [isOpen]);
 
-  // Close on Escape
+  // Close on Escape — and RESTORE FOCUS to the trigger. Closing used to
+  // strand keyboard focus on an unmounted menu item, dropping the user back
+  // to the top of the tab order.
   useEffect(() => {
     if (!isOpen) return;
     function handleKey(e: KeyboardEvent) {
       if (e.key === 'Escape') {
         close();
+        chevronRef.current?.focus();
       }
     }
     document.addEventListener('keydown', handleKey);
@@ -132,11 +136,14 @@ export function NavDropdown({ label, items, width = 'w-56', basePath }: NavDropd
           </button>
         )}
         <button
+          ref={chevronRef}
           onClick={() => setIsOpen((prev) => !prev)}
           aria-expanded={isOpen}
           aria-haspopup="true"
           aria-label={`${label} submenu`}
-          className="p-0.5 hover:text-header-foreground transition-colors"
+          // ≥24px in both axes (WCAG 2.5.8) with full header height for the
+          // pointer — the old p-0.5 around a 14px icon was an ~18px target.
+          className="flex min-h-[44px] min-w-[28px] items-center justify-center hover:text-header-foreground transition-colors"
         >
           <ChevronDown
             className={cn(

@@ -2,9 +2,12 @@
  * FinanceWorkspace — Admin hub for finance content management.
  *
  * Provides:
- *   - Featured essay selector
- *   - Finance section (domain) metadata editor
- *   - Quick links to tools
+ *   - Landing page tagline editor
+ *   - Module and finance section (domain) metadata editors
+ *
+ * Featuring moved OUT of here: essays.is_selected is the one mechanism,
+ * toggled from Admin → Content (a star per essay). The old
+ * finance_settings.featured_finance_essay_id path is deleted.
  */
 
 import { useEffect, useMemo, useState } from 'react';
@@ -14,7 +17,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Star, Layers, Save, Check } from 'lucide-react';
@@ -27,7 +29,6 @@ import {
   useUpdateFinanceSetting,
   useFinanceSections,
   useUpdateFinanceSection,
-  useFinanceEssaysForAdmin,
 } from '@/hooks/queries/useFinance';
 
 export default function FinanceWorkspace() {
@@ -35,28 +36,12 @@ export default function FinanceWorkspace() {
 
   // Data
   const { data: settings, isLoading: settingsLoading } = useFinanceSettings();
-  const { data: essays, isLoading: essaysLoading } = useFinanceEssaysForAdmin();
   const { data: sections, isLoading: sectionsLoading } = useFinanceSections();
   const { data: modules, isLoading: modulesLoading, refetch: refetchModules } = useAllFinanceModules();
 
   // Mutations
   const updateSetting = useUpdateFinanceSetting();
   const updateSection = useUpdateFinanceSection();
-
-  // Featured essay state
-  const currentFeaturedId = settings?.featured_finance_essay_id || '';
-
-  const handleFeaturedChange = async (essayId: string) => {
-    try {
-      await updateSetting.mutateAsync({
-        key: 'featured_finance_essay_id',
-        value: essayId || null,
-      });
-      toast({ title: 'Featured essay updated' });
-    } catch {
-      toast({ title: 'Failed to update', variant: 'destructive' });
-    }
-  };
 
   // Tagline state
   const handleTaglineSave = async (value: string) => {
@@ -109,37 +94,13 @@ export default function FinanceWorkspace() {
                 Landing Page Settings
               </CardTitle>
               <CardDescription>
-                Configure the featured essay and tagline shown on /finance.
+                Configure the tagline shown on /finance. Featuring an essay
+                moved to Admin → Content — the star toggle sets
+                `is_selected`, which drives the homepage, About and the
+                Finance landing alike.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              {/* Featured Essay Selector */}
-              <div className="space-y-2">
-                <Label>Featured Essay</Label>
-                {settingsLoading || essaysLoading ? (
-                  <Skeleton className="h-10 w-full" />
-                ) : (
-                  <Select
-                    value={currentFeaturedId}
-                    onValueChange={handleFeaturedChange}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select featured essay" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {essays?.filter(e => e.published).map((essay) => (
-                        <SelectItem key={essay.id} value={essay.id}>
-                          {essay.title}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-                <p className="text-xs text-muted-foreground">
-                  Shown prominently at the top of the Finance landing page.
-                </p>
-              </div>
-
               {/* Tagline Editor */}
               <TaglineEditor
                 initialValue={settings?.finance_tagline || ''}

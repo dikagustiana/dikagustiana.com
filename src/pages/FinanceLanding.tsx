@@ -2,7 +2,7 @@
  * FinanceLanding — Publication-style finance landing page.
  *
  * Structure:
- *   1. Featured Essay (DB-driven via finance_settings)
+ *   1. Featured Essay (essays.is_selected — the ONE featuring mechanism)
  *   2. Four equal domain entry points (DB-driven via finance_sections)
  *
  * All content is DB-backed and admin-editable.
@@ -14,6 +14,7 @@ import { SEO } from '@/components/SEO';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowRight } from 'lucide-react';
 import { useFeaturedFinanceEssay, useFinanceSections } from '@/hooks/queries/useFinance';
+import { essayUrl, essayUrlInputFromRow, universalEssayUrl } from '@/lib/essayUrl';
 
 /**
  * Map section slug → route path.
@@ -57,7 +58,11 @@ export default function FinanceLanding() {
           </div>
         ) : featured ? (
           (() => {
-            const featuredHref = `/essay/${featured.slug}`;
+            // The old hand-built `/essay/${slug}` (singular) matched no route
+            // at all — a dead link behind a Featured banner. The canonical
+            // builder cannot emit a URL that is not in the route table.
+            const featuredHref =
+              essayUrl(essayUrlInputFromRow(featured)) ?? universalEssayUrl(featured.slug);
 
             return (
               <Link
