@@ -3,20 +3,82 @@
 Append-only. Newest entry first. A fresh session must be able to resume from this file.
 
 ## NEXT ACTION (single)
-**Open and merge the PR for `claude/essay-brief-companion-pl83ym` (base `main`), then let
-Vercel deploy.** The schema half is ALREADY LIVE (migration `essay_brief_companion`
-applied via `apply_migration`: `essays.brief_json`, widened `essay_revisions.change_type`
-CHECK) and is backward-compatible — the deployed bundle ignores the new column, so the
-DB/deploy window is open but harmless. Gates B1–B7 all PASSED with measurements in
-`docs/GATE_LEDGER.md`; the one test Brief (597 words, on `driver-tree-construction`) is
-live and can be kept or rewritten by the owner from `/admin/content` → Briefs → Written.
-(The previous next action — merge the design-subtractions PR — happened: PR #23 is
-merged at `46f4dc0`.)
-Standing item unchanged: set the two backup secrets (`VITE_SUPABASE_URL`,
-`SUPABASE_SERVICE_ROLE_KEY`) and flip the backup workflow's first run green — still the
-only mitigation of free-tier Supabase having no PITR.
-Owner items still pending: the `/about` biography, and the two copy-linter decisions
-(em-dash allowlist for owner-verbatim blocks; whether the sibling-rhythm check ships).
+**Open and merge the PR for `claude/draft-structure-coming-soon` (base `main`), let
+Vercel deploy, then — as a separate later step — apply the staged `essay_count`
+removal below once the deployed pages are confirmed reading the derived counts.**
+The `essay_structure` view is ALREADY LIVE (backward-compatible: the deployed bundle
+never queries it), so the DB/deploy window is open but harmless. Gates S1–S7 all
+PASSED (`docs/GATE_LEDGER.md`, "Structure-visibility session").
+
+**Staged follow-up migration (do NOT apply until the derived read path is confirmed
+in production — the *_fields precedent; name it e.g. `drop_module_meta_essay_count`):**
+```sql
+-- module_meta.essay_count is unread since the structure-visibility session
+-- (counts derive from essay_structure; useModuleLessonCounts deleted).
+UPDATE public.finance_modules SET module_meta = module_meta - 'essay_count'
+WHERE module_meta ? 'essay_count';
+```
+Standing item unchanged: set the two backup secrets and flip the backup workflow's
+first run green. Owner items still pending: the `/about` biography, and the two
+copy-linter decisions.
+
+## 2026-08-03 (structure-visibility session) — draft titles and decks go public, gates S1–S7
+
+Branch `claude/draft-structure-coming-soon`, base `main` @ `48fc7e5` (the merged Brief
+PR #24). All seven gates **PASSED** with measurements; the two superseded decisions are
+updated in place, not worked around (`docs/DECISIONS.md` 2026-08-03 "The structure is
+public"; four obsolete ledger rows rewritten in place — 1b, D, W2 and two notes).
+
+**The owner's reversal, scope stated precisely.** Anonymous visitors used to see module
+names and counts; they now see the titles and decks of all 159 unwritten essays,
+labelled `Coming soon`, with the author byline — and nothing else. Bodies
+(`content`/`content_json`) remain unreadable for unpublished essays by every client
+identity, measured at PostgREST beneath the UI, not at the client.
+
+**The mechanism.** RLS is row-level, so `essays_select_anon_published` could not be
+loosened without handing anon whole rows (161 unwritten essays plus anything
+mid-draft). It is untouched — qual re-read as `(published = true)`. The exposure is
+the **`essay_structure` view** (migration `essay_structure_public_view`, applied via
+`apply_migration`, mirrored in the repo): SELECT list = the entire public contract
+(id, slug, title, snippet, author, section, module_id, finance_order, published;
+read_time/lesson_type NULL until published), scope `status IN ('draft','published')`
+so archived essays never resurface. **`security_invoker = false` deliberately** —
+invoker semantics would re-apply the caller's RLS underneath and expose nothing;
+definer semantics make the column list the boundary. Supabase's linter will flag the
+SECURITY DEFINER view; that property is the design. A view cannot carry CREATE
+POLICY, so its explicit policy is the privilege layer: REVOKE ALL from
+PUBLIC/anon/authenticated, then GRANT SELECT to anon+authenticated.
+
+**Client.** `useTrackAllEssays` / `useEssaysByModuleId` now read the view for every
+identity (the identity flag is gone from the hook — rendering, not data, differs by
+role). Draft rows for readers are INERT: plain divs, no anchor, no handler, nothing
+focusable (0 interactive elements across all 56 fundamentals draft rows, measured),
+muted and `cursor-default` — not a disabled link, because click-shaped-but-dead
+elements have shipped here twice. Admins keep the editor routing on draft titles and
+the pencils. Published rows byte-identical in behaviour: link, byline, read time
+(S4: 25,849 chars rendered anonymously at the canonical URL). Decks render clamped
+(`line-clamp-2`) — 375px scrollWidth 375 on both surfaces (S6).
+
+**Counts derived, module-level only.** `useTrackEssayCounts` derives published AND
+total from the view; `useModuleLessonCounts` (zero consumers — dead code, and the
+only other `essay_count` reader) is deleted. Verified before switching: all 49
+modules' stored `module_meta.essay_count` equal their real row counts (49/0), and
+after: all 49 rendered count strings equal the derived numbers (49/0) — no number
+changed (S7). `module_meta.essay_count` is now entirely unread; removal staged above,
+never in this session's migration. Section landings deliberately keep hand-maintained
+numbers (static non-essays work would be undercounted). The count line itself stays:
+modules are collapsed by default, so `n of N published` summarises what expansion
+would show and repeats nothing visible at rest — reasoning in DECISIONS.
+
+**The name rule updated.** Owner decision: essay-row bylines stay (`Coming soon ·
+Dika Gustiana` on ~159 rows). The 2026-08-02 footer-only rule is amended in place
+with a dated note plus the new entry, so no later session deletes 161 bylines as a
+violation.
+
+**Harness.** Dev server + CORS relay as before (PIDs recorded, killed at end);
+session identities `sv-admin@`/`sv-user@` created and deleted (`auth.users` back
+to 1). No essays-table write occurred: all five published essays' md5s identical
+start to end, 0 new `manual_save` rows.
 
 ## 2026-08-03 (Brief-companion session) — the 500–600-word second body, gates B1–B7
 

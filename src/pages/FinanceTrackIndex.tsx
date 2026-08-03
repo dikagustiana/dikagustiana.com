@@ -17,7 +17,7 @@ import {
   useFinanceSectionBySlug,
   useFinanceModulesByTrack,
   type FinanceModule,
-  type FinanceModuleEssay,
+  type EssayStructureRow,
 } from '@/hooks/queries/useFinance';
 import { useTrackEssayCounts, useTrackAllEssays } from '@/hooks/queries/useFinanceTrackEssays';
 import { useAuth } from '@/contexts/AuthContext';
@@ -40,25 +40,26 @@ const EssayRow = React.memo(function EssayRow({
   mod,
   isAdmin,
 }: {
-  essay: FinanceModuleEssay;
+  essay: EssayStructureRow;
   mod: FinanceModule;
   isAdmin: boolean;
 }) {
   const { line1, line2 } = splitTitle(essay.title);
-  const isPublished = essay.status === 'published';
+  const isPublished = essay.published;
 
-  // The row used to render title, deck and byline with no <Link> at all — the
-  // one thing a reader would click was the one thing that did nothing.
   const publicUrl = essayUrl({
     slug: essay.slug,
     section: 'finance',
     track: mod.track_slug,
     moduleSlug: mod.slug,
   });
-  // Drafts are visible only to admins (RLS hides them from everyone else), and
-  // the public view of an empty stub is not worth landing on — for a draft the
-  // title goes straight to the editor.
-  const titleTo = isAdmin && !isPublished ? essayEditorUrl(essay.slug) : publicUrl;
+  // Everyone now sees every row (essay_structure), but only two kinds may be
+  // interactive: a published essay links to its page for everyone, and a
+  // draft links to the EDITOR for admins only — a draft's public page is an
+  // empty shell not worth landing on. For readers a draft is INERT: no
+  // anchor at all, because a title that looks clickable and does nothing (or
+  // 404s) reads as broken — this exact failure shipped twice before.
+  const titleTo = isPublished ? publicUrl : isAdmin ? essayEditorUrl(essay.slug) : null;
 
   const title = (
     <>
@@ -75,12 +76,18 @@ const EssayRow = React.memo(function EssayRow({
             {title}
           </Link>
         ) : (
-          <div className="text-foreground">{title}</div>
+          // A real <div>, not a disabled link: nothing to click, focus, or
+          // activate. Muted, so the eye reads "planned", not "broken".
+          <div className="cursor-default text-muted-foreground">{title}</div>
         )}
-        {/* Real status and real author from the row — this line used to
-            hardcode "Draft · <author name>" even for the published essay. */}
+        {essay.snippet && (
+          <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{essay.snippet}</p>
+        )}
+        {/* Status and author from the row. "Coming soon" is the owner's
+            label for the unwritten; published rows keep their byline and
+            read time exactly as before. */}
         <p className="text-xs text-muted-foreground mt-2">
-          {isPublished ? 'Published' : 'Draft'}
+          {isPublished ? 'Published' : 'Coming soon'}
           {essay.author ? ` · ${essay.author}` : ''}
           {essay.read_time ? ` · ${essay.read_time}` : ''}
         </p>
@@ -100,7 +107,7 @@ const CollapsibleModuleRow = React.memo(function CollapsibleModuleRow({
   isAdmin,
 }: {
   mod: FinanceModule;
-  essays: FinanceModuleEssay[];
+  essays: EssayStructureRow[];
   counts: { published: number; total: number };
   isOpen: boolean;
   onToggle: () => void;
@@ -118,9 +125,11 @@ const CollapsibleModuleRow = React.memo(function CollapsibleModuleRow({
         <span className="text-base font-semibold text-foreground group-hover:text-primary transition-colors leading-snug">
           {mod.title}
         </span>
-        {/* "n of N published" — N is the framework's planned count, readable
-            without seeing drafts. A bare "0 essays" told the reader the module
-            was empty when it has lessons planned and written. */}
+        {/* "n of N published" — N is now DERIVED from essay_structure, which
+            every identity can count in full. The count keeps its place beside
+            a collapsed module: at rest it is the only signal of the module's
+            size and progress; the titles it summarises appear only on
+            expansion. */}
         <span className="text-xs text-muted-foreground tabular-nums shrink-0">
           {counts.total > 0
             ? `${counts.published} of ${counts.total} published`
@@ -142,12 +151,12 @@ const CollapsibleModuleRow = React.memo(function CollapsibleModuleRow({
           ))}
         </div>
       )}
-      {/* An anonymous reader can open a module whose lessons are all drafts
-          (RLS hides them) — expanding to NOTHING reads as broken. Say what
-          the state is, in one quiet line sized like the absence it announces. */}
+      {/* Every planned lesson now has a visible row, so an empty expansion
+          means the module genuinely has no lessons assigned — say that, in
+          one quiet line sized like the absence it announces. */}
       {isOpen && essays.length === 0 && (
         <p className="px-4 pb-4 pl-14 text-sm italic text-muted-foreground/80 sm:pl-16">
-          Nothing published in this module yet.
+          No lessons assigned to this module yet.
         </p>
       )}
     </div>
@@ -182,10 +191,9 @@ const SimpleModuleRow = React.memo(function SimpleModuleRow({
           </p>
         )}
       </div>
-      {/* Planned count comes from module_meta.essay_count (anon-readable);
-          published comes from a query RLS scopes. "0 of 3 published" is the
-          truth for a visitor. "0/0 lessons" was not — it counted drafts the
-          reader is not allowed to see and got zero. */}
+      {/* Both numbers derive from essay_structure, which every identity can
+          count in full — the "0/0 lessons" era (counting rows RLS hid) is
+          structurally over, because the view hides no structure. */}
       <span className="text-xs text-muted-foreground tabular-nums shrink-0">
         {lessonCount.total > 0
           ? `${lessonCount.published} of ${lessonCount.total} published`

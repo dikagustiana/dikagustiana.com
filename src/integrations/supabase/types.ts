@@ -661,7 +661,30 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      essay_structure: {
+        Row: {
+          author: string | null
+          finance_order: number | null
+          id: string | null
+          lesson_type: Database["public"]["Enums"]["lesson_type_enum"] | null
+          module_id: string | null
+          published: boolean | null
+          read_time: string | null
+          section: string | null
+          slug: string | null
+          snippet: string | null
+          title: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "essays_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "finance_modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       has_role: {
