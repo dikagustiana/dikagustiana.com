@@ -9,6 +9,7 @@ import { RequireAdmin } from "@/components/auth/RequireAdmin";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { lazy, Suspense } from "react";
 import { LoadingState } from "@/components/states";
+import { Analytics } from "@vercel/analytics/react";
 
 // Pages — lazy-loaded so each route ships its own chunk and heavy libraries
 // (editor, charts, math) only download when a route that needs them is visited.
@@ -109,6 +110,7 @@ const App = () => (
         <TooltipProvider>
           <Toaster />
           <Sonner />
+          <Analytics />
         <BrowserRouter>
           <ErrorBoundary>
             <Suspense fallback={<RouteFallback />}>
