@@ -6,6 +6,7 @@ import { SEO } from '@/components/SEO';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUnifiedContent, useContentStats, useBulkPublishContent, useDeleteContent, useRestoreContent, useTogglePublishContent, useToggleSelectContent, ContentType } from '@/hooks/queries/useUnifiedContent';
 import { useSections } from '@/hooks/queries/useSections';
+import { BriefQueue } from '@/components/admin/BriefQueue';
 import { LoadingState, ErrorState, EmptyState } from '@/components/states';
 import {
   Card,
@@ -295,6 +296,11 @@ export default function AdminContent() {
             </span>
           </button>
         </div>
+
+        {/* Briefs — published essays awaiting their 500–600-word companion,
+            oldest first, plus written Briefs with their word counts. A list,
+            not a notification: it makes no demand. */}
+        <BriefQueue enabled={!authLoading && isAdmin} />
 
         {/* Filters bar */}
         <div className="flex flex-col sm:flex-row gap-3 mb-6">

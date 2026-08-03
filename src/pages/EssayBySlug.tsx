@@ -42,13 +42,14 @@ interface Row {
   created_at: string;
   updated_at: string;
   presentation: EssayPresentation | null;
+  brief_json: unknown;
   finance_modules: { slug: string; track_slug: string } | null;
 }
 
 const ROW_SELECT = `
   id, slug, title, snippet, author, date, read_time, thumbnail_url,
   content, section, phase, finance_section, fsli_slug, topic,
-  published, created_at, updated_at, presentation,
+  published, created_at, updated_at, presentation, brief_json,
   finance_modules!essays_module_id_fkey ( slug, track_slug )
 `;
 
@@ -142,6 +143,7 @@ export default function EssayBySlug() {
       heroCaption={presentation.hero_caption}
       content={essay.content || ''}
       htmlContent={contentToHtml(essay.content || '')}
+      brief={essay.brief_json}
       keyTakeaways={presentation.key_takeaways}
       references={presentation.references}
       authorBio={presentation.author_bio}

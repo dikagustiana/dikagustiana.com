@@ -12,7 +12,7 @@
  * This component replaces per-section layouts.
  */
 
-import { ReactNode } from 'react';
+import { ReactNode, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { Header } from '@/components/Header';
@@ -23,12 +23,14 @@ import { ShareButton } from './ShareButton';
 import { ArticleHeader } from './ArticleHeader';
 import { ArticleToc } from './ArticleToc';
 import { ArticleBody } from './ArticleBody';
+import { BriefToggle, type EssayView } from './BriefToggle';
 import { KeyTakeaways } from './KeyTakeaways';
 import { References } from './References';
 import { AuthorBox } from './AuthorBox';
 import { EssayNavigation } from './EssayNavigation';
 import { RelatedEssays } from './RelatedEssays';
 import { SEO } from '@/components/SEO';
+import { parseBriefDoc, isEmptyBrief } from '@/lib/brief';
 import { cn } from '@/lib/utils';
 
 // ---------------------------------------------------------------------------
@@ -60,6 +62,13 @@ export interface ArticleShellProps {
   content: string;
   /** Pre-rendered HTML for TOC extraction (optional, avoids double-conversion) */
   htmlContent?: string;
+  /**
+   * The essay's optional Brief companion (`essays.brief_json`, raw). When a
+   * real Brief is present, the `Full · Brief` toggle renders near the title —
+   * two views of one essay at one URL, Full always the default. Absent or
+   * empty: no toggle, no placeholder, no disabled state.
+   */
+  brief?: unknown;
 
   /** End matter */
   keyTakeaways?: string[];
@@ -102,6 +111,7 @@ export function ArticleShell({
   heroCaption,
   content,
   htmlContent,
+  brief,
   keyTakeaways,
   references,
   authorBio,
@@ -114,6 +124,20 @@ export function ArticleShell({
   className,
 }: ArticleShellProps) {
   const { fontSize, changeFontSize, fontSizeClass } = useFontSize();
+
+  // The Brief view. A real Brief must exist for the toggle to render at all;
+  // Full is the resting state, and navigating to a different essay (this
+  // shell instance survives prev/next navigation) resets to it — an arriving
+  // reader always gets the long essay.
+  const briefContent = useMemo(() => {
+    const doc = parseBriefDoc(brief);
+    return doc && !isEmptyBrief(doc) ? JSON.stringify(doc) : null;
+  }, [brief]);
+  const [view, setView] = useState<EssayView>('full');
+  useEffect(() => {
+    setView('full');
+  }, [content]);
+  const showBrief = view === 'brief' && briefContent != null;
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -180,16 +204,25 @@ export function ArticleShell({
               heroCaption={heroCaption}
             />
 
+            {/* `Full · Brief` — only when a Brief exists. Sits directly under
+                the header block, near the title. */}
+            {briefContent != null && (
+              <BriefToggle view={view} onChange={setView} className="-mt-4 mb-8" />
+            )}
+
             {/* Table of contents — inline collapsible below lg: only; the
-                sticky sidebar takes over at lg:+ */}
-            <ArticleToc className="lg:hidden" content={htmlContent || content} />
+                sticky sidebar takes over at lg:+. Hidden in the Brief view:
+                it navigates the long essay's headings, which a Brief has
+                none of (flowing prose only). */}
+            {!showBrief && <ArticleToc className="lg:hidden" content={htmlContent || content} />}
 
             {/* Optional extra content before body */}
             {children}
 
-            {/* Article body */}
+            {/* Article body — the ONE thing the toggle switches. Header,
+                end matter and navigation belong to the essay, not the view. */}
             <ArticleBody
-              content={content}
+              content={showBrief ? briefContent : content}
               fontSizeClass={fontSizeClass}
             />
 
@@ -227,11 +260,14 @@ export function ArticleShell({
 
             {/* Sticky ToC rail, lg:+ only. top-32 clears the fixed header
                 (4rem) and the sticky reader-controls bar. The list inside
-                caps its own height and scrolls internally. */}
+                caps its own height and scrolls internally. Hidden in the
+                Brief view for the same reason as the inline ToC. */}
             <aside className="hidden lg:block">
-              <div className="sticky top-32">
-                <ArticleToc variant="sidebar" content={htmlContent || content} />
-              </div>
+              {!showBrief && (
+                <div className="sticky top-32">
+                  <ArticleToc variant="sidebar" content={htmlContent || content} />
+                </div>
+              )}
             </aside>
           </div>
         </div>

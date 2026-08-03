@@ -11,7 +11,7 @@
  */
 import fs from 'node:fs';
 
-const MIN_TESTS = 253; // 256 at the time of writing; slack of 3, not 30.
+const MIN_TESTS = 280; // 283 at the time of writing; slack of 3, not 30.
 
 const reportPath = process.argv[2] ?? 'vitest-report.json';
 if (!fs.existsSync(reportPath)) {

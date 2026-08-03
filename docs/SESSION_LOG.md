@@ -3,19 +3,82 @@
 Append-only. Newest entry first. A fresh session must be able to resume from this file.
 
 ## NEXT ACTION (single)
-**Merge the design-subtractions PR and let Vercel deploy.** All five review items are
-code-complete and gate-measured locally (F1–F5 in `docs/GATE_LEDGER.md`); nothing
-touches the database, so there is no DB/router window this time.
-(The previous next action — re-baseline the `fa-07-01` fingerprint — is **resolved by
-mandate**: the invariant is no longer a hardcoded fingerprint at all. The rule now: a
-published essay must not change unless an `essay_revisions` row of type `manual_save`
-explains it. This session checked it in that form — all five published essays'
-`(updated_at, md5)` identical start to end.)
-After that, the standing item unchanged: set the two backup secrets
-(`VITE_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`) and flip the backup workflow's
-first run green — still the only mitigation of free-tier Supabase having no PITR.
+**Open and merge the PR for `claude/essay-brief-companion-pl83ym` (base `main`), then let
+Vercel deploy.** The schema half is ALREADY LIVE (migration `essay_brief_companion`
+applied via `apply_migration`: `essays.brief_json`, widened `essay_revisions.change_type`
+CHECK) and is backward-compatible — the deployed bundle ignores the new column, so the
+DB/deploy window is open but harmless. Gates B1–B7 all PASSED with measurements in
+`docs/GATE_LEDGER.md`; the one test Brief (597 words, on `driver-tree-construction`) is
+live and can be kept or rewritten by the owner from `/admin/content` → Briefs → Written.
+(The previous next action — merge the design-subtractions PR — happened: PR #23 is
+merged at `46f4dc0`.)
+Standing item unchanged: set the two backup secrets (`VITE_SUPABASE_URL`,
+`SUPABASE_SERVICE_ROLE_KEY`) and flip the backup workflow's first run green — still the
+only mitigation of free-tier Supabase having no PITR.
 Owner items still pending: the `/about` biography, and the two copy-linter decisions
 (em-dash allowlist for owner-verbatim blocks; whether the sibling-rhythm check ships).
+
+## 2026-08-03 (Brief-companion session) — the 500–600-word second body, gates B1–B7
+
+Branch `claude/essay-brief-companion-pl83ym`, base `main` @ `46f4dc0`. All seven gates
+**PASSED** (`docs/GATE_LEDGER.md`, "Brief-companion session"); the three delegated
+decisions, the word-count reconciliation, the storage shape and the revision
+coexistence are recorded in `docs/DECISIONS.md` ("The Brief companion").
+
+**What shipped.** (1) Schema, live: `essays.brief_json` (jsonb, NULL = no Brief, **no
+HTML mirror** — one representation, so the content/content_json divergence class cannot
+exist for it) and two new `essay_revisions.change_type` values `brief_autosave` /
+`brief_manual_save` (same table, same content_json column, namespaced by type; every
+reader now filters by body via `src/lib/revisions.ts` — the fence that stops the long
+editor's recovery probe offering a 600-word Brief as a "newer version" of a
+26,000-character essay). RLS inherited; 0 tables without a policy after. (2) The
+dedicated Brief surface `/admin/writer/:section/:slug/brief` (`BriefEditor`): never
+fetches `content`/`content_json`, restricted schema (`getBriefExtensions()` —
+paragraphs, bold, italic, links, hard breaks; exclusion at the schema so paste cannot
+smuggle structure), live word count with "target 500–600" stated, backup-only autosave
+regardless of essay status, guarded single-column Save. No summarise/generate/AI
+affordance exists (GATE B7 grep + full button census: Save, Bold, Italic, Link). (3)
+The public `Full · Brief` toggle in ArticleShell + LongformArticleShell: renders only
+when a real Brief exists, Full always the anonymous default, one URL, body-only swap
+(ToC hidden in Brief view), wired through all five essay pages (the two `select('*')`
+pages got it free; EssayBySlug's explicit list gained `brief_json`). (4) The Briefs
+panel on `/admin/content`: awaiting-list (published, no Brief, age since publication
+from `essays.date`, oldest first) + written-list with each Brief's word count — derived
+on read by the same `briefWordCount()` the editor uses, never stored. (5) Tests: +27
+(283 total, floor 280) — restricted-schema round-trips, six smuggle cases, cross-schema
+render identity, brief word-count/boundary tests, cross-body revision fences.
+
+**Measured highlights.** Live count observed at 0 → 41 → 597 words while writing
+through the real UI; cold reload returned the document byte-identically three ways
+(editor JSON canonicalJson, ProseMirror DOM innerHTML, stored row). The long body of
+`driver-tree-construction` finished the session with the SAME md5s it started with
+(content f8e0dcfa…, content_json 12d45d72…), 13 long-body revisions and 3 manual_saves
+unchanged — writing a Brief created zero long-body history, and the autosave probe held
+`essays.updated_at` frozen across three backup firings. Toggle: anonymous first fetch
+renders Full (long-only citation marker present, Brief-only sentence absent), both
+views at 375px with scrollWidth 375. Queue: **five** published essays awaited a Brief
+(the mandate said four — five is what is published; named with ages in the ledger),
+oldest first; after the test Brief, four remain and the written list shows "597 words".
+
+**Pre-existing breakage found and fixed while proving the suite.** The mock e2e suite
+had been unable to START since the prerender script landed: its webServer ran `npm run
+build`, whose prerender step deliberately ignores non-supabase.co URLs, hit the REAL
+project with the fake test key, got 401 and exited 1 — the hermetic suite now builds
+with `vite build` directly (playwright.config.ts, with the reason in a comment). Under
+the repaired config, one spec still asserted the pre-featuring homepage ("Recent
+Analysis", recency-seeded row): updated to the `is_selected` / "Selected Analysis"
+contract. 33/33 pass.
+
+**Harness.** Dev server + hardened CORS relay (127.0.0.1:8787) as before; PIDs recorded
+in the scratchpad and both processes killed at session end. `.env` left at production
+values. Session identities and residue cleaned: `brief-gate-admin@dika.test` deleted
+(`auth.users` back to 1), the two scaffold revision rows (smuggle save, identical
+autosave-probe row) deleted, the real Brief's `brief_manual_save` kept as its history.
+
+**Explicitly not done, per mandate:** no long-form-canvas changes beyond decision 1
+(which required none), no Brief content beyond the one gate piece, no navigation
+restructure, no Personal OS integration (what it would need is written down in
+DECISIONS under delegated decision 2).
 
 ## 2026-08-03 (design-subtractions session) — five settled items, gates F1–F5
 

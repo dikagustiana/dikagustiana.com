@@ -5,6 +5,156 @@ alternatives. Newest first.
 
 ---
 
+# 2026-08-03 — The Brief companion
+
+Every essay gets an optional companion: a Brief — 500–600 words, written days after
+the long essay is published, explaining the same thing in a fraction of the space. It
+is a **writing exercise** (compression as a test of understanding, the form every
+scholarship-application artefact takes), not a reader convenience. Consequence that
+governs the build: **if a Brief is ever machine-generated the feature has no value**,
+so there is no summarise button, no AI-assist affordance, no generate-from-long
+action — not now, not behind a flag (GATE B7 greps for this).
+
+Settled by the owner, recorded here so they are not reopened: two views of one essay
+at one URL; labels `Full · Brief` near the title; Full is the default; the toggle
+renders only when a Brief exists (no placeholder, no disabled state); optional with
+no publish gate; long first, then compress; flowing prose only (no headings, tables,
+figures or lists — bold and links fine); visible live word count with 500–600 stated.
+
+## The word-count reconciliation — record this before someone "fixes" it
+
+The long-form writing canvas was deliberately stripped of its word count (the bar
+comment in `WriterEditor.tsx` still says why: "a word count in the corner is a number
+the writer will watch"). That was correct and stays correct. The Brief editor shows
+one, live. These are not in tension. **The rule: a word count is part of the work
+when there is a target, and noise when there is not.** The long essay has no word
+target, so the number is only distraction; the Brief's 500–600 target is its
+constraint, so the number is the task. A later session noticing the inconsistency
+must not converge the two surfaces in either direction.
+
+## Delegated decision 1 — where the Brief is written: a dedicated surface that never loads the long body
+
+**Chosen: a separate Brief editor at `/admin/writer/:section/:slug/brief`
+(`BriefEditorPage` → `BriefEditor`), which never mounts an editable long body.**
+Rejected: the long editor with the body rendered read-only in Brief mode behind an
+explicit switch-to-edit control.
+
+Writing a Brief means opening a *published* essay — 161 times, tired, at midnight.
+On a shared screen, the 26,000-character body is one mode-switch away from a stray
+keystroke, and modes invite mode errors: the read-only variant protects exactly until
+the author flips it, which is precisely when the protection matters. The dedicated
+surface closes the risk **by construction**: no code on that screen writes
+`essays.content` or `essays.content_json` — its save statement updates
+`brief_json` and nothing else, which is checkable by reading one function
+(GATE B2 verifies it behaviourally). Two further effects tipped it:
+
+- **It makes the exercise cleaner.** The long version is not on screen, so it cannot
+  be whittled down by copy-paste; the Brief is written from understanding. Consulting
+  the long essay means opening its public page — reading, which is the right
+  relationship to a published piece.
+- **It satisfies "do not touch the long-form canvas" literally.** The chosen shape
+  required zero edits to `WriterEditor`/`EssayEditor`; the read-only variant would
+  have meant restructuring the canvas around a mode flag.
+
+The Brief editor shows the essay's title and deck read-only (context, not editable
+fields), the restricted canvas, the live word count with the 500–600 target stated,
+and Save. Autosave follows the published-essay rule regardless of essay status:
+backup-only into `essay_revisions` (`brief_autosave`), explicit Save to touch the
+row — a Brief's subject is usually live, and one uniform rule beats two.
+The Save is guarded on `updated_at` like every other essays write, so a stale tab
+loses loudly instead of winning silently.
+
+## Delegated decision 2 — the queue lives in /admin/content, not Personal OS
+
+**Chosen: a Briefs panel on `/admin/content` — published essays with no Brief, age
+since publication, oldest first.** A list makes no demand; it is there when he
+wants it. A notification for optional work gets ignored, then habitually ignored,
+then becomes noise that masks something that matters — the panel is deliberately
+not a badge, not a nag, not a count in the nav.
+
+Personal OS (Website page, GROWTH workspace) is where planned personal work actually
+gets looked at, and the honest cost of not choosing it is that this list lives where
+content is managed rather than where work is planned. But it crosses into a
+different Supabase project (`ascbthsgborseynmmthm`), which is an architectural
+decision in its own right and out of scope here. **What the Personal OS version
+would need, recorded for the day it is wanted:** a read of this project's
+`essays` (slug, title, date, `brief_json IS NULL`) from the personal-os app —
+either a periodic sync job writing into a personal-os table, or a direct
+cross-project fetch with this project's anon key (published essays are
+anon-readable, so no secret crosses); a place on the Website page to render it;
+and a decision about whether completing an item there marks anything here (it
+should not — the Brief's existence IS the completion state, single source of
+truth). Nothing on this project's side blocks it.
+
+Age since publication is computed from `essays.date` (the stated publication date;
+`created_at` fallback), because only one of the five published essays has a
+`publish` revision row — the date column is the honest source that exists for all.
+An essay published yesterday is inside the normal window; one three weeks unwritten
+is a different fact, so the age is printed per row, oldest first, not summarised.
+
+## Delegated decision 3 — an essay leaves the queue when a Brief exists, at any length
+
+**Chosen: exit on existence** (non-empty `brief_json`), not on the Brief landing
+inside 500–600 words. A 900-word Brief is a finished Brief that missed its target —
+useful information about the exercise, not unfinished work. Any length-based exit
+rule turns the target into a gate by the back door: a 700-word Brief pinned
+permanently in the queue is a nag, and this feature must never block or nag
+(the unwound publish-gate rule is the precedent). The pressure survives as
+information instead: the panel's second list — essays whose Brief exists — prints
+each Brief's word count, so drift from 600 to 900 to 1,100 is visible without any
+rule preventing it.
+
+## Storage shape — one jsonb column, no HTML mirror
+
+`essays.brief_json jsonb`, NULL meaning no Brief. **No HTML mirror**, deliberately.
+The long body's `content` (HTML) column exists because it predates `content_json` —
+legacy rows still read from it (`ArticleBody`'s second branch). No Brief row
+predates anything, so a `brief` HTML column would be a second representation with
+no consumer whose only capability is diverging from the first — the exact
+`content`/`content_json` failure this project already shipped once. The public
+page renders the Brief through `ArticleBody`'s canonical JSON branch; HTML is
+derived at read time where needed. GATE B5's divergence check is therefore run in
+its honest form for a single-representation body: after a cold reload, the
+editor's in-memory document equals the stored `brief_json` byte-for-byte
+(canonicalJson), and serialise(parse(·)) over the stored document is stable.
+
+## Brief revisions coexist in essay_revisions by change_type namespace
+
+Same table, same `content_json` column, two new `change_type` values:
+`brief_autosave` and `brief_manual_save` (CHECK constraint widened in migration
+`essay_brief_companion`). Rejected: a parallel `brief_json` column on
+`essay_revisions` (every row would carry a dead column for the other body, and
+every writer must know which column to fill); a separate `brief_revisions` table
+(a second numbering scheme and RLS surface for what is the same audit trail).
+
+The load-bearing consequence: **every reader must filter by kind.** The revision
+helpers in `src/lib/revisions.ts` now define the two namespaces
+(`BRIEF_CHANGE_TYPES` / long) and `useEssayAutosave` takes a `body` parameter —
+rollup and the recovery probe read only their own kind, while `revision_no`
+still numbers across both (the UNIQUE constraint is per essay, not per kind).
+Without the filter, the long editor's recovery probe would see a newer
+`brief_autosave` row, find it differs from the long body, and offer to "restore"
+a 26,000-character essay into its 600-word Brief. The word-count column question
+resolved the same way as the mirror: **derived on read, never stored** — one
+shared `briefWordCount()` walks the JSON text nodes for both the editor's live
+count and the queue's displayed count, so the two numbers cannot disagree and
+nothing can go stale.
+
+## The Brief schema is a restriction, not a new contract surface
+
+`getBriefExtensions()` in `src/lib/tiptap/extensions.ts`: paragraphs, text, bold,
+italic, links, hard breaks — nothing else. Italic is included though the mandate
+named only bold and links: the exclusion list is structural (headings, tables,
+figures, lists — the places explanatory load hides), and emphasis is prose, not
+structure; an editor that strips emphasis mangles meaning. Everything the Brief
+can produce (`p`, `strong`, `em`, `a`, `br`) is already inside all five places of
+the content contract — serialize.ts, ArticleBody, the sanitizer allowlist and the
+round-trip test already handle these nodes — so the Brief adds **restriction**
+tests (excluded nodes cannot exist even via paste, because they are absent from
+the schema) rather than new rendering paths.
+
+---
+
 # 2026-08-03 — The Sections list: kept by owner decision, reshaped by subtraction
 
 ## The grid stays — owner decision, recorded so it is not relitigated

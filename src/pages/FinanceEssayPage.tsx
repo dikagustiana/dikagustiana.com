@@ -41,6 +41,8 @@ interface Essay {
   created_at: string;
   updated_at: string;
   presentation: EssayPresentation | null;
+  /** Optional Brief companion (raw jsonb) — the shell renders the toggle when present. */
+  brief_json: unknown;
   /** The essay's actual module, joined — the URL's track is checked against this. */
   finance_modules: { slug: string; track_slug: string; title: string | null } | null;
 }
@@ -224,6 +226,7 @@ export default function FinanceEssayPage() {
     heroCaption: presentation.hero_caption,
     content: essay.content || '',
     htmlContent,
+    brief: essay.brief_json,
     keyTakeaways: presentation.key_takeaways,
     references: presentation.references,
     authorBio: presentation.author_bio,
