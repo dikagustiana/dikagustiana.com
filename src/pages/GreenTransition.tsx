@@ -50,7 +50,7 @@ export default function GreenTransition() {
     >
       <SEO
         title="Green Transition"
-        description="The economics of decarbonization. Who pays, who benefits, what trade-offs exist. Analysis of energy transition as a financial and policy problem."
+        description="This section examines the economics of the energy transition and the policy choices behind it."
       />
 
       {/* Page header. Was a 40vh third-party stock photograph, hot-linked at

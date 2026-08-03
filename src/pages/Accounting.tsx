@@ -14,7 +14,7 @@ export default function Accounting() {
     >
       <SEO
         title="Accounting"
-        description="Consolidation, PSAK standards, revenue recognition, and statutory reporting. What you check, what you calculate, what decisions this supports."
+        description="Reference pages on financial-statement line items and on how group consolidation works under PSAK."
       />
 
       <div className="py-8 container">

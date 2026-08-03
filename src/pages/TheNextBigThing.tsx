@@ -46,7 +46,7 @@ export default function TheNextBigThing() {
     >
       <SEO
         title="The Next Big Thing"
-        description="Speculative but reasoned essays on emerging forces in industry, finance, and policy. Critical questions, not predictions. Winners, losers, and second-order effects."
+        description="Essays that reason through big structural shifts while they are still taking shape."
       />
 
       {/* Page header. Was a 40vh third-party stock photograph, hot-linked at

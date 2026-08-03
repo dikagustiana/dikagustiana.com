@@ -3,23 +3,51 @@
 Append-only. Newest entry first. A fresh session must be able to resume from this file.
 
 ## NEXT ACTION (single)
-**Re-baseline the `fa-07-01` invariant, then decide whether revision 12 was intended.**
-(The previous next action — merge the editorial-taxonomy PR — is **done**: it landed as
-PR #20, `a85ffaa`, and this branch is merged up to it.)
-The mandated fingerprint (21,946 chars / 81 blocks / md5 `b36b8ba5…`) no longer matches any
-row. `fa-07-01` is `driver-tree-construction` and now measures **26,932 chars / 82 blocks /
-md5 `f8e0dcfa8ecc9cc5cd8a811d644ea0b5`**, because it was edited in the writer studio today
-between 12:21 and 12:50 UTC (`essay_revisions` 4-8 at 81 blocks; 12 and 13 at 82). If that
-edit was intended, update the invariant to the new fingerprint so future sessions have a
-true target; if it was not, `essay_revisions` revision 8 is the 81-block state. Either way
-the invariant as written cannot be satisfied and should not be carried forward unchanged.
-**Independently corroborated:** the parallel editorial-taxonomy session (below) measured
-`26,932 / 82 / f8e0dcfa…` at *its* session start and byte-identical at its end, so the
-divergence predates both sessions and neither caused it. Two sessions have now spent effort
-proving the same stale number — that is the cost of not re-baselining it.
-After that, the standing item unchanged: set the two backup secrets (`VITE_SUPABASE_URL`,
-`SUPABASE_SERVICE_ROLE_KEY`) and flip the backup workflow's first run green — still the only
-mitigation of free-tier Supabase having no PITR.
+**Merge the design-subtractions PR and let Vercel deploy.** All five review items are
+code-complete and gate-measured locally (F1–F5 in `docs/GATE_LEDGER.md`); nothing
+touches the database, so there is no DB/router window this time.
+(The previous next action — re-baseline the `fa-07-01` fingerprint — is **resolved by
+mandate**: the invariant is no longer a hardcoded fingerprint at all. The rule now: a
+published essay must not change unless an `essay_revisions` row of type `manual_save`
+explains it. This session checked it in that form — all five published essays'
+`(updated_at, md5)` identical start to end.)
+After that, the standing item unchanged: set the two backup secrets
+(`VITE_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`) and flip the backup workflow's
+first run green — still the only mitigation of free-tier Supabase having no PITR.
+Owner items still pending: the `/about` biography, and the two copy-linter decisions
+(em-dash allowlist for owner-verbatim blocks; whether the sibling-rhythm check ships).
+
+## 2026-08-03 (design-subtractions session) — five settled items, gates F1–F5
+
+Branch `claude/blissful-archimedes-ltp5rb`, base `main` @ `01d0daf`. All five gates
+**PASSED** with measurements in `docs/GATE_LEDGER.md`; decisions recorded in
+`docs/DECISIONS.md`. Zero schema changes, zero DB writes — the published-essay
+invariant held trivially in its new form.
+
+**What changed.** (1) The homepage Sections grid — kept by owner decision against the
+review's delete recommendation — reshaped into a `divide-y` list: five title-only
+rows, each row the link; no cards, icon chips, "Enter →", numerals or descriptions
+(the slot is removed, not emptied; if descriptions return, the owner writes them).
+(2) IELTS left the list; its page and Learning → IELTS nav entry stay. The Finance
+row now targets `/finance` directly instead of the `/finance-101` redirect. (3) The
+fabricated "Band 7 = 25% complex sentences" claim on the IELTS page replaced with the
+real descriptor language ("a variety of complex structures"); the word counts kept.
+(4) All five section meta descriptions rewritten — one plain factual sentence each,
+five distinct clause skeletons, no tricolons, no contrast constructions; before/after
+verbatim in the ledger. (5) The two comments that reproduced the owner's name
+(HeroSection's wrapped verbatim quote; FinanceTrackIndex's quoted UI string)
+reworded; F5 ran both a line-mode grep and a whitespace-normalised whole-file scan
+and attached the 15-hit classified inventory (domain strings, the footer contact
+line, and the attribution/SEO values kept by the six-areas GATE 1 owner decision —
+satisfying the gate's letter would mean reversing that decision, stated rather than
+silently done).
+
+**Reported, untouched:** `About.tsx` `readingStack` carries the same
+parallel-sentence signature as the deleted cards, at greater length — owner's
+writing, owner's call. **Hygiene:** 256 tests / 24 files green (floor 253), eslint 0
+errors, `tsc -b --force` clean, build + prerender green (5 routes); relay and preview
+backgrounded with PIDs recorded and verified dead by port probe at teardown; `.env`
+restored to production values.
 
 ## 2026-08-02 (design-audit session) — retire emerald, strip the decorative layer
 

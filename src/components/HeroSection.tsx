@@ -49,14 +49,7 @@ export function HeroSection() {
               Let&rsquo;s get insanely, damn good at numbers.
             </h1>
 
-            {/* The hero is exactly two text blocks and then the CTA. A third
-                paragraph — "Essays and a curriculum on corporate finance,
-                accounting, and the economics of the green transition. By Dika
-                Gustiana." — was removed deliberately, not lost. It carried the
-                only occurrence of the owner's name in the hero; the rule is
-                that the name appears where LinkedIn or email is attached, and
-                that is the footer contact line. `mb-12` moved up from that
-                paragraph so the CTA keeps its spacing. See docs/DECISIONS.md. */}
+            {/* A third paragraph was removed deliberately: it carried a byline, and the name belongs only where contact links live (the footer); its mb-12 moved up here so the CTA keeps its spacing. See docs/DECISIONS.md. */}
             <p
               className="text-lg sm:text-xl font-sans font-normal leading-relaxed mb-12"
               style={{ color: '#0F172A', letterSpacing: '0.01em' }}
