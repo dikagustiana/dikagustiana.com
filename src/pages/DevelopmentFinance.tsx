@@ -49,7 +49,7 @@ export default function DevelopmentFinance() {
     >
       <SEO
         title="Development Finance"
-        description="How public capital is deployed, at scale, to shape economies. Sovereign funds, multilateral lenders, blended finance, and the infrastructure of development."
+        description="How sovereign funds and multilateral lenders put public capital to work in developing economies."
       />
 
       {/* Hero */}

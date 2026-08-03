@@ -77,8 +77,8 @@ const EssayRow = React.memo(function EssayRow({
         ) : (
           <div className="text-foreground">{title}</div>
         )}
-        {/* Real status and real author from the row — this line was a hardcoded
-            "Draft · Dika Gustiana" even for the published essay. */}
+        {/* Real status and real author from the row — this line used to
+            hardcode "Draft · <author name>" even for the published essay. */}
         <p className="text-xs text-muted-foreground mt-2">
           {isPublished ? 'Published' : 'Draft'}
           {essay.author ? ` · ${essay.author}` : ''}

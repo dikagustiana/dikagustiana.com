@@ -3,59 +3,33 @@ import { PageLayout } from '@/components/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
 import { Card, CardContent } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
-import { ArrowRight, BarChart3, BookOpen, Leaf, Lightbulb, Clock, User, GraduationCap, Landmark } from 'lucide-react';
+import { Clock, User } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useSelectedEssays } from '@/hooks/queries/useSelectedEssays';
 import { LoadingState } from '@/components/states/LoadingState';
 import { HeroSection } from '@/components/HeroSection';
 
 /**
- * The section cards. There is deliberately NO per-section `accent` field.
+ * The Sections list: titles and destinations, nothing else.
  *
- * This array used to assign each card its own hue — blue-500, purple-500,
- * the brand emerald, amber-500, green-500, sky-500 — which put six accents in
- * one grid, including two greens two cards apart and two near-identical
- * blues. Distinctness between sections comes from order and typography, not
- * from hue; every icon renders in one muted colour and picks up the accent
- * only on hover, alongside its title.
+ * Kept by owner decision against a review that recommended deleting it; the
+ * shape is a divide-y list because six equal cards with icon chips, parallel
+ * descriptions and a repeated "Enter →" read as generated. Three constraints
+ * this code cannot show (rationale in docs/DECISIONS.md, 2026-08-03):
+ *   - No descriptions. The slot is removed on purpose — six sibling sentences
+ *     in one meter are the tell. If they return, the owner writes them.
+ *   - No numbering. These are peers with no learning order; numerals would
+ *     read as rank. (FinanceLanding numbers its tracks because that order is
+ *     real. This list is not that.)
+ *   - IELTS is deliberately absent here. The page stays, the nav entry stays;
+ *     it is an audience asset, not a top-level door.
  */
 const sections = [
-  {
-    icon: BarChart3,
-    title: 'Finance',
-    description: 'How to calculate, analyze, and support decisions. Not theory—procedure.',
-    path: '/finance-101',
-  },
-  {
-    icon: BookOpen,
-    title: 'Accounting',
-    description: 'Consolidation, policy choices, PSAK application. What you check, what you calculate.',
-    path: '/accounting',
-  },
-  {
-    icon: Leaf,
-    title: 'Green Transition',
-    description: 'The economics of decarbonization. Who pays, who benefits, what trade-offs exist.',
-    path: '/green-transition',
-  },
-  {
-    icon: Lightbulb,
-    title: 'The Next Big Thing',
-    description: 'Rigorous speculation about structural shifts. Winners, losers, second-order effects.',
-    path: '/the-next-big-thing',
-  },
-  {
-    icon: GraduationCap,
-    title: 'IELTS Preparation',
-    description: 'Band 7+ methodology. Time limits, task protocols, scoring criteria.',
-    path: '/english-ielts',
-  },
-  {
-    icon: Landmark,
-    title: 'Development Finance',
-    description: 'Sovereign funds, multilateral lenders, and blended finance. How public capital shapes economies.',
-    path: '/development-finance',
-  },
+  { title: 'Finance', path: '/finance' },
+  { title: 'Accounting', path: '/accounting' },
+  { title: 'Green Transition', path: '/green-transition' },
+  { title: 'The Next Big Thing', path: '/the-next-big-thing' },
+  { title: 'Development Finance', path: '/development-finance' },
 ];
 
 const getSectionLabel = (section: string, phase: string | null) => {
@@ -138,45 +112,30 @@ const Index = () => {
         </section>
       )}
 
-      {/* Sections Grid. id="sections", NOT "main-content": PageLayout's
+      {/* Sections list. id="sections", NOT "main-content": PageLayout's
           <main> already owns that id (the skip-link target), and the
           duplicate made the hero CTA resolve to the page top — it scrolled
-          nowhere. */}
+          nowhere. Each row IS the link; there is no per-row call to action. */}
       <section id="sections" className="py-16 container">
-        <div className="max-w-4xl mx-auto mb-12">
-          <h2 className="text-2xl font-display font-semibold text-foreground mb-4 text-center">
+        <div className="max-w-3xl mx-auto">
+          <h2 className="text-2xl font-display font-semibold text-foreground mb-6">
             Sections
           </h2>
-        </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
-          {sections.map((section) => (
-            <Link key={section.path} to={section.path}>
-              <Card className="h-full hover:shadow-lg transition-[transform,box-shadow] hover:-translate-y-1 cursor-pointer group">
-                <CardContent className="p-6">
-                  <div className="flex items-start gap-4">
-                    <div className="p-3 rounded-lg bg-secondary text-muted-foreground group-hover:text-accent transition-colors">
-                      <section.icon className="h-5 w-5" />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-foreground mb-2 group-hover:text-accent transition-colors">
-                        {section.title}
-                      </h3>
-                      <p className="text-sm text-muted-foreground leading-relaxed mb-3">
-                        {section.description}
-                      </p>
-                      <span className="text-sm font-medium text-accent-text inline-flex items-center gap-1">
-                        Enter
-                        {/* Nudge the arrow with a transform instead of
-                            animating the flex gap, which re-runs layout. */}
-                        <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-                      </span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
+          <ul className="divide-y divide-border border-y border-border">
+            {sections.map((section) => (
+              <li key={section.path}>
+                <Link
+                  to={section.path}
+                  className="group block py-5"
+                >
+                  <span className="text-lg font-display font-semibold text-foreground group-hover:text-accent transition-colors">
+                    {section.title}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
     </PageLayout>

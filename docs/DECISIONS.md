@@ -5,6 +5,61 @@ alternatives. Newest first.
 
 ---
 
+# 2026-08-03 — The Sections list: kept by owner decision, reshaped by subtraction
+
+## The grid stays — owner decision, recorded so it is not relitigated
+
+A design review recommended deleting the homepage Sections grid outright, on the
+grounds that four of its six sections have no essay rows at all. **The owner declined
+that recommendation.** The grid stays as a surface; what changed is its shape. Do not
+reopen the argument; the next session that wants to delete it needs a new owner
+decision, not a re-reading of the old review.
+
+## Cards became a divide-y list of titles, and the description slot is REMOVED
+
+Six equal cards with icon chips, six parallel one-line descriptions and a repeated
+"Enter →" is the shape that reads as generated. The fix is subtraction, not better
+copy: rows in a `divide-y` list, title only, the row itself the link. The description
+slot is deliberately gone rather than emptied — six sibling sentences in one meter is
+the tell, and a model asked for six parallel descriptions will produce six isometric
+sentences again; removing the slot removes the problem. If descriptions return, the
+owner writes them.
+
+## Numbering was rejected, deliberately
+
+Easy to get wrong by analogy: `FinanceLanding.tsx` numbers its entries and is this
+repo's reference page. But numbering is load-bearing there — fundamentals → strategic
+→ planning → analytics is a real learning order. The homepage's five sections are
+peers with no order, so `01–06` would be read as rank, and "why does X outrank Y" is
+a question with no answer. A list that provokes an unanswerable question is worse
+than a plain one. (`FinanceLanding.tsx` itself was not edited: it is the reference,
+and converging other pages onto it is right while editing it is how references
+erode.)
+
+## IELTS left the homepage and kept its page and nav entry
+
+Likely the highest-search-volume content on the site, so it stays as an audience
+asset reachable from Learning → IELTS. It does not sit among the top-level doors: on
+a site read by scholarship panels, exam technique beside sovereign lending is a
+register collision. The Finance row also now links to `/finance` directly instead of
+the `/finance-101` legacy redirect — the row should name the destination, not a
+forwarding address.
+
+## Comments may not quote deleted copy (the wrapped-phrase lesson, twice in one session)
+
+`HeroSection.tsx` explained a removed paragraph by quoting it verbatim — including
+the owner's name, wrapped across a line break where the phrase-grep gate could not
+see it. Reworded to explain the removal without reproducing the sentence; the same
+fix applied to `FinanceTrackIndex.tsx`'s comment quoting the old hardcoded byline
+string. And the session promptly repeated the mistake in miniature: the first fix for
+the fabricated IELTS statistic quoted the bogus number in its explanatory comment,
+where the gate grep caught it. The rule that falls out: **a comment explaining a
+removal never reproduces the removed text**, and **any grep used as a gate must be
+line-break insensitive** (search whitespace-normalised content), or it is a check
+that passes because it never really looked.
+
+---
+
 # 2026-08-02 — The hero drops its third paragraph, and with it the only byline
 
 The hero is now **exactly two text blocks and then the CTA**: the h1, one paragraph, "Read

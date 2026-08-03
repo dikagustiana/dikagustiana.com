@@ -24,7 +24,11 @@ const skills = [
     title: 'Writing',
     targetScore: 'Band 7.0+',
     timeRequired: 'Task 1: 20 min | Task 2: 40 min',
-    task: 'Task 1: 150+ words. Task 2: 250+ words. Band 7 = 25% complex sentences.',
+    // The final clause used to state a numeric share of complex sentences as
+    // the Band 7 bar. No such threshold exists in the public band
+    // descriptors; Band 7 Grammatical Range and Accuracy asks for "a variety
+    // of complex structures", so that is what this says now.
+    task: 'Task 1: 150+ words. Task 2: 250+ words. Band 7 grammar: a variety of complex structures.',
     method: '5 min planning. 4 paragraphs Task 2. Proofread last 3 min.',
     icon: Pencil,
   },
@@ -51,7 +55,7 @@ export default function EnglishIelts() {
     >
       <SEO 
         title="IELTS Preparation"
-        description="Band 7+ methodology for IELTS. Time limits, task protocols, scoring criteria. Structured exam preparation."
+        description="A study plan for the IELTS academic test, with timing and task requirements for each of the four papers."
       />
 
       <div className="container py-8">

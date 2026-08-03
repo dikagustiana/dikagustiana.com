@@ -408,6 +408,145 @@ mirrored in `supabase/migrations/`. Checks: eslint 0 errors (30 warnings, cap 35
 build + prerender green. Servers were backgrounded with PIDs recorded and killed at
 teardown; `vitest run` only, never watch mode.
 
+## Design-subtractions session (2026-08-03) — gates F1–F5
+
+Five settled review items, all subtraction or factual correction. Branch
+`claude/blissful-archimedes-ltp5rb` (harness-assigned name), base `main` @ `01d0daf`.
+Local production build served at 127.0.0.1:4173 against the live DB through the
+dev-only relay; servers backgrounded with PIDs recorded and killed at teardown.
+**Zero schema changes and zero database writes this session** — the
+`apply_migration`-only rule holds vacuously, measured: all five published essays'
+`(updated_at, md5(content))` identical at session start and end, so nothing needs a
+`manual_save` explanation; 0 public tables without RLS or policies, re-measured.
+
+### GATE F1 — the Sections list — PASSED
+
+Measured in an anonymous browser on the built app. The homepage `#sections` block is a
+`ul` of **5** rows — `Finance · Accounting · Green Transition · The Next Big Thing ·
+Development Finance` — with divide-y observed as computed style, not class names
+(row `border-top-width` = `0/1/1/1/1px`). Zero `svg` inside the block, zero occurrences
+of "Enter", zero rows containing a numeral, zero card elements, and each row's text is
+exactly its title — no description text under any row. The whole row is the link.
+At **375px** the recorded `scrollWidth` = **375** (no horizontal scroll); screenshots
+at both widths. **All five rows clicked**, not just opened: each landed on its
+destination with that page's own h1 (`Finance`, `Accounting`, `Green Transition`,
+`The Next Big Thing`, `Development Finance`), zero page errors; document GETs for all
+five destinations returned **200**. The Finance row now points at `/finance` directly
+rather than bouncing through the `/finance-101` legacy redirect.
+
+*Measurement lesson recorded:* the first pass read the destination h1 immediately
+after `waitForURL` and got the HOMEPAGE hero h1 five times — React Router keeps the
+old view mounted while the lazy route chunk loads. A click sweep that reads too early
+reports the wrong page as the destination while looking green. The corrected wait
+keys on the old content leaving.
+
+### GATE F2 — IELTS — PASSED
+
+All three observed: the five row texts contain no IELTS (absent from the homepage
+list); the nav's **Learning → IELTS entry was clicked** and landed on
+`/english-ielts`; the page rendered its own h1 ("IELTS Preparation: Band 7+
+Methodology"). The nav entry itself is untouched (`navConfig.ts:53`).
+
+### GATE F3 — the statistic — PASSED
+
+`grep -rn "25%" src/pages/EnglishIelts.tsx` exits 1 (no match). The replacement line:
+
+    task: 'Task 1: 150+ words. Task 2: 250+ words. Band 7 grammar: a variety of complex structures.',
+
+The word counts stay; the final clause now uses the actual Band 7 Grammatical Range
+and Accuracy descriptor language. The rendered page was also checked in the browser:
+0 occurrences of the string. *Worth confessing:* the first fix quoted the deleted
+claim inside an explanatory comment, and the gate grep caught it — the same
+quote-the-deleted-thing failure as Item 5, one file over. Reworded without the number.
+
+### GATE F4 — five meta descriptions — PASSED
+
+Before → after, verbatim:
+
+1. **Accounting** — "Consolidation, PSAK standards, revenue recognition, and
+   statutory reporting. What you check, what you calculate, what decisions this
+   supports." → **"Reference pages on financial-statement line items and on how group
+   consolidation works under PSAK."**
+2. **GreenTransition** — "The economics of decarbonization. Who pays, who benefits,
+   what trade-offs exist. Analysis of energy transition as a financial and policy
+   problem." → **"This section examines the economics of the energy transition and
+   the policy choices behind it."**
+3. **TheNextBigThing** — "Speculative but reasoned essays on emerging forces in
+   industry, finance, and policy. Critical questions, not predictions. Winners,
+   losers, and second-order effects." → **"Essays that reason through big structural
+   shifts while they are still taking shape."**
+4. **EnglishIelts** — "Band 7+ methodology for IELTS. Time limits, task protocols,
+   scoring criteria. Structured exam preparation." → **"A study plan for the IELTS
+   academic test, with timing and task requirements for each of the four papers."**
+5. **DevelopmentFinance** — "How public capital is deployed, at scale, to shape
+   economies. Sovereign funds, multilateral lenders, blended finance, and the
+   infrastructure of development." → **"How sovereign funds and multilateral lenders
+   put public capital to work in developing economies."**
+
+How the judgement was checked, since it is not a grep: each rewrite was classified by
+clause skeleton — (1) noun phrase with two coordinated prepositional complements,
+(2) declarative sentence with subject "This section" and a transitive verb, (3) noun
+phrase with a restrictive relative plus temporal subordinate clause, (4) indefinite
+noun phrase with a "with" adjunct and a distributive tail, (5) a free "How…" clause
+standing alone. Five distinct skeletons; no coordination anywhere exceeds two items
+(no tricolons); zero em-dashes and zero negation-contrast ("X — not Y", "rather
+than") constructions in any of the five — verified by reading each candidate against
+those three bans and discarding drafts that failed (three drafts died to the tricolon
+alone; the pull is real).
+
+### GATE F5 — the name — PASSED for the rule as recorded, inventory attached
+
+Form used, since a line-mode grep is exactly the check that missed the wrapped
+phrase: **both** `grep -rni "gustiana" src` (line mode) **and** a
+whitespace-normalised whole-file scan (every file's text collapsed with
+`re.sub(r'\s+',' ')` before searching, so a phrase wrapped across any line break
+cannot hide). Both return the same **15** hits — meaning nothing wraps.
+
+The two name-in-comment occurrences are gone: `HeroSection.tsx` (the wrapped verbatim
+quote of the deleted byline sentence — reworded to one line that explains the removal
+without reproducing it) and `FinanceTrackIndex.tsx:81` (a comment quoting the old
+hardcoded "Draft · <name>" UI string — same disease, fixed unasked).
+
+The 15 remaining hits, classified:
+- **3 × the site's own domain** as a string (`siteOrigin.ts` SITE_ORIGIN,
+  `index.css` theme comment, `Footer.tsx` © line) — the domain contains the name.
+- **2 × the footer contact line** (`Footer.tsx:22,24` — LinkedIn href and
+  "Dika Gustiana Irawan · LinkedIn"), the sanctioned occurrence.
+- **10 × attribution values and SEO strings** itemised and KEPT by the six-areas
+  session's GATE 1 owner decision ("author-attribution values and SEO strings are
+  essay metadata, not chrome"): `SEO.tsx` SITE_NAME and default description,
+  `ArticleShell`/`LongformArticleShell` seoAuthor fallbacks, `ArticleHeader`'s
+  publication masthead (the reader specification's "name of the publication" line),
+  `CapitalConditionCard` byline, `WriterEditor` DEFAULT_AUTHOR, `Auth.tsx` and
+  `Index.tsx` SEO strings, `CriticalThinkingEssay` author fallback.
+
+Stated plainly rather than silently reinterpreted: the gate's literal phrasing
+("returns only the footer contact line") is not achievable without reversing that
+recorded owner decision and renaming the site's own domain — neither of which this
+mandate's subtraction scope asks for. The rule the decision actually set — the name
+appears as CHROME only where contact links live — holds, and the comment class the
+gate exists to catch is now empty.
+
+*Method lesson, as mandated:* a phrase grep used as a gate reports clean when the
+phrase wraps. Any grep gate in this project must run against whitespace-normalised
+content (or equivalent multiline mode), or it belongs to the same family as
+`tsc --noEmit` compiling zero files — a check that passes because it never looked.
+
+### Reported, left untouched (as instructed)
+
+`About.tsx`'s `readingStack`: ten book annotations carrying the same
+parallel-sentence signature as the deleted cards, at greater length. It is the
+owner's writing; reported here, not edited. The copy linter, the `/about` biography
+and the navigation are untouched per the mandate's exclusions.
+
+### Session hygiene
+
+Checks: eslint 0 errors on touched files (repo-wide run unchanged), `tsc -b --force`
+clean, **256 tests / 24 files green**, count guard `ok` at floor 253, build +
+prerender green (5 routes). Published-essay invariant: all five `(updated_at, md5)`
+pairs identical start to end. `.env` restored to production values; relay and preview
+processes verified dead by port probe.
+
 ## Notes
 
 ### `tsc --noEmit` was checking ZERO files (found 2026-08-01, fixed)
