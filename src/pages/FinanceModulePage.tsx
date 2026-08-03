@@ -12,7 +12,6 @@ import { PageLayout } from '@/components/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
-import { Badge } from '@/components/ui/badge';
 import { ModuleHeaderFactory } from '@/components/finance/ModuleHeaderFactory';
 import { FinanceCycleMap } from '@/components/finance/FinanceCycleMap';
 import {
@@ -38,7 +37,9 @@ function EssayListing({
   moduleSlug: string;
 }) {
   const { isAdmin } = useAuth();
-  const { data: essays, isLoading } = useEssaysByModuleId(moduleId, !!isAdmin);
+  // essay_structure: every identity receives every lesson row — drafts
+  // included, bodies never. Only the rendering differs by identity.
+  const { data: essays, isLoading } = useEssaysByModuleId(moduleId);
 
   if (isLoading) {
     return (
@@ -60,29 +61,36 @@ No lessons assigned to this module yet.
 
   return (
     <div>
-      {essays.map((essay, index) => (
-        <div
-          key={essay.id}
-          className="flex items-start gap-2 border-b border-border last:border-b-0"
-        >
-          <Link
-            // A draft's public view is an empty page; for the admin filling in
-            // stubs, the row itself is the way into the editor. Published rows
-            // keep pointing at the reading experience.
-            to={
-              isAdmin && !essay.published
-                ? essayEditorUrl(essay.slug)
-                : `/finance/${track}/${essay.slug}`
-            }
-            className="flex flex-1 min-w-0 items-start gap-4 py-4 group"
-          >
+      {essays.map((essay, index) => {
+        // Published rows link to the reading experience for everyone. A
+        // draft links to the EDITOR for admins (its public page is an empty
+        // shell); for readers a draft is INERT — a plain div, no anchor, no
+        // handler, nothing to focus — because a title that looks clickable
+        // and goes nowhere reads as broken, and that exact failure has
+        // shipped here twice.
+        const rowTo = essay.published
+          ? `/finance/${track}/${essay.slug}`
+          : isAdmin
+            ? essayEditorUrl(essay.slug)
+            : null;
+
+        const rowBody = (
+          <>
             <span className="text-sm font-mono text-muted-foreground tabular-nums shrink-0 mt-0.5">
               {String(moduleSortOrder).padStart(2, '0')}.{String(index + 1).padStart(2, '0')}
             </span>
 
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
-                <h3 className="text-base font-medium text-foreground group-hover:text-primary transition-colors leading-snug">
+                <h3
+                  className={
+                    essay.published
+                      ? 'text-base font-medium text-foreground group-hover:text-primary transition-colors leading-snug'
+                      : isAdmin
+                        ? 'text-base font-medium text-muted-foreground group-hover:text-primary transition-colors leading-snug'
+                        : 'text-base font-medium text-muted-foreground leading-snug'
+                  }
+                >
                   {essay.title}
                 </h3>
                 {essay.lesson_type && essay.lesson_type !== 'concept' && (
@@ -90,25 +98,44 @@ No lessons assigned to this module yet.
                     {essay.lesson_type}
                   </span>
                 )}
-                {isAdmin && !essay.published && (
-                  <Badge variant="secondary" className="text-[10px] uppercase tracking-wider">
-                    Draft
-                  </Badge>
-                )}
               </div>
               {essay.snippet && (
-                <p className="text-sm text-muted-foreground mt-1 line-clamp-1">{essay.snippet}</p>
+                <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{essay.snippet}</p>
+              )}
+              {/* The unwritten carry the owner's label and the author who
+                  will write them; published rows keep their prior shape. */}
+              {!essay.published && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  Coming soon{essay.author ? ` · ${essay.author}` : ''}
+                </p>
               )}
             </div>
 
             {essay.read_time && (
               <span className="text-xs text-muted-foreground shrink-0 mt-1">{essay.read_time}</span>
             )}
-          </Link>
-          {/* Sibling of the row link, never nested inside it. */}
-          <EssayEditLink slug={essay.slug} className="mt-4" />
-        </div>
-      ))}
+          </>
+        );
+
+        return (
+          <div
+            key={essay.id}
+            className="flex items-start gap-2 border-b border-border last:border-b-0"
+          >
+            {rowTo ? (
+              <Link to={rowTo} className="flex flex-1 min-w-0 items-start gap-4 py-4 group">
+                {rowBody}
+              </Link>
+            ) : (
+              <div className="flex flex-1 min-w-0 cursor-default items-start gap-4 py-4">
+                {rowBody}
+              </div>
+            )}
+            {/* Sibling of the row link, never nested inside it. */}
+            <EssayEditLink slug={essay.slug} className="mt-4" />
+          </div>
+        );
+      })}
     </div>
   );
 }

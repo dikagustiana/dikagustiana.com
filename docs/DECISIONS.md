@@ -5,6 +5,95 @@ alternatives. Newest first.
 
 ---
 
+# 2026-08-03 — The structure is public: draft titles and decks render to everyone
+
+**Owner decision, reversing the 2026-08-01 rule "do not make drafts anon-readable" —
+with its scope stated precisely: titles and decks only, never bodies.** Anonymous
+visitors used to see module names and a count; the curriculum's structure — the
+titles and decks of the 159 unwritten essays — now renders publicly, labelled
+`Coming soon`, with the author shown. The ledger rows that asserted an anonymous
+reader sees zero drafts are rewritten in place (`docs/GATE_LEDGER.md` rows 1b, D,
+W2 and two bulleted notes) rather than left contradicting the code.
+
+## The mechanism: a column-enumerating view, because RLS is row-level
+
+Postgres RLS cannot express "unpublished rows, some columns". Loosening
+`essays_select_anon_published` would hand anon the entire row — `content` and
+`content_json` included — publishing 161 unwritten essays and exposing whatever is
+mid-draft. That policy is untouched (non-negotiable, and re-measured: its qual is
+still `(published = true)`). The exposure is the **`essay_structure` view**
+(migration `essay_structure_public_view`), whose SELECT list is the whole public
+contract: `id, slug, title, snippet, author, section, module_id, finance_order,
+published` — plus `read_time` and `lesson_type` NULLed until published, so an
+unpublished row exposes exactly the enumerated set and nothing presentational
+leaks early. Scope `status IN ('draft','published')`: archived essays are
+soft-deleted and must not resurface as `Coming soon`, and any future status stays
+hidden until deliberately exposed.
+
+**The `security_invoker` question, answered explicitly because getting it backwards
+fails in one of two opposite ways:** the view is created `WITH (security_invoker =
+false, security_barrier = true)`. Invoker semantics would apply the CALLER's RLS to
+`essays` underneath — anon would see only published rows through the view and the
+feature would expose nothing. Definer semantics (the deliberate choice) read
+`essays` as the view's owner (`postgres`, the table owner, whom RLS does not bind),
+so the view's column list and WHERE clause are the entire boundary. Supabase's
+linter flags SECURITY DEFINER views; here that property is the point, and the
+narrowness of the SELECT list is what makes it safe. A view cannot carry `CREATE
+POLICY`, so its explicit access policy is the privilege layer: `REVOKE ALL` from
+PUBLIC/anon/authenticated first (Supabase default privileges grant ALL to new
+objects), then `GRANT SELECT` to anon and authenticated only.
+
+## Drafts are inert, not disabled
+
+A draft title that looks clickable and does nothing — or 404s — reads as broken,
+and that failure has shipped here twice (track-index rows that were not links; the
+dead `?theme=` tabs). Unpublished rows for readers are plain `<div>`s: no anchor,
+no handler, no tabindex, muted text, `cursor-default`. Not a disabled link, not an
+anchor without a target. For admins the same row keeps routing into the editor,
+and the pencil stays admin-only. Published rows are byte-for-byte the interaction
+they were: link, byline, read time.
+
+## The name rule, updated to match the owner's call
+
+The 2026-08-02 hero decision recorded the standing rule as "the name appears where
+LinkedIn or email is attached" — one rendered occurrence, the footer contact line.
+**The owner has now decided the byline stays on essay rows: `Coming soon · Dika
+Gustiana` on every unwritten essay, `Published · Dika Gustiana · …` on published
+ones — roughly 161 rendered occurrences. That is settled; do not delete these
+bylines as a rule violation.** The rule as it now stands: the name appears on the
+footer contact line, AND as the author byline on essay rows and essay pages —
+authorship attribution on a byline is not the self-promotion the hero rule
+removed. The hero itself stays byline-free; nothing about the 2026-08-02 hero
+change is reopened.
+
+## Module counts are derived; section landings are not
+
+`useTrackEssayCounts` now derives both `published` and `total` per module from
+`essay_structure` — the stored `module_meta.essay_count` is no longer read
+anywhere (`useModuleLessonCounts`, its only other reader, had zero consumers and
+is deleted as dead code). Verified at switch time: **all 49 modules' stored counts
+equalled their real row counts, zero mismatches** (gate S7), so no rendered number
+changed and the stored values are confirmed correct rather than inherited from the
+framework document's 55-vs-56 inconsistency. The derivation is **module-level
+only**: Accounting and Green Transition carry real work as hand-built static pages
+that are not `essays` rows, so a derived count would understate section landings —
+do not extend it there. The now-unread `essay_count` key's removal is staged as a
+follow-up migration (SQL in the session log), to be applied only after production
+pages are confirmed reading the derived source — the *_fields precedent: the drop
+never travels with the new read path.
+
+## The count line keeps its place — reported, as asked
+
+`0 of 56 essays published` above a list of 56 visible titles would merely repeat
+the page — if the titles were visible at rest. They are not: modules are collapsed
+by default, so the per-module `n of N published` is the only signal of a module's
+size and progress until it is expanded, and the track-level line aggregates 49 of
+them. The counts summarise what expansion would show, repeat nothing the reader
+can already see, and are now derived from the same rows as the titles, so they can
+never disagree with them. Kept, on that reasoning.
+
+---
+
 # 2026-08-03 — The Brief companion
 
 Every essay gets an optional companion: a Brief — 500–600 words, written days after
@@ -223,6 +312,13 @@ the only place the owner's name appeared in the hero. After this change the name
 the email address. That is the standing rule — the name appears where LinkedIn or email is
 attached — and it is the same rule that removed the standalone name heading from the footer
 in an earlier session. This is that rule reaching the hero.
+
+*[AMENDED 2026-08-03 — the rule above is superseded in one respect, by owner decision:
+essay-row BYLINES are exempt. `Coming soon · Dika Gustiana` renders on every unwritten
+essay row and `Published · Dika Gustiana · …` on published ones (~161 occurrences).
+Authorship attribution is not the self-promotion this rule removed; the hero stays
+byline-free. Full statement in the 2026-08-03 structure-visibility entry. Do not delete
+essay-row bylines as a violation of this entry.]*
 
 `mb-12` moved from the deleted paragraph up onto the surviving one, so the CTA keeps its
 spacing rather than collapsing to the `mb-6` the second paragraph carried.
