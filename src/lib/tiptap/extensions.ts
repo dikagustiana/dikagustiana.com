@@ -185,3 +185,54 @@ export function getEditorExtensions(options: EditorExtensionOptions = {}) {
 export function getSchemaExtensions() {
   return baseExtensions(null);
 }
+
+/**
+ * The Brief companion's schema — a RESTRICTION of the essay schema, not a
+ * sibling. Flowing prose only: paragraphs, bold, italic, links, hard breaks.
+ * No headings, tables, figures, lists, quotes, code, dividers, math,
+ * footnotes, callouts or images — structure is where explanatory load hides
+ * instead of being solved, and the Brief is an exercise in selection and
+ * sequence (docs/DECISIONS.md, "The Brief companion").
+ *
+ * Exclusion happens at the SCHEMA level, so pasted content cannot smuggle a
+ * forbidden block in: a node type absent from the schema cannot exist in the
+ * document — ProseMirror keeps the text and drops the structure. GATE B4
+ * verifies this through the real editor.
+ *
+ * Every node/mark this schema can produce is already inside all five places
+ * of the content contract (serialize.ts, ArticleBody, sanitizeHtml, the
+ * round-trip test cover p/strong/em/a/br for the long schema), so the Brief
+ * adds no new rendering surface. tests/unit/editorHtmlRoundTrip.test.ts
+ * covers the restricted schema separately.
+ */
+export function getBriefExtensions(options: { placeholder?: string } = {}) {
+  const kit = StarterKit.configure({
+    // The allowed set: document, paragraph, text, bold, italic, hardBreak,
+    // undoRedo, and link (configured, not disabled). Everything else off.
+    heading: false,
+    blockquote: false,
+    bulletList: false,
+    orderedList: false,
+    listItem: false,
+    code: false,
+    codeBlock: false,
+    horizontalRule: false,
+    strike: false,
+    underline: false,
+    link: {
+      openOnClick: false,
+      HTMLAttributes: { class: LINK_CLASS },
+    },
+    // Drag affordances are for rearranging blocks; a Brief has only prose.
+    dropcursor: false,
+    gapcursor: false,
+  });
+  if (!options.placeholder) return [kit];
+  return [
+    kit,
+    Placeholder.configure({
+      placeholder: options.placeholder,
+      emptyEditorClass: 'is-editor-empty',
+    }),
+  ];
+}

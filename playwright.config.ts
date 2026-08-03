@@ -28,7 +28,14 @@ export default defineConfig({
     { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
   ],
   webServer: {
-    command: `${TEST_SUPABASE_ENV} npm run build && npm run preview -- --host 127.0.0.1 --port ${PORT} --strictPort`,
+    // `vite build` directly, NOT `npm run build`: the npm script also runs
+    // scripts/prerender.mjs, which contacts the REAL Supabase project (it
+    // deliberately ignores non-supabase.co URLs, so the test URL above does
+    // not stop it) and dies on 401 under the fake test key. This suite's
+    // whole premise is that no production backend is ever contacted; the
+    // SPA bundle is what it tests, and preview falls back to index.html for
+    // every route, so the per-essay static files are not needed here.
+    command: `${TEST_SUPABASE_ENV} npx vite build && npm run preview -- --host 127.0.0.1 --port ${PORT} --strictPort`,
     url: `http://127.0.0.1:${PORT}`,
     timeout: 180_000,
     reuseExistingServer: !process.env.CI,

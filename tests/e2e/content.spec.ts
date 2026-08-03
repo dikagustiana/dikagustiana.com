@@ -14,6 +14,10 @@ test.beforeEach(async ({ page }) => {
 });
 
 test('homepage renders featured essays returned by the backend', async ({ page }) => {
+  // The homepage's essay strip is the SELECTED mechanism (essays.is_selected,
+  // published only — see useSelectedEssays). This test predated it and
+  // asserted the old recency-based "Recent Analysis" heading; the seeded row
+  // now carries the featuring fields the real query filters on.
   const seededTitle = 'Seeded Featured Essay For E2E';
   await mockSupabase(page, {
     tables: {
@@ -28,6 +32,14 @@ test('homepage renders featured essays returned by the backend', async ({ page }
           author: 'Test Author',
           read_time: '5 min',
           created_at: new Date().toISOString(),
+          date: '2026-08-01',
+          is_selected: true,
+          published: true,
+          status: 'published',
+          finance_section: null,
+          fsli_slug: null,
+          topic: null,
+          finance_modules: null,
         },
       ],
     },
@@ -38,8 +50,8 @@ test('homepage renders featured essays returned by the backend', async ({ page }
 
   await page.goto('/', { waitUntil: 'load' });
 
-  // The "Recent Analysis" section only renders when essays are returned.
-  await expect(page.getByRole('heading', { name: 'Recent Analysis' })).toBeVisible();
+  // The "Selected Analysis" section only renders when essays are returned.
+  await expect(page.getByRole('heading', { name: 'Selected Analysis' })).toBeVisible();
   await expect(page.getByText(seededTitle)).toBeVisible();
   await expect(page.getByText('A deterministic snippet rendered from mock data.')).toBeVisible();
 

@@ -5,7 +5,7 @@
  * Single-column, wide paragraphs, minimal chrome, intellectual essay feel.
  */
 
-import { ReactNode, useMemo } from 'react';
+import { ReactNode, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, User, Calendar, Clock } from 'lucide-react';
 import { Header } from '@/components/Header';
@@ -13,6 +13,8 @@ import { Footer } from '@/components/Footer';
 import { ReadingProgress } from './ReadingProgress';
 import { ArticleToc } from './ArticleToc';
 import { ArticleBody } from './ArticleBody';
+import { BriefToggle, type EssayView } from './BriefToggle';
+import { parseBriefDoc, isEmptyBrief } from '@/lib/brief';
 import { contentToHtml } from '@/lib/tiptap/serialize';
 import { KeyTakeaways } from './KeyTakeaways';
 import { References } from './References';
@@ -38,6 +40,8 @@ export interface LongformArticleShellProps {
   content: string;
   /** Pre-rendered HTML for TOC extraction (optional, avoids double-conversion) */
   htmlContent?: string;
+  /** The essay's optional Brief companion — see ArticleShell's prop of the same name. */
+  brief?: unknown;
   keyTakeaways?: string[];
   references?: (string | { label: string; url?: string })[];
   authorBio?: string | null;
@@ -76,6 +80,7 @@ export function LongformArticleShell({
   heroCaption,
   content,
   htmlContent,
+  brief,
   keyTakeaways,
   references,
   authorBio,
@@ -95,6 +100,18 @@ export function LongformArticleShell({
 
   // ToC heading extraction parses HTML; the body may be stored as TipTap JSON.
   const tocHtml = useMemo(() => contentToHtml(content), [content]);
+
+  // Brief view — same rules as ArticleShell: toggle only when a real Brief
+  // exists, Full the default, reset on essay change.
+  const briefContent = useMemo(() => {
+    const doc = parseBriefDoc(brief);
+    return doc && !isEmptyBrief(doc) ? JSON.stringify(doc) : null;
+  }, [brief]);
+  const [view, setView] = useState<EssayView>('full');
+  useEffect(() => {
+    setView('full');
+  }, [content]);
+  const showBrief = view === 'brief' && briefContent != null;
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -181,15 +198,20 @@ export function LongformArticleShell({
             </figure>
           )}
 
+          {/* `Full · Brief` — only when a Brief exists, near the title. */}
+          {briefContent != null && <BriefToggle view={view} onChange={setView} />}
+
           {/* Table of contents — inline collapsible below lg: only; the
               sticky sidebar takes over at lg:+. htmlContent is the caller's
               precomputed HTML; tocHtml is the internal fallback so heading
-              extraction works even when only TipTap JSON was passed. */}
-          <ArticleToc className="lg:hidden" content={htmlContent || tocHtml} />
+              extraction works even when only TipTap JSON was passed.
+              Hidden in the Brief view — it navigates headings the Brief
+              does not have. */}
+          {!showBrief && <ArticleToc className="lg:hidden" content={htmlContent || tocHtml} />}
 
-          {/* ── Body ── */}
+          {/* ── Body — the one thing the toggle switches. ── */}
           <div className="longform-body">
-            <ArticleBody content={content} />
+            <ArticleBody content={showBrief ? briefContent : content} />
           </div>
 
           {/* End matter */}
@@ -219,11 +241,13 @@ export function LongformArticleShell({
 
           {/* Sticky ToC rail, lg:+ only. top-24 clears the fixed header and
               the reading-progress bar; the list caps its own height and
-              scrolls internally. */}
+              scrolls internally. Hidden in the Brief view. */}
           <aside className="hidden lg:block py-16">
-            <div className="sticky top-24">
-              <ArticleToc variant="sidebar" content={htmlContent || tocHtml} />
-            </div>
+            {!showBrief && (
+              <div className="sticky top-24">
+                <ArticleToc variant="sidebar" content={htmlContent || tocHtml} />
+              </div>
+            )}
           </aside>
         </div>
       </main>

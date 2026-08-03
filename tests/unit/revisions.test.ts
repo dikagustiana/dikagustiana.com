@@ -1,8 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import {
   REVISION_ROLLUP_MS,
+  autosaveTypeForBody,
   canAutosave,
   canonicalJson,
+  changeTypesForBody,
   docsDiffer,
   findRecoveryCandidate,
   isEmptyDoc,
@@ -166,5 +168,62 @@ describe('findRecoveryCandidate', () => {
 
   it('handles no history at all', () => {
     expect(findRecoveryCandidate(null, doc)).toBeNull();
+  });
+});
+
+// ── The Brief body namespace. Brief revisions share the table and the
+//    content_json column with long-body revisions, split by change_type;
+//    these tests are the fences that keep the two bodies from ever reading
+//    each other's backups (docs/DECISIONS.md, "Brief revisions coexist…"). ──
+
+describe('changeTypesForBody / autosaveTypeForBody', () => {
+  it('partitions every change type into exactly one body', () => {
+    const long = changeTypesForBody('long');
+    const brief = changeTypesForBody('brief');
+    expect(brief).toEqual(['brief_autosave', 'brief_manual_save']);
+    for (const t of brief) expect(long).not.toContain(t);
+    for (const t of long) expect(brief).not.toContain(t);
+  });
+
+  it('names each body its own autosave type', () => {
+    expect(autosaveTypeForBody('long')).toBe('autosave');
+    expect(autosaveTypeForBody('brief')).toBe('brief_autosave');
+  });
+});
+
+describe('cross-body fences', () => {
+  const longDoc = { type: 'doc', content: [{ type: 'paragraph' }] };
+
+  it('a brief backup can never become a LONG recovery candidate', () => {
+    // The failure this prevents: the long editor offering to "restore" a
+    // 26,000-character essay into its 600-word Brief.
+    const briefBackup = revision({ change_type: 'brief_autosave', content_json: { type: 'doc' } });
+    expect(findRecoveryCandidate(briefBackup, longDoc)).toBeNull();
+    expect(findRecoveryCandidate(briefBackup, longDoc, 'autosave')).toBeNull();
+  });
+
+  it('a long backup can never become a BRIEF recovery candidate', () => {
+    const longBackup = revision({ change_type: 'autosave', content_json: longDoc });
+    expect(findRecoveryCandidate(longBackup, null, 'brief_autosave')).toBeNull();
+  });
+
+  it('a brief backup IS a brief recovery candidate when it differs', () => {
+    const briefBackup = revision({ change_type: 'brief_autosave', content_json: longDoc });
+    expect(findRecoveryCandidate(briefBackup, null, 'brief_autosave')).not.toBeNull();
+  });
+
+  it('a brief autosave never rolls up a long-body row, even our own', () => {
+    const ours = revision({ change_type: 'autosave' });
+    expect(shouldRollUpRevision(ours, 'r1', NOW, 'brief_autosave')).toBe(false);
+  });
+
+  it('a brief autosave rolls up our own recent brief row', () => {
+    const ours = revision({ change_type: 'brief_autosave' });
+    expect(shouldRollUpRevision(ours, 'r1', NOW, 'brief_autosave')).toBe(true);
+  });
+
+  it('a brief manual save is never a rollup target', () => {
+    const ours = revision({ change_type: 'brief_manual_save' });
+    expect(shouldRollUpRevision(ours, 'r1', NOW, 'brief_autosave')).toBe(false);
   });
 });

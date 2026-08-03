@@ -23,13 +23,16 @@ import type { JSONContent } from '@tiptap/core';
 import { supabase } from '@/integrations/supabase/client';
 import {
   AUTOSAVE_DEBOUNCE_MS,
+  autosaveTypeForBody,
   canAutosave,
+  changeTypesForBody,
   docsDiffer,
   findRecoveryCandidate,
   isEmptyDoc,
   nextRevisionNo,
   shouldRollUpRevision,
   type RecoveryCandidate,
+  type RevisionBody,
   type RevisionChangeType,
   type RevisionSummary,
 } from '@/lib/revisions';
@@ -52,12 +55,40 @@ export interface EssayRevisionInput {
   changeSummary?: string | null;
 }
 
-/** Fetch the newest revision for an essay (highest revision_no). */
+/**
+ * Fetch the newest revision for an essay (highest revision_no), across BOTH
+ * bodies — revision_no is one sequence per essay, so numbering must see
+ * every row.
+ */
 async function fetchLatestRevision(essayId: string): Promise<RevisionSummary | null> {
   const { data, error } = await supabase
     .from('essay_revisions')
     .select(REVISION_COLUMNS)
     .eq('essay_id', essayId)
+    .order('revision_no', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) throw error;
+  return (data as RevisionSummary | null) ?? null;
+}
+
+/**
+ * Fetch the newest revision OF ONE BODY (long or brief). Rollup and the
+ * recovery probe must only ever see their own body's rows — a long-body
+ * recovery candidate that is actually a Brief backup would offer to replace
+ * the essay with its Brief (see docs/DECISIONS.md, "Brief revisions
+ * coexist…").
+ */
+async function fetchLatestRevisionOfBody(
+  essayId: string,
+  body: RevisionBody,
+): Promise<RevisionSummary | null> {
+  const { data, error } = await supabase
+    .from('essay_revisions')
+    .select(REVISION_COLUMNS)
+    .eq('essay_id', essayId)
+    .in('change_type', [...changeTypesForBody(body)])
     .order('revision_no', { ascending: false })
     .limit(1)
     .maybeSingle();
@@ -80,10 +111,22 @@ export async function writeRevision(
   input: EssayRevisionInput,
   ownRevisionId: string | null,
 ): Promise<string> {
-  const latest = await fetchLatestRevision(input.essayId);
   const doc = input.doc as unknown as null;
+  const body: RevisionBody =
+    input.changeType === 'brief_autosave' || input.changeType === 'brief_manual_save'
+      ? 'brief'
+      : 'long';
 
-  if (input.changeType === 'autosave' && shouldRollUpRevision(latest, ownRevisionId, Date.now())) {
+  // Rollup candidacy is judged against the newest revision OF THIS BODY —
+  // a Brief backup appending between two long autosaves must not stop the
+  // long burst from rolling up, and vice versa. Numbering (below) still
+  // reads the absolute latest, because revision_no is one sequence.
+  const latestOfBody = await fetchLatestRevisionOfBody(input.essayId, body);
+
+  if (
+    input.changeType === autosaveTypeForBody(body) &&
+    shouldRollUpRevision(latestOfBody, ownRevisionId, Date.now(), autosaveTypeForBody(body))
+  ) {
     const { error } = await supabase
       .from('essay_revisions')
       .update({
@@ -93,14 +136,14 @@ export async function writeRevision(
         status: input.status,
         created_at: new Date().toISOString(),
       })
-      .eq('id', latest!.id);
+      .eq('id', latestOfBody!.id);
 
     if (error) throw error;
-    return latest!.id;
+    return latestOfBody!.id;
   }
 
   let attempt = 0;
-  let candidate = nextRevisionNo(latest);
+  let candidate = nextRevisionNo(await fetchLatestRevision(input.essayId));
 
   while (true) {
     attempt += 1;
@@ -144,9 +187,17 @@ interface UseEssayAutosaveArgs {
   html?: string;
   /**
    * True for an essay that has never been published: autosave then writes the
-   * `essays` row itself, not just a backup.
+   * `essays` row itself, not just a backup. Ignored for `body: 'brief'` — a
+   * Brief autosave is ALWAYS backup-only, because its subject is usually a
+   * live page and one uniform rule beats two (docs/DECISIONS.md).
    */
   persistToEssay?: boolean;
+  /**
+   * Which body this hook instance is saving: the long essay ('long',
+   * default) or the Brief companion ('brief'). Selects the revision
+   * change_type namespace and scopes rollup/recovery to that namespace.
+   */
+  body?: RevisionBody;
   /**
    * Owned by WriterEditor: the row's updated_at as this tab last saw it.
    * The row-persisting write is guarded on it so a stale tab's autosave can
@@ -198,6 +249,7 @@ export function useEssayAutosave({
   enabled,
   html,
   persistToEssay = false,
+  body = 'long',
   serverUpdatedAtRef,
 }: UseEssayAutosaveArgs): UseEssayAutosaveResult {
   const [autosaveStatus, setAutosaveStatus] = useState<AutosaveStatus>('idle');
@@ -210,14 +262,17 @@ export function useEssayAutosave({
   // The doc as last backed up, so an unchanged doc never re-writes a revision.
   const backedUpDoc = useRef<unknown>(null);
   const inFlight = useRef(false);
+  // A Brief autosave never writes the essays row, whatever the caller says.
+  const persistRow = body === 'brief' ? false : persistToEssay;
+
   // Latest values, so the debounced callback never closes over stale state.
   const latestArgs = useRef({
-    essayId, title, snippet, status, doc, sectionId, categoryId, html, persistToEssay,
-    serverUpdatedAtRef,
+    essayId, title, snippet, status, doc, sectionId, categoryId, html,
+    persistToEssay: persistRow, body, serverUpdatedAtRef,
   });
   latestArgs.current = {
-    essayId, title, snippet, status, doc, sectionId, categoryId, html, persistToEssay,
-    serverUpdatedAtRef,
+    essayId, title, snippet, status, doc, sectionId, categoryId, html,
+    persistToEssay: persistRow, body, serverUpdatedAtRef,
   };
 
   const runAutosave = useCallback(async () => {
@@ -237,7 +292,7 @@ export function useEssayAutosave({
           title: args.title,
           snippet: args.snippet,
           status: args.status,
-          changeType: 'autosave',
+          changeType: autosaveTypeForBody(args.body),
         },
         ownRevisionId.current,
       );
@@ -383,11 +438,17 @@ export interface UseDraftRecoveryResult {
  *
  * Runs once per essay, right after load. The caller decides what to do with
  * the candidate — this never mutates the editor by itself.
+ *
+ * Scoped to ONE body: the long editor probes long-body backups, the Brief
+ * editor probes Brief backups. Cross-body candidates must be impossible —
+ * offering a Brief backup as long-body recovery would replace the essay
+ * with its Brief.
  */
 export function useDraftRecovery(
   essayId: string | null,
   essayDoc: unknown,
   ready: boolean,
+  body: RevisionBody = 'long',
 ): UseDraftRecoveryResult {
   const [candidate, setCandidate] = useState<RecoveryCandidate | null>(null);
   const checkedFor = useRef<string | null>(null);
@@ -399,9 +460,9 @@ export function useDraftRecovery(
     let cancelled = false;
     void (async () => {
       try {
-        const latest = await fetchLatestRevision(essayId);
+        const latest = await fetchLatestRevisionOfBody(essayId, body);
         if (cancelled) return;
-        setCandidate(findRecoveryCandidate(latest, essayDoc));
+        setCandidate(findRecoveryCandidate(latest, essayDoc, autosaveTypeForBody(body)));
       } catch {
         // A failed recovery probe must not block opening the editor; the
         // backup itself is unaffected and still in the table.
@@ -412,7 +473,7 @@ export function useDraftRecovery(
     return () => {
       cancelled = true;
     };
-  }, [essayId, essayDoc, ready]);
+  }, [essayId, essayDoc, ready, body]);
 
   const dismiss = useCallback(() => setCandidate(null), []);
 

@@ -90,8 +90,13 @@ read_time, thumbnail_url, content (legacy string), content_json (JSONB canonical
 (JSONB), published, sort_order, category_id (NOT NULL FK), voice_role, prerequisites[],
 learning_outcomes[], status (enum), manager_fields/economist_fields/educator_fields/coach_fields
 (JSONB), voice_validated_at, fsli_slug, topic, finance_section, finance_order, module_id (FK),
-lesson_type (enum), is_selected, created_at, updated_at`.
+lesson_type (enum), is_selected, brief_json (JSONB, optional Brief companion — restricted
+schema, no HTML mirror; see docs/DECISIONS.md 2026-08-03), created_at, updated_at`.
 **No `tags`, no `meta_description`.**
+`essay_revisions.change_type` carries two namespaces: long-body
+(`create/autosave/manual_save/publish/unpublish/rollback/migration`) and Brief
+(`brief_autosave/brief_manual_save`) — every reader must filter to one body
+(`src/lib/revisions.ts`).
 
 ## 5. RLS posture
 

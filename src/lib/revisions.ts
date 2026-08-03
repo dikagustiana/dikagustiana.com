@@ -33,7 +33,33 @@ export type RevisionChangeType =
   | 'publish'
   | 'unpublish'
   | 'rollback'
-  | 'migration';
+  | 'migration'
+  | 'brief_autosave'
+  | 'brief_manual_save';
+
+/**
+ * Which body a revision row describes. Brief revisions share the table and
+ * the content_json column with long-body revisions, namespaced by
+ * change_type (docs/DECISIONS.md, "Brief revisions coexist…"). Every reader
+ * MUST scope to one body: a long-body recovery probe that picked up a
+ * `brief_autosave` row would offer to replace the 26,000-character essay
+ * with its 600-word Brief.
+ */
+export type RevisionBody = 'long' | 'brief';
+
+export const BRIEF_CHANGE_TYPES: readonly string[] = ['brief_autosave', 'brief_manual_save'];
+
+/** The change types belonging to a body — the filter every reader applies. */
+export function changeTypesForBody(body: RevisionBody): readonly string[] {
+  return body === 'brief'
+    ? BRIEF_CHANGE_TYPES
+    : ['create', 'autosave', 'manual_save', 'publish', 'unpublish', 'rollback', 'migration'];
+}
+
+/** The autosave change type for a body (rollup compares against this). */
+export function autosaveTypeForBody(body: RevisionBody): RevisionChangeType {
+  return body === 'brief' ? 'brief_autosave' : 'autosave';
+}
 
 /** The subset of an `essay_revisions` row the decision logic needs. */
 export interface RevisionSummary {
@@ -118,15 +144,20 @@ export function canAutosave(state: {
  * this session did not write would silently destroy another tab's backup, and
  * a page reload deliberately starts a fresh revision so the pre-reload state
  * stays recoverable.
+ *
+ * `autosaveType` scopes the check to one body's autosave kind — a Brief
+ * autosave must never roll up a long-body row or vice versa, even if the id
+ * bookkeeping were somehow confused.
  */
 export function shouldRollUpRevision(
   latest: RevisionSummary | null,
   ownRevisionId: string | null,
   nowMs: number,
+  autosaveType: RevisionChangeType = 'autosave',
 ): boolean {
   if (!latest || !ownRevisionId) return false;
   if (latest.id !== ownRevisionId) return false;
-  if (latest.change_type !== 'autosave') return false;
+  if (latest.change_type !== autosaveType) return false;
   const age = nowMs - new Date(latest.created_at).getTime();
   return Number.isFinite(age) && age >= 0 && age < REVISION_ROLLUP_MS;
 }
@@ -153,13 +184,18 @@ export interface RecoveryCandidate {
  * the essays row holds. That is exactly the "the tab died before Save" case.
  * A matching backup means the last save captured everything and there is
  * nothing to recover. Recovery is never applied automatically.
+ *
+ * `latest` must already be the newest revision OF THIS BODY (the caller
+ * queries with the body filter); `autosaveType` is the second fence — a row
+ * of the other body's kind can never become a candidate here.
  */
 export function findRecoveryCandidate(
   latest: RevisionSummary | null,
   essayDoc: unknown,
+  autosaveType: RevisionChangeType = 'autosave',
 ): RecoveryCandidate | null {
   if (!latest) return null;
-  if (latest.change_type !== 'autosave') return null;
+  if (latest.change_type !== autosaveType) return null;
   if (!latest.content_json) return null;
   if (!docsDiffer(latest.content_json, essayDoc)) return null;
   return { revision: latest, savedAt: latest.created_at };

@@ -214,6 +214,7 @@ export type Database = {
       essays: {
         Row: {
           author: string | null
+          brief_json: Json | null
           category_id: string
           code: string | null
           content: string | null
@@ -248,6 +249,7 @@ export type Database = {
         }
         Insert: {
           author?: string | null
+          brief_json?: Json | null
           category_id?: string
           code?: string | null
           content?: string | null
@@ -282,6 +284,7 @@ export type Database = {
         }
         Update: {
           author?: string | null
+          brief_json?: Json | null
           category_id?: string
           code?: string | null
           content?: string | null

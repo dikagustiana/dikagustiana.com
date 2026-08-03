@@ -28,6 +28,8 @@ interface Essay {
   created_at: string;
   updated_at: string;
   presentation: EssayPresentation | null;
+  /** Optional Brief companion (raw jsonb) — the shell renders the toggle when present. */
+  brief_json: unknown;
 }
 
 interface EssayListItem {
@@ -200,6 +202,7 @@ export default function NextBigThingEssayPage() {
       heroCaption={presentation.hero_caption}
       content={essay.content || ''}
       htmlContent={htmlContent}
+      brief={essay.brief_json}
       keyTakeaways={presentation.key_takeaways}
       references={presentation.references}
       authorBio={presentation.author_bio}
