@@ -23,12 +23,15 @@ on:
     - cron: '17 20 * * *'
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   dump:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
@@ -38,6 +41,23 @@ jobs:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: node scripts/dump-content.mjs
+      # Belt-and-braces on top of the script's own row-count floors: a dump
+      # whose essays.json is implausibly small must never upload as a "good"
+      # artifact. 50 KB is far below any real dump of 100+ essays but far
+      # above an empty array / header-only file.
+      - name: Verify dump is not suspiciously small
+        run: |
+          ESSAYS=$(find backups -name essays.json | head -1)
+          if [ -z "$ESSAYS" ]; then
+            echo "::error::No essays.json found in backups/ — dump did not produce content."
+            exit 1
+          fi
+          SIZE=$(stat -c%s "$ESSAYS")
+          echo "essays.json: $SIZE bytes"
+          if [ "$SIZE" -lt 51200 ]; then
+            echo "::error::essays.json is only $SIZE bytes (< 50 KB) — refusing to treat this as a valid backup."
+            exit 1
+          fi
       - name: Upload dump artifact
         uses: actions/upload-artifact@v4
         with:
