@@ -73,6 +73,25 @@ under the landing-page hero, and redrew the narrow-screen layout.
   plate from 1280px and the HTML column below it on the first render. Rejected: both in the DOM with
   CSS display switching (duplicate buttons, duplicate ids, and the "robust for prerender" argument was
   false — prerender touches only essay routes).
+- **Between the phone and the plate, the column is read at reading width.** From 1280px up the
+  generated plate is the map; below that the column is, capped at 42rem rather than stretched across
+  a tablet. Lowering the plate's breakpoint was rejected: at 1024px its type would fall under 12px.
+- **A lens dims the geometry, never the type.** `opacity:.42` on the whole base group took every
+  stage and node name to about 2:1 — the very names the lens readings are anchored to. The rule now
+  selects leaf shapes only, so labels keep their contrast under a lens.
+- **The plate is a `role="group"`, and its lens overlays are NOT `aria-hidden`.** Under `role="img"`
+  the browser prunes every button inside the drawing; with the overlays hidden, pressing a lens word
+  announced "pressed" and exposed nothing. Both are reversed, and `display:none` still keeps the
+  inactive overlay out of the tree.
+- **Every box is sized from its own label.** The generator wraps each label to a per-column character
+  budget and derives the box width and height from the wrapped lines, so a longer word in the data
+  widens its box instead of overrunning it. Nothing in the generator restates a label any more — the
+  stage names and the distributor's recursion come from the data, and a test asserts it. A browser
+  audit (every text inside its box, no text over another text, nothing clipped) runs at rest and
+  under both lenses.
+- **Closing a reading returns focus to the door the reader came through**, even when they walked
+  from a joint into one of its layers: a trigger inside the panel does not become the return target,
+  and a detached one falls back to the figure.
 - **Mobile is a column, in HTML** (`ChainColumn.tsx`), replacing the generated tall SVG whose rotated
   9px type could not hold five bands as rails. Stages are boxes, nodes pills, joints tappable rows that
   open their reading right beneath them; origins and the two side inputs sit two abreast; layers are a
@@ -99,7 +118,7 @@ under the landing-page hero, and redrew the narrow-screen layout.
   pinned, and a draft lesson stays inert "Coming soon".
 - Every colour on the plate is a token; `chain-plate.css` is generated — edit the generator.
 - Layers per joint are derived from spans; do not add a hand list back.
-- Test floor raised 309 → 350 (353 tests).
+- Test floor raised 309 → 351 (354 tests).
 
 # 2026-09-05 — The chain at two distances: the headline wins, the lenses overlay, the mapping ships empty
 

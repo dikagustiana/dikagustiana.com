@@ -13,8 +13,9 @@
  * dash-dot with an open head, borders are vertical dashes with a chip.
  *
  * Contrast budget: at rest the base map sits on foreground / muted /
- * border. A lens dims the base to .42 and takes the accent at full, so the
- * overlay reads without the base ever disappearing.
+ * border. A lens dims the base GEOMETRY to .42 and takes the accent at full,
+ * so the overlay reads without the base ever disappearing; label text is
+ * never dimmed, so every name keeps its contrast under a lens.
  */
 .chain-plate{
   --cp-far: hsl(var(--accent));
@@ -23,9 +24,12 @@
 }
 .chain-plate .cp-svg{display:block;width:100%;height:auto}
 
-/* Base — the far reading, deliberately quiet so the lenses can speak. */
-.cp-base{transition:opacity .22s ease}
-.chain-plate[data-lens] .cp-base{opacity:.42}
+/* Base — the far reading, deliberately quiet so the lenses can speak. A lens
+   dims the GEOMETRY only: every label stays at full strength, because a name
+   the reader can no longer read is a name the lens reading cannot anchor to.
+   Leaf selectors, so nested groups never compound the opacity. */
+.cp-base :is(path,rect,circle,ellipse,line,polygon,polyline){transition:opacity .22s ease}
+.chain-plate[data-lens] .cp-base :is(path,rect,circle,ellipse,line,polygon,polyline){opacity:.42}
 .cp-stage rect{fill:hsl(var(--background));stroke:hsl(var(--foreground));stroke-width:1.5}
 .cp-stage .cp-origin{fill:hsl(var(--primary));stroke:none}
 .cp-stage-t{font-size:18px;font-weight:600;fill:hsl(var(--foreground));letter-spacing:-.005em}
@@ -94,4 +98,4 @@
 .cp-band-hit rect.cp-band-rect{fill:hsl(var(--secondary))}
 .cp-band-hit[aria-expanded="true"] rect.cp-band-rect{fill:hsl(var(--muted));stroke:var(--cp-near);stroke-width:1.5}
 .cp-band-hit:focus-visible rect.cp-band-rect{stroke:hsl(var(--ring));stroke-width:2}
-@media (prefers-reduced-motion:reduce){.cp-base{transition:none}}
+@media (prefers-reduced-motion:reduce){.cp-base :is(path,rect,circle,ellipse,line,polygon,polyline){transition:none}}

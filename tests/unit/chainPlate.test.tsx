@@ -128,8 +128,14 @@ describe('a joint as a door, with nothing mapped', () => {
     expect(within(layers).queryByRole('button', { name: /Contract capacity/ })).not.toBeInTheDocument();
 
     await userEvent.click(within(layers).getByRole('button', { name: /Credit and working capital/ }));
-    expect(screen.getByRole('region', { name: 'Credit and working capital' })).toBeInTheDocument();
+    const band = screen.getByRole('region', { name: 'Credit and working capital' });
+    expect(band).toBeInTheDocument();
     expect(screen.queryByRole('region', { name: 'Distributor → wholesaler' })).not.toBeInTheDocument();
+
+    // Closing that reading returns the reader to the door they came through,
+    // not to the top of the page: the layer link inside the panel is gone.
+    await userEvent.click(within(band).getByRole('button', { name: CHAIN_COPY.panel.close }));
+    expect(joint('Distributor → wholesaler')).toHaveFocus();
   });
 
   it('reads manufacturing → distribution both ways', async () => {

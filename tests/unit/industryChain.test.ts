@@ -90,11 +90,16 @@ describe('the three margin kinds', () => {
     }
   });
 
-  it('tell node from layer by the PSAK 72 principal–agent test — gross against net', () => {
+  it('tell node from layer by the PSAK 72 principal–agent test — the whole sale against the fee', () => {
     expect(MARGIN_KINDS['node-spread'].test).toMatch(/PSAK 72/);
     expect(MARGIN_KINDS['node-spread'].test.toLowerCase()).toContain('gross');
+    // A layer is not an agent for its own service — it is the principal for
+    // it, and books the fee. The agent proper is the intermediary that fails
+    // the control test, and the copy has to say so.
     expect(MARGIN_KINDS['service-fee'].test).toMatch(/PSAK 72/);
-    expect(MARGIN_KINDS['service-fee'].test.toLowerCase()).toContain('net');
+    expect(MARGIN_KINDS['service-fee'].test.toLowerCase()).toContain('fee for its own service');
+    expect(MARGIN_KINDS['service-fee'].test.toLowerCase()).toContain('control test');
+    expect(MARGIN_KINDS['service-fee'].lines.join(' ').toLowerCase()).toContain('net');
     expect(LEGEND_NOTE).toMatch(/PSAK 72/);
   });
 });
@@ -276,15 +281,30 @@ describe('the generated plates', () => {
     expect(ids).toContain(BYPRODUCT.id);
   });
 
-  it('draw every node, slice and economy note as text, in sync with the data', () => {
-    // Joined with a space, not a newline: a long note is wrapped onto consecutive <text> lines.
+  it('draw every stage, node, slice and economy note as text, in sync with the data', () => {
+    // Joined with a space, not a newline: a long label or note is wrapped onto
+    // consecutive <text> lines, so the plate holds the words but not the breaks.
     const drawn = texts(wideSrc).join(' ');
+    const compactDrawn = texts(compactSrc).join(' ');
+    for (const st of STAGES) expect(drawn, st.id).toContain(st.label);
+    for (const st of COMPACT.sequence.flatMap((x) => (x.kind === 'stages' ? x.ids : []))) {
+      expect(compactDrawn, st).toContain(STAGES.find((x) => x.id === st)!.label);
+    }
+    expect(drawn, 'the distributor recursion comes from the data too').toContain(
+      NODES.find((n) => n.id === 'node-distributor')!.recursion!,
+    );
     for (const n of [...NODES, ...RETAIL]) expect(drawn, n.id).toContain(n.label);
     for (const s of UNIT_LENS) expect(drawn, s.id).toContain(s.label);
     for (const e of ECONOMY_LENS) expect(drawn, e.id).toContain(e.note);
     for (const r of RETURNS) expect(drawn, r.id).toContain(r.label);
     for (const f of NON_PHYSICAL) expect(drawn, f.id).toContain(f.label);
     for (const b of BORDERS) expect(drawn, b.id).toContain(b.label);
+  });
+
+  it('keeps the lens overlays in the accessibility tree, and dims only geometry under a lens', () => {
+    expect(tsx).not.toMatch(/cp-lens[^>]*aria-hidden/);
+    expect(css).toMatch(/\.chain-plate\[data-lens\] \.cp-base :is\(path,rect/);
+    expect(css).not.toMatch(/\.chain-plate\[data-lens\] \.cp-base\{opacity/);
   });
 
   it('draw no hourglass hull, no filled entry stage, and no digits in any label', () => {

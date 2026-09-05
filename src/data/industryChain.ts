@@ -165,7 +165,7 @@ export const MARGIN_KINDS: Record<MarginKind, MarginKindInfo> = {
     chip: 'Fee',
     means:
       'Net revenue on capacity — a truck, a warehouse, a credit line, a machine hour — never on the goods themselves.',
-    test: 'PSAK 72 agent: the layer never controls the goods, so it books revenue net — the fee for its own service only. On the other side of the same line, the user of the layer books an expense.',
+    test: 'The layer never controls the goods, so their value never passes through its revenue: it books the fee for its own service, and under PSAK 72 it is the principal for that service. The PSAK 72 agent proper is the intermediary that fails the control test — a commission marketplace — whose spread is a fee for the same reason. On the other side of the same line, the user of the layer books an expense.',
     lines: [
       'Service revenue, net — at the provider',
       'Freight, rent, tolling or finance cost — at the user, in operating expense or finance cost',
@@ -341,11 +341,15 @@ export const JOINTS: Joint[] = [
     from: 'stage-consumption',
     to: 'stage-recovery',
     margin: 'service-fee',
-    note: 'Recovery is paid to take the goods: a collection or gate fee from the party discarding them, so money runs with the goods here. Its conversion margin comes later, when recyclate or compost is sold on the return flows.',
+    note: 'Where what is discarded has no value, recovery is paid to take it — a collection or gate fee from the party discarding it — so money runs with the goods here. Its conversion margin comes later, when recyclate or compost is sold on the return flows.',
     lines: [
       'Collection and gate fee revenue — at recovery; disposal cost — at the discarding party',
       'Recovered-material revenue, later, on the return flows',
     ],
+    alt: {
+      margin: 'conversion',
+      when: 'where what is discarded still has value: recovery buys it, money runs against the goods as at every other joint, and the slice is the conversion margin on what recovery sells back up the return flows',
+    },
   },
 ];
 
@@ -426,7 +430,7 @@ export const BANDS: Band[] = [
     lines: [
       "Rebates, trade promotion and listing fees — consideration payable to a customer, netted from the principal's revenue",
       'Variable consideration — targets and returns that leave the price uncertain until the period closes',
-      'Sales returns, and the provision for them',
+      'Sales returns — a refund liability, and an asset for the goods expected back',
     ],
   },
   {
@@ -438,7 +442,7 @@ export const BANDS: Band[] = [
     means: 'Sets what may be sold, moved and claimed. It takes no title and earns no fee; its cost lands in every function it touches.',
     lines: [
       'Compliance cost — certification, testing and licensing, inside operating expense',
-      'Excise and VAT — collected at each formal transfer of title, never earned; the fiscal reading in the economy lens',
+      'Excise, once, on release by the manufacturer or importer; VAT at each formal transfer of title — both collected, never earned; the fiscal reading in the economy lens',
     ],
   },
 ];
@@ -553,7 +557,7 @@ export const NON_PHYSICAL: NonPhysicalFlow[] = [
     kind: 'money',
     direction: 'upstream',
     label: 'Payment for the goods',
-    note: 'money against the goods, at every transfer of title — except at recovery, where the discarding party pays',
+    note: 'money against the goods, at every transfer of title — except where recovery is paid to take what has no value',
   },
   {
     id: 'flow-money-credit',

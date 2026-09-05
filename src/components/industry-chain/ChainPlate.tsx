@@ -102,15 +102,25 @@ export function ChainPlate({
     setSelected(null);
   }, []);
 
-  const onSelect = useCallback((id: string, trigger: Element | null) => {
-    triggerRef.current = trigger;
-    setSelected((current) => (current === id ? null : id));
-  }, []);
+  const onSelect = useCallback(
+    (id: string, trigger: Element | null) => {
+      // A layer named inside an open reading is a door too, but it is about
+      // to be unmounted with that reading — so the door the reader actually
+      // came through stays the one Close returns them to.
+      const panel = document.getElementById(panelId);
+      if (!(trigger && panel?.contains(trigger))) triggerRef.current = trigger;
+      setSelected((current) => (current === id ? null : id));
+    },
+    [panelId],
+  );
 
   const closePanel = useCallback(() => {
     setSelected(null);
     const t = triggerRef.current;
-    if (t && 'focus' in t && typeof (t as HTMLElement).focus === 'function') (t as HTMLElement).focus();
+    if (t instanceof HTMLElement || t instanceof SVGElement) {
+      if (t.isConnected) t.focus();
+      else figureRef.current?.focus();
+    } else figureRef.current?.focus();
   }, []);
 
   const toggleExpanded = useCallback(() => {
@@ -164,7 +174,14 @@ export function ChainPlate({
       </header>
 
       <ChainLensContext.Provider value={lensState}>
-        <figure id={figureId} ref={figureRef} tabIndex={-1} className={cn('mt-8 outline-none', FOCUS)}>
+        {/* Below the plate's width the column is the map, and a column is
+            read at reading width — not stretched across a tablet. */}
+        <figure
+          id={figureId}
+          ref={figureRef}
+          tabIndex={-1}
+          className={cn('mt-8 outline-none', !wideScreen && 'max-w-2xl', FOCUS)}
+        >
           {wideScreen ? (
             showCompact ? (
               <ChainPlateCompact />
@@ -197,7 +214,11 @@ export function ChainPlate({
 
         {!showCompact && wideScreen && selected && renderPanel(selected)}
 
-        {!showCompact && <ChainLegend collapsible={!wideScreen} />}
+        {!showCompact && (
+          <div className={cn(!wideScreen && 'max-w-2xl')}>
+            <ChainLegend collapsible={!wideScreen} />
+          </div>
+        )}
       </ChainLensContext.Provider>
     </div>
   );

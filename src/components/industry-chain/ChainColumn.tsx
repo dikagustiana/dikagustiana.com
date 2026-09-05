@@ -79,7 +79,9 @@ function SliceFor({ column }: { column: string }) {
       className="mt-1.5 rounded-sm border border-accent-editorial bg-accent-editorial/20 px-2 py-1 font-mono text-xs leading-snug text-foreground"
     >
       <span className="font-semibold">{slice.label}</span>
-      {slice.note && <span className="text-muted-foreground"> · {slice.note}</span>}
+      {/* Not muted: on the tinted ground muted grey falls under AA. Weight
+          separates label from note, as it does on the wide plate. */}
+      {slice.note && <span> · {slice.note}</span>}
     </div>
   );
 }
@@ -239,10 +241,6 @@ function ReturnsList({ id }: { id: string }) {
           </span>
         </li>
       ))}
-      <li data-id={BYPRODUCT.id} className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-2 text-xs leading-snug">
-        <span aria-hidden="true" className="text-muted-foreground">↘</span>
-        <span className="min-w-0 font-mono text-foreground">{BYPRODUCT.label}</span>
-      </li>
     </ul>
   );
 }
