@@ -232,13 +232,13 @@ function tall() {
   });
 
   o.push(
-    st(222, 38, 208, ['Biological primary production'], true), en(241, 208),
+    st(220, 44, 208, ['Biological primary', 'production'], true), en(242, 208),
     st(264, 32, 208, ['Geological extraction'], true), en(280, 208),
     down(296, 322), nd(322, 26, 156, 'Aggregation'),
     down(348, 380), st(380, 46, 112, ['Primary', 'processing']), en(402, 112),
     down(426, 452), nd(452, 26, 132, 'Trader / importer'),
-    down(478, 508), st(508, 34, 124, ['Packaging manufacture']), en(525, 124),
-    down(542, 572), st(572, 46, 124, ['Finished-goods', 'manufacturing']), en(594, 124),
+    down(478, 500), st(500, 44, 124, ['Packaging', 'manufacture']), en(522, 124),
+    down(544, 572), st(572, 46, 124, ['Finished-goods', 'manufacturing']), en(594, 124),
     down(618, 648), nd(648, 26, 160, 'Brand owner / principal'),
     down(674, 704), nd(704, 26, 150, 'Distributor'),
     T(b(150)[0] + 12, 742, '↳ sub-distributor · regional agent', { cls: 'recur' }),
@@ -405,6 +405,8 @@ figcaption{font-family:var(--mono);font-size:10px;color:var(--ledger);line-heigh
 .stage rect{fill:var(--paper);stroke:var(--ink);stroke-width:1.4}
 .stage--entry rect{fill:var(--ink);stroke:none}
 .stage-t{font-size:14.5px;font-weight:600;fill:var(--ink);letter-spacing:-.005em}
+/* The tall plate renders near 1:1, where 14.5 overruns the narrow boxes. */
+.plate--tall .stage-t{font-size:13px}
 .stage-t--rev{fill:var(--paper)}
 .entry-bar{stroke:var(--ink);stroke-width:5;stroke-linecap:square}
 .node rect{fill:none;stroke:var(--ink-soft);stroke-width:1;stroke-dasharray:3 2.5}

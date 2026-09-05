@@ -300,9 +300,9 @@ export function ChainPlate() {
         <path className="flow-thin" d="M 266 158 C 266 196, 190 186, 190 222"/>
         <text x="270" y="152" className="lane-t" textAnchor="start" transform="rotate(-90 270 152)">Minerals and ores</text>
         <g className="stage stage--entry">
-            <rect x="86" y="222" width="208" height="38" rx="2"/>
-            <text x="96" y="246" className="stage-t stage-t--rev" textAnchor="start">Biological primary production</text></g>
-        <path className="energy" d="M 316 241 L 298 241" markerEnd="url(#tip-energy)"/>
+            <rect x="86" y="220" width="208" height="44" rx="2"/>
+            <text x="96" y="240" className="stage-t stage-t--rev" textAnchor="start">Biological primary</text><text x="96" y="254" className="stage-t stage-t--rev" textAnchor="start">production</text></g>
+        <path className="energy" d="M 316 242 L 298 242" markerEnd="url(#tip-energy)"/>
         <g className="stage stage--entry">
             <rect x="86" y="264" width="208" height="32" rx="2"/>
             <text x="96" y="285" className="stage-t stage-t--rev" textAnchor="start">Geological extraction</text></g>
@@ -320,12 +320,12 @@ export function ChainPlate() {
         
         <g className="node"><rect x="124" y="452" width="132" height="26" rx="13"/>
           <text x="136" y="469" className="node-t" textAnchor="start">Trader / importer</text></g>
-        <path className="flow" d="M 190 478 L 190 508" markerEnd="url(#tip)"/>
+        <path className="flow" d="M 190 478 L 190 500" markerEnd="url(#tip)"/>
         <g className="stage">
-            <rect x="128" y="508" width="124" height="34" rx="2"/>
-            <text x="138" y="530" className="stage-t" textAnchor="start">Packaging manufacture</text></g>
-        <path className="energy" d="M 274 525 L 256 525" markerEnd="url(#tip-energy)"/>
-        <path className="flow" d="M 190 542 L 190 572" markerEnd="url(#tip)"/>
+            <rect x="128" y="500" width="124" height="44" rx="2"/>
+            <text x="138" y="520" className="stage-t" textAnchor="start">Packaging</text><text x="138" y="534" className="stage-t" textAnchor="start">manufacture</text></g>
+        <path className="energy" d="M 274 522 L 256 522" markerEnd="url(#tip-energy)"/>
+        <path className="flow" d="M 190 544 L 190 572" markerEnd="url(#tip)"/>
         <g className="stage">
             <rect x="128" y="572" width="124" height="46" rx="2"/>
             <text x="138" y="593" className="stage-t" textAnchor="start">Finished-goods</text><text x="138" y="607" className="stage-t" textAnchor="start">manufacturing</text></g>

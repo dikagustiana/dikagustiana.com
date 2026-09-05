@@ -35,6 +35,8 @@
 .chain-plate .stage rect{fill:var(--paper);stroke:var(--ink);stroke-width:1.4}
 .chain-plate .stage--entry rect{fill:var(--ink);stroke:none}
 .chain-plate .stage-t{font-size:14.5px;font-weight:600;fill:var(--ink);letter-spacing:-.005em}
+/* The tall plate renders near 1:1, where 14.5 overruns the narrow boxes. */
+.chain-plate .plate--tall .stage-t{font-size:13px}
 .chain-plate .stage-t--rev{fill:var(--paper)}
 .chain-plate .entry-bar{stroke:var(--ink);stroke-width:5;stroke-linecap:square}
 .chain-plate .node rect{fill:none;stroke:var(--ink-soft);stroke-width:1;stroke-dasharray:3 2.5}
