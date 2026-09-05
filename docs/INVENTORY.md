@@ -23,7 +23,7 @@ Gating: **[P]** public · **[A]** admin-only (`RequireAdmin`).
 | Path | Page | Data | States present | SEO |
 |---|---|---|---|---|
 | `/` [P] | `Index.tsx` | `useFeaturedEssays(4)` | loading | ✓ |
-| `/about` [P] | `About.tsx` | `useSelectedEssays()` | — | ✓ |
+| `/about` [P] | `About.tsx` | `useSelectedEssays()` · `useChainModules()` (chain plate, only when a joint with a mapped module is opened) | loading (curriculum panel) | ✓ |
 | `/auth` [P] | `Auth.tsx` | `useAuth` + form | — | ✗ |
 | `*` [P] | `NotFound.tsx` | — | — | ✗ (also `console.error` on every hit) |
 

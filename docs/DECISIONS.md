@@ -5,6 +5,90 @@ alternatives. Newest first.
 
 ---
 
+# 2026-09-05 — The chain at two distances: the headline wins, the lenses overlay, the mapping ships empty
+
+**The About map is rebuilt around one verbatim sentence — "Nothing here is complicated. It
+only looks that way from the wrong distance." — and the diagram is subordinate to it.** Three
+versions preceded this one in a single day: a toggle-and-panel map on About, a ledger-green
+standalone plate proposed for the landing page, and that plate mounted in place of the homepage
+hero. All three are gone. The homepage has its hero back (the DELIBERATE KEEP in
+`HeroSection.tsx` stands); About carries the plate; the landing page waits — "masuk ke About
+dulu, belum ke landing page".
+
+## Owner decisions taken in session, recorded so they are not re-litigated
+
+- **The chain is an hourglass** — narrows to primary processing, widens after distribution.
+  This reverses the morning brief of the same day, which forbade claiming any chain shape. The
+  later brief marks it final content; it is drawn, not captioned: lane count carries it on the
+  wide plate, box width on the tall one.
+- **Content is final.** Four categories never share a visual treatment (transformation stage,
+  intermediary node, spanning layer, physical return). Logistics is a spanning layer, not a
+  parallel stage. Energy is a perpendicular input into every stage, not a first stage. Two
+  flows run against the goods: money right-to-left, physical returns.
+- **The enabling-layer table under the map is dissolved, not tidied.** At rest only two bands
+  survive — logistics and warehousing; regulation and standards. Contract capacity (makloon,
+  toll manufacturing) is deleted outright, not kept in any form. Principal–distributor contract
+  governance is an attribute of one joint (manufacturing → distribution), visible only under a
+  lens. Monetary policy, fiscal policy and the external balance moved into the ECONOMY lens;
+  credit and working capital (DSO, DIO, DPO — who finances whom) into UNIT ECONOMICS.
+- **No figures.** Not percentages, not amounts, not "illustrative" magnitudes. The map carries
+  the anatomy of a slice — what attaches at a joint and which way the cost moves — never its
+  size. `tests/unit/industryChain.test.ts` asserts no digit appears in the data or the
+  generated plate.
+- **The joint → module mapping is data, not a design decision.** `src/data/chainCurriculumMap.ts`
+  ships EMPTY with the schema documented (joint · moduleSlug · moduleClass ∈ chain-located,
+  chain-wide, off-chain). Only chain-located rows attach. Nothing was guessed from module
+  titles: a module linked to the wrong joint does more damage than a joint with no module yet.
+- **Placement:** the earlier same-day choice "the plate replaces the hero" is superseded by the
+  later brief; the hero is back and the About section carries the map.
+
+## Decisions taken here, with the alternative rejected
+
+- **The lens control is the sentence.** The supporting line under the headline names the two
+  lenses, and those two words are the two buttons (dotted underline at rest, solid in the lens
+  colour when on, `aria-pressed`). Rejected: a toggle bar above the map (the previous brief
+  killed it — controls announced before anything is worth controlling) and buttons under the
+  plate (chrome that competes with the headline for the entry point).
+- **Palette stays inside the navy system; the two lenses take the two accents it already has.**
+  ECONOMY = `--accent` (navy; cool recedes, the far reading). UNIT ECONOMICS =
+  `--accent-editorial` (the Substack orange; warm advances, the near reading) — used only as a
+  field and an edge, never as text: as text it measures 2.4:1 on `--card`, below AA. Rejected:
+  `--destructive` (passes contrast, but it is the delete-button red and would couple a lens to
+  admin semantics) and a new token (the brief said not to touch the theme).
+- **Returns are neutral** (`--muted-foreground`, dashed) so that red means exactly one thing on
+  the page. The oxide-red returns of the standalone plate also cut through text.
+- **The unit-economics strip mirrors the hull's own lower edge.** Slice thickness at each column
+  is the hull's half-height there, so cost per unit visibly falls to processing and rises after
+  distribution from the SAME geometry as the base map — the two lenses cannot disagree on the
+  shape. Rejected: a cumulative stacked bar (its step sizes are implied magnitudes, and it does
+  not read as an hourglass).
+- **Information flow is no longer drawn.** The brief's final content names two counter-flows and
+  a resting state of "the chain and two bands, nothing more"; information was neither. The
+  by-product branch is kept, small, as a forward flow out of processing.
+- **The regulation band is "Regulation and standards"**, because fiscal status moved into the
+  ECONOMY lens under the brief's own split.
+- **Geometry is generated, not hand-placed.** `scripts/build-chain-plate.mjs`
+  (`npm run build:chain`) imports `src/data/industryChain.ts` directly (Node type stripping)
+  and writes `ChainPlateSvg.tsx` and `chain-plate.css`; a test checks the generated file is in
+  sync with the data. Rejected: hand-authored SVG — two layouts × ~200 coordinates do not stay
+  on one grid, and the third same-day rework proved it.
+- **Mobile is a redesign, not a shrink.** The hourglass stands upright (box width carries the
+  pinch); the two bands become rails on the far left; returns run the gutter beside them; both
+  lenses write into a right-hand column with wrapped notes; the curriculum panel drops below.
+- **Skills:** `frontend-design` (and `design-direction`, which `component-craft` refers to) are
+  not in the account's library. `artifact-design` and `artifact-diagramming` stood in for the
+  page-level direction; `component-craft` was used as briefed.
+
+## What a future session must not undo by accident
+
+- The headline is verbatim, and a test asserts it. Do not rewrite, soften or lengthen it.
+- No digits anywhere in the map — data or generated plate. A test asserts it.
+- A joint with no chain-located mapping renders NO target: not a disabled one, none.
+- In the curriculum panel a draft lesson is inert text labelled "Coming soon" on the same
+  `published` flag `FinanceTrackIndex` uses. Never a link that 404s.
+- Every colour on the plate is a token. `chain-plate.css` is generated; edit the generator.
+- Test floor raised 299 → 309 (312 tests; the map's 19 replaced by the plate's 29).
+
 # 2026-08-03 — The structure is public: draft titles and decks render to everyone
 
 **Owner decision, reversing the 2026-08-01 rule "do not make drafts anon-readable" —
