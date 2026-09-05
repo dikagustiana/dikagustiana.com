@@ -49,8 +49,8 @@ describe('ChainPlate at rest', () => {
     expect(screen.getByRole('button', { name: 'unit economics' })).toHaveAttribute('aria-pressed', 'false');
   });
 
-  it('offers no joint targets while the mapping table is empty', async () => {
-    mount(<ChainPlate />);
+  it('offers no joint targets when nothing is mapped', async () => {
+    mount(<ChainPlate links={[]} />);
     await userEvent.click(screen.getByRole('button', { name: 'unit economics' }));
     expect(document.querySelectorAll('.cp-joint')).toHaveLength(0);
     expect(screen.queryByText(/Select a highlighted joint/)).not.toBeInTheDocument();

@@ -36,9 +36,17 @@ dulu, belum ke landing page".
   size. `tests/unit/industryChain.test.ts` asserts no digit appears in the data or the
   generated plate.
 - **The joint → module mapping is data, not a design decision.** `src/data/chainCurriculumMap.ts`
-  ships EMPTY with the schema documented (joint · moduleSlug · moduleClass ∈ chain-located,
-  chain-wide, off-chain). Only chain-located rows attach. Nothing was guessed from module
-  titles: a module linked to the wrong joint does more damage than a joint with no module yet.
+  documents the schema (joint · moduleSlug · moduleClass ∈ chain-located, chain-wide,
+  off-chain); only chain-located rows attach. It shipped empty, then the owner asked for the
+  manufacturing → distribution joint to be filled first. Every row was checked against the live
+  `finance_modules` table before it went in: `t1-m10` Working Capital Management and `t3-m06`
+  Working Capital Optimization and Cash Conversion — the two modules that read receivables,
+  payables and inventory, which is exactly what the lens sites at that joint ("DSO · DPO — who
+  finances whom"). Considered and rejected for the same joint: `t2-m01` Corporate Governance and
+  Agency Theory (the joint's attribute is contract governance between two firms, not board-level
+  agency), `t2-m07` Credit Risk (framed on covenants, not trade receivables), `t4-m05` Unit
+  Economics (the lens's own method — chain-wide, not one joint's). All six essays under the two
+  modules are drafts, so the panel links the modules and lists the lessons as inert "Coming soon".
 - **Placement:** the earlier same-day choice "the plate replaces the hero" is superseded by the
   later brief; the hero is back and the About section carries the map.
 

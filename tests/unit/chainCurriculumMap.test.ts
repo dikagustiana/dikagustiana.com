@@ -24,10 +24,19 @@ describe('the shipped mapping table', () => {
     for (const row of CHAIN_MODULE_LINKS) expect(CLASSES).toContain(row.moduleClass);
   });
 
-  it('leaves every joint quiet until the owner fills it in', () => {
-    // Ships empty on purpose. If this fails, someone has added rows — fine,
-    // but the placeholder comment in the data file should then be removed.
-    for (const j of JOINT_IDS) expect(jointHasModules(j)).toBe(false);
+  it('pins the two working-capital modules to manufacturing → distribution, and nothing else yet', () => {
+    // Filled one joint at a time, each row checked against finance_modules.
+    // If this fails because a joint was added, extend the expectation — do
+    // not loosen it: an unexpected mapping is exactly what this guards.
+    expect(locatedModulesByJoint()['j-manufacturing-distribution']).toEqual(['t1-m10', 't3-m06']);
+    for (const j of JOINT_IDS) {
+      expect(jointHasModules(j), j).toBe(j === 'j-manufacturing-distribution');
+    }
+  });
+
+  it('never pins the same module to one joint twice', () => {
+    const keys = CHAIN_MODULE_LINKS.map((r) => `${r.joint}::${r.moduleSlug}`);
+    expect(new Set(keys).size).toBe(keys.length);
   });
 });
 
