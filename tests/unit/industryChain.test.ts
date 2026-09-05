@@ -1,173 +1,126 @@
 /**
- * The map's data contract.
+ * The chain's content contract.
  *
- * The four categories are the whole claim of this diagram, so the things that
- * would quietly break it are asserted here: an id that two categories share, a
- * macro lens pointing at an element that does not exist, a node with no group,
- * a by-product that has drifted into the return flows.
+ * What would quietly break the page: a lens reading anchored to something
+ * that does not exist, a slice under a column the layout does not have, a
+ * figure sneaking into a map that promises none, or the generated plate
+ * drifting from the data it was generated from.
  */
 
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
-  BOUNDARY,
-  BYPRODUCT_BRANCH,
-  CHAIN_META,
-  LAYERS,
-  MACRO_ENTRIES,
+  BANDS,
+  BYPRODUCT,
+  CHAIN_COPY,
+  ECONOMY_LENS,
+  ENERGY,
+  JOINT_ATTRIBUTES,
+  JOINT_IDS,
+  JOINT_LABELS,
+  MONEY,
   NODES,
-  NODE_GROUPS,
-  NON_PHYSICAL_FLOWS,
-  RETURN_FLOWS,
-  RETURN_SUMMARY,
+  RETAIL,
+  RETURNS,
   STAGES,
+  UNIT_LENS,
+  UNIT_LOGISTICS,
 } from '@/data/industryChain';
-import { highlightSetFor, labelFor, resolvePanel } from '@/components/industry-chain/chainModel';
 
-const allIds = [
-  ...STAGES.map((s) => s.id),
-  ...STAGES.flatMap((s) => (s.subLabels ?? []).map((sub) => sub.id)),
-  ...NODE_GROUPS.map((g) => g.id),
-  ...NODES.map((n) => n.id),
-  ...LAYERS.map((l) => l.id),
-  ...LAYERS.flatMap((l) => (l.subBands ?? []).map((b) => b.id)),
-  ...RETURN_FLOWS.map((r) => r.id),
-  ...NON_PHYSICAL_FLOWS.map((f) => f.id),
-  ...MACRO_ENTRIES.map((m) => m.id),
-  BOUNDARY.id,
-  BYPRODUCT_BRANCH.id,
-  RETURN_SUMMARY.id,
-];
+const stageIds = new Set(STAGES.map((s) => s.id));
+const nodeIds = new Set([...NODES, ...RETAIL].map((n) => n.id));
+const anchorIds = new Set([...stageIds, ...nodeIds, ...JOINT_IDS, ENERGY.id, 'node-retail']);
 
-describe('industry chain data', () => {
-  it('gives every element a unique id', () => {
-    expect(new Set(allIds).size).toBe(allIds.length);
+describe('the chain', () => {
+  it('names every joint exactly once, and labels each one', () => {
+    expect(new Set(JOINT_IDS).size).toBe(JOINT_IDS.length);
+    for (const j of JOINT_IDS) expect(JOINT_LABELS[j], j).toBeTruthy();
   });
 
-  it('resolves a panel for every element', () => {
-    for (const id of allIds) {
-      expect(resolvePanel(id), id).not.toBeNull();
-      expect(resolvePanel(id)?.definition, id).toBeTruthy();
+  it('draws exactly two spanning layers, and contract capacity is nowhere', () => {
+    expect(BANDS.map((b) => b.id)).toEqual(['band-logistics', 'band-regulation']);
+    const everything = JSON.stringify({ STAGES, NODES, RETAIL, BANDS, JOINT_ATTRIBUTES, RETURNS, ECONOMY_LENS, UNIT_LENS, CHAIN_COPY });
+    expect(everything.toLowerCase()).not.toMatch(/makloon|toll manufacturing|contract capacity/);
+  });
+
+  it('pins every joint attribute to a real joint', () => {
+    for (const a of JOINT_ATTRIBUTES) expect(JOINT_IDS).toContain(a.joint);
+  });
+
+  it('routes every return between real ends', () => {
+    const ends = new Set([...stageIds, ...nodeIds, 'node-retail']);
+    for (const r of RETURNS) {
+      expect(ends.has(r.from), `${r.id} from ${r.from}`).toBe(true);
+      expect(ends.has(r.to), `${r.id} to ${r.to}`).toBe(true);
     }
-  });
-
-  it('returns nothing for an id the map does not know', () => {
-    expect(resolvePanel('stage-nonexistent')).toBeNull();
-    expect(labelFor('stage-nonexistent')).toBeUndefined();
-  });
-
-  it('numbers exactly six transformation stages on the axis', () => {
-    const numbered = STAGES.filter((stage) => stage.ordinal !== null);
-    expect(numbered.map((stage) => stage.ordinal)).toEqual([1, 2, 3, 4, 5, 6]);
-    // Packaging is a parallel branch, so it carries no ordinal.
-    expect(STAGES.filter((stage) => stage.ordinal === null).map((s) => s.id)).toEqual([
-      'stage-packaging',
-    ]);
-  });
-
-  it('starts the chain with two parallel beginnings that share a column', () => {
-    const beginnings = STAGES.filter((stage) => stage.column === 1);
-    expect(beginnings.map((stage) => stage.lane).sort()).toEqual(['lower', 'upper']);
-  });
-
-  it('collapses the nodes into exactly three top-level groups', () => {
-    expect(NODE_GROUPS).toHaveLength(3);
-  });
-
-  it('places every node in a group, and every group member in NODES', () => {
-    const groupIds = new Set(NODE_GROUPS.map((group) => group.id));
-    const nodeIds = new Set(NODES.map((node) => node.id));
-    for (const node of NODES) expect(groupIds.has(node.groupId), node.id).toBe(true);
-    for (const group of NODE_GROUPS) {
-      for (const member of group.members) expect(nodeIds.has(member), member).toBe(true);
-    }
-    // No node is orphaned from its group's member list either.
-    const listed = new Set(NODE_GROUPS.flatMap((group) => group.members));
-    for (const node of NODES) expect(listed.has(node.id), node.id).toBe(true);
-  });
-
-  it('keeps the by-product out of the return flows', () => {
-    expect(RETURN_FLOWS.map((flow) => flow.id)).not.toContain(BYPRODUCT_BRANCH.id);
-    expect(resolvePanel(BYPRODUCT_BRANCH.id)?.category).toBe('branch');
-  });
-
-  it('draws four leftward return flows and one loop', () => {
-    expect(RETURN_FLOWS.filter((flow) => flow.shape === 'leftward')).toHaveLength(4);
-    expect(RETURN_FLOWS.filter((flow) => flow.shape === 'loop')).toHaveLength(1);
-  });
-
-  it('counts seven enabling layers, one of which is not a band', () => {
-    expect(LAYERS).toHaveLength(6);
-    expect(BOUNDARY.crossings).toHaveLength(3);
-    expect(LAYERS.map((layer) => layer.id)).not.toContain(BOUNDARY.id);
-  });
-
-  it('never mixes the categories', () => {
-    for (const stage of STAGES) expect(resolvePanel(stage.id)?.category).toBe('stage');
-    for (const group of NODE_GROUPS) expect(resolvePanel(group.id)?.category).toBe('node');
-    for (const node of NODES) expect(resolvePanel(node.id)?.category).toBe('node');
-    for (const layer of LAYERS) expect(resolvePanel(layer.id)?.category).toBe('layer');
-    for (const flow of RETURN_FLOWS) expect(resolvePanel(flow.id)?.category).toBe('return');
+    expect(RETURNS.map((r) => r.id)).not.toContain(BYPRODUCT.id);
   });
 });
 
-describe('the macro lens', () => {
-  it('carries eight variables, each with a micro counterpart', () => {
-    expect(MACRO_ENTRIES).toHaveLength(8);
-    for (const entry of MACRO_ENTRIES) {
-      expect(entry.micro.label, entry.id).toBeTruthy();
-      expect(entry.micro.description, entry.id).toBeTruthy();
-      expect(entry.badge.length, entry.id).toBeLessThanOrEqual(2);
+describe('the lenses', () => {
+  it('anchors every economy reading to a stage, node, joint or the energy input', () => {
+    for (const item of ECONOMY_LENS) expect(anchorIds.has(item.anchor), `${item.id} → ${item.anchor}`).toBe(true);
+  });
+
+  it('covers every variable the economy lens promises', () => {
+    const labels = new Set(ECONOMY_LENS.map((i) => i.label));
+    for (const must of ['Inflation', 'Exchange rate', 'Labour', 'Business cycle', 'Growth', 'External balance', 'Monetary policy', 'Fiscal', 'Capital goods', 'Import share', 'Energy intensity']) {
+      expect(labels.has(must), must).toBe(true);
     }
   });
 
-  it('only ever highlights elements that exist', () => {
-    const known = new Set(allIds);
-    for (const entry of MACRO_ENTRIES) {
-      for (const target of entry.highlights) expect(known.has(target), `${entry.id} → ${target}`).toBe(true);
-    }
+  it('sits every unit-economics slice under a real column, in chain order', () => {
+    const columns = new Set([...stageIds, ...nodeIds, 'node-retail']);
+    for (const s of UNIT_LENS) expect(columns.has(s.column), `${s.id} → ${s.column}`).toBe(true);
+    expect(UNIT_LENS[0].column).toBe('stage-biological');
+    expect(UNIT_LENS[UNIT_LENS.length - 1].column).toBe('stage-consumption');
   });
 
-  it('lights a node group when the variable enters at one of its nodes', () => {
-    // Exchange rate enters at the trader, which is only drawn once Detail is
-    // on — so the group it belongs to has to light up at the top level too.
-    const lit = highlightSetFor('macro-fx');
-    expect(lit.has('node-trader')).toBe(true);
-    expect(lit.has('group-distribution')).toBe(true);
-    expect(lit.has('stage-extraction')).toBe(true);
-  });
-
-  it('lights the parent stage when the variable enters at a sub-label', () => {
-    const lit = highlightSetFor('macro-external');
-    expect(lit.has('sub-abroad')).toBe(true);
-    expect(lit.has('stage-consumption')).toBe(true);
-  });
-
-  it('lights nothing when no lens is chosen', () => {
-    expect(highlightSetFor(null).size).toBe(0);
-    expect(highlightSetFor('macro-nonexistent').size).toBe(0);
-  });
-
-  it('shows the micro counterpart in the same panel as the macro entry', () => {
-    for (const entry of MACRO_ENTRIES) {
-      expect(resolvePanel(entry.id)?.micro).toEqual(entry.micro);
+  it('covers the five things a slice is made of', () => {
+    const text = [...UNIT_LENS.map((s) => `${s.label} ${s.note ?? ''}`), UNIT_LOGISTICS.label].join(' ').toLowerCase();
+    for (const must of ['value added', 'logistics', 'cost to serve', 'contribution margin', 'dso']) {
+      expect(text, must).toContain(must);
     }
   });
 });
 
-describe('the section copy', () => {
-  it('states the thesis in sixty words or fewer', () => {
-    expect(CHAIN_META.intro.trim().split(/\s+/).length).toBeLessThanOrEqual(60);
+describe('what the map promises', () => {
+  it('keeps the headline verbatim', () => {
+    expect(CHAIN_COPY.headline).toBe('Nothing here is complicated. It only looks that way from the wrong distance.');
   });
 
-  it('carries no figures — the map is structure and mechanism only', () => {
-    const prose = [
-      CHAIN_META.intro,
-      ...STAGES.map((s) => `${s.definition} ${(s.detail ?? []).join(' ')}`),
-      ...NODES.map((n) => `${n.definition} ${(n.detail ?? []).join(' ')}`),
-      ...LAYERS.map((l) => `${l.definition} ${(l.detail ?? []).join(' ')}`),
-      ...MACRO_ENTRIES.map((m) => `${m.definition} ${m.micro.description}`),
-    ].join(' ');
-    // PSAK 72 is a standard's number, and lives only in the footnote.
-    expect(prose).not.toMatch(/\d/);
+  it('carries no figures anywhere — no percentages, amounts or magnitudes', () => {
+    const text = JSON.stringify({ STAGES, NODES, RETAIL, BANDS, JOINT_ATTRIBUTES, RETURNS, BYPRODUCT, MONEY, ENERGY, ECONOMY_LENS, UNIT_LENS, UNIT_LOGISTICS, CHAIN_COPY, JOINT_LABELS });
+    expect(text).not.toMatch(/\d/);
+  });
+});
+
+describe('the generated plate', () => {
+  const tsx = readFileSync(resolve(process.cwd(), 'src/components/industry-chain/ChainPlateSvg.tsx'), 'utf8');
+  const texts = Array.from(tsx.matchAll(/<text[^>]*>([^<]*)<\/text>/g)).map((m) => m[1]);
+
+  it('is in sync with the data: every node, band and slice label is drawn', () => {
+    const drawn = texts.join('\n');
+    for (const n of [...NODES, ...RETAIL]) expect(drawn, n.id).toContain(n.label);
+    for (const b of BANDS) expect(drawn, b.id).toContain(b.label);
+    for (const s of UNIT_LENS) expect(drawn, s.id).toContain(s.label);
+    for (const e of ECONOMY_LENS) expect(drawn, e.id).toContain(e.note);
+  });
+
+  it('draws no digits in any label', () => {
+    for (const t of texts) expect(t, t).not.toMatch(/\d/);
+  });
+
+  it('carries every joint as a possible curriculum door, in both layouts', () => {
+    for (const j of JOINT_IDS) {
+      const hits = tsx.match(new RegExp(`<JointHit id="${j}"`, 'g')) ?? [];
+      expect(hits.length, j).toBe(2);
+    }
+  });
+
+  it('never shows a caption sentence under the plate', () => {
+    expect(tsx).not.toMatch(/accounting instrument/i);
+    expect(tsx).not.toContain('<figcaption');
   });
 });

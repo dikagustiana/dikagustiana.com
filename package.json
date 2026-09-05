@@ -15,7 +15,8 @@
     "test:unit": "vitest run",
     "test:watch": "vitest",
     "dump:content": "node scripts/dump-content.mjs",
-    "prerender": "node scripts/prerender.mjs"
+    "prerender": "node scripts/prerender.mjs",
+    "build:chain": "node --experimental-strip-types scripts/build-chain-plate.mjs"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.11",

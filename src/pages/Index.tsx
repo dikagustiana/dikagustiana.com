@@ -7,7 +7,7 @@ import { Clock, User } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useSelectedEssays } from '@/hooks/queries/useSelectedEssays';
 import { LoadingState } from '@/components/states/LoadingState';
-import { ChainPlate } from '@/components/industry-chain/ChainPlate';
+import { HeroSection } from '@/components/HeroSection';
 
 /**
  * The Sections list: titles and destinations, nothing else.
@@ -51,10 +51,8 @@ const Index = () => {
         description="Finance, accounting, and green transition economics. Research and analysis by Dika Gustiana."
       />
 
-      {/* The plate holds the first screen. It replaces the hero rather than the
-          page: Featured Analysis and the Sections list below are unchanged, and
-          HeroSection itself is left in the repo so reinstating it is one line. */}
-      <ChainPlate />
+      {/* Hero */}
+      <HeroSection />
 
       {/* Featured Analysis */}
       {!isLoading && featuredEssays && featuredEssays.length > 0 && (

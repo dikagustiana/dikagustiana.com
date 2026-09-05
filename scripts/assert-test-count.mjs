@@ -11,7 +11,7 @@
  */
 import fs from 'node:fs';
 
-const MIN_TESTS = 299; // 302 after the industry chain map's 19; slack of 3, not 30.
+const MIN_TESTS = 309; // 312 after the chain plate's 29 (replacing the map's 19); slack of 3, not 30.
 
 const reportPath = process.argv[2] ?? 'vitest-report.json';
 if (!fs.existsSync(reportPath)) {

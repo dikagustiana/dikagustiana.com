@@ -1,2 +1,3 @@
-export { IndustryChainMap, IndustryChainSection } from './IndustryChainMap';
-export { ChainPlate } from './ChainPlate';
+export { ChainPlate, IndustryChainSection } from './ChainPlate';
+export { ChainCurriculumPanel } from './ChainCurriculumPanel';
+export { useChainModules } from './useChainModules';
