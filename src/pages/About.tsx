@@ -1,4 +1,5 @@
 import { EssayCardLink } from '@/components/EssayCardLink';
+import { IndustryChainSection } from '@/components/industry-chain';
 import { PageLayout } from '@/components/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
 import { useSelectedEssays } from '@/hooks/queries/useSelectedEssays';
@@ -111,6 +112,10 @@ export default function About() {
           </p>
         </div>
       </section>
+
+      {/* The industry chain map — the artefact this page carries, sitting
+          directly under the narrative it belongs to. */}
+      <IndustryChainSection />
 
       {/* Selected Essays */}
       {selectedEssays && selectedEssays.length > 0 && (
