@@ -10,22 +10,32 @@
  *
  * The base map is complete without any interaction. A lens is an overlay: it
  * dims the base enough to stand out and never hides it. One lens at a time.
- * Under the unit-economics lens, a joint the mapping table has pinned a
- * module to becomes a door into the curriculum; every other joint stays
- * quiet.
+ * Every joint and every layer is a door: it opens the reading of the margin
+ * cut there and the line of the accounts that carries it; where the mapping
+ * table has pinned curriculum modules to a joint, they follow.
  *
- * Self-contained: drop it on any page. The plate itself is generated
- * (ChainPlateSvg.tsx) from src/data/industryChain.ts.
+ * Two layouts, one state. A wide screen gets the generated plate
+ * (ChainPlateSvg.tsx); a narrow one gets the column (ChainColumn.tsx). The
+ * choice is a media query read on the first render, so only one is ever in
+ * the document. `variant="preview"` opens with the short plate and one
+ * button; the button, or either lens word, swaps in the full chain in place.
  */
 
-import { useCallback, useId, useMemo, useState } from 'react';
-import { CHAIN_COPY, JOINT_IDS, type JointId, type LensId } from '@/data/industryChain';
+import { useCallback, useId, useMemo, useRef, useState, type ReactNode } from 'react';
+import { CHAIN_COPY, type JointId, type LensId } from '@/data/industryChain';
 import { CHAIN_MODULE_LINKS, locatedModulesByJoint, type ChainModuleLink } from '@/data/chainCurriculumMap';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { cn } from '@/lib/utils';
-import { ChainLensContext } from './chainLensContext';
-import { ChainPlateTall, ChainPlateWide } from './ChainPlateSvg';
-import { ChainCurriculumPanel } from './ChainCurriculumPanel';
+import { ChainColumn } from './ChainColumn';
+import { ChainLegend } from './ChainLegend';
+import { ChainLensContext, type ChainLensState } from './chainLensContext';
+import { ChainPlateCompact, ChainPlateWide } from './ChainPlateSvg';
+import { ChainTargetPanel } from './ChainTargetPanel';
+import { isJointId } from './chainTargets';
 import './chain-plate.css';
+
+/** The wide plate needs this much room before its type stays readable. */
+export const WIDE_PLATE_QUERY = '(min-width: 1280px)';
 
 const FOCUS =
   'rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background';
@@ -62,35 +72,80 @@ function LensWord({
   );
 }
 
-export function ChainPlate({ links = CHAIN_MODULE_LINKS }: { links?: readonly ChainModuleLink[] }) {
-  const panelId = `${useId()}-chain-panel`;
+export function ChainPlate({
+  links = CHAIN_MODULE_LINKS,
+  variant = 'full',
+}: {
+  links?: readonly ChainModuleLink[];
+  /** `preview` opens short and expands in place; `full` is the whole chain from the start. */
+  variant?: 'full' | 'preview';
+}) {
+  const base = useId();
+  const panelId = `${base}-chain-panel`;
+  const figureId = `${base}-chain-figure`;
+  const wideScreen = useMediaQuery(WIDE_PLATE_QUERY, true);
+
   const [lens, setLens] = useState<LensId | null>(null);
-  const [selectedJoint, setSelectedJoint] = useState<JointId | null>(null);
+  const [selected, setSelected] = useState<string | null>(null);
+  const [expanded, setExpanded] = useState(variant === 'full');
+  const triggerRef = useRef<Element | null>(null);
+  const figureRef = useRef<HTMLElement>(null);
+
+  const showCompact = variant === 'preview' && !expanded;
 
   const modulesByJoint = useMemo(() => locatedModulesByJoint(links), [links]);
-  const activeJoints = useMemo(
-    () => new Set(JOINT_IDS.filter((j) => (modulesByJoint[j]?.length ?? 0) > 0)),
-    [modulesByJoint],
-  );
 
   const toggleLens = useCallback((next: LensId) => {
+    // A lens is a closer look; on the short plate it opens the full chain.
+    setExpanded(true);
     setLens((current) => (current === next ? null : next));
-    setSelectedJoint(null);
+    setSelected(null);
   }, []);
 
-  const onSelectJoint = useCallback((joint: JointId) => {
-    setSelectedJoint((current) => (current === joint ? null : joint));
+  const onSelect = useCallback((id: string, trigger: Element | null) => {
+    triggerRef.current = trigger;
+    setSelected((current) => (current === id ? null : id));
   }, []);
 
-  const lensState = useMemo(
-    () => ({ lens, activeJoints, selectedJoint, onSelectJoint, panelId }),
-    [lens, activeJoints, selectedJoint, onSelectJoint, panelId],
+  const closePanel = useCallback(() => {
+    setSelected(null);
+    const t = triggerRef.current;
+    if (t && 'focus' in t && typeof (t as HTMLElement).focus === 'function') (t as HTMLElement).focus();
+  }, []);
+
+  const toggleExpanded = useCallback(() => {
+    const next = !expanded;
+    if (!next) {
+      // Back to the short plate: no lens, no reading — it has neither.
+      setLens(null);
+      setSelected(null);
+    }
+    setExpanded(next);
+    // Let the swapped figure paint, then land focus on it so the reader is
+    // where the chain now is. No scroll of our own: focus brings it into view
+    // and respects the reader's motion setting through the browser.
+    requestAnimationFrame(() => figureRef.current?.focus());
+  }, [expanded]);
+
+  const lensState = useMemo<ChainLensState>(() => ({ lens, selected, onSelect, panelId }), [lens, selected, onSelect, panelId]);
+
+  const renderPanel = useCallback(
+    (id: string, inline = false): ReactNode => (
+      <ChainTargetPanel
+        id={id}
+        moduleSlugs={isJointId(id) ? modulesByJoint[id as JointId] ?? [] : []}
+        onClose={closePanel}
+        panelId={panelId}
+        inline={inline}
+      />
+    ),
+    [modulesByJoint, closePanel, panelId],
   );
 
   const { lead } = CHAIN_COPY;
 
   return (
-    <div className="chain-plate" data-lens={lens ?? undefined}>
+    <div className="chain-plate" data-lens={lens ?? undefined} data-view={showCompact ? 'compact' : 'full'}>
       <header className="max-w-3xl">
         <h2 className="font-display text-2xl font-semibold leading-tight tracking-tight text-foreground md:text-3xl [text-wrap:balance]">
           {CHAIN_COPY.headline}
@@ -109,24 +164,41 @@ export function ChainPlate({ links = CHAIN_MODULE_LINKS }: { links?: readonly Ch
       </header>
 
       <ChainLensContext.Provider value={lensState}>
-        <figure className="mt-8" aria-label={`${CHAIN_COPY.lensName.economy} and ${CHAIN_COPY.lensName.unit}`}>
-          <ChainPlateWide />
-          <ChainPlateTall />
+        <figure id={figureId} ref={figureRef} tabIndex={-1} className={cn('mt-8 outline-none', FOCUS)}>
+          {wideScreen ? (
+            showCompact ? (
+              <ChainPlateCompact />
+            ) : (
+              <ChainPlateWide extended={lens === 'unit'} />
+            )
+          ) : (
+            <ChainColumn variant={showCompact ? 'compact' : 'full'} panel={(id) => renderPanel(id, true)} />
+          )}
         </figure>
+
+        {variant === 'preview' && (
+          <button
+            type="button"
+            aria-expanded={expanded}
+            aria-controls={figureId}
+            onClick={toggleExpanded}
+            className={cn(
+              'mt-6 inline-block rounded border-2 border-foreground px-6 py-2.5 text-sm font-medium tracking-[0.04em] text-foreground transition-colors hover:bg-foreground/[0.06] active:bg-foreground/[0.12]',
+              FOCUS,
+            )}
+          >
+            {expanded ? CHAIN_COPY.controls.seeCompact : CHAIN_COPY.controls.seeFull}
+          </button>
+        )}
+
+        {!showCompact && wideScreen && lens === 'unit' && !selected && (
+          <p className="mt-3 text-xs text-muted-foreground">{CHAIN_COPY.panel.hint}</p>
+        )}
+
+        {!showCompact && wideScreen && selected && renderPanel(selected)}
+
+        {!showCompact && <ChainLegend collapsible={!wideScreen} />}
       </ChainLensContext.Provider>
-
-      {lens === 'unit' && activeJoints.size > 0 && !selectedJoint && (
-        <p className="mt-3 text-xs text-muted-foreground">{CHAIN_COPY.panel.hint}</p>
-      )}
-
-      {lens === 'unit' && selectedJoint && modulesByJoint[selectedJoint] && (
-        <ChainCurriculumPanel
-          joint={selectedJoint}
-          moduleSlugs={modulesByJoint[selectedJoint] ?? []}
-          onClose={() => setSelectedJoint(null)}
-          panelId={panelId}
-        />
-      )}
     </div>
   );
 }
@@ -134,9 +206,20 @@ export function ChainPlate({ links = CHAIN_MODULE_LINKS }: { links?: readonly Ch
 /** The plate as an About section: no heading of its own — the headline is the heading. */
 export function IndustryChainSection() {
   return (
-    <section className="border-b border-border py-12">
-      <div className="container max-w-6xl">
+    <section id="industry-chain" className="border-b border-border py-12">
+      <div className="container">
         <ChainPlate />
+      </div>
+    </section>
+  );
+}
+
+/** The short version, for the landing page: the second thing after the hero. */
+export function IndustryChainPreview() {
+  return (
+    <section id="industry-chain" className="border-b border-border py-12">
+      <div className="container">
+        <ChainPlate variant="preview" />
       </div>
     </section>
   );

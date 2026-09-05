@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { useSelectedEssays } from '@/hooks/queries/useSelectedEssays';
 import { LoadingState } from '@/components/states/LoadingState';
 import { HeroSection } from '@/components/HeroSection';
+import { IndustryChainPreview } from '@/components/industry-chain';
 
 /**
  * The Sections list: titles and destinations, nothing else.
@@ -53,6 +54,11 @@ const Index = () => {
 
       {/* Hero */}
       <HeroSection />
+
+      {/* The industry chain, in short — the second thing on the page. One
+          button (or either lens word) swaps in the full chain in place; the
+          About page carries the full chain from the start. */}
+      <IndustryChainPreview />
 
       {/* Featured Analysis */}
       {!isLoading && featuredEssays && featuredEssays.length > 0 && (

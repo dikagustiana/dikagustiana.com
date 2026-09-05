@@ -22,8 +22,8 @@ Gating: **[P]** public · **[A]** admin-only (`RequireAdmin`).
 ### Core
 | Path | Page | Data | States present | SEO |
 |---|---|---|---|---|
-| `/` [P] | `Index.tsx` | `useFeaturedEssays(4)` | loading | ✓ |
-| `/about` [P] | `About.tsx` | `useSelectedEssays()` · `useChainModules()` (chain plate, only when a joint with a mapped module is opened) | loading (curriculum panel) | ✓ |
+| `/` [P] | `Index.tsx` | `useSelectedEssays(4)` · `useChainModules()` (chain plate, short version under the hero; full chain and its joint readings on request) | loading | ✓ |
+| `/about` [P] | `About.tsx` | `useSelectedEssays()` · `useChainModules()` (chain plate; every joint and layer opens a reading, the curriculum list only for a joint with a mapped module) | loading (curriculum list) | ✓ |
 | `/auth` [P] | `Auth.tsx` | `useAuth` + form | — | ✗ |
 | `*` [P] | `NotFound.tsx` | — | — | ✗ (also `console.error` on every hit) |
 

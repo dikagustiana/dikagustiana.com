@@ -5,6 +5,102 @@ alternatives. Newest first.
 
 ---
 
+# 2026-09-05 (later) — Every joint answers for its margin; five layers; the landing page carries the short chain
+
+**The owner's later brief of the same day reverses several of the morning's "not to be re-litigated"
+bullets, and this entry records the reversals so neither set is mistaken for current.** The plate on
+About was complete and worked; this pass fixed four substantive faults in it, added a short version
+under the landing-page hero, and redrew the narrow-screen layout.
+
+## Superseded from the earlier entry (owner brief, later 2026-09-05)
+
+- **The chain is NOT an hourglass, or any shape.** The grey hull is gone. A geological chain funnels, a
+  biological chain fragments; the map is generic across sectors and must not claim a shape through
+  layout. The unit-economics slices are now all one thickness — a thicker block would be a figure.
+- **Contract capacity is back**, as an enabling layer (makloon · toll manufacturing) spanning primary
+  processing → finished-goods manufacturing only. The earlier "deleted outright" is reversed.
+- **Principal–distributor contract governance is a layer, not a joint attribute**, spanning
+  manufacturing → retail only. `JOINT_ATTRIBUTES` is gone.
+- **Information flow is drawn again**: demand signal back up the chain, specifications and standards
+  forward. Money runs BOTH ways: payment against the goods; trade credit, trade promotion and rebates
+  with them — the second line is what decides who can afford to be a node.
+- **An unmapped joint is a target.** Every joint now answers "what margin sits here" and names the line
+  of the accounts that carries it, so every joint is a button at rest — quiet diamond, chip on hover /
+  focus / under the unit lens, panel on click. The earlier rule "no chain-located module → no target"
+  now applies only to the curriculum section inside the panel.
+- **The landing page carries the short version** as the second section under the hero (hero untouched).
+  The earlier "the landing page waits" is superseded.
+
+## What was built, and the choices made
+
+- **Margin at a joint = the seller's slice.** A node sells a spread; a stage sells its conversion
+  margin; consumption → recovery is a service fee (the discarding party pays a gate fee — money runs
+  WITH the goods there, and recovery's conversion margin is realised later on the return flows).
+  Manufacturing → distribution reads both ways: conversion where the maker sells as principal;
+  node spread where a brand owner sells goods a toller made for it. Rejected: labelling by the buying
+  side (retail → consumption would be "conversion", and a household converts nothing).
+- **Three margin kinds, per the brief, and the layers keep their own lines.** Logistics, credit and
+  contract capacity carry `service-fee`; governance ("Terms") and regulation ("Rules") carry no
+  margin kind — they set or constrain the spreads either side. The credit layer's lines say when the
+  "fee" is a lender's finance income and when it is a position on the balance sheet (receivables and
+  payables, DSO/DPO, advances to suppliers, early-payment discounts as variable consideration,
+  derecognition on factoring). Rejected: a fourth kind "financing" — the brief defines three.
+- **Layers riding on a joint are DERIVED from the band's span** (`bandJoints`, `jointLayers`), not
+  listed by hand. Contract capacity rides exactly processing→trader, trader→manufacturing,
+  packaging→manufacturing; governance exactly manufacturing→distribution, distributor→wholesaler,
+  wholesale→retail. A test pins both sets.
+- **Border lines are base structure, not a lens.** Export cuts at extraction → processing, import at
+  trader → manufacturing, drawn as vertical dashes with a chip. The economy lens's three "cuts" (which
+  sat at the wrong x) are gone; its external-balance and import-share readings were re-anchored to the
+  same joints as the borders, and a test asserts the two layers agree.
+- **Post-consumer loop split by material**: recyclate lands on primary processing; organic (compost)
+  lands on biological production. By-product stays a forward branch.
+- **Four rails under the chain** for the non-physical flows, two per kind: money dotted with a filled
+  head, information dash-dot with an open head; upstream rails arrow left, downstream right, captions
+  on the tail. Rejected: one bidirectional line per kind (a reviewer's proposal) — the brief asks for
+  two lines clearly different in direction.
+- **Legend by form, not colour**: solid box, dashed pill, filled band, dashed arc, dotted/filled head,
+  dash-dot/open head, vertical dash with chip, diamond. Plus the PSAK 72 principal–agent note.
+- **Type**: every label on the wide plate is ≥14 viewBox units (names 18), the viewBox is 1600 wide,
+  the About section uses the full `container`, and the wide plate is shown only from 1280px, where a
+  name renders ≥12px. A test pins the CSS floor; the e2e spec measures the rendered scale.
+- **Accessibility of the wide plate**: `role="img"` on the SVG would have pruned every button inside it
+  from the accessibility tree, so the plate is a `role="group"` with `<title>`/`<desc>`. Triggers use
+  `aria-expanded` + `aria-controls` (the panel is a disclosure); the two lens words and the two mobile
+  toggles keep `aria-pressed`. On open, focus moves to the panel heading; Close returns it to the door.
+  Hover affordances sit under `@media (hover:hover)`; nothing is hover-only.
+- **One layout in the document at a time.** `useMediaQuery` (useSyncExternalStore) picks the generated
+  plate from 1280px and the HTML column below it on the first render. Rejected: both in the DOM with
+  CSS display switching (duplicate buttons, duplicate ids, and the "robust for prerender" argument was
+  false — prerender touches only essay routes).
+- **Mobile is a column, in HTML** (`ChainColumn.tsx`), replacing the generated tall SVG whose rotated
+  9px type could not hold five bands as rails. Stages are boxes, nodes pills, joints tappable rows that
+  open their reading right beneath them; origins and the two side inputs sit two abreast; layers are a
+  list of rows that open; returns and money/information are lists behind two toggles, off by default;
+  lenses write inline. No fixed widths, no `whitespace-nowrap`; the e2e spec asserts
+  `scrollWidth ≤ 360` with everything open.
+- **The short version is a VIEW over the same data** (`COMPACT`): six stages, three node groups
+  (Aggregator · Distribution / wholesale · Retail), two layers, one return arrow, no small labels, no
+  doors. Packaging, the trader and the principal are omitted, not merged.
+- **Progressive disclosure = one button, in place.** "See the full chain" (or pressing either lens word,
+  which is a closer look) swaps the compact plate for the full one under the same headline; "Back to
+  the short version" swaps back. Rejected: expansion on scroll (layout shifts under the reader's
+  thumb and fights the reduced-motion rule) and a link to About (a second click and a page load for a
+  reader who has just been promised the map is not complicated).
+- **Generator ⇄ column parity is tested**: every id in the data must appear as `data-id` both in the
+  generated plate and in the rendered column (with toggles and lenses on).
+- **No digits**, still — the test now strips the one allowed token, "PSAK 72", before asserting.
+
+## What a future session must not undo by accident
+
+- The headline is verbatim, and a test asserts it.
+- No digits anywhere in the map except "PSAK 72". A test asserts it.
+- Every joint and every layer is a door; the curriculum follows only where a chain-located module is
+  pinned, and a draft lesson stays inert "Coming soon".
+- Every colour on the plate is a token; `chain-plate.css` is generated — edit the generator.
+- Layers per joint are derived from spans; do not add a hand list back.
+- Test floor raised 309 → 350 (353 tests).
+
 # 2026-09-05 — The chain at two distances: the headline wins, the lenses overlay, the mapping ships empty
 
 **The About map is rebuilt around one verbatim sentence — "Nothing here is complicated. It
