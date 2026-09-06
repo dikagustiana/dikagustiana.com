@@ -16,6 +16,7 @@
  */
 
 import { useContext, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import {
   BAND_BY_ID,
   CHAIN_COPY,
@@ -31,10 +32,11 @@ import {
   type LensNote,
   type MarginKind,
 } from '@/data/industryChain';
+import { universalEssayUrl } from '@/lib/essayUrl';
 import { cn } from '@/lib/utils';
 import { ChainCurriculumList } from './ChainCurriculumList';
 import { ChainLensContext } from './chainLensContext';
-import { isJointId, targetLabel } from './chainTargets';
+import { isDoor, isJointId, markNumber, targetLabel } from './chainTargets';
 
 const KICKER = 'text-[11px] uppercase tracking-[0.18em] text-muted-foreground';
 
@@ -119,6 +121,50 @@ function UnderShift({ id }: { id: string }) {
       </h4>
       <p className="mt-1.5 text-sm text-foreground">{target.read[lens]}</p>
     </div>
+  );
+}
+
+/**
+ * The essays the owner has attached to this target under this shift.
+ *
+ * Deliberately not inferred from anything: a target with no essays yet shows
+ * nothing here rather than a promise. `/essays/:slug` resolves for every
+ * published essay and redirects to the canonical URL where one exists, so a
+ * row needs no placement fields to be a working link.
+ */
+function ShiftArticles({ id }: { id: string }) {
+  const { shift } = useContext(ChainLensContext);
+  const articles = shiftTarget(shift, id)?.articles ?? [];
+  if (articles.length === 0) return null;
+  return (
+    <div className="mt-4" data-shift-articles={id}>
+      <h4 className={KICKER}>{CHAIN_COPY.panel.articlesHeading}</h4>
+      <ul className="mt-1.5 space-y-1 text-sm">
+        {articles.map((a) => (
+          <li key={a.slug}>
+            <Link to={universalEssayUrl(a.slug)} className="text-foreground underline-offset-2 hover:text-accent hover:underline">
+              {a.title}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+/**
+ * A marked target that is neither a joint nor a layer — a stage, a node, a
+ * border, a return. It has no margin of its own to answer for; what it has is
+ * what the shift does to it, at both distances, and the essays that read it.
+ */
+function MarkDetails({ id }: { id: string }) {
+  const { shift, lens } = useContext(ChainLensContext);
+  const target = shiftTarget(shift, id);
+  if (!target) return null;
+  return (
+    <>
+      <TwoDistances read={target.read} lens={lens} />
+    </>
   );
 }
 
@@ -209,7 +255,7 @@ function BandDetails({ band }: { band: Band }) {
 function TargetDetails({ id }: { id: string }) {
   if (isJointId(id)) return <JointDetails joint={JOINT_BY_ID[id]} />;
   const band = BAND_BY_ID[id];
-  return band ? <BandDetails band={band} /> : null;
+  return band ? <BandDetails band={band} /> : <MarkDetails id={id} />;
 }
 
 export function ChainTargetPanel({
@@ -227,7 +273,10 @@ export function ChainTargetPanel({
   inline?: boolean;
 }) {
   const headingRef = useRef<HTMLHeadingElement>(null);
+  const { shift } = useContext(ChainLensContext);
   const joint = isJointId(id);
+  const n = shift ? markNumber(shift, id) : 0;
+  const kicker = joint ? CHAIN_COPY.panel.jointKicker : isDoor(id) ? CHAIN_COPY.panel.bandKicker : CHAIN_COPY.panel.markKicker;
 
   // The panel can open far from the target that opened it (under a tall
   // plate, or under a row half a screen up), so focus follows it. Close
@@ -244,7 +293,10 @@ export function ChainTargetPanel({
     >
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className={KICKER}>{joint ? CHAIN_COPY.panel.jointKicker : CHAIN_COPY.panel.bandKicker}</p>
+          <p className={KICKER}>
+            {kicker}
+            {n > 0 && <span className="ml-2 tabular-nums text-foreground">{n}</span>}
+          </p>
           <h3
             id={`${panelId}-title`}
             ref={headingRef}
@@ -264,6 +316,7 @@ export function ChainTargetPanel({
       </div>
 
       <TargetDetails id={id} />
+      <ShiftArticles id={id} />
 
       {joint && moduleSlugs.length > 0 && <ChainCurriculumList moduleSlugs={moduleSlugs} />}
     </section>

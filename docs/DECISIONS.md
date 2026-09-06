@@ -5,6 +5,88 @@ alternatives. Newest first.
 
 ---
 
+# 2026-09-06 (later) — Numbered marks, a slug per element, and the map's state in the address
+
+**The owner's audit brief of 2026-09-06 asked for a completeness pass first and aesthetics second:
+check every element against the target list, then build section 6 — numbered marks with panels,
+permanent slugs, the map's state in the URL, the finance distance as the process of value creation,
+and the enabling layer as the bearer of a per-unit burden.** This pass ran on a branch, stopped at a
+pull request, and touched only the map's components, its data file, its generator and its tests.
+Every visual judgement was made on renders taken in this session at 1440px and 360px.
+
+## Found broken on `main`
+
+- **The suite was red, and had been since #28.** That pull request rewrote the readings and removed
+  the standard's number from the copy, but left `tests/unit/industryChain.test.ts`,
+  `tests/unit/chainPlate.test.tsx` and `tests/e2e/chain.spec.ts` asserting the old headline and the
+  old `PSAK 72` strings — while adding, in `ChainAudit.test.tsx`, a test that forbids any digit in
+  the same records. Six unit tests and several e2e assertions contradicted each other. Fixed here by
+  taking the newer intent: no standard is named anywhere in the public copy, the principal–agent
+  test is stated in words, and `noFigures` now forbids every digit with no exception.
+
+## Decisions
+
+- **Contract capacity is gone as a layer.** The brief withdrew it; the target list of layers does not
+  contain it. The local term it carried is not lost: `makloon` and the tolling fee now live on the
+  reading of the manufacturing → distribution joint, where a toller actually appears — the brand
+  owner books the sale gross and holds the inventory, and the plant behind it sells machine hours.
+  That is a better place for it than a band: contract capacity was never a service riding on a span
+  of the chain, it was an alternative answer to "who controls these goods".
+  One `git revert` of this commit restores the band if the owner wants it back.
+
+- **Five layers, not six**, and the green transition now lights logistics as well as energy, credit
+  and recovery. The brief's own list for the green overlay names logistics, and section 6.4 asks the
+  map to say why: an enabling layer takes no title and transforms nothing, but it INJECTS a cost, an
+  energy use and an emission into every joint it touches, which puts a floor under the unit that no
+  single stage can remove. The reading also carries the demonstration the brief asked for — one
+  physical fact booked in two places, direct emission at the provider and purchased emission at the
+  brand owner, the same split the gross-and-net line makes at a node. Written in plain words rather
+  than with the scope numerals, because the map carries no digits at all.
+
+- **A mark is a position; a slug is a name.** The numbered marks are computed by the generator from
+  where they land on the plate — left to right, then top to bottom, with the layers last because
+  they are the bottom row — and renumbered from one for every overlay. Identity is `SLUGS` in the
+  data file: one permanent public address per element, pinned verbatim by a unit test, because it is
+  what an essay links to. Nothing on the map ever displays a slug and nothing outside the map ever
+  links to a number.
+
+- **A mark exists only where BOTH readings are written.** That is what keeps the marked set the same
+  at both distances: the shift decides which elements are marked, the distance decides only what a
+  mark says. It also means an element with nothing to say carries no mark, so the map is never
+  pitted with empty panels — and leaving a reading empty is how the owner parks a target.
+
+- **The URL parameters are the owner's spelling, not the code's**: `?lens=` is the SHIFT and
+  `?distance=` is what the code calls the lens. They are a published contract that essays will be
+  written against, so they are mapped once in `useChainUrl.ts` and never renamed casually. Written
+  with `history.replaceState`, not the router: the map is not a navigation, and a step per click
+  would fill the back button. A plain visit rewrites nothing.
+
+- **A readout replaces the tooltip.** One line of fixed height under the plate, which every mark,
+  joint and layer writes into on hover and on focus. A floating tooltip on a plate this dense covers
+  the neighbour the reader is comparing against — which is what the brief reported seeing — and the
+  margin kind now reads as words there, not only as the chip's border.
+
+- **The finance distance names the service, not the measure.** Every joint's finance reading now
+  opens with what is done there — makes the material, bulks the lots, refines the input, lands the
+  goods, breaks the bulk, holds the shelf — and the margin follows as the thing that measures it.
+  Each layer reads the same way: what is sold here is capacity, or the wait, or power.
+
+- **The headline states the thesis.** "Every joint in this chain is a margin.", with the standfirst
+  "Add them up and you have an economy; take one apart and you have a driver tree." The previous
+  headline named the mechanism (one chain, two distances); the controls already say that in the two
+  sentences beneath, and the headline is the one place the argument can be made.
+
+- **The consumption → recovery chip moved to the left of its joint.** On the right it was an opaque
+  label painted across the two post-consumer return risers.
+
+## Held
+
+- Swimlane, left to right. No shape claimed. Four categories kept apart by form. No new palette. No
+  figures. The landing page keeps its hero and its short chain. Every colour is still a token and
+  `chain-plate.css` is still generated — edit the generator.
+
+---
+
 # 2026-09-06 — Two controls that compose: every joint carries two readings, and a shift is an overlay
 
 **The owner's design brief of 2026-09-06 asked for two controls over one map — a distance

@@ -68,7 +68,10 @@ const ids = () => new Set(Array.from(document.querySelectorAll<HTMLElement>('[da
 const word = (name: string) => screen.getByRole('button', { name, exact: true });
 const rowChips = () => Array.from(document.querySelectorAll('[data-id^="j-"] button [data-chip]')).map((c) => c.textContent);
 
-beforeEach(narrowScreen);
+beforeEach(() => {
+  narrowScreen();
+  window.history.replaceState({}, '', '/about');
+});
 afterEach(() => {
   // @ts-expect-error — restore jsdom's absence of matchMedia for the next file
   delete window.matchMedia;
@@ -130,11 +133,11 @@ describe('the column', () => {
     expect(screen.getByText('Trade credit · trade promotion · rebates')).toBeInTheDocument();
   });
 
-  it('lists the six layers as rows that open, with their span in words', async () => {
+  it('lists the five layers as rows that open, with their span in words', async () => {
     mount(<ChainPlate links={[]} />);
     const list = screen.getByRole('heading', { name: CHAIN_COPY.controls.layers }).parentElement!;
     for (const b of BANDS) expect(within(list).getByRole('button', { name: new RegExp(b.label) })).toHaveAttribute('aria-expanded', 'false');
-    expect(within(list).getByText('Primary processing → finished-goods manufacturing')).toBeInTheDocument();
+    expect(within(list).getAllByText('The whole chain').length).toBeGreaterThan(0);
     expect(within(list).getByRole('button', { name: /^Energy/ })).toBeInTheDocument();
 
     await userEvent.click(within(list).getByRole('button', { name: /Credit and working capital/ }));

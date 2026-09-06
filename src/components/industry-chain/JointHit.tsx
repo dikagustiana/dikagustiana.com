@@ -13,6 +13,10 @@
  * The chip is drawn as a SIBLING of the button, not inside it, so the
  * button's box stays the diamond and its hit circle whatever the chip does.
  *
+ * Pointing at a joint writes its margin kind and its current reading into the
+ * readout under the plate — one line, always in the same place, never a
+ * floating panel over the neighbour the reader is comparing it with.
+ *
  * Geometry comes from the generator as props; every word comes from the data
  * file at run time.
  */
@@ -45,7 +49,7 @@ export function JointHit({
   chipY: number;
   chipAt: ChipAt;
 }) {
-  const { lens, shift, selected, onSelect, panelId } = useContext(ChainLensContext);
+  const { lens, shift, selected, onSelect, onHover, panelId } = useContext(ChainLensContext);
   const joint = JOINT_BY_ID[id];
   const descriptionId = useId();
   const kind = MARGIN_KINDS[joint.margin];
@@ -86,6 +90,10 @@ export function JointHit({
         aria-controls={open ? panelId : undefined}
         onClick={select}
         onKeyDown={onKey}
+        onMouseEnter={() => onHover(id)}
+        onMouseLeave={() => onHover(null)}
+        onFocus={() => onHover(id)}
+        onBlur={() => onHover(null)}
       >
         <desc id={descriptionId}>{kind.label}. {joint.read[lens].chip}. {joint.read[lens].note}</desc>
         <circle cx={cx} cy={cy} r={18} fill="transparent" stroke="none" />

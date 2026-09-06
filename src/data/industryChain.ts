@@ -42,6 +42,16 @@
  *              layers it moves and adds arrows; it never redraws the chain.
  *              The two shifts are exclusive in this interface so their
  *              mechanisms can be examined separately, including tensions.
+ *
+ * The division of labour between them is strict: the SHIFT decides which
+ * elements are marked, and the DISTANCE decides only what a mark then says.
+ * Move the distance control and the marks stay exactly where they were.
+ *
+ * Two more things live here because they are content, not layout:
+ *   SLUGS      one permanent public address per element. Displayed numbers
+ *              are a reading order and change with the overlay; a slug never
+ *              does, so it is what an essay links to and what the URL holds.
+ *   articles   the essays that read a target under a shift. Owner-filled.
  */
 
 /* ── Distance: the two readings of every joint ───────────────────────────── */
@@ -268,8 +278,8 @@ export const JOINTS: Joint[] = [
         note: 'The gate price values output; subtract intermediate inputs to obtain value added. Input prices, yields, wages and subsidies affect production costs, while downstream prices can absorb or pass on changes.',
       },
       finance: {
-        chip: 'Yield · gate price',
-        note: "The producer's conversion margin: yield against input cost, realised at the gate price — and often financed by the aggregator's advance, the first credit on the chain.",
+        chip: 'Makes the material',
+        note: "What is done here: land, labour and purchased inputs become a material the next stage can use. Yield against input cost is what the gate price then measures, and the aggregator's advance often finances the wait.",
       },
     },
   },
@@ -287,8 +297,8 @@ export const JOINTS: Joint[] = [
         note: 'This export cut illustrates raw goods leaving before processing. Export receipts, imported inputs and foreign-currency liabilities determine the exchange-rate effect; royalties are one possible fiscal claim on extraction.',
       },
       finance: {
-        chip: 'Rent · royalty',
-        note: 'Deposit quality, extraction cost, commodity price and royalties shape the margin. Resource rent is the residual after the relevant costs and required returns; it is not automatically the whole conversion margin.',
+        chip: 'Lifts the deposit',
+        note: 'What is done here: a deposit in the ground becomes a material that can be moved and processed. Deposit quality, extraction cost, commodity price and royalties shape what that is worth. Resource rent is the residual after the relevant costs and required returns; it is not automatically the whole conversion margin.',
       },
     },
   },
@@ -310,8 +320,8 @@ export const JOINTS: Joint[] = [
         note: "The first mark-up on the chain — the aggregator's spread — is the first step of inflation's pass-through, and much of the trade's informal labour sits in this node.",
       },
       finance: {
-        chip: 'Spread · DSO/DPO',
-        note: "The aggregator's spread: bought in small lots, sold in one, and it paid the producer before the processor paid it — the working-capital gap is the business.",
+        chip: 'Bulks the lots',
+        note: "What is done here: many small lots become one consignment of known quality, ready when a processor wants it, and the producer is settled with long before the processor settles. The spread is what that service earns; the working-capital gap is the business.",
       },
     },
   },
@@ -333,8 +343,8 @@ export const JOINTS: Joint[] = [
         note: "Basic industry's value added — the capital-intensive middle of the chain, where energy intensity peaks and the by-product leaves for another sector's account.",
       },
       finance: {
-        chip: 'Fixed cost · yield',
-        note: "Processing's conversion margin: a fixed plant cost spread over volume, so utilisation and yield decide it; the by-product credit sits inside cost of sales.",
+        chip: 'Refines the input',
+        note: "What is done here: a raw material becomes an industrial input of a specified grade. A fixed plant cost is spread over volume, so utilisation and yield decide the margin that measures it; the by-product credit sits inside cost of sales.",
       },
     },
   },
@@ -356,8 +366,8 @@ export const JOINTS: Joint[] = [
         note: 'The import line crosses here: the import share of intermediate inputs and of capital goods is read at this joint, and the exchange rate lands in landed cost before manufacturing has added anything.',
       },
       finance: {
-        chip: 'Landed cost · DIO',
-        note: "The trader's spread over landed cost — freight, duty and the exchange rate inside cost of sales — with inventory carried against a lead time and import finance in finance cost.",
+        chip: 'Lands the goods',
+        note: "What is done here: a supply that exists abroad becomes stock available here, cleared and on hand against a lead time. The spread sits over landed cost — freight, duty and the exchange rate inside cost of sales — with import finance in finance cost.",
       },
     },
   },
@@ -375,8 +385,8 @@ export const JOINTS: Joint[] = [
         note: "Intermediate consumption between two branches of manufacturing: packaging's output is manufacturing's input, counted gross in each branch's output and only once in value added.",
       },
       finance: {
-        chip: 'Component cost',
-        note: "Packaging's conversion margin is cut here and attaches to the unit as a component cost in the finished good's bill of materials.",
+        chip: 'Makes the pack',
+        note: "What is done here: the good gains something that protects it, carries it and identifies it on a shelf. Packaging's conversion margin is cut here and attaches to the unit as a component cost in the finished good's bill of materials.",
       },
     },
   },
@@ -398,13 +408,13 @@ export const JOINTS: Joint[] = [
         note: 'Product taxes depend on the goods and jurisdiction; excise is relevant only where applicable. Trade-credit terms are one route through which financing conditions reach production and distribution.',
       },
       finance: {
-        chip: 'Trade credit · DSO',
-        note: "Manufacturing's conversion margin, and the joint where trade credit is extended: receivables days, trade promotion and rebates netted from revenue — the working-capital modules read it here.",
+        chip: 'Finishes the good',
+        note: "What is done here: components become a good a buyer can use, and the maker lets the distributor sell it before paying for it. Receivables days, trade promotion and rebates netted from revenue — the working-capital modules read it here.",
       },
     },
     alt: {
       margin: 'node-spread',
-      when: 'where the brand owner sells goods a toller made for it: the principal books the sale gross and holds the inventory, and the plant behind it earns a tolling fee in the contract-capacity layer',
+      when: 'where the brand owner sells goods a toller made for it under makloon: the principal books the sale gross and holds the inventory, while the plant behind it earns a tolling fee for machine hours and never a margin on the goods',
     },
   },
   {
@@ -425,8 +435,8 @@ export const JOINTS: Joint[] = [
         note: "Distribution’s trade margin is its output measure; purchased services and other intermediate inputs are deducted to obtain value added. Informal activity is within the national-accounts production boundary even when it is difficult to measure.",
       },
       finance: {
-        chip: 'Spread · reach',
-        note: "The distributor's spread for reach, stock and the credit it carries on both sides, after the principal's rebates — who finances whom, read as DSO against DPO.",
+        chip: 'Reaches the trade',
+        note: "What is done here: one national supply becomes stock inside a territory, within reach of buyers the maker never meets, financed on both sides. The spread pays for that, after the principal's rebates — who finances whom, read as DSO against DPO.",
       },
     },
   },
@@ -444,8 +454,8 @@ export const JOINTS: Joint[] = [
         note: 'The business cycle runs right to left through node inventories from here: a slower shelf shows first as stock at the wholesaler, then as smaller orders up the chain.',
       },
       finance: {
-        chip: 'Cost to serve',
-        note: "The wholesaler's spread cut into ever smaller drops: cost to serve rises as the drops shrink, and the credit extended to small retail is the risk in the receivable.",
+        chip: 'Breaks the bulk',
+        note: "What is done here: a pallet becomes a case, and a case becomes what one shop can pay for today. Cost to serve rises as the drops shrink, and the credit extended to small retail is the risk in the receivable.",
       },
     },
   },
@@ -467,8 +477,8 @@ export const JOINTS: Joint[] = [
         note: 'Retail connects the chain to final household demand and consumer prices. Government and institutional purchases, and exports, may follow other routes; consumer prices also depend on taxes, services and demand conditions.',
       },
       finance: {
-        chip: 'Shelf margin · DPO',
-        note: "Retail's shelf margin, different by channel, with shrink and cost to serve beneath it. The consumer pays at once, so the chain behind the shelf finances the retailer: stock on the shelf, paid for by suppliers.",
+        chip: 'Holds the shelf',
+        note: "What is done here: the good waits within arm's reach of whoever wants it, at the moment they want it. The shelf margin pays for that and differs by channel, with shrink and cost to serve beneath it; the consumer pays at once, so the chain behind the shelf finances the retailer.",
       },
     },
   },
@@ -489,8 +499,8 @@ export const JOINTS: Joint[] = [
         note: 'Discard can be bought for its material value, collected for a fee, or left with costs that no transaction covers. Producer responsibility can change who pays; recovery is not universally unpaid or absent from the accounts.',
       },
       finance: {
-        chip: 'Gate fee',
-        note: 'Recovery is paid a collection or gate fee to take what has no value; where the discard still has value it buys instead, and its conversion margin is realised later on the return flows.',
+        chip: 'Takes the discard',
+        note: 'What is done here: what the user has finished with is taken away and sorted into something a chain can use again. Recovery is paid a collection or gate fee to take what has no value; where the discard still has value it buys instead, and its conversion margin is realised later on the return flows.',
       },
     },
     alt: {
@@ -532,7 +542,8 @@ export const BANDS: Band[] = [
     span: ['stage-biological', 'stage-recovery'],
     spanLabel: 'The whole chain',
     margin: 'service-fee',
-    means: 'Moves and holds the goods without ever owning them. Attaches at every move, and weighs most where the drops are smallest.',
+    means:
+      'Moves and holds the goods without ever owning them, so the next function gets them in the right place, at the right time and at the right temperature. It attaches at every move and injects a cost, an energy use and an emission into each one — a floor under the unit that no single stage can remove — and it weighs most where the drops are smallest and the cold chain is unbroken.',
     lines: [
       'Freight and warehousing service revenue — gross when the provider controls its service; net commission when acting as an agent',
       'Freight-out, warehouse rent and handling — at the user, inside cost to serve',
@@ -541,7 +552,8 @@ export const BANDS: Band[] = [
     read: {
       economy:
         'Transport and storage are a sector of their own in the accounts, but on the chain they are a cost at every move — and where the drops are smallest, the widest wedge between farm gate and shelf.',
-      finance: 'Freight-out, warehouse rent and handling inside cost to serve; right-of-use assets and lease liabilities where the warehouse is leased.',
+      finance:
+        'What is sold here is capacity, speed and a temperature held to a standard. Freight-out, warehouse rent and handling sit inside cost to serve; right-of-use assets and lease liabilities where the warehouse is leased. Every touch adds its own charge, so the number of touches per unit is a cost driver in its own right.',
     },
   },
   {
@@ -562,7 +574,8 @@ export const BANDS: Band[] = [
     read: {
       economy:
         'The channel through which monetary policy reaches the chain: the policy rate becomes the price of waiting, and who can afford to wait decides who can be a node.',
-      finance: 'DSO, DIO and DPO — the cash conversion cycle — and finance cost as the price of the gap it leaves.',
+      finance:
+        'What is sold here is the wait: someone holds goods they have not been paid for, so the next function can trade before it settles. DSO, DIO and DPO — the cash conversion cycle — and finance cost as the price of the gap it leaves.',
     },
   },
   {
@@ -581,26 +594,8 @@ export const BANDS: Band[] = [
     read: {
       economy:
         'Energy intensity, stage by stage — heaviest in extraction and primary processing. Where the state pays part of the price, the subsidy is a fiscal line every stage draws on.',
-      finance: 'Fuel and power inside cost of sales at every stage; a price set outside the chain, so it is passed on or absorbed in the conversion margin.',
-    },
-  },
-  {
-    id: 'band-contract-capacity',
-    label: 'Contract capacity',
-    note: 'makloon · toll manufacturing',
-    span: ['stage-processing', 'stage-manufacturing'],
-    spanLabel: 'Primary processing → finished-goods manufacturing',
-    margin: 'service-fee',
-    means: "A plant that converts someone else's material for a fee. The owner of the material keeps title; the toller sells machine hours.",
-    lines: [
-      'Tolling service revenue — gross at a toller that controls its service; customer-owned material is excluded from its revenue and inventory',
-      'Conversion cost purchased — at the owner, inside cost of sales; the work in progress stays on its balance sheet',
-      'Capacity utilisation — the toller lives in the fixed cost it absorbs',
-    ],
-    read: {
-      economy:
-        'Manufacturing capacity separated from the ownership of the goods: output counted at the toller, value added split between the plant and the brand.',
-      finance: 'Tolling service revenue and operating costs at the toller; conversion cost purchased at the owner. Utilisation, yield and operating efficiency drive the toller’s margin.',
+      finance:
+        'What is sold here is heat, motion and light: every conversion needs them and none makes them. Fuel and power sit inside cost of sales at every stage, at a price set outside the chain, so a change is passed on or absorbed in the conversion margin.',
     },
   },
   {
@@ -618,7 +613,8 @@ export const BANDS: Band[] = [
     ],
     read: {
       economy: 'The contract that decides how the trade margin is divided between principal and distributor — and how concentrated distribution becomes.',
-      finance: 'Rebates, listing fees and trade promotion as variable consideration; sales returns as a refund liability and an asset for the goods expected back.',
+      finance:
+        'What this settles is the terms on which the next function may sell at all: territory, exclusivity and what happens when the appointment ends. Rebates, listing fees and trade promotion as variable consideration; sales returns as a refund liability and an asset for the goods expected back.',
     },
   },
   {
@@ -634,7 +630,8 @@ export const BANDS: Band[] = [
     ],
     read: {
       economy: 'Excise, VAT, licensing and standards — collected or imposed, never earned: the fiscal reading of the chain, joint by joint.',
-      finance: 'Compliance cost inside operating expense; excise once on release; VAT collected at each formal transfer and never revenue.',
+      finance:
+        'What this provides is a good a buyer can rely on without testing it: what may be sold, moved and claimed. Compliance cost inside operating expense; excise once on release; VAT collected at each formal transfer and never revenue.',
     },
   },
 ];
@@ -816,10 +813,35 @@ export const LEVERS: Record<LeverId, Lever> = {
 
 export type ShiftId = 'reindustrialisation' | 'green';
 
-/** A joint, layer, stage, node, border or return the shift moves, and what moves there at each distance. */
+/**
+ * An essay that reads one target under one shift. The owner fills these in;
+ * nothing is inferred from a title. `/essays/:slug` resolves for every
+ * published essay and redirects to the canonical URL where one exists, so a
+ * row needs no placement fields to be a working link.
+ */
+export interface ShiftArticle {
+  /** essays.slug — the essay itself, never a module. */
+  slug: string;
+  /** How the title should read in the panel. */
+  title: string;
+}
+
+/**
+ * A joint, layer, stage, node, border or return the shift moves, what moves
+ * there at each distance, and the essays that read it.
+ *
+ * A target carries a numbered mark on the map only where BOTH readings are
+ * written — the mark is a promise of a panel, and an empty panel is worse
+ * than no mark. Leaving a reading empty is therefore how a target is parked:
+ * listed here, absent from the map, and no hole where it would have been.
+ * The set of marks is the same at both distances by construction, so moving
+ * the distance control re-reads the marks instead of renumbering them.
+ */
 export interface ShiftTarget {
   id: string;
   read: LensNote;
+  /** Owner-maintained. Empty until an essay actually reads this target. */
+  articles?: readonly ShiftArticle[];
 }
 
 /** An arrow drawn on the overlay: a cut that moves from one place on the chain to another. */
@@ -943,6 +965,15 @@ export const SHIFTS: Shift[] = [
         },
       },
       {
+        id: 'band-logistics',
+        read: {
+          economy:
+            'Cleaner power and tighter plants do not reach here. The layer injects its own fuel and emissions at every touch, so it sets a floor under the unit that no stage can remove on its own; where the geography is an archipelago and the trade is tiered, the touches per unit are many and that floor is high.',
+          finance:
+            "One physical fact, booked in two places: the fleet's fuel is the provider's own direct emission and the brand owner's indirect, purchased one — the same split the gross-and-net line makes at a node. Lowering it means fewer touches, denser drops or a different fleet, and each of those is a capital decision with its own payback.",
+        },
+      },
+      {
         id: 'band-credit',
         read: {
           economy: 'Where the transition is financed: concessional and blended capital, guarantees — the cost of capital for green assets is pushed down here.',
@@ -985,11 +1016,96 @@ export const SHIFTS: Shift[] = [
 
 export const SHIFT_BY_ID = Object.fromEntries(SHIFTS.map((s) => [s.id, s])) as Record<ShiftId, Shift>;
 
+/**
+ * A target earns a mark on the map only when it can answer at both
+ * distances. This is what keeps the marked set identical at economy and at
+ * finance: the shift control decides WHICH elements are marked, the distance
+ * control decides only what the mark then says.
+ */
+export const isMarked = (target: ShiftTarget): boolean =>
+  target.read.economy.trim() !== '' && target.read.finance.trim() !== '';
+
+/** The marked targets of a shift, in the order this file happens to list them — NOT reading order. */
+export const markedTargets = (shift: ShiftId): ShiftTarget[] => SHIFT_BY_ID[shift].targets.filter(isMarked);
+
 /** The target record for an id under a shift, or nothing when the shift does not move it. */
 export function shiftTarget(shift: ShiftId | null, id: string): ShiftTarget | undefined {
   if (!shift) return undefined;
   return SHIFT_BY_ID[shift].targets.find((t) => t.id === id);
 }
+
+/* ── Identity: a permanent slug per element ──────────────────────────────── */
+
+/**
+ * What a number is NOT. A mark on the map shows a number, and the number is
+ * a position in a reading order that is renumbered every time the overlay
+ * changes. Identity is this table instead: one permanent slug per element,
+ * never shown as a number, never changed when an overlay changes, and never
+ * reused for a different element.
+ *
+ * It is what an essay links to and what the URL carries
+ * (`?lens=green&distance=finance&node=energy`), so a slug here is a public
+ * address: rename one and every link written against it breaks. The unit
+ * test pins the whole table verbatim for exactly that reason.
+ */
+export const SLUGS: Record<string, string> = {
+  // Transformation stages
+  'stage-biological': 'biological-production',
+  'stage-extraction': 'extraction',
+  'stage-processing': 'processing',
+  'stage-packaging': 'packaging',
+  'stage-manufacturing': 'manufacturing',
+  'stage-consumption': 'consumption',
+  'stage-recovery': 'recovery',
+  // Intermediary nodes
+  'node-aggregation': 'aggregation',
+  'node-trader': 'trader',
+  'node-principal': 'principal',
+  'node-distributor': 'distributor',
+  'node-wholesaler': 'wholesaler',
+  'node-retail': 'retail',
+  'node-retail-general': 'retail-general-trade',
+  'node-retail-modern': 'retail-modern-trade',
+  'node-retail-ecommerce': 'retail-ecommerce',
+  'node-retail-quick': 'retail-quick-commerce',
+  'node-retail-horeca': 'retail-horeca',
+  // Enabling layers
+  'band-logistics': 'logistics',
+  'band-credit': 'credit',
+  'band-energy': 'energy',
+  'band-governance': 'governance',
+  'band-regulation': 'regulation',
+  // Borders
+  'border-export': 'border-export',
+  'border-import': 'border-import',
+  // Joints
+  'j-production-aggregation': 'production-aggregation',
+  'j-extraction-processing': 'extraction-processing',
+  'j-aggregation-processing': 'aggregation-processing',
+  'j-processing-trader': 'processing-trader',
+  'j-trader-manufacturing': 'trader-manufacturing',
+  'j-packaging-manufacturing': 'packaging-manufacturing',
+  'j-manufacturing-distribution': 'manufacturing-distribution',
+  'j-distributor-wholesaler': 'distributor-wholesaler',
+  'j-wholesale-retail': 'wholesale-retail',
+  'j-retail-consumption': 'retail-consumption',
+  'j-consumption-recovery': 'consumption-recovery',
+  // Physical returns, and the branch that is not one
+  'return-scrap': 'return-scrap',
+  'return-commercial': 'return-commercial',
+  'return-packaging': 'return-packaging',
+  'return-postconsumer-material': 'return-postconsumer-material',
+  'return-postconsumer-organic': 'return-postconsumer-organic',
+  'return-secondary': 'return-secondary',
+  'branch-byproduct': 'byproduct',
+};
+
+const ID_BY_SLUG: Record<string, string> = Object.fromEntries(Object.entries(SLUGS).map(([id, slug]) => [slug, id]));
+
+/** The public address of an element, or its id where the table has none. */
+export const slugOf = (id: string): string => SLUGS[id] ?? id;
+/** The element a public address names, or nothing when the address is unknown. */
+export const idOfSlug = (slug: string): string | undefined => ID_BY_SLUG[slug];
 
 /* ── Legend: the forms, told in words ────────────────────────────────────── */
 
@@ -1002,6 +1118,7 @@ export type LegendSwatch =
   | 'information'
   | 'border'
   | 'joint'
+  | 'mark'
   | 'conversion'
   | 'spread'
   | 'fee'
@@ -1026,6 +1143,11 @@ export const LEGEND: LegendItem[] = [
   { id: 'information', label: 'Information', note: 'demand told back; specification told forward' },
   { id: 'border', label: 'Border', note: 'where the chain crosses the external sector' },
   { id: 'shift', label: 'Shift', note: 'under reindustrialisation or the green transition, the joints and layers that move are ringed; the rest recedes' },
+  {
+    id: 'mark',
+    label: 'Numbered mark',
+    note: 'under a shift, every element that moves is numbered in reading order — left to right, then top to bottom, layers last. The number is a place in that list and is renumbered for each shift; what does not change is the element it sits on',
+  },
 ];
 
 export const LEGEND_NOTE =
@@ -1069,7 +1191,9 @@ export const COMPACT = {
 /* ── Copy ────────────────────────────────────────────────────────────────── */
 
 export const CHAIN_COPY = {
-  headline: 'One chain. Two distances.',
+  headline: 'Every joint in this chain is a margin.',
+  /** The thesis, between the headline and the two controls. */
+  standfirst: 'Add them up and you have an economy; take one apart and you have a driver tree.',
   /** The distance control is this sentence: the two lens names in it are the two positions. */
   lead: {
     before: 'Read the chain as an ',
@@ -1105,7 +1229,7 @@ export const CHAIN_COPY = {
   aria: {
     wide: {
       title: 'The industry chain, in full',
-      desc: 'Left to right: two origins, primary processing, packaging and finished-goods manufacturing, then distribution, wholesale and retail into consumption and recovery. Intermediary nodes are dashed pills between the stages. Every joint is a diamond on the flow with a chip that reads it at the chosen distance — as an economy or as finance — and opens the margin cut there. Six enabling layers run beneath the chain, money and information run both ways under it, and two dashed border lines mark where goods are exported and imported. A shift, when one is chosen, rings the joints and layers it moves.',
+      desc: 'Left to right: two origins, primary processing, packaging and finished-goods manufacturing, then distribution, wholesale and retail into consumption and recovery. Intermediary nodes are dashed pills between the stages. Every joint is a diamond on the flow with a chip that reads it at the chosen distance — as an economy or as finance — and opens the margin cut there. Five enabling layers run beneath the chain, money and information run both ways under it, and two dashed border lines mark where goods are exported and imported. A shift, when one is chosen, rings the joints and layers it moves and numbers them in reading order, left to right and then top to bottom.',
     },
     compact: {
       title: 'The industry chain, in short',
@@ -1126,6 +1250,9 @@ export const CHAIN_COPY = {
     /** Followed by the shift's name: "Under reindustrialisation". */
     shiftHeading: 'Under',
     curriculumHeading: 'Read this joint in the curriculum',
+    articlesHeading: 'Read this in the essays',
+    /** The kicker over a marked target that is neither a joint nor a layer. */
+    markKicker: 'Marked on the map',
     published: 'Published',
     comingSoon: 'Coming soon',
     close: 'Close',
@@ -1135,6 +1262,21 @@ export const CHAIN_COPY = {
     leverKicker: 'Lever',
     movesHeading: 'What moves',
     hint: 'Select a ringed joint or layer to read what moves there.',
+  },
+  /** The numbered marks a shift puts on the map, and the line that reads them. */
+  mark: {
+    /** The lane label beside the marks, in the reading lane. */
+    lane: 'Marked',
+    /** The readout line when nothing is under the pointer and a shift is on. */
+    rest: 'Point at a numbered mark to read it here; select it to open what moves there.',
+    /** Between a mark's number and its title, for a screen reader. */
+    aria: 'Mark',
+    /** Follows the title in the readout: "· one essay" / "· three essays". */
+    essayOne: 'essay',
+    essayMany: 'essays',
+    essayNone: 'no essay yet',
+    markOne: 'mark',
+    markMany: 'marks',
   },
   controls: {
     noShift: 'No shift',

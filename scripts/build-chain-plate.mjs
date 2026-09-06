@@ -114,7 +114,7 @@ const diamond = (x, y, r = 5) => `<path className="cp-joint-motif" d="M ${x} ${y
 
 function wide() {
   const AX = 275;
-  const base = [], jointHits = [], bandHits = [], shiftLayers = [];
+  const base = [], jointHits = [], bandHits = [], shiftLayers = [], marks = [];
 
   /* Type sizes, mirrored in the generated CSS. Every box is sized FROM its
      text at these sizes, so a longer label in the data widens its box
@@ -306,8 +306,15 @@ function wide() {
      joints, and never crossing a node it does not connect. The path of each
      is kept so a shift can redraw it lit. */
   const returnPath = {};
+  /** The left edge and baseline of a return's own label, where its mark is read with it. */
+  const returnLabel = {};
+  const labelAt = (id, text, x, y, anchor = 'middle') => {
+    const w = est(text, T_SMALL, 0.56) + 12;
+    returnLabel[id] = [anchor === 'middle' ? x - w / 2 : anchor === 'end' ? x - w : x, y - 5];
+  };
   const arc = (r, x1, y1, x2, y2, peak, lx, ly, anchor = 'middle') => {
     returnPath[r.id] = `M ${x1} ${y1} C ${x1} ${peak}, ${x2} ${peak}, ${x2} ${y2}`;
+    labelAt(r.id, r.label, lx, ly, anchor);
     return `<g className="cp-ret" data-id="${r.id}">
       <path d="${returnPath[r.id]}" markerEnd="${M('cp-tip-soft')}" />
       ${chip(lx, ly, r.label, 'cp-ret-t', anchor)}</g>`;
@@ -316,6 +323,9 @@ function wide() {
   returnPath['return-postconsumer-organic'] = `M ${C.rec[1]} ${recB[0] + 8} L ${RISER_A} ${recB[0] + 8} L ${RISER_A} 34 L ${mid(C.org)} 34 L ${mid(C.org)} ${bioB[0] - 4}`;
   returnPath['return-postconsumer-material'] = `M ${C.rec[1]} ${recB[0] + 22} L ${RISER_B} ${recB[0] + 22} L ${RISER_B} 56 L ${mid(C.proc)} 56 L ${mid(C.proc)} ${procB[0] - 4}`;
   returnPath['return-secondary'] = `M ${C.cons[1] - 60} ${consB[0]} C ${C.cons[1] - 60} ${consB[0] - 42}, ${C.cons[1] - 10} ${consB[0] - 42}, ${C.cons[1] - 10} ${consB[0]}`;
+  labelAt('return-postconsumer-organic', R['return-postconsumer-organic'].label, C.dist[0], 38);
+  labelAt('return-postconsumer-material', R['return-postconsumer-material'].label, C.trad[0], 60);
+  labelAt('return-secondary', R['return-secondary'].label, C.cons[1] - 6, consB[0] - 58, 'end');
   base.push(
     arc(R['return-scrap'], C.mfg[0] + 20, mfgB[0] - 4, C.proc[1] - 20, procB[0] - 4, 150, C.proc[0] + 20, 156),
     arc(R['return-commercial'], C.ret[0] + 24, retB[0] - 2, mid(C.dist), distY - distH / 2 - 3, retB[0] - 44, C.ret[0] + 6, retB[0] - 40, 'start'),
@@ -394,7 +404,7 @@ function wide() {
     'j-distributor-wholesaler': [C.dist[0] + 8, Math.round((distY + wholY) / 2), 'right', 0],
     'j-wholesale-retail': [Math.round((C.dist[1] + C.ret[0]) / 2), wholY, 'rowA', 0],
     'j-retail-consumption': [Math.round((C.ret[1] + C.cons[0]) / 2), AX, 'rowA', 0],
-    'j-consumption-recovery': [mid(C.cons) + 30, Math.round((consB[0] + consB[1] + recB[0]) / 2), 'right', 0],
+    'j-consumption-recovery': [mid(C.cons) + 30, Math.round((consB[0] + consB[1] + recB[0]) / 2), 'left', 0],
   };
   JOINTS.forEach((j) => {
     const [x, y, at, dx] = jointGeom[j.id];
@@ -455,7 +465,70 @@ function wide() {
     </g>`);
   });
 
-  return { W, H, base, shiftLayers, hits: [...jointHits, ...bandHits], aria: CHAIN_COPY.aria.wide };
+  /* ── Numbered marks: the index onto a shift's targets ──────────────────────
+     A mark is drawn beside the thing it belongs to, never on top of its own
+     ring: up-left of a joint's diamond, off the left end of a layer's band,
+     at the top-left corner of a box, on a border line under its chip, and
+     beside a return's own label — because a return is read at its label, not
+     at the point where its arrow leaves.
+
+     The ORDER is computed here, from where the marks actually land, and never
+     from the order of the data file: left to right, then top to bottom, with
+     the layers last because they are the bottom row of the plate. The runtime
+     numbers targets by their position in this list, so a target whose reading
+     is still empty simply drops out and the rest close up. ── */
+  const markAt = (id) => {
+    if (jointGeom[id]) {
+      const [x, y, at] = jointGeom[id];
+      return [at === 'left' ? x + 14 : x - 14, y - 14];
+    }
+    if (bandGeom[id]) {
+      const [x, y, , h] = bandGeom[id];
+      return [x - 15, y + h / 2];
+    }
+    if (borderGeom[id]) {
+      const [x, [y0]] = borderGeom[id];
+      return [x, y0 + 18];
+    }
+    if (returnLabel[id]) {
+      const [x, y] = returnLabel[id];
+      return [x - 13, y];
+    }
+    if (boxes[id]) {
+      const [x, y] = boxes[id];
+      return [x - 11, y - 11];
+    }
+    throw new Error(`shift target ${id} has no place for a mark on the wide plate`);
+  };
+  const markOrder = {};
+  SHIFTS.forEach((s) => {
+    const placedMarks = s.targets.map((t) => {
+      const [x, y] = markAt(t.id);
+      return { id: t.id, x, y, row: bandGeom[t.id] ? 1 : 0 };
+    });
+    // Left to right, then top to bottom; the layers are the bottom row.
+    placedMarks.sort((a, b) => a.row - b.row || a.x - b.x || a.y - b.y);
+    /* Where a joint and the box beside it are marked, their two anchors can
+       land within a disc of each other. Reading order is already fixed above,
+       so the later mark is the one that moves, and it moves straight up —
+       the space above the chain is the emptiest on the plate. */
+    const CLEAR = 27;
+    placedMarks.forEach((m, i) => {
+      let guard = 0;
+      while (
+        guard++ < 8 &&
+        placedMarks.slice(0, i).some((o) => Math.hypot(o.x - m.x, o.y - m.y) < CLEAR)
+      ) {
+        m.y -= CLEAR;
+      }
+    });
+    markOrder[s.id] = placedMarks.map((m) => m.id);
+    marks.push(`<g className="cp-marks cp-marks--${s.id}">
+      ${placedMarks.map((m) => `<ShiftMark shift="${s.id}" id="${m.id}" cx={${Math.round(m.x)}} cy={${Math.round(m.y)}} />`).join('\n      ')}
+    </g>`);
+  });
+
+  return { W, H, base, shiftLayers, marks, markOrder, hits: [...jointHits, ...bandHits], aria: CHAIN_COPY.aria.wide };
 }
 
 /* ═══ COMPACT PLATE — the short version ═══════════════════════════════════ */
@@ -569,6 +642,9 @@ const svgWide = (p) => `<svg className="cp-svg cp-svg--wide" viewBox="0 0 ${p.W}
     <g className="cp-hits">
       ${p.hits.join('\n      ')}
     </g>
+    <g className="cp-mark-layer">
+      ${p.marks.join('\n      ')}
+    </g>
   </svg>`;
 
 const svgCompact = (p) => `<svg className="cp-svg cp-svg--compact" viewBox="0 0 ${p.W} ${p.H}" role="img" aria-labelledby="cp-compact-title" aria-describedby="cp-compact-desc" focusable="false">
@@ -600,6 +676,7 @@ fs.writeFileSync(path.join(OUT, 'ChainPlateSvg.tsx'), `/**
  */
 import { BandHit } from './BandHit';
 import { JointHit } from './JointHit';
+import { ShiftMark } from './ShiftMark';
 
 export function ChainPlateWide() {
   return (
@@ -612,6 +689,24 @@ export function ChainPlateCompact() {
   ${compactJsx}
   );
 }
+`);
+
+fs.writeFileSync(path.join(OUT, 'chainMarkOrder.ts'), `/**
+ * GENERATED by scripts/build-chain-plate.mjs — do not edit by hand.
+ *
+ * The reading order of a shift's marks, computed from where they land on the
+ * wide plate: left to right, then top to bottom, with the enabling layers
+ * last because they are the bottom row. It is deliberately NOT the order of
+ * src/data/industryChain.ts, and it is shared with the narrow-screen column
+ * so a number means the same thing on a phone as on a laptop.
+ *
+ * A target whose reading is empty at either distance carries no mark; the
+ * runtime filters this list and numbers what is left from one, so the numbers
+ * are always contiguous.
+ */
+import type { ShiftId } from '@/data/industryChain';
+
+export const MARK_ORDER: Record<ShiftId, readonly string[]> = ${JSON.stringify(w.markOrder, null, 2).replace(/"([\w-]+)":/g, "'$1':").replace(/"/g, "'").replace(/\n/g, '\n')} as const;
 `);
 
 fs.writeFileSync(path.join(OUT, 'chain-plate.css'), `/**
@@ -725,6 +820,27 @@ fs.writeFileSync(path.join(OUT, 'chain-plate.css'), `/**
 .cp-callout-t{font-size:14px;fill:hsl(var(--foreground));font-weight:600}
 .cp-hit[data-lit] .cp-joint-mark{stroke:var(--cp-shift);stroke-width:2.4}
 .cp-hit[data-lit] rect.cp-band-rect{stroke:var(--cp-shift);stroke-width:1.5}
+
+/* The numbered marks: an index onto the shift that is on, drawn last so a
+   mark is never buried, and carried on an opaque disc so it stays legible
+   wherever it lands. Only the marks of the shift that is on are in the
+   document's tab order — display:none, not opacity. */
+.cp-marks{display:none}
+.chain-plate[data-shift="reindustrialisation"] .cp-marks--reindustrialisation{display:block}
+.chain-plate[data-shift="green"] .cp-marks--green{display:block}
+.cp-mark{cursor:pointer}
+.cp-mark:focus{outline:none}
+.cp-mark circle{fill:hsl(var(--background));stroke:var(--cp-shift);stroke-width:1.6}
+.cp-mark text{font-size:14px;font-weight:700;fill:hsl(var(--foreground));letter-spacing:0}
+.cp-mark[aria-expanded="true"] circle{fill:var(--cp-shift);fill-opacity:.16;stroke-width:2.4}
+.cp-mark:focus-visible circle{stroke:hsl(var(--ring));stroke-width:3}
+@media (hover:hover) and (pointer:fine){.cp-mark:hover circle{stroke-width:2.6}}
+/* Renumbering is a change of place, so the marks arrive in reading order
+   rather than all at once: the reader's eye is led along the new sequence
+   instead of having to find it. */
+@keyframes cp-mark-in{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:none}}
+.cp-mark{animation:cp-mark-in .2s ease both;animation-delay:calc(var(--cp-n, 0) * 45ms);transform-box:fill-box;transform-origin:center}
+@media (prefers-reduced-motion:reduce){.cp-mark{animation:none}}
 @media (prefers-reduced-motion:reduce){.cp-base :is(path,rect,circle,ellipse,line,polygon,polyline){transition:none}}
 `);
 

@@ -1,11 +1,17 @@
-import { describe, expect, it, vi } from 'vitest';
-import { render, screen, within } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { render as rtlRender, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { MemoryRouter } from 'react-router-dom';
+import type { ReactElement } from 'react';
 import { BANDS, CHAIN_COPY, JOINTS, LEGEND, LEGEND_NOTE, MARGIN_KINDS, STAGES } from '@/data/industryChain';
 vi.mock('@/integrations/supabase/client', () => ({ supabase: {} }));
 import { ChainPlate } from './ChainPlate';
 
 const choose = (name: string) => screen.getByRole('button', { name });
+const render = (ui: ReactElement) => rtlRender(<MemoryRouter>{ui}</MemoryRouter>);
+
+// The map keeps its state in the address; one test's map must not seed the next.
+beforeEach(() => window.history.replaceState({}, '', '/about'));
 
 describe('audit corrections', () => {
   it.each(['reindustrialisation', 'green transition'])('resets %s without losing the selected joint or distance', async (shift) => {

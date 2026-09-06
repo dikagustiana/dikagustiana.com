@@ -88,6 +88,16 @@ function Swatch({ id }: { id: LegendSwatch }) {
           <rect x="12" y="6" width="16" height="8" rx="1" className="fill-background stroke-foreground" strokeWidth="1" />
         </svg>
       );
+    case 'mark':
+      return (
+        <svg {...common}>
+          <circle cx="11" cy="10" r="8" className="fill-background stroke-accent-editorial" strokeWidth="1.6" />
+          <text x="11" y="14" textAnchor="middle" className="fill-foreground" fontSize="10" fontWeight="700">
+            3
+          </text>
+          <path d="M 23 10 L 39 10" className="stroke-muted-foreground" strokeWidth="1" strokeDasharray="3 2" />
+        </svg>
+      );
     case 'shift':
       return (
         <svg {...common}>

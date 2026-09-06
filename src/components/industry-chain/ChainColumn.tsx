@@ -42,8 +42,11 @@ import {
   type JointId,
   type MarginKind,
 } from '@/data/industryChain';
+import { universalEssayUrl } from '@/lib/essayUrl';
 import { cn } from '@/lib/utils';
+import { Link } from 'react-router-dom';
 import { ChainLensContext } from './chainLensContext';
+import { markNumber } from './chainTargets';
 
 const S = Object.fromEntries(STAGES.map((s) => [s.id, s]));
 const N = Object.fromEntries([...NODES, ...RETAIL].map((n) => [n.id, n]));
@@ -71,14 +74,44 @@ function useLit(id: string) {
   return shiftTarget(shift, id) !== undefined;
 }
 
+/**
+ * What a shift does at this row, read at the distance that is on, with the
+ * same number the wide plate would give it.
+ *
+ * The column carries no floating marks: a phone has no hover and no room for
+ * a badge that does not also say something. So the number opens the note
+ * instead of pointing at it, and the essays behind a mark are listed right
+ * here rather than in a panel the reader has to go and find. The numbering is
+ * the plate's, so a number quoted in an essay means the same thing on both.
+ */
 function LitNote({ id }: { id: string }) {
   const { shift, lens } = useContext(ChainLensContext);
   const target = shiftTarget(shift, id);
   if (!shift || !target) return null;
+  const n = markNumber(shift, id);
+  const articles = target.articles ?? [];
   return (
-    <p data-lit-note={id} className="mt-1.5 border-l-2 border-accent-editorial pl-2 text-xs leading-snug text-foreground">
-      <span className="font-medium">{SHIFT_BY_ID[shift].label}</span> — {target.read[lens]}
-    </p>
+    <div data-lit-note={id} className="mt-1.5 border-l-2 border-accent-editorial pl-2 text-xs leading-snug text-foreground">
+      <p>
+        {n > 0 && (
+          <span data-mark-n={n} className="mr-1.5 inline-block rounded-full border border-accent-editorial px-1.5 text-center font-semibold tabular-nums">
+            {n}
+          </span>
+        )}
+        <span className="font-medium">{SHIFT_BY_ID[shift].label}</span> — {target.read[lens]}
+      </p>
+      {articles.length > 0 && (
+        <ul className="mt-1 space-y-0.5" data-shift-articles={id}>
+          {articles.map((a) => (
+            <li key={a.slug}>
+              <Link to={universalEssayUrl(a.slug)} className="underline underline-offset-2 hover:text-accent">
+                {a.title}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
   );
 }
 

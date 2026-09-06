@@ -31,7 +31,7 @@ export function BandHit({
   /** Where the note starts, or null when the band is too short to hold it. */
   noteX: number | null;
 }) {
-  const { shift, selected, onSelect, panelId } = useContext(ChainLensContext);
+  const { shift, selected, onSelect, onHover, panelId } = useContext(ChainLensContext);
   const band = BAND_BY_ID[id];
   const chip = bandChip(band);
   const form = band.margin ? MARGIN_KINDS[band.margin].form : 'word';
@@ -59,6 +59,10 @@ export function BandHit({
       aria-controls={open ? panelId : undefined}
       onClick={select}
       onKeyDown={onKey}
+      onMouseEnter={() => onHover(id)}
+      onMouseLeave={() => onHover(null)}
+      onFocus={() => onHover(id)}
+      onBlur={() => onHover(null)}
     >
       <rect className="cp-band-rect" x={x} y={y} width={width} height={height} />
       <path className="cp-band-line" d={`M ${x} ${y} L ${x + width} ${y}`} />

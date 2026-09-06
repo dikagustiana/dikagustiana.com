@@ -109,4 +109,25 @@
 .cp-callout-t{font-size:14px;fill:hsl(var(--foreground));font-weight:600}
 .cp-hit[data-lit] .cp-joint-mark{stroke:var(--cp-shift);stroke-width:2.4}
 .cp-hit[data-lit] rect.cp-band-rect{stroke:var(--cp-shift);stroke-width:1.5}
+
+/* The numbered marks: an index onto the shift that is on, drawn last so a
+   mark is never buried, and carried on an opaque disc so it stays legible
+   wherever it lands. Only the marks of the shift that is on are in the
+   document's tab order — display:none, not opacity. */
+.cp-marks{display:none}
+.chain-plate[data-shift="reindustrialisation"] .cp-marks--reindustrialisation{display:block}
+.chain-plate[data-shift="green"] .cp-marks--green{display:block}
+.cp-mark{cursor:pointer}
+.cp-mark:focus{outline:none}
+.cp-mark circle{fill:hsl(var(--background));stroke:var(--cp-shift);stroke-width:1.6}
+.cp-mark text{font-size:14px;font-weight:700;fill:hsl(var(--foreground));letter-spacing:0}
+.cp-mark[aria-expanded="true"] circle{fill:var(--cp-shift);fill-opacity:.16;stroke-width:2.4}
+.cp-mark:focus-visible circle{stroke:hsl(var(--ring));stroke-width:3}
+@media (hover:hover) and (pointer:fine){.cp-mark:hover circle{stroke-width:2.6}}
+/* Renumbering is a change of place, so the marks arrive in reading order
+   rather than all at once: the reader's eye is led along the new sequence
+   instead of having to find it. */
+@keyframes cp-mark-in{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:none}}
+.cp-mark{animation:cp-mark-in .2s ease both;animation-delay:calc(var(--cp-n, 0) * 45ms);transform-box:fill-box;transform-origin:center}
+@media (prefers-reduced-motion:reduce){.cp-mark{animation:none}}
 @media (prefers-reduced-motion:reduce){.cp-base :is(path,rect,circle,ellipse,line,polygon,polyline){transition:none}}

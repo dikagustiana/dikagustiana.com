@@ -46,14 +46,17 @@ const word = (name: string) => screen.getByRole('button', { name, exact: true })
 const chipWords = () => Array.from(document.querySelectorAll('.cp-joint-chip text')).map((t) => t.textContent);
 const litIds = () => Array.from(document.querySelectorAll<SVGGElement>('.cp-hit[data-lit]')).map((g) => g.dataset.id).sort();
 
-beforeEach(() => fromMock.mockReset());
+beforeEach(() => {
+  fromMock.mockReset();
+  window.history.replaceState({}, '', '/about');
+});
 
 describe('ChainPlate at rest', () => {
   it('leads with the headline, verbatim', () => {
     mount(<ChainPlate />);
-    expect(
-      screen.getByRole('heading', { name: 'Nothing here is complicated. It only looks that way from the wrong distance.' }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: CHAIN_COPY.headline })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Every joint in this chain is a margin.' })).toBeInTheDocument();
+    expect(document.querySelector('[data-chain-standfirst]')!.textContent).toBe(CHAIN_COPY.standfirst);
   });
 
   it('reads the chain from far — economy on, finance off — with no shift and both shift words unpressed', () => {
@@ -91,7 +94,7 @@ describe('ChainPlate at rest', () => {
     for (const id of ['stage', 'node', 'layer', 'return', 'joint', 'conversion', 'spread', 'fee', 'shift']) {
       expect(document.querySelector(`[data-legend="${id}"]`), id).not.toBeNull();
     }
-    expect(screen.getByText(/PSAK 72 principal–agent test/)).toBeInTheDocument();
+    expect(screen.getByText(/principal versus agent/)).toBeInTheDocument();
   });
 });
 
@@ -147,7 +150,7 @@ describe('the shift control', () => {
     expect(word('green transition')).toHaveAttribute('aria-pressed', 'true');
     expect(document.querySelector('[data-shift-caption="reindustrialisation"]')).toBeNull();
     expect(document.querySelector('[data-shift-caption="green"]')).not.toBeNull();
-    expect(litIds()).toEqual(['band-credit', 'band-energy', 'j-consumption-recovery']);
+    expect(litIds()).toEqual(['band-credit', 'band-energy', 'band-logistics', 'j-consumption-recovery']);
 
     await userEvent.click(word('green transition'));
     expect(plate().dataset.shift).toBeUndefined();
@@ -283,15 +286,15 @@ describe('a joint as a door, with nothing mapped', () => {
 describe('a layer as a door', () => {
   it('opens its span, its fee or its terms, its two readings, its lines and the joints it rides on', async () => {
     mount(<ChainPlate links={[]} />);
-    await userEvent.click(screen.getByRole('button', { name: 'Contract capacity' }));
-    const panel = screen.getByRole('region', { name: 'Contract capacity' });
+    await userEvent.click(screen.getByRole('button', { name: 'Logistics and warehousing' }));
+    const panel = screen.getByRole('region', { name: 'Logistics and warehousing' });
     expect(within(panel).getByText(CHAIN_COPY.panel.bandKicker)).toBeInTheDocument();
-    expect(within(panel).getByText('Primary processing → finished-goods manufacturing')).toBeInTheDocument();
+    expect(within(panel).getByText('The whole chain')).toBeInTheDocument();
     expect(within(panel).getByText(MARGIN_KINDS['service-fee'].label)).toBeInTheDocument();
-    expect(within(panel).getByText(/Tolling fee revenue, net — at the toller/)).toBeInTheDocument();
-    const band = BANDS.find((b) => b.id === 'band-contract-capacity')!;
+    expect(within(panel).getByText(/Right-of-use assets and lease liabilities, where the warehouse is leased/)).toBeInTheDocument();
+    const band = BANDS.find((b) => b.id === 'band-logistics')!;
     expect(within(panel).getByText(band.read.economy)).toBeInTheDocument();
-    expect(within(panel).getByText(/Processing → trader \/ importer · Trader \/ importer → manufacturing · Packaging → manufacturing/)).toBeInTheDocument();
+    expect(within(panel).getByText(/Production → aggregation · Extraction → processing/)).toBeInTheDocument();
   });
 
   it('shows a layer that only sets the terms without a margin kind', async () => {
