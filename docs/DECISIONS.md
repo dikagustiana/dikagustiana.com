@@ -5,6 +5,102 @@ alternatives. Newest first.
 
 ---
 
+# 2026-09-06 — Two controls that compose: every joint carries two readings, and a shift is an overlay
+
+**The owner's design brief of 2026-09-06 asked for two controls over one map — a distance
+(economy ↔ finance) and a shift (none / reindustrialisation / green transition) — that compose into
+six states, and asked that the joints, not the boxes, be the protagonists.** This pass builds both
+controls, restructures the lens content around the joints, and re-weights the plate. It ran on a
+branch and stopped at a pull request; the owner merges. Screenshots were not received with the brief,
+so every visual judgement here was made on renders taken from `main` in this session.
+
+## Superseded from the two entries of 2026-09-05
+
+- **The lens ids are `economy` and `finance`**, not `economy` and `unit`. The brief names the two
+  positions Economy ↔ Finance; "unit economics" is what finance sees, not the name of the distance.
+- **The distance is a position, not a switch, and one of the two is always on** — economy at rest,
+  because the reader arrives from far. The earlier three-state lens (off / economy / unit) is gone:
+  the brief's model is two distances × three shifts = six states, and a "no distance" state was a
+  seventh the thesis has no use for.
+- **The economy lens is no longer a cloud of fifteen anchored annotations, and the unit lens is no
+  longer a strip of slices under the columns.** Both readings now live ON THE JOINTS: every joint
+  carries `read.economy` and `read.finance`, each a chip word and a sentence. The chip is always on;
+  its word is the joint read at the distance that is on. Rejected: keeping the cloud (it read as an
+  annotated infographic and anchored nine of fifteen readings to boxes, when the thesis says the
+  joint is where inflation passes and value added is added up) and keeping the strip (a slice is cut
+  at a joint, so drawing it under a column contradicted the map's own claim). Every fact in the old
+  fifteen readings survives inside the per-joint sentences; energy intensity moved to the energy
+  layer's reading.
+- **The two distances have no colour.** Navy-for-far and orange-for-near are gone: a distance changes
+  words, and the lane label under the chain says which is on. The editorial orange now means exactly
+  one thing on the plate — a shift — as ring, outline, arrow and callout edge, never as text.
+- **Energy is the sixth enabling layer**, a whole-chain band with a `service-fee` margin, not a set
+  of perpendicular arrows into every stage. The brief lists energy among the layers, and the green
+  transition has to be able to light it. Order of the six: logistics, credit, energy (the three
+  whole-chain costs), contract capacity, governance (the two partial layers), regulation (the rules
+  under everything). Tests pin the order.
+- **The retail formats are rows inside one dashed retail node**, not five pills. One node type, five
+  formats — as the column already drew them — and it takes eight flow lines and four pills off the
+  right third of the plate, where the nodes were competing with the joints.
+- **Monospace is gone from the plate and the column.** One face; case and weight tell a name from a
+  note from a lane title.
+
+## What was built, and the choices made
+
+- **Two sentences are the two controls.** The lead names the two distances and the two words are
+  the positions (`aria-pressed`, one always true). A second sentence names the two shifts; each word
+  is a toggle and the two exclude each other, and the sentence says why in economic terms ("one at a
+  time, since both draw on the same export earnings"). Rejected: a segmented control or tabs — the
+  brief's own test is that if the control feels like navigation the thesis has failed.
+- **A shift is an overlay, generated as static geometry** (`.cp-shift--{id}` groups, shown by CSS
+  from `data-shift`): a ring on every joint it moves, an outline on every stage, node and layer, a
+  lit redraw of every border line and return arc, one arrow where a cut moves (the export cut, from
+  extraction → processing to processing → trader), and a callout chip. The base geometry and every
+  unlit joint recede to a fixed opacity; labels never dim. Nothing is redrawn.
+- **Composition happens in three places.** The caption under the sentences reads the shift as a
+  whole at the distance that is on; the "What moves" list under the plate reads every lit target at
+  that distance (each door among them a button); the panel of a lit target carries an "Under
+  {shift}" block. Changing either control re-reads all three. A door stays open while a control
+  changes — the same target, read differently — where before a lens change closed it.
+- **Three levers, as data.** `LEVERS` names the only three ways the map moves (move the border cut;
+  price a joint that was free; re-price a layer); each shift lists which it pulls, and a test asserts
+  the two pull all three between them and light disjoint targets. Reindustrialisation lights the two
+  borders, extraction → processing, processing (the capacity), processing → trader, the trader,
+  trader → manufacturing and manufacturing. The green transition lights the energy and credit layers,
+  consumption → recovery, recovery, and the two post-consumer loops. Regulation was considered for
+  the green list (a carbon price is a rule) and left out to keep to the brief's four.
+- **Margin kind is told by the chip's form**, not its word: solid for conversion, dashed for a
+  spread, filled for a fee — the three forms the panel's `Chip` already used, now on the plate, in
+  the column and in the legend. With a 2-position distance the kind words (Conversion / Spread / Fee)
+  have no lane of their own; the form carries them without colour.
+- **Weight inverted.** Stage boxes drop to a one-unit stroke; the flow rises to the heaviest line on
+  the plate (foreground, 1.7); the joint diamond is the heaviest mark (radius eight, stroke 1.8). A
+  test asserts flow outweighs box.
+- **The reading lane** is two rows under the chain with elbowed leaders where three joints share one
+  stretch (the two left-hand joints step sideways; processing → trader takes the lower row with the
+  two border joints). A browser audit — no text over another text, every label inside its box, no
+  chip over a box — passes in all six states at 1280 and 1440.
+- **Mobile**: chips on every joint row swap with the distance; a shift outlines the rows it moves
+  and writes what moves beneath each; the two post-consumer loops appear inline under Recovery while
+  the green transition is on, so the loop is visible without opening the returns list. Nothing dims
+  on a phone — a long column read at arm's length cannot afford to lose contrast.
+- **The short version gains a quiet diamond at every join**, so the joints read as the motif before
+  the reader expands the chain. No chips, no doors, no overlay there.
+- **The headline is unchanged.** The brief floats two alternative headlines and asks for a
+  proposal; the proposal is in the pull request, the code keeps the verbatim sentence and its test.
+
+## What a future session must not undo by accident
+
+- The headline is verbatim, and a test asserts it.
+- No digits anywhere in the map except "PSAK 72". A test asserts it, over the shifts and levers too.
+- One distance is always on; the two shifts are exclusive and light disjoint targets; there are
+  exactly three levers. Tests assert all three.
+- Every joint carries both readings with distinct chip words within a distance. A test asserts it.
+- Every colour on the plate is a token; orange means a shift and nothing else; `chain-plate.css` is
+  generated — edit the generator.
+- Layers per joint are derived from spans; do not add a hand list back.
+- Test floor raised 351 → 367 (370 tests).
+
 # 2026-09-05 (later) — Every joint answers for its margin; five layers; the landing page carries the short chain
 
 **The owner's later brief of the same day reverses several of the morning's "not to be re-litigated"
