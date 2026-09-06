@@ -2,10 +2,11 @@
  * The chain's content contract.
  *
  * What would quietly break the page: a joint with no margin to answer for, a
- * layer whose span does not resolve, a border on the wrong joint, a lens
- * reading anchored to something that does not exist, a figure sneaking into
- * a map that promises none, or the generated plate drifting from the data it
- * was generated from.
+ * joint with only one of its two readings, a layer whose span does not
+ * resolve, a border on the wrong joint, a shift that lights a target the map
+ * does not have — or lights one the other shift lights too — a figure
+ * sneaking into a map that promises none, or the generated plate drifting
+ * from the data it was generated from.
  */
 
 import { readFileSync } from 'node:fs';
@@ -18,30 +19,39 @@ import {
   CHAIN_COPY,
   COLUMNS,
   COMPACT,
-  ECONOMY_LENS,
-  ENERGY,
   JOINTS,
   JOINT_IDS,
   JOINT_LABELS,
   LEGEND,
   LEGEND_NOTE,
+  LEVERS,
   MARGIN_KINDS,
   NODES,
   NON_PHYSICAL,
   RETAIL,
   RETAIL_GROUP,
   RETURNS,
+  SHIFTS,
+  SHIFT_BY_ID,
   STAGES,
-  UNIT_LENS,
-  UNIT_LOGISTICS,
+  bandChip,
   bandJoints,
   jointLayers,
+  shiftTarget,
+  type LensId,
 } from '@/data/industryChain';
 
+const LENSES: LensId[] = ['economy', 'finance'];
 const stageIds = new Set(STAGES.map((s) => s.id));
 const nodeIds = new Set([...NODES, ...RETAIL].map((n) => n.id));
 const endIds = new Set([...stageIds, ...nodeIds, RETAIL_GROUP.id]);
-const anchorIds = new Set([...endIds, ...JOINT_IDS, ENERGY.id]);
+const targetIds = new Set([
+  ...endIds,
+  ...JOINT_IDS,
+  ...BANDS.map((b) => b.id),
+  ...BORDERS.map((b) => b.id),
+  ...RETURNS.map((r) => r.id),
+]);
 
 /** The one number the map carries is the standard's own name. Strip it, then nothing else may be a digit. */
 const noFigures = (text: string) => expect(text.replace(/PSAK 72/g, 'PSAK')).not.toMatch(/\d/);
@@ -78,16 +88,38 @@ describe('the joints', () => {
     expect(j.margin).toBe('conversion');
     expect(j.alt?.margin).toBe('node-spread');
   });
+
+  it('each carry two readings — from far and from close — with a short chip word and a sentence behind it', () => {
+    for (const j of JOINTS) {
+      for (const l of LENSES) {
+        expect(j.read[l].chip, `${j.id} ${l} chip`).toBeTruthy();
+        expect(j.read[l].chip.length, `${j.id} ${l} chip is short enough to sit on the chain`).toBeLessThanOrEqual(20);
+        expect(j.read[l].note.length, `${j.id} ${l} note`).toBeGreaterThan(40);
+      }
+      expect(j.read.economy.chip, `${j.id} reads differently at the two distances`).not.toBe(j.read.finance.chip);
+    }
+  });
+
+  it('never repeat a chip word within one distance, so the reading lane tells the joints apart', () => {
+    for (const l of LENSES) {
+      const chips = JOINTS.map((j) => j.read[l].chip);
+      expect(new Set(chips).size, l).toBe(chips.length);
+    }
+  });
 });
 
 describe('the three margin kinds', () => {
-  it('each have a chip word, a meaning, a test and at least one line', () => {
+  it('each have a chip word, a form, a meaning, a test and at least one line', () => {
+    const forms = new Set<string>();
     for (const k of Object.values(MARGIN_KINDS)) {
       expect(k.chip).toBeTruthy();
       expect(k.means).toBeTruthy();
       expect(k.test).toBeTruthy();
       expect(k.lines.length).toBeGreaterThan(0);
+      forms.add(k.form);
     }
+    // Three kinds, three forms: the kind reads from the chip's border without colour.
+    expect(forms).toEqual(new Set(['solid', 'dashed', 'filled']));
   });
 
   it('tell node from layer by the PSAK 72 principal–agent test — the whole sale against the fee', () => {
@@ -105,17 +137,18 @@ describe('the three margin kinds', () => {
 });
 
 describe('the enabling layers', () => {
-  it('are five, in this order, with credit directly under logistics', () => {
+  it('are six, in this order: the three whole-chain costs, the two partial layers, then the rules under everything', () => {
     expect(BANDS.map((b) => b.id)).toEqual([
       'band-logistics',
       'band-credit',
+      'band-energy',
       'band-contract-capacity',
       'band-governance',
       'band-regulation',
     ]);
   });
 
-  it('span real columns, in reading order, and say so in words', () => {
+  it('span real columns, in reading order, say so in words, and read at both distances', () => {
     for (const b of BANDS) {
       const [from, to] = b.span;
       expect(COLUMNS.indexOf(from), `${b.id} from ${from}`).toBeGreaterThanOrEqual(0);
@@ -123,14 +156,24 @@ describe('the enabling layers', () => {
       expect(b.spanLabel, b.id).toBeTruthy();
       expect(b.means, b.id).toBeTruthy();
       expect(b.lines.length, b.id).toBeGreaterThan(0);
-      expect(b.margin || b.chip, `${b.id} needs a chip word`).toBeTruthy();
+      expect(bandChip(b), `${b.id} needs a chip word`).toBeTruthy();
+      for (const l of LENSES) expect(b.read[l], `${b.id} ${l}`).toBeTruthy();
     }
+  });
+
+  it('make energy a layer every stage buys and none owns: whole chain, a fee, the subsidy named', () => {
+    const energy = BANDS.find((b) => b.id === 'band-energy')!;
+    expect(energy.span).toEqual(['stage-biological', 'stage-recovery']);
+    expect(energy.margin).toBe('service-fee');
+    expect(`${energy.note} ${energy.means} ${energy.read.economy}`.toLowerCase()).toContain('subsid');
+    expect(bandJoints(energy)).toEqual([...JOINT_IDS]);
   });
 
   it('put contract capacity under processing → manufacturing only, and governance under manufacturing → retail only', () => {
     const cc = BANDS.find((b) => b.id === 'band-contract-capacity')!;
     expect(cc.span).toEqual(['stage-processing', 'stage-manufacturing']);
     expect(cc.margin).toBe('service-fee');
+    expect(cc.note).toContain('makloon');
     expect(bandJoints(cc)).toEqual(['j-processing-trader', 'j-trader-manufacturing', 'j-packaging-manufacturing']);
 
     const gov = BANDS.find((b) => b.id === 'band-governance')!;
@@ -140,7 +183,7 @@ describe('the enabling layers', () => {
   });
 
   it('ride on every joint for the whole-chain layers, and are derived from the span, not listed by hand', () => {
-    for (const id of ['band-logistics', 'band-credit', 'band-regulation']) {
+    for (const id of ['band-logistics', 'band-credit', 'band-energy', 'band-regulation']) {
       expect(bandJoints(BANDS.find((b) => b.id === id)!)).toEqual([...JOINT_IDS]);
     }
     for (const j of JOINT_IDS) expect(jointLayers(j).map((b) => b.id), j).toContain('band-logistics');
@@ -157,12 +200,11 @@ describe('the borders', () => {
     ]);
   });
 
-  it('agree with the economy lens about where the external balance is read', () => {
-    const exportLine = BORDERS.find((b) => b.direction === 'out')!;
-    const importLine = BORDERS.find((b) => b.direction === 'in')!;
-    expect(ECONOMY_LENS.find((e) => e.id === 'econ-external-export')!.anchor).toBe(exportLine.at);
-    expect(ECONOMY_LENS.find((e) => e.id === 'econ-external-import')!.anchor).toBe(importLine.at);
-    expect(ECONOMY_LENS.find((e) => e.id === 'econ-import-share')!.anchor).toBe(importLine.at);
+  it('agree with the economy reading of the joints they cut', () => {
+    for (const b of BORDERS) {
+      const joint = JOINTS.find((j) => j.id === b.at)!;
+      expect(joint.read.economy.note.toLowerCase(), b.id).toContain(b.direction === 'out' ? 'export' : 'import');
+    }
   });
 });
 
@@ -193,37 +235,85 @@ describe('the flows against the goods', () => {
   });
 });
 
-describe('the legend', () => {
-  it('names the four categories and the non-physical flows, each with a note', () => {
-    const ids = LEGEND.map((l) => l.id);
-    for (const must of ['stage', 'node', 'layer', 'return', 'money', 'information', 'border', 'joint']) expect(ids).toContain(must);
-    for (const l of LEGEND) expect(l.note, l.id).toBeTruthy();
+describe('the shifts', () => {
+  it('are two — reindustrialisation and the green transition — each a word in the sentence, read at both distances', () => {
+    expect(SHIFTS.map((s) => s.id)).toEqual(['reindustrialisation', 'green']);
+    for (const s of SHIFTS) {
+      expect(s.label).toBeTruthy();
+      expect(s.word).toBeTruthy();
+      for (const l of LENSES) expect(s.read[l].length, `${s.id} ${l}`).toBeGreaterThan(80);
+    }
+  });
+
+  it('pull only the three levers there are, and between them pull all three', () => {
+    expect(Object.keys(LEVERS).sort()).toEqual(['move-border', 'price-unpaid-joint', 'reprice-layer']);
+    const pulled = new Set(SHIFTS.flatMap((s) => s.levers));
+    expect(pulled).toEqual(new Set(Object.keys(LEVERS)));
+    for (const s of SHIFTS) expect(s.levers.length, s.id).toBeGreaterThan(0);
+    for (const lever of Object.values(LEVERS)) {
+      expect(lever.label).toBeTruthy();
+      expect(lever.means).toBeTruthy();
+    }
+  });
+
+  it('light only things the map has, each read at both distances', () => {
+    for (const s of SHIFTS) {
+      expect(s.targets.length, s.id).toBeGreaterThanOrEqual(3);
+      for (const t of s.targets) {
+        expect(targetIds.has(t.id), `${s.id} lights ${t.id}, which the map does not have`).toBe(true);
+        for (const l of LENSES) expect(t.read[l], `${t.id} ${l}`).toBeTruthy();
+      }
+      for (const m of s.moves) {
+        expect(targetIds.has(m.from), `${m.id} from`).toBe(true);
+        expect(targetIds.has(m.to), `${m.id} to`).toBe(true);
+        expect(m.label).toBeTruthy();
+      }
+      for (const c of s.callouts) {
+        expect(targetIds.has(c.at), `${c.id} at`).toBe(true);
+        expect(c.label).toBeTruthy();
+      }
+    }
+  });
+
+  it('never light the same target twice, so the two are never read as compatible', () => {
+    const [a, b] = SHIFTS;
+    const shared = a.targets.filter((t) => b.targets.some((u) => u.id === t.id));
+    expect(shared).toEqual([]);
+    const overlap = SHIFTS.map((s) => new Set(s.targets.map((t) => t.id)));
+    expect([...overlap[0]].some((id) => overlap[1].has(id))).toBe(false);
+  });
+
+  it('reindustrialisation lights the border lines, the trader and manufacturing; the green transition lights energy, credit, recovery and the post-consumer loop', () => {
+    const lit = (id: string) => new Set(SHIFT_BY_ID[id as 'reindustrialisation' | 'green'].targets.map((t) => t.id));
+    const re = lit('reindustrialisation');
+    for (const must of ['border-export', 'border-import', 'node-trader', 'stage-manufacturing', 'j-extraction-processing', 'j-trader-manufacturing']) {
+      expect(re.has(must), `reindustrialisation lights ${must}`).toBe(true);
+    }
+    expect(SHIFT_BY_ID.reindustrialisation.moves.map((m) => [m.from, m.to])).toEqual([['border-export', 'j-processing-trader']]);
+
+    const gr = lit('green');
+    for (const must of ['band-energy', 'band-credit', 'stage-recovery', 'j-consumption-recovery', 'return-postconsumer-material', 'return-postconsumer-organic']) {
+      expect(gr.has(must), `green lights ${must}`).toBe(true);
+    }
+    expect(SHIFT_BY_ID.green.levers).toEqual(['price-unpaid-joint', 'reprice-layer']);
+    expect(SHIFT_BY_ID.reindustrialisation.levers).toEqual(['move-border']);
+  });
+
+  it('answer shiftTarget only for a lit id under an active shift', () => {
+    expect(shiftTarget(null, 'border-export')).toBeUndefined();
+    expect(shiftTarget('reindustrialisation', 'border-export')?.read.economy).toBeTruthy();
+    expect(shiftTarget('green', 'border-export')).toBeUndefined();
+    expect(shiftTarget('green', 'band-energy')?.read.finance).toBeTruthy();
   });
 });
 
-describe('the lenses', () => {
-  it('anchors every economy reading to a stage, node, joint or the energy input', () => {
-    for (const item of ECONOMY_LENS) expect(anchorIds.has(item.anchor), `${item.id} → ${item.anchor}`).toBe(true);
-  });
-
-  it('covers every variable the economy lens promises', () => {
-    const labels = new Set(ECONOMY_LENS.map((i) => i.label));
-    for (const must of ['Inflation', 'Exchange rate', 'Labour', 'Business cycle', 'Growth', 'External balance', 'Monetary policy', 'Fiscal', 'Capital goods', 'Import share', 'Energy intensity']) {
-      expect(labels.has(must), must).toBe(true);
+describe('the legend', () => {
+  it('names the four categories, the joint and its three chip forms, the non-physical flows, the border and the shift, each with a note', () => {
+    const ids = LEGEND.map((l) => l.id);
+    for (const must of ['stage', 'node', 'layer', 'return', 'joint', 'conversion', 'spread', 'fee', 'money', 'information', 'border', 'shift']) {
+      expect(ids).toContain(must);
     }
-  });
-
-  it('sits every unit-economics slice under a real column, in chain order', () => {
-    for (const s of UNIT_LENS) expect(endIds.has(s.column), `${s.id} → ${s.column}`).toBe(true);
-    expect(UNIT_LENS[0].column).toBe('stage-biological');
-    expect(UNIT_LENS[UNIT_LENS.length - 1].column).toBe('stage-consumption');
-  });
-
-  it('covers the five things a slice is made of', () => {
-    const text = [...UNIT_LENS.map((s) => `${s.label} ${s.note ?? ''}`), UNIT_LOGISTICS.label].join(' ').toLowerCase();
-    for (const must of ['value added', 'logistics', 'cost to serve', 'contribution margin', 'dso']) {
-      expect(text, must).toContain(must);
-    }
+    for (const l of LEGEND) expect(l.note, l.id).toBeTruthy();
   });
 });
 
@@ -251,11 +341,25 @@ describe('what the map promises', () => {
     expect(CHAIN_COPY.headline).toBe('Nothing here is complicated. It only looks that way from the wrong distance.');
   });
 
+  it('makes the two controls two sentences whose words are the positions', () => {
+    expect(CHAIN_COPY.lead.economy).toBe('economy');
+    expect(CHAIN_COPY.lead.finance).toBe('finance');
+    expect(CHAIN_COPY.shiftLead.before).toBeTruthy();
+    expect(CHAIN_COPY.shiftLead.middle).toBeTruthy();
+    expect(CHAIN_COPY.shiftLead.after.toLowerCase()).toContain('one at a time');
+    expect(CHAIN_COPY.lensName).toEqual({ economy: 'Economy', finance: 'Finance' });
+  });
+
+  it('keeps the local terms', () => {
+    const all = JSON.stringify({ RETAIL, BANDS, LEVERS }).toLowerCase();
+    for (const term of ['warung', 'makloon', 'horeca', 'general trade', 'hilirisasi']) expect(all, term).toContain(term);
+  });
+
   it('carries no figures anywhere — no percentages, amounts or magnitudes — only the name of the standard', () => {
     noFigures(
       JSON.stringify({
-        STAGES, NODES, RETAIL, JOINTS, MARGIN_KINDS, BANDS, BORDERS, RETURNS, BYPRODUCT, ENERGY, NON_PHYSICAL,
-        LEGEND, LEGEND_NOTE, ECONOMY_LENS, UNIT_LENS, UNIT_LOGISTICS, COMPACT, CHAIN_COPY, JOINT_LABELS,
+        STAGES, NODES, RETAIL, RETAIL_GROUP, JOINTS, MARGIN_KINDS, BANDS, BORDERS, RETURNS, BYPRODUCT, NON_PHYSICAL,
+        LEGEND, LEGEND_NOTE, SHIFTS, LEVERS, COMPACT, CHAIN_COPY, JOINT_LABELS,
       }),
     );
     expect(JSON.stringify(MARGIN_KINDS)).toMatch(/PSAK 72/);
@@ -269,19 +373,18 @@ describe('the generated plates', () => {
   const texts = (src: string) => Array.from(src.matchAll(/<text[^>]*>([^<]*)<\/text>/g)).map((m) => m[1]);
   const dataIds = (src: string) => new Set(Array.from(src.matchAll(/data-id="([^"]+)"/g)).map((m) => m[1]));
 
-  it('draw every stage, node, return, border and non-physical flow of the full chain, by id', () => {
+  it('draw every stage, node, retail format, return, border and non-physical flow of the full chain, by id', () => {
     const ids = dataIds(wideSrc);
     for (const s of STAGES) expect(ids, s.id).toContain(s.id);
     for (const n of [...NODES, ...RETAIL]) expect(ids, n.id).toContain(n.id);
+    expect(ids).toContain(RETAIL_GROUP.id);
     for (const r of RETURNS) expect(ids, r.id).toContain(r.id);
     for (const b of BORDERS) expect(ids, b.id).toContain(b.id);
     for (const f of NON_PHYSICAL) expect(ids, f.id).toContain(f.id);
-    for (const e of ECONOMY_LENS) expect(ids, e.id).toContain(e.id);
-    for (const s of UNIT_LENS) expect(ids, s.id).toContain(s.id);
     expect(ids).toContain(BYPRODUCT.id);
   });
 
-  it('draw every stage, node, slice and economy note as text, in sync with the data', () => {
+  it('draw every stage, node and format as text, in sync with the data — and no lens text, which lives on the chips at run time', () => {
     // Joined with a space, not a newline: a long label or note is wrapped onto
     // consecutive <text> lines, so the plate holds the words but not the breaks.
     const drawn = texts(wideSrc).join(' ');
@@ -294,23 +397,24 @@ describe('the generated plates', () => {
       NODES.find((n) => n.id === 'node-distributor')!.recursion!,
     );
     for (const n of [...NODES, ...RETAIL]) expect(drawn, n.id).toContain(n.label);
-    for (const s of UNIT_LENS) expect(drawn, s.id).toContain(s.label);
-    for (const e of ECONOMY_LENS) expect(drawn, e.id).toContain(e.note);
     for (const r of RETURNS) expect(drawn, r.id).toContain(r.label);
     for (const f of NON_PHYSICAL) expect(drawn, f.id).toContain(f.label);
     for (const b of BORDERS) expect(drawn, b.id).toContain(b.label);
+    for (const name of Object.values(CHAIN_COPY.lensName)) expect(drawn, `${name} lane label`).toContain(name);
+    for (const j of JOINTS) for (const l of LENSES) expect(drawn, `${j.id} ${l} chip is a run-time word`).not.toContain(j.read[l].chip);
   });
 
-  it('keeps the lens overlays in the accessibility tree, and dims only geometry under a lens', () => {
-    expect(tsx).not.toMatch(/cp-lens[^>]*aria-hidden/);
-    expect(css).toMatch(/\.chain-plate\[data-lens\] \.cp-base :is\(path,rect/);
-    expect(css).not.toMatch(/\.chain-plate\[data-lens\] \.cp-base\{opacity/);
+  it('carry the retail formats as rows inside one retail node', () => {
+    // The retail node is drawn just before the consumption stage; every format row sits between the two.
+    const start = wideSrc.indexOf('cp-retail" data-id="node-retail"');
+    const retail = wideSrc.slice(start, wideSrc.indexOf('data-id="stage-consumption"', start));
+    expect(start).toBeGreaterThan(0);
+    for (const r of RETAIL) expect(retail, r.id).toContain(`<g className="cp-retail-row" data-id="${r.id}">`);
   });
 
-  it('draw no hourglass hull, no filled entry stage, and no digits in any label', () => {
-    expect(tsx).not.toMatch(/cp-hull/);
-    expect(tsx).not.toMatch(/cp-stage--entry/);
-    expect(css).not.toMatch(/cp-hull|cp-stage--entry/);
+  it('draw no hourglass hull, no lens cloud, no unit strip, no energy arrows, and no digits in any label', () => {
+    expect(tsx).not.toMatch(/cp-hull|cp-stage--entry|cp-econ|cp-slice|cp-energy|cp-lens--/);
+    expect(css).not.toMatch(/cp-hull|cp-stage--entry|cp-econ|cp-slice|cp-energy/);
     for (const t of texts(tsx)) noFigures(t);
   });
 
@@ -321,11 +425,41 @@ describe('the generated plates', () => {
     expect(compactSrc).not.toMatch(/<JointHit|<BandHit/);
   });
 
-  it('give the partial layers a shorter band than the whole-chain ones', () => {
+  it('give the partial layers a shorter band than the whole-chain ones, and energy the whole chain', () => {
     const width = (id: string) => Number(wideSrc.match(new RegExp(`<BandHit id="${id}"[^>]*width=\\{(\\d+)\\}`))![1]);
     expect(width('band-contract-capacity')).toBeLessThan(width('band-logistics'));
     expect(width('band-governance')).toBeLessThan(width('band-logistics'));
     expect(width('band-credit')).toBe(width('band-logistics'));
+    expect(width('band-energy')).toBe(width('band-logistics'));
+  });
+
+  it('draw one overlay per shift with a lit mark for every target, the moves and the callouts, hidden until the wrapper says which', () => {
+    for (const s of SHIFTS) {
+      const start = wideSrc.indexOf(`cp-shift cp-shift--${s.id}"`);
+      expect(start, s.id).toBeGreaterThan(0);
+      const end = wideSrc.indexOf('cp-shift cp-shift--', start + 10);
+      const layer = wideSrc.slice(start, end === -1 ? wideSrc.indexOf('<g className="cp-hits">') : end);
+      for (const t of s.targets) expect(layer, `${s.id} lights ${t.id}`).toContain(`<g className="cp-lit" data-for="${t.id}">`);
+      for (const m of s.moves) {
+        expect(layer, m.id).toContain(`data-id="${m.id}"`);
+        expect(layer, m.label).toContain(m.label);
+      }
+      for (const c of s.callouts) {
+        expect(layer, c.id).toContain(`data-id="${c.id}"`);
+        expect(layer, c.label).toContain(c.label);
+      }
+      expect(css).toContain(`.chain-plate[data-shift="${s.id}"] .cp-shift--${s.id}{display:block}`);
+    }
+    expect(css).toMatch(/\.cp-shift\{display:none\}/);
+    // Under a shift the base geometry recedes; under a distance nothing does.
+    expect(css).toMatch(/\.chain-plate\[data-shift\] \.cp-base :is\(path,rect/);
+    expect(css).not.toMatch(/\.chain-plate\[data-lens\] \.cp-base/);
+  });
+
+  it('puts a quiet diamond on every join of the short version', () => {
+    const joins = compactSrc.match(/cp-joint-motif/g) ?? [];
+    // Two origins into what follows, then one join per step after the first.
+    expect(joins.length).toBeGreaterThanOrEqual(COMPACT.sequence.length);
   });
 
   it('expose the full plate as a group with a title and description, so the doors inside it stay in the accessibility tree', () => {
@@ -333,6 +467,7 @@ describe('the generated plates', () => {
     expect(wideSrc).toContain(`<title id="cp-wide-title">${CHAIN_COPY.aria.wide.title}</title>`);
     expect(wideSrc).not.toMatch(/hourglass/i);
     expect(tsx).not.toContain('<figcaption');
+    expect(wideSrc).toMatch(/<g className="cp-shifts" aria-hidden="true">/);
   });
 
   it('draws the short version from COMPACT and nothing more', () => {
@@ -351,11 +486,17 @@ describe('the generated plates', () => {
     expect(ids.every((id) => id.endsWith('--wide') || id.endsWith('--compact'))).toBe(true);
   });
 
-  it('uses tokens only, and no type smaller than fourteen viewBox units', () => {
+  it('uses tokens only, one accent that means a shift, and no type smaller than fourteen viewBox units', () => {
     expect(css).not.toMatch(/#[0-9a-fA-F]{3,8}\b/);
     const sizes = Array.from(css.matchAll(/font-size:(\d+(?:\.\d+)?)px/g)).map((m) => Number(m[1]));
     expect(sizes.length).toBeGreaterThan(0);
     for (const s of sizes) expect(s).toBeGreaterThanOrEqual(14);
     expect(css).toMatch(/@media \(hover:hover\)/);
+    expect(css).toMatch(/--cp-shift: hsl\(var\(--accent-editorial\)\)/);
+    expect(css).not.toMatch(/--cp-far|--cp-near|--cp-mono/);
+    // The flow outweighs the box: the chain reads before its stations.
+    const flow = Number(css.match(/\.cp-flow\{[^}]*stroke-width:([\d.]+)/)![1]);
+    const box = Number(css.match(/\.cp-stage rect\{[^}]*stroke-width:([\d.]+)/)![1]);
+    expect(flow).toBeGreaterThan(box);
   });
 });

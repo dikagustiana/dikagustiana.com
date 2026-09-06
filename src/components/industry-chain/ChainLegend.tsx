@@ -1,9 +1,10 @@
 /**
- * How to read the map: the four categories plus the two non-physical flows,
- * the border and the joint marker, each told by FORM before colour — a solid
- * box, a dashed pill, a filled band, a dashed arc, a dotted line with a
- * filled head, a dash-dot line with an open head, a vertical dash with a
- * chip, a diamond. The words come from the data file; only the swatches live
+ * How to read the map: the four categories, the joint and its three chip
+ * forms, the two non-physical flows, the border and the shift ring, each
+ * told by FORM before colour — a solid box, a dashed pill, a filled band, a
+ * dashed arc, a diamond, a solid / dashed / filled chip, a dotted line with
+ * a filled head, a dash-dot line with an open head, a vertical dash with a
+ * chip, a ring. The words come from the data file; only the swatches live
  * here, drawn as plain paths so they need no shared marker definitions.
  */
 
@@ -18,13 +19,13 @@ function Swatch({ id }: { id: LegendSwatch }) {
     case 'stage':
       return (
         <svg {...common}>
-          <rect x="1" y="2" width="38" height="16" rx="1.5" className="fill-background stroke-foreground" strokeWidth="1.5" />
+          <rect x="1" y="2" width="38" height="16" rx="1.5" className="fill-background stroke-foreground" strokeWidth="1" />
         </svg>
       );
     case 'node':
       return (
         <svg {...common}>
-          <rect x="1" y="3" width="38" height="14" rx="7" className="fill-background stroke-muted-foreground" strokeWidth="1.1" strokeDasharray="3 2.5" />
+          <rect x="1" y="3" width="38" height="14" rx="7" className="fill-background stroke-muted-foreground" strokeWidth="1" strokeDasharray="3 2.5" />
         </svg>
       );
     case 'layer':
@@ -37,8 +38,33 @@ function Swatch({ id }: { id: LegendSwatch }) {
     case 'return':
       return (
         <svg {...common}>
-          <path d="M 36 17 C 36 3, 6 3, 6 14" fill="none" className="stroke-muted-foreground" strokeWidth="1.1" strokeDasharray="5 3" />
+          <path d="M 36 17 C 36 3, 6 3, 6 14" fill="none" className="stroke-muted-foreground" strokeWidth="1" strokeDasharray="5 3" />
           <path d="M 3 10 L 6 16 L 9 10 Z" className="fill-muted-foreground" />
+        </svg>
+      );
+    case 'joint':
+      return (
+        <svg {...common}>
+          <path d="M 2 10 L 38 10" className="stroke-foreground" strokeWidth="1.7" />
+          <path d="M 20 3 L 27 10 L 20 17 L 13 10 Z" className="fill-background stroke-foreground" strokeWidth="1.8" />
+        </svg>
+      );
+    case 'conversion':
+      return (
+        <svg {...common}>
+          <rect x="3" y="3" width="34" height="14" rx="2" className="fill-background stroke-foreground" strokeWidth="1" />
+        </svg>
+      );
+    case 'spread':
+      return (
+        <svg {...common}>
+          <rect x="3" y="3" width="34" height="14" rx="2" className="fill-background stroke-foreground" strokeWidth="1" strokeDasharray="3 2.5" />
+        </svg>
+      );
+    case 'fee':
+      return (
+        <svg {...common}>
+          <rect x="3" y="3" width="34" height="14" rx="2" className="fill-secondary stroke-border" strokeWidth="1" />
         </svg>
       );
     case 'money':
@@ -62,11 +88,12 @@ function Swatch({ id }: { id: LegendSwatch }) {
           <rect x="12" y="6" width="16" height="8" rx="1" className="fill-background stroke-foreground" strokeWidth="1" />
         </svg>
       );
-    case 'joint':
+    case 'shift':
       return (
         <svg {...common}>
-          <path d="M 4 10 L 36 10" className="stroke-muted-foreground" strokeWidth="1.3" />
-          <path d="M 20 4 L 26 10 L 20 16 L 14 10 Z" className="fill-background stroke-foreground" strokeWidth="1.5" />
+          <path d="M 2 10 L 38 10" className="stroke-foreground" strokeWidth="1.2" opacity="0.4" />
+          <path d="M 20 5 L 25 10 L 20 15 L 15 10 Z" className="fill-background stroke-accent-editorial" strokeWidth="1.8" />
+          <circle cx="20" cy="10" r="8.5" fill="none" className="stroke-accent-editorial" strokeWidth="1.6" />
         </svg>
       );
   }

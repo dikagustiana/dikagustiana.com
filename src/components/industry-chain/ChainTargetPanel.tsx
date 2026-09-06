@@ -2,11 +2,13 @@
  * The reading of one target: a joint or a layer.
  *
  * For a joint: the margin kind cut there, what it means, the control test
- * that puts it in that class, the lines of the financial statements that
- * carry it, and the layers riding on the same move — each a fee (or the
- * terms) on top of the slice. For a layer: what it does, its span, the joints
- * it rides on, and its own lines. Where the curriculum has pinned modules to
- * a joint, they follow, one level down.
+ * that puts it in that class, the joint read at both distances — the one
+ * that is on first — the lines of the financial statements that carry it,
+ * and the layers riding on the same move. For a layer: what it does, its
+ * span, its two readings, its own lines, and the joints it rides on. Under a
+ * shift that moves this target, what moves here, at the distance that is
+ * on. Where the curriculum has pinned modules to a joint, they follow, one
+ * level down.
  *
  * The same body serves the panel under the wide plate, the inline panel
  * under a joint row on a narrow screen, and the open state of a layer in the
@@ -19,10 +21,14 @@ import {
   CHAIN_COPY,
   JOINT_BY_ID,
   MARGIN_KINDS,
+  SHIFT_BY_ID,
   bandJoints,
   jointLayers,
+  shiftTarget,
   type Band,
   type Joint,
+  type LensId,
+  type LensNote,
   type MarginKind,
 } from '@/data/industryChain';
 import { cn } from '@/lib/utils';
@@ -32,7 +38,8 @@ import { isJointId, targetLabel } from './chainTargets';
 
 const KICKER = 'text-[11px] uppercase tracking-[0.18em] text-muted-foreground';
 
-function Chip({ kind, word, className }: { kind?: MarginKind; word?: string; className?: string }) {
+/** The margin-kind marker, in the same three forms the plate's chips use. */
+export function Chip({ kind, word, className }: { kind?: MarginKind; word?: string; className?: string }) {
   const text = kind ? MARGIN_KINDS[kind].chip : word;
   if (!text) return null;
   return (
@@ -80,7 +87,42 @@ function MarginBlock({ kind, note }: { kind: MarginKind; note?: string }) {
   );
 }
 
-/** A layer named inside a joint's panel: a button on a wide screen, so one panel leads to the next. */
+/** The two distances, the one that is on first and in full strength. */
+function TwoDistances({ read, lens }: { read: LensNote; lens: LensId }) {
+  const order: LensId[] = lens === 'economy' ? ['economy', 'finance'] : ['finance', 'economy'];
+  return (
+    <div className="mt-4">
+      <h4 className={KICKER}>{CHAIN_COPY.panel.readHeading}</h4>
+      <dl className="mt-1.5 space-y-1.5 text-sm">
+        {order.map((l) => (
+          <div key={l} data-distance={l} data-active={l === lens || undefined}>
+            <dt className={cn('inline font-medium', l === lens ? 'text-foreground' : 'text-muted-foreground')}>
+              {CHAIN_COPY.distance[l]}.{' '}
+            </dt>
+            <dd className={cn('inline', l === lens ? 'text-foreground' : 'text-muted-foreground')}>{read[l]}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  );
+}
+
+/** What moves at this target under the shift that is on. Present only while it is. */
+function UnderShift({ id }: { id: string }) {
+  const { shift, lens } = useContext(ChainLensContext);
+  const target = shiftTarget(shift, id);
+  if (!shift || !target) return null;
+  return (
+    <div className="mt-4 border-l-2 border-accent-editorial pl-3" data-under-shift={shift}>
+      <h4 className={KICKER}>
+        {CHAIN_COPY.panel.shiftHeading} {SHIFT_BY_ID[shift].label.toLowerCase()} · {CHAIN_COPY.lensName[lens]}
+      </h4>
+      <p className="mt-1.5 text-sm text-foreground">{target.read[lens]}</p>
+    </div>
+  );
+}
+
+/** A layer named inside a joint's panel: a button, so one panel leads to the next. */
 function LayerRef({ band }: { band: Band }) {
   const { onSelect } = useContext(ChainLensContext);
   return (
@@ -98,10 +140,13 @@ function LayerRef({ band }: { band: Band }) {
 }
 
 function JointDetails({ joint }: { joint: Joint }) {
+  const { lens } = useContext(ChainLensContext);
   const layers = jointLayers(joint.id);
   return (
     <>
       <MarginBlock kind={joint.margin} note={joint.note} />
+      <TwoDistances read={{ economy: joint.read.economy.note, finance: joint.read.finance.note }} lens={lens} />
+      <UnderShift id={joint.id} />
       {joint.alt && (
         <div className="mt-4">
           <h4 className={KICKER}>{CHAIN_COPY.panel.whenHeading}</h4>
@@ -127,13 +172,14 @@ function JointDetails({ joint }: { joint: Joint }) {
 }
 
 function BandDetails({ band }: { band: Band }) {
+  const { lens } = useContext(ChainLensContext);
   const joints = bandJoints(band);
   return (
     <>
       <div className="mt-4">
         <h4 className={KICKER}>{CHAIN_COPY.panel.spanHeading}</h4>
         <p className="mt-1.5 text-sm text-foreground">{band.spanLabel}</p>
-        {band.note && <p className="mt-1 font-mono text-xs text-muted-foreground">{band.note}</p>}
+        {band.note && <p className="mt-1 text-xs text-muted-foreground">{band.note}</p>}
       </div>
       {band.margin ? (
         <MarginBlock kind={band.margin} note={band.means} />
@@ -146,6 +192,8 @@ function BandDetails({ band }: { band: Band }) {
           <p className="mt-1.5 text-sm text-foreground">{band.means}</p>
         </div>
       )}
+      <TwoDistances read={band.read} lens={lens} />
+      <UnderShift id={band.id} />
       <Lines heading={CHAIN_COPY.panel.linesHeading} lines={band.lines} />
       {joints.length > 0 && (
         <div className="mt-4">
