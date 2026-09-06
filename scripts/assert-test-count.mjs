@@ -11,7 +11,7 @@
  */
 import fs from 'node:fs';
 
-const MIN_TESTS = 351; // 354 after the chain rework (a margin at every joint, the column, the short version); slack of 3, not 30.
+const MIN_TESTS = 367; // 370 after the two-control rework (two readings on every joint, six layers, the shifts); slack of 3, not 30.
 
 const reportPath = process.argv[2] ?? 'vitest-report.json';
 if (!fs.existsSync(reportPath)) {

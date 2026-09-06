@@ -5,24 +5,24 @@
  *
  * Two plates for a wide screen, one content: the full chain and the short
  * version. The joint markers and the layer bands are React components so
- * their text comes from the data at run time. The narrow-screen layout is
- * ChainColumn.tsx, not generated. CSS picks which plate is shown, and which
- * lens overlay is visible, from the wrapper's data attributes.
+ * their text comes from the data at run time; the shift overlays are static
+ * geometry shown by CSS from the wrapper's data-shift attribute. The
+ * narrow-screen layout is ChainColumn.tsx, not generated.
  */
 import { BandHit } from './BandHit';
 import { JointHit } from './JointHit';
 
-/** `extended` makes room at the foot for the unit-economics strip; the plate passes it while that lens is on. */
-export function ChainPlateWide({ extended = false }: { extended?: boolean }) {
+export function ChainPlateWide() {
   return (
-  <svg className="cp-svg cp-svg--wide" viewBox={extended ? "0 0 1713 984" : "0 0 1713 838"} role="group" aria-labelledby="cp-wide-title" aria-describedby="cp-wide-desc" focusable="false">
+  <svg className="cp-svg cp-svg--wide" viewBox="0 0 1717 841" role="group" aria-labelledby="cp-wide-title" aria-describedby="cp-wide-desc" focusable="false">
     <title id="cp-wide-title">The industry chain, in full</title>
-    <desc id="cp-wide-desc">Left to right: two origins, primary processing, packaging and finished-goods manufacturing, then distribution, wholesale and retail into consumption and recovery. Intermediary nodes are dashed pills between the stages. Five enabling layers run beneath the chain, money and information run both ways under it, and two dashed border lines mark where goods are exported and imported. Every joint and every layer is a button that opens a reading of the margin cut there.</desc>
+    <desc id="cp-wide-desc">Left to right: two origins, primary processing, packaging and finished-goods manufacturing, then distribution, wholesale and retail into consumption and recovery. Intermediary nodes are dashed pills between the stages. Every joint is a diamond on the flow with a chip that reads it at the chosen distance — as an economy or as finance — and opens the margin cut there. Six enabling layers run beneath the chain, money and information run both ways under it, and two dashed border lines mark where goods are exported and imported. A shift, when one is chosen, rings the joints and layers it moves.</desc>
     <defs>
-      <marker id="cp-tip--wide" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 1 L 7 4 L 0 7 z" className="cp-mk" /></marker>
-      <marker id="cp-tip-soft--wide" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M 0 1 L 7 4 L 0 7 z" className="cp-mk" /></marker>
-      <marker id="cp-tip-money--wide" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 1 L 7 4 L 0 7 z" className="cp-mk" /></marker>
+      <marker id="cp-tip--wide" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M 0 1 L 7 4 L 0 7 z" className="cp-mk" /></marker>
+      <marker id="cp-tip-soft--wide" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M 0 1 L 7 4 L 0 7 z" className="cp-mk-soft" /></marker>
+      <marker id="cp-tip-money--wide" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 1 L 7 4 L 0 7 z" className="cp-mk-soft" /></marker>
       <marker id="cp-tip-info--wide" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 1 1.5 L 8 5 L 1 8.5 z" className="cp-mk-open" /></marker>
+      <marker id="cp-tip-shift--wide" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 1 L 7 4 L 0 7 z" className="cp-mk-shift" /></marker>
     </defs>
     <g className="cp-base">
       <text x="118" y="102.5" className="cp-lane-t" textAnchor="end">Genetics and</text>
@@ -48,27 +48,12 @@ export function ChainPlateWide({ extended = false }: { extended?: boolean }) {
       <path className="cp-flow" d="M 1020 275 C 1033 275, 1033 240, 1046 240" />
       <path className="cp-flow" d="M 1020 275 C 1033 275, 1033 372, 1046 372" />
       <path className="cp-flow" d="M 1054 257 L 1054 352" markerEnd="url(#cp-tip--wide)" />
-      <path className="cp-flow" d="M 1218 240 C 1231 240, 1231 139, 1244 139" />
-      <path className="cp-flow" d="M 1218 240 C 1231 240, 1231 207, 1244 207" />
-      <path className="cp-flow" d="M 1218 372 C 1231 372, 1231 275, 1244 275" />
-      <path className="cp-flow" d="M 1218 372 C 1231 372, 1231 343, 1244 343" />
-      <path className="cp-flow" d="M 1218 372 C 1231 372, 1231 411, 1244 411" />
-      <path className="cp-flow" d="M 1394 139 L 1420 139" />
-      <path className="cp-flow" d="M 1394 207 L 1420 207" />
-      <path className="cp-flow" d="M 1394 275 L 1420 275" />
-      <path className="cp-flow" d="M 1394 343 L 1420 343" />
-      <path className="cp-flow" d="M 1394 411 L 1420 411" />
+      <path className="cp-flow" d="M 1218 240 C 1231 240, 1231 240, 1244 240" />
+      <path className="cp-flow" d="M 1218 372 C 1231 372, 1231 372, 1244 372" />
+      <path className="cp-flow" d="M 1398 275 L 1424 275" />
       <path className="cp-flow" d="M 892 154 L 892 243" markerEnd="url(#cp-tip--wide)" />
       <path className="cp-flow-thin" d="M 864 304 L 864 398" />
-      <path className="cp-flow" d="M 1462 420 L 1462 433" markerEnd="url(#cp-tip--wide)" />
-      <text x="176" y="78" className="cp-kind-t" textAnchor="start">Energy</text>
-      <path className="cp-energy" d="M 242 114 L 242 134" markerEnd="url(#cp-tip-soft--wide)" />
-      <path className="cp-energy" d="M 242 328 L 242 348" markerEnd="url(#cp-tip-soft--wide)" />
-      <path className="cp-energy" d="M 549 222 L 549 242" markerEnd="url(#cp-tip-soft--wide)" />
-      <path className="cp-energy" d="M 972 72 L 972 92" markerEnd="url(#cp-tip-soft--wide)" />
-      <path className="cp-energy" d="M 972 222 L 972 242" markerEnd="url(#cp-tip-soft--wide)" />
-      <path className="cp-energy" d="M 1552 106 L 1552 126" markerEnd="url(#cp-tip-soft--wide)" />
-      <path className="cp-energy" d="M 1552 412 L 1552 432" markerEnd="url(#cp-tip-soft--wide)" />
+      <path className="cp-flow" d="M 1536 395 L 1536 426" markerEnd="url(#cp-tip--wide)" />
       <g className="cp-stage" data-id="stage-biological">
     <rect x="176" y="138" width="132" height="77" rx="2" /><rect x="176" y="138" width="4" height="77" className="cp-origin" />
     <text x="188" y="163.98" className="cp-stage-t" textAnchor="start">Biological</text><text x="188" y="182.98" className="cp-stage-t" textAnchor="start">primary</text><text x="188" y="201.98" className="cp-stage-t" textAnchor="start">production</text></g>
@@ -101,189 +86,114 @@ export function ChainPlateWide({ extended = false }: { extended?: boolean }) {
       <g className="cp-node" data-id="node-wholesaler">
     <rect x="1046" y="355" width="172" height="34" rx="17" />
     <text x="1058" y="377" className="cp-node-t" textAnchor="start">Wholesaler</text></g>
-      <g className="cp-node" data-id="node-retail-general">
-    <rect x="1244" y="115" width="150" height="48" rx="24" />
-    <text x="1256" y="136" className="cp-node-t" textAnchor="start">Warung /</text><text x="1256" y="152" className="cp-node-t" textAnchor="start">general trade</text></g>
-      <g className="cp-node" data-id="node-retail-modern">
-    <rect x="1244" y="191" width="150" height="32" rx="16" />
-    <text x="1256" y="212" className="cp-node-t" textAnchor="start">Modern trade</text></g>
-      <g className="cp-node" data-id="node-retail-ecommerce">
-    <rect x="1244" y="251" width="150" height="48" rx="24" />
-    <text x="1256" y="272" className="cp-node-t" textAnchor="start">E-commerce,</text><text x="1256" y="288" className="cp-node-t" textAnchor="start">first party</text></g>
-      <g className="cp-node" data-id="node-retail-quick">
-    <rect x="1244" y="327" width="150" height="32" rx="16" />
-    <text x="1256" y="348" className="cp-node-t" textAnchor="start">Quick commerce</text></g>
-      <g className="cp-node" data-id="node-retail-horeca">
-    <rect x="1244" y="395" width="150" height="32" rx="16" />
-    <text x="1256" y="416" className="cp-node-t" textAnchor="start">Horeca</text></g>
+      <g className="cp-node cp-retail" data-id="node-retail">
+      <rect x="1244" y="161" width="154" height="228" rx="14" />
+      <text x="1258" y="185" className="cp-kind-t" textAnchor="start">Retail</text><text x="1258" y="200" className="cp-recur" textAnchor="start">stock-holding</text>
+      <g className="cp-retail-row" data-id="node-retail-general"><text x="1258" y="223" className="cp-node-t" textAnchor="start">Warung /</text><text x="1258" y="238" className="cp-node-t" textAnchor="start">general trade</text></g><path className="cp-retail-sep" d="M 1258 252 L 1384 252" />
+      <g className="cp-retail-row" data-id="node-retail-modern"><text x="1258" y="268" className="cp-node-t" textAnchor="start">Modern trade</text></g><path className="cp-retail-sep" d="M 1258 282 L 1384 282" />
+      <g className="cp-retail-row" data-id="node-retail-ecommerce"><text x="1258" y="298" className="cp-node-t" textAnchor="start">E-commerce,</text><text x="1258" y="313" className="cp-node-t" textAnchor="start">first party</text></g><path className="cp-retail-sep" d="M 1258 327 L 1384 327" />
+      <g className="cp-retail-row" data-id="node-retail-quick"><text x="1258" y="343" className="cp-node-t" textAnchor="start">Quick commerce</text></g><path className="cp-retail-sep" d="M 1258 357 L 1384 357" />
+      <g className="cp-retail-row" data-id="node-retail-horeca"><text x="1258" y="373" className="cp-node-t" textAnchor="start">Horeca</text></g></g>
       <g className="cp-stage" data-id="stage-consumption">
-    <rect x="1420" y="130" width="163" height="290" rx="2" />
-    <text x="1432" y="152" className="cp-stage-t" textAnchor="start">Consumption</text><text x="1432" y="171" className="cp-stage-t" textAnchor="start">and use</text></g>
+    <rect x="1424" y="155" width="163" height="240" rx="2" />
+    <text x="1436" y="177" className="cp-stage-t" textAnchor="start">Consumption</text><text x="1436" y="196" className="cp-stage-t" textAnchor="start">and use</text></g>
       <g className="cp-demand">
-      <path d="M 1432 194 L 1432 210" />
-      <text x="1441" y="206" className="cp-demand-t" textAnchor="start">Households</text></g>
+      <path d="M 1436 233 L 1436 249" />
+      <text x="1445" y="245" className="cp-demand-t" textAnchor="start">Households</text></g>
       <g className="cp-demand">
-      <path d="M 1432 256 L 1432 287" />
-      <text x="1441" y="268" className="cp-demand-t" textAnchor="start">Government and</text><text x="1441" y="283" className="cp-demand-t" textAnchor="start">institutions</text></g>
+      <path d="M 1436 281 L 1436 312" />
+      <text x="1445" y="293" className="cp-demand-t" textAnchor="start">Government and</text><text x="1445" y="308" className="cp-demand-t" textAnchor="start">institutions</text></g>
       <g className="cp-demand">
-      <path d="M 1432 318 L 1432 334" />
-      <text x="1441" y="330" className="cp-demand-t" textAnchor="start">Abroad</text></g>
+      <path d="M 1436 329 L 1436 345" />
+      <text x="1445" y="341" className="cp-demand-t" textAnchor="start">Abroad</text></g>
       <g className="cp-stage" data-id="stage-recovery">
-    <rect x="1420" y="436" width="163" height="44" rx="2" />
-    <text x="1432" y="464.48" className="cp-stage-t" textAnchor="start">Recovery</text></g>
-      <g className="cp-border" data-id="border-export"><path d="M 366 300 L 366 480" />
-      <rect x="333.96" y="284" width="64.08" height="18" rx="2" className="cp-chip" /><text x="366" y="298" className="cp-border-t" textAnchor="middle">Export</text></g>
-      <g className="cp-border" data-id="border-import"><path d="M 831 86 L 831 480" />
-      <rect x="798.96" y="70" width="64.08" height="18" rx="2" className="cp-chip" /><text x="831" y="84" className="cp-border-t" textAnchor="middle">Import</text></g>
+    <rect x="1424" y="429" width="163" height="44" rx="2" />
+    <text x="1436" y="457.48" className="cp-stage-t" textAnchor="start">Recovery</text></g>
+      <g className="cp-border" data-id="border-export"><path d="M 366 300 L 366 473" />
+      <rect x="336.48" y="284" width="59.040000000000006" height="18" rx="2" className="cp-chip" /><text x="366" y="298" className="cp-border-t" textAnchor="middle">Export</text></g>
+      <g className="cp-border" data-id="border-import"><path d="M 831 86 L 831 473" />
+      <rect x="801.48" y="70" width="59.040000000000006" height="18" rx="2" className="cp-chip" /><text x="831" y="84" className="cp-border-t" textAnchor="middle">Import</text></g>
       <g className="cp-ret" data-id="return-scrap">
       <path d="M 864 242 C 864 150, 595 150, 595 242" markerEnd="url(#cp-tip-soft--wide)" />
-      <rect x="427.56" y="142" width="150.88" height="18" rx="2" className="cp-chip" /><text x="503" y="156" className="cp-ret-t" textAnchor="middle">Scrap and reject</text></g>
+      <rect x="434.28" y="142" width="137.44" height="18" rx="2" className="cp-chip" /><text x="503" y="156" className="cp-ret-t" textAnchor="middle">Scrap and reject</text></g>
       <g className="cp-ret" data-id="return-commercial">
-      <path d="M 1242 207 C 1242 178, 1132 178, 1132 220" markerEnd="url(#cp-tip-soft--wide)" />
-      <rect x="1242" y="170" width="168.24" height="18" rx="2" className="cp-chip" /><text x="1242" y="184" className="cp-ret-t" textAnchor="start">Commercial returns</text></g>
+      <path d="M 1268 159 C 1268 117, 1132 117, 1132 220" markerEnd="url(#cp-tip-soft--wide)" />
+      <rect x="1250" y="107" width="153.12" height="18" rx="2" className="cp-chip" /><text x="1250" y="121" className="cp-ret-t" textAnchor="start">Commercial returns</text></g>
       <g className="cp-ret" data-id="return-packaging">
-      <path d="M 1242 343 C 1242 138, 864 138, 864 242" markerEnd="url(#cp-tip-soft--wide)" />
-      <rect x="1047.88" y="130" width="168.24" height="18" rx="2" className="cp-chip" /><text x="1132" y="144" className="cp-ret-t" textAnchor="middle">Reusable packaging</text></g>
+      <path d="M 1304 159 C 1304 138, 864 138, 864 242" markerEnd="url(#cp-tip-soft--wide)" />
+      <rect x="1055.44" y="130" width="153.12" height="18" rx="2" className="cp-chip" /><text x="1132" y="144" className="cp-ret-t" textAnchor="middle">Reusable packaging</text></g>
       <g className="cp-ret" data-id="return-postconsumer-organic">
-      <path d="M 1583 444 L 1673 444 L 1673 34 L 242 34 L 242 134" markerEnd="url(#cp-tip-soft--wide)" />
-      <rect x="948.86" y="24" width="194.28" height="18" rx="2" className="cp-chip" /><text x="1046" y="38" className="cp-ret-t" textAnchor="middle">Post-consumer organic</text></g>
+      <path d="M 1587 437 L 1677 437 L 1677 34 L 242 34 L 242 134" markerEnd="url(#cp-tip-soft--wide)" />
+      <rect x="957.68" y="24" width="176.64000000000001" height="18" rx="2" className="cp-chip" /><text x="1046" y="38" className="cp-ret-t" textAnchor="middle">Post-consumer organic</text></g>
       <g className="cp-ret" data-id="return-postconsumer-material">
-      <path d="M 1583 458 L 1655 458 L 1655 56 L 549 56 L 549 242" markerEnd="url(#cp-tip-soft--wide)" />
-      <rect x="539.52" y="46" width="202.96" height="18" rx="2" className="cp-chip" /><text x="641" y="60" className="cp-ret-t" textAnchor="middle">Post-consumer material</text></g>
+      <path d="M 1587 451 L 1659 451 L 1659 56 L 549 56 L 549 242" markerEnd="url(#cp-tip-soft--wide)" />
+      <rect x="548.76" y="46" width="184.48000000000002" height="18" rx="2" className="cp-chip" /><text x="641" y="60" className="cp-ret-t" textAnchor="middle">Post-consumer material</text></g>
       <g className="cp-ret" data-id="return-secondary">
-      <path d="M 1523 130 C 1523 88, 1573 88, 1573 130" markerEnd="url(#cp-tip-soft--wide)" />
-      <text x="1374" y="84" className="cp-ret-t" textAnchor="end">Secondary market</text><text x="1374" y="99" className="cp-ret-t" textAnchor="end">and refurbishment</text></g>
-      <g className="cp-byp" data-id="branch-byproduct"><path d="M 569 304 L 629 356" markerEnd="url(#cp-tip-soft--wide)" />
-      <rect x="381.32" y="364" width="237.68" height="18" rx="2" className="cp-chip" /><text x="619" y="378" className="cp-ret-t" textAnchor="end">By-product → another chain</text></g>
+      <path d="M 1527 155 C 1527 113, 1577 113, 1577 155" markerEnd="url(#cp-tip-soft--wide)" />
+      <text x="1581" y="97" className="cp-ret-t" textAnchor="end">Secondary market</text><text x="1581" y="112" className="cp-ret-t" textAnchor="end">and refurbishment</text></g>
+      <g className="cp-byp" data-id="branch-byproduct"><path d="M 539 304 L 581 356" markerEnd="url(#cp-tip-soft--wide)" />
+      <rect x="355.15999999999997" y="364" width="215.84000000000003" height="18" rx="2" className="cp-chip" /><text x="571" y="378" className="cp-ret-t" textAnchor="end">By-product → another chain</text></g>
       <g className="cp-nonphys" data-id="flow-money-payment">
-      <path className="cp-money" d="M 1583 546 L 182 546" markerEnd="url(#cp-tip-money--wide)" />
-      <rect x="1389.72" y="536" width="194.28" height="18" rx="2" className="cp-chip" /><text x="1584" y="550" className="cp-rail-t" textAnchor="end">Payment for the goods</text></g>
+      <path className="cp-money" d="M 1587 555 L 182 555" markerEnd="url(#cp-tip-money--wide)" />
+      <rect x="1411.36" y="545" width="176.64000000000001" height="18" rx="2" className="cp-chip" /><text x="1588" y="559" className="cp-rail-t" textAnchor="end">Payment for the goods</text></g>
       <g className="cp-nonphys" data-id="flow-money-credit">
-      <path className="cp-money" d="M 176 566 L 1577 566" markerEnd="url(#cp-tip-money--wide)" />
-      <rect x="175" y="556" width="359.2" height="18" rx="2" className="cp-chip" /><text x="175" y="570" className="cp-rail-t" textAnchor="start">Trade credit · trade promotion · rebates</text></g>
+      <path className="cp-money" d="M 176 575 L 1581 575" markerEnd="url(#cp-tip-money--wide)" />
+      <rect x="175" y="565" width="325.6" height="18" rx="2" className="cp-chip" /><text x="175" y="579" className="cp-rail-t" textAnchor="start">Trade credit · trade promotion · rebates</text></g>
       <g className="cp-nonphys" data-id="flow-info-demand">
-      <path className="cp-info" d="M 1583 586 L 182 586" markerEnd="url(#cp-tip-info--wide)" />
-      <rect x="1459.16" y="576" width="124.84" height="18" rx="2" className="cp-chip" /><text x="1584" y="590" className="cp-rail-t" textAnchor="end">Demand signal</text></g>
+      <path className="cp-info" d="M 1587 595 L 182 595" markerEnd="url(#cp-tip-info--wide)" />
+      <rect x="1474.08" y="585" width="113.92000000000002" height="18" rx="2" className="cp-chip" /><text x="1588" y="599" className="cp-rail-t" textAnchor="end">Demand signal</text></g>
       <g className="cp-nonphys" data-id="flow-info-spec">
-      <path className="cp-info" d="M 176 606 L 1577 606" markerEnd="url(#cp-tip-info--wide)" />
-      <rect x="175" y="596" width="255.04" height="18" rx="2" className="cp-chip" /><text x="175" y="610" className="cp-rail-t" textAnchor="start">Specifications and standards</text></g>
-      <text x="118" y="560" className="cp-kind-t" textAnchor="end">Money</text>
-      <text x="118" y="600" className="cp-kind-t" textAnchor="end">Information</text>
+      <path className="cp-info" d="M 176 615 L 1581 615" markerEnd="url(#cp-tip-info--wide)" />
+      <rect x="175" y="605" width="231.52" height="18" rx="2" className="cp-chip" /><text x="175" y="619" className="cp-rail-t" textAnchor="start">Specifications and standards</text></g>
+      <text x="118" y="569" className="cp-kind-t" textAnchor="end">Money</text>
+      <text x="118" y="609" className="cp-kind-t" textAnchor="end">Information</text>
+      <text x="118" y="509" className="cp-kind-t cp-lens-name cp-lens-name--economy" textAnchor="end">Economy</text>
+      <text x="118" y="509" className="cp-kind-t cp-lens-name cp-lens-name--finance" textAnchor="end">Finance</text>
     </g>
-    <g className="cp-lens cp-lens--economy">
-      <g className="cp-econ" data-id="econ-energy">
-      <path className="cp-econ-lead" d="M 251 95 L 242 106" />
-      <text x="256" y="78" className="cp-econ-t" textAnchor="start">Energy intensity</text>
-      <text x="256" y="93" className="cp-econ-n" textAnchor="start">stage by stage</text></g>
-      <g className="cp-econ" data-id="econ-inflation">
-      <path className="cp-econ-lead" d="M 468 139 L 470 226" />
-      <text x="473" y="92" className="cp-econ-t" textAnchor="start">Inflation</text>
-      <text x="473" y="107" className="cp-econ-n" textAnchor="start">enters at the raw end</text><text x="473" y="122" className="cp-econ-n" textAnchor="start">· travels right</text><text x="473" y="137" className="cp-econ-n" textAnchor="start">through each mark-up</text></g>
-      <g className="cp-econ" data-id="econ-capital-goods">
-      <path className="cp-econ-lead" d="M 628 116 L 831 275" />
-      <text x="633" y="84" className="cp-econ-t" textAnchor="start">Capital goods</text>
-      <text x="633" y="99" className="cp-econ-n" textAnchor="start">imported into</text><text x="633" y="114" className="cp-econ-n" textAnchor="start">manufacturing</text></g>
-      <g className="cp-econ" data-id="econ-external-import">
-      <path className="cp-econ-lead" d="M 628 170 L 831 275" />
-      <text x="633" y="138" className="cp-econ-t" textAnchor="start">External balance</text>
-      <text x="633" y="153" className="cp-econ-n" textAnchor="start">import enters before</text><text x="633" y="168" className="cp-econ-n" textAnchor="start">manufacturing</text></g>
-      <g className="cp-econ" data-id="econ-import-share">
-      <path className="cp-econ-lead" d="M 628 209 L 831 275" />
-      <text x="633" y="192" className="cp-econ-t" textAnchor="start">Import share</text>
-      <text x="633" y="207" className="cp-econ-n" textAnchor="start">of intermediate inputs</text></g>
-      <g className="cp-econ" data-id="econ-growth">
-      <path className="cp-econ-lead" d="M 1415 94 L 1502 128" />
-      <text x="1420" y="62" className="cp-econ-t" textAnchor="start">Growth</text>
-      <text x="1420" y="77" className="cp-econ-n" textAnchor="start">demand components land</text><text x="1420" y="92" className="cp-econ-n" textAnchor="start">here</text></g>
-      <g className="cp-econ" data-id="econ-labour">
-      <path className="cp-econ-lead" d="M 171 228 L 242 217" />
-      <text x="176" y="240" className="cp-econ-t" textAnchor="start">Labour</text>
-      <text x="176" y="255" className="cp-econ-n" textAnchor="start">concentrated here and in</text><text x="176" y="270" className="cp-econ-n" textAnchor="start">the informal nodes</text></g>
-      <g className="cp-econ" data-id="econ-fiscal-subsidy">
-      <path className="cp-econ-lead" d="M 171 278 L 242 217" />
-      <text x="176" y="290" className="cp-econ-t" textAnchor="start">Fiscal</text>
-      <text x="176" y="305" className="cp-econ-n" textAnchor="start">subsidy, on inputs and</text><text x="176" y="320" className="cp-econ-n" textAnchor="start">energy</text></g>
-      <g className="cp-econ" data-id="econ-fx-cost">
-      <path className="cp-econ-lead" d="M 628 243 L 730 257" />
-      <text x="633" y="226" className="cp-econ-t" textAnchor="start">Exchange rate</text>
-      <text x="633" y="241" className="cp-econ-n" textAnchor="start">a cost, in landed inputs</text></g>
-      <g className="cp-econ" data-id="econ-fx-windfall">
-      <path className="cp-econ-lead" d="M 171 430 L 242 412" />
-      <text x="176" y="442" className="cp-econ-t" textAnchor="start">Exchange rate</text>
-      <text x="176" y="457" className="cp-econ-n" textAnchor="start">a windfall, on exports</text></g>
-      <g className="cp-econ" data-id="econ-fiscal-royalty">
-      <path className="cp-econ-lead" d="M 171 464 L 318 412" />
-      <text x="176" y="476" className="cp-econ-t" textAnchor="start">Fiscal</text>
-      <text x="176" y="491" className="cp-econ-n" textAnchor="start">royalty</text></g>
-      <g className="cp-econ" data-id="econ-external-export">
-      <path className="cp-econ-lead" d="M 484 430 L 424 298" />
-      <text x="489" y="442" className="cp-econ-t" textAnchor="start">External balance</text>
-      <text x="489" y="457" className="cp-econ-n" textAnchor="start">export leaves at</text><text x="489" y="472" className="cp-econ-n" textAnchor="start">extraction</text></g>
-      <g className="cp-econ" data-id="econ-fiscal-excise">
-      <path className="cp-econ-lead" d="M 859 458 L 864 306" />
-      <text x="864" y="470" className="cp-econ-t" textAnchor="start">Fiscal</text>
-      <text x="864" y="485" className="cp-econ-n" textAnchor="start">excise · VAT at</text><text x="864" y="500" className="cp-econ-n" textAnchor="start">every formal</text><text x="864" y="515" className="cp-econ-n" textAnchor="start">transfer of title</text></g>
-      <g className="cp-econ" data-id="econ-monetary">
-      <path className="cp-econ-lead" d="M 1035 430 L 1033 275" />
-      <text x="1040" y="442" className="cp-econ-t" textAnchor="start">Monetary policy</text>
-      <text x="1040" y="457" className="cp-econ-n" textAnchor="start">transmits through</text><text x="1040" y="472" className="cp-econ-n" textAnchor="start">trade credit</text><text x="1040" y="487" className="cp-econ-n" textAnchor="start">between nodes</text></g>
-      <g className="cp-econ" data-id="econ-cycle">
-      <path className="cp-econ-lead" d="M 1239 430 L 1231 372" />
-      <text x="1244" y="442" className="cp-econ-t" textAnchor="start">Business cycle</text>
-      <text x="1244" y="457" className="cp-econ-n" textAnchor="start">runs right to left</text><text x="1244" y="472" className="cp-econ-n" textAnchor="start">through node</text><text x="1244" y="487" className="cp-econ-n" textAnchor="start">inventory</text></g>
+    <g className="cp-shifts" aria-hidden="true">
+      <g className="cp-shift cp-shift--reindustrialisation" data-id="reindustrialisation">
+      <g className="cp-lit" data-for="border-export"><path className="cp-lit-line" d="M 366 300 L 366 473" /></g>
+      <g className="cp-lit" data-for="j-extraction-processing"><circle className="cp-lit-ring" cx="424" cy="298" r="17" /></g>
+      <g className="cp-lit" data-for="stage-processing"><rect className="cp-lit-rect" x="478" y="241" width="142" height="68" rx="4" /></g>
+      <g className="cp-lit" data-for="j-processing-trader"><circle className="cp-lit-ring" cx="628" cy="275" r="17" /></g>
+      <g className="cp-lit" data-for="border-import"><path className="cp-lit-line" d="M 831 86 L 831 473" /></g>
+      <g className="cp-lit" data-for="node-trader"><rect className="cp-lit-rect" x="636" y="254" width="187" height="42" rx="12" /></g>
+      <g className="cp-lit" data-for="j-trader-manufacturing"><circle className="cp-lit-ring" cx="831" cy="275" r="17" /></g>
+      <g className="cp-lit" data-for="stage-manufacturing"><rect className="cp-lit-rect" x="839" y="241" width="186" height="68" rx="4" /></g>
+      <g className="cp-move" data-id="move-export-cut">
+      <path className="cp-move-path" d="M 366 222 L 628 222 L 628 253" markerEnd="url(#cp-tip-shift--wide)" />
+      <text x="366" y="214" className="cp-move-t" textAnchor="start">The export cut moves right</text></g>
+      <g className="cp-callout" data-id="callout-import-share"><rect x="875" y="69" width="163.2" height="20" rx="2" className="cp-chip" /><text x="875" y="85" className="cp-callout-t" textAnchor="start">Import share falls</text></g>
     </g>
-    <g className="cp-lens cp-lens--unit">
-      <g className="cp-slice" data-id="slice-production">
-      <rect x="176" y="868" width="132" height="36" />
-      <path className="cp-slice-lead" d="M 242 906 L 242 915" />
-      <text x="242" y="926" className="cp-slice-t" textAnchor="middle">Value added — production</text></g>
-      <g className="cp-slice" data-id="slice-aggregation">
-      <rect x="334" y="868" width="123" height="36" />
-      <path className="cp-slice-lead" d="M 396 906 L 396 945" />
-      <text x="396" y="956" className="cp-slice-t" textAnchor="middle">Aggregator's margin</text><text x="396" y="970" className="cp-slice-n" textAnchor="middle">who waits for payment</text></g>
-      <g className="cp-slice" data-id="slice-processing">
-      <rect x="483" y="868" width="132" height="36" />
-      <path className="cp-slice-lead" d="M 549 906 L 549 915" />
-      <text x="549" y="926" className="cp-slice-t" textAnchor="middle">Value added — processing</text><text x="549" y="940" className="cp-slice-n" textAnchor="middle">fixed plant cost spread over volume</text></g>
-      <g className="cp-slice" data-id="slice-trader">
-      <rect x="641" y="868" width="177" height="36" />
-      <path className="cp-slice-lead" d="M 730 906 L 730 945" />
-      <text x="730" y="956" className="cp-slice-t" textAnchor="middle">Trader's margin</text><text x="730" y="970" className="cp-slice-n" textAnchor="middle">FX lands in cost · DIO</text></g>
-      <g className="cp-slice" data-id="slice-manufacturing">
-      <rect x="844" y="868" width="176" height="36" />
-      <path className="cp-slice-lead" d="M 932 906 L 932 915" />
-      <text x="932" y="926" className="cp-slice-t" textAnchor="middle">Value added — manufacturing</text><text x="932" y="940" className="cp-slice-n" textAnchor="middle">packaging attaches</text></g>
-      <g className="cp-slice" data-id="slice-distribution">
-      <rect x="1046" y="868" width="172" height="36" />
-      <path className="cp-slice-lead" d="M 1132 906 L 1132 945" />
-      <text x="1132" y="956" className="cp-slice-t" textAnchor="middle">Distributor's margin</text><text x="1132" y="970" className="cp-slice-n" textAnchor="middle">DSO · DPO — who finances whom</text></g>
-      <g className="cp-slice" data-id="slice-retail">
-      <rect x="1244" y="868" width="150" height="36" />
-      <path className="cp-slice-lead" d="M 1319 906 L 1319 915" />
-      <text x="1319" y="926" className="cp-slice-t" textAnchor="middle">Cost to serve, per channel</text><text x="1319" y="940" className="cp-slice-n" textAnchor="middle">smaller drops, more of them</text></g>
-      <g className="cp-slice" data-id="slice-consumption">
-      <rect x="1420" y="868" width="163" height="36" />
-      <path className="cp-slice-lead" d="M 1502 906 L 1502 945" />
-      <text x="1502" y="956" className="cp-slice-t" textAnchor="middle">Contribution margin</text></g>
-      <text x="176" y="862" className="cp-slice-n" textAnchor="start">Logistics cost attaches at every move</text>
+      <g className="cp-shift cp-shift--green" data-id="green">
+      <g className="cp-lit" data-for="band-energy"><rect className="cp-lit-rect" x="173" y="708" width="1417" height="32" rx="3" /></g>
+      <g className="cp-lit" data-for="band-credit"><rect className="cp-lit-rect" x="173" y="678" width="1417" height="32" rx="3" /></g>
+      <g className="cp-lit" data-for="j-consumption-recovery"><circle className="cp-lit-ring" cx="1536" cy="412" r="17" /></g>
+      <g className="cp-lit" data-for="stage-recovery"><rect className="cp-lit-rect" x="1419" y="424" width="173" height="54" rx="4" /></g>
+      <g className="cp-lit" data-for="return-postconsumer-material"><path className="cp-lit-path" d="M 1587 451 L 1659 451 L 1659 56 L 549 56 L 549 242" markerEnd="url(#cp-tip-shift--wide)" /></g>
+      <g className="cp-lit" data-for="return-postconsumer-organic"><path className="cp-lit-path" d="M 1587 437 L 1677 437 L 1677 34 L 242 34 L 242 134" markerEnd="url(#cp-tip-shift--wide)" /></g>
+      
+      <g className="cp-callout" data-id="callout-new-price"><rect x="1412.4" y="517" width="247.2" height="20" rx="2" className="cp-chip" /><text x="1536" y="533" className="cp-callout-t" textAnchor="middle">A price where there was none</text></g>
+    </g>
     </g>
     <g className="cp-hits">
-      <JointHit id="j-production-aggregation" cx={321} cy={177} chipX={321} chipY={498} chipAt="rowA" />
-      <JointHit id="j-extraction-processing" cx={424} cy={298} chipX={424} chipY={520} chipAt="rowB" />
-      <JointHit id="j-aggregation-processing" cx={470} cy={226} chipX={470} chipY={498} chipAt="rowA" />
-      <JointHit id="j-processing-trader" cx={628} cy={275} chipX={628} chipY={498} chipAt="rowA" />
-      <JointHit id="j-trader-manufacturing" cx={831} cy={275} chipX={831} chipY={520} chipAt="rowB" />
-      <JointHit id="j-packaging-manufacturing" cx={892} cy={200} chipX={880} chipY={192} chipAt="left" />
-      <JointHit id="j-manufacturing-distribution" cx={1033} cy={275} chipX={1033} chipY={498} chipAt="rowA" />
-      <JointHit id="j-distributor-wholesaler" cx={1054} cy={306} chipX={1066} chipY={298} chipAt="right" />
-      <JointHit id="j-wholesale-retail" cx={1231} cy={372} chipX={1231} chipY={498} chipAt="rowA" />
-      <JointHit id="j-retail-consumption" cx={1407} cy={275} chipX={1407} chipY={498} chipAt="rowA" />
-      <JointHit id="j-consumption-recovery" cx={1462} cy={428} chipX={1450} chipY={420} chipAt="left" />
-      <BandHit id="band-logistics" x={176} y={644} width={1407} height={32} noteX={449} />
-      <BandHit id="band-credit" x={176} y={680} width={1407} height={32} noteX={458} />
-      <BandHit id="band-contract-capacity" x={483} y={716} width={537} height={32} noteX={687} />
-      <BandHit id="band-governance" x={844} y={752} width={550} height={32} noteX={null} />
-      <BandHit id="band-regulation" x={176} y={788} width={1407} height={32} noteX={null} />
+      <JointHit id="j-production-aggregation" cx={321} cy={177} chipX={301} chipY={495} chipAt="rowA" />
+      <JointHit id="j-extraction-processing" cx={424} cy={298} chipX={424} chipY={519} chipAt="rowB" />
+      <JointHit id="j-aggregation-processing" cx={470} cy={226} chipX={490} chipY={495} chipAt="rowA" />
+      <JointHit id="j-processing-trader" cx={628} cy={275} chipX={628} chipY={519} chipAt="rowB" />
+      <JointHit id="j-trader-manufacturing" cx={831} cy={275} chipX={831} chipY={519} chipAt="rowB" />
+      <JointHit id="j-packaging-manufacturing" cx={892} cy={200} chipX={906} chipY={191} chipAt="right" />
+      <JointHit id="j-manufacturing-distribution" cx={1033} cy={275} chipX={1033} chipY={495} chipAt="rowA" />
+      <JointHit id="j-distributor-wholesaler" cx={1054} cy={306} chipX={1068} chipY={297} chipAt="right" />
+      <JointHit id="j-wholesale-retail" cx={1231} cy={372} chipX={1231} chipY={495} chipAt="rowA" />
+      <JointHit id="j-retail-consumption" cx={1411} cy={275} chipX={1411} chipY={495} chipAt="rowA" />
+      <JointHit id="j-consumption-recovery" cx={1536} cy={412} chipX={1550} chipY={403} chipAt="right" />
+      <BandHit id="band-logistics" x={176} y={651} width={1411} height={26} noteX={449} />
+      <BandHit id="band-credit" x={176} y={681} width={1411} height={26} noteX={458} />
+      <BandHit id="band-energy" x={176} y={711} width={1411} height={26} noteX={284} />
+      <BandHit id="band-contract-capacity" x={483} y={741} width={537} height={26} noteX={null} />
+      <BandHit id="band-governance" x={844} y={771} width={554} height={26} noteX={null} />
+      <BandHit id="band-regulation" x={176} y={801} width={1411} height={26} noteX={null} />
     </g>
   </svg>
   );
@@ -293,12 +203,13 @@ export function ChainPlateCompact() {
   return (
   <svg className="cp-svg cp-svg--compact" viewBox="0 0 1590 320" role="img" aria-labelledby="cp-compact-title" aria-describedby="cp-compact-desc" focusable="false">
     <title id="cp-compact-title">The industry chain, in short</title>
-    <desc id="cp-compact-desc">Primary production, aggregation, processing, manufacturing, distribution, retail, consumption and recovery, with logistics and credit running beneath and one return arrow above.</desc>
+    <desc id="cp-compact-desc">Primary production, aggregation, processing, manufacturing, distribution, retail, consumption and recovery, a diamond at every join, with logistics and credit running beneath and one return arrow above.</desc>
     <defs>
-      <marker id="cp-tip--compact" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 1 L 7 4 L 0 7 z" className="cp-mk" /></marker>
-      <marker id="cp-tip-soft--compact" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M 0 1 L 7 4 L 0 7 z" className="cp-mk" /></marker>
-      <marker id="cp-tip-money--compact" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 1 L 7 4 L 0 7 z" className="cp-mk" /></marker>
+      <marker id="cp-tip--compact" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M 0 1 L 7 4 L 0 7 z" className="cp-mk" /></marker>
+      <marker id="cp-tip-soft--compact" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M 0 1 L 7 4 L 0 7 z" className="cp-mk-soft" /></marker>
+      <marker id="cp-tip-money--compact" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 1 L 7 4 L 0 7 z" className="cp-mk-soft" /></marker>
       <marker id="cp-tip-info--compact" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 1 1.5 L 8 5 L 1 8.5 z" className="cp-mk-open" /></marker>
+      <marker id="cp-tip-shift--compact" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 1 L 7 4 L 0 7 z" className="cp-mk-shift" /></marker>
     </defs>
     <g className="cp-base">
       <g className="cp-stage" data-id="stage-biological">
@@ -336,9 +247,17 @@ export function ChainPlateCompact() {
       <path className="cp-flow" d="M 972 150 C 986 150, 986 150, 1000 150" />
       <path className="cp-flow" d="M 1150 150 C 1164 150, 1164 150, 1178 150" />
       <path className="cp-flow" d="M 1358 150 C 1372 150, 1372 150, 1386 150" />
+      <path className="cp-joint-motif" d="M 214 108 L 219 113 L 214 118 L 209 113 Z" />
+      <path className="cp-joint-motif" d="M 303 168.25 L 308 173.25 L 303 178.25 L 298 173.25 Z" />
+      <path className="cp-joint-motif" d="M 392 126.5 L 397 131.5 L 392 136.5 L 387 131.5 Z" />
+      <path className="cp-joint-motif" d="M 600 145 L 605 150 L 600 155 L 595 150 Z" />
+      <path className="cp-joint-motif" d="M 808 145 L 813 150 L 808 155 L 803 150 Z" />
+      <path className="cp-joint-motif" d="M 986 145 L 991 150 L 986 155 L 981 150 Z" />
+      <path className="cp-joint-motif" d="M 1164 145 L 1169 150 L 1164 155 L 1159 150 Z" />
+      <path className="cp-joint-motif" d="M 1372 145 L 1377 150 L 1372 155 L 1367 150 Z" />
       <g className="cp-ret" data-id="compact-return">
       <path d="M 1476 124 L 1476 70 L 496 70 L 496 120" markerEnd="url(#cp-tip-soft--compact)" />
-      <rect x="949.62" y="60" width="72.75999999999999" height="18" rx="2" className="cp-chip" /><text x="986" y="74" className="cp-ret-t" textAnchor="middle">Returns</text></g>
+      <rect x="952.56" y="60" width="66.88" height="18" rx="2" className="cp-chip" /><text x="986" y="74" className="cp-ret-t" textAnchor="middle">Returns</text></g>
       <g className="cp-band" data-id="band-logistics">
       <rect x="20" y="236" width="1550" height="30" />
       <path className="cp-band-line" d="M 20 236 L 1570 236" />
