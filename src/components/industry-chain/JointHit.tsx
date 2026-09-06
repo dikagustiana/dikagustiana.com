@@ -17,7 +17,7 @@
  * file at run time.
  */
 
-import { useContext, type KeyboardEvent, type MouseEvent } from 'react';
+import { useContext, useId, type KeyboardEvent, type MouseEvent } from 'react';
 import { JOINT_BY_ID, MARGIN_KINDS, shiftTarget, type JointId } from '@/data/industryChain';
 import { cn } from '@/lib/utils';
 import { ChainLensContext } from './chainLensContext';
@@ -47,6 +47,7 @@ export function JointHit({
 }) {
   const { lens, shift, selected, onSelect, panelId } = useContext(ChainLensContext);
   const joint = JOINT_BY_ID[id];
+  const descriptionId = useId();
   const kind = MARGIN_KINDS[joint.margin];
   const word = joint.read[lens].chip;
   const open = selected === id;
@@ -80,11 +81,13 @@ export function JointHit({
         role="button"
         tabIndex={0}
         aria-label={joint.label}
+        aria-describedby={descriptionId}
         aria-expanded={open}
         aria-controls={open ? panelId : undefined}
         onClick={select}
         onKeyDown={onKey}
       >
+        <desc id={descriptionId}>{kind.label}. {joint.read[lens].chip}. {joint.read[lens].note}</desc>
         <circle cx={cx} cy={cy} r={18} fill="transparent" stroke="none" />
         <path className="cp-joint-mark" d={`M ${cx} ${cy - R} L ${cx + R} ${cy} L ${cx} ${cy + R} L ${cx - R} ${cy} Z`} />
       </g>

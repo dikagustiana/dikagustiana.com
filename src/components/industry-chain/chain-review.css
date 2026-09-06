@@ -1,0 +1,21 @@
+/* Hand-maintained refinements; build:chain does not overwrite this file. */
+.chain-plate{--cp-shift:hsl(var(--accent))}
+/* A shift accents the structure; all label ink keeps its original contrast. */
+.chain-plate[data-shift] .cp-hit:not([data-lit]),
+.chain-plate[data-shift] .cp-joint-chip:not([data-lit]){opacity:1}
+.chain-plate[data-shift] .cp-hit:not([data-lit]) .cp-joint-mark{opacity:.55}
+.chain-plate .cp-reference{color:hsl(var(--foreground));overflow-wrap:anywhere}
+.chain-plate .cp-reference summary{min-height:44px}
+.chain-plate .cp-text-money{border-left:2px dotted hsl(var(--muted-foreground));padding-left:12px}
+.chain-plate .cp-text-information{border-left:3px double hsl(var(--muted-foreground));padding-left:12px}
+.chain-plate .cp-column[data-variant="full"] :is(.text-xs,.text-\[12px\]){font-size:14px;line-height:1.5}
+.chain-plate .cp-column button{min-height:44px}
+.chain-plate .cp-column [data-id^="band-"] button{grid-template-columns:minmax(0,1fr);row-gap:6px}
+.chain-plate .cp-column [data-id^="band-"] button>span:last-child{justify-self:start}
+/* Keep the navy palette. Rings, outlines and labels carry shift membership. */
+.chain-plate .border-accent-editorial{border-color:hsl(var(--accent))}
+.chain-plate .outline-accent-editorial{outline-color:hsl(var(--accent))}
+.chain-plate .stroke-accent-editorial{stroke:hsl(var(--accent))}
+@media (prefers-reduced-motion:reduce){
+  .chain-plate *{scroll-behavior:auto;transition:none!important}
+}
