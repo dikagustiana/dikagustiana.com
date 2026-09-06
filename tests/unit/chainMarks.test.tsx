@@ -196,6 +196,31 @@ describe('the map in the address bar', () => {
     expect(window.location.search).toBe('?lens=green&distance=finance&node=energy');
   });
 
+  it('refuses an address that names an element the overlay does not mark, and cleans the parameter away', () => {
+    // A stage is a door only while the overlay that marks it is on. Opening it
+    // regardless would put a panel with a heading and nothing beneath it on
+    // the page — the empty panel the map must never show.
+    window.history.replaceState({}, '', '/about?lens=reindustrialisation&node=recovery');
+    mount(<ChainPlate links={[]} />);
+    expect((document.querySelector('.chain-plate') as HTMLElement).dataset.shift).toBe('reindustrialisation');
+    expect(screen.queryByRole('region', { name: 'Recovery' })).not.toBeInTheDocument();
+    expect(window.location.search).toBe('?lens=reindustrialisation');
+  });
+
+  it('refuses a marked element named with no overlay on at all', () => {
+    window.history.replaceState({}, '', '/about?node=aggregation');
+    mount(<ChainPlate links={[]} />);
+    expect(screen.queryByRole('region', { name: 'Aggregation' })).not.toBeInTheDocument();
+    expect(window.location.search).toBe('');
+  });
+
+  it('still opens a joint or a layer named with no overlay, because those are doors at all times', () => {
+    window.history.replaceState({}, '', '/about?node=credit');
+    mount(<ChainPlate links={[]} />);
+    expect(screen.getByRole('region', { name: 'Credit and working capital' })).toBeInTheDocument();
+    expect(window.location.search).toBe('?node=credit');
+  });
+
   it('never puts the short version on the landing page into the address: it has no doors to share', async () => {
     window.history.replaceState({}, '', '/');
     mount(<ChainPlate links={[]} variant="preview" />);

@@ -251,3 +251,37 @@ describe('the short version on a narrow screen', () => {
     expect(screen.getByRole('button', { name: 'Aggregation → processing' })).toBeInTheDocument();
   });
 });
+
+describe('a mark on a narrow screen', () => {
+  it('opens the panel it promises: the number is the control, and both distances follow under the row', async () => {
+    mount(<ChainPlate links={[]} />);
+    await userEvent.click(word('green transition'));
+
+    // A stage the overlay marks is not a door in its own right, so its number
+    // is the only thing that can open it.
+    const badge = screen.getByRole('button', { name: /^3\. Green transition · Recovery$/ });
+    expect(badge).toHaveAttribute('aria-expanded', 'false');
+    await userEvent.click(badge);
+
+    const panel = screen.getByRole('region', { name: 'Recovery' });
+    const target = SHIFT_BY_ID.green.targets.find((t) => t.id === 'stage-recovery')!;
+    expect(within(panel).getByText(target.read.economy)).toBeInTheDocument();
+    // The panel is what the inline note is not: BOTH distances, not just the one that is on.
+    expect(within(panel).getByText(target.read.finance)).toBeInTheDocument();
+    expect(badge).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  it('renders the panel a shared address asks for, so a link made on the wide plate still lands on a phone', () => {
+    window.history.replaceState({}, '', '/about?lens=green&node=recovery');
+    mount(<ChainPlate links={[]} />);
+    expect(document.querySelector('.cp-column[data-variant="full"]')).not.toBeNull();
+    expect(screen.getByRole('region', { name: 'Recovery' })).toBeInTheDocument();
+  });
+
+  it('leaves a joint and a layer to place their own panel: one panel per target, never two', async () => {
+    mount(<ChainPlate links={[]} />);
+    await userEvent.click(word('green transition'));
+    await userEvent.click(screen.getByRole('button', { name: 'Consumption → recovery' }));
+    expect(screen.getAllByRole('region', { name: 'Consumption → recovery' })).toHaveLength(1);
+  });
+});

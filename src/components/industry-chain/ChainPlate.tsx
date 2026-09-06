@@ -279,7 +279,16 @@ export function ChainPlate({
   // has no doors and nothing to share, so only the full plate reads and
   // writes the URL.
   const urlEnabled = variant === 'full';
-  const [fromUrl] = useState(() => initialChainUrl(urlEnabled));
+  // An address can name an element that this overlay does not mark — an old
+  // link, a hand-edited one, or one written against the other shift. Opening
+  // it anyway would put a panel with a heading and nothing under it on the
+  // page, which is the one thing the map must never show. So the address is
+  // validated before it becomes state, here and on every Back or Forward;
+  // the rejected parameter is then dropped from the URL by the writer.
+  const [fromUrl] = useState(() => {
+    const url = initialChainUrl(urlEnabled);
+    return { ...url, node: canOpen(url.node, url.shift) ? url.node : null };
+  });
 
   const [lens, setLens] = useState<LensId>(fromUrl.lens ?? 'economy');
   const [shift, setShift] = useState<ShiftId | null>(fromUrl.shift);
@@ -296,7 +305,7 @@ export function ChainPlate({
       subscribeToUrl((next) => {
         setLens(next.lens ?? 'economy');
         setShift(next.shift);
-        setSelected(next.node);
+        setSelected(canOpen(next.node, next.shift) ? next.node : null);
       }),
     [subscribeToUrl],
   );
