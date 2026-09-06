@@ -93,6 +93,7 @@ function StageBox({ id, detail = true }: { id: string; detail?: boolean }) {
         {detail && stage.origin && <p className={KICKER}>{CHAIN_COPY.controls.origin}</p>}
         <p className="break-words text-[15px] font-semibold leading-snug text-foreground">{stage.label}</p>
         {detail && stage.lanes && <p className="mt-1 text-xs leading-snug text-muted-foreground">{stage.lanes.join(' · ')}</p>}
+        {detail && stage.detail && <p className="mt-1 text-xs leading-snug text-muted-foreground">{stage.detail}</p>}
         {detail && stage.demand && (
           <ul className="mt-1.5 space-y-0.5 border-l-2 border-foreground pl-2 text-xs text-foreground">
             {stage.demand.map((d) => (
@@ -168,6 +169,7 @@ function JointRow({ id }: { id: JointId }) {
         </span>
         <span className="min-w-0">
           <span className="block break-words text-xs leading-snug text-muted-foreground">{joint.label}</span>
+          <span className="block text-sm font-medium text-foreground">{MARGIN_KINDS[joint.margin].label}</span>
           <span data-chip={lens} className={cn('mt-0.5 inline-block rounded-sm px-1.5 text-[12px] font-medium', chipForm(joint.margin))}>
             {joint.read[lens].chip}
           </span>
@@ -284,7 +286,7 @@ function NonPhysicalList({ id }: { id: string }) {
           <p className={KICKER}>{FLOW_KIND_LABELS[kind]}</p>
           <ul className="mt-1 space-y-1.5">
             {NON_PHYSICAL.filter((f) => f.kind === kind).map((f) => (
-              <li key={f.id} data-id={f.id} className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-2 text-xs leading-snug">
+              <li key={f.id} data-id={f.id} className={cn('grid grid-cols-[auto_minmax(0,1fr)] gap-x-2 text-xs leading-snug', kind === 'money' ? 'cp-text-money' : 'cp-text-information')}>
                 <span aria-hidden="true" className="text-muted-foreground">
                   {f.direction === 'upstream' ? '↑' : '↓'}
                 </span>
@@ -323,6 +325,7 @@ function LayerRow({ band, panel }: { band: Band; panel: (id: string) => ReactNod
         <span className="min-w-0">
           <span className="block break-words text-xs font-medium uppercase tracking-wider text-foreground">{band.label}</span>
           <span className="block text-xs text-muted-foreground">{band.spanLabel}</span>
+          {band.note && <span className="mt-1 block text-xs text-muted-foreground">{band.note}</span>}
         </span>
         {chip && (
           <span className={cn('rounded-sm px-1.5 text-[11px] font-semibold uppercase tracking-wider', chipForm(band.margin), !band.margin && 'bg-background')}>
@@ -346,6 +349,7 @@ function FullColumn({ panel }: { panel: (id: string) => ReactNode }) {
 
   return (
     <div className="cp-column flex min-w-0 flex-col" data-variant="full" role="group" aria-label={CHAIN_COPY.aria.column}>
+      <p className="mb-4 border-l-2 border-border pl-3 text-sm leading-relaxed text-muted-foreground">{CHAIN_COPY.mobileFlows}</p>
       <div className="grid min-w-0 grid-cols-2 gap-3">
         <div className="flex min-w-0 flex-col">
           <StageBox id="stage-biological" />

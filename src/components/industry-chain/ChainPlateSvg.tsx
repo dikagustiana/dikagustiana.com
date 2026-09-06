@@ -163,7 +163,7 @@ export function ChainPlateWide() {
       <g className="cp-move" data-id="move-export-cut">
       <path className="cp-move-path" d="M 366 222 L 628 222 L 628 253" markerEnd="url(#cp-tip-shift--wide)" />
       <text x="366" y="214" className="cp-move-t" textAnchor="start">The export cut moves right</text></g>
-      <g className="cp-callout" data-id="callout-import-share"><rect x="875" y="69" width="163.2" height="20" rx="2" className="cp-chip" /><text x="875" y="85" className="cp-callout-t" textAnchor="start">Import share falls</text></g>
+      <g className="cp-callout" data-id="callout-import-share"><rect x="875" y="69" width="188.4" height="20" rx="2" className="cp-chip" /><text x="875" y="85" className="cp-callout-t" textAnchor="start">Domestic input option</text></g>
     </g>
       <g className="cp-shift cp-shift--green" data-id="green">
       <g className="cp-lit" data-for="band-energy"><rect className="cp-lit-rect" x="173" y="708" width="1417" height="32" rx="3" /></g>
@@ -173,7 +173,7 @@ export function ChainPlateWide() {
       <g className="cp-lit" data-for="return-postconsumer-material"><path className="cp-lit-path" d="M 1587 451 L 1659 451 L 1659 56 L 549 56 L 549 242" markerEnd="url(#cp-tip-shift--wide)" /></g>
       <g className="cp-lit" data-for="return-postconsumer-organic"><path className="cp-lit-path" d="M 1587 437 L 1677 437 L 1677 34 L 242 34 L 242 134" markerEnd="url(#cp-tip-shift--wide)" /></g>
       
-      <g className="cp-callout" data-id="callout-new-price"><rect x="1412.4" y="517" width="247.2" height="20" rx="2" className="cp-chip" /><text x="1536" y="533" className="cp-callout-t" textAnchor="middle">A price where there was none</text></g>
+      <g className="cp-callout" data-id="callout-new-price"><rect x="1437.6" y="517" width="196.79999999999998" height="20" rx="2" className="cp-chip" /><text x="1536" y="533" className="cp-callout-t" textAnchor="middle">Who pays for recovery?</text></g>
     </g>
     </g>
     <g className="cp-hits">

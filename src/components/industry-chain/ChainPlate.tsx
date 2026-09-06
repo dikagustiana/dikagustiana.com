@@ -1,21 +1,18 @@
 /**
  * The industry chain, at two distances — and in motion.
  *
- * The headline is the entry point of the page and it is a claim the page has
- * to pay for: "Nothing here is complicated. It only looks that way from the
- * wrong distance." Two sentences under it are the two controls, and both are
- * arguments rather than chrome:
+ * One chain. Two distances. Two sentences under the headline contain the
+ * controls that change how the same structure is read:
  *
  *   distance   the two lens names in the first sentence. ECONOMY or FINANCE,
  *              always one of them, economy at rest — the reader arrives from
  *              far. The map does not change; the word on every joint does.
  *   shift      the two shift words in the second sentence. Neither on is the
  *              resting map; one on rings the joints and layers that shift
- *              moves and recedes the rest; the other switches. Never both:
- *              the two draw on the same export earnings.
+ *              moves; the other switches. Each scenario is read separately.
  *
  * The two compose. A shift is read at whichever distance is on, in the
- * caption under the sentences and in the panel of any lit target — and the
+ * caption after the figure and in the panel of any lit target — and the
  * reader finds for themselves that the two lenses work on movement as they
  * do on rest.
  *
@@ -46,11 +43,13 @@ import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { cn } from '@/lib/utils';
 import { ChainColumn } from './ChainColumn';
 import { ChainLegend } from './ChainLegend';
+import { ChainReference } from './ChainReference';
 import { ChainLensContext, type ChainLensState } from './chainLensContext';
 import { ChainPlateCompact, ChainPlateWide } from './ChainPlateSvg';
 import { ChainTargetPanel } from './ChainTargetPanel';
 import { isDoor, isJointId, targetLabel } from './chainTargets';
 import './chain-plate.css';
+import './chain-review.css';
 
 /** The wide plate needs this much room before its type stays readable. */
 export const WIDE_PLATE_QUERY = '(min-width: 1280px)';
@@ -77,7 +76,7 @@ function LensWord({
       aria-pressed={active}
       onClick={() => onChoose(id)}
       className={cn(
-        'inline border-b pb-px font-medium text-foreground transition-colors',
+        'inline-flex min-h-11 items-center border-b pb-px font-medium text-foreground transition-colors',
         active ? 'border-b-2 border-foreground' : 'border-dotted border-muted-foreground hover:border-solid hover:border-foreground',
         FOCUS,
       )}
@@ -105,7 +104,7 @@ function ShiftWord({
       aria-pressed={active}
       onClick={() => onToggle(id)}
       className={cn(
-        'inline border-b pb-px font-medium text-foreground transition-colors',
+        'inline-flex min-h-11 items-center border-b pb-px font-medium text-foreground transition-colors',
         active ? 'border-b-2 border-accent-editorial' : 'border-dotted border-muted-foreground hover:border-solid hover:border-foreground',
         FOCUS,
       )}
@@ -284,7 +283,16 @@ export function ChainPlate({
           </ShiftWord>
           {shiftLead.after}
         </p>
-        {shift && !showCompact && <ShiftCaption shift={shift} lens={lens} />}
+        <div className="mt-2 flex flex-wrap items-center gap-x-4 text-sm text-muted-foreground">
+          <button type="button" aria-pressed={shift === null} onClick={() => setShift(null)}
+            className={cn('min-h-11 border-b text-foreground', shift === null ? 'border-foreground font-medium' : 'border-transparent', FOCUS)}>
+            {CHAIN_COPY.controls.noShift}
+          </button>
+          <span role="status" aria-live="polite" aria-atomic="true">
+            {CHAIN_COPY.lensName[lens]} · {shift ? SHIFT_BY_ID[shift].label : CHAIN_COPY.controls.noShift}
+          </span>
+        </div>
+        {!showCompact && <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{CHAIN_COPY.scopeLead}</p>}
       </header>
 
       <ChainLensContext.Provider value={lensState}>
@@ -306,6 +314,9 @@ export function ChainPlate({
             <ChainColumn variant={showCompact ? 'compact' : 'full'} panel={(id) => renderPanel(id, true)} />
           )}
         </figure>
+
+        {/* Keep the plate anchored when the scenario caption changes length. */}
+        {shift && !showCompact && <ShiftCaption shift={shift} lens={lens} />}
 
         {variant === 'preview' && (
           <button
@@ -329,6 +340,16 @@ export function ChainPlate({
         )}
 
         {!showCompact && wideScreen && selected && renderPanel(selected)}
+
+        {!showCompact && wideScreen && <ChainReference />}
+
+        {!showCompact && (
+          <details className="mt-5 max-w-3xl border-t border-border text-sm text-muted-foreground">
+            <summary className={cn('min-h-11 cursor-pointer py-3 font-medium text-foreground', FOCUS)}>{CHAIN_COPY.reference.basis}</summary>
+            <p className="mb-3 leading-relaxed">{CHAIN_COPY.scope}</p>
+            <p className="leading-relaxed">{CHAIN_COPY.basis}</p>
+          </details>
+        )}
 
         {!showCompact && (
           <div className={cn(!wideScreen && 'max-w-2xl')}>
