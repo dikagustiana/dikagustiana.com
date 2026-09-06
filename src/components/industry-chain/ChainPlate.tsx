@@ -21,6 +21,22 @@
  * table has pinned curriculum modules to a joint, they follow. A door stays
  * open when a control changes: the same target, read differently.
  *
+ * A shift also NUMBERS what it moves. The marks are an index onto the
+ * overlay, in the order the marks land on the plate rather than the order of
+ * the data file, and they are renumbered from one for each overlay. Which
+ * elements are marked is the shift's business and the shift's alone: move the
+ * distance control and the marks stay where they are, saying something else.
+ * The control says how many marks it would raise before it raises them.
+ *
+ * Nothing floats. Pointing at a mark, a joint or a layer writes one line into
+ * a readout of fixed height under the plate, so no label is ever raised over
+ * the element beside the one being pointed at.
+ *
+ * The state — overlay, distance, open door — is in the address, so an essay
+ * can link into the exact reading it argues from and a reader can share what
+ * they are looking at. See useChainUrl.ts; the address carries slugs, never
+ * the numbers, because the numbers are positions and the slugs are names.
+ *
  * Two layouts, one state. A wide screen gets the generated plate
  * (ChainPlateSvg.tsx); a narrow one gets the column (ChainColumn.tsx). The
  * choice is a media query read on the first render, so only one is ever in
@@ -28,12 +44,16 @@
  * button; the button, a lens word or a shift word swaps in the full chain.
  */
 
-import { useCallback, useContext, useId, useMemo, useRef, useState, type ReactNode } from 'react';
+import { useCallback, useContext, useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react';
 import {
   CHAIN_COPY,
   LEVERS,
+  MARGIN_KINDS,
   SHIFT_BY_ID,
   SHIFTS,
+  BAND_BY_ID,
+  JOINT_BY_ID,
+  bandChip,
   type JointId,
   type LensId,
   type ShiftId,
@@ -47,7 +67,8 @@ import { ChainReference } from './ChainReference';
 import { ChainLensContext, type ChainLensState } from './chainLensContext';
 import { ChainPlateCompact, ChainPlateWide } from './ChainPlateSvg';
 import { ChainTargetPanel } from './ChainTargetPanel';
-import { isDoor, isJointId, targetLabel } from './chainTargets';
+import { isDoor, isJointId, markArticles, markNumber, markedIds, targetLabel } from './chainTargets';
+import { initialChainUrl, useChainUrl, type ChainUrlState } from './useChainUrl';
 import './chain-plate.css';
 import './chain-review.css';
 
@@ -86,7 +107,13 @@ function LensWord({
   );
 }
 
-/** One of the two shift words: a toggle, and the two exclude each other. */
+/**
+ * One of the two shift words: a toggle, and the two exclude each other. It
+ * says how many marks it would put on the map, so the reader knows the size
+ * of what they are turning on before they turn it on. The count is
+ * aria-hidden because the live status line announces it in words; the word
+ * itself stays the button's whole accessible name.
+ */
 function ShiftWord({
   id,
   active,
@@ -98,19 +125,70 @@ function ShiftWord({
   onToggle: (id: ShiftId) => void;
   children: string;
 }) {
+  const count = markedIds(id).length;
   return (
     <button
       type="button"
       aria-pressed={active}
       onClick={() => onToggle(id)}
       className={cn(
-        'inline-flex min-h-11 items-center border-b pb-px font-medium text-foreground transition-colors',
+        'inline-flex min-h-11 items-center gap-1 border-b pb-px font-medium text-foreground transition-colors',
         active ? 'border-b-2 border-accent-editorial' : 'border-dotted border-muted-foreground hover:border-solid hover:border-foreground',
         FOCUS,
       )}
     >
       {children}
+      <span aria-hidden="true" className="text-xs tabular-nums text-muted-foreground" data-mark-count={id}>
+        ({count})
+      </span>
     </button>
+  );
+}
+
+/**
+ * One line under the plate, in place of a tooltip.
+ *
+ * A floating tooltip on a plate this dense covers the element next to the one
+ * being pointed at — the reader loses the neighbour they were comparing it
+ * with. This line is always in the document, always the same height, and
+ * always in the same place, so nothing moves and nothing is hidden. It reads
+ * whatever the pointer or the focus ring is on: a mark by its number, title
+ * and how many essays sit behind it; a joint by the margin cut there; a layer
+ * by what it charges for.
+ */
+function Readout({ hovered, shift, lens }: { hovered: string | null; shift: ShiftId | null; lens: LensId }) {
+  const rest = shift ? CHAIN_COPY.mark.rest : CHAIN_COPY.panel.hint;
+  let line: ReactNode = rest;
+
+  if (hovered) {
+    const n = shift ? markNumber(shift, hovered) : 0;
+    const articles = markArticles(shift, hovered).length;
+    const essays = articles === 0 ? CHAIN_COPY.mark.essayNone : `${articles} ${articles === 1 ? CHAIN_COPY.mark.essayOne : CHAIN_COPY.mark.essayMany}`;
+    const joint = isJointId(hovered) ? JOINT_BY_ID[hovered] : null;
+    const band = BAND_BY_ID[hovered];
+    const detail = joint
+      ? `${MARGIN_KINDS[joint.margin].label} · ${joint.read[lens].chip}`
+      : band
+        ? `${band.margin ? MARGIN_KINDS[band.margin].label : bandChip(band)}`
+        : null;
+    line = (
+      <>
+        {n > 0 && <span className="font-semibold tabular-nums">{n}. </span>}
+        <span className="font-medium text-foreground">{targetLabel(hovered)}</span>
+        {detail && <span className="text-muted-foreground"> · {detail}</span>}
+        {n > 0 && <span className="text-muted-foreground"> · {essays}</span>}
+      </>
+    );
+  }
+
+  return (
+    <p
+      data-chain-readout=""
+      data-readout-target={hovered ?? undefined}
+      className="mt-3 min-h-[2.75rem] border-t border-border pt-2 text-sm leading-snug text-muted-foreground"
+    >
+      {line}
+    </p>
   );
 }
 
@@ -142,27 +220,47 @@ function ShiftMoves({ shift, lens }: { shift: ShiftId; lens: LensId }) {
         {CHAIN_COPY.shift.movesHeading} · {CHAIN_COPY.lensName[lens]}
       </h3>
       <ul className="mt-2 grid gap-x-8 gap-y-1.5 text-sm text-foreground md:grid-cols-2">
-        {s.targets.map((t) => (
-          <li key={t.id} data-move={t.id}>
-            {isDoor(t.id) ? (
-              <button
-                type="button"
-                onClick={(e) => onSelect(t.id, e.currentTarget)}
-                className={cn('font-medium text-foreground hover:text-accent', FOCUS)}
-              >
-                {targetLabel(t.id)}
-              </button>
-            ) : (
-              <span className="font-medium">{targetLabel(t.id)}</span>
-            )}
-            <span className="text-muted-foreground"> — {t.read[lens]}</span>
-          </li>
-        ))}
+        {/* In the order the marks are numbered, not the order the data file
+            happens to list them: this list IS the index, so it has to count. */}
+        {[...s.targets]
+          .sort((a, b) => markNumber(shift, a.id) - markNumber(shift, b.id))
+          .map((t) => {
+          const n = markNumber(shift, t.id);
+          return (
+            <li key={t.id} data-move={t.id} className="grid grid-cols-[1.5rem_minmax(0,1fr)]">
+              <span aria-hidden="true" className="tabular-nums font-semibold text-muted-foreground">
+                {n > 0 ? n : '·'}
+              </span>
+              <span>
+                {/* Every marked target opens, whether or not it is a door in
+                    its own right: a mark that could not be opened would be a
+                    number pointing at nothing. */}
+                <button
+                  type="button"
+                  onClick={(e) => onSelect(t.id, e.currentTarget)}
+                  className={cn('text-left font-medium text-foreground hover:text-accent', FOCUS)}
+                >
+                  {targetLabel(t.id)}
+                </button>
+                <span className="text-muted-foreground"> — {t.read[lens]}</span>
+              </span>
+            </li>
+          );
+        })}
       </ul>
       <p className="mt-2 text-xs text-muted-foreground">{CHAIN_COPY.shift.hint}</p>
     </section>
   );
 }
+
+/**
+ * Which targets can be open at all under a shift: every joint and every layer
+ * always, plus whatever that shift has marked. A stage or a border is a door
+ * only while the overlay that marks it is on, so switching overlays closes a
+ * reading that no longer exists rather than leaving a panel with no mark.
+ */
+const canOpen = (id: string | null, shift: ShiftId | null): boolean =>
+  id !== null && (isDoor(id) || (shift !== null && markNumber(shift, id) > 0));
 
 export function ChainPlate({
   links = CHAIN_MODULE_LINKS,
@@ -177,12 +275,40 @@ export function ChainPlate({
   const figureId = `${base}-chain-figure`;
   const wideScreen = useMediaQuery(WIDE_PLATE_QUERY, true);
 
-  const [lens, setLens] = useState<LensId>('economy');
-  const [shift, setShift] = useState<ShiftId | null>(null);
-  const [selected, setSelected] = useState<string | null>(null);
+  // The short version on the landing page is a taster, not an address: it
+  // has no doors and nothing to share, so only the full plate reads and
+  // writes the URL.
+  const urlEnabled = variant === 'full';
+  // An address can name an element that this overlay does not mark — an old
+  // link, a hand-edited one, or one written against the other shift. Opening
+  // it anyway would put a panel with a heading and nothing under it on the
+  // page, which is the one thing the map must never show. So the address is
+  // validated before it becomes state, here and on every Back or Forward;
+  // the rejected parameter is then dropped from the URL by the writer.
+  const [fromUrl] = useState(() => {
+    const url = initialChainUrl(urlEnabled);
+    return { ...url, node: canOpen(url.node, url.shift) ? url.node : null };
+  });
+
+  const [lens, setLens] = useState<LensId>(fromUrl.lens ?? 'economy');
+  const [shift, setShift] = useState<ShiftId | null>(fromUrl.shift);
+  const [selected, setSelected] = useState<string | null>(fromUrl.node);
+  const [hovered, setHovered] = useState<string | null>(null);
   const [expanded, setExpanded] = useState(variant === 'full');
   const triggerRef = useRef<Element | null>(null);
   const figureRef = useRef<HTMLElement>(null);
+
+  const urlState = useMemo<ChainUrlState>(() => ({ lens, shift, node: selected }), [lens, shift, selected]);
+  const subscribeToUrl = useChainUrl(urlEnabled, urlState);
+  useEffect(
+    () =>
+      subscribeToUrl((next) => {
+        setLens(next.lens ?? 'economy');
+        setShift(next.shift);
+        setSelected(canOpen(next.node, next.shift) ? next.node : null);
+      }),
+    [subscribeToUrl],
+  );
 
   const showCompact = variant === 'preview' && !expanded;
 
@@ -194,10 +320,15 @@ export function ChainPlate({
     setLens(next);
   }, []);
 
-  const toggleShift = useCallback((next: ShiftId) => {
+  const chooseShift = useCallback((next: ShiftId | null) => {
     setExpanded(true);
-    setShift((current) => (current === next ? null : next));
+    setShift((current) => {
+      const after = current === next ? null : next;
+      setSelected((open) => (canOpen(open, after) ? open : null));
+      return after;
+    });
   }, []);
+  const toggleShift = useCallback((next: ShiftId) => chooseShift(next), [chooseShift]);
 
   const onSelect = useCallback(
     (id: string, trigger: Element | null) => {
@@ -235,8 +366,8 @@ export function ChainPlate({
   }, [expanded]);
 
   const lensState = useMemo<ChainLensState>(
-    () => ({ lens, shift, selected, onSelect, panelId }),
-    [lens, shift, selected, onSelect, panelId],
+    () => ({ lens, shift, selected, onSelect, hovered, onHover: setHovered, panelId }),
+    [lens, shift, selected, onSelect, hovered, panelId],
   );
 
   const renderPanel = useCallback(
@@ -254,6 +385,7 @@ export function ChainPlate({
 
   const { lead, shiftLead } = CHAIN_COPY;
   const [reindus, green] = SHIFTS;
+  const marks = shift ? markedIds(shift).length : 0;
 
   return (
     <div className="chain-plate" data-lens={lens} data-shift={shift ?? undefined} data-view={showCompact ? 'compact' : 'full'}>
@@ -261,6 +393,9 @@ export function ChainPlate({
         <h2 className="font-display text-2xl font-semibold leading-tight tracking-tight text-foreground md:text-3xl [text-wrap:balance]">
           {CHAIN_COPY.headline}
         </h2>
+        <p className="mt-3 text-base leading-relaxed text-foreground md:text-lg" data-chain-standfirst>
+          {CHAIN_COPY.standfirst}
+        </p>
         <p className="mt-3 text-sm leading-relaxed text-muted-foreground md:text-base">
           {lead.before}
           <LensWord id="economy" active={lens === 'economy'} onChoose={chooseLens}>
@@ -284,12 +419,13 @@ export function ChainPlate({
           {shiftLead.after}
         </p>
         <div className="mt-2 flex flex-wrap items-center gap-x-4 text-sm text-muted-foreground">
-          <button type="button" aria-pressed={shift === null} onClick={() => setShift(null)}
+          <button type="button" aria-pressed={shift === null} onClick={() => chooseShift(null)}
             className={cn('min-h-11 border-b text-foreground', shift === null ? 'border-foreground font-medium' : 'border-transparent', FOCUS)}>
             {CHAIN_COPY.controls.noShift}
           </button>
           <span role="status" aria-live="polite" aria-atomic="true">
             {CHAIN_COPY.lensName[lens]} · {shift ? SHIFT_BY_ID[shift].label : CHAIN_COPY.controls.noShift}
+            {shift && ` · ${marks} ${marks === 1 ? CHAIN_COPY.mark.markOne : CHAIN_COPY.mark.markMany}`}
           </span>
         </div>
         {!showCompact && <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{CHAIN_COPY.scopeLead}</p>}
@@ -315,6 +451,8 @@ export function ChainPlate({
           )}
         </figure>
 
+        {!showCompact && wideScreen && <Readout hovered={hovered} shift={shift} lens={lens} />}
+
         {/* Keep the plate anchored when the scenario caption changes length. */}
         {shift && !showCompact && <ShiftCaption shift={shift} lens={lens} />}
 
@@ -334,10 +472,6 @@ export function ChainPlate({
         )}
 
         {!showCompact && wideScreen && shift && !selected && <ShiftMoves shift={shift} lens={lens} />}
-
-        {!showCompact && wideScreen && !shift && !selected && (
-          <p className="mt-3 text-xs text-muted-foreground">{CHAIN_COPY.panel.hint}</p>
-        )}
 
         {!showCompact && wideScreen && selected && renderPanel(selected)}
 

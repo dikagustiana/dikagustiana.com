@@ -17,6 +17,13 @@ export interface ChainLensState {
   selected: string | null;
   /** Toggle a target; the element is remembered so focus can return to it. */
   onSelect: (id: string, trigger: Element | null) => void;
+  /**
+   * What the pointer or the focus ring is on, if anything. It writes one line
+   * into the readout under the plate instead of raising a floating tooltip:
+   * on a plate this dense a tooltip covers the very thing being pointed at.
+   */
+  hovered: string | null;
+  onHover: (id: string | null) => void;
   panelId: string;
 }
 
@@ -25,5 +32,7 @@ export const ChainLensContext = createContext<ChainLensState>({
   shift: null,
   selected: null,
   onSelect: () => {},
+  hovered: null,
+  onHover: () => {},
   panelId: '',
 });

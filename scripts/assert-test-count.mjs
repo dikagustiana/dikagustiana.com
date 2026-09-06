@@ -11,7 +11,7 @@
  */
 import fs from 'node:fs';
 
-const MIN_TESTS = 367; // 370 after the two-control rework (two readings on every joint, six layers, the shifts); slack of 3, not 30.
+const MIN_TESTS = 407; // 410 after the numbered marks, the slug table and the map's state in the URL; slack of 3, not 30.
 
 const reportPath = process.argv[2] ?? 'vitest-report.json';
 if (!fs.existsSync(reportPath)) {

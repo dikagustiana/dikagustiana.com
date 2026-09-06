@@ -18,7 +18,7 @@
  * layers list, no toggles, no small labels.
  */
 
-import { useContext, useId, useState, type ReactNode } from 'react';
+import { createContext, useContext, useId, useState, type ReactNode } from 'react';
 import {
   BANDS,
   BORDERS,
@@ -42,12 +42,28 @@ import {
   type JointId,
   type MarginKind,
 } from '@/data/industryChain';
+import { universalEssayUrl } from '@/lib/essayUrl';
 import { cn } from '@/lib/utils';
+import { Link } from 'react-router-dom';
 import { ChainLensContext } from './chainLensContext';
+import { isDoor, markNumber } from './chainTargets';
+
+/**
+ * The panel renderer, shared with every row rather than passed down through
+ * six components that have no other use for it. A joint row and a layer row
+ * place their own panel; a marked stage, node, border or return places it
+ * from inside its note, because that is the only thing it has.
+ */
+const PanelRenderer = createContext<(id: string) => ReactNode>(() => null);
 
 const S = Object.fromEntries(STAGES.map((s) => [s.id, s]));
 const N = Object.fromEntries([...NODES, ...RETAIL].map((n) => [n.id, n]));
-const labelOf = (id: string) => S[id]?.label ?? N[id]?.label ?? (id === RETAIL_GROUP.id ? RETAIL_GROUP.label : id);
+const labelOf = (id: string) =>
+  S[id]?.label ??
+  N[id]?.label ??
+  BORDERS.find((b) => b.id === id)?.label ??
+  RETURNS.find((r) => r.id === id)?.label ??
+  (id === RETAIL_GROUP.id ? RETAIL_GROUP.label : id);
 
 const FOCUS = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background';
 const KICKER = 'text-[10px] uppercase tracking-[0.16em] text-muted-foreground';
@@ -71,14 +87,67 @@ function useLit(id: string) {
   return shiftTarget(shift, id) !== undefined;
 }
 
+/**
+ * What a shift does at this row, read at the distance that is on, with the
+ * same number the wide plate would give it.
+ *
+ * The column carries no floating marks: a phone has no hover and no room for
+ * a badge that does not also say something. So the number opens the note
+ * instead of pointing at it, and the essays behind a mark are listed right
+ * here rather than in a panel the reader has to go and find. The numbering is
+ * the plate's, so a number quoted in an essay means the same thing on both.
+ */
 function LitNote({ id }: { id: string }) {
-  const { shift, lens } = useContext(ChainLensContext);
+  const { shift, lens, selected, onSelect, panelId } = useContext(ChainLensContext);
+  const panel = useContext(PanelRenderer);
   const target = shiftTarget(shift, id);
   if (!shift || !target) return null;
+  const n = markNumber(shift, id);
+  const articles = target.articles ?? [];
+  // A joint and a layer are doors in their own right and place their own
+  // panel; everything else a shift marks has only its number to open with.
+  const opensHere = !isDoor(id);
+  const open = opensHere && selected === id;
   return (
-    <p data-lit-note={id} className="mt-1.5 border-l-2 border-accent-editorial pl-2 text-xs leading-snug text-foreground">
-      <span className="font-medium">{SHIFT_BY_ID[shift].label}</span> — {target.read[lens]}
-    </p>
+    <div data-lit-note={id} className="mt-1.5 border-l-2 border-accent-editorial pl-2 text-xs leading-snug text-foreground">
+      <p>
+        {n > 0 &&
+          (opensHere ? (
+            <button
+              type="button"
+              data-mark-n={n}
+              aria-label={`${n}. ${SHIFT_BY_ID[shift].label} · ${labelOf(id)}`}
+              aria-expanded={open}
+              aria-controls={open ? panelId : undefined}
+              onClick={(e) => onSelect(id, e.currentTarget)}
+              className={cn(
+                'mr-1.5 inline-block min-h-6 rounded-full border border-accent-editorial px-2 text-center font-semibold tabular-nums',
+                open && 'bg-foreground text-background',
+                FOCUS,
+              )}
+            >
+              {n}
+            </button>
+          ) : (
+            <span data-mark-n={n} className="mr-1.5 inline-block rounded-full border border-accent-editorial px-1.5 text-center font-semibold tabular-nums">
+              {n}
+            </span>
+          ))}
+        <span className="font-medium">{SHIFT_BY_ID[shift].label}</span> — {target.read[lens]}
+      </p>
+      {articles.length > 0 && (
+        <ul className="mt-1 space-y-0.5" data-shift-articles={id}>
+          {articles.map((a) => (
+            <li key={a.slug}>
+              <Link to={universalEssayUrl(a.slug)} className="underline underline-offset-2 hover:text-accent">
+                {a.title}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
+      {open && <div className="mt-2">{panel(id)}</div>}
+    </div>
   );
 }
 
@@ -500,5 +569,9 @@ function CompactColumn() {
 }
 
 export function ChainColumn({ variant, panel }: { variant: 'full' | 'compact'; panel: (id: string) => ReactNode }) {
-  return variant === 'compact' ? <CompactColumn /> : <FullColumn panel={panel} />;
+  return (
+    <PanelRenderer.Provider value={panel}>
+      {variant === 'compact' ? <CompactColumn /> : <FullColumn panel={panel} />}
+    </PanelRenderer.Provider>
+  );
 }

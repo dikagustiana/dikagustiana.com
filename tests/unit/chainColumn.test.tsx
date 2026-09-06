@@ -68,7 +68,10 @@ const ids = () => new Set(Array.from(document.querySelectorAll<HTMLElement>('[da
 const word = (name: string) => screen.getByRole('button', { name, exact: true });
 const rowChips = () => Array.from(document.querySelectorAll('[data-id^="j-"] button [data-chip]')).map((c) => c.textContent);
 
-beforeEach(narrowScreen);
+beforeEach(() => {
+  narrowScreen();
+  window.history.replaceState({}, '', '/about');
+});
 afterEach(() => {
   // @ts-expect-error — restore jsdom's absence of matchMedia for the next file
   delete window.matchMedia;
@@ -130,11 +133,11 @@ describe('the column', () => {
     expect(screen.getByText('Trade credit · trade promotion · rebates')).toBeInTheDocument();
   });
 
-  it('lists the six layers as rows that open, with their span in words', async () => {
+  it('lists the five layers as rows that open, with their span in words', async () => {
     mount(<ChainPlate links={[]} />);
     const list = screen.getByRole('heading', { name: CHAIN_COPY.controls.layers }).parentElement!;
     for (const b of BANDS) expect(within(list).getByRole('button', { name: new RegExp(b.label) })).toHaveAttribute('aria-expanded', 'false');
-    expect(within(list).getByText('Primary processing → finished-goods manufacturing')).toBeInTheDocument();
+    expect(within(list).getAllByText('The whole chain').length).toBeGreaterThan(0);
     expect(within(list).getByRole('button', { name: /^Energy/ })).toBeInTheDocument();
 
     await userEvent.click(within(list).getByRole('button', { name: /Credit and working capital/ }));
@@ -246,5 +249,39 @@ describe('the short version on a narrow screen', () => {
     await userEvent.click(screen.getByRole('button', { name: CHAIN_COPY.controls.seeFull }));
     expect(document.querySelectorAll('.cp-column[data-variant="full"]')).toHaveLength(1);
     expect(screen.getByRole('button', { name: 'Aggregation → processing' })).toBeInTheDocument();
+  });
+});
+
+describe('a mark on a narrow screen', () => {
+  it('opens the panel it promises: the number is the control, and both distances follow under the row', async () => {
+    mount(<ChainPlate links={[]} />);
+    await userEvent.click(word('green transition'));
+
+    // A stage the overlay marks is not a door in its own right, so its number
+    // is the only thing that can open it.
+    const badge = screen.getByRole('button', { name: /^3\. Green transition · Recovery$/ });
+    expect(badge).toHaveAttribute('aria-expanded', 'false');
+    await userEvent.click(badge);
+
+    const panel = screen.getByRole('region', { name: 'Recovery' });
+    const target = SHIFT_BY_ID.green.targets.find((t) => t.id === 'stage-recovery')!;
+    expect(within(panel).getByText(target.read.economy)).toBeInTheDocument();
+    // The panel is what the inline note is not: BOTH distances, not just the one that is on.
+    expect(within(panel).getByText(target.read.finance)).toBeInTheDocument();
+    expect(badge).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  it('renders the panel a shared address asks for, so a link made on the wide plate still lands on a phone', () => {
+    window.history.replaceState({}, '', '/about?lens=green&node=recovery');
+    mount(<ChainPlate links={[]} />);
+    expect(document.querySelector('.cp-column[data-variant="full"]')).not.toBeNull();
+    expect(screen.getByRole('region', { name: 'Recovery' })).toBeInTheDocument();
+  });
+
+  it('leaves a joint and a layer to place their own panel: one panel per target, never two', async () => {
+    mount(<ChainPlate links={[]} />);
+    await userEvent.click(word('green transition'));
+    await userEvent.click(screen.getByRole('button', { name: 'Consumption → recovery' }));
+    expect(screen.getAllByRole('region', { name: 'Consumption → recovery' })).toHaveLength(1);
   });
 });

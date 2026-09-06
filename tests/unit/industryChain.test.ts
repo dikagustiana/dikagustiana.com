@@ -14,12 +14,14 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
   BANDS,
+  BAND_BY_ID,
   BORDERS,
   BYPRODUCT,
   CHAIN_COPY,
   COLUMNS,
   COMPACT,
   JOINTS,
+  JOINT_BY_ID,
   JOINT_IDS,
   JOINT_LABELS,
   LEGEND,
@@ -34,10 +36,15 @@ import {
   SHIFTS,
   SHIFT_BY_ID,
   STAGES,
+  SLUGS,
   bandChip,
   bandJoints,
+  idOfSlug,
+  isMarked,
   jointLayers,
+  markedTargets,
   shiftTarget,
+  slugOf,
   type LensId,
 } from '@/data/industryChain';
 
@@ -53,8 +60,8 @@ const targetIds = new Set([
   ...RETURNS.map((r) => r.id),
 ]);
 
-/** The one number the map carries is the standard's own name. Strip it, then nothing else may be a digit. */
-const noFigures = (text: string) => expect(text.replace(/PSAK 72/g, 'PSAK')).not.toMatch(/\d/);
+/** No figures at all. Not a magnitude, not an illustrative one, and not a standard's number either. */
+const noFigures = (text: string) => expect(text).not.toMatch(/\d/);
 
 describe('the joints', () => {
   it('are named exactly once, labelled, and run between real ends', () => {
@@ -122,30 +129,39 @@ describe('the three margin kinds', () => {
     expect(forms).toEqual(new Set(['solid', 'dashed', 'filled']));
   });
 
-  it('tell node from layer by the PSAK 72 principal–agent test — the whole sale against the fee', () => {
-    expect(MARGIN_KINDS['node-spread'].test).toMatch(/PSAK 72/);
-    expect(MARGIN_KINDS['node-spread'].test.toLowerCase()).toContain('gross');
+  it('tell node from layer by the principal–agent control test — the whole sale against the fee — and name no standard', () => {
+    expect(MARGIN_KINDS['node-spread'].test.toLowerCase()).toContain('control');
+    expect(MARGIN_KINDS['node-spread'].test.toLowerCase()).toContain('the whole sale as revenue');
+    expect(MARGIN_KINDS['node-spread'].lines.join(' ').toLowerCase()).toContain('gross');
     // A layer is not an agent for its own service — it is the principal for
     // it, and books the fee. The agent proper is the intermediary that fails
     // the control test, and the copy has to say so.
-    expect(MARGIN_KINDS['service-fee'].test).toMatch(/PSAK 72/);
-    expect(MARGIN_KINDS['service-fee'].test.toLowerCase()).toContain('fee for its own service');
-    expect(MARGIN_KINDS['service-fee'].test.toLowerCase()).toContain('control test');
+    expect(MARGIN_KINDS['service-fee'].test.toLowerCase()).toContain('service');
+    expect(MARGIN_KINDS['service-fee'].test.toLowerCase()).toContain('control');
     expect(MARGIN_KINDS['service-fee'].lines.join(' ').toLowerCase()).toContain('net');
-    expect(LEGEND_NOTE).toMatch(/PSAK 72/);
+    expect(LEGEND_NOTE.toLowerCase()).toContain('principal versus agent');
+    // The standard is the owner's to cite in prose; the map states the test, never a reference.
+    for (const k of Object.values(MARGIN_KINDS)) expect(k.test).not.toMatch(/PSAK/);
   });
 });
 
 describe('the enabling layers', () => {
-  it('are six, in this order: the three whole-chain costs, the two partial layers, then the rules under everything', () => {
+  it('are five, in this order: the three whole-chain costs, the one partial layer, then the rules under everything', () => {
     expect(BANDS.map((b) => b.id)).toEqual([
       'band-logistics',
       'band-credit',
       'band-energy',
-      'band-contract-capacity',
       'band-governance',
       'band-regulation',
     ]);
+  });
+
+  it('do not carry contract capacity as a layer of its own — withdrawn — while makloon survives where a toller actually appears', () => {
+    expect(BANDS.map((b) => b.id)).not.toContain('band-contract-capacity');
+    const alt = JOINT_BY_ID['j-manufacturing-distribution'].alt!;
+    expect(alt.margin).toBe('node-spread');
+    expect(alt.when).toContain('makloon');
+    expect(alt.when.toLowerCase()).toContain('tolling fee');
   });
 
   it('span real columns, in reading order, say so in words, and read at both distances', () => {
@@ -169,13 +185,7 @@ describe('the enabling layers', () => {
     expect(bandJoints(energy)).toEqual([...JOINT_IDS]);
   });
 
-  it('put contract capacity under processing → manufacturing only, and governance under manufacturing → retail only', () => {
-    const cc = BANDS.find((b) => b.id === 'band-contract-capacity')!;
-    expect(cc.span).toEqual(['stage-processing', 'stage-manufacturing']);
-    expect(cc.margin).toBe('service-fee');
-    expect(cc.note).toContain('makloon');
-    expect(bandJoints(cc)).toEqual(['j-processing-trader', 'j-trader-manufacturing', 'j-packaging-manufacturing']);
-
+  it('put governance under manufacturing → retail only', () => {
     const gov = BANDS.find((b) => b.id === 'band-governance')!;
     expect(gov.span).toEqual(['stage-manufacturing', RETAIL_GROUP.id]);
     expect(gov.margin).toBeUndefined();
@@ -187,7 +197,7 @@ describe('the enabling layers', () => {
       expect(bandJoints(BANDS.find((b) => b.id === id)!)).toEqual([...JOINT_IDS]);
     }
     for (const j of JOINT_IDS) expect(jointLayers(j).map((b) => b.id), j).toContain('band-logistics');
-    expect(jointLayers('j-retail-consumption').map((b) => b.id)).not.toContain('band-contract-capacity');
+    expect(jointLayers('j-retail-consumption').map((b) => b.id)).not.toContain('band-governance');
     expect(jointLayers('j-production-aggregation').map((b) => b.id)).not.toContain('band-governance');
   });
 });
@@ -337,8 +347,9 @@ describe('the short version', () => {
 });
 
 describe('what the map promises', () => {
-  it('keeps the headline verbatim', () => {
-    expect(CHAIN_COPY.headline).toBe('Nothing here is complicated. It only looks that way from the wrong distance.');
+  it('keeps the headline and the standfirst verbatim: the joint is the subject, the two distances are the claim', () => {
+    expect(CHAIN_COPY.headline).toBe('Every joint in this chain is a margin.');
+    expect(CHAIN_COPY.standfirst).toBe('Add them up and you have an economy; take one apart and you have a driver tree.');
   });
 
   it('makes the two controls two sentences whose words are the positions', () => {
@@ -351,7 +362,7 @@ describe('what the map promises', () => {
   });
 
   it('keeps the local terms', () => {
-    const all = JSON.stringify({ RETAIL, BANDS, LEVERS }).toLowerCase();
+    const all = JSON.stringify({ RETAIL, BANDS, LEVERS, JOINTS }).toLowerCase();
     for (const term of ['warung', 'makloon', 'horeca', 'general trade', 'hilirisasi']) expect(all, term).toContain(term);
   });
 
@@ -362,7 +373,6 @@ describe('what the map promises', () => {
         LEGEND, LEGEND_NOTE, SHIFTS, LEVERS, COMPACT, CHAIN_COPY, JOINT_LABELS,
       }),
     );
-    expect(JSON.stringify(MARGIN_KINDS)).toMatch(/PSAK 72/);
   });
 });
 
@@ -425,9 +435,8 @@ describe('the generated plates', () => {
     expect(compactSrc).not.toMatch(/<JointHit|<BandHit/);
   });
 
-  it('give the partial layers a shorter band than the whole-chain ones, and energy the whole chain', () => {
+  it('give the partial layer a shorter band than the whole-chain ones, and energy the whole chain', () => {
     const width = (id: string) => Number(wideSrc.match(new RegExp(`<BandHit id="${id}"[^>]*width=\\{(\\d+)\\}`))![1]);
-    expect(width('band-contract-capacity')).toBeLessThan(width('band-logistics'));
     expect(width('band-governance')).toBeLessThan(width('band-logistics'));
     expect(width('band-credit')).toBe(width('band-logistics'));
     expect(width('band-energy')).toBe(width('band-logistics'));
@@ -498,5 +507,117 @@ describe('the generated plates', () => {
     const flow = Number(css.match(/\.cp-flow\{[^}]*stroke-width:([\d.]+)/)![1]);
     const box = Number(css.match(/\.cp-stage rect\{[^}]*stroke-width:([\d.]+)/)![1]);
     expect(flow).toBeGreaterThan(box);
+  });
+});
+
+describe('identity: the slug table', () => {
+  const addressable = [
+    ...STAGES.map((x) => x.id),
+    ...NODES.map((x) => x.id),
+    ...RETAIL.map((x) => x.id),
+    RETAIL_GROUP.id,
+    ...BANDS.map((x) => x.id),
+    ...BORDERS.map((x) => x.id),
+    ...JOINT_IDS,
+    ...RETURNS.map((x) => x.id),
+    BYPRODUCT.id,
+  ];
+
+  it('gives every element on the map a slug, and never the same slug twice', () => {
+    for (const id of addressable) expect(SLUGS[id], id).toBeTruthy();
+    const slugs = Object.values(SLUGS);
+    expect(new Set(slugs).size, 'a repeated slug would make two elements share one address').toBe(slugs.length);
+    for (const slug of slugs) expect(slug, slug).toMatch(/^[a-z][a-z-]*[a-z]$/);
+  });
+
+  it('round-trips, and answers nothing for an address it does not know', () => {
+    for (const id of addressable) expect(idOfSlug(slugOf(id))).toBe(id);
+    expect(idOfSlug('not-a-thing')).toBeUndefined();
+  });
+
+  it('pins the addresses the brief names, so a link written today still resolves tomorrow', () => {
+    expect(slugOf('band-energy')).toBe('energy');
+    expect(slugOf('band-credit')).toBe('credit');
+    expect(slugOf('band-logistics')).toBe('logistics');
+    expect(slugOf('border-import')).toBe('border-import');
+    expect(slugOf('stage-recovery')).toBe('recovery');
+  });
+
+  it('never shows a number as identity: a slug is letters and hyphens only', () => {
+    expect(JSON.stringify(SLUGS)).not.toMatch(/\d/);
+  });
+});
+
+describe('the marks a shift puts on the map', () => {
+  it('marks a target only when it can answer at BOTH distances, so the distance control never renumbers anything', () => {
+    for (const s of SHIFTS) {
+      expect(markedTargets(s.id).length, s.id).toBe(s.targets.length);
+      for (const t of s.targets) expect(isMarked(t), `${s.id} ${t.id}`).toBe(true);
+    }
+    expect(isMarked({ id: 'x', read: { economy: 'said', finance: '' } })).toBe(false);
+    expect(isMarked({ id: 'x', read: { economy: '', finance: 'said' } })).toBe(false);
+  });
+
+  it('leaves the essay list empty until the owner fills it, and never invents one', () => {
+    for (const s of SHIFTS) {
+      for (const t of s.targets) {
+        for (const a of t.articles ?? []) {
+          expect(a.slug, `${s.id} ${t.id}`).toMatch(/^[a-z0-9-]+$/);
+          expect(a.title, `${s.id} ${t.id}`).toBeTruthy();
+        }
+      }
+    }
+  });
+});
+
+describe('what each shift moves', () => {
+  it('lights the elements reindustrialisation actually moves: the border cut, the trader, manufacturing and processing', () => {
+    const ids = SHIFT_BY_ID.reindustrialisation.targets.map((t) => t.id);
+    for (const id of ['border-export', 'border-import', 'node-trader', 'stage-manufacturing', 'stage-processing']) {
+      expect(ids, id).toContain(id);
+    }
+  });
+
+  it('lights the elements the green transition actually moves: energy, recovery, the post-consumer loops, credit AND logistics', () => {
+    const ids = SHIFT_BY_ID.green.targets.map((t) => t.id);
+    for (const id of [
+      'band-energy',
+      'stage-recovery',
+      'return-postconsumer-material',
+      'return-postconsumer-organic',
+      'band-credit',
+      'band-logistics',
+    ]) {
+      expect(ids, id).toContain(id);
+    }
+  });
+
+  it('reads the enabling layer as the bearer of a per-unit burden: a floor no single stage can remove', () => {
+    const logistics = shiftTarget('green', 'band-logistics')!;
+    expect(logistics.read.economy.toLowerCase()).toContain('floor');
+    expect(logistics.read.economy.toLowerCase()).toContain('touch');
+    // One physical fact, booked in two places — the gross/net split, again.
+    expect(logistics.read.finance.toLowerCase()).toContain('two places');
+    expect(BAND_BY_ID['band-logistics'].means.toLowerCase()).toContain('floor');
+  });
+
+  it('moves no element under both shifts: hilirisasi and the transition are read apart', () => {
+    const a = new Set(SHIFT_BY_ID.reindustrialisation.targets.map((t) => t.id));
+    for (const t of SHIFT_BY_ID.green.targets) expect(a.has(t.id), t.id).toBe(false);
+  });
+});
+
+describe('the finance distance reads a joint as the service performed there', () => {
+  it('names what is done at the joint before it names the margin that measures it', () => {
+    for (const j of JOINTS) {
+      expect(j.read.finance.note, j.id).toContain('What is done here');
+      expect(j.read.finance.chip, j.id).not.toBe(j.read.economy.chip);
+      // Short enough to sit on the chain without pushing its neighbours off it.
+      expect(j.read.finance.chip.length, j.id).toBeLessThanOrEqual(18);
+    }
+  });
+
+  it('reads each layer as a service too: capacity, the wait, power, terms, reliance', () => {
+    for (const b of BANDS) expect(b.read.finance.toLowerCase(), b.id).toMatch(/what is sold here|what this settles|what this provides/);
   });
 });

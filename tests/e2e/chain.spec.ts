@@ -15,7 +15,7 @@ const LAPTOP = { width: 1280, height: 800 };
 async function open(page: Page, path: string) {
   await mockSupabase(page);
   await page.goto(path);
-  await expect(page.getByRole('heading', { name: /Nothing here is complicated/ })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /Every joint in this chain is a margin/ })).toBeVisible();
 }
 
 const scrollWidth = (page: Page) => page.evaluate(() => document.documentElement.scrollWidth);
@@ -81,8 +81,8 @@ test('/about at 1280px draws one wide plate whose names are readable, with every
   await expect(panel.getByText(/^Conversion margin/)).toBeVisible();
   await expect(panel.getByRole('heading', { level: 3 })).toBeFocused();
 
-  await page.getByRole('button', { name: 'Contract capacity', exact: true }).click();
-  await expect(page.getByRole('region', { name: 'Contract capacity' })).toBeVisible();
+  await page.getByRole('button', { name: 'Logistics and warehousing', exact: true }).click();
+  await expect(page.getByRole('region', { name: 'Logistics and warehousing' })).toBeVisible();
   await expect(page.getByRole('region', { name: 'Processing → trader / importer' })).toHaveCount(0);
 });
 
@@ -91,22 +91,74 @@ test('/about at 1280px: the distance re-reads every chip, and a shift draws one 
   await open(page, '/about');
 
   await word(page, 'finance').click();
-  await expect(page.locator('.cp-joint-chip[data-for="j-processing-trader"] text')).toHaveText('Fixed cost · yield');
+  await expect(page.locator('.cp-joint-chip[data-for="j-processing-trader"] text')).toHaveText('Refines the input');
   await expect(page.locator('.chain-plate')).toHaveAttribute('data-lens', 'finance');
 
   await word(page, 'reindustrialisation').click();
   await expect(page.locator('.cp-shift--reindustrialisation')).toBeVisible();
   await expect(page.locator('.cp-shift--green')).toBeHidden();
-  await expect(page.locator('[data-shift-caption="reindustrialisation"]')).toContainText('does the domestic processing margin justify the capex');
+  await expect(page.locator('[data-shift-caption="reindustrialisation"]')).toContainText('Does the domestic processing margin justify capex');
   await expect(page.locator('.cp-shift--reindustrialisation .cp-lit')).toHaveCount(8);
 
   await word(page, 'green transition').click();
   await expect(page.locator('.cp-shift--reindustrialisation')).toBeHidden();
   await expect(page.locator('.cp-shift--green')).toBeVisible();
-  await expect(page.locator('[data-shift-caption="green"]')).toContainText('cost-of-capital question');
+  await expect(page.locator('[data-shift-caption="green"]')).toContainText('Test project cash flows together with financing terms');
 
   await word(page, 'economy').click();
-  await expect(page.locator('[data-shift-caption="green"]')).toContainText('fiscal and external-balance story');
+  await expect(page.locator('[data-shift-caption="green"]')).toContainText('Follow a transition scenario through energy, credit and recovery');
+});
+
+test('/about at 1280px: the marks are an index onto the overlay, and nothing floats over the plate', async ({ page }) => {
+  await page.setViewportSize(LAPTOP);
+  await open(page, '/about');
+
+  // At rest there is no index, and nothing to tab into.
+  await expect(page.locator('.cp-mark:visible')).toHaveCount(0);
+
+  await word(page, 'green transition').click();
+  await expect(page.locator('.cp-marks--green .cp-mark')).toHaveCount(7);
+  await expect(page.locator('.cp-marks--reindustrialisation .cp-mark:visible')).toHaveCount(0);
+  await expect(page.locator('.cp-mark:visible')).toHaveCount(7);
+
+  // Reading order, left to right and then top to bottom, layers last.
+  const order = await page.locator('.cp-marks--green .cp-mark').evaluateAll((marks) =>
+    marks.map((m) => ({ n: Number(m.textContent), x: (m.querySelector('circle') as SVGCircleElement).cx.baseVal.value })),
+  );
+  expect(order.map((m) => m.n)).toEqual([1, 2, 3, 4, 5, 6, 7]);
+
+  // Pointing reads under the plate. Nothing is raised over the drawing, so the
+  // element beside the one being pointed at stays readable.
+  const mark = page.getByRole('button', { name: /^5\. Green transition · Logistics and warehousing$/ });
+  await mark.hover();
+  await expect(page.locator('[data-chain-readout]')).toContainText('Logistics and warehousing · Service fee');
+  // Measured together, in the page's own coordinates, so a scroll between the
+  // two reads cannot make a line that sits under the plate look as if it were on it.
+  const gap = await page.evaluate(() => {
+    const plate = document.querySelector('svg.cp-svg--wide')!.getBoundingClientRect();
+    const line = document.querySelector('[data-chain-readout]')!.getBoundingClientRect();
+    return line.top - plate.bottom;
+  });
+  expect(gap, 'the readout sits under the plate, never on it').toBeGreaterThanOrEqual(0);
+  await expect(page.locator('[role="tooltip"]')).toHaveCount(0);
+
+  // The mark opens the same panel the ring does.
+  await mark.click();
+  await expect(page.getByRole('region', { name: 'Logistics and warehousing' })).toBeVisible();
+});
+
+test('/about?lens=green&distance=finance&node=energy opens the overlay and the panel on the first paint', async ({ page }) => {
+  await page.setViewportSize(LAPTOP);
+  await open(page, '/about?lens=green&distance=finance&node=energy');
+
+  await expect(page.locator('.chain-plate')).toHaveAttribute('data-shift', 'green');
+  await expect(page.locator('.chain-plate')).toHaveAttribute('data-lens', 'finance');
+  await expect(page.getByRole('region', { name: 'Energy' })).toBeVisible();
+  await expect(page.locator('.cp-shift--green')).toBeVisible();
+
+  // Moving a control keeps the address in step, so what is shared is what is seen.
+  await word(page, 'economy').click();
+  expect(new URL(page.url()).search).toBe('?lens=green&node=energy');
 });
 
 test('/ at 1280px opens short, expands in place, and keeps the hero above it', async ({ page }) => {
@@ -118,7 +170,7 @@ test('/ at 1280px opens short, expands in place, and keeps the hero above it', a
   await expect(page.locator('svg.cp-svg--wide')).toHaveCount(0);
 
   const hero = await page.getByRole('heading', { name: /insanely, damn good at numbers/ }).boundingBox();
-  const chain = await page.getByRole('heading', { name: /Nothing here is complicated/ }).boundingBox();
+  const chain = await page.getByRole('heading', { name: /Every joint in this chain is a margin/ }).boundingBox();
   expect(hero!.y).toBeLessThan(chain!.y);
 
   const button = page.getByRole('button', { name: 'See the full chain' });

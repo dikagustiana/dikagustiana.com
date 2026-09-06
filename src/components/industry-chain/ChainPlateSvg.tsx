@@ -11,12 +11,13 @@
  */
 import { BandHit } from './BandHit';
 import { JointHit } from './JointHit';
+import { ShiftMark } from './ShiftMark';
 
 export function ChainPlateWide() {
   return (
-  <svg className="cp-svg cp-svg--wide" viewBox="0 0 1717 841" role="group" aria-labelledby="cp-wide-title" aria-describedby="cp-wide-desc" focusable="false">
+  <svg className="cp-svg cp-svg--wide" viewBox="0 0 1717 811" role="group" aria-labelledby="cp-wide-title" aria-describedby="cp-wide-desc" focusable="false">
     <title id="cp-wide-title">The industry chain, in full</title>
-    <desc id="cp-wide-desc">Left to right: two origins, primary processing, packaging and finished-goods manufacturing, then distribution, wholesale and retail into consumption and recovery. Intermediary nodes are dashed pills between the stages. Every joint is a diamond on the flow with a chip that reads it at the chosen distance — as an economy or as finance — and opens the margin cut there. Six enabling layers run beneath the chain, money and information run both ways under it, and two dashed border lines mark where goods are exported and imported. A shift, when one is chosen, rings the joints and layers it moves.</desc>
+    <desc id="cp-wide-desc">Left to right: two origins, primary processing, packaging and finished-goods manufacturing, then distribution, wholesale and retail into consumption and recovery. Intermediary nodes are dashed pills between the stages. Every joint is a diamond on the flow with a chip that reads it at the chosen distance — as an economy or as finance — and opens the margin cut there. Five enabling layers run beneath the chain, money and information run both ways under it, and two dashed border lines mark where goods are exported and imported. A shift, when one is chosen, rings the joints and layers it moves and numbers them in reading order, left to right and then top to bottom.</desc>
     <defs>
       <marker id="cp-tip--wide" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M 0 1 L 7 4 L 0 7 z" className="cp-mk" /></marker>
       <marker id="cp-tip-soft--wide" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M 0 1 L 7 4 L 0 7 z" className="cp-mk-soft" /></marker>
@@ -167,6 +168,7 @@ export function ChainPlateWide() {
     </g>
       <g className="cp-shift cp-shift--green" data-id="green">
       <g className="cp-lit" data-for="band-energy"><rect className="cp-lit-rect" x="173" y="708" width="1417" height="32" rx="3" /></g>
+      <g className="cp-lit" data-for="band-logistics"><rect className="cp-lit-rect" x="173" y="648" width="1417" height="32" rx="3" /></g>
       <g className="cp-lit" data-for="band-credit"><rect className="cp-lit-rect" x="173" y="678" width="1417" height="32" rx="3" /></g>
       <g className="cp-lit" data-for="j-consumption-recovery"><circle className="cp-lit-ring" cx="1536" cy="412" r="17" /></g>
       <g className="cp-lit" data-for="stage-recovery"><rect className="cp-lit-rect" x="1419" y="424" width="173" height="54" rx="4" /></g>
@@ -187,13 +189,33 @@ export function ChainPlateWide() {
       <JointHit id="j-distributor-wholesaler" cx={1054} cy={306} chipX={1068} chipY={297} chipAt="right" />
       <JointHit id="j-wholesale-retail" cx={1231} cy={372} chipX={1231} chipY={495} chipAt="rowA" />
       <JointHit id="j-retail-consumption" cx={1411} cy={275} chipX={1411} chipY={495} chipAt="rowA" />
-      <JointHit id="j-consumption-recovery" cx={1536} cy={412} chipX={1550} chipY={403} chipAt="right" />
+      <JointHit id="j-consumption-recovery" cx={1536} cy={412} chipX={1522} chipY={403} chipAt="left" />
       <BandHit id="band-logistics" x={176} y={651} width={1411} height={26} noteX={449} />
       <BandHit id="band-credit" x={176} y={681} width={1411} height={26} noteX={458} />
       <BandHit id="band-energy" x={176} y={711} width={1411} height={26} noteX={284} />
-      <BandHit id="band-contract-capacity" x={483} y={741} width={537} height={26} noteX={null} />
-      <BandHit id="band-governance" x={844} y={771} width={554} height={26} noteX={null} />
-      <BandHit id="band-regulation" x={176} y={801} width={1411} height={26} noteX={null} />
+      <BandHit id="band-governance" x={844} y={741} width={554} height={26} noteX={null} />
+      <BandHit id="band-regulation" x={176} y={771} width={1411} height={26} noteX={null} />
+    </g>
+    <g className="cp-mark-layer">
+      <g className="cp-marks cp-marks--reindustrialisation">
+      <ShiftMark shift="reindustrialisation" id="border-export" cx={366} cy={318} />
+      <ShiftMark shift="reindustrialisation" id="j-extraction-processing" cx={410} cy={284} />
+      <ShiftMark shift="reindustrialisation" id="stage-processing" cx={472} cy={235} />
+      <ShiftMark shift="reindustrialisation" id="j-processing-trader" cx={614} cy={261} />
+      <ShiftMark shift="reindustrialisation" id="node-trader" cx={630} cy={221} />
+      <ShiftMark shift="reindustrialisation" id="j-trader-manufacturing" cx={817} cy={261} />
+      <ShiftMark shift="reindustrialisation" id="border-import" cx={831} cy={104} />
+      <ShiftMark shift="reindustrialisation" id="stage-manufacturing" cx={833} cy={235} />
+    </g>
+      <g className="cp-marks cp-marks--green">
+      <ShiftMark shift="green" id="return-postconsumer-material" cx={536} cy={55} />
+      <ShiftMark shift="green" id="return-postconsumer-organic" cx={945} cy={33} />
+      <ShiftMark shift="green" id="stage-recovery" cx={1413} cy={418} />
+      <ShiftMark shift="green" id="j-consumption-recovery" cx={1550} cy={398} />
+      <ShiftMark shift="green" id="band-logistics" cx={161} cy={664} />
+      <ShiftMark shift="green" id="band-credit" cx={161} cy={694} />
+      <ShiftMark shift="green" id="band-energy" cx={161} cy={724} />
+    </g>
     </g>
   </svg>
   );
