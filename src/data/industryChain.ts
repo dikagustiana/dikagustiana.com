@@ -339,7 +339,7 @@ export const JOINTS: Joint[] = [
     ],
     read: {
       economy: {
-        chip: 'Basic industry',
+        chip: 'Processing value-add',
         note: "Basic industry's value added — the capital-intensive middle of the chain, where energy intensity peaks and the by-product leaves for another sector's account.",
       },
       finance: {
@@ -381,7 +381,7 @@ export const JOINTS: Joint[] = [
     lines: ['Gross profit — packaging', "Component cost, inside the finished good's bill of materials"],
     read: {
       economy: {
-        chip: 'Intermediate input',
+        chip: 'Packaging value-add',
         note: "Intermediate consumption between two branches of manufacturing: packaging's output is manufacturing's input, counted gross in each branch's output and only once in value added.",
       },
       finance: {
@@ -526,8 +526,8 @@ export interface Band {
   spanLabel: string;
   /** The margin kind of a layer that earns a fee. Absent where the layer earns nothing itself. */
   margin?: MarginKind;
-  /** The word on the marker for a layer with no margin of its own. */
-  chip?: string;
+  /** The paid work named on a fee-bearing layer. Terms and rules earn no chip. */
+  serviceChip?: string;
   means: string;
   lines: string[];
   /** The layer read from far and from close. */
@@ -538,10 +538,11 @@ export const BANDS: Band[] = [
   {
     id: 'band-logistics',
     label: 'Logistics and warehousing',
-    note: 'ambient · cold chain',
+    note: 'ambient movement and storage',
     span: ['stage-biological', 'stage-recovery'],
     spanLabel: 'The whole chain',
     margin: 'service-fee',
+    serviceChip: 'Move · hold',
     means:
       'Moves and holds the goods without ever owning them, so the next function gets them in the right place, at the right time and at the right temperature. It attaches at every move and injects a cost, an energy use and an emission into each one — a floor under the unit that no single stage can remove — and it weighs most where the drops are smallest and the cold chain is unbroken.',
     lines: [
@@ -557,12 +558,34 @@ export const BANDS: Band[] = [
     },
   },
   {
+    id: 'band-cold-chain',
+    label: 'Cold-chain logistics',
+    note: 'temperature-controlled · route-specific',
+    span: ['stage-biological', 'stage-consumption'],
+    spanLabel: 'Production → consumption, where temperature control is required',
+    margin: 'service-fee',
+    serviceChip: 'Move · cool',
+    means:
+      'Moves and holds temperature-sensitive goods without taking title. It is a separate constraint because each transfer must preserve temperature, which limits feasible routes and stock-holding nodes.',
+    lines: [
+      'Temperature-controlled freight and storage revenue — at the provider',
+      'Refrigeration, monitoring and spoilage — at the user, inside cost to serve or cost of sales',
+    ],
+    read: {
+      economy:
+        'Temperature-controlled capacity limits which routes can carry perishable goods and adds energy use at every required hand-off.',
+      finance:
+        'What is sold here is temperature held within specification while goods move and wait. Route density, dwell time, energy and spoilage drive its cost per unit.',
+    },
+  },
+  {
     id: 'band-credit',
     label: 'Credit and working capital',
     note: 'trade credit · inventory finance · who waits for payment',
     span: ['stage-biological', 'stage-recovery'],
     spanLabel: 'The whole chain',
     margin: 'service-fee',
+    serviceChip: 'Fund the wait',
     means:
       'Finances the gap between paying for the goods and being paid for them. A lender earns the fee for the line; when the chain finances itself, the credit is a position on the balance sheet, not a payment. It decides who can afford to be a node, and it is the channel through which monetary policy reaches the chain.',
     lines: [
@@ -585,6 +608,7 @@ export const BANDS: Band[] = [
     span: ['stage-biological', 'stage-recovery'],
     spanLabel: 'The whole chain',
     margin: 'service-fee',
+    serviceChip: 'Fuel · power',
     means:
       'Fuel and power enter each function as purchased inputs or through self-supply. This layer describes their cross-cutting role; it does not imply that energy cannot be owned or that its sale is a net commission. Market prices, tariffs and subsidies affect the cost.',
     lines: [
@@ -604,7 +628,6 @@ export const BANDS: Band[] = [
     note: 'territory · exclusivity · trade terms · how an appointment ends',
     span: ['stage-manufacturing', RETAIL_GROUP.id],
     spanLabel: 'Manufacturing → retail',
-    chip: 'Terms',
     means: 'The contract that sets the spreads either side of it: who may sell where, on what terms, and what happens when the appointment ends. It earns nothing itself; it decides who earns.',
     lines: [
       "Rebates, trade promotion and listing fees — consideration payable to a customer, netted from the principal's revenue",
@@ -622,7 +645,6 @@ export const BANDS: Band[] = [
     label: 'Regulation and standards',
     span: ['stage-biological', 'stage-recovery'],
     spanLabel: 'The whole chain',
-    chip: 'Rules',
     means: 'Sets what may be sold, moved and claimed. It takes no title and earns no fee; its cost lands in every function it touches.',
     lines: [
       'Compliance cost — certification, testing and licensing, inside operating expense',
@@ -638,8 +660,8 @@ export const BANDS: Band[] = [
 
 export const BAND_BY_ID = Object.fromEntries(BANDS.map((b) => [b.id, b])) as Record<string, Band>;
 
-/** The word on a layer's marker: its margin kind where it earns a fee, its own word where it only sets the terms. */
-export const bandChip = (band: Band): string => (band.margin ? MARGIN_KINDS[band.margin].chip : band.chip ?? '');
+/** The work bought from a fee-bearing layer. Non-fee layers deliberately carry no margin chip. */
+export const bandChip = (band: Band): string => band.serviceChip ?? '';
 
 /** The column a joint end belongs to: a retail format reads as the retail column. */
 const columnOf = (id: string) => (RETAIL.some((r) => r.id === id) ? RETAIL_GROUP.id : id);
@@ -837,9 +859,41 @@ export interface ShiftArticle {
  * The set of marks is the same at both distances by construction, so moving
  * the distance control re-reads the marks instead of renumbering them.
  */
+export type ConditionStatus = 'bottleneck' | 'moving' | 'unpriced';
+
+export const CONDITION_STATUSES: Record<
+  ConditionStatus,
+  { label: string; form: 'square' | 'circle' | 'diamond'; note: string }
+> = {
+  bottleneck: {
+    label: 'Bottleneck',
+    form: 'square',
+    note: 'This element is holding the shift back.',
+  },
+  moving: {
+    label: 'Moving',
+    form: 'circle',
+    note: 'Policy or investment is already moving this element.',
+  },
+  unpriced: {
+    label: 'Unpriced',
+    form: 'diamond',
+    note: 'The economic joint is missing or does not yet carry a price.',
+  },
+};
+
+/** Four owner-written slots that turn an anatomical target into a condition reading. */
+export interface TargetCondition {
+  status: ConditionStatus;
+  current: LensNote;
+  missing: LensNote;
+  lever: LeverId[];
+  financedBy: LensNote;
+}
+
 export interface ShiftTarget {
   id: string;
-  read: LensNote;
+  condition: TargetCondition;
   /** Owner-maintained. Empty until an essay actually reads this target. */
   articles?: readonly ShiftArticle[];
 }
@@ -865,80 +919,123 @@ export interface Shift {
   /** The word in the sentence that is the control. */
   word: string;
   levers: LeverId[];
-  /** The shift as a whole, read from far and from close — the caption. */
-  read: LensNote;
   targets: ShiftTarget[];
   moves: ShiftMove[];
   callouts: ShiftCallout[];
 }
 
 export const SHIFTS: Shift[] = [
+  // Statuses below are provisional editorial scaffolding inferred from the
+  // supplied brief. The owner should confirm them together with the empty
+  // `missing` and `financedBy` slots before publication.
   {
     id: 'reindustrialisation',
     label: 'Reindustrialisation',
     word: 'reindustrialisation',
     levers: ['move-border'],
-    read: {
-      economy:
-        'Follow a downstreaming scenario: more processing takes place before export, bringing domestic value added into view. Imported equipment and inputs can offset foreign-exchange gains, especially while plants are built. The result depends on domestic capability, energy use and demand for the processed product.',
-      finance:
-        'Does the domestic processing margin justify capex and the working capital required? Test utilisation, input costs, selling prices and cost of capital together. Fixed assets need long-term funding; inventories and receivables still need working-capital finance.',
-    },
     targets: [
       {
         id: 'border-export',
-        read: {
-          economy: 'The cut moves right: what crosses here is processed, not raw.',
-          finance: 'The export price becomes a processed price: a conversion margin is captured before the border.',
+        condition: {
+          status: 'moving',
+          current: {
+            economy: 'The cut moves right: what crosses here is processed, not raw.',
+            finance: 'The export price becomes a processed price: a conversion margin is captured before the border.',
+          },
+          missing: { economy: '', finance: '' },
+          lever: ['move-border'],
+          financedBy: { economy: '', finance: '' },
         },
       },
       {
         id: 'j-extraction-processing',
-        read: {
-          economy: 'More material is processed domestically before export; tax and royalty effects depend on the policy and pricing arrangements.',
-          finance: 'A domestic buyer changes pricing, offtake risk and payment terms; a domestic sale is not necessarily an intra-group transfer.',
+        condition: {
+          status: 'moving',
+          current: {
+            economy: 'More material is processed domestically before export; tax and royalty effects depend on the policy and pricing arrangements.',
+            finance: 'A domestic buyer changes pricing, offtake risk and payment terms; a domestic sale is not necessarily an intra-group transfer.',
+          },
+          missing: { economy: '', finance: '' },
+          lever: ['move-border'],
+          financedBy: { economy: '', finance: '' },
         },
       },
       {
         id: 'stage-processing',
-        read: {
-          economy: "The capacity built here is the reindustrialisation: basic industry's share of value added.",
-          finance: 'Capex, cost of capital, utilisation — the three things the conversion margin has to cover.',
+        condition: {
+          status: 'bottleneck',
+          current: {
+            economy: "The capacity built here is the reindustrialisation: basic industry's share of value added.",
+            finance: 'Capex, cost of capital, utilisation — the three things the conversion margin has to cover.',
+          },
+          missing: { economy: '', finance: '' },
+          lever: ['move-border'],
+          financedBy: { economy: '', finance: '' },
         },
       },
       {
         id: 'j-processing-trader',
-        read: {
-          economy: 'Processed goods leave here now: the external balance is read one joint further right.',
-          finance: "Processing's conversion margin is the return on the smelter; the by-product finds a market or becomes a cost.",
+        condition: {
+          status: 'moving',
+          current: {
+            economy: 'Processed goods leave here now: the external balance is read one joint further right.',
+            finance: "Processing's conversion margin is the return on the smelter; the by-product finds a market or becomes a cost.",
+          },
+          missing: { economy: '', finance: '' },
+          lever: ['move-border'],
+          financedBy: { economy: '', finance: '' },
         },
       },
       {
         id: 'border-import',
-        read: {
-          economy: 'The import share of intermediates falls; capital goods imports rise while the plants are built.',
-          finance: 'Less landed cost and less exchange-rate exposure in cost of sales — after a capex that is itself mostly imported.',
+        condition: {
+          status: 'moving',
+          current: {
+            economy: 'The import share of intermediates falls; capital goods imports rise while the plants are built.',
+            finance: 'Less landed cost and less exchange-rate exposure in cost of sales — after a capex that is itself mostly imported.',
+          },
+          missing: { economy: '', finance: '' },
+          lever: ['move-border'],
+          financedBy: { economy: '', finance: '' },
         },
       },
       {
         id: 'node-trader',
-        read: {
-          economy: 'Import intermediation can shrink where competitive domestic inputs replace landed inputs; trading functions can also adapt.',
-          finance: 'The spread on landed inputs is the margin domestic processing has to beat.',
+        condition: {
+          status: 'moving',
+          current: {
+            economy: 'Import intermediation can shrink where competitive domestic inputs replace landed inputs; trading functions can also adapt.',
+            finance: 'The spread on landed inputs is the margin domestic processing has to beat.',
+          },
+          missing: { economy: '', finance: '' },
+          lever: ['move-border'],
+          financedBy: { economy: '', finance: '' },
         },
       },
       {
         id: 'j-trader-manufacturing',
-        read: {
-          economy: 'Domestic intermediates replace imported ones behind manufacturing.',
-          finance: 'Input cost moves from landed cost to domestic conversion cost; import finance gives way to supplier credit.',
+        condition: {
+          status: 'moving',
+          current: {
+            economy: 'Domestic intermediates replace imported ones behind manufacturing.',
+            finance: 'Input cost moves from landed cost to domestic conversion cost; import finance gives way to supplier credit.',
+          },
+          missing: { economy: '', finance: '' },
+          lever: ['move-border'],
+          financedBy: { economy: '', finance: '' },
         },
       },
       {
         id: 'stage-manufacturing',
-        read: {
-          economy: 'Domestic inputs can reduce import content; imported equipment, energy and components still matter.',
-          finance: 'Compare a domestic input with landed alternatives. Domestic prices can remain linked to foreign exchange and international commodity prices.',
+        condition: {
+          status: 'bottleneck',
+          current: {
+            economy: 'Domestic inputs can reduce import content; imported equipment, energy and components still matter.',
+            finance: 'Compare a domestic input with landed alternatives. Domestic prices can remain linked to foreign exchange and international commodity prices.',
+          },
+          missing: { economy: '', finance: '' },
+          lever: ['move-border'],
+          financedBy: { economy: '', finance: '' },
         },
       },
     ],
@@ -950,66 +1047,120 @@ export const SHIFTS: Shift[] = [
     label: 'Green transition',
     word: 'green transition',
     levers: ['price-unpaid-joint', 'reprice-layer'],
-    read: {
-      economy:
-        'Follow a transition scenario through energy, credit and recovery. Energy-subsidy reform and carbon pricing can change production costs and fiscal balances. Producer responsibility can fund collection and recovery. Fossil-export receipts, imported clean equipment and avoided fuel imports pull the external balance in different directions.',
-      finance:
-        'Test project cash flows together with financing terms. Performance, utilisation, energy use and offtake determine operating economics; guarantees or concessional capital can change risk allocation and funding cost. Producer responsibility can support a recovery revenue line where collection costs were previously unfunded.',
-    },
     targets: [
       {
         id: 'band-energy',
-        read: {
-          economy: 'Subsidy reform and carbon pricing can alter energy prices, fiscal costs and price transmission across the chain.',
-          finance: 'Energy price and energy use per unit both matter; efficiency can offset a price increase, with the remainder absorbed or passed on.',
+        condition: {
+          status: 'moving',
+          current: {
+            economy: 'Subsidy reform and carbon pricing can alter energy prices, fiscal costs and price transmission across the chain.',
+            finance: 'Energy price and energy use per unit both matter; efficiency can offset a price increase, with the remainder absorbed or passed on.',
+          },
+          missing: { economy: '', finance: '' },
+          lever: ['reprice-layer'],
+          financedBy: { economy: '', finance: '' },
         },
       },
       {
         id: 'band-logistics',
-        read: {
-          economy:
-            'Cleaner power and tighter plants do not reach here. The layer injects its own fuel and emissions at every touch, so it sets a floor under the unit that no stage can remove on its own; where the geography is an archipelago and the trade is tiered, the touches per unit are many and that floor is high.',
-          finance:
-            "One physical fact, booked in two places: the fleet's fuel is the provider's own direct emission and the brand owner's indirect, purchased one — the same split the gross-and-net line makes at a node. Lowering it means fewer touches, denser drops or a different fleet, and each of those is a capital decision with its own payback.",
+        condition: {
+          status: 'bottleneck',
+          current: {
+            economy:
+              'Cleaner power and tighter plants do not reach here. The layer injects its own fuel and emissions at every touch, so it sets a floor under the unit that no stage can remove on its own; where the geography is an archipelago and the trade is tiered, the touches per unit are many and that floor is high.',
+            finance:
+              "One physical fact, booked in two places: the fleet's fuel is the provider's own direct emission and the brand owner's indirect, purchased one — the same split the gross-and-net line makes at a node. Lowering it means fewer touches, denser drops or a different fleet, and each of those is a capital decision with its own payback.",
+          },
+          missing: { economy: '', finance: '' },
+          lever: ['reprice-layer'],
+          financedBy: { economy: '', finance: '' },
+        },
+      },
+      {
+        id: 'band-cold-chain',
+        // Target reserved deliberately: no number until the owner supplies both readings.
+        condition: {
+          status: 'bottleneck',
+          current: { economy: '', finance: '' },
+          missing: { economy: '', finance: '' },
+          lever: ['reprice-layer'],
+          financedBy: { economy: '', finance: '' },
         },
       },
       {
         id: 'band-credit',
-        read: {
-          economy: 'Where the transition is financed: concessional and blended capital, guarantees — the cost of capital for green assets is pushed down here.',
-          finance: 'Performance and offtake risk affect funding terms; guarantees and concessional capital can help a viable project reach financial close.',
+        condition: {
+          status: 'bottleneck',
+          current: {
+            economy: 'Where the transition is financed: concessional and blended capital, guarantees — the cost of capital for green assets is pushed down here.',
+            finance: 'Performance and offtake risk affect funding terms; guarantees and concessional capital can help a viable project reach financial close.',
+          },
+          missing: { economy: '', finance: '' },
+          lever: ['reprice-layer'],
+          financedBy: { economy: '', finance: '' },
         },
       },
       {
         id: 'j-consumption-recovery',
-        read: {
-          economy: 'Producer responsibility or a deposit can fund collection; carbon pricing charges emissions where policy places the obligation, not necessarily at disposal.',
-          finance: 'Collection and gate fee become revenue at recovery; the producer books the levy as a cost of the unit it sold.',
+        condition: {
+          status: 'unpriced',
+          current: {
+            economy: 'Producer responsibility or a deposit can fund collection; carbon pricing charges emissions where policy places the obligation, not necessarily at disposal.',
+            finance: 'Collection and gate fee become revenue at recovery; the producer books the levy as a cost of the unit it sold.',
+          },
+          missing: { economy: '', finance: '' },
+          lever: ['price-unpaid-joint'],
+          financedBy: { economy: '', finance: '' },
         },
       },
       {
         id: 'stage-recovery',
-        read: {
-          economy: 'More recovery can become viable and measurable; existing informal production is already within the national-accounts boundary.',
-          finance: 'Recovered-material revenue against a virgin-input price.',
+        condition: {
+          status: 'moving',
+          current: {
+            economy: 'More recovery can become viable and measurable; existing informal production is already within the national-accounts boundary.',
+            finance: 'Recovered-material revenue against a virgin-input price.',
+          },
+          missing: { economy: '', finance: '' },
+          lever: ['price-unpaid-joint'],
+          financedBy: { economy: '', finance: '' },
         },
       },
       {
         id: 'return-postconsumer-material',
-        read: {
-          economy: 'The loop is formalised: recyclate re-enters as an industrial input, and is counted.',
-          finance: 'A secondary input priced against virgin material; the collection cost is what it competes on.',
+        condition: {
+          status: 'unpriced',
+          current: {
+            economy: 'The loop is formalised: recyclate re-enters as an industrial input, and is counted.',
+            finance: 'A secondary input priced against virgin material; the collection cost is what it competes on.',
+          },
+          missing: { economy: '', finance: '' },
+          lever: ['price-unpaid-joint'],
+          financedBy: { economy: '', finance: '' },
         },
       },
       {
         id: 'return-postconsumer-organic',
-        read: {
-          economy: 'Compost re-enters as a farm input; the organic loop closes inside the count.',
-          finance: 'A farm input priced against fertiliser.',
+        condition: {
+          status: 'unpriced',
+          current: {
+            economy: 'Compost re-enters as a farm input; the organic loop closes inside the count.',
+            finance: 'A farm input priced against fertiliser.',
+          },
+          missing: { economy: '', finance: '' },
+          lever: ['price-unpaid-joint'],
+          financedBy: { economy: '', finance: '' },
         },
       },
     ],
-    moves: [],
+    moves: [
+      {
+        id: 'move-recovery-price',
+        from: 'j-retail-consumption',
+        to: 'j-consumption-recovery',
+        label: 'Price reaches recovery',
+      },
+    ],
     callouts: [{ id: 'callout-new-price', at: 'j-consumption-recovery', label: 'Who pays for recovery?' }],
   },
 ];
@@ -1023,7 +1174,7 @@ export const SHIFT_BY_ID = Object.fromEntries(SHIFTS.map((s) => [s.id, s])) as R
  * control decides only what the mark then says.
  */
 export const isMarked = (target: ShiftTarget): boolean =>
-  target.read.economy.trim() !== '' && target.read.finance.trim() !== '';
+  target.condition.current.economy.trim() !== '' && target.condition.current.finance.trim() !== '';
 
 /** The marked targets of a shift, in the order this file happens to list them — NOT reading order. */
 export const markedTargets = (shift: ShiftId): ShiftTarget[] => SHIFT_BY_ID[shift].targets.filter(isMarked);
@@ -1071,6 +1222,7 @@ export const SLUGS: Record<string, string> = {
   'node-retail-horeca': 'retail-horeca',
   // Enabling layers
   'band-logistics': 'logistics',
+  'band-cold-chain': 'cold-chain',
   'band-credit': 'credit',
   'band-energy': 'energy',
   'band-governance': 'governance',
@@ -1191,9 +1343,10 @@ export const COMPACT = {
 /* ── Copy ────────────────────────────────────────────────────────────────── */
 
 export const CHAIN_COPY = {
-  headline: 'Every joint in this chain is a margin.',
+  headline: 'One chain, read at two distances.',
   /** The thesis, between the headline and the two controls. */
-  standfirst: 'Add them up and you have an economy; take one apart and you have a driver tree.',
+  standfirst:
+    'Step back: value added accumulates across an economy. Step closer: each hand-off exposes the process, spread or service charge shaping one unit.',
   /** The distance control is this sentence: the two lens names in it are the two positions. */
   lead: {
     before: 'Read the chain as an ',
@@ -1229,7 +1382,7 @@ export const CHAIN_COPY = {
   aria: {
     wide: {
       title: 'The industry chain, in full',
-      desc: 'Left to right: two origins, primary processing, packaging and finished-goods manufacturing, then distribution, wholesale and retail into consumption and recovery. Intermediary nodes are dashed pills between the stages. Every joint is a diamond on the flow with a chip that reads it at the chosen distance — as an economy or as finance — and opens the margin cut there. Five enabling layers run beneath the chain, money and information run both ways under it, and two dashed border lines mark where goods are exported and imported. A shift, when one is chosen, rings the joints and layers it moves and numbers them in reading order, left to right and then top to bottom.',
+      desc: 'Left to right: two origins, primary processing, packaging and finished-goods manufacturing, then distribution, wholesale and retail into consumption and recovery. Intermediary nodes are dashed pills between the stages. Every joint is a diamond on the flow with a chip that reads it at the chosen distance — as an economy or as finance — and opens the margin cut there. Six enabling layers run beneath the chain, money and information run both ways under it, and two dashed border lines mark where goods are exported and imported. A condition layer, when chosen, marks what moves in reading order and adds direction without redrawing the chain.',
     },
     compact: {
       title: 'The industry chain, in short',
@@ -1238,6 +1391,13 @@ export const CHAIN_COPY = {
     column: 'The industry chain, top to bottom',
   },
   panel: {
+    conditionKicker: "Condition layer · author's reading",
+    statusHeading: 'Status now',
+    currentHeading: 'Where we are now',
+    missingHeading: 'What is still missing',
+    financedHeading: 'Who finances it',
+    ownerPending: 'Owner analysis pending.',
+    baseHeading: 'Base-chain mechanism',
     jointKicker: 'At this joint',
     bandKicker: 'Enabling layer',
     marginHeading: 'The margin that sits here',
@@ -1256,7 +1416,7 @@ export const CHAIN_COPY = {
     published: 'Published',
     comingSoon: 'Coming soon',
     close: 'Close',
-    hint: 'Select a joint to read the margin cut there, and the line of the accounts that carries it.',
+    hint: 'Select a joint or layer to inspect its process, drivers and price boundary.',
   },
   shift: {
     leverKicker: 'Lever',
@@ -1268,7 +1428,7 @@ export const CHAIN_COPY = {
     /** The lane label beside the marks, in the reading lane. */
     lane: 'Marked',
     /** The readout line when nothing is under the pointer and a shift is on. */
-    rest: 'Point at a numbered mark to read it here; select it to open what moves there.',
+    rest: 'Point at a numbered condition mark to read its title, status and article count; select it to open the author’s reading.',
     /** Between a mark's number and its title, for a screen reader. */
     aria: 'Mark',
     /** Follows the title in the readout: "· one essay" / "· three essays". */

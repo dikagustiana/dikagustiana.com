@@ -30,6 +30,7 @@ export const MARK_ORDER: Record<ShiftId, readonly string[]> = {
     'stage-recovery',
     'j-consumption-recovery',
     'band-logistics',
+    'band-cold-chain',
     'band-credit',
     'band-energy'
   ]

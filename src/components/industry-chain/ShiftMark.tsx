@@ -20,7 +20,7 @@
  */
 
 import { useContext, type KeyboardEvent, type MouseEvent } from 'react';
-import { SHIFT_BY_ID, type ShiftId } from '@/data/industryChain';
+import { CONDITION_STATUSES, SHIFT_BY_ID, shiftTarget, type ShiftId } from '@/data/industryChain';
 import { ChainLensContext } from './chainLensContext';
 import { markNumber, targetLabel } from './chainTargets';
 
@@ -33,6 +33,9 @@ export function ShiftMark({ shift, id, cx, cy }: { shift: ShiftId; id: string; c
   // the numbers close up because they are positions, not names.
   if (n === 0) return null;
 
+  const target = shiftTarget(shift, id)!;
+  const status = target.condition.status;
+  const statusLabel = CONDITION_STATUSES[status].label;
   const open = selected === id;
   const label = `${SHIFT_BY_ID[shift].label} · ${targetLabel(id)}`;
   const select = (event: MouseEvent<SVGGElement> | KeyboardEvent<SVGGElement>) => onSelect(id, event.currentTarget);
@@ -42,10 +45,11 @@ export function ShiftMark({ shift, id, cx, cy }: { shift: ShiftId; id: string; c
       className="cp-mark"
       data-mark={id}
       data-n={n}
+      data-status={status}
       style={{ ['--cp-n' as string]: n - 1 }}
       role="button"
       tabIndex={0}
-      aria-label={`${n}. ${label}`}
+      aria-label={`${n}. ${label} · ${statusLabel}`}
       aria-expanded={open}
       aria-controls={open ? panelId : undefined}
       onClick={select}
@@ -60,7 +64,10 @@ export function ShiftMark({ shift, id, cx, cy }: { shift: ShiftId; id: string; c
       onFocus={() => onHover(id)}
       onBlur={() => onHover(null)}
     >
-      <circle cx={cx} cy={cy} r={R} />
+      <circle className="cp-mark-anchor" cx={cx} cy={cy} r={18} />
+      {status === 'moving' && <circle className="cp-mark-shape" cx={cx} cy={cy} r={R} />}
+      {status === 'bottleneck' && <rect className="cp-mark-shape" x={cx - R} y={cy - R} width={R * 2} height={R * 2} rx={1.5} />}
+      {status === 'unpriced' && <path className="cp-mark-shape" d={`M ${cx} ${cy - R - 1} L ${cx + R + 1} ${cy} L ${cx} ${cy + R + 1} L ${cx - R - 1} ${cy} Z`} />}
       <text x={cx} y={cy + 5} textAnchor="middle">
         {n}
       </text>

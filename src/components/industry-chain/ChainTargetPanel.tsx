@@ -10,9 +10,9 @@
  * on. Where the curriculum has pinned modules to a joint, they follow, one
  * level down.
  *
- * The same body serves the panel under the wide plate, the inline panel
- * under a joint row on a narrow screen, and the open state of a layer in the
- * narrow-screen list. All text comes from the data file.
+ * Under an overlay the author's four-part condition reading leads; anatomy
+ * is secondary and collapsible. The same body sits in a wide popover and a
+ * narrow bottom sheet. All text comes from the data file.
  */
 
 import { useContext, useEffect, useRef } from 'react';
@@ -20,9 +20,10 @@ import { Link } from 'react-router-dom';
 import {
   BAND_BY_ID,
   CHAIN_COPY,
+  CONDITION_STATUSES,
   JOINT_BY_ID,
+  LEVERS,
   MARGIN_KINDS,
-  SHIFT_BY_ID,
   bandJoints,
   jointLayers,
   shiftTarget,
@@ -109,21 +110,6 @@ function TwoDistances({ read, lens }: { read: LensNote; lens: LensId }) {
   );
 }
 
-/** What moves at this target under the shift that is on. Present only while it is. */
-function UnderShift({ id }: { id: string }) {
-  const { shift, lens } = useContext(ChainLensContext);
-  const target = shiftTarget(shift, id);
-  if (!shift || !target) return null;
-  return (
-    <div className="mt-4 border-l-2 border-accent-editorial pl-3" data-under-shift={shift}>
-      <h4 className={KICKER}>
-        {CHAIN_COPY.panel.shiftHeading} {SHIFT_BY_ID[shift].label.toLowerCase()} · {CHAIN_COPY.lensName[lens]}
-      </h4>
-      <p className="mt-1.5 text-sm text-foreground">{target.read[lens]}</p>
-    </div>
-  );
-}
-
 /**
  * The essays the owner has attached to this target under this shift.
  *
@@ -152,20 +138,57 @@ function ShiftArticles({ id }: { id: string }) {
   );
 }
 
+function ConditionField({ heading, value }: { heading: string; value: string }) {
+  return (
+    <div>
+      <dt className={KICKER}>{heading}</dt>
+      <dd className="mt-1 text-sm leading-relaxed text-foreground">
+        {value || <span className="italic text-muted-foreground">{CHAIN_COPY.panel.ownerPending}</span>}
+      </dd>
+    </div>
+  );
+}
+
+/** The author's bounded condition reading; the selected distance chooses every prose slot. */
+function ConditionDetails({ id }: { id: string }) {
+  const { shift, lens } = useContext(ChainLensContext);
+  const target = shiftTarget(shift, id);
+  if (!shift || !target) return null;
+  const condition = target.condition;
+  const status = CONDITION_STATUSES[condition.status];
+  return (
+    <div className="mt-4 border-l-2 border-accent-editorial pl-4" data-condition-panel={shift}>
+      <p className={KICKER}>{CHAIN_COPY.panel.conditionKicker} · {CHAIN_COPY.lensName[lens]}</p>
+      <dl className="mt-3 space-y-4">
+        <div>
+          <dt className={KICKER}>{CHAIN_COPY.panel.statusHeading}</dt>
+          <dd className="mt-1 flex items-center gap-2 text-sm font-semibold text-foreground">
+            <span className="cp-status-mini" data-status={condition.status} aria-hidden="true" />
+            {status.label}
+          </dd>
+        </div>
+        <ConditionField heading={CHAIN_COPY.panel.currentHeading} value={condition.current[lens]} />
+        <ConditionField heading={CHAIN_COPY.panel.missingHeading} value={condition.missing[lens]} />
+        <div>
+          <dt className={KICKER}>{CHAIN_COPY.shift.leverKicker}</dt>
+          <dd className="mt-1 text-sm leading-relaxed text-foreground">
+            {condition.lever.map((id) => LEVERS[id].label).join(' · ')}
+          </dd>
+        </div>
+        <ConditionField heading={CHAIN_COPY.panel.financedHeading} value={condition.financedBy[lens]} />
+      </dl>
+      <ShiftArticles id={id} />
+    </div>
+  );
+}
+
 /**
  * A marked target that is neither a joint nor a layer — a stage, a node, a
  * border, a return. It has no margin of its own to answer for; what it has is
  * what the shift does to it, at both distances, and the essays that read it.
  */
-function MarkDetails({ id }: { id: string }) {
-  const { shift, lens } = useContext(ChainLensContext);
-  const target = shiftTarget(shift, id);
-  if (!target) return null;
-  return (
-    <>
-      <TwoDistances read={target.read} lens={lens} />
-    </>
-  );
+function MarkDetails() {
+  return null;
 }
 
 /** A layer named inside a joint's panel: a button, so one panel leads to the next. */
@@ -179,7 +202,7 @@ function LayerRef({ band }: { band: Band }) {
         className="flex flex-wrap items-baseline gap-2 rounded-sm text-left text-sm text-foreground hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
       >
         <span>{band.label}</span>
-        <Chip kind={band.margin} word={band.chip} />
+        <Chip kind={band.margin} word={band.serviceChip} />
       </button>
     </li>
   );
@@ -192,7 +215,6 @@ function JointDetails({ joint }: { joint: Joint }) {
     <>
       <MarginBlock kind={joint.margin} note={joint.note} />
       <TwoDistances read={{ economy: joint.read.economy.note, finance: joint.read.finance.note }} lens={lens} />
-      <UnderShift id={joint.id} />
       {joint.alt && (
         <div className="mt-4">
           <h4 className={KICKER}>{CHAIN_COPY.panel.whenHeading}</h4>
@@ -233,13 +255,12 @@ function BandDetails({ band }: { band: Band }) {
         <div className="mt-4">
           <h4 className={KICKER}>{CHAIN_COPY.panel.marginHeading}</h4>
           <p className="mt-1.5 flex flex-wrap items-baseline gap-2 text-base font-semibold text-foreground">
-            <Chip word={band.chip} />
+            <Chip word={band.serviceChip} />
           </p>
           <p className="mt-1.5 text-sm text-foreground">{band.means}</p>
         </div>
       )}
       <TwoDistances read={band.read} lens={lens} />
-      <UnderShift id={band.id} />
       <Lines heading={CHAIN_COPY.panel.linesHeading} lines={band.lines} />
       {joints.length > 0 && (
         <div className="mt-4">
@@ -255,7 +276,7 @@ function BandDetails({ band }: { band: Band }) {
 function TargetDetails({ id }: { id: string }) {
   if (isJointId(id)) return <JointDetails joint={JOINT_BY_ID[id]} />;
   const band = BAND_BY_ID[id];
-  return band ? <BandDetails band={band} /> : <MarkDetails id={id} />;
+  return band ? <BandDetails band={band} /> : <MarkDetails />;
 }
 
 export function ChainTargetPanel({
@@ -263,17 +284,15 @@ export function ChainTargetPanel({
   moduleSlugs,
   onClose,
   panelId,
-  inline = false,
 }: {
   id: string;
   moduleSlugs: string[];
   onClose: () => void;
   panelId: string;
-  /** Under a row of the narrow-screen column rather than under the plate. */
-  inline?: boolean;
 }) {
   const headingRef = useRef<HTMLHeadingElement>(null);
   const { shift } = useContext(ChainLensContext);
+  const conditionTarget = shift && markNumber(shift, id) > 0 ? shiftTarget(shift, id) : undefined;
   const joint = isJointId(id);
   const n = shift ? markNumber(shift, id) : 0;
   const kicker = joint ? CHAIN_COPY.panel.jointKicker : isDoor(id) ? CHAIN_COPY.panel.bandKicker : CHAIN_COPY.panel.markKicker;
@@ -289,7 +308,7 @@ export function ChainTargetPanel({
     <section
       id={panelId}
       aria-labelledby={`${panelId}-title`}
-      className={cn('rounded-md border border-border bg-card p-5', inline ? 'mt-2' : 'mt-4')}
+      className="bg-background"
     >
       <div className="flex items-start justify-between gap-4">
         <div>
@@ -309,16 +328,30 @@ export function ChainTargetPanel({
         <button
           type="button"
           onClick={onClose}
-          className="rounded-md border border-border px-2 py-1 text-xs text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          className="min-h-11 rounded-md border border-border px-3 py-1 text-xs text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         >
           {CHAIN_COPY.panel.close}
         </button>
       </div>
 
-      <TargetDetails id={id} />
-      <ShiftArticles id={id} />
-
-      {joint && moduleSlugs.length > 0 && <ChainCurriculumList moduleSlugs={moduleSlugs} />}
+      {conditionTarget ? (
+        <>
+          <ConditionDetails id={id} />
+          {isDoor(id) && (
+            <details className="mt-5 border-t border-border pt-3">
+              <summary className="min-h-11 cursor-pointer py-2 text-sm font-medium text-foreground">
+                {CHAIN_COPY.panel.baseHeading}
+              </summary>
+              <TargetDetails id={id} />
+            </details>
+          )}
+        </>
+      ) : (
+        <>
+          <TargetDetails id={id} />
+          {joint && moduleSlugs.length > 0 && <ChainCurriculumList moduleSlugs={moduleSlugs} />}
+        </>
+      )}
     </section>
   );
 }

@@ -1,75 +1,83 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { render as rtlRender, screen, within } from '@testing-library/react';
+import { render as rtlRender, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import type { ReactElement } from 'react';
-import { BANDS, CHAIN_COPY, JOINTS, LEGEND, LEGEND_NOTE, MARGIN_KINDS, STAGES } from '@/data/industryChain';
+import { BANDS, CHAIN_COPY, SHIFTS, SLUGS } from '@/data/industryChain';
 vi.mock('@/integrations/supabase/client', () => ({ supabase: {} }));
 import { ChainPlate } from './ChainPlate';
 
-const choose = (name: string) => screen.getByRole('button', { name });
 const render = (ui: ReactElement) => rtlRender(<MemoryRouter>{ui}</MemoryRouter>);
 
-// The map keeps its state in the address; one test's map must not seed the next.
 beforeEach(() => window.history.replaceState({}, '', '/about'));
 
-describe('audit corrections', () => {
-  it.each(['reindustrialisation', 'green transition'])('resets %s without losing the selected joint or distance', async (shift) => {
-    const user = userEvent.setup();
-    render(<ChainPlate links={[]} />);
-    await user.click(choose('finance'));
-    await user.click(choose('Processing → trader / importer'));
-    await user.click(choose(shift));
-    await user.click(choose('No shift'));
-    expect(choose('finance')).toHaveAttribute('aria-pressed', 'true');
-    expect(choose('No shift')).toHaveAttribute('aria-pressed', 'true');
-    expect(document.querySelector('.chain-plate')).not.toHaveAttribute('data-shift');
-    expect(screen.getByRole('region', { name: 'Processing → trader / importer' })).toBeVisible();
-  });
-
-  it('retains the same map and stage elements through all composed states', async () => {
+describe('condition layer', () => {
+  it('composes one distance switch with one exclusive condition selector without remounting the map', async () => {
     const user = userEvent.setup();
     render(<ChainPlate links={[]} />);
     const svg = document.querySelector('.cp-svg--wide');
-    const stages = Array.from(document.querySelectorAll('.cp-stage'));
-    for (const shift of ['No shift', 'reindustrialisation', 'green transition']) {
-      for (const lens of ['economy', 'finance']) {
-        await user.click(choose(lens));
-        if (choose(shift).getAttribute('aria-pressed') !== 'true') await user.click(choose(shift));
-        expect(document.querySelector('.cp-svg--wide')).toBe(svg);
-        expect(Array.from(document.querySelectorAll('.cp-stage'))).toEqual(stages);
-      }
-    }
+    const distance = screen.getByRole('switch', { name: /Distance: Economy/i });
+    await user.click(screen.getByRole('radio', { name: /Reindustrialisation \(8\)/i }));
+    expect(document.querySelector('.chain-plate')).toHaveAttribute('data-shift', 'reindustrialisation');
+    expect(screen.getByRole('radio', { name: /Green transition/i })).not.toBeChecked();
+    await user.click(distance);
+    expect(screen.getByRole('switch', { name: /Distance: Finance/i })).toHaveAttribute('aria-checked', 'true');
+    expect(document.querySelector('.chain-plate')).toHaveAttribute('data-lens', 'finance');
+    expect(document.querySelector('.cp-svg--wide')).toBe(svg);
   });
 
-  it('opens the same detail from the reading-size connection reference and follows the active lens', async () => {
+  it('opens the four condition slots in an attached panel', async () => {
     const user = userEvent.setup();
     render(<ChainPlate links={[]} />);
-    await user.click(screen.getByText(CHAIN_COPY.reference.heading));
-    const joint = JOINTS.find((item) => item.id === 'j-processing-trader')!;
-    const reference = document.querySelector(`[data-reference-id="${joint.id}"]`) as HTMLElement;
-    expect(within(reference).getByText(MARGIN_KINDS[joint.margin].chip)).toBeVisible();
-    await user.click(choose('finance'));
-    expect(within(reference).getByText(joint.read.finance.chip)).toBeVisible();
-    await user.click(choose(`Read: ${joint.label}`));
-    expect(screen.getByRole('region', { name: joint.label })).toBeVisible();
+    await user.click(screen.getByRole('radio', { name: /Green transition \(7\)/i }));
+    await user.click(screen.getByRole('button', { name: /Green transition · Logistics and warehousing · Bottleneck/i }));
+    const panel = await screen.findByRole('region', { name: 'Logistics and warehousing' });
+    expect(panel).toHaveTextContent("Condition layer · author's reading");
+    expect(panel).toHaveTextContent('Where we are now');
+    expect(panel).toHaveTextContent('What is still missing');
+    expect(panel).toHaveTextContent('Re-price a layer');
+    expect(panel).toHaveTextContent('Who finances it');
+    expect(panel).toHaveTextContent('Owner analysis pending.');
   });
 
-  it('announces the margin type and active reading on each SVG joint', async () => {
+  it('hydrates overlay, distance and permanent target slug from the URL', async () => {
+    window.history.replaceState({}, '', '/about?lens=green&distance=finance&node=energy');
+    render(<ChainPlate links={[]} />);
+    expect(document.querySelector('.chain-plate')).toHaveAttribute('data-shift', 'green');
+    expect(document.querySelector('.chain-plate')).toHaveAttribute('data-lens', 'finance');
+    expect(await screen.findByRole('region', { name: 'Energy' })).toBeVisible();
+    expect(window.location.search).toContain('node=energy');
+    expect(SLUGS['band-energy']).toBe('energy');
+  });
+
+  it('shape-codes visible condition states and leaves an unwritten target unnumbered', async () => {
     const user = userEvent.setup();
     render(<ChainPlate links={[]} />);
-    const joint = JOINTS[0];
-    const button = choose(joint.label);
-    const description = () => document.getElementById(button.getAttribute('aria-describedby')!)!.textContent;
-    expect(description()).toContain(MARGIN_KINDS[joint.margin].label);
-    await user.click(choose('finance'));
-    expect(description()).toContain(joint.read.finance.note);
+    await user.click(screen.getByRole('radio', { name: /Green transition \(7\)/i }));
+    const marks = document.querySelectorAll('.cp-marks--green .cp-mark');
+    expect(marks).toHaveLength(7);
+    expect(document.querySelector('.cp-marks--green [data-status="bottleneck"]')).not.toBeNull();
+    expect(document.querySelector('.cp-marks--green [data-status="moving"]')).not.toBeNull();
+    expect(document.querySelector('.cp-marks--green [data-status="unpriced"]')).not.toBeNull();
+    expect(document.querySelector('[data-mark="band-cold-chain"]')).toBeNull();
   });
 
-  it('does not silently restore numeric identifiers or categorical net-service-revenue claims in public definitions', () => {
-    expect(JSON.stringify({ BANDS, CHAIN_COPY, JOINTS, LEGEND, LEGEND_NOTE, MARGIN_KINDS, STAGES })).not.toMatch(/\d/);
-    expect(MARGIN_KINDS['service-fee'].test).toContain('gross when it controls that service');
-    expect(MARGIN_KINDS['service-fee'].test).toContain('commission net');
-    expect(CHAIN_COPY.basis).toContain('not gross profit');
+  it('removes the stacked caption, marked list and long reference accordions', async () => {
+    const user = userEvent.setup();
+    render(<ChainPlate links={[]} />);
+    await user.click(screen.getByRole('radio', { name: /Green transition/i }));
+    expect(document.querySelector('[data-shift-caption]')).toBeNull();
+    expect(document.querySelector('[data-shift-moves]')).toBeNull();
+    expect(document.querySelector('[data-chain-reference]')).toBeNull();
+    expect(screen.queryByText('Read the chain at text size')).not.toBeInTheDocument();
+    expect(document.querySelector('[data-chain-legend]')).not.toBeNull();
+  });
+
+  it('keeps service chips semantic and avoids the false GDP–margin equivalence', () => {
+    expect(BANDS.find((band) => band.id === 'band-cold-chain')).toBeDefined();
+    expect(BANDS.find((band) => band.id === 'band-governance')?.serviceChip).toBeUndefined();
+    expect(BANDS.find((band) => band.id === 'band-regulation')?.serviceChip).toBeUndefined();
+    expect(CHAIN_COPY.standfirst.toLowerCase()).not.toContain('add them up');
+    expect(SHIFTS.every((shift) => shift.targets.every((target) => 'condition' in target))).toBe(true);
   });
 });
