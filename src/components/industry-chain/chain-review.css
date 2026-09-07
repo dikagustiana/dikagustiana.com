@@ -3,15 +3,31 @@
 /* A shift accents the structure; all label ink keeps its original contrast. */
 .chain-plate[data-shift] .cp-hit:not([data-lit]),
 .chain-plate[data-shift] .cp-joint-chip:not([data-lit]){opacity:1}
-.chain-plate[data-shift] .cp-hit:not([data-lit]) .cp-joint-mark{opacity:.55}
-.chain-plate .cp-reference{color:hsl(var(--foreground));overflow-wrap:anywhere}
-.chain-plate .cp-reference summary{min-height:44px}
+.chain-plate[data-shift] .cp-hit:not([data-lit]) .cp-joint-mark{opacity:1}
+.chain-plate .cp-band-attachment{stroke:hsl(var(--muted-foreground));stroke-width:1;opacity:.6}
+.chain-plate .cp-band-hit[data-lit] .cp-band-attachment{stroke:var(--cp-shift);stroke-width:1.5;opacity:1}
 .chain-plate .cp-text-money{border-left:2px dotted hsl(var(--muted-foreground));padding-left:12px}
 .chain-plate .cp-text-information{border-left:3px double hsl(var(--muted-foreground));padding-left:12px}
 .chain-plate .cp-column[data-variant="full"] :is(.text-xs,.text-\[12px\]){font-size:14px;line-height:1.5}
 .chain-plate .cp-column button{min-height:44px}
 .chain-plate .cp-column [data-id^="band-"] button{grid-template-columns:minmax(0,1fr);row-gap:6px}
-.chain-plate .cp-column [data-id^="band-"] button>span:last-child{justify-self:start}
+.chain-plate .cp-column [data-id^="band-"] button>span{justify-self:start}
+.chain-plate .cp-mark .cp-mark-anchor{fill:transparent;stroke:none}
+.chain-plate .cp-mark .cp-mark-shape{fill:hsl(var(--background));stroke:var(--cp-shift);stroke-width:1.8}
+.chain-plate .cp-mark[data-status="bottleneck"] .cp-mark-shape{stroke-width:2.7}
+.chain-plate .cp-mark[data-status="unpriced"] .cp-mark-shape{stroke-dasharray:3 2;stroke-width:2}
+.chain-plate .cp-mark[aria-expanded="true"] .cp-mark-shape{fill:var(--cp-shift);fill-opacity:.14;stroke-width:3}
+.chain-plate .cp-mark:focus-visible .cp-mark-shape{stroke:hsl(var(--ring));stroke-width:3}
+.cp-condition-badge{display:inline-flex;min-height:44px;align-items:center;gap:6px;color:hsl(var(--foreground));font-size:11px;font-weight:600;line-height:1}
+.cp-condition-badge__mark{display:inline-grid;width:26px;height:26px;place-items:center;border:2px solid var(--cp-shift);background:hsl(var(--background));font-variant-numeric:tabular-nums}
+.cp-condition-badge[data-status="moving"] .cp-condition-badge__mark{border-radius:999px}
+.cp-condition-badge[data-status="bottleneck"] .cp-condition-badge__mark{border-width:3px;border-radius:2px}
+.cp-condition-badge[data-status="unpriced"] .cp-condition-badge__mark{width:24px;height:24px;margin:1px;transform:rotate(45deg);border-style:dashed}
+.cp-condition-badge[data-status="unpriced"] .cp-condition-badge__mark>span{transform:rotate(-45deg)}
+.cp-status-mini{display:inline-block;width:12px;height:12px;border:2px solid var(--cp-shift);background:hsl(var(--background));flex:none}
+.cp-status-mini[data-status="moving"]{border-radius:999px}
+.cp-status-mini[data-status="bottleneck"]{border-width:3px;border-radius:1px}
+.cp-status-mini[data-status="unpriced"]{transform:rotate(45deg);border-style:dashed}
 /* Keep the navy palette. Rings, outlines and labels carry shift membership. */
 .chain-plate .border-accent-editorial{border-color:hsl(var(--accent))}
 .chain-plate .outline-accent-editorial{outline-color:hsl(var(--accent))}

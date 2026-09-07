@@ -6,19 +6,17 @@
  * between them with the same diamond the wide plate uses and the same chip —
  * the joint read at the distance that is on, in the form of its margin kind.
  * The two origins and the two side inputs sit two abreast where the chain
- * actually forks. The enabling layers become a list whose rows open; return
- * flows and the money and information flows are lists behind two toggles,
- * off by default. Under a shift, the rows it moves are outlined and carry
- * what moves there, right beneath them; nothing is dimmed, because a long
- * column read at arm's length cannot afford to lose contrast.
+ * actually forks. Enabling layers become a list; return flows and the money
+ * and information flows sit behind two toggles. Under a condition overlay,
+ * written targets gain a number and a status form; their reading opens in a
+ * bottom sheet rather than expanding the already long column.
  *
  * Same data file, same controls, same panel as the wide plate. The order of
  * rows here is layout; every word is a record in src/data/industryChain.ts.
- * `variant="compact"` draws the short version from COMPACT: no joints, no
- * layers list, no toggles, no small labels.
+ * `variant="compact"` draws the short version from COMPACT.
  */
 
-import { createContext, useContext, useId, useState, type ReactNode } from 'react';
+import { useContext, useId, useState, type ReactNode } from 'react';
 import {
   BANDS,
   BORDERS,
@@ -34,27 +32,17 @@ import {
   RETAIL_GROUP,
   RETURNS,
   STAGES,
-  SHIFT_BY_ID,
   bandChip,
+  isMarked,
   shiftTarget,
   type Band,
   type CompactStep,
   type JointId,
   type MarginKind,
 } from '@/data/industryChain';
-import { universalEssayUrl } from '@/lib/essayUrl';
 import { cn } from '@/lib/utils';
-import { Link } from 'react-router-dom';
 import { ChainLensContext } from './chainLensContext';
-import { isDoor, markNumber } from './chainTargets';
-
-/**
- * The panel renderer, shared with every row rather than passed down through
- * six components that have no other use for it. A joint row and a layer row
- * place their own panel; a marked stage, node, border or return places it
- * from inside its note, because that is the only thing it has.
- */
-const PanelRenderer = createContext<(id: string) => ReactNode>(() => null);
+import { ConditionBadge } from './ConditionBadge';
 
 const S = Object.fromEntries(STAGES.map((s) => [s.id, s]));
 const N = Object.fromEntries([...NODES, ...RETAIL].map((n) => [n.id, n]));
@@ -84,71 +72,8 @@ const chipForm = (kind?: MarginKind) =>
 
 function useLit(id: string) {
   const { shift } = useContext(ChainLensContext);
-  return shiftTarget(shift, id) !== undefined;
-}
-
-/**
- * What a shift does at this row, read at the distance that is on, with the
- * same number the wide plate would give it.
- *
- * The column carries no floating marks: a phone has no hover and no room for
- * a badge that does not also say something. So the number opens the note
- * instead of pointing at it, and the essays behind a mark are listed right
- * here rather than in a panel the reader has to go and find. The numbering is
- * the plate's, so a number quoted in an essay means the same thing on both.
- */
-function LitNote({ id }: { id: string }) {
-  const { shift, lens, selected, onSelect, panelId } = useContext(ChainLensContext);
-  const panel = useContext(PanelRenderer);
   const target = shiftTarget(shift, id);
-  if (!shift || !target) return null;
-  const n = markNumber(shift, id);
-  const articles = target.articles ?? [];
-  // A joint and a layer are doors in their own right and place their own
-  // panel; everything else a shift marks has only its number to open with.
-  const opensHere = !isDoor(id);
-  const open = opensHere && selected === id;
-  return (
-    <div data-lit-note={id} className="mt-1.5 border-l-2 border-accent-editorial pl-2 text-xs leading-snug text-foreground">
-      <p>
-        {n > 0 &&
-          (opensHere ? (
-            <button
-              type="button"
-              data-mark-n={n}
-              aria-label={`${n}. ${SHIFT_BY_ID[shift].label} · ${labelOf(id)}`}
-              aria-expanded={open}
-              aria-controls={open ? panelId : undefined}
-              onClick={(e) => onSelect(id, e.currentTarget)}
-              className={cn(
-                'mr-1.5 inline-block min-h-6 rounded-full border border-accent-editorial px-2 text-center font-semibold tabular-nums',
-                open && 'bg-foreground text-background',
-                FOCUS,
-              )}
-            >
-              {n}
-            </button>
-          ) : (
-            <span data-mark-n={n} className="mr-1.5 inline-block rounded-full border border-accent-editorial px-1.5 text-center font-semibold tabular-nums">
-              {n}
-            </span>
-          ))}
-        <span className="font-medium">{SHIFT_BY_ID[shift].label}</span> — {target.read[lens]}
-      </p>
-      {articles.length > 0 && (
-        <ul className="mt-1 space-y-0.5" data-shift-articles={id}>
-          {articles.map((a) => (
-            <li key={a.slug}>
-              <Link to={universalEssayUrl(a.slug)} className="underline underline-offset-2 hover:text-accent">
-                {a.title}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      )}
-      {open && <div className="mt-2">{panel(id)}</div>}
-    </div>
-  );
+  return target !== undefined && isMarked(target);
 }
 
 /* ── The forms ───────────────────────────────────────────────────────────── */
@@ -159,6 +84,7 @@ function StageBox({ id, detail = true }: { id: string; detail?: boolean }) {
   return (
     <div className="min-w-0">
       <div data-id={id} data-lit={lit || undefined} className={cn('rounded-sm border border-foreground bg-background px-3 py-2', lit && LIT)}>
+        <ConditionBadge id={id} />
         {detail && stage.origin && <p className={KICKER}>{CHAIN_COPY.controls.origin}</p>}
         <p className="break-words text-[15px] font-semibold leading-snug text-foreground">{stage.label}</p>
         {detail && stage.lanes && <p className="mt-1 text-xs leading-snug text-muted-foreground">{stage.lanes.join(' · ')}</p>}
@@ -171,7 +97,6 @@ function StageBox({ id, detail = true }: { id: string; detail?: boolean }) {
           </ul>
         )}
       </div>
-      {detail && <LitNote id={id} />}
     </div>
   );
 }
@@ -182,10 +107,10 @@ function NodePill({ id, label }: { id: string; label?: string }) {
   return (
     <div className="min-w-0">
       <div data-id={id} data-lit={lit || undefined} className={cn('rounded-full border border-dashed border-muted-foreground bg-background px-3 py-1.5', lit && LIT)}>
+        <ConditionBadge id={id} />
         <p className="break-words text-sm leading-snug text-foreground">{label ?? node?.label ?? id}</p>
         {node?.recursion && <p className="mt-0.5 text-xs text-muted-foreground">↳ {node.recursion}</p>}
       </div>
-      <LitNote id={id} />
     </div>
   );
 }
@@ -195,6 +120,7 @@ function RetailGroup() {
   return (
     <div className="min-w-0">
       <div data-id={RETAIL_GROUP.id} data-lit={lit || undefined} className={cn('rounded-md border border-dashed border-muted-foreground p-2', lit && LIT)}>
+        <ConditionBadge id={RETAIL_GROUP.id} />
         <p className={KICKER}>
           {RETAIL_GROUP.label} <span className="normal-case tracking-normal">· {RETAIL_GROUP.note}</span>
         </p>
@@ -206,7 +132,6 @@ function RetailGroup() {
           ))}
         </ul>
       </div>
-      <LitNote id={RETAIL_GROUP.id} />
     </div>
   );
 }
@@ -242,9 +167,9 @@ function JointRow({ id }: { id: JointId }) {
           <span data-chip={lens} className={cn('mt-0.5 inline-block rounded-sm px-1.5 text-[12px] font-medium', chipForm(joint.margin))}>
             {joint.read[lens].chip}
           </span>
+          <ConditionBadge id={id} interactive={false} />
         </span>
       </button>
-      <LitNote id={id} />
     </div>
   );
 }
@@ -266,7 +191,7 @@ function BorderRule({ id }: { id: string }) {
         <span>{border.label}</span>
         <span aria-hidden="true" className="flex-1 border-t border-dashed border-foreground" />
       </div>
-      <LitNote id={id} />
+      <ConditionBadge id={id} />
     </div>
   );
 }
@@ -276,13 +201,6 @@ const Arrow = () => (
     ↓
   </div>
 );
-
-/** The panel, rendered under whichever row opened it — never half a screen away. */
-function PanelSlot({ ids, panel }: { ids: readonly string[]; panel: (id: string) => ReactNode }) {
-  const { selected } = useContext(ChainLensContext);
-  if (!selected || !ids.includes(selected)) return null;
-  return <div className="min-w-0">{panel(selected)}</div>;
-}
 
 /* ── Lists behind toggles ────────────────────────────────────────────────── */
 
@@ -316,7 +234,7 @@ function ReturnItem({ id }: { id: string }) {
           {labelOf(r.from)} → {labelOf(r.to)}
           {r.note && ` · ${r.note}`}
         </span>
-        <LitNote id={r.id} />
+        <ConditionBadge id={r.id} />
       </span>
     </li>
   );
@@ -336,7 +254,10 @@ function ReturnsList({ id }: { id: string }) {
 function LitReturns({ from }: { from: string }) {
   const { shift } = useContext(ChainLensContext);
   if (!shift) return null;
-  const lit = RETURNS.filter((r) => r.from === from && shiftTarget(shift, r.id));
+  const lit = RETURNS.filter((r) => {
+    const target = shiftTarget(shift, r.id);
+    return target && isMarked(target);
+  });
   if (lit.length === 0) return null;
   return (
     <ul className="mt-2 space-y-2" data-lit-returns={from}>
@@ -373,7 +294,7 @@ function NonPhysicalList({ id }: { id: string }) {
 }
 
 /** One layer as a row that opens: the same door the wide plate's band is. */
-function LayerRow({ band, panel }: { band: Band; panel: (id: string) => ReactNode }) {
+function LayerRow({ band }: { band: Band }) {
   const { selected, onSelect, panelId } = useContext(ChainLensContext);
   const open = selected === band.id;
   const lit = useLit(band.id);
@@ -401,16 +322,15 @@ function LayerRow({ band, panel }: { band: Band; panel: (id: string) => ReactNod
             {chip}
           </span>
         )}
+        <ConditionBadge id={band.id} interactive={false} />
       </button>
-      <LitNote id={band.id} />
-      <PanelSlot ids={[band.id]} panel={panel} />
     </li>
   );
 }
 
 /* ── The two columns ─────────────────────────────────────────────────────── */
 
-function FullColumn({ panel }: { panel: (id: string) => ReactNode }) {
+function FullColumn() {
   const base = useId();
   const returnsId = `${base}-returns`, flowsId = `${base}-flows`, layersId = `${base}-layers`;
   const [showReturns, setShowReturns] = useState(false);
@@ -432,14 +352,12 @@ function FullColumn({ panel }: { panel: (id: string) => ReactNode }) {
           <JointRow id="j-extraction-processing" />
         </div>
       </div>
-      <PanelSlot ids={['j-production-aggregation', 'j-aggregation-processing', 'j-extraction-processing']} panel={panel} />
 
       <StageBox id="stage-processing" />
       <p data-id={BYPRODUCT.id} className="mt-1 text-right text-xs text-muted-foreground">
         ↘ {BYPRODUCT.label}
       </p>
       <JointRow id="j-processing-trader" />
-      <PanelSlot ids={['j-processing-trader']} panel={panel} />
 
       <div className="grid min-w-0 grid-cols-2 gap-3">
         <div className="flex min-w-0 flex-col">
@@ -452,7 +370,6 @@ function FullColumn({ panel }: { panel: (id: string) => ReactNode }) {
           <JointRow id="j-packaging-manufacturing" />
         </div>
       </div>
-      <PanelSlot ids={['j-trader-manufacturing', 'j-packaging-manufacturing']} panel={panel} />
 
       <StageBox id="stage-manufacturing" />
       <div className="my-1 flex items-center gap-2 pl-4 text-xs text-muted-foreground">
@@ -461,20 +378,15 @@ function FullColumn({ panel }: { panel: (id: string) => ReactNode }) {
       </div>
       <NodePill id="node-principal" />
       <JointRow id="j-manufacturing-distribution" />
-      <PanelSlot ids={['j-manufacturing-distribution']} panel={panel} />
 
       <NodePill id="node-distributor" />
       <JointRow id="j-distributor-wholesaler" />
-      <PanelSlot ids={['j-distributor-wholesaler']} panel={panel} />
       <NodePill id="node-wholesaler" />
       <JointRow id="j-wholesale-retail" />
-      <PanelSlot ids={['j-wholesale-retail']} panel={panel} />
       <RetailGroup />
       <JointRow id="j-retail-consumption" />
-      <PanelSlot ids={['j-retail-consumption']} panel={panel} />
       <StageBox id="stage-consumption" />
       <JointRow id="j-consumption-recovery" />
-      <PanelSlot ids={['j-consumption-recovery']} panel={panel} />
       <StageBox id="stage-recovery" />
       {!showReturns && <LitReturns from="stage-recovery" />}
 
@@ -495,7 +407,7 @@ function FullColumn({ panel }: { panel: (id: string) => ReactNode }) {
         </h3>
         <ul className="mt-2 space-y-1.5">
           {BANDS.map((b) => (
-            <LayerRow key={b.id} band={b} panel={panel} />
+            <LayerRow key={b.id} band={b} />
           ))}
         </ul>
       </section>
@@ -568,10 +480,6 @@ function CompactColumn() {
   );
 }
 
-export function ChainColumn({ variant, panel }: { variant: 'full' | 'compact'; panel: (id: string) => ReactNode }) {
-  return (
-    <PanelRenderer.Provider value={panel}>
-      {variant === 'compact' ? <CompactColumn /> : <FullColumn panel={panel} />}
-    </PanelRenderer.Provider>
-  );
+export function ChainColumn({ variant }: { variant: 'full' | 'compact' }) {
+  return variant === 'compact' ? <CompactColumn /> : <FullColumn />;
 }

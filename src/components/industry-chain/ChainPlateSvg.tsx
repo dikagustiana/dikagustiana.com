@@ -15,9 +15,9 @@ import { ShiftMark } from './ShiftMark';
 
 export function ChainPlateWide() {
   return (
-  <svg className="cp-svg cp-svg--wide" viewBox="0 0 1717 811" role="group" aria-labelledby="cp-wide-title" aria-describedby="cp-wide-desc" focusable="false">
+  <svg className="cp-svg cp-svg--wide" viewBox="0 0 1717 841" role="group" aria-labelledby="cp-wide-title" aria-describedby="cp-wide-desc" focusable="false">
     <title id="cp-wide-title">The industry chain, in full</title>
-    <desc id="cp-wide-desc">Left to right: two origins, primary processing, packaging and finished-goods manufacturing, then distribution, wholesale and retail into consumption and recovery. Intermediary nodes are dashed pills between the stages. Every joint is a diamond on the flow with a chip that reads it at the chosen distance — as an economy or as finance — and opens the margin cut there. Five enabling layers run beneath the chain, money and information run both ways under it, and two dashed border lines mark where goods are exported and imported. A shift, when one is chosen, rings the joints and layers it moves and numbers them in reading order, left to right and then top to bottom.</desc>
+    <desc id="cp-wide-desc">Left to right: two origins, primary processing, packaging and finished-goods manufacturing, then distribution, wholesale and retail into consumption and recovery. Intermediary nodes are dashed pills between the stages. Every joint is a diamond on the flow with a chip that reads it at the chosen distance — as an economy or as finance — and opens the margin cut there. Six enabling layers run beneath the chain, money and information run both ways under it, and two dashed border lines mark where goods are exported and imported. A condition layer, when chosen, marks what moves in reading order and adds direction without redrawing the chain.</desc>
     <defs>
       <marker id="cp-tip--wide" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M 0 1 L 7 4 L 0 7 z" className="cp-mk" /></marker>
       <marker id="cp-tip-soft--wide" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M 0 1 L 7 4 L 0 7 z" className="cp-mk-soft" /></marker>
@@ -167,14 +167,17 @@ export function ChainPlateWide() {
       <g className="cp-callout" data-id="callout-import-share"><rect x="875" y="69" width="188.4" height="20" rx="2" className="cp-chip" /><text x="875" y="85" className="cp-callout-t" textAnchor="start">Domestic input option</text></g>
     </g>
       <g className="cp-shift cp-shift--green" data-id="green">
-      <g className="cp-lit" data-for="band-energy"><rect className="cp-lit-rect" x="173" y="708" width="1417" height="32" rx="3" /></g>
+      <g className="cp-lit" data-for="band-energy"><rect className="cp-lit-rect" x="173" y="738" width="1417" height="32" rx="3" /></g>
       <g className="cp-lit" data-for="band-logistics"><rect className="cp-lit-rect" x="173" y="648" width="1417" height="32" rx="3" /></g>
-      <g className="cp-lit" data-for="band-credit"><rect className="cp-lit-rect" x="173" y="678" width="1417" height="32" rx="3" /></g>
+      <g className="cp-lit" data-for="band-cold-chain"><rect className="cp-lit-rect" x="173" y="678" width="1417" height="32" rx="3" /></g>
+      <g className="cp-lit" data-for="band-credit"><rect className="cp-lit-rect" x="173" y="708" width="1417" height="32" rx="3" /></g>
       <g className="cp-lit" data-for="j-consumption-recovery"><circle className="cp-lit-ring" cx="1536" cy="412" r="17" /></g>
       <g className="cp-lit" data-for="stage-recovery"><rect className="cp-lit-rect" x="1419" y="424" width="173" height="54" rx="4" /></g>
       <g className="cp-lit" data-for="return-postconsumer-material"><path className="cp-lit-path" d="M 1587 451 L 1659 451 L 1659 56 L 549 56 L 549 242" markerEnd="url(#cp-tip-shift--wide)" /></g>
       <g className="cp-lit" data-for="return-postconsumer-organic"><path className="cp-lit-path" d="M 1587 437 L 1677 437 L 1677 34 L 242 34 L 242 134" markerEnd="url(#cp-tip-shift--wide)" /></g>
-      
+      <g className="cp-move" data-id="move-recovery-price">
+      <path className="cp-move-path" d="M 1411 222 L 1536 222 L 1536 390" markerEnd="url(#cp-tip-shift--wide)" />
+      <text x="1411" y="214" className="cp-move-t" textAnchor="start">Price reaches recovery</text></g>
       <g className="cp-callout" data-id="callout-new-price"><rect x="1437.6" y="517" width="196.79999999999998" height="20" rx="2" className="cp-chip" /><text x="1536" y="533" className="cp-callout-t" textAnchor="middle">Who pays for recovery?</text></g>
     </g>
     </g>
@@ -191,10 +194,11 @@ export function ChainPlateWide() {
       <JointHit id="j-retail-consumption" cx={1411} cy={275} chipX={1411} chipY={495} chipAt="rowA" />
       <JointHit id="j-consumption-recovery" cx={1536} cy={412} chipX={1522} chipY={403} chipAt="left" />
       <BandHit id="band-logistics" x={176} y={651} width={1411} height={26} noteX={449} />
-      <BandHit id="band-credit" x={176} y={681} width={1411} height={26} noteX={458} />
-      <BandHit id="band-energy" x={176} y={711} width={1411} height={26} noteX={284} />
-      <BandHit id="band-governance" x={844} y={741} width={554} height={26} noteX={null} />
-      <BandHit id="band-regulation" x={176} y={771} width={1411} height={26} noteX={null} />
+      <BandHit id="band-cold-chain" x={176} y={681} width={1411} height={26} noteX={406} />
+      <BandHit id="band-credit" x={176} y={711} width={1411} height={26} noteX={458} />
+      <BandHit id="band-energy" x={176} y={741} width={1411} height={26} noteX={284} />
+      <BandHit id="band-governance" x={844} y={771} width={554} height={26} noteX={null} />
+      <BandHit id="band-regulation" x={176} y={801} width={1411} height={26} noteX={null} />
     </g>
     <g className="cp-mark-layer">
       <g className="cp-marks cp-marks--reindustrialisation">
@@ -213,8 +217,9 @@ export function ChainPlateWide() {
       <ShiftMark shift="green" id="stage-recovery" cx={1413} cy={418} />
       <ShiftMark shift="green" id="j-consumption-recovery" cx={1550} cy={398} />
       <ShiftMark shift="green" id="band-logistics" cx={161} cy={664} />
-      <ShiftMark shift="green" id="band-credit" cx={161} cy={694} />
-      <ShiftMark shift="green" id="band-energy" cx={161} cy={724} />
+      <ShiftMark shift="green" id="band-cold-chain" cx={161} cy={694} />
+      <ShiftMark shift="green" id="band-credit" cx={161} cy={724} />
+      <ShiftMark shift="green" id="band-energy" cx={161} cy={754} />
     </g>
     </g>
   </svg>
