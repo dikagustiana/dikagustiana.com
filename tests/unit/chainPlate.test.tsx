@@ -117,6 +117,23 @@ describe('ChainPlate at rest', () => {
     await userEvent.click(screen.getByRole('switch', { name: /Show layer: Energy/ }));
     expect(document.querySelector('.cp-band-hit[data-id="band-energy"]')).not.toHaveAttribute('data-hidden');
   });
+
+  it('fades every drawing of a switched-off layer: its band, its shift outline, its mark and, for energy, the arrows into the stages', async () => {
+    mount(<ChainPlate links={[]} />);
+    await userEvent.click(word('green transition'));
+    const stubs = document.querySelectorAll('.cp-energy-in');
+    expect(stubs.length).toBeGreaterThan(0);
+    await userEvent.click(screen.getByRole('switch', { name: /Hide layer: Energy/ }));
+    expect(document.querySelector('.cp-shift--green .cp-lit[data-for="band-energy"]')).toHaveAttribute('data-hidden');
+    expect(document.querySelector('.cp-mark[data-mark="band-energy"]')).toHaveAttribute('data-hidden');
+    stubs.forEach((el) => expect(el).toHaveAttribute('data-hidden'));
+    // Another layer's outline is untouched.
+    expect(document.querySelector('.cp-shift--green .cp-lit[data-for="band-logistics"]')).not.toHaveAttribute('data-hidden');
+
+    await userEvent.click(screen.getByRole('switch', { name: /Show layer: Energy/ }));
+    expect(document.querySelector('.cp-shift--green .cp-lit[data-for="band-energy"]')).not.toHaveAttribute('data-hidden');
+    stubs.forEach((el) => expect(el).not.toHaveAttribute('data-hidden'));
+  });
 });
 
 describe('a page frame that opens the map with a shift on', () => {

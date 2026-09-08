@@ -25,7 +25,7 @@ vi.mock('@/integrations/supabase/client', () => ({ supabase: { from: () => ({}) 
 import { ChainPlate } from '@/components/industry-chain/ChainPlate';
 import { MARK_ORDER } from '@/components/industry-chain/chainMarkOrder';
 import { placeLabel, placePopover } from '@/components/industry-chain/chainPlacement';
-import { hoverLine, isolationSet, markNumber, markedIds } from '@/components/industry-chain/chainTargets';
+import { hoverLine, isLit, isolationSet, markNumber, markedIds } from '@/components/industry-chain/chainTargets';
 import { readChainUrl, writeChainUrl } from '@/components/industry-chain/useChainUrl';
 
 function mount(ui: ReactElement) {
@@ -68,6 +68,17 @@ describe('the reading order of a shift', () => {
   it('gives no number at all to a target this shift does not move', () => {
     expect(markNumber('green', 'stage-manufacturing')).toBe(0);
     expect(markNumber('reindustrialisation', 'band-energy')).toBe(0);
+  });
+
+  it('lights a door only where the shift gives it a status — the same rule the overlay and the marks follow', () => {
+    expect(isLit('green', 'band-logistics')).toBe(true);
+    expect(isLit('green', 'j-consumption-recovery')).toBe(true);
+    expect(isLit('reindustrialisation', 'band-logistics')).toBe(false);
+    expect(isLit(null, 'band-logistics')).toBe(false);
+    // Every lit door has a mark, and every mark is a lit element: nothing is emphasised without a status.
+    for (const shift of ['reindustrialisation', 'green'] as const) {
+      for (const id of markedIds(shift)) expect(isLit(shift, id), `${shift} ${id}`).toBe(true);
+    }
   });
 });
 

@@ -14,9 +14,10 @@
  */
 
 import { useContext, type KeyboardEvent, type MouseEvent } from 'react';
-import { BAND_BY_ID, MARGIN_KINDS, shiftTarget } from '@/data/industryChain';
+import { BAND_BY_ID, MARGIN_KINDS } from '@/data/industryChain';
 import { cn } from '@/lib/utils';
 import { ChainLensContext } from './chainLensContext';
+import { isLit } from './chainTargets';
 
 const TICK = 6;
 
@@ -42,7 +43,7 @@ export function BandHit({
   const { shift, selected, onSelect, onHover, hidden, panelId } = useContext(ChainLensContext);
   const band = BAND_BY_ID[id];
   const open = selected === id;
-  const lit = shiftTarget(shift, id) !== undefined;
+  const lit = isLit(shift, id);
   const off = hidden.has(id);
   const tickForm = band.attaches === 'stages' ? 'up' : band.margin ? 'fee' : 'terms';
 

@@ -103,7 +103,7 @@
 .cp-band-hit:focus-visible rect.cp-band-rect{stroke:hsl(var(--ring));stroke-width:2}
 
 /* A layer switched off recedes but stays in place; its switch stays crisp. */
-.cp-band-hit[data-hidden],.chain-plate .cp-lit[data-hidden],.chain-plate .cp-mark[data-hidden]{opacity:.18}
+.cp-band-hit[data-hidden],.chain-plate .cp-lit[data-hidden],.chain-plate .cp-mark[data-hidden],.chain-plate .cp-energy-in[data-hidden]{opacity:.18}
 .cp-switch{cursor:pointer}
 .cp-switch:focus{outline:none}
 .cp-switch .cp-switch-box{fill:hsl(var(--background));stroke:hsl(var(--muted-foreground));stroke-width:1}

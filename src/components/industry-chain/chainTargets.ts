@@ -58,6 +58,14 @@ export function targetLabel(id: string): string {
 }
 
 /**
+ * Whether a shift marks an element right now. A target listed under a shift
+ * without a condition is parked — no mark, no status, no reading — so it must
+ * not be emphasised on the plate either; the generated overlay already omits
+ * it, and this keeps the doors in step with the overlay.
+ */
+export const isLit = (shift: ShiftId | null, id: string): boolean => targetStatus(shift, id) !== undefined;
+
+/**
  * The marks of one shift, in reading order, already filtered to the targets
  * that have a condition. The order is the generator's — where the marks land
  * on the plate — so the same list numbers the wide plate and the narrow

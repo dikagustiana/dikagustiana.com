@@ -333,6 +333,22 @@ export function ChainPlate({
     });
   }, [isolate, shift, lens]);
 
+  // A layer switched off must fade everywhere it is drawn, and two of those
+  // places are static geometry with no handlers: the shift outline on its
+  // band, and, for energy, the arrows rising into every stage.
+  useEffect(() => {
+    const svg = figureRef.current?.querySelector('svg.cp-svg--wide');
+    if (!svg) return;
+    svg.querySelectorAll<Element>('.cp-shifts .cp-lit[data-for]').forEach((el) => {
+      if (hidden.has(el.getAttribute('data-for')!)) el.setAttribute('data-hidden', '');
+      else el.removeAttribute('data-hidden');
+    });
+    svg.querySelectorAll<Element>('.cp-energy-in').forEach((el) => {
+      if (hidden.has('band-energy')) el.setAttribute('data-hidden', '');
+      else el.removeAttribute('data-hidden');
+    });
+  }, [hidden, shift, showCompact, wideScreen]);
+
   const lensState = useMemo<ChainLensState>(
     () => ({ lens, shift, selected, onSelect, hovered, onHover, hidden, onToggleLayer, panelId }),
     [lens, shift, selected, onSelect, hovered, onHover, hidden, onToggleLayer, panelId],

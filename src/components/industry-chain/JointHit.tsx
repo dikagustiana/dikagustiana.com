@@ -21,9 +21,10 @@
  */
 
 import { useContext, useId, type KeyboardEvent, type MouseEvent } from 'react';
-import { JOINT_BY_ID, MARGIN_KINDS, shiftTarget, type JointId } from '@/data/industryChain';
+import { JOINT_BY_ID, MARGIN_KINDS, type JointId } from '@/data/industryChain';
 import { cn } from '@/lib/utils';
 import { ChainLensContext } from './chainLensContext';
+import { isLit } from './chainTargets';
 
 export type ChipAt = 'rowA' | 'rowB' | 'left' | 'right';
 
@@ -63,7 +64,7 @@ export function JointHit({
   const kind = MARGIN_KINDS[joint.margin];
   const word = joint.read[lens].chip;
   const open = selected === id;
-  const lit = shiftTarget(shift, id) !== undefined;
+  const lit = isLit(shift, id);
 
   const w = chipWidth(word);
   const rx = chipAt === 'left' ? chipX - w : chipAt === 'right' ? chipX : chipX - w / 2;
