@@ -119,6 +119,21 @@ describe('ChainPlate at rest', () => {
   });
 });
 
+describe('a page frame that opens the map with a shift on', () => {
+  it('starts with that overlay marked, and lets an address override it', () => {
+    mount(<ChainPlate links={[]} initialShift="green" />);
+    expect(plate().dataset.shift).toBe('green');
+    expect(word('green transition')).toHaveAttribute('aria-pressed', 'true');
+    expect(document.querySelectorAll('.cp-marks--green .cp-mark')).toHaveLength(8);
+  });
+
+  it('yields to the address when the address names an overlay', () => {
+    window.history.replaceState({}, '', '/about?lens=reindustrialisation');
+    mount(<ChainPlate links={[]} initialShift="green" />);
+    expect(plate().dataset.shift).toBe('reindustrialisation');
+  });
+});
+
 describe('the distance control', () => {
   it('steps in from the sentence: every chip re-reads as finance, the lane says so, and the map itself does not change', async () => {
     mount(<ChainPlate links={[]} />);

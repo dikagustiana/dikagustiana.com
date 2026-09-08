@@ -11,7 +11,7 @@
  */
 import fs from 'node:fs';
 
-const MIN_TESTS = 426; // 429 after the condition layer, the cold chain, the popover, the hover label, isolation and the layer switches; slack of 3, not 30.
+const MIN_TESTS = 428; // 431 after the condition layer, the cold chain, the popover, the hover label, isolation, the layer switches and initialShift; slack of 3, not 30.
 
 const reportPath = process.argv[2] ?? 'vitest-report.json';
 if (!fs.existsSync(reportPath)) {

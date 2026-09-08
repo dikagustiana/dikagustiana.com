@@ -98,6 +98,18 @@ iteration behind `main` (the marks, the chip counts and the URL state were alrea
   where the chain stands, not part of its anatomy." The panel's kicker says "Reading · {shift} ·
   {distance}" against "At this joint · {distance}" for anatomy.
 
+## Coordination
+
+- **A parallel draft existed.** While this branch was being finished, pull request #30
+  (`codex/industry-chain-condition-layer`, one commit on the same base) was found open, building a
+  condition layer of its own over twelve of the same files, with the map's tests left red and the
+  headline changed. Nothing was merged here; the pull request for this branch names the overlap and
+  the differences, and the owner chooses. Two older branches (`claude/industry-chain-map-audit-ybm76s`,
+  `codex/industry-chain-audit`) are the sources of #28 and #29 and carry nothing `main` lacks.
+- **`initialShift`** lets a page frame open the same component with an overlay on — the Green
+  Transition section's "Where We Are Now" — while an address still wins. Mounting it there is outside
+  this branch's fence and is listed in the pull request.
+
 ## Held
 
 - Swimlane, left to right. No shape claimed. Four categories kept apart by form. No new palette; every

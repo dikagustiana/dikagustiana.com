@@ -133,10 +133,17 @@ function anchorFor(figure: HTMLElement | null, id: string, shift: ShiftId | null
 export function ChainPlate({
   links = CHAIN_MODULE_LINKS,
   variant = 'full',
+  initialShift = null,
 }: {
   links?: readonly ChainModuleLink[];
   /** `preview` opens short and expands in place; `full` is the whole chain from the start. */
   variant?: 'full' | 'preview';
+  /**
+   * The overlay a page frame opens the map with when the address names none —
+   * the Green Transition section mounts the same component with `green` on.
+   * An address always wins over it.
+   */
+  initialShift?: ShiftId | null;
 }) {
   const base = useId();
   const panelId = `${base}-chain-panel`;
@@ -159,7 +166,7 @@ export function ChainPlate({
   });
 
   const [lens, setLens] = useState<LensId>(fromUrl.lens ?? 'economy');
-  const [shift, setShift] = useState<ShiftId | null>(fromUrl.shift);
+  const [shift, setShift] = useState<ShiftId | null>(fromUrl.shift ?? initialShift);
   const [selected, setSelected] = useState<string | null>(fromUrl.node);
   const [hovered, setHovered] = useState<Hovered | null>(null);
   const [hidden, setHidden] = useState<ReadonlySet<string>>(() => new Set());
