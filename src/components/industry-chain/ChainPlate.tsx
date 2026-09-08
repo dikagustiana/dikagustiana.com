@@ -1,36 +1,31 @@
 /**
  * The industry chain, at two distances — and in motion.
  *
- * One chain. Two distances. Two sentences under the headline contain the
- * controls that change how the same structure is read:
+ * One chain. Two sentences under the headline contain the controls that
+ * change how the same structure is read:
  *
  *   distance   the two lens names in the first sentence. ECONOMY or FINANCE,
  *              always one of them, economy at rest — the reader arrives from
- *              far. The map does not change; the word on every joint does.
+ *              far. The map does not change; the word on every joint does,
+ *              and at FINANCE an open reading isolates its joint: the rest of
+ *              the chain steps back until it is closed.
  *   shift      the two shift words in the second sentence. Neither on is the
- *              resting map; one on rings the joints and layers that shift
- *              moves; the other switches. Each scenario is read separately.
+ *              resting map; one on marks the elements that shift moves, each
+ *              with a numbered disc whose form is its status; the other
+ *              switches. Each scenario is read separately.
  *
- * The two compose. A shift is read at whichever distance is on, in the
- * caption after the figure and in the panel of any lit target — and the
- * reader finds for themselves that the two lenses work on movement as they
- * do on rest.
+ * The two compose. A shift is read at whichever distance is on, in the panel
+ * of any marked element — and the panel speaks in that one voice only. Which
+ * elements are marked is the shift's business alone: move the distance
+ * control and the marks stay where they are, saying something else. The
+ * control says how many marks it would raise before it raises them.
  *
- * Every joint and every layer is a door: it opens the reading of the margin
- * cut there and the line of the accounts that carries it; where the mapping
- * table has pinned curriculum modules to a joint, they follow. A door stays
- * open when a control changes: the same target, read differently.
- *
- * A shift also NUMBERS what it moves. The marks are an index onto the
- * overlay, in the order the marks land on the plate rather than the order of
- * the data file, and they are renumbered from one for each overlay. Which
- * elements are marked is the shift's business and the shift's alone: move the
- * distance control and the marks stay where they are, saying something else.
- * The control says how many marks it would raise before it raises them.
- *
- * Nothing floats. Pointing at a mark, a joint or a layer writes one line into
- * a readout of fixed height under the plate, so no label is ever raised over
- * the element beside the one being pointed at.
+ * Nothing lives under the map. There is no legend, no caption, no list of
+ * what moves and no hint line: every definition is read on the element that
+ * raises the question (hover or focus pins one line beside it), and every
+ * reading opens as a popover beside the element that opened it — a bottom
+ * sheet on a narrow screen. Under the map there is only the button back to
+ * the short version, where the map has one.
  *
  * The state — overlay, distance, open door — is in the address, so an essay
  * can link into the exact reading it argues from and a reader can share what
@@ -44,30 +39,19 @@
  * button; the button, a lens word or a shift word swaps in the full chain.
  */
 
-import { useCallback, useContext, useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react';
-import {
-  CHAIN_COPY,
-  LEVERS,
-  MARGIN_KINDS,
-  SHIFT_BY_ID,
-  SHIFTS,
-  BAND_BY_ID,
-  JOINT_BY_ID,
-  bandChip,
-  type JointId,
-  type LensId,
-  type ShiftId,
-} from '@/data/industryChain';
+import { useCallback, useEffect, useId, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent, type ReactNode } from 'react';
+import { CHAIN_COPY, SHIFT_BY_ID, SHIFTS, type JointId, type LensId, type ShiftId } from '@/data/industryChain';
 import { CHAIN_MODULE_LINKS, locatedModulesByJoint, type ChainModuleLink } from '@/data/chainCurriculumMap';
+import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/ui/sheet';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { cn } from '@/lib/utils';
 import { ChainColumn } from './ChainColumn';
-import { ChainLegend } from './ChainLegend';
-import { ChainReference } from './ChainReference';
-import { ChainLensContext, type ChainLensState } from './chainLensContext';
+import { ChainLensContext, type ChainLensState, type Hovered } from './chainLensContext';
 import { ChainPlateCompact, ChainPlateWide } from './ChainPlateSvg';
+import { ChainPopover } from './ChainPopover';
 import { ChainTargetPanel } from './ChainTargetPanel';
-import { isDoor, isJointId, markArticles, markNumber, markedIds, targetLabel } from './chainTargets';
+import { HoverLabel } from './HoverLabel';
+import { isDoor, isJointId, isolationSet, markNumber, markedIds, targetLabel } from './chainTargets';
 import { initialChainUrl, useChainUrl, type ChainUrlState } from './useChainUrl';
 import './chain-plate.css';
 import './chain-review.css';
@@ -77,23 +61,13 @@ export const WIDE_PLATE_QUERY = '(min-width: 1280px)';
 
 const FOCUS =
   'rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background';
-const KICKER = 'text-[11px] uppercase tracking-[0.18em] text-muted-foreground';
 
 /** One of the two lens names inside the sentence: a position, not a switch — one of the two is always on. */
-function LensWord({
-  id,
-  active,
-  onChoose,
-  children,
-}: {
-  id: LensId;
-  active: boolean;
-  onChoose: (id: LensId) => void;
-  children: string;
-}) {
+function LensWord({ id, active, onChoose, children }: { id: LensId; active: boolean; onChoose: (id: LensId) => void; children: string }) {
   return (
     <button
       type="button"
+      data-chain-control="lens"
       aria-pressed={active}
       onClick={() => onChoose(id)}
       className={cn(
@@ -114,21 +88,12 @@ function LensWord({
  * aria-hidden because the live status line announces it in words; the word
  * itself stays the button's whole accessible name.
  */
-function ShiftWord({
-  id,
-  active,
-  onToggle,
-  children,
-}: {
-  id: ShiftId;
-  active: boolean;
-  onToggle: (id: ShiftId) => void;
-  children: string;
-}) {
+function ShiftWord({ id, active, onToggle, children }: { id: ShiftId; active: boolean; onToggle: (id: ShiftId) => void; children: string }) {
   const count = markedIds(id).length;
   return (
     <button
       type="button"
+      data-chain-control="shift"
       aria-pressed={active}
       onClick={() => onToggle(id)}
       className={cn(
@@ -146,114 +111,6 @@ function ShiftWord({
 }
 
 /**
- * One line under the plate, in place of a tooltip.
- *
- * A floating tooltip on a plate this dense covers the element next to the one
- * being pointed at — the reader loses the neighbour they were comparing it
- * with. This line is always in the document, always the same height, and
- * always in the same place, so nothing moves and nothing is hidden. It reads
- * whatever the pointer or the focus ring is on: a mark by its number, title
- * and how many essays sit behind it; a joint by the margin cut there; a layer
- * by what it charges for.
- */
-function Readout({ hovered, shift, lens }: { hovered: string | null; shift: ShiftId | null; lens: LensId }) {
-  const rest = shift ? CHAIN_COPY.mark.rest : CHAIN_COPY.panel.hint;
-  let line: ReactNode = rest;
-
-  if (hovered) {
-    const n = shift ? markNumber(shift, hovered) : 0;
-    const articles = markArticles(shift, hovered).length;
-    const essays = articles === 0 ? CHAIN_COPY.mark.essayNone : `${articles} ${articles === 1 ? CHAIN_COPY.mark.essayOne : CHAIN_COPY.mark.essayMany}`;
-    const joint = isJointId(hovered) ? JOINT_BY_ID[hovered] : null;
-    const band = BAND_BY_ID[hovered];
-    const detail = joint
-      ? `${MARGIN_KINDS[joint.margin].label} · ${joint.read[lens].chip}`
-      : band
-        ? `${band.margin ? MARGIN_KINDS[band.margin].label : bandChip(band)}`
-        : null;
-    line = (
-      <>
-        {n > 0 && <span className="font-semibold tabular-nums">{n}. </span>}
-        <span className="font-medium text-foreground">{targetLabel(hovered)}</span>
-        {detail && <span className="text-muted-foreground"> · {detail}</span>}
-        {n > 0 && <span className="text-muted-foreground"> · {essays}</span>}
-      </>
-    );
-  }
-
-  return (
-    <p
-      data-chain-readout=""
-      data-readout-target={hovered ?? undefined}
-      className="mt-3 min-h-[2.75rem] border-t border-border pt-2 text-sm leading-snug text-muted-foreground"
-    >
-      {line}
-    </p>
-  );
-}
-
-/** The shift as a whole, read at the distance that is on. Changes with either control. */
-function ShiftCaption({ shift, lens }: { shift: ShiftId; lens: LensId }) {
-  const s = SHIFT_BY_ID[shift];
-  return (
-    <div className="mt-4 max-w-3xl border-l-2 border-accent-editorial pl-4" data-shift-caption={shift}>
-      <p className={KICKER}>
-        {s.label} · {CHAIN_COPY.lensName[lens]}
-      </p>
-      <p className="mt-1 text-sm leading-relaxed text-foreground md:text-base">{s.read[lens]}</p>
-      <p className="mt-1.5 text-xs text-muted-foreground">
-        <span className="uppercase tracking-wider">{CHAIN_COPY.shift.leverKicker}</span>
-        {' — '}
-        {s.levers.map((l) => LEVERS[l].label).join(' · ')}
-      </p>
-    </div>
-  );
-}
-
-/** Under the wide plate: what moves where, one line per lit target, each door among them a button. */
-function ShiftMoves({ shift, lens }: { shift: ShiftId; lens: LensId }) {
-  const { onSelect } = useContext(ChainLensContext);
-  const s = SHIFT_BY_ID[shift];
-  return (
-    <section aria-label={`${CHAIN_COPY.shift.movesHeading} — ${s.label}`} className="mt-4" data-shift-moves={shift}>
-      <h3 className={KICKER}>
-        {CHAIN_COPY.shift.movesHeading} · {CHAIN_COPY.lensName[lens]}
-      </h3>
-      <ul className="mt-2 grid gap-x-8 gap-y-1.5 text-sm text-foreground md:grid-cols-2">
-        {/* In the order the marks are numbered, not the order the data file
-            happens to list them: this list IS the index, so it has to count. */}
-        {[...s.targets]
-          .sort((a, b) => markNumber(shift, a.id) - markNumber(shift, b.id))
-          .map((t) => {
-          const n = markNumber(shift, t.id);
-          return (
-            <li key={t.id} data-move={t.id} className="grid grid-cols-[1.5rem_minmax(0,1fr)]">
-              <span aria-hidden="true" className="tabular-nums font-semibold text-muted-foreground">
-                {n > 0 ? n : '·'}
-              </span>
-              <span>
-                {/* Every marked target opens, whether or not it is a door in
-                    its own right: a mark that could not be opened would be a
-                    number pointing at nothing. */}
-                <button
-                  type="button"
-                  onClick={(e) => onSelect(t.id, e.currentTarget)}
-                  className={cn('text-left font-medium text-foreground hover:text-accent', FOCUS)}
-                >
-                  {targetLabel(t.id)}
-                </button>
-                <span className="text-muted-foreground"> — {t.read[lens]}</span>
-              </span>
-            </li>
-          );
-        })}
-      </ul>
-      <p className="mt-2 text-xs text-muted-foreground">{CHAIN_COPY.shift.hint}</p>
-    </section>
-  );
-}
-
-/**
  * Which targets can be open at all under a shift: every joint and every layer
  * always, plus whatever that shift has marked. A stage or a border is a door
  * only while the overlay that marks it is on, so switching overlays closes a
@@ -261,6 +118,17 @@ function ShiftMoves({ shift, lens }: { shift: ShiftId; lens: LensId }) {
  */
 const canOpen = (id: string | null, shift: ShiftId | null): boolean =>
   id !== null && (isDoor(id) || (shift !== null && markNumber(shift, id) > 0));
+
+/** The element on the plate a reading is anchored to: its mark under a shift, else its own door or form. */
+function anchorFor(figure: HTMLElement | null, id: string, shift: ShiftId | null): Element | null {
+  if (!figure) return null;
+  const q = (sel: string) => figure.querySelector(sel);
+  return (
+    (shift && markNumber(shift, id) > 0 ? q(`.cp-marks--${shift} .cp-mark[data-mark="${id}"]`) : null) ??
+    q(`.cp-hit[data-id="${id}"]`) ??
+    q(`.cp-base [data-id="${id}"]`)
+  );
+}
 
 export function ChainPlate({
   links = CHAIN_MODULE_LINKS,
@@ -293,8 +161,10 @@ export function ChainPlate({
   const [lens, setLens] = useState<LensId>(fromUrl.lens ?? 'economy');
   const [shift, setShift] = useState<ShiftId | null>(fromUrl.shift);
   const [selected, setSelected] = useState<string | null>(fromUrl.node);
-  const [hovered, setHovered] = useState<string | null>(null);
+  const [hovered, setHovered] = useState<Hovered | null>(null);
+  const [hidden, setHidden] = useState<ReadonlySet<string>>(() => new Set());
   const [expanded, setExpanded] = useState(variant === 'full');
+  const [anchor, setAnchor] = useState<Element | null>(null);
   const triggerRef = useRef<Element | null>(null);
   const figureRef = useRef<HTMLElement>(null);
 
@@ -332,9 +202,9 @@ export function ChainPlate({
 
   const onSelect = useCallback(
     (id: string, trigger: Element | null) => {
-      // A door named inside an open reading (a layer in a joint's panel, a
-      // target in the moves list) is about to be re-rendered with it — so the
-      // door the reader actually came through stays the one Close returns to.
+      // A door named inside an open reading (a layer in a joint's panel) is
+      // about to be re-rendered with it — so the door the reader actually
+      // came through stays the one Close returns to.
       const panel = document.getElementById(panelId);
       if (!(trigger && panel?.contains(trigger))) triggerRef.current = trigger;
       setSelected((current) => (current === id ? null : id));
@@ -342,13 +212,59 @@ export function ChainPlate({
     [panelId],
   );
 
+  /** Focus goes back to the door the reader came through, or to the figure when that door is gone. */
+  const returnFocus = useCallback(() => {
+    const t = triggerRef.current;
+    if ((t instanceof HTMLElement || t instanceof SVGElement) && t.isConnected) t.focus({ preventScroll: true });
+    else figureRef.current?.focus({ preventScroll: true });
+  }, []);
+
   const closePanel = useCallback(() => {
     setSelected(null);
-    const t = triggerRef.current;
-    if (t instanceof HTMLElement || t instanceof SVGElement) {
-      if (t.isConnected) t.focus();
-      else figureRef.current?.focus();
-    } else figureRef.current?.focus();
+    // Beside the plate the reading is a plain element, so focus can return at
+    // once. In the sheet a focus trap is still up until it unmounts, so the
+    // sheet returns focus itself, from onCloseAutoFocus.
+    if (wideScreen) returnFocus();
+  }, [wideScreen, returnFocus]);
+
+  const onHover = useCallback((id: string | null, el?: Element | null) => {
+    setHovered(id ? { id, el: el ?? null } : null);
+  }, []);
+
+  // The stages, nodes, returns, borders, rails and shift arrows are static
+  // geometry with no handlers of their own; the figure listens for them, so
+  // every form on the plate reads its definition on hover. The joints, bands,
+  // switches and marks have their own handlers and are left alone here.
+  const baseTarget = (target: EventTarget | null): Element | null => {
+    const el = target instanceof Element ? target : null;
+    const hit = el?.closest('.cp-base [data-id], .cp-shifts .cp-move[data-id]') ?? null;
+    return hit && !hit.closest('.cp-hits, .cp-mark-layer') ? hit : null;
+  };
+  const onFigureOver = useCallback(
+    (e: ReactMouseEvent<HTMLElement>) => {
+      const hit = baseTarget(e.target);
+      if (hit) onHover(hit.getAttribute('data-id'), hit);
+    },
+    [onHover],
+  );
+  const onFigureOut = useCallback(
+    (e: ReactMouseEvent<HTMLElement>) => {
+      const from = baseTarget(e.target);
+      if (!from) return;
+      const to = e.relatedTarget instanceof Element ? e.relatedTarget : null;
+      if (to && from.contains(to)) return;
+      onHover(null);
+    },
+    [onHover],
+  );
+
+  const onToggleLayer = useCallback((id: string) => {
+    setHidden((current) => {
+      const next = new Set(current);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
   }, []);
 
   const toggleExpanded = useCallback(() => {
@@ -365,22 +281,70 @@ export function ChainPlate({
     requestAnimationFrame(() => figureRef.current?.focus());
   }, [expanded]);
 
+  // The popover is anchored to the element that carries the open reading —
+  // its mark under a shift, else its door — found after the plate has drawn
+  // it, so a reading opened from the address is anchored on the first paint.
+  useEffect(() => {
+    if (!wideScreen || showCompact || !selected) {
+      setAnchor(null);
+      return;
+    }
+    setAnchor(anchorFor(figureRef.current, selected, shift));
+  }, [wideScreen, showCompact, selected, shift]);
+
+  // Isolation at the finance distance: everything not in the open reading's
+  // set steps back. Done by marking the plate's own elements, because the
+  // base geometry is static and knows nothing about state.
+  const isolate = wideScreen && !showCompact && lens === 'finance' && selected ? isolationSet(selected) : null;
+  useEffect(() => {
+    const svg = figureRef.current?.querySelector('svg.cp-svg--wide');
+    if (!svg) return;
+    const all = svg.querySelectorAll<Element>('[data-dim]');
+    all.forEach((el) => el.removeAttribute('data-dim'));
+    if (!isolate) return;
+    const keep = isolate;
+    const own = (el: Element) => el.getAttribute('data-id') ?? el.getAttribute('data-for') ?? el.getAttribute('data-mark') ?? el.getAttribute('data-switch');
+    // The flows that pass through a kept joint stay with it.
+    const centres = Array.from(keep)
+      .filter(isJointId)
+      .map((jid) => svg.querySelector(`.cp-hit[data-id="${jid}"] .cp-joint-mark`))
+      .filter((el): el is SVGGraphicsElement => !!el && 'getBBox' in el)
+      .map((el) => {
+        const b = el.getBBox();
+        return { x: b.x + b.width / 2, y: b.y + b.height / 2 };
+      });
+    const throughKept = (el: Element) => {
+      if (!('getBBox' in el)) return false;
+      const b = (el as SVGGraphicsElement).getBBox();
+      return centres.some((c) => c.x >= b.x - 3 && c.x <= b.x + b.width + 3 && c.y >= b.y - 3 && c.y <= b.y + b.height + 3);
+    };
+    svg.querySelectorAll<Element>('.cp-base > *, .cp-hits > *, .cp-shifts .cp-lit, .cp-shifts .cp-move, .cp-shifts .cp-callout, .cp-mark').forEach((el) => {
+      const id = own(el);
+      if (id && keep.has(id)) return;
+      if (el.classList.contains('cp-flow') && throughKept(el)) return;
+      el.setAttribute('data-dim', '');
+    });
+  }, [isolate, shift, lens]);
+
   const lensState = useMemo<ChainLensState>(
-    () => ({ lens, shift, selected, onSelect, hovered, onHover: setHovered, panelId }),
-    [lens, shift, selected, onSelect, hovered, panelId],
+    () => ({ lens, shift, selected, onSelect, hovered, onHover, hidden, onToggleLayer, panelId }),
+    [lens, shift, selected, onSelect, hovered, onHover, hidden, onToggleLayer, panelId],
   );
 
   const renderPanel = useCallback(
-    (id: string, inline = false): ReactNode => (
+    (id: string, opts: { inline?: boolean; hideClose?: boolean } = {}): ReactNode => (
       <ChainTargetPanel
         id={id}
         moduleSlugs={isJointId(id) ? modulesByJoint[id as JointId] ?? [] : []}
         onClose={closePanel}
         panelId={panelId}
-        inline={inline}
-      />
+        inline={opts.inline}
+        hideClose={opts.hideClose}
+      >
+        {isolate && <p className="mt-2 text-xs text-muted-foreground">{CHAIN_COPY.controls.isolated}</p>}
+      </ChainTargetPanel>
     ),
-    [modulesByJoint, closePanel, panelId],
+    [modulesByJoint, closePanel, panelId, isolate],
   );
 
   const { lead, shiftLead } = CHAIN_COPY;
@@ -388,7 +352,13 @@ export function ChainPlate({
   const marks = shift ? markedIds(shift).length : 0;
 
   return (
-    <div className="chain-plate" data-lens={lens} data-shift={shift ?? undefined} data-view={showCompact ? 'compact' : 'full'}>
+    <div
+      className="chain-plate"
+      data-lens={lens}
+      data-shift={shift ?? undefined}
+      data-view={showCompact ? 'compact' : 'full'}
+      data-isolate={isolate ? selected ?? undefined : undefined}
+    >
       <header className="max-w-3xl">
         <h2 className="font-display text-2xl font-semibold leading-tight tracking-tight text-foreground md:text-3xl [text-wrap:balance]">
           {CHAIN_COPY.headline}
@@ -407,7 +377,7 @@ export function ChainPlate({
           </LensWord>
           {lead.after}
         </p>
-        <p className="mt-2 text-sm leading-relaxed text-muted-foreground md:text-base">
+        <p className="mt-2 text-sm leading-relaxed text-muted-foreground md:text-base" data-chain-shift-lead>
           {shiftLead.before}
           <ShiftWord id={reindus.id} active={shift === reindus.id} onToggle={toggleShift}>
             {reindus.word}
@@ -419,42 +389,75 @@ export function ChainPlate({
           {shiftLead.after}
         </p>
         <div className="mt-2 flex flex-wrap items-center gap-x-4 text-sm text-muted-foreground">
-          <button type="button" aria-pressed={shift === null} onClick={() => chooseShift(null)}
-            className={cn('min-h-11 border-b text-foreground', shift === null ? 'border-foreground font-medium' : 'border-transparent', FOCUS)}>
+          <button
+            type="button"
+            data-chain-control="shift"
+            aria-pressed={shift === null}
+            onClick={() => chooseShift(null)}
+            className={cn('min-h-11 border-b text-foreground', shift === null ? 'border-foreground font-medium' : 'border-transparent', FOCUS)}
+          >
             {CHAIN_COPY.controls.noShift}
           </button>
           <span role="status" aria-live="polite" aria-atomic="true">
             {CHAIN_COPY.lensName[lens]} · {shift ? SHIFT_BY_ID[shift].label : CHAIN_COPY.controls.noShift}
-            {shift && ` · ${marks} ${marks === 1 ? CHAIN_COPY.mark.markOne : CHAIN_COPY.mark.markMany}`}
+            {shift && ` · ${CHAIN_COPY.status.marks(marks)}`}
+            {selected && ` · ${targetLabel(selected)}`}
           </span>
         </div>
-        {!showCompact && <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{CHAIN_COPY.scopeLead}</p>}
+        {!showCompact && (
+          <p className="mt-3 text-sm leading-relaxed text-muted-foreground" data-chain-scope>
+            {CHAIN_COPY.scopeLead}
+          </p>
+        )}
       </header>
 
       <ChainLensContext.Provider value={lensState}>
         {/* Below the plate's width the column is the map, and a column is
-            read at reading width — not stretched across a tablet. */}
+            read at reading width — not stretched across a tablet. The figure
+            is the positioning context for the popover and the hover label. */}
         <figure
           id={figureId}
           ref={figureRef}
           tabIndex={-1}
-          className={cn('mt-8 outline-none', !wideScreen && 'max-w-2xl', FOCUS)}
+          className={cn('relative mt-8 outline-none', !wideScreen && 'max-w-2xl', FOCUS)}
+          onMouseOver={wideScreen ? onFigureOver : undefined}
+          onMouseOut={wideScreen ? onFigureOut : undefined}
         >
-          {wideScreen ? (
-            showCompact ? (
-              <ChainPlateCompact />
-            ) : (
-              <ChainPlateWide />
-            )
-          ) : (
-            <ChainColumn variant={showCompact ? 'compact' : 'full'} panel={(id) => renderPanel(id, true)} />
+          {wideScreen ? showCompact ? <ChainPlateCompact /> : <ChainPlateWide /> : <ChainColumn variant={showCompact ? 'compact' : 'full'} />}
+
+          {/* No label for the element whose reading is already open: the reading says it all. */}
+          {wideScreen && !showCompact && (
+            <HoverLabel hovered={hovered && hovered.id !== selected ? hovered : null} figure={figureRef.current} shift={shift} lens={lens} />
+          )}
+
+          {wideScreen && !showCompact && selected && (
+            <ChainPopover anchor={anchor} figure={figureRef.current} onClose={closePanel}>
+              {renderPanel(selected)}
+            </ChainPopover>
           )}
         </figure>
 
-        {!showCompact && wideScreen && <Readout hovered={hovered} shift={shift} lens={lens} />}
-
-        {/* Keep the plate anchored when the scenario caption changes length. */}
-        {shift && !showCompact && <ShiftCaption shift={shift} lens={lens} />}
+        {/* A phone has no hover and no room beside a row: a reading opens as a bottom sheet. */}
+        {!wideScreen && !showCompact && (
+          <Sheet open={!!selected} onOpenChange={(open) => !open && closePanel()}>
+            {selected && (
+              <SheetContent
+                side="bottom"
+                data-chain-sheet=""
+                className="max-h-[85vh] overflow-y-auto rounded-t-lg p-4 pt-3"
+                // Close returns focus to the row that opened the reading, once the trap is down.
+                onCloseAutoFocus={(e) => {
+                  e.preventDefault();
+                  returnFocus();
+                }}
+              >
+                <SheetTitle className="sr-only">{targetLabel(selected)}</SheetTitle>
+                <SheetDescription className="sr-only">{CHAIN_COPY.panel.close}</SheetDescription>
+                {renderPanel(selected, { inline: true, hideClose: true })}
+              </SheetContent>
+            )}
+          </Sheet>
+        )}
 
         {variant === 'preview' && (
           <button
@@ -469,26 +472,6 @@ export function ChainPlate({
           >
             {expanded ? CHAIN_COPY.controls.seeCompact : CHAIN_COPY.controls.seeFull}
           </button>
-        )}
-
-        {!showCompact && wideScreen && shift && !selected && <ShiftMoves shift={shift} lens={lens} />}
-
-        {!showCompact && wideScreen && selected && renderPanel(selected)}
-
-        {!showCompact && wideScreen && <ChainReference />}
-
-        {!showCompact && (
-          <details className="mt-5 max-w-3xl border-t border-border text-sm text-muted-foreground">
-            <summary className={cn('min-h-11 cursor-pointer py-3 font-medium text-foreground', FOCUS)}>{CHAIN_COPY.reference.basis}</summary>
-            <p className="mb-3 leading-relaxed">{CHAIN_COPY.scope}</p>
-            <p className="leading-relaxed">{CHAIN_COPY.basis}</p>
-          </details>
-        )}
-
-        {!showCompact && (
-          <div className={cn(!wideScreen && 'max-w-2xl')}>
-            <ChainLegend collapsible={!wideScreen} />
-          </div>
         )}
       </ChainLensContext.Provider>
     </div>

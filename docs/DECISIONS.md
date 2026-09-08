@@ -5,6 +5,118 @@ alternatives. Newest first.
 
 ---
 
+# 2026-09-08 — The condition layer: a status on every mark, a reading in one voice, and nothing under the map
+
+**The owner's brief of 2026-09-08 named one priority above all others: the map was anatomy, and its
+job is condition — where the chain stands, what holds it, which lever moves it, who pays.** This pass
+builds that layer (§6.5 of the brief), reworks the panels and controls around it (§6.1–6.3), adds
+isolation at the finance distance (§6.6a) and per-layer switches (§6.6b), and clears everything from
+under the plate (§6.5d). It ran on a branch and stopped at a pull request; it touched the map's
+components, data file, generator and tests, and nothing else. Every visual judgement was made on
+renders taken in this session at 1440px, 1280px and 360px; the brief's screenshots were one
+iteration behind `main` (the marks, the chip counts and the URL state were already there).
+
+## Decisions
+
+- **A mark is a promise of a status and a reading, and a status is the one thing it cannot do
+  without.** `ShiftTarget.condition` carries `status` — stuck, moving or unpriced, and only those
+  three — plus four two-voice slots: `now`, `holds`, `action` (what the lever does here) and `funds`,
+  each a `LensNote`. `isMarked` is now "has a condition". Removing a target's condition parks it: no
+  mark, no gap, the numbers close up. The four lines are the owner's; `UNWRITTEN` marks the empty
+  slots and the panel omits them rather than showing a placeholder. The earlier "what moves here"
+  readings became the `action` line, because that is what they always described.
+- **Statuses are provisional and say so.** Each was set from the brief's own examples (the floor
+  logistics sets: stuck; formal recovery: unpriced; a policy or investment under way: moving) and
+  the existing reading of the target. The pull request lists every one for the owner to confirm or
+  flip; a unit test pins only the two the brief itself gives.
+- **Status is told by form, never by colour alone.** On the plate: a heavy outline for stuck, a plain
+  one for moving, a dashed one for unpriced; the numbered disc is filled, open or dashed to match;
+  the border line goes solid when stuck. In the panel and the column the badge is a filled, open or
+  dashed square beside the word. One accent still means one thing — a shift.
+- **The panel speaks in one voice.** The "Two distances" block is gone from every panel. A reading
+  under a shift is the six blocks the brief fixes, in that order: name and status badge; where it
+  stands; what holds it; the lever and what it does here; who finances it; the essays. An anatomy
+  panel (a joint or a layer at rest) reads its margin kind, its meaning, the control test, the one
+  distance that is on, the lines of the accounts and the layers riding on it. Under a shift the
+  anatomy folds beneath the reading, closed, so the reading is not lost under definitions.
+- **Nothing under the map.** Removed outright: the shift caption and its lever line, the "What moves"
+  list, the readout line, the "Read the chain at text size" reference, the "How the two distances
+  relate" fold, the legend and its footnote. What stays is the button back to the short version. The
+  footnote about functions versus firms and principal versus agent became one line over the plate.
+- **Definitions moved to the element.** Hover or focus pins one line beside the thing itself — a
+  node reads "takes title, transforms nothing; revenue gross; its margin is a spread", a joint reads
+  its margin kind with the service performed there, a mark reads its number, title, status and essay
+  count. The label is placed by trying above, below, right and left and taking the position that
+  covers the least of the plate's own ink, clamped inside the figure, and it never covers its own
+  anchor. The static geometry is reached by event delegation on the figure; the joints, bands and
+  marks keep their own handlers. `DEFINE` in the data file holds the words the legend used to hold.
+- **A reading opens beside its mark.** On the wide plate the panel is a popover inside the figure —
+  below the anchor where there is room, else above, else beside, always clamped inside the figure and
+  capped to its height — closed by Close, Escape or a click outside. On a narrow screen it is a
+  bottom sheet (Radix Dialog), because a phone has no hover and no room beside a row; the sheet
+  carries the one close control and returns focus to the row once its trap is down. Rejected:
+  keeping the panel under the plate — the brief's rule is that the eye must not leave the element.
+- **Finance isolates.** At the finance distance an open joint keeps itself, its two hands and the
+  layers riding on it; the rest of the plate steps back to a tenth. A stage or node keeps the joints
+  that touch it. A layer, border or return isolates nothing. Done by marking `data-dim` on the
+  plate's elements from an effect, because the generated geometry knows nothing about state.
+  Economy never isolates: from far, the whole chain is the reading.
+- **The layers sit directly under the chain and are ticked where they attach.** The vertical order
+  under the chain is now reading lane, bands, rails. Money and information run the length of the
+  chain and attach nowhere in particular, so they take the bottom. Each fee-earning band is ticked
+  with a small filled square at every joint it rides on; governance is ticked open at the three joints
+  it governs; regulation has no tick. The "Fee" chip at the far right of each row is gone: the fee is
+  read where it is paid, and the word "fee" follows the band's label.
+- **The cold chain is its own band**, production → consumption, a fee, attaching at the moves. It is
+  split from logistics because it does more than add a fee: a node that cannot keep the cold cannot
+  hold the stock, so it decides which intermediaries can exist. The green transition marks it stuck,
+  alongside logistics.
+- **Energy is drawn as an input into every stage, and kept as a layer.** A short dotted arrow rises
+  into the bottom edge of every stage box, and the energy band is ticked with a rising arrow under
+  each; the band itself stays, because the brief's own list of layers names energy and the green
+  overlay must be able to mark it. A full riser from the band to each stage was rejected: the stages
+  are stacked in pairs (packaging over manufacturing, the two origins, consumption over recovery) and
+  a riser to the upper box would cross the lower one.
+- **The margin kind is told by the joint mark, not the chip's border.** A filled diamond where a
+  stage sells (conversion), an open diamond where a node sells (spread), a square where a fee is paid.
+  The chip is a reading and only a reading; its border no longer varies. "Terms" and "Rules" are gone
+  as chip words — a layer that earns nothing is not a fourth kind of margin, and it says so on hover.
+- **Two economy chips renamed.** "Basic industry" (a sector) → "Producer prices"; "Intermediate
+  input" (a kind of good) → "Input–output link". Every economy chip is now the macro variable that
+  enters at that joint.
+- **Arrows of movement.** The reindustrialisation cut still moves right; the green transition gains
+  a `price` move — a short arrow into the consumption → recovery ring, in the gap between the two
+  boxes it sits between, with the callout "Who pays for recovery?" carrying the words.
+- **Per-layer switches.** A small square at the left end of each band turns that layer off on its
+  own; the band, its ticks and its mark fade but keep their place, and the marks keep their numbers.
+  The shift control is untouched: still exclusive.
+- **Marks are placed by collision, and their order by intent.** Each kind of target has a list of
+  candidate places; the first that lands on no box, chip, band, border line, arrow or earlier mark
+  is taken. The reading order is decided by the first candidate — where the mark belongs — so a mark
+  that has to step aside keeps its place in the sequence.
+- **The shift sentence draws the line the brief asks for**: "What a shift marks is my reading of
+  where the chain stands, not part of its anatomy." The panel's kicker says "Reading · {shift} ·
+  {distance}" against "At this joint · {distance}" for anatomy.
+
+## Held
+
+- Swimlane, left to right. No shape claimed. Four categories kept apart by form. No new palette; every
+  colour a token. No figures. The headline and standfirst verbatim. The landing page keeps its hero
+  and its short chain. `chain-plate.css`, `ChainPlateSvg.tsx` and `chainMarkOrder.ts` are generated
+  — edit the generator. The URL parameters are the owner's spelling.
+
+## What a future session must not undo by accident
+
+- A mark exists only where a condition exists; the four lines are never faked. Tests assert both.
+- Status by form: heavy / plain / dashed on the plate, filled / open / dashed on the disc and badge.
+- One voice per panel. A test asserts no panel carries two distances.
+- Nothing under the plate but the controls and the back button. A test asserts the figure is last.
+- Six layers in this order: logistics, cold chain, credit, energy, governance, regulation; bands
+  before rails. Tests pin the order and the geometry.
+- Test floor raised 407 → 426 (429 tests).
+
+---
+
 # 2026-09-06 (later) — Numbered marks, a slug per element, and the map's state in the address
 
 **The owner's audit brief of 2026-09-06 asked for a completeness pass first and aesthetics second:

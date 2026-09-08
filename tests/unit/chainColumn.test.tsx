@@ -1,11 +1,14 @@
 /**
  * The chain on a narrow screen: a column, not a shrunken plate. Every joint
- * is a tappable row with its chip — the joint read at the distance that is
- * on — that opens its reading right beneath it; the layers are a list whose
- * rows open; returns and the money and information flows sit behind two
- * toggles, off by default; a shift outlines the rows it moves and writes
- * what moves there beneath them. And the column draws exactly the records
- * the wide plate draws — a parity test keeps the two layouts from drifting.
+ * is a tappable row whose mark is the form of its margin kind and whose chip
+ * is the joint read at the distance that is on; a reading opens as a bottom
+ * sheet, because a phone has no hover and no room beside a row; the layers
+ * are a list whose rows open the same way; returns and the money and
+ * information flows sit behind two toggles, off by default; a shift outlines
+ * the rows it moves in the form of their status and writes the status and the
+ * lever's work beneath each, in one voice. There is no legend: every form
+ * carries its own definition. And the column draws exactly the records the
+ * wide plate draws — a parity test keeps the two layouts from drifting.
  */
 
 import { readFileSync } from 'node:fs';
@@ -22,7 +25,9 @@ import {
   BYPRODUCT,
   CHAIN_COPY,
   COMPACT,
+  DEFINE,
   JOINTS,
+  LEVERS,
   MARGIN_KINDS,
   NODES,
   NON_PHYSICAL,
@@ -31,6 +36,7 @@ import {
   RETURNS,
   SHIFT_BY_ID,
   STAGES,
+  STATUS,
 } from '@/data/industryChain';
 
 vi.mock('@/integrations/supabase/client', () => ({ supabase: { from: vi.fn() } }));
@@ -67,6 +73,8 @@ function mount(ui: ReactElement) {
 const ids = () => new Set(Array.from(document.querySelectorAll<HTMLElement>('[data-id]')).map((el) => el.dataset.id!));
 const word = (name: string) => screen.getByRole('button', { name, exact: true });
 const rowChips = () => Array.from(document.querySelectorAll('[data-id^="j-"] button [data-chip]')).map((c) => c.textContent);
+/** The one reading open, wherever the sheet has put it. */
+const region = (name: string) => screen.getByRole('region', { name });
 
 beforeEach(() => {
   narrowScreen();
@@ -78,30 +86,38 @@ afterEach(() => {
 });
 
 describe('the column', () => {
-  it('replaces the plate: one column, no svg, the headline still first', () => {
+  it('replaces the plate: one column, no svg, the headline still first, nothing under it', () => {
     mount(<ChainPlate links={[]} />);
     expect(document.querySelectorAll('.cp-column[data-variant="full"]')).toHaveLength(1);
     expect(document.querySelector('svg.cp-svg')).toBeNull();
     expect(screen.getByRole('heading', { name: CHAIN_COPY.headline })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'How to read the map' })).not.toBeInTheDocument();
+    expect(screen.queryByText('How the two distances relate')).not.toBeInTheDocument();
   });
 
-  it('makes every joint a tappable row, and opens its reading right beneath it', async () => {
+  it('makes every joint a tappable row marked in the form of its margin kind, and opens its reading as a bottom sheet', async () => {
     mount(<ChainPlate links={[]} />);
-    for (const j of JOINTS) expect(screen.getByRole('button', { name: j.label })).toHaveAttribute('aria-expanded', 'false');
+    for (const j of JOINTS) {
+      expect(screen.getByRole('button', { name: j.label })).toHaveAttribute('aria-expanded', 'false');
+      expect(document.querySelector(`[data-id="${j.id}"] [data-mark-form]`)!.getAttribute('data-mark-form')).toBe(MARGIN_KINDS[j.margin].mark);
+    }
 
     const trigger = screen.getByRole('button', { name: 'Trader / importer → manufacturing' });
     await userEvent.click(trigger);
-    const panel = screen.getByRole('region', { name: 'Trader / importer → manufacturing' });
+    const panel = region('Trader / importer → manufacturing');
     expect(trigger).toHaveAttribute('aria-expanded', 'true');
+    expect(panel.closest('[data-chain-sheet]')).not.toBeNull();
+    expect(panel.closest('[role="dialog"]')).not.toBeNull();
     expect(within(panel).getByText(MARGIN_KINDS['node-spread'].label)).toBeInTheDocument();
-    // The reading follows the row that opened it: it comes after the trigger, before the next stage box.
-    const order = Array.from(
-      document.querySelectorAll('[data-id="j-trader-manufacturing"], section[aria-labelledby$="-chain-panel-title"], [data-id="stage-manufacturing"]'),
-    );
-    expect(order.map((el) => el.tagName)).toEqual(['DIV', 'SECTION', 'DIV']);
+    // One voice: the economy reading, and not the finance one beneath it.
+    const j = JOINTS.find((x) => x.id === 'j-trader-manufacturing')!;
+    expect(within(panel).getByText(j.read.economy.note)).toBeInTheDocument();
+    expect(within(panel).queryByText(j.read.finance.note)).not.toBeInTheDocument();
     expect(within(panel).getByRole('heading', { level: 3 })).toHaveFocus();
 
-    await userEvent.click(within(panel).getByRole('button', { name: CHAIN_COPY.panel.close }));
+    // The sheet carries the one close control; the panel does not repeat it.
+    expect(within(panel).queryByRole('button', { name: CHAIN_COPY.panel.close })).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: CHAIN_COPY.panel.close }));
     expect(document.querySelector('section[aria-labelledby$="-chain-panel-title"]')).toBeNull();
     expect(trigger).toHaveFocus();
   });
@@ -133,17 +149,21 @@ describe('the column', () => {
     expect(screen.getByText('Trade credit · trade promotion · rebates')).toBeInTheDocument();
   });
 
-  it('lists the five layers as rows that open, with their span in words', async () => {
+  it('lists the six layers as rows that open, with their span in words, and no chip word on a layer that only sets the terms', async () => {
     mount(<ChainPlate links={[]} />);
     const list = screen.getByRole('heading', { name: CHAIN_COPY.controls.layers }).parentElement!;
     for (const b of BANDS) expect(within(list).getByRole('button', { name: new RegExp(b.label) })).toHaveAttribute('aria-expanded', 'false');
     expect(within(list).getAllByText('The whole chain').length).toBeGreaterThan(0);
     expect(within(list).getByRole('button', { name: /^Energy/ })).toBeInTheDocument();
+    expect(within(list).getByRole('button', { name: /^Cold chain/ })).toBeInTheDocument();
+    expect(within(list).queryByText('Terms')).not.toBeInTheDocument();
+    expect(within(list).queryByText('Rules')).not.toBeInTheDocument();
 
-    await userEvent.click(within(list).getByRole('button', { name: /Credit and working capital/ }));
-    const panel = screen.getByRole('region', { name: 'Credit and working capital' });
+    const credit = within(list).getByRole('button', { name: /Credit and working capital/ });
+    await userEvent.click(credit);
+    const panel = region('Credit and working capital');
     expect(within(panel).getByText(/Finance income and finance cost/)).toBeInTheDocument();
-    expect(within(list).getByRole('button', { name: /Credit and working capital/ })).toHaveAttribute('aria-expanded', 'true');
+    expect(credit).toHaveAttribute('aria-expanded', 'true');
   });
 
   it('cuts the chain with the two border lines at their joints', () => {
@@ -153,13 +173,15 @@ describe('the column', () => {
     expect(screen.getByText('Import')).toBeInTheDocument();
   });
 
-  it('closes the legend by default on a narrow screen, and opens it on request', async () => {
+  it('carries no legend: each form says what it is on the element itself', () => {
     mount(<ChainPlate links={[]} />);
-    const trigger = screen.getByRole('button', { name: CHAIN_COPY.controls.legend });
-    expect(trigger).toHaveAttribute('aria-expanded', 'false');
-    expect(document.querySelector('[data-legend="stage"]')).toBeNull();
-    await userEvent.click(trigger);
-    expect(document.querySelector('[data-legend="stage"]')).not.toBeNull();
+    expect(document.querySelector('[data-legend]')).toBeNull();
+    expect(document.querySelector('[data-id="node-aggregation"]')!.getAttribute('title')).toBe(DEFINE.node);
+    expect(document.querySelector('[data-id="stage-processing"]')!.getAttribute('title')).toBe(DEFINE.stage);
+    expect(document.querySelector('[data-id="stage-biological"]')!.getAttribute('title')).toBe(DEFINE.origin);
+    expect(document.querySelector('[data-id="node-retail"]')!.getAttribute('title')).toBe(DEFINE.retail);
+    const button = screen.getByRole('button', { name: 'Processing → trader / importer' });
+    expect(document.getElementById(button.getAttribute('aria-describedby')!)!.textContent).toContain(MARGIN_KINDS.conversion.label);
   });
 
   it('never fixes a width or forbids wrapping, so nothing can be wider than the screen', () => {
@@ -169,20 +191,25 @@ describe('the column', () => {
 });
 
 describe('a shift on a narrow screen', () => {
-  it('outlines exactly the rows it moves, writes what moves beneath each at the distance that is on, and captions the whole', async () => {
+  it('outlines exactly the rows it moves in the form of their status, writes the status and the lever beneath each in one voice, and nothing under the column', async () => {
     mount(<ChainPlate links={[]} />);
     await userEvent.click(word('reindustrialisation'));
     const s = SHIFT_BY_ID.reindustrialisation;
     const lit = Array.from(document.querySelectorAll<HTMLElement>('[data-id][data-lit]')).map((el) => el.dataset.id!).sort();
     expect(lit).toEqual(s.targets.map((t) => t.id).sort());
     for (const t of s.targets) {
-      expect(document.querySelector(`[data-lit-note="${t.id}"]`)!.textContent, t.id).toContain(t.read.economy);
+      const note = document.querySelector(`[data-lit-note="${t.id}"]`)!;
+      expect(note.getAttribute('data-status'), t.id).toBe(t.condition!.status);
+      expect(note.textContent, t.id).toContain(STATUS[t.condition!.status].label);
+      expect(note.textContent, t.id).toContain(LEVERS[t.condition!.lever].label);
+      expect(note.textContent, t.id).toContain(t.condition!.action.economy);
+      expect(note.textContent, t.id).not.toContain(t.condition!.action.finance);
     }
-    expect(document.querySelector('[data-shift-caption="reindustrialisation"]')!.textContent).toContain(s.read.economy);
+    expect(document.querySelector('[data-shift-caption]')).toBeNull();
 
     await userEvent.click(word('finance'));
     for (const t of s.targets) {
-      expect(document.querySelector(`[data-lit-note="${t.id}"]`)!.textContent, t.id).toContain(t.read.finance);
+      expect(document.querySelector(`[data-lit-note="${t.id}"]`)!.textContent, t.id).toContain(t.condition!.action.finance);
     }
   });
 
@@ -195,7 +222,6 @@ describe('a shift on a narrow screen', () => {
     expect(within(loop as HTMLElement).getByText('Post-consumer material')).toBeInTheDocument();
     expect(within(loop as HTMLElement).getByText('Post-consumer organic')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: CHAIN_COPY.controls.returns })).toHaveAttribute('aria-pressed', 'false');
-    // The list, once opened, carries the same rows lit — and the inline loop steps aside.
     await userEvent.click(screen.getByRole('button', { name: CHAIN_COPY.controls.returns }));
     expect(document.querySelector('[data-lit-returns]')).toBeNull();
     expect(document.querySelector('[data-id="return-postconsumer-material"][data-lit]')).not.toBeNull();
@@ -236,11 +262,7 @@ describe('the short version on a narrow screen', () => {
   it('draws exactly COMPACT — six stages, three groups, two layers, one return — with no doors', async () => {
     mount(<ChainPlate variant="preview" links={[]} />);
     expect(document.querySelectorAll('.cp-column[data-variant="compact"]')).toHaveLength(1);
-    const expected = new Set<string>([
-      ...COMPACT.sequence.flatMap((s) => (s.kind === 'stages' ? s.ids : [s.id])),
-      ...COMPACT.bands,
-      COMPACT.returnArrow.id,
-    ]);
+    const expected = new Set<string>([...COMPACT.sequence.flatMap((s) => (s.kind === 'stages' ? s.ids : [s.id])), ...COMPACT.bands, COMPACT.returnArrow.id]);
     expect(ids()).toEqual(expected);
     for (const j of JOINTS) expect(screen.queryByRole('button', { name: j.label })).not.toBeInTheDocument();
     expect(screen.getByText('Aggregator')).toBeInTheDocument();
@@ -253,32 +275,31 @@ describe('the short version on a narrow screen', () => {
 });
 
 describe('a mark on a narrow screen', () => {
-  it('opens the panel it promises: the number is the control, and both distances follow under the row', async () => {
+  it('opens the reading it promises as a bottom sheet: the number is the control, and the sheet speaks in the one voice that is on', async () => {
     mount(<ChainPlate links={[]} />);
     await userEvent.click(word('green transition'));
 
-    // A stage the overlay marks is not a door in its own right, so its number
-    // is the only thing that can open it.
-    const badge = screen.getByRole('button', { name: /^3\. Green transition · Recovery$/ });
+    const badge = screen.getByRole('button', { name: /^4\. Green transition · Recovery · Unpriced$/ });
     expect(badge).toHaveAttribute('aria-expanded', 'false');
     await userEvent.click(badge);
 
-    const panel = screen.getByRole('region', { name: 'Recovery' });
-    const target = SHIFT_BY_ID.green.targets.find((t) => t.id === 'stage-recovery')!;
-    expect(within(panel).getByText(target.read.economy)).toBeInTheDocument();
-    // The panel is what the inline note is not: BOTH distances, not just the one that is on.
-    expect(within(panel).getByText(target.read.finance)).toBeInTheDocument();
+    const panel = region('Recovery');
+    expect(panel.closest('[data-chain-sheet]')).not.toBeNull();
+    const target = SHIFT_BY_ID.green.targets.find((t) => t.id === 'stage-recovery')!.condition!;
+    expect(within(panel).getByText(target.action.economy)).toBeInTheDocument();
+    expect(within(panel).queryByText(target.action.finance)).not.toBeInTheDocument();
+    expect(within(panel).getByText('Unpriced')).toBeInTheDocument();
     expect(badge).toHaveAttribute('aria-expanded', 'true');
   });
 
-  it('renders the panel a shared address asks for, so a link made on the wide plate still lands on a phone', () => {
+  it('renders the reading a shared address asks for, so a link made on the wide plate still lands on a phone', () => {
     window.history.replaceState({}, '', '/about?lens=green&node=recovery');
     mount(<ChainPlate links={[]} />);
     expect(document.querySelector('.cp-column[data-variant="full"]')).not.toBeNull();
-    expect(screen.getByRole('region', { name: 'Recovery' })).toBeInTheDocument();
+    expect(region('Recovery')).toBeInTheDocument();
   });
 
-  it('leaves a joint and a layer to place their own panel: one panel per target, never two', async () => {
+  it('opens one reading per target, never two', async () => {
     mount(<ChainPlate links={[]} />);
     await userEvent.click(word('green transition'));
     await userEvent.click(screen.getByRole('button', { name: 'Consumption → recovery' }));
