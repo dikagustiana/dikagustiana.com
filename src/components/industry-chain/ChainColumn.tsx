@@ -8,25 +8,30 @@
  * The two origins and the two side inputs sit two abreast where the chain
  * actually forks. The enabling layers become a list whose rows open; return
  * flows and the money and information flows are lists behind two toggles,
- * off by default. Under a shift, the rows it moves are outlined and carry
- * what moves there, right beneath them; nothing is dimmed, because a long
- * column read at arm's length cannot afford to lose contrast.
+ * off by default. Under a shift, the rows it moves are outlined in the form
+ * of their status and carry the status word and the lever's work there,
+ * right beneath them; nothing is dimmed, because a long column read at arm's
+ * length cannot afford to lose contrast. A reading opens as a bottom sheet
+ * (ChainPlate owns it): a phone has no hover and no room beside a row.
  *
  * Same data file, same controls, same panel as the wide plate. The order of
  * rows here is layout; every word is a record in src/data/industryChain.ts.
  * `variant="compact"` draws the short version from COMPACT: no joints, no
- * layers list, no toggles, no small labels.
+ * layers list, no toggles, no small labels. There is no legend: every form
+ * carries its own definition in its accessible description.
  */
 
-import { createContext, useContext, useId, useState, type ReactNode } from 'react';
+import { useContext, useId, useState, type ReactNode } from 'react';
 import {
   BANDS,
   BORDERS,
   BYPRODUCT,
   CHAIN_COPY,
   COMPACT,
+  DEFINE,
   FLOW_KIND_LABELS,
   JOINT_BY_ID,
+  LEVERS,
   MARGIN_KINDS,
   NODES,
   NON_PHYSICAL,
@@ -35,26 +40,19 @@ import {
   RETURNS,
   STAGES,
   SHIFT_BY_ID,
+  STATUS,
   bandChip,
+  isWritten,
   shiftTarget,
   type Band,
   type CompactStep,
   type JointId,
   type MarginKind,
 } from '@/data/industryChain';
-import { universalEssayUrl } from '@/lib/essayUrl';
 import { cn } from '@/lib/utils';
-import { Link } from 'react-router-dom';
+import { StatusBadge } from './ChainTargetPanel';
 import { ChainLensContext } from './chainLensContext';
 import { isDoor, markNumber } from './chainTargets';
-
-/**
- * The panel renderer, shared with every row rather than passed down through
- * six components that have no other use for it. A joint row and a layer row
- * place their own panel; a marked stage, node, border or return places it
- * from inside its note, because that is the only thing it has.
- */
-const PanelRenderer = createContext<(id: string) => ReactNode>(() => null);
 
 const S = Object.fromEntries(STAGES.map((s) => [s.id, s]));
 const N = Object.fromEntries([...NODES, ...RETAIL].map((n) => [n.id, n]));
@@ -67,8 +65,10 @@ const labelOf = (id: string) =>
 
 const FOCUS = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background';
 const KICKER = 'text-[10px] uppercase tracking-[0.16em] text-muted-foreground';
-/** A target the shift that is on moves: the same ring the wide plate draws, as an outline. */
-const LIT = 'outline outline-2 outline-offset-2 outline-accent-editorial';
+/** A target the shift that is on moves: an outline in the form of its status — heavy, plain or dashed. */
+const LIT = 'outline outline-offset-2 outline-accent-editorial';
+const litForm = (status?: string) =>
+  status === 'stuck' ? `${LIT} outline-[3px]` : status === 'unpriced' ? `${LIT} outline-2 outline-dashed` : `${LIT} outline-2`;
 
 /** The chip forms, the same three the plate and the panel use. */
 const chipForm = (kind?: MarginKind) =>
@@ -84,7 +84,11 @@ const chipForm = (kind?: MarginKind) =>
 
 function useLit(id: string) {
   const { shift } = useContext(ChainLensContext);
-  return shiftTarget(shift, id) !== undefined;
+  return shiftTarget(shift, id)?.condition !== undefined;
+}
+function useStatus(id: string) {
+  const { shift } = useContext(ChainLensContext);
+  return shiftTarget(shift, id)?.condition?.status;
 }
 
 /**
@@ -99,54 +103,50 @@ function useLit(id: string) {
  */
 function LitNote({ id }: { id: string }) {
   const { shift, lens, selected, onSelect, panelId } = useContext(ChainLensContext);
-  const panel = useContext(PanelRenderer);
   const target = shiftTarget(shift, id);
-  if (!shift || !target) return null;
+  const condition = target?.condition;
+  if (!shift || !target || !condition) return null;
   const n = markNumber(shift, id);
-  const articles = target.articles ?? [];
-  // A joint and a layer are doors in their own right and place their own
-  // panel; everything else a shift marks has only its number to open with.
-  const opensHere = !isDoor(id);
-  const open = opensHere && selected === id;
+  const open = selected === id;
+  // The status and the lever's work here, in the voice that is on. The
+  // number is the button: it opens the full reading as a bottom sheet.
+  const action = isWritten(condition.action, lens) ? condition.action[lens] : '';
   return (
-    <div data-lit-note={id} className="mt-1.5 border-l-2 border-accent-editorial pl-2 text-xs leading-snug text-foreground">
-      <p>
-        {n > 0 &&
-          (opensHere ? (
-            <button
-              type="button"
-              data-mark-n={n}
-              aria-label={`${n}. ${SHIFT_BY_ID[shift].label} · ${labelOf(id)}`}
-              aria-expanded={open}
-              aria-controls={open ? panelId : undefined}
-              onClick={(e) => onSelect(id, e.currentTarget)}
-              className={cn(
-                'mr-1.5 inline-block min-h-6 rounded-full border border-accent-editorial px-2 text-center font-semibold tabular-nums',
-                open && 'bg-foreground text-background',
-                FOCUS,
-              )}
-            >
-              {n}
-            </button>
-          ) : (
-            <span data-mark-n={n} className="mr-1.5 inline-block rounded-full border border-accent-editorial px-1.5 text-center font-semibold tabular-nums">
-              {n}
-            </span>
-          ))}
-        <span className="font-medium">{SHIFT_BY_ID[shift].label}</span> — {target.read[lens]}
-      </p>
-      {articles.length > 0 && (
-        <ul className="mt-1 space-y-0.5" data-shift-articles={id}>
-          {articles.map((a) => (
-            <li key={a.slug}>
-              <Link to={universalEssayUrl(a.slug)} className="underline underline-offset-2 hover:text-accent">
-                {a.title}
-              </Link>
-            </li>
-          ))}
-        </ul>
+    <div
+      data-lit-note={id}
+      data-status={condition.status}
+      className={cn(
+        'mt-1.5 border-l-2 pl-2 text-xs leading-snug text-foreground',
+        condition.status === 'stuck' ? 'border-l-[3px] border-foreground' : condition.status === 'unpriced' ? 'border-dashed border-muted-foreground' : 'border-accent-editorial',
       )}
-      {open && <div className="mt-2">{panel(id)}</div>}
+    >
+      <p className="flex flex-wrap items-center gap-x-2 gap-y-1">
+        {n > 0 && (
+          <button
+            type="button"
+            data-mark-n={n}
+            aria-label={`${n}. ${SHIFT_BY_ID[shift].label} · ${labelOf(id)} · ${STATUS[condition.status].label}`}
+            aria-expanded={open}
+            aria-controls={open ? panelId : undefined}
+            onClick={(e) => onSelect(id, e.currentTarget)}
+            className={cn(
+              'inline-block min-h-6 min-w-6 rounded-full border px-2 text-center font-semibold tabular-nums',
+              condition.status === 'stuck' && 'border-foreground bg-foreground text-background',
+              condition.status === 'moving' && 'border-foreground',
+              condition.status === 'unpriced' && 'border-dashed border-foreground',
+              open && 'ring-2 ring-ring ring-offset-1',
+              FOCUS,
+            )}
+          >
+            {n}
+          </button>
+        )}
+        <StatusBadge status={condition.status} />
+      </p>
+      <p className="mt-1">
+        <span className="font-medium">{LEVERS[condition.lever].label}</span>
+        {action && <span className="text-muted-foreground"> — {action}</span>}
+      </p>
     </div>
   );
 }
@@ -156,9 +156,15 @@ function LitNote({ id }: { id: string }) {
 function StageBox({ id, detail = true }: { id: string; detail?: boolean }) {
   const stage = S[id];
   const lit = useLit(id);
+  const status = useStatus(id);
   return (
     <div className="min-w-0">
-      <div data-id={id} data-lit={lit || undefined} className={cn('rounded-sm border border-foreground bg-background px-3 py-2', lit && LIT)}>
+      <div
+        data-id={id}
+        data-lit={lit || undefined}
+        title={stage.origin ? DEFINE.origin : DEFINE.stage}
+        className={cn('rounded-sm border border-foreground bg-background px-3 py-2', lit && litForm(status))}
+      >
         {detail && stage.origin && <p className={KICKER}>{CHAIN_COPY.controls.origin}</p>}
         <p className="break-words text-[15px] font-semibold leading-snug text-foreground">{stage.label}</p>
         {detail && stage.lanes && <p className="mt-1 text-xs leading-snug text-muted-foreground">{stage.lanes.join(' · ')}</p>}
@@ -179,9 +185,15 @@ function StageBox({ id, detail = true }: { id: string; detail?: boolean }) {
 function NodePill({ id, label }: { id: string; label?: string }) {
   const node = N[id];
   const lit = useLit(id);
+  const status = useStatus(id);
   return (
     <div className="min-w-0">
-      <div data-id={id} data-lit={lit || undefined} className={cn('rounded-full border border-dashed border-muted-foreground bg-background px-3 py-1.5', lit && LIT)}>
+      <div
+        data-id={id}
+        data-lit={lit || undefined}
+        title={DEFINE.node}
+        className={cn('rounded-full border border-dashed border-muted-foreground bg-background px-3 py-1.5', lit && litForm(status))}
+      >
         <p className="break-words text-sm leading-snug text-foreground">{label ?? node?.label ?? id}</p>
         {node?.recursion && <p className="mt-0.5 text-xs text-muted-foreground">↳ {node.recursion}</p>}
       </div>
@@ -192,9 +204,10 @@ function NodePill({ id, label }: { id: string; label?: string }) {
 
 function RetailGroup() {
   const lit = useLit(RETAIL_GROUP.id);
+  const status = useStatus(RETAIL_GROUP.id);
   return (
     <div className="min-w-0">
-      <div data-id={RETAIL_GROUP.id} data-lit={lit || undefined} className={cn('rounded-md border border-dashed border-muted-foreground p-2', lit && LIT)}>
+      <div data-id={RETAIL_GROUP.id} data-lit={lit || undefined} title={DEFINE.retail} className={cn('rounded-md border border-dashed border-muted-foreground p-2', lit && litForm(status))}>
         <p className={KICKER}>
           {RETAIL_GROUP.label} <span className="normal-case tracking-normal">· {RETAIL_GROUP.note}</span>
         </p>
@@ -211,28 +224,43 @@ function RetailGroup() {
   );
 }
 
-/** A transfer of title: the arrow between two forms, its chip at the distance that is on, and the door into its margin. */
+/**
+ * A transfer of title: the arrow between two forms, the joint mark in the
+ * form of its margin kind — a filled diamond where a stage sells, an open one
+ * where a node sells, a square where a fee is paid — its chip at the distance
+ * that is on, and the door into its margin.
+ */
 function JointRow({ id }: { id: JointId }) {
   const { lens, selected, onSelect, panelId } = useContext(ChainLensContext);
   const joint = JOINT_BY_ID[id];
+  const kind = MARGIN_KINDS[joint.margin];
   const open = selected === id;
   const lit = useLit(id);
+  const status = useStatus(id);
   return (
-    <div data-id={id} data-lit={lit || undefined} className="min-w-0 py-1">
+    <div data-id={id} data-lit={lit || undefined} data-status={status} className="min-w-0 py-1">
+      <span id={`${id}-desc`} className="sr-only">
+        {kind.label}. {joint.read[lens].chip}.
+      </span>
       <button
         type="button"
         aria-label={joint.label}
+        aria-describedby={`${id}-desc`}
         aria-expanded={open}
         aria-controls={open ? panelId : undefined}
         onClick={(e) => onSelect(id, e.currentTarget)}
-        className={cn('grid w-full grid-cols-[auto_minmax(0,1fr)] items-center gap-x-2 rounded-sm px-1 py-1 text-left', FOCUS)}
+        className={cn('grid w-full grid-cols-[auto_minmax(0,1fr)] items-center gap-x-2 rounded-sm px-1 py-1 text-left', lit && litForm(status), FOCUS)}
       >
         <span aria-hidden="true" className="flex flex-col items-center leading-none text-muted-foreground">
           <span className="text-base">↓</span>
           <span
+            data-mark-form={kind.mark}
             className={cn(
-              'mt-0.5 block h-3 w-3 rotate-45 border-[1.5px] bg-background',
-              open ? 'border-foreground bg-foreground' : lit ? 'border-accent-editorial border-2' : 'border-foreground',
+              'mt-0.5 block h-3 w-3 border-[1.5px] border-foreground bg-background',
+              kind.mark !== 'square' && 'rotate-45',
+              kind.mark === 'filled-diamond' && 'bg-foreground',
+              kind.mark === 'square' && 'bg-foreground',
+              open && 'ring-2 ring-ring ring-offset-1',
             )}
           />
         </span>
@@ -252,14 +280,16 @@ function JointRow({ id }: { id: JointId }) {
 function BorderRule({ id }: { id: string }) {
   const border = BORDERS.find((b) => b.id === id)!;
   const lit = useLit(id);
+  const status = useStatus(id);
   return (
     <div className="min-w-0">
       <div
         data-id={id}
         data-lit={lit || undefined}
+        title={`${DEFINE.border} — ${border.note}`}
         className={cn(
           'my-1 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider text-foreground',
-          lit && 'rounded-sm ' + LIT,
+          lit && 'rounded-sm ' + litForm(status),
         )}
       >
         <span aria-hidden="true" className="flex-1 border-t border-dashed border-foreground" />
@@ -276,13 +306,6 @@ const Arrow = () => (
     ↓
   </div>
 );
-
-/** The panel, rendered under whichever row opened it — never half a screen away. */
-function PanelSlot({ ids, panel }: { ids: readonly string[]; panel: (id: string) => ReactNode }) {
-  const { selected } = useContext(ChainLensContext);
-  if (!selected || !ids.includes(selected)) return null;
-  return <div className="min-w-0">{panel(selected)}</div>;
-}
 
 /* ── Lists behind toggles ────────────────────────────────────────────────── */
 
@@ -307,8 +330,9 @@ function Toggle({ id, pressed, onToggle, children }: { id: string; pressed: bool
 function ReturnItem({ id }: { id: string }) {
   const r = RETURNS.find((x) => x.id === id)!;
   const lit = useLit(id);
+  const status = useStatus(id);
   return (
-    <li data-id={r.id} data-lit={lit || undefined} className={cn('grid grid-cols-[auto_minmax(0,1fr)] gap-x-2 text-xs leading-snug', lit && 'rounded-sm ' + LIT)}>
+    <li data-id={r.id} data-lit={lit || undefined} title={DEFINE.return} className={cn('grid grid-cols-[auto_minmax(0,1fr)] gap-x-2 text-xs leading-snug', lit && 'rounded-sm ' + litForm(status))}>
       <span aria-hidden="true" className="text-muted-foreground">↺</span>
       <span className="min-w-0">
         <span className="font-medium text-foreground">{r.label}</span>
@@ -336,7 +360,7 @@ function ReturnsList({ id }: { id: string }) {
 function LitReturns({ from }: { from: string }) {
   const { shift } = useContext(ChainLensContext);
   if (!shift) return null;
-  const lit = RETURNS.filter((r) => r.from === from && shiftTarget(shift, r.id));
+  const lit = RETURNS.filter((r) => r.from === from && shiftTarget(shift, r.id)?.condition);
   if (lit.length === 0) return null;
   return (
     <ul className="mt-2 space-y-2" data-lit-returns={from}>
@@ -373,21 +397,27 @@ function NonPhysicalList({ id }: { id: string }) {
 }
 
 /** One layer as a row that opens: the same door the wide plate's band is. */
-function LayerRow({ band, panel }: { band: Band; panel: (id: string) => ReactNode }) {
+function LayerRow({ band }: { band: Band }) {
   const { selected, onSelect, panelId } = useContext(ChainLensContext);
   const open = selected === band.id;
   const lit = useLit(band.id);
+  const status = useStatus(band.id);
   const chip = bandChip(band);
   return (
     <li data-id={band.id} data-lit={lit || undefined} className="min-w-0">
+      {/* The definition sits outside the button so the button's name stays the layer's own label. */}
+      <span id={`${band.id}-desc`} className="sr-only">
+        {band.margin ? DEFINE.layerFee : DEFINE.layerTerms}
+      </span>
       <button
         type="button"
         aria-expanded={open}
         aria-controls={open ? panelId : undefined}
+        aria-describedby={`${band.id}-desc`}
         onClick={(e) => onSelect(band.id, e.currentTarget)}
         className={cn(
           'grid w-full grid-cols-[minmax(0,1fr)_auto] items-start gap-x-3 rounded-sm border-t border-border bg-secondary px-3 py-2 text-left',
-          lit && LIT,
+          lit && litForm(status),
           FOCUS,
         )}
       >
@@ -403,14 +433,13 @@ function LayerRow({ band, panel }: { band: Band; panel: (id: string) => ReactNod
         )}
       </button>
       <LitNote id={band.id} />
-      <PanelSlot ids={[band.id]} panel={panel} />
     </li>
   );
 }
 
 /* ── The two columns ─────────────────────────────────────────────────────── */
 
-function FullColumn({ panel }: { panel: (id: string) => ReactNode }) {
+function FullColumn() {
   const base = useId();
   const returnsId = `${base}-returns`, flowsId = `${base}-flows`, layersId = `${base}-layers`;
   const [showReturns, setShowReturns] = useState(false);
@@ -432,14 +461,12 @@ function FullColumn({ panel }: { panel: (id: string) => ReactNode }) {
           <JointRow id="j-extraction-processing" />
         </div>
       </div>
-      <PanelSlot ids={['j-production-aggregation', 'j-aggregation-processing', 'j-extraction-processing']} panel={panel} />
 
       <StageBox id="stage-processing" />
       <p data-id={BYPRODUCT.id} className="mt-1 text-right text-xs text-muted-foreground">
         ↘ {BYPRODUCT.label}
       </p>
       <JointRow id="j-processing-trader" />
-      <PanelSlot ids={['j-processing-trader']} panel={panel} />
 
       <div className="grid min-w-0 grid-cols-2 gap-3">
         <div className="flex min-w-0 flex-col">
@@ -452,7 +479,6 @@ function FullColumn({ panel }: { panel: (id: string) => ReactNode }) {
           <JointRow id="j-packaging-manufacturing" />
         </div>
       </div>
-      <PanelSlot ids={['j-trader-manufacturing', 'j-packaging-manufacturing']} panel={panel} />
 
       <StageBox id="stage-manufacturing" />
       <div className="my-1 flex items-center gap-2 pl-4 text-xs text-muted-foreground">
@@ -461,20 +487,15 @@ function FullColumn({ panel }: { panel: (id: string) => ReactNode }) {
       </div>
       <NodePill id="node-principal" />
       <JointRow id="j-manufacturing-distribution" />
-      <PanelSlot ids={['j-manufacturing-distribution']} panel={panel} />
 
       <NodePill id="node-distributor" />
       <JointRow id="j-distributor-wholesaler" />
-      <PanelSlot ids={['j-distributor-wholesaler']} panel={panel} />
       <NodePill id="node-wholesaler" />
       <JointRow id="j-wholesale-retail" />
-      <PanelSlot ids={['j-wholesale-retail']} panel={panel} />
       <RetailGroup />
       <JointRow id="j-retail-consumption" />
-      <PanelSlot ids={['j-retail-consumption']} panel={panel} />
       <StageBox id="stage-consumption" />
       <JointRow id="j-consumption-recovery" />
-      <PanelSlot ids={['j-consumption-recovery']} panel={panel} />
       <StageBox id="stage-recovery" />
       {!showReturns && <LitReturns from="stage-recovery" />}
 
@@ -495,7 +516,7 @@ function FullColumn({ panel }: { panel: (id: string) => ReactNode }) {
         </h3>
         <ul className="mt-2 space-y-1.5">
           {BANDS.map((b) => (
-            <LayerRow key={b.id} band={b} panel={panel} />
+            <LayerRow key={b.id} band={b} />
           ))}
         </ul>
       </section>
@@ -568,10 +589,6 @@ function CompactColumn() {
   );
 }
 
-export function ChainColumn({ variant, panel }: { variant: 'full' | 'compact'; panel: (id: string) => ReactNode }) {
-  return (
-    <PanelRenderer.Provider value={panel}>
-      {variant === 'compact' ? <CompactColumn /> : <FullColumn panel={panel} />}
-    </PanelRenderer.Provider>
-  );
+export function ChainColumn({ variant }: { variant: 'full' | 'compact' }) {
+  return variant === 'compact' ? <CompactColumn /> : <FullColumn />;
 }

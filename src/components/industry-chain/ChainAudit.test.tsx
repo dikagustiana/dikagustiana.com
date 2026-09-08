@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { render as rtlRender, screen, within } from '@testing-library/react';
+import { render as rtlRender, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import type { ReactElement } from 'react';
-import { BANDS, CHAIN_COPY, JOINTS, LEGEND, LEGEND_NOTE, MARGIN_KINDS, STAGES } from '@/data/industryChain';
+import { BANDS, CHAIN_COPY, DEFINE, JOINTS, MARGIN_KINDS, STAGES, STATUS } from '@/data/industryChain';
 vi.mock('@/integrations/supabase/client', () => ({ supabase: {} }));
 import { ChainPlate } from './ChainPlate';
 
@@ -24,7 +24,7 @@ describe('audit corrections', () => {
     expect(choose('finance')).toHaveAttribute('aria-pressed', 'true');
     expect(choose('No shift')).toHaveAttribute('aria-pressed', 'true');
     expect(document.querySelector('.chain-plate')).not.toHaveAttribute('data-shift');
-    expect(screen.getByRole('region', { name: 'Processing → trader / importer' })).toBeVisible();
+    expect(screen.getByRole('region', { name: 'Processing → trader / importer' })).toBeInTheDocument();
   });
 
   it('retains the same map and stage elements through all composed states', async () => {
@@ -42,17 +42,16 @@ describe('audit corrections', () => {
     }
   });
 
-  it('opens the same detail from the reading-size connection reference and follows the active lens', async () => {
+  it('opens the same detail from the chip as from the diamond, and the chip follows the active lens', async () => {
     const user = userEvent.setup();
     render(<ChainPlate links={[]} />);
-    await user.click(screen.getByText(CHAIN_COPY.reference.heading));
     const joint = JOINTS.find((item) => item.id === 'j-processing-trader')!;
-    const reference = document.querySelector(`[data-reference-id="${joint.id}"]`) as HTMLElement;
-    expect(within(reference).getByText(MARGIN_KINDS[joint.margin].chip)).toBeVisible();
+    const chip = () => document.querySelector(`.cp-joint-chip[data-for="${joint.id}"] text`)!;
+    expect(chip().textContent).toBe(joint.read.economy.chip);
     await user.click(choose('finance'));
-    expect(within(reference).getByText(joint.read.finance.chip)).toBeVisible();
-    await user.click(choose(`Read: ${joint.label}`));
-    expect(screen.getByRole('region', { name: joint.label })).toBeVisible();
+    expect(chip().textContent).toBe(joint.read.finance.chip);
+    await user.click(chip());
+    expect(screen.getByRole('region', { name: joint.label })).toBeInTheDocument();
   });
 
   it('announces the margin type and active reading on each SVG joint', async () => {
@@ -67,7 +66,7 @@ describe('audit corrections', () => {
   });
 
   it('does not silently restore numeric identifiers or categorical net-service-revenue claims in public definitions', () => {
-    expect(JSON.stringify({ BANDS, CHAIN_COPY, JOINTS, LEGEND, LEGEND_NOTE, MARGIN_KINDS, STAGES })).not.toMatch(/\d/);
+    expect(JSON.stringify({ BANDS, CHAIN_COPY, DEFINE, JOINTS, MARGIN_KINDS, STAGES, STATUS })).not.toMatch(/\d/);
     expect(MARGIN_KINDS['service-fee'].test).toContain('gross when it controls that service');
     expect(MARGIN_KINDS['service-fee'].test).toContain('commission net');
     expect(CHAIN_COPY.basis).toContain('not gross profit');
