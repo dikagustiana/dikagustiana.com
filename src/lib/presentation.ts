@@ -32,6 +32,20 @@ export interface EssayPresentation {
    * older rows; read it with `?? row.thumbnail_url`, never on its own.
    */
   hero_image_url?: string;
+  /**
+   * What kind of piece this is, from src/data/genres.ts. Optional and absent
+   * on every row written before 2026-09-14. It rides here rather than in a
+   * column because a genre needs no query, no index and no route — only the
+   * writer writes it and only the article shell reads it — and a migration
+   * for a label nothing filters on is a migration for nothing.
+   */
+  genre?: string;
+  /**
+   * What a material revision changed, and what it does to the conclusion.
+   * Shown to readers above the article when present. A revision a reader
+   * cannot see is, from where they stand, a revision that did not happen.
+   */
+  revision_note?: string;
 }
 
 /**

@@ -11,6 +11,7 @@ import { Link, useParams, Navigate } from 'react-router-dom';
 import { ChevronDown } from 'lucide-react';
 import { PageLayout } from '@/components/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
+import { CURRICULUM_CONTRACT } from '@/data/curriculumContract';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import {
@@ -83,11 +84,12 @@ const EssayRow = React.memo(function EssayRow({
         {essay.snippet && (
           <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{essay.snippet}</p>
         )}
-        {/* Status and author from the row. "Coming soon" is the owner's
-            label for the unwritten; published rows keep their byline and
-            read time exactly as before. */}
+        {/* Status and author from the row. "Planned" replaced "Coming soon":
+            the second is a delivery promise, and 159 of these rows were making
+            it. Published rows keep their byline and read time exactly as
+            before. */}
         <p className="text-xs text-muted-foreground mt-2">
-          {isPublished ? 'Published' : 'Coming soon'}
+          {isPublished ? 'Published' : CURRICULUM_CONTRACT.plannedLabel}
           {essay.author ? ` · ${essay.author}` : ''}
           {essay.read_time ? ` · ${essay.read_time}` : ''}
         </p>
@@ -282,16 +284,16 @@ function TrackContent({ track }: { track: string }) {
             {description && (
               <p className="text-lg text-muted-foreground mb-4">{description}</p>
             )}
-            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-8">
-              {hasEssays ? (
-                <span>
-                  {publishedEssays} of {totalEssays} essays published
-                </span>
-              ) : (
-                <span>
-                  {modulesWithContent} of {totalModules} modules have content
-                </span>
-              )}
+            {/* The counts come from the rows, not from the seed files: a
+                planned inventory and a published count are different numbers
+                and must never share a denominator. */}
+            <div className="text-sm text-muted-foreground mb-8">
+              <p>
+                {hasEssays
+                  ? `${publishedEssays} written, ${totalEssays - publishedEssays} planned`
+                  : `${modulesWithContent} of ${totalModules} modules have anything in them`}
+              </p>
+              <p className="mt-2 max-w-2xl leading-relaxed">{CURRICULUM_CONTRACT.note}</p>
             </div>
           </>
         )}

@@ -33,6 +33,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { GENRES, GENRE_IDS, genreOf } from '@/data/genres';
+
+/** Radix Select reserves the empty string for its placeholder. */
+const NO_GENRE = '__none__';
 import {
   Select,
   SelectContent,
@@ -81,6 +85,12 @@ export interface PublishModalProps {
   setCategoryId: (v: string) => void;
 
   /* End matter */
+  /** `presentation.genre`, or '' for a piece that declares none. */
+  genre: string;
+  setGenre: (value: string) => void;
+  /** `presentation.revision_note`. */
+  revisionNote: string;
+  setRevisionNote: (value: string) => void;
   keyTakeaways: string[];
   setKeyTakeaways: (v: string[]) => void;
   references: { label: string; url: string }[];
@@ -126,6 +136,10 @@ export function PublishModal({
   categories,
   categoryId,
   setCategoryId,
+  genre,
+  setGenre,
+  revisionNote,
+  setRevisionNote,
   keyTakeaways,
   setKeyTakeaways,
   references,
@@ -145,6 +159,11 @@ export function PublishModal({
   onPublish,
   onSaveDraft,
 }: PublishModalProps) {
+  /* Radix's Select cannot hold an empty-string value — it reserves '' for the
+     placeholder — so "not declared" needs a sentinel, converted at the
+     boundary so the payload still stores '' for an undeclared piece. */
+  const declaredGenre = genreOf(genre);
+
   const [track, setTrack] = useState<string>(
     () => modules.find(m => m.id === moduleId)?.track_slug ?? '',
   );
@@ -447,14 +466,77 @@ export function PublishModal({
 
           <Separator />
 
+          {/* ── What kind of piece this is ──
+              Optional, and it declares an EVIDENTIAL CONTRACT rather than a
+              tone: it scales the length floor, the takeaway rule and whether a
+              source is required. Leaving it unset keeps the old rules exactly.
+              It is not a new section and creates no route. */}
+          <div className="space-y-3">
+            <div>
+              <Label className="text-base">What kind of piece is this?</Label>
+              <p className="text-sm text-muted-foreground">
+                Optional. It sets what this piece owes a reader — how short it may be, whether the
+                takeaway block applies, and whether a source is required. Leave it blank and the
+                standard rules apply.
+              </p>
+            </div>
+            <Select value={genre || NO_GENRE} onValueChange={(v) => setGenre(v === NO_GENRE ? '' : v)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Not declared" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={NO_GENRE}>Not declared</SelectItem>
+                {GENRE_IDS.map((id) => (
+                  <SelectItem key={id} value={id}>
+                    {GENRES[id].label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {declaredGenre && (
+              <div className="rounded-md border border-border bg-muted/30 p-3 text-sm">
+                <p className="text-foreground">{declaredGenre.means}</p>
+                <p className="mt-2 text-muted-foreground">{declaredGenre.contract}</p>
+              </div>
+            )}
+          </div>
+
+          <Separator />
+
+          {/* ── What changed ──
+              Reader-visible where it is filled. A revision a reader cannot see
+              is a revision that did not happen, as far as they can tell. */}
+          <div className="space-y-3">
+            <div>
+              <Label className="text-base" htmlFor="revision-note">
+                What changed, and what it does to the conclusion
+              </Label>
+              <p className="text-sm text-muted-foreground">
+                Shown to readers above the article when filled. Required for a correction; leave it
+                blank on a first publish.
+              </p>
+            </div>
+            <Textarea
+              id="revision-note"
+              value={revisionNote}
+              onChange={(e) => setRevisionNote(e.target.value)}
+              placeholder="What was claimed, what is the case, and where the conclusion still stands."
+              rows={3}
+            />
+          </div>
+
+          <Separator />
+
           {/* ── Key takeaways ── */}
           <div className="space-y-3">
             <div>
               <Label className="text-base">Key takeaways</Label>
               <p className="text-sm text-muted-foreground">
-                {isFinanceSection && moduleId
-                  ? 'Three required for concept and framework lessons; optional (but all-or-nothing) for case studies, exercises and model walkthroughs. They appear at the end of the article.'
-                  : 'Three are required to publish. They appear at the end of the article.'}
+                {declaredGenre?.takeaways === 'optional'
+                  ? `Optional for a ${declaredGenre.label.toLowerCase()}, and all-or-nothing if used. They appear at the end of the article.`
+                  : isFinanceSection && moduleId
+                    ? 'Three required for concept and framework lessons; optional (but all-or-nothing) for case studies, exercises and model walkthroughs. They appear at the end of the article.'
+                    : 'Three are required to publish. They appear at the end of the article.'}
               </p>
             </div>
             {keyTakeaways.map((takeaway, index) => (

@@ -148,6 +148,8 @@ export default function EssayBySlug() {
       keyTakeaways={presentation.key_takeaways}
       references={presentation.references}
       authorBio={presentation.author_bio}
+      genre={presentation.genre}
+      revisionNote={presentation.revision_note}
       currentEssayId={essay.id}
       // The ESSAY's section, not a literal. This prop is what RelatedEssays
       // queries on, so hard-coding "finance" showed a placement-less

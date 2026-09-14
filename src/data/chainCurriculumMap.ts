@@ -23,7 +23,7 @@
  * Only chain-located rows light a joint. A joint with no chain-located row is
  * inert: it cannot be highlighted, opens no panel, and does not look broken.
  * A module whose essays are still drafts is linked all the same — the panel
- * says "Coming soon" before anyone clicks, using the same `published` flag the
+ * says "Planned" before anyone clicks, using the same `published` flag the
  * rest of the site uses.
  *
  * To extend it, add rows in the same shape, one joint at a time, after

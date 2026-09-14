@@ -4,7 +4,7 @@
  * Rendered inside the joint's panel, only for a joint the mapping table has
  * pinned a module to. Density lives here, not on the diagram: module, then
  * its lessons one level down. A lesson that is still a draft is shown and
- * labelled "Coming soon" BEFORE anyone can click it — as inert text, never
+ * labelled "Planned" BEFORE anyone can click it — as inert text, never
  * as a link that goes nowhere. That is the rule the finance track index
  * already follows, and this list follows it to the letter.
  */

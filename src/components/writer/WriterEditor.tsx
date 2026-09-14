@@ -173,6 +173,12 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
   const [keyTakeaways, setKeyTakeaways] = useState<string[]>(['', '', '']);
   const [references, setReferences] = useState<{ label: string; url: string }[]>([]);
   const [authorBio, setAuthorBio] = useState('');
+  /* What kind of piece this is, and what it therefore owes a reader. Both
+     ride in the existing `presentation` jsonb payload: no migration, and no
+     promise about work that does not exist, because an undeclared piece
+     renders nothing and validates exactly as before. */
+  const [genre, setGenre] = useState('');
+  const [revisionNote, setRevisionNote] = useState('');
   const [status, setStatus] = useState<'draft' | 'published'>('draft');
   const [createdAt, setCreatedAt] = useState<string | null>(null);
   const [updatedAt, setUpdatedAt] = useState<string | null>(null);
@@ -254,6 +260,8 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
         ) || []);
         setHeroCaption(pres.hero_caption || '');
         setAuthorBio(pres.author_bio || '');
+        setGenre(pres.genre || '');
+        setRevisionNote(pres.revision_note || '');
 
         setTimeout(() => {
           isInitialLoad.current = false;
@@ -344,8 +352,10 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
       // editorial essays and unplaced finance essays send null and stay on
       // the strict three-takeaways policy.
       lessonType: section === 'finance' && moduleId ? lessonType : null,
+      genre,
+      revisionNote,
     });
-  }, [title, deck, keyTakeaways, wordCount, references, section, content, categoryId, categoryBelongsToSection, lessonType, moduleId]);
+  }, [title, deck, keyTakeaways, wordCount, references, section, content, categoryId, categoryBelongsToSection, lessonType, moduleId, genre, revisionNote]);
 
   // ── Autosave: debounced backup into essay_revisions ──
   // Deliberately does NOT write the essays row. A backup is not a save, and a
@@ -448,6 +458,8 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
         })),
         hero_caption: heroCaption || null,
         author_bio: authorBio || null,
+        genre: genre || null,
+        revision_note: revisionNote || null,
       };
 
       // Placement-derived fields. For a finance essay with a module, phase and
@@ -842,6 +854,10 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
         categories={categories}
         categoryId={categoryId}
         setCategoryId={setCategoryId}
+        genre={genre}
+        setGenre={setGenre}
+        revisionNote={revisionNote}
+        setRevisionNote={setRevisionNote}
         keyTakeaways={keyTakeaways}
         setKeyTakeaways={setKeyTakeaways}
         references={references}

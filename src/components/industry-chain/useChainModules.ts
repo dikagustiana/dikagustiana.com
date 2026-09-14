@@ -3,7 +3,7 @@
  *
  * Follows the structure the site already has — finance_sections →
  * finance_modules → essays — and the same `published` flag the track index
- * uses to say "Coming soon". Drafts are returned so they can be shown as
+ * uses to say "Planned". Drafts are returned so they can be shown as
  * planned; the panel never links them for readers, exactly like
  * FinanceTrackIndex.
  */
@@ -20,7 +20,7 @@ export interface ChainEssayRow {
   author: string | null;
   module_id: string | null;
   finance_order: number | null;
-  /** The site's own rule for "Coming soon": false or null means unwritten. */
+  /** The site's own rule for "Planned": false or null means unwritten. */
   published: boolean | null;
 }
 

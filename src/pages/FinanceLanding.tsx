@@ -11,6 +11,7 @@
 import { Link } from 'react-router-dom';
 import { PageLayout } from '@/components/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
+import { CURRICULUM_CONTRACT } from '@/data/curriculumContract';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowRight } from 'lucide-react';
 import { useFeaturedFinanceEssay, useFinanceSections } from '@/hooks/queries/useFinance';
@@ -46,6 +47,11 @@ export default function FinanceLanding() {
           </p>
           <p className="text-base text-muted-foreground mt-3">
             Start with Fundamentals if you are building from scratch.
+          </p>
+          {/* Said once, at the entrance, rather than implied 159 times by a
+              row label. */}
+          <p className="text-base text-muted-foreground mt-3">
+            {CURRICULUM_CONTRACT.standfirst}
           </p>
         </div>
 

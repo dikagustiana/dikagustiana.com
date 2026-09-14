@@ -10,6 +10,7 @@
 import { useParams, Link } from 'react-router-dom';
 import { PageLayout } from '@/components/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
+import { CURRICULUM_CONTRACT } from '@/data/curriculumContract';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
 import { ModuleHeaderFactory } from '@/components/finance/ModuleHeaderFactory';
@@ -102,11 +103,13 @@ No lessons assigned to this module yet.
               {essay.snippet && (
                 <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{essay.snippet}</p>
               )}
-              {/* The unwritten carry the owner's label and the author who
-                  will write them; published rows keep their prior shape. */}
+              {/* The unwritten carry their status and the author who will
+                  write them. "Planned", not "Coming soon": see
+                  src/data/curriculumContract.ts. */}
               {!essay.published && (
                 <p className="text-xs text-muted-foreground mt-1">
-                  Coming soon{essay.author ? ` · ${essay.author}` : ''}
+                  {CURRICULUM_CONTRACT.plannedLabel}
+                  {essay.author ? ` · ${essay.author}` : ''}
                 </p>
               )}
             </div>
@@ -226,9 +229,7 @@ export default function FinanceModulePage() {
             dangerouslySetInnerHTML={{ __html: sanitizeHtml(module.framing_content) }}
           />
         ) : (
-          <p className="text-muted-foreground italic mb-8">
-            Framing content coming soon.
-          </p>
+          <p className="text-muted-foreground italic mb-8">{CURRICULUM_CONTRACT.unframed}</p>
         )}
 
         <Separator className="my-8" />

@@ -1786,7 +1786,8 @@ export const CHAIN_COPY = {
     anatomyLayer: 'The layer itself',
     curriculumHeading: 'Read this joint in the curriculum',
     published: 'Published',
-    comingSoon: 'Coming soon',
+    /** Same word as the curriculum uses; see src/data/curriculumContract.ts. */
+    comingSoon: 'Planned',
     close: 'Close',
   },
   /** The numbered marks a shift puts on the map. */

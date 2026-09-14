@@ -206,6 +206,8 @@ export default function NextBigThingEssayPage() {
       keyTakeaways={presentation.key_takeaways}
       references={presentation.references}
       authorBio={presentation.author_bio}
+      genre={presentation.genre}
+      revisionNote={presentation.revision_note}
       previous={previous}
       next={next}
       getEssayUrl={getEssayUrl}

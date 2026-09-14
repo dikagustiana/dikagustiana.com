@@ -8,7 +8,7 @@
  * every layer is a door whose reading opens beside it and stays open while a
  * control changes; nothing sits under the plate but the controls; the
  * curriculum follows only where a module is pinned; a draft lesson is
- * labelled "Coming soon" as inert text; and the short version expands in
+ * labelled "Planned" as inert text; and the short version expands in
  * place.
  *
  * jsdom has no matchMedia, so the layout hook falls back to the wide plate
@@ -509,7 +509,7 @@ describe('a joint with a module pinned to it', () => {
     expect(within(panel).getByRole('link', { name: 'DSO, DIO and DPO' })).toHaveAttribute('href', '/finance/operating/dso-dio-dpo');
     expect(within(panel).queryByRole('link', { name: 'Trade credit as transmission' })).not.toBeInTheDocument();
     expect(within(panel).getByText('Trade credit as transmission')).toBeInTheDocument();
-    expect(within(panel).getByText('Coming soon')).toBeInTheDocument();
+    expect(within(panel).getByText(CHAIN_COPY.panel.comingSoon)).toBeInTheDocument();
     expect(within(panel).getByText('Published')).toBeInTheDocument();
   });
 
