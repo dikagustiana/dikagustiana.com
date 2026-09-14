@@ -645,7 +645,15 @@ function wide() {
 /* ═══ COMPACT PLATE — the short version ═══════════════════════════════════ */
 
 function compact() {
-  const W = 1590, H = 320, AX = 150;
+  /* The canvas height FOLLOWS the band count. It was a constant 320, which
+     happened to fit the two bands the short version had; a third band was laid
+     at y=308 with a height of 30 and fell 18px outside the viewBox, so it
+     simply did not render. A generator whose output silently clips when its
+     input grows is worse than one that errors. */
+  const BAND_TOP = 236, BAND_STEP = 36, BAND_H = 30, BAND_PAD = 18;
+  const W = 1590;
+  const H = BAND_TOP + (COMPACT.bands.length - 1) * BAND_STEP + BAND_H + BAND_PAD;
+  const AX = 150;
   const base = [];
   const SW = 180, GW = 150, GAP = 28;
   /* Wrapped from the data, never restated here: fifteen characters is what a
@@ -722,12 +730,12 @@ function compact() {
       <path d="M ${fx} ${AX - 26} L ${fx} 70 L ${tx} 70 L ${tx} ${AX - 30}" markerEnd="${M('cp-tip-soft')}" />
       ${chip((fx + tx) / 2, 74, COMPACT.returnArrow.label, 'cp-ret-t')}</g>`);
 
-  /* Two layers, the whole chain. Static here: the short version has no doors. */
+  /* The layers, each the whole chain. Static here: the short version has no doors. */
   const B = byId(BANDS);
   COMPACT.bands.forEach((id, i) => {
-    const y = 236 + i * 36;
+    const y = BAND_TOP + i * BAND_STEP;
     base.push(`<g className="cp-band" data-id="${id}">
-      <rect x="20" y="${y}" width="${W - 40}" height="30" />
+      <rect x="20" y="${y}" width="${W - 40}" height="${BAND_H}" />
       <path className="cp-band-line" d="M 20 ${y} L ${W - 20} ${y}" />
       ${T(32, y + 20, B[id].label, 'cp-band-t')}</g>`);
   });

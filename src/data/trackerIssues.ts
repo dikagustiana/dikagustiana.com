@@ -16,7 +16,7 @@ export type DirectionalReading =
  * Three of these words describe DIRECTION and one describes DIVERGENCE, so
  * they are not four positions on one dial and a quarter can carry more than
  * one of them at once. The label names the condition the author judged
- * DOMINANT across the instruments this tracker actually read that quarter \u2014
+ * DOMINANT across the instruments this tracker actually read that quarter —
  * not a measurement of the Indonesian energy transition as a whole, and not a
  * count of anything. `covers` says what was in the field of view; `excludes`
  * says what the label is not entitled to claim.
@@ -54,9 +54,9 @@ export const READING_META: Record<DirectionalReading, ReadingMeta> = {
  * Whether the tracker is still being written.
  *
  * A quarterly cadence is a promise, and an interface that keeps saying
- * \u201clatest issue\u201d while the newest issue is over a year old makes the promise
- * on the author\u2019s behalf. This says the true thing instead. `paused` is the
- * default whenever no sourced continuation exists \u2014 it is not a commitment to
+ * “latest issue” while the newest issue is over a year old makes the promise
+ * on the author’s behalf. This says the true thing instead. `paused` is the
+ * default whenever no sourced continuation exists — it is not a commitment to
  * resume.
  */
 export const TRACKER_COVERAGE = {
@@ -106,7 +106,7 @@ export interface Source {
   url: string;
   /** When the source itself was published. */
   publishedAt: string;
-  /** What the source actually establishes \u2014 never more than that. */
+  /** What the source actually establishes — never more than that. */
   supports: string;
 }
 
@@ -116,7 +116,7 @@ export interface Source {
  * The entry body is never rewritten: it stays exactly as published, because a
  * tracker whose history quietly changes is worth less than one that is wrong
  * in public and says so. A correction is issued on the date it is issued, and
- * it says three things \u2014 what was claimed, what is actually the case, and
+ * it says three things — what was claimed, what is actually the case, and
  * what that does to the conclusion the claim carried.
  */
 export interface Correction {
@@ -126,7 +126,7 @@ export interface Correction {
   claim: string;
   /** The corrected fact. */
   correction: string;
-  /** What the correction does to the conclusion \u2014 including where it leaves it standing. */
+  /** What the correction does to the conclusion — including where it leaves it standing. */
   effect: string;
   sources: Source[];
 }
@@ -174,7 +174,7 @@ export interface TrackerIssue {
   activeThreads: string[];
   openQuestion: string;
   /**
-   * What the quarterly label was read FROM \u2014 the instruments and subsectors
+   * What the quarterly label was read FROM — the instruments and subsectors
    * actually in view. A label without this is a verdict with no stated scope.
    */
   readingBasis?: string;
@@ -182,7 +182,7 @@ export interface TrackerIssue {
   corrections?: Correction[];
 }
 
-/* \u2500\u2500 The primary sources the corrections below rest on \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+/* ── The primary sources the corrections below rest on ───────────────────── */
 
 const SRC_RUPTL: Source = {
   label: 'Kementerian ESDM \u2014 \u201cKementerian ESDM Resmi Merilis Dokumen RUPTL PLN 2025\u20132034\u201d',
@@ -414,9 +414,9 @@ export const trackerIssues: TrackerIssue[] = [
           publishedAt: '2025-03-15',
           body: 'The Ministry of Energy and Mineral Resources did not release the long-anticipated RUPTL update during the quarter, extending the planning vacuum that has constrained PLN\'s ability to issue new procurement signals for renewable capacity.\n\nThe RUPTL serves as the legal basis for PLN\'s procurement pipeline. Without it, the utility cannot commit to new capacity additions regardless of available financing or developer readiness. This single document remains the most consequential bottleneck in Indonesia\'s energy transition architecture.',
           keyObservation: 'The RUPTL\'s continued absence means PLN cannot legally commit to new renewable capacity procurement at scale, regardless of political signaling.',
-          // This entry holds. RUPTL 2025\u20132034 was ratified on 26 May 2025, which
-          // is after the quarter this entry covers \u2014 so \u201cnot released during
-          // January\u2013March 2025\u201d is correct as written. It is listed here as
+          // This entry holds. RUPTL 2025–2034 was ratified on 26 May 2025, which
+          // is after the quarter this entry covers — so “not released during
+          // January–March 2025” is correct as written. It is listed here as
           // source-checked precisely so that the two corrected entries are not
           // read as a verdict on the archive as a whole.
           evidence: 'verified',

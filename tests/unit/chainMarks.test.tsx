@@ -18,7 +18,7 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactElement } from 'react';
-import { CHAIN_COPY, LEVERS, SHIFT_BY_ID, STATUS, slugOf } from '@/data/industryChain';
+import { BASIS, CHAIN_COPY, LEVERS, SHIFT_BY_ID, STATUS, slugOf } from '@/data/industryChain';
 
 vi.mock('@/integrations/supabase/client', () => ({ supabase: { from: () => ({}) } }));
 
@@ -141,23 +141,49 @@ describe('the marks on the plate', () => {
     expect(screen.queryByRole('region', { name: 'Recovery' })).not.toBeInTheDocument();
   });
 
-  it('keeps the panel in the order the brief fixes and omits a line the owner has not written, never faking it', async () => {
+  it('omits a line the owner has not written, never faking it, and says the mark is a scenario', async () => {
+    // Logistics is a SCENARIO mark: its status was set from the brief's worked
+    // examples and its four lines are unwritten. Omitting them silently made
+    // an illustration read as a concise finding, so the panel now says which
+    // it is before it says anything else.
     mount(<ChainPlate links={[]} />);
     await userEvent.click(word('green transition'));
-    await userEvent.click(screen.getByRole('button', { name: /Green transition · Energy · Moving$/ }));
-    const panel = screen.getByRole('region', { name: 'Energy' });
+    await userEvent.click(screen.getByRole('button', { name: /Green transition · Logistics and warehousing · Stuck$/ }));
+    const panel = screen.getByRole('region', { name: 'Logistics and warehousing' });
     const headings = Array.from(panel.querySelectorAll('[data-condition-line]')).map((el) => el.getAttribute('data-condition-line'));
-    // Only the lever line is written so far; the others are UNWRITTEN and absent.
     expect(headings).toEqual([CHAIN_COPY.panel.lever]);
     expect(within(panel).queryByText(CHAIN_COPY.panel.now)).not.toBeInTheDocument();
     expect(within(panel).queryByText(CHAIN_COPY.panel.holds)).not.toBeInTheDocument();
     expect(within(panel).queryByText(CHAIN_COPY.panel.funds)).not.toBeInTheDocument();
     expect(within(panel).getByText(LEVERS['reprice-layer'].label)).toBeInTheDocument();
     expect(within(panel).getByText(CHAIN_COPY.panel.articlesNone)).toBeInTheDocument();
+    expect(panel.querySelector('[data-basis="scenario"]')).not.toBeNull();
+    expect(within(panel).getByText(BASIS.scenario.means)).toBeInTheDocument();
     // The title carries the badge, and the badge comes before the lines.
     const title = within(panel).getByRole('heading', { level: 3 });
-    expect(within(title).getByText('Moving')).toBeInTheDocument();
-    expect(panel.textContent!.indexOf('Moving')).toBeLessThan(panel.textContent!.indexOf(LEVERS['reprice-layer'].label));
+    expect(within(title).getByText('Stuck')).toBeInTheDocument();
+    expect(panel.textContent!.indexOf('Stuck')).toBeLessThan(panel.textContent!.indexOf(LEVERS['reprice-layer'].label));
+  });
+
+  it('keeps the panel in the order the brief fixes on the one mark that is fully written', async () => {
+    // Energy under the green shift is the one ASSESSED mark. All four lines
+    // are written, in order, and the lever line is followed by the mechanism
+    // that is actually at work \u2014 a contract, which the map cannot draw.
+    mount(<ChainPlate links={[]} />);
+    await userEvent.click(word('green transition'));
+    await userEvent.click(screen.getByRole('button', { name: /Green transition · Energy · Moving$/ }));
+    const panel = screen.getByRole('region', { name: 'Energy' });
+    const headings = Array.from(panel.querySelectorAll('[data-condition-line]')).map((el) => el.getAttribute('data-condition-line'));
+    expect(headings).toEqual([
+      CHAIN_COPY.panel.now,
+      CHAIN_COPY.panel.holds,
+      CHAIN_COPY.panel.lever,
+      CHAIN_COPY.panel.funds,
+    ]);
+    expect(panel.querySelector('[data-basis="assessed"]')).not.toBeNull();
+    expect(panel.querySelector('[data-mechanism="contract"]')).not.toBeNull();
+    expect(within(panel).getByText(CHAIN_COPY.panel.fundsRoles)).toBeInTheDocument();
+    expect(within(panel).queryByText(CHAIN_COPY.panel.articlesNone)).not.toBeInTheDocument();
   });
 
   it('pins one line beside a mark on hover — number, title, status, essays — and raises no tooltip role', async () => {
@@ -165,11 +191,11 @@ describe('the marks on the plate', () => {
     await userEvent.click(word('green transition'));
     expect(hoverLabel()).toBeNull();
 
-    const mark = screen.getByRole('button', { name: /Green transition · Energy · Moving$/ });
+    const mark = screen.getByRole('button', { name: /Green transition · Logistics and warehousing · Stuck$/ });
     await userEvent.hover(mark);
     expect(hoverLabel()).not.toBeNull();
-    expect(hoverLabel()!.textContent).toContain('Energy');
-    expect(hoverLabel()!.textContent).toContain('Moving');
+    expect(hoverLabel()!.textContent).toContain('Logistics and warehousing');
+    expect(hoverLabel()!.textContent).toContain('Stuck');
     expect(hoverLabel()!.textContent).toContain(CHAIN_COPY.mark.essayNone);
     expect(hoverLabel()!.closest('figure')).not.toBeNull();
     expect(document.querySelector('[role="tooltip"]')).toBeNull();
@@ -320,10 +346,20 @@ describe('the map in the address bar', () => {
     expect(window.location.search).toBe('?node=credit');
   });
 
-  it('never puts the short version on the landing page into the address: it has no doors to share', async () => {
+  it('leaves the address alone while the short version is still short: it has no doors to share', async () => {
+    window.history.replaceState({}, '', '/');
+    mount(<ChainPlate links={[]} variant="preview" />);
+    expect(window.location.search).toBe('');
+  });
+
+  it('puts the state in the address once the reader opens the full chain from the landing page', async () => {
+    // The old rule was "the preview never writes the URL", which meant a
+    // reading reached from the landing page could not be sent to anyone \u2014
+    // precisely the moment someone wants to send it. Opening it makes it the
+    // same map with the same doors, so it becomes shareable then.
     window.history.replaceState({}, '', '/');
     mount(<ChainPlate links={[]} variant="preview" />);
     await userEvent.click(word('green transition'));
-    expect(window.location.search).toBe('');
+    expect(window.location.search).toBe('?lens=green');
   });
 });
