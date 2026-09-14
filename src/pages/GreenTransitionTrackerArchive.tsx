@@ -4,7 +4,8 @@ import { PageLayout } from '@/components/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
 import { Card, CardContent } from '@/components/ui/card';
 import { GREEN_TRANSITION_TABS } from '@/data/greenTransitionTabs';
-import { trackerIssues, DirectionalReading } from '@/data/trackerIssues';
+import { trackerIssues, DirectionalReading, TRACKER_COVERAGE } from '@/data/trackerIssues';
+import { CoverageNotice } from '@/components/tracker/CoverageNotice';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 
 const READING_ORDER: DirectionalReading[] = [
@@ -185,12 +186,17 @@ export default function GreenTransitionTrackerArchive() {
             Archive — Indonesia Green Transition Tracker
           </h1>
           <p className="text-muted-foreground max-w-2xl">
-            All issues grouped by directional reading. {trackerIssues.length} issues published.
+            All issues grouped by directional reading. {trackerIssues.length} issues, covering{' '}
+            {TRACKER_COVERAGE.coversFrom}–June 2025. A grouping is not a trend: three of these
+            labels describe direction and one describes divergence, so the size of a group counts
+            quarters, not progress.
           </p>
         </div>
       </div>
 
       <div className="container max-w-4xl py-10 space-y-8">
+        <CoverageNotice />
+
         {/* Sub-navigation strip */}
         <div className="flex items-center gap-4 text-sm">
           <Link
@@ -198,7 +204,7 @@ export default function GreenTransitionTrackerArchive() {
             className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
-            Latest Issue
+            Tracker
           </Link>
           <span className="text-foreground font-medium">Archive</span>
         </div>

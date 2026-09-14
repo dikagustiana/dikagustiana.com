@@ -4,7 +4,9 @@ import { Card, CardContent } from '@/components/ui/card';
 import { GREEN_TRANSITION_TABS } from '@/data/greenTransitionTabs';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
-import { trackerIssues } from '@/data/trackerIssues';
+import { trackerIssues, READING_META, TRACKER_COVERAGE } from '@/data/trackerIssues';
+import { CoverageNotice } from '@/components/tracker/CoverageNotice';
+import { formatDate } from '@/lib/formatDate';
 import { WhatChangedPanel } from '@/components/tracker/WhatChangedPanel';
 
 export default function GreenTransitionTracker() {
@@ -23,7 +25,7 @@ export default function GreenTransitionTracker() {
     >
       <SEO
         title="Indonesia Green Transition Tracker"
-        description="Quarterly structured monitoring of policy architecture, capital positioning, and execution friction shaping Indonesia's energy transition."
+        description="A paused archive of quarterly readings on Indonesia's energy transition, covering January–June 2025: policy architecture, capital positioning, institutional incentives and execution friction, with dated corrections."
       />
 
       {/* 1. Page Header */}
@@ -36,27 +38,36 @@ export default function GreenTransitionTracker() {
             Indonesia Green Transition Tracker
           </h1>
           <p className="text-muted-foreground max-w-2xl">
-            Quarterly structured monitoring of the policy architecture, capital positioning,
-            institutional incentive shifts, and execution friction shaping Indonesia's energy transition.
+            Structured quarterly readings of the policy architecture, capital positioning,
+            institutional incentive shifts, and execution friction shaping Indonesia's energy transition —
+            written across {TRACKER_COVERAGE.coversFrom}–June 2025, and paused there.
           </p>
         </div>
       </div>
 
       <div className="container max-w-4xl py-10 space-y-12">
-        {/* 2. Latest Issue Panel */}
+        <CoverageNotice />
+
+        {/* 2. Most recent issue. NOT "latest": an archive that stopped in
+            2025 calling its newest issue the latest one makes a promise of
+            continuation on the author's behalf. */}
         {latestIssue ? (
           <section>
             <h2 className="text-sm font-mono text-muted-foreground uppercase tracking-widest mb-4">
-              Latest Issue
+              Most recent issue
             </h2>
             <Card>
               <CardContent className="p-6 space-y-3">
                 <p className="text-xs font-mono text-muted-foreground">
-                  {latestIssue.label} · {latestIssue.publishedAt}
+                  {latestIssue.label} · Covering {latestIssue.periodCovered} · Published{' '}
+                  {formatDate(latestIssue.publishedAt)}
                 </p>
                 <h3 className="text-xl font-semibold text-foreground">
                   {latestIssue.directionalReading}
                 </h3>
+                <p className="text-sm text-muted-foreground">
+                  {READING_META[latestIssue.directionalReading].means}
+                </p>
                 <p className="text-muted-foreground">
                   {latestIssue.strategicImplicationPreview}
                 </p>
@@ -73,12 +84,12 @@ export default function GreenTransitionTracker() {
         ) : (
           <section>
             <h2 className="text-sm font-mono text-muted-foreground uppercase tracking-widest mb-4">
-              Latest Issue
+              Most recent issue
             </h2>
             <Card>
               <CardContent className="p-6">
                 <p className="text-muted-foreground">
-                  First issue forthcoming — Q1 2025
+                  No issue has been written.
                 </p>
               </CardContent>
             </Card>
@@ -108,14 +119,14 @@ export default function GreenTransitionTracker() {
               Previous Issues
             </h2>
             <div className="divide-y divide-border/50">
-              {pastIssues.map((issue: any) => (
+              {pastIssues.map((issue) => (
                 <Link
                   key={issue.slug}
                   to={`/green-transition/tracker/${issue.slug}`}
                 >
                   <div className="group py-5 hover:bg-muted/30 -mx-4 px-4 transition-colors">
                     <p className="text-xs font-mono text-muted-foreground mb-1.5">
-                      {issue.label} · {issue.publishedAt}
+                      {issue.label} · Covering {issue.periodCovered}
                     </p>
                     <h3 className="text-[16px] font-semibold text-foreground leading-snug mb-1 group-hover:text-foreground/80 transition-colors">
                       {issue.directionalReading}
