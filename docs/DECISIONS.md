@@ -5,6 +5,101 @@ alternatives. Newest first.
 
 ---
 
+# 2026-09-14 (v3) — The UI pass: an inert control is not offered, a figure is not a viewport, and a door is sized to the screen
+
+Continues the executed v2 at `66d78b4`. Ten findings (U01–U10) of a focused UI audit; the record is
+in `docs/response-2026-09-14-v3/`. Nothing of v2 was reset or replaced.
+
+## Decisions
+
+- **A control that cannot act where it is shown is not shown there.** The short plate's distance and
+  scenario controls were coupled to expansion because the short plate can honour neither — it has no
+  chips to re-word and no marks to raise. The fix is not to make them expand more carefully; it is not
+  to offer them. Rejected: a third "Explore" distance (the audit rules it out, and it would have made
+  a detail level into an analytical position); rejected: leaving them inert but harmless, which is how
+  pressing the already-active "No shift" came to swap the whole plate.
+
+- **The short plate carries one bounded question and one labelled action.** Orientation is not
+  explanation: v2 put the right noun on the plate and left a stranger to invent the question, choose
+  among two distances, two scenarios and sixteen marks, and work out for themselves which had been
+  written against evidence. The entrance opens the one reading that is `basis: 'assessed'`, at the
+  distance and under the scenario it was written in, and its description says so before it acts. It
+  names the relation rather than the noun, and it bounds the case in the same breath: the electricity
+  network is a different network from the goods distribution on this chain. Rejected: a tutorial, an
+  autoplay sequence, a second map, a below-map essay — all ruled out, and none needed.
+
+- **Nothing under the map, except the way back and the written conflict.** The older rule rejected a
+  legend and a second explanation surface beneath the figure; v2 added a specific trade-off block
+  there. **That block stays**, and this pass integrated rather than duplicated it: the featured
+  entrance opens a reading whose scenario is the one the block is about, so a reader meets the
+  trade-off immediately after the reading rather than as unrelated apparatus. What was added under the
+  map is a second exit and nothing else. What was added *above* it is one line naming which shapes
+  open — in the existing introduction, where the audit prefers it, and not a legend.
+
+- **The figure is not the reader's viewport.** The reading popover was clamped to the figure, which is
+  correct by the figure's geometry and put the reading's own title and Close behind the page's sticky
+  header — measured at 1348×936, Close at y≈21–47 under a header at y=0–65. Placement now intersects
+  the figure with the part of it a reader can see and re-places on scroll. The reading stays *inside*
+  the figure: the brief's rule that the eye does not leave the selected element is not traded away for
+  the fix. Where the figure has genuinely left the readable band, the reading scrolls away with the map
+  it belongs to rather than detaching and floating over the page.
+
+- **A door is sized to the screen it is drawn on, not to the grid it is drawn in.** The plate is drawn
+  at `width:100%`, so a unit is not a pixel: at the 1280px breakpoint a chip was 12.7px tall, a layer
+  switch 8.5px and a numbered mark 15.6px. Each is enlarged by a *transparent* hit shape, and the room
+  comes from the plate's height, which costs nothing because the scale is set by its width.
+  **Rejected, and measured rather than argued:** raising the generator's small type from 14 units to
+  16 grew the viewBox from 1717 to 1789, returning about one pixel net while shrinking every target and
+  every stage label by 4.2%. A proportional plate cannot be made legible by scaling its own type; what
+  is left is an editorial question about how much the map draws, and it is in the handoff as one.
+
+- **A mark has two radii.** The generator used one for both keeping a mark off the plate's ink and
+  keeping two marks apart, which is how a mark's enlarged target came to sit on a chip's. They are now
+  separate constants and the chip's *target* — not its ink — is what the placer avoids.
+
+- **A transparent presentation attribute loses to a stylesheet rule.** `fill="transparent"` on a bare
+  `circle` inside `.cp-mark` is overridden by `.cp-mark circle{fill:…}`, so the first attempt drew the
+  hit areas as rings. Every hit shape now carries `.cp-hit-area`, and the generated CSS keeps it
+  unpainted at two classes of specificity.
+
+- **What steps back under isolation is the geometry, not the information.** Fading a group takes its
+  labels with it — a stage name came out at an effective opacity of 0.1, in the half of the plate a
+  reader consults to choose the next comparison. Shapes recede to .1; names stay legible a step behind
+  at .45. Both fades come back whole under keyboard focus and never for a pointer, because CSS cannot
+  restore a child through its parent's opacity and a focus ring at .18 is not a focus ring.
+
+- **Hiding a layer is a statement about the drawing, and says so.** Beside the controls, only while a
+  layer is off, with the way back — which nothing offered before. A faded band must never read as a
+  claim that the service stopped being bought or that its constraint has gone.
+
+- **A link that records an exploration restores it.** Reading the address is no longer gated on the
+  full variant. A plain visit is still untouched, and `distance=economy` — which the writer never
+  emits — leaves the landing page short, because that is what the short plate already shows.
+
+- **The compact reading path ranks what it already had.** One necessary reading in full, the two
+  methods grouped as optional with their links live, the two gaps grouped and named, and the reasoning
+  of all four one disclosure away. Rejected: a second reading-path component, dropping a gap, and
+  shortening a destination. A closed `details` is in the document, so nothing is hidden from a crawler
+  or a screen reader. Public copy about checking "all 165 essay records, published and draft" was
+  replaced with what a reader can inspect and when it was last true; the audit trail stays in the
+  response record.
+
+- **The desktop navigation and the drawer swap at the width where the row actually fits** (`xl`, not
+  `lg`). At 1024px seven labels did not fit and did not wrap, so flexbox compressed them — one label
+  was clipped mid-word inside a 64px header. Above that width the row wraps rather than overrunning,
+  because the labels grow with the reader's default font and at 24px they gave the whole document a
+  horizontal scrollbar. **Nothing is dropped to make room:** every label is a section of the site, and
+  a capacity problem solved by hiding destinations solves it by making them unreachable.
+
+## Not done, deliberately
+
+No DNS or Vercel change; no canonical origin switched for convenience; the stale mirror repository was
+not inspected. No numerical magnitude on the map — the repository's own no-figures test caught a first
+draft of the entrance copy that carried a date range. No promotion of any of the fifteen scenario
+marks. No comprehension claimed: nobody unfamiliar has used any of it.
+
+---
+
 # 2026-09-08 — The condition layer: a status on every mark, a reading in one voice, and nothing under the map
 
 **The owner's brief of 2026-09-08 named one priority above all others: the map was anatomy, and its
