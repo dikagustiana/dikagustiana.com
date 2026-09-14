@@ -54,7 +54,18 @@ function LinkChips({ links }: { links: readonly ReadingStep['links'][number][] }
   );
 }
 
-function StepBody({ step, row, index }: { step: ReadingStep; row?: ReadingPathRow; index: number }) {
+function StepBody({
+  step,
+  row,
+  index,
+  unreachable = false,
+}: {
+  step: ReadingStep;
+  row?: ReadingPathRow;
+  index: number;
+  /** The lookup failed. Not the same as "not written", and must not say so. */
+  unreachable?: boolean;
+}) {
   const href = stepHref(step, row);
   const written = !!href;
 
@@ -75,7 +86,12 @@ function StepBody({ step, row, index }: { step: ReadingStep; row?: ReadingPathRo
       <div className="min-w-0 flex-1">
         <div className="mb-1.5 flex flex-wrap items-center gap-2">
           <LinkChips links={step.links} />
-          {!written && (
+          {!written && step.slug && unreachable && (
+            <span className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground">
+              Couldn&rsquo;t check
+            </span>
+          )}
+          {!written && !(step.slug && unreachable) && (
             <span className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground">
               Not written
             </span>
@@ -102,7 +118,17 @@ function StepBody({ step, row, index }: { step: ReadingStep; row?: ReadingPathRo
           </p>
         )}
 
-        {!written && step.missing && (
+        {/* A failed lookup is not an absent essay. Saying "not written" here
+            would be the same error as an error page telling a reader their
+            essay is gone because the database was unreachable. */}
+        {!written && step.slug && unreachable && (
+          <p className="mt-2 border-l-2 border-border pl-3 text-[14px] leading-relaxed text-muted-foreground">
+            This page couldn&rsquo;t reach the essay index, so it cannot say whether this step is
+            published. It may be there.
+          </p>
+        )}
+
+        {!written && !step.slug && step.missing && (
           <p className="mt-2 border-l-2 border-border pl-3 text-[14px] leading-relaxed text-muted-foreground">
             {step.missing}
           </p>
@@ -128,7 +154,7 @@ function StepBody({ step, row, index }: { step: ReadingStep; row?: ReadingPathRo
 }
 
 export function ReadingPath({ compact = false }: { compact?: boolean }) {
-  const { data: rows, isLoading } = useReadingPath();
+  const { data: rows, isLoading, isError, refetch } = useReadingPath();
 
   return (
     <section id="the-argument" className="border-b border-border py-12">
@@ -202,13 +228,27 @@ export function ReadingPath({ compact = false }: { compact?: boolean }) {
                       </Link>
                     ) : (
                       <div className="py-6">
-                        <StepBody step={step} index={index} />
+                        <StepBody step={step} index={index} unreachable={isError} />
                       </div>
                     )}
                   </li>
                 );
               })}
         </ol>
+
+        {isError && (
+          <p className="mt-4 max-w-3xl text-[13px] text-muted-foreground">
+            The essay index could not be reached, so no step below could be resolved to a link.{' '}
+            <button
+              type="button"
+              onClick={() => refetch()}
+              className="text-primary underline underline-offset-2"
+            >
+              Try again
+            </button>
+            .
+          </p>
+        )}
 
         <p className="mt-5 max-w-3xl text-[13px] text-muted-foreground">
           This framing was last reviewed on {fullDate(ARGUMENT.asOf)}.{' '}

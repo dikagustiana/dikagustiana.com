@@ -52,27 +52,44 @@ const sections = [
  * rule against six sibling sentences under six headings (docs/DECISIONS.md,
  * 2026-08-03) is about generated prose, and a number is not prose.
  *
- * Returns null while the count is loading: no number is better than a zero
- * that turns into a two.
+ * Takes `loaded` rather than inferring it from the count, because the count
+ * map has no key for a section with nothing in it: an absent key means zero,
+ * and an unresolved query also means absent. Collapsing those two was how the
+ * three EMPTY sections — the ones this exists for — rendered blank.
+ *
+ * Returns null until the query resolves: no number is better than a zero that
+ * turns into a two.
  */
-function sectionStanding(count: number | undefined, alsoHolds?: string): string | null {
-  if (count === undefined) return null;
+function sectionStanding(loaded: boolean, count: number | undefined, alsoHolds?: string): string | null {
+  if (!loaded) return null;
+  count = count ?? 0;
   const essays = count === 0 ? 'Nothing written yet' : `${count} essay${count === 1 ? '' : 's'}`;
   return alsoHolds ? `${essays} \u00b7 ${alsoHolds}` : essays;
 }
 
-const getSectionLabel = (section: string, phase: string | null) => {
-  if (section === 'green-transition') return 'Green Transition';
-  if (section === 'next-big-thing') return 'Next Big Thing';
-  return section;
+/**
+ * A section slug is not a label. Falling through to the raw slug printed
+ * "finance" and "accounting" in lower case on the card badges, beside two
+ * hand-written ones — which reads as an unfinished mapping, because it was.
+ */
+const SECTION_LABELS: Record<string, string> = {
+  finance: 'Finance',
+  accounting: 'Accounting',
+  'green-transition': 'Green Transition',
+  'next-big-thing': 'The Next Big Thing',
+  'development-finance': 'Development Finance',
+  'critical-thinking': 'Critical Thinking',
+  'critical-thinking-research': 'Critical Thinking',
 };
+
+const getSectionLabel = (section: string) => SECTION_LABELS[section] ?? section;
 
 
 const Index = () => {
   // Manual curation, not recency — recency is what put a database-rebuild
   // notice on the homepage. Zero selected essays hides the section entirely.
   const { data: featuredEssays, isLoading } = useSelectedEssays(4);
-  const { data: sectionCounts } = useSectionCounts();
+  const { data: sectionCounts, isSuccess: countsLoaded } = useSectionCounts();
 
   return (
     <PageLayout role="hybrid">
@@ -118,7 +135,7 @@ const Index = () => {
                   <Card className="h-full hover:shadow-lg transition-[transform,box-shadow] hover:-translate-y-1 cursor-pointer group">
                     <CardContent className="p-5">
                       <Badge variant="secondary" className="mb-3 text-xs">
-                        {getSectionLabel(essay.section, essay.phase)}
+                        {getSectionLabel(essay.section)}
                       </Badge>
                       <h3 className="font-semibold text-foreground mb-2 line-clamp-2 group-hover:text-accent transition-colors">
                         {essay.title}
@@ -174,18 +191,19 @@ const Index = () => {
               <li key={section.path}>
                 <Link
                   to={section.path}
-                  className="group flex items-baseline justify-between gap-4 py-5"
+                  className="group flex flex-col gap-1 py-5 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4"
                 >
                   <span className="text-lg font-display font-semibold text-foreground group-hover:text-accent transition-colors">
                     {section.title}
                   </span>
                   {(() => {
                     const standing = sectionStanding(
+                      countsLoaded,
                       sectionCounts?.[section.section],
                       section.alsoHolds,
                     );
                     return standing ? (
-                      <span className="flex-shrink-0 text-xs font-mono text-muted-foreground">
+                      <span className="text-xs font-mono text-muted-foreground sm:text-right">
                         {standing}
                       </span>
                     ) : null;

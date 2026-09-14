@@ -146,6 +146,20 @@ describe('<ReadingPath />', () => {
     }
   });
 
+  it('does not call a failed lookup "not written"', async () => {
+    // The A08 failure, in a new place: a fetch that could not reach the index
+    // knows nothing about whether an essay exists.
+    fromMock.mockReturnValue(makeQueryResult(null, { message: 'network down' }));
+    renderPath(<ReadingPath />);
+
+    await waitFor(() => expect(screen.getAllByText(/Couldn.t check/).length).toBeGreaterThan(0));
+    // The two real gaps still say "Not written"; the three lookups do not.
+    expect(screen.getAllByText('Not written')).toHaveLength(
+      READING_PATH.filter((s) => !s.slug).length,
+    );
+    expect(screen.getByRole('button', { name: /Try again/i })).toBeInTheDocument();
+  });
+
   it('filters on the column RLS enforces, not on `status`', async () => {
     const builder = makeQueryResult([flagship]) as Record<string, unknown> & {
       eq: (c: string, v: unknown) => unknown;
