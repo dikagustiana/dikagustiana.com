@@ -16,18 +16,26 @@
  *
  * Same data file, same controls, same panel as the wide plate. The order of
  * rows here is layout; every word is a record in src/data/industryChain.ts.
- * `variant="compact"` draws the short version from COMPACT: no joints, no
- * layers list, no toggles, no small labels. There is no legend: every form
- * carries its own definition in its accessible description.
+ * There is no legend: every form carries its own definition in its accessible
+ * description.
+ *
+ * ONE COLUMN, TWO LEVELS OF GROUPING, exactly as the wide plate has. The
+ * overview used to be a different drawing built from a COMPACT sequence: a
+ * handful of boxes with no joints, no layers, no chips and no marks, so the
+ * distance and shift controls had nothing to act on and had to be hidden.
+ * `level="overview"` now runs the SAME column and applies the SAME grouping
+ * rules the plate applies — OVERVIEW_GROUPS, OVERVIEW_INTERNAL_JOINTS,
+ * OVERVIEW_OMITS — so the narrow reader gets every joint but one, every
+ * layer, every border, every return, every flow and every mark without
+ * opening the detail. `detail` un-groups; it adds nothing.
  */
 
-import { useContext, useId, useState, type ReactNode } from 'react';
+import { useContext, useId, useState } from 'react';
 import {
   BANDS,
   BORDERS,
   BYPRODUCT,
   CHAIN_COPY,
-  COMPACT,
   DEFINE,
   FLOW_KIND_LABELS,
   JOINT_BY_ID,
@@ -35,6 +43,8 @@ import {
   MARGIN_KINDS,
   NODES,
   NON_PHYSICAL,
+  OVERVIEW_GROUPS,
+  OVERVIEW_INTERNAL_JOINTS,
   RETAIL,
   RETAIL_GROUP,
   RETURNS,
@@ -45,9 +55,10 @@ import {
   isWritten,
   shiftTarget,
   type Band,
-  type CompactStep,
+  type ChainLevel,
   type JointId,
   type MarginKind,
+  type OverviewGroup,
 } from '@/data/industryChain';
 import { cn } from '@/lib/utils';
 import { StatusBadge } from './ChainTargetPanel';
@@ -153,6 +164,13 @@ function LitNote({ id }: { id: string }) {
 
 /* ── The forms ───────────────────────────────────────────────────────────── */
 
+/**
+ * A transformation stage. `detail` gates the material the overview groups
+ * away — the example lanes into an origin, the stage's own gloss, and the
+ * components of demand — and nothing else. The origin bar stays, because the
+ * plate keeps it at both levels, and the shift's reading stays, because the
+ * overview is a map to work at rather than a picture of one.
+ */
 function StageBox({ id, detail = true }: { id: string; detail?: boolean }) {
   const stage = S[id];
   const lit = useLit(id);
@@ -165,7 +183,7 @@ function StageBox({ id, detail = true }: { id: string; detail?: boolean }) {
         title={stage.origin ? DEFINE.origin : DEFINE.stage}
         className={cn('rounded-sm border border-foreground bg-background px-3 py-2', lit && litForm(status))}
       >
-        {detail && stage.origin && <p className={KICKER}>{CHAIN_COPY.controls.origin}</p>}
+        {stage.origin && <p className={KICKER}>{CHAIN_COPY.controls.origin}</p>}
         <p className="break-words text-[15px] font-semibold leading-snug text-foreground">{stage.label}</p>
         {detail && stage.lanes && <p className="mt-1 text-xs leading-snug text-muted-foreground">{stage.lanes.join(' · ')}</p>}
         {detail && stage.detail && <p className="mt-1 text-xs leading-snug text-muted-foreground">{stage.detail}</p>}
@@ -177,7 +195,7 @@ function StageBox({ id, detail = true }: { id: string; detail?: boolean }) {
           </ul>
         )}
       </div>
-      {detail && <LitNote id={id} />}
+      <LitNote id={id} />
     </div>
   );
 }
@@ -202,7 +220,13 @@ function NodePill({ id, label }: { id: string; label?: string }) {
   );
 }
 
-function RetailGroup() {
+/**
+ * The retail function. Its five formats are rows on detail and are grouped
+ * away on the overview; the node, its note and its joints are the same at
+ * both levels. Grouping them says they share a FUNCTION — not a margin, which
+ * is why the formats come back rather than being summed.
+ */
+function RetailGroup({ formats = true }: { formats?: boolean }) {
   const lit = useLit(RETAIL_GROUP.id);
   const status = useStatus(RETAIL_GROUP.id);
   return (
@@ -211,13 +235,15 @@ function RetailGroup() {
         <p className={KICKER}>
           {RETAIL_GROUP.label} <span className="normal-case tracking-normal">· {RETAIL_GROUP.note}</span>
         </p>
-        <ul className="mt-1.5 flex flex-wrap gap-1.5">
-          {RETAIL.map((r) => (
-            <li key={r.id} data-id={r.id} className="rounded-full border border-dashed border-muted-foreground bg-background px-2 py-0.5 text-xs text-foreground">
-              {r.label}
-            </li>
-          ))}
-        </ul>
+        {formats && (
+          <ul className="mt-1.5 flex flex-wrap gap-1.5">
+            {RETAIL.map((r) => (
+              <li key={r.id} data-id={r.id} className="rounded-full border border-dashed border-muted-foreground bg-background px-2 py-0.5 text-xs text-foreground">
+                {r.label}
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
       <LitNote id={RETAIL_GROUP.id} />
     </div>
@@ -437,32 +463,77 @@ function LayerRow({ band }: { band: Band }) {
   );
 }
 
-/* ── The two columns ─────────────────────────────────────────────────────── */
+/* ── One column, two levels of grouping ───────────────────────── */
 
-function FullColumn() {
+/**
+ * One box standing for two or more source records.
+ *
+ * It takes the node form because both groups collapse NODES, and it carries
+ * the group’s own account of what stays true while they share a box — which
+ * is where the sentence about two spreads not adding into one lives. It is
+ * not a door: a group is a way of drawing, not a margin to read. The margins
+ * inside it are read on detail, separately, which is the point.
+ */
+function GroupBox({ group }: { group: OverviewGroup }) {
+  return (
+    <div className="min-w-0">
+      <div
+        data-id={group.id}
+        data-group=""
+        title={`${DEFINE.node} — ${group.keeps}`}
+        className="rounded-full border border-dashed border-muted-foreground bg-background px-3 py-1.5"
+      >
+        <p className="break-words text-sm leading-snug text-foreground">{group.label}</p>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * The chain, top to bottom, at one of two levels of grouping.
+ *
+ * Everything that is a RELATION is drawn at both levels: the two origins and
+ * where they join, the parallel packaging input, ten of the eleven joints,
+ * every border, every enabling layer, every return with its own destination,
+ * and both non-physical flow lists. What the overview groups away is named in
+ * OVERVIEW_GROUPS and OVERVIEW_OMITS and put back by `detail`.
+ *
+ * The one joint the overview does not draw is the transfer between the
+ * distributor and the wholesaler, which is internal to their shared box. It
+ * is a door, so an address naming it opens the detail rather than a panel
+ * with nothing behind it — see asksForFullChain in useChainUrl.ts.
+ */
+function Column({ level }: { level: ChainLevel }) {
   const base = useId();
   const returnsId = `${base}-returns`, flowsId = `${base}-flows`, layersId = `${base}-layers`;
   const [showReturns, setShowReturns] = useState(false);
   const [showFlows, setShowFlows] = useState(false);
+  const overview = level === 'overview';
+  const detail = !overview;
 
   return (
-    <div className="cp-column flex min-w-0 flex-col" data-variant="full" role="group" aria-label={CHAIN_COPY.aria.column}>
+    <div
+      className="cp-column flex min-w-0 flex-col"
+      data-level={level}
+      role="group"
+      aria-label={overview ? CHAIN_COPY.aria.compact.title : CHAIN_COPY.aria.column}
+    >
       <p className="mb-4 border-l-2 border-border pl-3 text-sm leading-relaxed text-muted-foreground">{CHAIN_COPY.mobileFlows}</p>
       <div className="grid min-w-0 grid-cols-2 gap-3">
         <div className="flex min-w-0 flex-col">
-          <StageBox id="stage-biological" />
+          <StageBox id="stage-biological" detail={detail} />
           <JointRow id="j-production-aggregation" />
           <NodePill id="node-aggregation" />
           <JointRow id="j-aggregation-processing" />
         </div>
         <div className="flex min-w-0 flex-col">
-          <StageBox id="stage-extraction" />
+          <StageBox id="stage-extraction" detail={detail} />
           <BorderRule id="border-export" />
           <JointRow id="j-extraction-processing" />
         </div>
       </div>
 
-      <StageBox id="stage-processing" />
+      <StageBox id="stage-processing" detail={detail} />
       <p data-id={BYPRODUCT.id} className="mt-1 text-right text-xs text-muted-foreground">
         ↘ {BYPRODUCT.label}
       </p>
@@ -475,12 +546,12 @@ function FullColumn() {
           <JointRow id="j-trader-manufacturing" />
         </div>
         <div className="flex min-w-0 flex-col">
-          <StageBox id="stage-packaging" />
+          <StageBox id="stage-packaging" detail={detail} />
           <JointRow id="j-packaging-manufacturing" />
         </div>
       </div>
 
-      <StageBox id="stage-manufacturing" />
+      <StageBox id="stage-manufacturing" detail={detail} />
       <div className="my-1 flex items-center gap-2 pl-4 text-xs text-muted-foreground">
         <span aria-hidden="true" className="h-4 border-l border-muted-foreground" />
         {CHAIN_COPY.controls.alongside}
@@ -488,15 +559,25 @@ function FullColumn() {
       <NodePill id="node-principal" />
       <JointRow id="j-manufacturing-distribution" />
 
-      <NodePill id="node-distributor" />
-      <JointRow id="j-distributor-wholesaler" />
-      <NodePill id="node-wholesaler" />
+      {/* The distributor and the wholesaler, as one box or as two nodes with
+          the transfer between them. Both take title and transform nothing;
+          the joint they share is real at both levels and is simply inside
+          the box at the coarser one. */}
+      {overview ? (
+        <GroupBox group={OVERVIEW_GROUPS['group-distribution']} />
+      ) : (
+        <>
+          <NodePill id="node-distributor" />
+          <JointRow id="j-distributor-wholesaler" />
+          <NodePill id="node-wholesaler" />
+        </>
+      )}
       <JointRow id="j-wholesale-retail" />
-      <RetailGroup />
+      <RetailGroup formats={detail} />
       <JointRow id="j-retail-consumption" />
-      <StageBox id="stage-consumption" />
+      <StageBox id="stage-consumption" detail={detail} />
       <JointRow id="j-consumption-recovery" />
-      <StageBox id="stage-recovery" />
+      <StageBox id="stage-recovery" detail={detail} />
       {!showReturns && <LitReturns from="stage-recovery" />}
 
       <div className="mt-5 flex flex-wrap gap-2">
@@ -524,71 +605,6 @@ function FullColumn() {
   );
 }
 
-function GroupPill({ step }: { step: Extract<CompactStep, { kind: 'group' }> }) {
-  return (
-    <div data-id={step.id} className="rounded-full border border-dashed border-muted-foreground bg-background px-3 py-1.5">
-      <p className="break-words text-sm leading-snug text-foreground">{step.label}</p>
-    </div>
-  );
-}
-
-function CompactColumn() {
-  const steps = COMPACT.sequence;
-  const out: ReactNode[] = [];
-  let i = 0;
-  while (i < steps.length) {
-    const step = steps[i];
-    if (step.kind === 'stages' && step.ids.length === 2) {
-      const next = steps[i + 1];
-      const groupForFirst = next && next.kind === 'group' && next.from?.includes(step.ids[0]) ? next : null;
-      out.push(
-        <div key={step.ids.join('+')} className="grid min-w-0 grid-cols-2 gap-3">
-          <div className="flex min-w-0 flex-col">
-            <StageBox id={step.ids[0]} detail={false} />
-            {groupForFirst && (
-              <>
-                <Arrow />
-                <GroupPill step={groupForFirst} />
-              </>
-            )}
-          </div>
-          <div className="flex min-w-0 flex-col">
-            <StageBox id={step.ids[1]} detail={false} />
-          </div>
-        </div>,
-      );
-      i += groupForFirst ? 2 : 1;
-    } else {
-      out.push(step.kind === 'stages' ? <StageBox key={step.ids[0]} id={step.ids[0]} detail={false} /> : <GroupPill key={step.id} step={step} />);
-      i += 1;
-    }
-    if (i < steps.length) out.push(<Arrow key={`arrow-${i}`} />);
-  }
-
-  const ret = COMPACT.returnArrow;
-  return (
-    <div className="cp-column flex min-w-0 flex-col" data-variant="compact" role="group" aria-label={CHAIN_COPY.aria.compact.title}>
-      {out}
-      <div data-id={ret.id} className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
-        <span aria-hidden="true" className="flex-1 border-t border-dashed border-muted-foreground" />
-        <span>
-          ↑ {ret.label} · {CHAIN_COPY.controls.back} {labelOf(ret.to)}
-        </span>
-      </div>
-      <ul className="mt-3 space-y-1.5">
-        {COMPACT.bands.map((id) => {
-          const band = BANDS.find((b) => b.id === id)!;
-          return (
-            <li key={id} data-id={id} className="rounded-sm border-t border-border bg-secondary px-3 py-2 text-xs font-medium uppercase tracking-wider text-foreground">
-              {band.label}
-            </li>
-          );
-        })}
-      </ul>
-    </div>
-  );
-}
-
-export function ChainColumn({ variant }: { variant: 'full' | 'compact' }) {
-  return variant === 'compact' ? <CompactColumn /> : <FullColumn />;
+export function ChainColumn({ level }: { level: ChainLevel }) {
+  return <Column level={level} />;
 }

@@ -18,7 +18,7 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactElement } from 'react';
-import { BASIS, CHAIN_COPY, LEVERS, SHIFT_BY_ID, STATUS, slugOf } from '@/data/industryChain';
+import { BASIS, CHAIN_COPY, LEVERS, OVERVIEW_HIDES, SHIFT_BY_ID, STATUS, drawnAtOverview, jointLayers, slugOf } from '@/data/industryChain';
 
 vi.mock('@/integrations/supabase/client', () => ({ supabase: { from: () => ({}) } }));
 
@@ -168,7 +168,7 @@ describe('the marks on the plate', () => {
   it('keeps the panel in the order the brief fixes on the one mark that is fully written', async () => {
     // Energy under the green shift is the one ASSESSED mark. All four lines
     // are written, in order, and the lever line is followed by the mechanism
-    // that is actually at work \u2014 a contract, which the map cannot draw.
+    // that is actually at work — a contract, which the map cannot draw.
     mount(<ChainPlate links={[]} />);
     await userEvent.click(word('green transition'));
     await userEvent.click(screen.getByRole('button', { name: /Green transition · Energy · Moving$/ }));
@@ -276,9 +276,19 @@ describe('where a reading and a label are placed', () => {
   });
 
   it('isolates a joint to its two hands and its layers, a stage to the joints that touch it, and a layer to nothing', () => {
+    // Every layer whose span covers the joint stays, both the ones charged
+    // there and the ones standing behind it — stepping into one unit of goods
+    // does not make the warehouse that holds it disappear. Which of the two a
+    // layer is, is said in the panel, not by dropping it from the drawing.
     expect(isolationSet('j-processing-trader')).toEqual(
-      new Set(['j-processing-trader', 'stage-processing', 'node-trader', 'band-logistics', 'band-cold-chain', 'band-credit', 'band-energy', 'band-regulation']),
+      new Set([
+        'j-processing-trader',
+        'stage-processing',
+        'node-trader',
+        ...jointLayers('j-processing-trader').map((b) => b.id),
+      ]),
     );
+    expect(jointLayers('j-processing-trader').map((b) => b.id)).toContain('band-capital');
     expect(isolationSet('stage-processing')).toContain('j-extraction-processing');
     expect(isolationSet('stage-processing')).toContain('j-processing-trader');
     expect(isolationSet('band-energy')).toBeNull();
@@ -342,7 +352,7 @@ describe('the map in the address bar', () => {
   it('still opens a joint or a layer named with no overlay, because those are doors at all times', () => {
     window.history.replaceState({}, '', '/about?node=credit');
     mount(<ChainPlate links={[]} />);
-    expect(screen.getByRole('region', { name: 'Credit and working capital' })).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: 'Working capital and trade credit' })).toBeInTheDocument();
     expect(window.location.search).toBe('?node=credit');
   });
 
@@ -352,20 +362,20 @@ describe('the map in the address bar', () => {
     expect(window.location.search).toBe('');
   });
 
-  it('puts the state in the address once the reader opens the full chain from the landing page', async () => {
+  it('puts the state in the address as soon as the reader changes anything, at the overview', async () => {
     // The old rule was "the preview never writes the URL", which meant a
-    // reading reached from the landing page could not be sent to anyone \u2014
-    // precisely the moment someone wants to send it. Opening it makes it the
-    // same map with the same doors, so it becomes shareable then.
+    // reading reached from the landing page could not be sent to anyone —
+    // precisely the moment someone wants to send it. Then it wrote only once
+    // the chain was expanded, because the short plate had no state worth
+    // sharing. The overview has all of it, so it is shareable from the start.
     window.history.replaceState({}, '', '/');
     mount(<ChainPlate links={[]} variant="preview" />);
-    //
-    // The click that opens it is no longer a shift word: a distance and a
-    // scenario are not offered while the plate is short, because neither has
-    // anything to change there (U02). The button that says what it does is.
-    await userEvent.click(screen.getByRole('button', { name: CHAIN_COPY.controls.seeFull }));
     await userEvent.click(word('green transition'));
     expect(window.location.search).toBe('?lens=green');
+    expect((document.querySelector('.chain-plate') as HTMLElement).dataset.level).toBe('overview');
+
+    await userEvent.click(word('Wholesale → retail'));
+    expect(window.location.search).toBe('?lens=green&node=wholesale-retail');
   });
 
   /*
@@ -375,11 +385,13 @@ describe('the map in the address bar', () => {
    * 14 September 2026 - ?distance=finance&lens=green&node=energy kept every
    * parameter and rendered Economy, No shift, short.
    */
-  it('restores a shared reading on the landing page, opening the short plate to draw it', () => {
+  it('restores a shared reading on the landing page, at the overview, which can draw it', () => {
     window.history.replaceState({}, '', '/?distance=finance&lens=green&node=energy');
     mount(<ChainPlate links={[]} variant="preview" />);
     const plate = document.querySelector('.chain-plate') as HTMLElement;
-    expect(plate.dataset.view).toBe('full');
+    // The whole state arrives, and the level stays where the reader would have
+    // been: the overview draws the energy layer, its door and its mark.
+    expect(plate.dataset.level).toBe('overview');
     expect(plate.dataset.lens).toBe('finance');
     expect(plate.dataset.shift).toBe('green');
     const panel = screen.getByRole('region', { name: 'Energy' });
@@ -387,22 +399,44 @@ describe('the map in the address bar', () => {
     expect(window.location.search).toBe('?distance=finance&lens=green&node=energy');
   });
 
-  it('leaves the landing page short when the address asks only for what the short plate already shows', () => {
+  /**
+   * The one address that still has to open the detail: an element the
+   * overview groups away. Opening a reading for something not on the drawing
+   * would put a panel on the page with no element under it.
+   */
+  it('opens the detail only for an element the overview does not draw', () => {
+    window.history.replaceState({}, '', '/?node=distributor-wholesaler');
+    mount(<ChainPlate links={[]} variant="preview" />);
+    const plate = document.querySelector('.chain-plate') as HTMLElement;
+    expect(plate.dataset.level).toBe('detail');
+    expect(screen.getByRole('region', { name: 'Distributor → wholesaler' })).toBeInTheDocument();
+    for (const id of OVERVIEW_HIDES) expect(drawnAtOverview(id), id).toBe(false);
+  });
+
+  it('leaves the landing page at the overview for any address the overview can draw', () => {
     // `distance=economy` is never written by the map (the resting distance is
     // not worth carrying), so it can only be a hand-edit - and the honest
     // reading of a hand-edit asking for the resting state is the resting state.
     window.history.replaceState({}, '', '/?distance=economy');
+    const first = mount(<ChainPlate links={[]} variant="preview" />);
+    expect((document.querySelector('.chain-plate') as HTMLElement).dataset.level).toBe('overview');
+    first.unmount();
+
+    // And an address naming a distance, an overlay and a door the overview
+    // draws stays there too: expanding would be the address being honoured by
+    // a control the reader did not touch.
+    window.history.replaceState({}, '', '/?distance=finance&lens=green&node=recovery');
     mount(<ChainPlate links={[]} variant="preview" />);
-    expect((document.querySelector('.chain-plate') as HTMLElement).dataset.view).toBe('compact');
+    expect((document.querySelector('.chain-plate') as HTMLElement).dataset.level).toBe('overview');
   });
 
   it('does not honour an address that names an element this overlay does not mark, on the landing page either', () => {
     window.history.replaceState({}, '', '/?lens=reindustrialisation&node=recovery');
     mount(<ChainPlate links={[]} variant="preview" />);
     const plate = document.querySelector('.chain-plate') as HTMLElement;
-    // The overlay is real and opens the chain; the rejected element does not
-    // leave a panel with a heading and nothing under it.
-    expect(plate.dataset.view).toBe('full');
+    // The overlay is real and is honoured; the rejected element does not leave
+    // a panel with a heading and nothing under it.
+    expect(plate.dataset.level).toBe('overview');
     expect(plate.dataset.shift).toBe('reindustrialisation');
     expect(screen.queryByRole('region', { name: 'Recovery' })).not.toBeInTheDocument();
     expect(window.location.search).toBe('?lens=reindustrialisation');

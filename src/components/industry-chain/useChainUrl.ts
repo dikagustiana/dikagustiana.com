@@ -24,7 +24,7 @@
  */
 
 import { useCallback, useEffect, useRef } from 'react';
-import { SHIFT_BY_ID, idOfSlug, slugOf, type LensId, type ShiftId } from '@/data/industryChain';
+import { SHIFT_BY_ID, drawnAtOverview, idOfSlug, slugOf, type LensId, type ShiftId } from '@/data/industryChain';
 
 export const CHAIN_PARAM = { shift: 'lens', lens: 'distance', node: 'node' } as const;
 
@@ -74,22 +74,22 @@ export function initialChainUrl(enabled = true): ChainUrlState {
 }
 
 /**
- * Whether an incoming address asks for something the SHORT plate cannot draw.
+ * Whether an incoming address asks for something the OVERVIEW cannot draw.
  *
- * The short plate has no doors, no marks and no chips: it is the chain at the
- * economy distance with no shift on. So an address naming a shift, an element
- * or the finance distance is asking for the full chain, and the preview has to
- * open to honour it. An address naming nothing — or naming only
- * `distance=economy`, which is what the short plate already shows — leaves a
- * plain visit short, which is the whole point of the preview.
+ * This used to be almost every address. The old short plate had no doors, no
+ * marks and no chips, so a shift, an element or the finance distance all had
+ * to force the full chain open. The overview is now the same drawing at a
+ * coarser grouping: it carries both distances, both overlays with their marks,
+ * and every door but one. So a shared link opens at the overview and stays
+ * there, which is where the map is meant to be read.
  *
- * `writeChainUrl` never emits `distance=economy` for exactly this reason: the
- * resting distance is not worth carrying, so its presence in an address is a
- * hand-edit, and the honest reading of a hand-edit asking for the resting
- * state is to show the resting state.
+ * The exception is exact rather than cautious: OVERVIEW_HIDES names the
+ * elements the grouping folds away, and an address naming one of those opens
+ * the detail so the reading has something to sit on. A link written against
+ * the joint inside the distribution box still lands on that joint.
  */
 export function asksForFullChain(state: ChainUrlState): boolean {
-  return state.shift !== null || state.node !== null || state.lens === 'finance';
+  return state.node !== null && !drawnAtOverview(state.node);
 }
 
 /**

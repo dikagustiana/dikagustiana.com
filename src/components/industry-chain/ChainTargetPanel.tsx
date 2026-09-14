@@ -174,6 +174,8 @@ function LayerRef({ band }: { band: Band }) {
 function JointAnatomy({ joint }: { joint: Joint }) {
   const { lens } = useContext(ChainLensContext);
   const layers = jointLayers(joint.id);
+  const charged = layers.filter((b) => b.attaches === 'joints');
+  const behind = layers.filter((b) => b.attaches !== 'joints');
   return (
     <>
       <MarginBlock kind={joint.margin} note={joint.note} />
@@ -192,11 +194,25 @@ function JointAnatomy({ joint }: { joint: Joint }) {
       {lens === 'finance' && (
         <Lines heading={CHAIN_COPY.panel.linesHeading} lines={[...joint.lines, ...MARGIN_KINDS[joint.margin].lines]} />
       )}
-      {layers.length > 0 && (
+      {/* Two groups, because they are two different claims. See
+          CHAIN_COPY.panel.layersHeading for why one list would have said that
+          the money which built the warehouse takes a cut of the move. */}
+      {charged.length > 0 && (
         <div className="mt-4">
           <h4 className={KICKER}>{CHAIN_COPY.panel.layersHeading}</h4>
           <ul className="mt-1.5 space-y-1">
-            {layers.map((b) => (
+            {charged.map((b) => (
+              <LayerRef key={b.id} band={b} />
+            ))}
+          </ul>
+        </div>
+      )}
+      {behind.length > 0 && (
+        <div className="mt-4">
+          <h4 className={KICKER}>{CHAIN_COPY.panel.layersBehindHeading}</h4>
+          <p className="mt-1 text-xs text-muted-foreground">{CHAIN_COPY.panel.layersBehindNote}</p>
+          <ul className="mt-1.5 space-y-1">
+            {behind.map((b) => (
               <LayerRef key={b.id} band={b} />
             ))}
           </ul>

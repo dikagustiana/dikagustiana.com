@@ -19,7 +19,6 @@ import {
   BYPRODUCT,
   CHAIN_COPY,
   COLUMNS,
-  COMPACT,
   DEFINE,
   JOINTS,
   JOINT_BY_ID,
@@ -29,14 +28,20 @@ import {
   MARGIN_KINDS,
   NODES,
   NON_PHYSICAL,
+  OVERVIEW_GROUPS,
+  OVERVIEW_HIDES,
+  OVERVIEW_INTERNAL_JOINTS,
+  OVERVIEW_OMITS,
   RETAIL,
   RETAIL_GROUP,
   RETURNS,
   SHIFTS,
   SHIFT_BY_ID,
   STAGES,
+  RETURNS_UNGROUPED,
   STATUS,
   SLUGS,
+  drawnAtOverview,
   UNWRITTEN,
   bandChip,
   bandJoints,
@@ -161,8 +166,39 @@ describe('the three margin kinds', () => {
 });
 
 describe('the enabling layers', () => {
-  it('are six, in this order: logistics, the cold chain split out of it, credit, energy, the one partial layer, then the rules under everything', () => {
-    expect(BANDS.map((b) => b.id)).toEqual(['band-logistics', 'band-cold-chain', 'band-credit', 'band-energy', 'band-governance', 'band-regulation']);
+  it('are seven, in this order: logistics, the cold chain split out of it, the two kinds of finance, energy, the one partial layer, then the rules under everything', () => {
+    expect(BANDS.map((b) => b.id)).toEqual([
+      'band-logistics',
+      'band-cold-chain',
+      'band-credit',
+      'band-capital',
+      'band-energy',
+      'band-governance',
+      'band-regulation',
+    ]);
+  });
+
+  /**
+   * Finance was one band, and one band could not answer the question a reader
+   * actually arrives with. Money that bridges a transfer and money that builds
+   * the plant are priced differently, committed for different lengths of time,
+   * and fail in different ways; a single “Credit and trade finance” band made the
+   * second invisible on a map whose argument turns on what gets built.
+   *
+   * The distinction is STRUCTURAL, not a rename: working capital attaches at
+   * the JOINTS it bridges, asset finance at the STAGES it builds. Two attach
+   * points is a claim the drawing makes and this test holds it to.
+   */
+  it('separate the money that bridges a transfer from the money that builds the asset, by where each attaches', () => {
+    const working = BAND_BY_ID['band-credit'];
+    const asset = BAND_BY_ID['band-capital'];
+    expect(working.attaches).toBe('joints');
+    expect(asset.attaches).toBe('stages');
+    expect(working.label.toLowerCase()).toContain('working capital');
+    expect(asset.label.toLowerCase()).toMatch(/asset|project/);
+    expect(asset.means.toLowerCase()).toContain('before it can trade');
+    // Three roles, usually three parties — the point a single finance band lost.
+    expect(asset.means.toLowerCase()).toContain('three separate parties');
   });
 
   it('do not carry contract capacity as a layer of its own — withdrawn — while makloon survives where a toller actually appears', () => {
@@ -474,44 +510,115 @@ describe('the definitions that replaced the legend', () => {
   });
 });
 
-describe('the short version', () => {
-  it('is six stages, three node groups, two layers and one return arrow, all resolving to records above', () => {
-    const stages = COMPACT.sequence.flatMap((s) => (s.kind === 'stages' ? s.ids : []));
-    const groups = COMPACT.sequence.filter((s) => s.kind === 'group');
-    expect(stages).toHaveLength(6);
-    for (const id of stages) expect(stageIds.has(id), id).toBe(true);
-    expect(groups).toHaveLength(3);
+/**
+ * The overview is the SAME drawing at a coarser grouping, not a second model.
+ * These tests hold the grouping to the one thing it must never do: change what
+ * the map says exists, what connects to what, or what a margin is.
+ */
+describe('the overview', () => {
+  it('groups only nodes, and only into boxes whose members all resolve to records above', () => {
+    const groups = Object.values(OVERVIEW_GROUPS);
+    expect(groups.length).toBeGreaterThan(0);
     for (const g of groups) {
-      if (g.kind !== 'group') continue;
-      expect(g.label).toBeTruthy();
+      expect(g.label, g.id).toBeTruthy();
+      expect(g.members.length, g.id).toBeGreaterThan(1);
       for (const m of g.members) expect(nodeIds.has(m), `${g.id} member ${m}`).toBe(true);
-      for (const f of g.from ?? []) expect(stageIds.has(f), `${g.id} from ${f}`).toBe(true);
+      // Every group says what survives the grouping and what detail puts back.
+      expect(g.keeps, g.id).toBeTruthy();
+      expect(g.opens, g.id).toBeTruthy();
     }
-    // Energy is on the short version because the entrance most readers meet
-    // showed it as nothing at all, while the argument this site makes turns
-    // on it. The full plate drew it only as arrows rising into each stage.
-    expect(COMPACT.bands).toEqual(['band-logistics', 'band-credit', 'band-energy']);
-    expect(stageIds.has(COMPACT.returnArrow.from)).toBe(true);
-    expect(stageIds.has(COMPACT.returnArrow.to)).toBe(true);
+  });
+
+  it('hides exactly the grouped members and the joints internal to them, and nothing else', () => {
+    const expected = new Set([
+      ...OVERVIEW_INTERNAL_JOINTS,
+      ...Object.values(OVERVIEW_GROUPS).flatMap((g) => g.members),
+    ]);
+    expect(new Set(OVERVIEW_HIDES)).toEqual(expected);
+    for (const id of OVERVIEW_HIDES) expect(drawnAtOverview(id), id).toBe(false);
+    for (const j of JOINT_IDS) {
+      if (OVERVIEW_INTERNAL_JOINTS.includes(j as (typeof OVERVIEW_INTERNAL_JOINTS)[number])) continue;
+      expect(drawnAtOverview(j), j).toBe(true);
+    }
+    for (const b of BANDS) expect(drawnAtOverview(b.id), b.id).toBe(true);
+  });
+
+  it('keeps every element either shift marks, so both overlays have something to raise at the overview', () => {
+    for (const shift of SHIFTS) {
+      for (const t of shift.targets) expect(drawnAtOverview(t.id), `${shift.id} marks ${t.id}`).toBe(true);
+    }
+  });
+
+  /**
+   * The returns were the one grouping available that was DECLINED. Six returns
+   * have five destinations; the old taster drew a single “Returns → Primary
+   * processing” arrow for all six, which says recovery sends everything back to
+   * one place. It does not.
+   */
+  it('does not group the returns, and says why', () => {
+    for (const r of RETURNS) expect(drawnAtOverview(r.id), r.id).toBe(true);
+    const destinations = new Set(RETURNS.map((r) => r.to));
+    expect(destinations.size).toBeGreaterThan(1);
+    expect(RETURNS_UNGROUPED).toBeTruthy();
+    for (const g of Object.values(OVERVIEW_GROUPS)) {
+      for (const m of g.members) expect(RETURNS.some((r) => r.id === m), `${g.id} groups a return`).toBe(false);
+    }
+  });
+
+  it('names every piece of detail it leaves out, and leaves out no relation', () => {
+    expect(OVERVIEW_OMITS.length).toBeGreaterThan(0);
+    for (const o of OVERVIEW_OMITS) {
+      expect(o.what).toBeTruthy();
+      expect(o.why).toBeTruthy();
+      // Nothing omitted may be a joint, a border, a return or a layer: those
+      // are relations, and a coarser grouping is not licence to drop one.
+      const text = `${o.what} ${o.why}`.toLowerCase();
+      expect(text, o.what).not.toMatch(/\bborder\b/);
+    }
+    const omitted = OVERVIEW_OMITS.map((o) => o.what.toLowerCase()).join(' ');
+    expect(omitted).toContain('lanes');
+    expect(omitted).toContain('demand');
+    expect(omitted).toContain('retail formats');
+  });
+
+  it('tells the reader what the level control does, and the two things it does not do', () => {
+    const note = CHAIN_COPY.controls.levelNote.toLowerCase();
+    expect(note).toContain('un-group');
+    expect(note).toContain('adds no relation');
+    expect(note).toMatch(/does not change the distance/);
+    expect(CHAIN_COPY.controls.seeFull.toLowerCase()).toContain('detail');
+    expect(CHAIN_COPY.controls.seeCompact.toLowerCase()).toContain('overview');
   });
 });
 
 describe('what the map promises', () => {
-  it('keeps the headline verbatim: the joint is the subject, the margin is the claim', () => {
-    expect(CHAIN_COPY.headline).toBe('Every joint in this chain is a margin.');
+  /**
+   * The headline made a claim: “Every joint in this chain is a margin.” It was
+   * true and it was doing work, but the map now opens the landing page with
+   * nothing above it, so its line is the page’s main heading — and a heading
+   * that argues is a hero by another name, which is exactly what the owner
+   * deleted. So the title NAMES the object, and the claim it used to carry is
+   * kept where it is actually checkable: on every joint’s own panel.
+   */
+  it('names the object rather than arguing, because it is the page heading now', () => {
+    expect(CHAIN_COPY.title).toBe('The industry chain');
+    expect(CHAIN_COPY.title).not.toMatch(/[.!?]$/);
+    // The claim is not lost: every joint still answers for a margin kind.
+    for (const j of JOINTS) expect(MARGIN_KINDS[j.margin], j.id).toBeTruthy();
   });
 
-  it('does not let the standfirst teach that margins aggregate into an economy', () => {
-    // The line used to read "Add them up and you have an economy; take one
-    // apart and you have a driver tree." The second half is right. The first
-    // half contradicts CHAIN_COPY.basis two fields below it, which says value
-    // added is output less intermediate consumption and is NOT gross profit \u2014
-    // so the most memorable sentence on the map taught the error the rest of
-    // it spends a paragraph correcting.
-    expect(CHAIN_COPY.standfirst).toContain('driver tree');
-    expect(CHAIN_COPY.standfirst.toLowerCase()).toContain('value added');
-    expect(CHAIN_COPY.standfirst.toLowerCase()).not.toMatch(/add them up and you (have|get) an economy/);
+  it('keeps the standfirst to the owner’s one line, and lets nothing in the copy teach that margins aggregate into an economy', () => {
+    expect(CHAIN_COPY.standfirst).toBe('Nothing here is complicated. It only looks that way from the wrong distance.');
+    // The line this replaced read “Add them up and you have an economy; take
+    // one apart and you have a driver tree.” The second half was right. The
+    // first contradicted CHAIN_COPY.basis two fields below it, which says
+    // value added is output less intermediate consumption and is NOT gross
+    // profit — so the most memorable sentence on the map taught the error the
+    // rest of it spends a paragraph correcting.
+    const copy = JSON.stringify(CHAIN_COPY).toLowerCase();
+    expect(copy).not.toMatch(/add them up and you (have|get) an economy/);
     expect(CHAIN_COPY.basis.toLowerCase()).toContain('not gross profit');
+    expect(CHAIN_COPY.basis.toLowerCase()).toContain('output less intermediate consumption');
   });
 
   it('makes the two controls two sentences whose words are the positions', () => {
@@ -531,7 +638,7 @@ describe('what the map promises', () => {
     noFigures(
       JSON.stringify({
         STAGES, NODES, RETAIL, RETAIL_GROUP, JOINTS, MARGIN_KINDS, BANDS, BORDERS, RETURNS, BYPRODUCT, NON_PHYSICAL,
-        SHIFTS, LEVERS, STATUS, DEFINE, COMPACT, CHAIN_COPY, JOINT_LABELS,
+        SHIFTS, LEVERS, STATUS, DEFINE, OVERVIEW_GROUPS, OVERVIEW_OMITS, RETURNS_UNGROUPED, CHAIN_COPY, JOINT_LABELS,
       }),
     );
   });
@@ -540,12 +647,14 @@ describe('what the map promises', () => {
 describe('the generated plates', () => {
   const tsx = readFileSync(resolve(process.cwd(), 'src/components/industry-chain/ChainPlateSvg.tsx'), 'utf8');
   const css = readFileSync(resolve(process.cwd(), 'src/components/industry-chain/chain-plate.css'), 'utf8');
-  const [wideSrc, compactSrc] = tsx.split('export function ChainPlateCompact');
+  // `wide`/`compact` are the emitted component names, kept so existing imports
+  // and CSS selectors hold; `detail`/`overview` is what they now ARE.
+  const [detailSrc, overviewSrc] = tsx.split('export function ChainPlateCompact');
   const texts = (src: string) => Array.from(src.matchAll(/<text[^>]*>([^<]*)<\/text>/g)).map((m) => m[1]);
   const dataIds = (src: string) => new Set(Array.from(src.matchAll(/data-id="([^"]+)"/g)).map((m) => m[1]));
 
   it('draw every stage, node, retail format, return, border and non-physical flow of the full chain, by id', () => {
-    const ids = dataIds(wideSrc);
+    const ids = dataIds(detailSrc);
     for (const s of STAGES) expect(ids, s.id).toContain(s.id);
     for (const n of [...NODES, ...RETAIL]) expect(ids, n.id).toContain(n.id);
     expect(ids).toContain(RETAIL_GROUP.id);
@@ -556,13 +665,29 @@ describe('the generated plates', () => {
   });
 
   it('draw every stage, node and format as text, in sync with the data — and no lens text, which lives on the chips at run time', () => {
-    const drawn = texts(wideSrc).join(' ');
-    const compactDrawn = texts(compactSrc).join(' ');
+    const drawn = texts(detailSrc).join(' ');
+    const overviewDrawn = texts(overviewSrc).join(' ');
     for (const st of STAGES) expect(drawn, st.id).toContain(st.label);
-    for (const st of COMPACT.sequence.flatMap((x) => (x.kind === 'stages' ? x.ids : []))) {
-      expect(compactDrawn, st).toContain(STAGES.find((x) => x.id === st)!.label);
+    // The overview groups NODES. Every stage keeps its own name at both levels,
+    // because a stage is a transformation and there is no coarser true name for
+    // one; what changes is that two node boxes become one, under the group's
+    // own label rather than either member's.
+    for (const st of STAGES) expect(overviewDrawn, `${st.id} at the overview`).toContain(st.label);
+    for (const g of Object.values(OVERVIEW_GROUPS)) {
+      const labelIsDrawn = overviewDrawn.includes(g.label) || overviewDrawn.includes(RETAIL_GROUP.label);
+      expect(labelIsDrawn, `${g.id} draws a group label`).toBe(true);
+      for (const m of g.members) {
+        const member = [...NODES, ...RETAIL].find((n) => n.id === m)!;
+        expect(overviewDrawn, `${m} is grouped away`).not.toContain(member.label);
+      }
     }
+    // The lanes, the demand components and the recursion note are detail only.
     expect(drawn, 'the distributor recursion comes from the data too').toContain(NODES.find((n) => n.id === 'node-distributor')!.recursion!);
+    expect(overviewDrawn).not.toContain(NODES.find((n) => n.id === 'node-distributor')!.recursion!);
+    for (const lane of [...STAGES.find((x) => x.id === 'stage-biological')!.lanes!, ...STAGES.find((x) => x.id === 'stage-extraction')!.lanes!]) {
+      expect(overviewDrawn, `lane ${lane}`).not.toContain(lane);
+    }
+    for (const d of STAGES.find((x) => x.id === 'stage-consumption')!.demand!) expect(overviewDrawn, `demand ${d}`).not.toContain(d);
     for (const n of [...NODES, ...RETAIL]) expect(drawn, n.id).toContain(n.label);
     for (const r of RETURNS) expect(drawn, r.id).toContain(r.label);
     for (const f of NON_PHYSICAL) expect(drawn, f.id).toContain(f.label);
@@ -572,8 +697,8 @@ describe('the generated plates', () => {
   });
 
   it('carry the retail formats as rows inside one retail node', () => {
-    const start = wideSrc.indexOf('cp-retail" data-id="node-retail"');
-    const retail = wideSrc.slice(start, wideSrc.indexOf('data-id="stage-consumption"', start));
+    const start = detailSrc.indexOf('cp-retail" data-id="node-retail"');
+    const retail = detailSrc.slice(start, detailSrc.indexOf('data-id="stage-consumption"', start));
     expect(start).toBeGreaterThan(0);
     for (const r of RETAIL) expect(retail, r.id).toContain(`<g className="cp-retail-row" data-id="${r.id}">`);
   });
@@ -582,27 +707,51 @@ describe('the generated plates', () => {
     expect(tsx).not.toMatch(/cp-hull|cp-stage--entry|cp-econ|cp-slice|cp-lens--/);
     expect(css).not.toMatch(/cp-hull|cp-stage--entry|cp-econ|cp-slice/);
     for (const t of texts(tsx)) noFigures(t);
-    const stubs = Array.from(wideSrc.matchAll(/cp-energy-in" data-for="([^"]+)"/g)).map((m) => m[1]).sort();
+    const stubs = Array.from(detailSrc.matchAll(/cp-energy-in" data-for="([^"]+)"/g)).map((m) => m[1]).sort();
     expect(stubs).toEqual(STAGES.map((s) => s.id).sort());
   });
 
-  it('carry every joint and every layer as a door, once each, joints first, each layer with its switch — and none in the short version', () => {
-    for (const j of JOINT_IDS) expect(wideSrc.match(new RegExp(`<JointHit id="${j}"`, 'g')) ?? [], j).toHaveLength(1);
-    for (const b of BANDS) {
-      expect(wideSrc.match(new RegExp(`<BandHit id="${b.id}"`, 'g')) ?? [], b.id).toHaveLength(1);
-      expect(wideSrc.match(new RegExp(`<LayerSwitch id="${b.id}"`, 'g')) ?? [], b.id).toHaveLength(1);
+  /**
+   * THE OVERVIEW IS A MAP, NOT A TASTER. The short plate had no doors and no
+   * marks, so its distance and shift controls had nothing to act on and had to
+   * be hidden — which is what made the landing page an advertisement for the
+   * map rather than the map. Every door but one is open at both levels.
+   */
+  it('carry every joint and every layer as a door, once each, joints first, each layer with its switch — at BOTH levels', () => {
+    for (const src of [detailSrc, overviewSrc]) {
+      for (const b of BANDS) {
+        expect(src.match(new RegExp(`<BandHit id="${b.id}"`, 'g')) ?? [], b.id).toHaveLength(1);
+        expect(src.match(new RegExp(`<LayerSwitch id="${b.id}"`, 'g')) ?? [], b.id).toHaveLength(1);
+      }
+      expect(src.lastIndexOf('<JointHit')).toBeLessThan(src.indexOf('<BandHit'));
     }
-    expect(wideSrc.lastIndexOf('<JointHit')).toBeLessThan(wideSrc.indexOf('<BandHit'));
-    expect(compactSrc).not.toMatch(/<JointHit|<BandHit|<LayerSwitch|<ShiftMark/);
+    for (const j of JOINT_IDS) {
+      expect(detailSrc.match(new RegExp(`<JointHit id="${j}"`, 'g')) ?? [], j).toHaveLength(1);
+      const atOverview = overviewSrc.match(new RegExp(`<JointHit id="${j}"`, 'g')) ?? [];
+      expect(atOverview, `${j} at the overview`).toHaveLength(drawnAtOverview(j) ? 1 : 0);
+    }
+  });
+
+  /**
+   * The numbers on the marks are positions in a reading order computed from the
+   * drawing. Two levels of the same drawing must not renumber them, or a number
+   * quoted in an essay would mean one thing on a phone-sized overview and
+   * another on the detail.
+   */
+  it('number the marks identically at both levels, so a number quoted in an essay means one thing', () => {
+    const order = (src: string) =>
+      Array.from(src.matchAll(/<ShiftMark shift="([^"]+)" id="([^"]+)"/g)).map((m) => `${m[1]}:${m[2]}`);
+    expect(order(overviewSrc)).toEqual(order(detailSrc));
+    expect(order(detailSrc).length).toBeGreaterThan(0);
   });
 
   it('put the bands directly under the reading lane and the rails at the bottom, and tick each band where it attaches', () => {
-    const bandY = (id: string) => Number(wideSrc.match(new RegExp(`<BandHit id="${id}"[^>]*y=\\{(\\d+)\\}`))![1]);
-    const railY = Number(wideSrc.match(/data-id="flow-money-payment">\s*<path className="cp-money" d="M \d+ (\d+)/)![1]);
-    const chipRowY = Number(wideSrc.match(/<JointHit id="j-production-aggregation"[^>]*chipY=\{(\d+)\}/)![1]);
+    const bandY = (id: string) => Number(detailSrc.match(new RegExp(`<BandHit id="${id}"[^>]*y=\\{(\\d+)\\}`))![1]);
+    const railY = Number(detailSrc.match(/data-id="flow-money-payment">\s*<path className="cp-money" d="M \d+ (\d+)/)![1]);
+    const chipRowY = Number(detailSrc.match(/<JointHit id="j-production-aggregation"[^>]*chipY=\{(\d+)\}/)![1]);
     expect(chipRowY).toBeLessThan(bandY('band-logistics'));
     expect(bandY('band-regulation')).toBeLessThan(railY);
-    const ticks = (id: string) => wideSrc.match(new RegExp(`<BandHit id="${id}"[^>]*ticks=\\{\\[([^\\]]*)\\]\\}`))![1].split(',').filter((s) => s.trim());
+    const ticks = (id: string) => detailSrc.match(new RegExp(`<BandHit id="${id}"[^>]*ticks=\\{\\[([^\\]]*)\\]\\}`))![1].split(',').filter((s) => s.trim());
     expect(ticks('band-logistics')).toHaveLength(JOINT_IDS.length);
     expect(ticks('band-cold-chain')).toHaveLength(JOINT_IDS.length - 1);
     expect(ticks('band-governance')).toHaveLength(3);
@@ -611,7 +760,7 @@ describe('the generated plates', () => {
   });
 
   it('give the partial layer a shorter band than the whole-chain ones, and energy the whole chain', () => {
-    const width = (id: string) => Number(wideSrc.match(new RegExp(`<BandHit id="${id}"[^>]*width=\\{(\\d+)\\}`))![1]);
+    const width = (id: string) => Number(detailSrc.match(new RegExp(`<BandHit id="${id}"[^>]*width=\\{(\\d+)\\}`))![1]);
     expect(width('band-governance')).toBeLessThan(width('band-logistics'));
     expect(width('band-credit')).toBe(width('band-logistics'));
     expect(width('band-energy')).toBe(width('band-logistics'));
@@ -620,10 +769,10 @@ describe('the generated plates', () => {
 
   it('draw one overlay per shift with an outline in the form of its status for every marked target, the moves and the callouts, hidden until the wrapper says which', () => {
     for (const s of SHIFTS) {
-      const start = wideSrc.indexOf(`cp-shift cp-shift--${s.id}"`);
+      const start = detailSrc.indexOf(`cp-shift cp-shift--${s.id}"`);
       expect(start, s.id).toBeGreaterThan(0);
-      const end = wideSrc.indexOf('cp-shift cp-shift--', start + 10);
-      const layer = wideSrc.slice(start, end === -1 ? wideSrc.indexOf('<g className="cp-hits">') : end);
+      const end = detailSrc.indexOf('cp-shift cp-shift--', start + 10);
+      const layer = detailSrc.slice(start, end === -1 ? detailSrc.indexOf('<g className="cp-hits">') : end);
       for (const t of s.targets) {
         expect(layer, `${s.id} marks ${t.id}`).toContain(`<g className="cp-lit" data-for="${t.id}" data-status="${t.condition!.status}">`);
         expect(layer, `${s.id} ${t.id} status form`).toContain(`cp-lit--${t.condition!.status}`);
@@ -645,23 +794,55 @@ describe('the generated plates', () => {
     expect(css).toMatch(/\.cp-mark--unpriced circle\{stroke-dasharray/);
   });
 
-  it('puts a quiet diamond on every join of the short version', () => {
-    const joins = compactSrc.match(/cp-joint-motif/g) ?? [];
-    expect(joins.length).toBeGreaterThanOrEqual(COMPACT.sequence.length);
+  it('gives every drawn joint a real mark at both levels, not a decorative motif', () => {
+    const marks = (src: string) => (src.match(/<JointHit /g) ?? []).length;
+    expect(marks(detailSrc)).toBe(JOINT_IDS.length);
+    expect(marks(overviewSrc)).toBe(JOINT_IDS.length - OVERVIEW_INTERNAL_JOINTS.length);
+    // The old short plate drew a quiet diamond that looked like a joint and
+    // opened nothing. There is no such shape any more, at either level.
+    expect(tsx).not.toMatch(/cp-joint-motif/);
+    expect(css).not.toMatch(/cp-joint-motif/);
   });
 
-  it('expose the full plate as a group with a title and description, so the doors inside it stay in the accessibility tree', () => {
-    expect(wideSrc).toMatch(/<svg[^>]*role="group"[^>]*aria-labelledby="cp-wide-title"[^>]*aria-describedby="cp-wide-desc"/);
-    expect(wideSrc).toContain(`<title id="cp-wide-title">${CHAIN_COPY.aria.wide.title}</title>`);
-    expect(wideSrc).not.toMatch(/hourglass/i);
+  /**
+   * BOTH plates are groups, not images. The overview used to be role="img",
+   * which is precisely why its controls could not act: an image has no doors,
+   * so the buttons inside it were unreachable and the whole level had to be
+   * treated as decoration.
+   */
+  it('expose both plates as groups with a title and description, so the doors inside them stay in the accessibility tree', () => {
+    for (const [src, key, aria] of [
+      [detailSrc, 'wide', CHAIN_COPY.aria.wide],
+      [overviewSrc, 'compact', CHAIN_COPY.aria.compact],
+    ] as const) {
+      expect(src).toMatch(new RegExp(`<svg[^>]*role="group"[^>]*aria-labelledby="cp-${key}-title"[^>]*aria-describedby="cp-${key}-desc"`));
+      expect(src).toContain(`<title id="cp-${key}-title">${aria.title}</title>`);
+      expect(src, `${key} is not an image`).not.toMatch(/role="img"/);
+      expect(src).toMatch(/<g className="cp-shifts" aria-hidden="true">/);
+    }
+    expect(detailSrc).not.toMatch(/hourglass/i);
     expect(tsx).not.toContain('<figcaption');
-    expect(wideSrc).toMatch(/<g className="cp-shifts" aria-hidden="true">/);
   });
 
-  it('draws the short version from COMPACT and nothing more', () => {
-    const ids = dataIds(compactSrc);
-    const expected = new Set<string>([...COMPACT.sequence.flatMap((s) => (s.kind === 'stages' ? s.ids : [s.id])), ...COMPACT.bands, COMPACT.returnArrow.id]);
-    expect(ids).toEqual(expected);
+  /**
+   * The one test that says the two levels are one drawing. Whatever the detail
+   * has, the overview has too, except the elements the grouping folds away —
+   * plus the group boxes that stand for them. A relation cannot be dropped
+   * from the overview without failing here.
+   */
+  it('draws the same elements at both levels but for the grouped ones, which become the group boxes', () => {
+    const detailIds = dataIds(detailSrc);
+    const overviewIds = dataIds(overviewSrc);
+    const groupIds = Object.values(OVERVIEW_GROUPS).map((g) => g.id);
+    const missing = [...detailIds].filter((id) => !overviewIds.has(id));
+    expect(new Set(missing)).toEqual(new Set(OVERVIEW_HIDES.filter((id) => detailIds.has(id))));
+    const extra = [...overviewIds].filter((id) => !detailIds.has(id));
+    expect(new Set(extra)).toEqual(new Set(groupIds.filter((id) => overviewIds.has(id))));
+    // Nothing structural is lost: every relation is present at both levels.
+    for (const r of RETURNS) expect(overviewIds, r.id).toContain(r.id);
+    for (const b of BORDERS) expect(overviewIds, b.id).toContain(b.id);
+    for (const f of NON_PHYSICAL) expect(overviewIds, f.id).toContain(f.id);
+    for (const st of STAGES) expect(overviewIds, st.id).toContain(st.id);
   });
 
   it('never share a marker id between the two plates', () => {

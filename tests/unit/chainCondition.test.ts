@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { describe, it, expect } from 'vitest';
 import {
   BASIS,
@@ -8,9 +10,11 @@ import {
   MECHANISMS,
   SHIFTS,
   SHIFT_BY_ID,
+  STAGES,
   STATUS,
   STATUS_NOTE,
   TENSIONS,
+  drawnAtOverview,
   isWritten,
   markedTargets,
   type LensId,
@@ -130,8 +134,21 @@ describe('energy is not one thing', () => {
     expect(labels).toEqual(['Generation', 'Network capacity', 'Connection']);
   });
 
-  it('is on the short version, where it used to be invisible', () => {
-    expect(CHAIN_COPY.aria.compact.desc.toLowerCase()).toContain('energy');
+  /**
+   * Energy is an argument this site turns on, and the entrance most readers
+   * meet used to show it as nothing at all. It is now a band with a door at
+   * BOTH levels, not a name in a description: the overview draws the same
+   * seven layers the detail does.
+   */
+  it('is a layer with a door at the overview, not only on the detail', () => {
+    expect(drawnAtOverview('band-energy')).toBe(true);
+    const overviewSrc = readFileSync(
+      resolve(process.cwd(), 'src/components/industry-chain/ChainPlateSvg.tsx'),
+      'utf8',
+    ).split('export function ChainPlateCompact')[1];
+    expect(overviewSrc).toContain('<BandHit id="band-energy"');
+    expect(overviewSrc).toContain('<LayerSwitch id="band-energy"');
+    expect(overviewSrc.match(/cp-energy-in" data-for="/g) ?? []).toHaveLength(STAGES.length);
   });
 });
 
@@ -165,9 +182,16 @@ describe('the shifts', () => {
 });
 
 describe('the map does not teach a category error', () => {
-  it('keeps margin and value added apart in the memorable line', () => {
-    expect(CHAIN_COPY.standfirst.toLowerCase()).toContain('value added');
-    expect(CHAIN_COPY.standfirst.toLowerCase()).not.toMatch(/add them up and you (have|get) an economy/);
+  /**
+   * The line that carried this correction was the standfirst, which the owner
+   * replaced with one of their own. The correction is not lost — it moved to
+   * `basis`, which is where a reader who asks what value added IS now finds
+   * it — and no copy on the map may re-teach the error.
+   */
+  it('keeps margin and value added apart, and lets no line on the map re-join them', () => {
+    expect(CHAIN_COPY.basis.toLowerCase()).toContain('value added');
+    expect(CHAIN_COPY.basis.toLowerCase()).toContain('not gross profit');
+    expect(JSON.stringify(CHAIN_COPY).toLowerCase()).not.toMatch(/add them up and you (have|get) an economy/);
   });
 
   it('says a mark number is a position on the drawing, not a ranking', () => {

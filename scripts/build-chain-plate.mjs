@@ -50,7 +50,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   STAGES, NODES, RETAIL, RETAIL_GROUP, BANDS, BORDERS, JOINTS, RETURNS, BYPRODUCT, NON_PHYSICAL,
-  FLOW_KIND_LABELS, COMPACT, CHAIN_COPY, SHIFTS, bandJoints,
+  FLOW_KIND_LABELS, CHAIN_COPY, SHIFTS, bandJoints,
+  OVERVIEW_GROUPS, OVERVIEW_INTERNAL_JOINTS,
 } from '../src/data/industryChain.ts';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -128,12 +129,26 @@ const defs = () => `<defs>
 const flow = (x1, y1, x2, y2, cls = 'cp-flow', marker = '') =>
   `<path className="${cls}" d="M ${x1} ${y1} C ${(x1 + x2) / 2} ${y1}, ${(x1 + x2) / 2} ${y2}, ${x2} ${y2}"${marker ? ` markerEnd="${M(marker)}"` : ''} />`;
 
-/** A quiet diamond on a flow, for the short plate where the joints are a motif, not doors. */
-const diamond = (x, y, r = 5) => `<path className="cp-joint-motif" d="M ${x} ${y - r} L ${x + r} ${y} L ${x} ${y + r} L ${x - r} ${y} Z" />`;
 
-/* ═══ WIDE PLATE — the full chain ═════════════════════════════════════════ */
+/* ═══ THE PLATE — one layout, two levels of grouping ════════════════════ */
 
-function wide() {
+/**
+ * ONE FUNCTION, TWO LEVELS. `overview` groups the retail formats into their
+ * node, the distributor and the wholesaler into one box, and drops the origin
+ * lane fans, the demand components and the recursion note. `detail` un-groups
+ * them. Everything else — every joint chip, every band and its ticks, every
+ * border, every return, every rail, every shift mark — is emitted by the code
+ * below at BOTH levels, which is what makes it impossible for the two
+ * drawings to disagree about what exists or what connects to what.
+ *
+ * The overview is therefore a working map rather than a taster: its distance
+ * control has chips to re-word and both overlays have marks to raise, without
+ * expanding anything. OVERVIEW_GROUPS in src/data/industryChain.ts records
+ * what each group keeps true of its members.
+ */
+function plate(level) {
+  /** Grouped, not reduced: see the note above. */
+  const OV = level === 'overview';
   obstacles = [];
   const AX = 275;
   const base = [], jointHits = [], bandHits = [], shiftLayers = [], marks = [];
@@ -157,15 +172,15 @@ function wide() {
     pack: lines('stage-packaging', CHARS.mfg),
     mfg: lines('stage-manufacturing', CHARS.mfg),
     princ: lines('node-principal', CHARS.mfg),
-    dist: lines('node-distributor', CHARS.dist),
+    dist: OV ? wrap(OVERVIEW_GROUPS['group-distribution'].label, CHARS.dist) : lines('node-distributor', CHARS.dist),
     whol: lines('node-wholesaler', CHARS.dist),
-    recur: wrap(N['node-distributor'].recursion, CHARS.recur).map((t, i) => (i === 0 ? '↳ ' : '') + t),
-    ret: RETAIL.map((r) => wrap(r.label, CHARS.ret)),
+    recur: OV ? [] : wrap(N['node-distributor'].recursion, CHARS.recur).map((t, i) => (i === 0 ? '↳ ' : '') + t),
+    ret: OV ? [] : RETAIL.map((r) => wrap(r.label, CHARS.ret)),
     cons: lines('stage-consumption', CHARS.cons),
     rec: lines('stage-recovery', CHARS.cons),
-    demand: S['stage-consumption'].demand.map((d) => wrap(d, CHARS.demand)),
-    bioLanes: S['stage-biological'].lanes.map((l) => wrap(l, CHARS.lane)),
-    geoLanes: S['stage-extraction'].lanes.map((l) => wrap(l, CHARS.lane)),
+    demand: OV ? [] : S['stage-consumption'].demand.map((d) => wrap(d, CHARS.demand)),
+    bioLanes: OV ? [] : S['stage-biological'].lanes.map((l) => wrap(l, CHARS.lane)),
+    geoLanes: OV ? [] : S['stage-extraction'].lanes.map((l) => wrap(l, CHARS.lane)),
   };
 
   const widths = {
@@ -174,15 +189,22 @@ function wide() {
     proc: boxW(L.proc, T_STAGE),
     trad: boxW(L.trad, T_NODE),
     mfg: Math.max(boxW(L.pack, T_STAGE), boxW(L.mfg, T_STAGE), boxW(L.princ, T_NODE)),
-    dist: Math.max(boxW(L.dist, T_NODE), boxW(L.whol, T_NODE), boxW(L.recur, T_SMALL, 12)),
-    // The retail node holds its formats as rows, so it is as wide as the widest row plus its own padding.
+    dist: Math.max(boxW(L.dist, T_NODE), OV ? 0 : boxW(L.whol, T_NODE), OV ? 0 : boxW(L.recur, T_SMALL, 12)),
+    // On detail the retail node holds its formats as rows, so it is as wide as
+    // the widest row plus its padding. On the overview it is a node like any
+    // other, as wide as its own name.
     ret: Math.max(...L.ret.map((ls) => boxW(ls, T_SMALL, 36)), boxW([RETAIL_GROUP.label], T_NODE)),
     cons: Math.max(boxW(L.cons, T_STAGE), boxW(L.rec, T_STAGE), ...L.demand.map((ls) => boxW(ls, T_SMALL) + 21)),
   };
 
-  /* The fan of example lanes sets the left margin: its labels are
-     end-anchored, so the chain starts far enough right for them to fit. */
-  const laneW = Math.ceil(Math.max(...[...L.bioLanes, ...L.geoLanes].flat().map((l) => est(l, T_SMALL, 0.6))));
+  /* The left margin is set by whatever is end-anchored in it. On detail that
+     is the fan of example lanes; on the overview, where there is no fan, it is
+     the reading-lane name and the two flow-kind names, which are drawn at both
+     levels and would otherwise run off the left edge. */
+  const gutterText = OV
+    ? [CHAIN_COPY.lensName.economy, CHAIN_COPY.lensName.finance, ...Object.values(FLOW_KIND_LABELS)]
+    : [...L.bioLanes, ...L.geoLanes].flat();
+  const laneW = Math.ceil(Math.max(...gutterText.map((l) => est(l, T_SMALL, 0.6))));
   const GAP = 26, LEFT = laneW + 66;
   const C = { fanT: LEFT - 58, fanL: LEFT - 50 };
   let cx = LEFT;
@@ -203,17 +225,36 @@ function wide() {
   const packB = [96, 20 + L.pack.length * (T_STAGE + 1)];
   const tradH = 16 + L.trad.length * 16, tradB = [AX - Math.round(tradH / 2), tradH];
   const princB = [398, 16 + L.princ.length * 16];
-  const distY = 240, wholY = 372, distH = 34;
-  /* The retail node: a kicker, then one row per format, each as tall as its wrapped label. */
+  /* Distribution: two nodes stacked off the axis on detail, one grouped box
+     ON the axis at the overview. The joint between them is real either way;
+     at the overview it is internal to the group and is not drawn, which is
+     the only joint the grouping removes. */
+  const distH = 34;
+  const distY = OV ? AX : 240, wholY = OV ? AX : 372;
+  /* The retail node: on detail a kicker and one row per format, each as tall
+     as its wrapped label; at the overview a node the size of its own name. */
   const RET_ROW_GAP = 9, RET_PAD = 12;
   const retRowH = L.ret.map((ls) => ls.length * 15 + 6);
-  const retInner = retRowH.reduce((a, b) => a + b, 0) + (retRowH.length - 1) * RET_ROW_GAP;
+  const retInner = retRowH.reduce((a, b) => a + b, 0) + Math.max(0, retRowH.length - 1) * RET_ROW_GAP;
   const RET_HEAD = 33; // the kicker and, under it, the note
-  const retH = RET_PAD + RET_HEAD + retInner + RET_PAD;
+  const retH = OV ? 44 : RET_PAD + RET_HEAD + retInner + RET_PAD;
   const retB = [AX - Math.round(retH / 2), retH];
-  const consB = [retB[0] - 6, retH + 12];
+  /* Consumption is as tall as the retail node on detail, because the two read
+     as a pair. At the overview retail is small, so consumption is sized from
+     its own label and its demand components are not drawn. */
+  const consH = OV ? 20 + L.cons.length * (T_STAGE + 1) : retH + 12;
+  const consB = [OV ? AX - Math.round(consH / 2) : retB[0] - 6, consH];
   const recB = [consB[0] + consB[1] + 34, 44];
-  const CHAIN_BOTTOM = recB[0] + recB[1];
+  /* The lowest edge of anything on the chain. It used to be recovery, because
+     on detail recovery always is; at the overview the chain is short enough
+     that extraction or the principal can sit lower, and the rows beneath have
+     to clear whichever it is. */
+  const CHAIN_BOTTOM = Math.max(
+    recB[0] + recB[1],
+    geoB[0] + geoB[1],
+    princB[0] + princB[1],
+    Math.max(distY, wholY) + distH / 2,
+  );
   /* Under the chain, in this order: the reading lane (two rows of chips),
      the enabling layers as bands directly beneath it, and the four rails of
      money and information at the very bottom. */
@@ -259,12 +300,17 @@ function wide() {
     flow(C.org[1], geoY, C.proc[0], AX),
     flow(C.proc[1], AX, C.trad[0], AX),
     flow(C.trad[1], AX, C.mfg[0], AX),
-    flow(C.mfg[1], AX, C.dist[0], distY), flow(C.mfg[1], AX, C.dist[0], wholY),
-    // the distributor sells on to the wholesaler
-    `<path className="cp-flow" d="M ${C.dist[0] + 8} ${distY + distH / 2} L ${C.dist[0] + 8} ${wholY - distH / 2 - 3}" markerEnd="${M('cp-tip')}" />`,
-    // the distributor and the wholesaler both sell into the retail node
-    flow(C.dist[1], distY, C.ret[0], distY),
-    flow(C.dist[1], wholY, C.ret[0], wholY),
+    ...(OV
+      ? [flow(C.mfg[1], AX, C.dist[0], AX), flow(C.dist[1], AX, C.ret[0], AX)]
+      : [
+          flow(C.mfg[1], AX, C.dist[0], distY),
+          flow(C.mfg[1], AX, C.dist[0], wholY),
+          // the distributor sells on to the wholesaler
+          `<path className="cp-flow" d="M ${C.dist[0] + 8} ${distY + distH / 2} L ${C.dist[0] + 8} ${wholY - distH / 2 - 3}" markerEnd="${M('cp-tip')}" />`,
+          // the distributor and the wholesaler both sell into the retail node
+          flow(C.dist[1], distY, C.ret[0], distY),
+          flow(C.dist[1], wholY, C.ret[0], wholY),
+        ]),
     // retail sells to consumption on the axis
     `<path className="cp-flow" d="M ${C.ret[1]} ${AX} L ${C.cons[0]} ${AX}" />`,
     // packaging joins manufacturing from above
@@ -286,17 +332,28 @@ function wide() {
   place('stage-packaging', C.mfg[0], packB[0], widths.mfg, packB[1]);
   place('stage-manufacturing', C.mfg[0], mfgB[0], widths.mfg, mfgB[1]);
   place('node-principal', C.princ[0], princB[0], widths.mfg, princB[1]);
-  place('node-distributor', C.dist[0], distY - distH / 2, widths.dist, distH);
-  place('node-wholesaler', C.dist[0], wholY - distH / 2, widths.dist, distH);
+  if (OV) place('group-distribution', C.dist[0], distY - distH / 2, widths.dist, distH);
+  else {
+    place('node-distributor', C.dist[0], distY - distH / 2, widths.dist, distH);
+    place('node-wholesaler', C.dist[0], wholY - distH / 2, widths.dist, distH);
+  }
   place(RETAIL_GROUP.id, C.ret[0], retB[0], widths.ret, retB[1]);
   place('stage-consumption', C.cons[0], consB[0], widths.cons, consB[1]);
   place('stage-recovery', C.rec[0], recB[0], widths.cons, recB[1]);
-  // the distributor's recursion note hangs under its pill
-  block(C.dist[0] + 14, distY + distH / 2 + 4, est(L.recur[0], T_SMALL, 0.6), L.recur.length * 15, 'recursion');
+  // the distributor's recursion note hangs under its pill (detail only)
+  if (!OV) block(C.dist[0] + 14, distY + distH / 2 + 4, est(L.recur[0], T_SMALL, 0.6), L.recur.length * 15, 'recursion');
 
-  /* The retail node: one dashed node holding its five formats as rows. */
+  /* The retail node: one dashed node holding its five formats as rows on
+     detail, and at the overview the same node carrying only its own name and
+     note. Same id, same door, same joint — the formats are what is grouped,
+     not the function. */
   const retail = () => {
     const [x, y, w, h] = boxes[RETAIL_GROUP.id];
+    if (OV) {
+      return `<g className="cp-node cp-retail" data-id="${RETAIL_GROUP.id}">
+      <rect x="${x}" y="${y}" width="${w}" height="${h}" rx="14" />
+      ${T(x + 14, y + 19, RETAIL_GROUP.label, 'cp-node-t')}${T(x + 14, y + 34, RETAIL_GROUP.note, 'cp-recur')}</g>`;
+    }
     let ry = y + RET_PAD + RET_HEAD + 6;
     const rows = RETAIL.map((r, i) => {
       const ls = L.ret[i];
@@ -320,9 +377,13 @@ function wide() {
     stage(C.mfg[0], packB[0], widths.mfg, packB[1], 'stage-packaging', L.pack),
     stage(C.mfg[0], mfgB[0], widths.mfg, mfgB[1], 'stage-manufacturing', L.mfg),
     node(C.princ[0], princB[0], widths.mfg, princB[1], 'node-principal', undefined, L.princ),
-    node(C.dist[0], distY - distH / 2, widths.dist, distH, 'node-distributor', undefined, L.dist),
-    ...L.recur.map((t, i) => T(C.dist[0] + 14, distY + distH / 2 + 16 + i * 15, t, 'cp-recur')),
-    node(C.dist[0], wholY - distH / 2, widths.dist, distH, 'node-wholesaler', undefined, L.whol),
+    ...(OV
+      ? [node(C.dist[0], distY - distH / 2, widths.dist, distH, 'group-distribution', L.dist[0], L.dist)]
+      : [
+          node(C.dist[0], distY - distH / 2, widths.dist, distH, 'node-distributor', undefined, L.dist),
+          ...L.recur.map((t, i) => T(C.dist[0] + 14, distY + distH / 2 + 16 + i * 15, t, 'cp-recur')),
+          node(C.dist[0], wholY - distH / 2, widths.dist, distH, 'node-wholesaler', undefined, L.whol),
+        ]),
     retail(),
     stage(C.cons[0], consB[0], widths.cons, consB[1], 'stage-consumption', L.cons, { titleTop: true }),
     ...L.demand.map((ls, i) => {
@@ -447,7 +508,12 @@ function wide() {
   /** The chip's box, for both words a joint can carry — the wider of the two blocks the lane. */
   const jointChipW = (text) => Math.round(text.length * 14 * 0.56 + 16);
   const jointChipRect = {};
-  JOINTS.forEach((j) => {
+  /* Ten joints at the overview, eleven on detail. The missing one is the
+     transfer between the distributor and the wholesaler, which is internal to
+     the grouped box — the only relation the grouping takes off the drawing,
+     and it comes back with the group. */
+  const drawnJoints = JOINTS.filter((j) => !(OV && OVERVIEW_INTERNAL_JOINTS.includes(j.id)));
+  drawnJoints.forEach((j) => {
     const [x, y, at, dx] = jointGeom[j.id];
     const chipX = at === 'left' ? x - 14 : at === 'right' ? x + 14 : x + dx;
     const chipY = at === 'rowA' ? ROW_A : at === 'rowB' ? ROW_B : y - 9;
@@ -487,7 +553,9 @@ function wide() {
     const noteFits = b.note ? labelEnd + est(b.note, T_SMALL, 0.6) + 24 < x1 - x0 : false;
     const ticks =
       b.attaches === 'joints'
-        ? bandJoints(b).map((jid) => jointGeom[jid][0])
+        ? bandJoints(b)
+            .filter((jid) => drawnJoints.some((j) => j.id === jid))
+            .map((jid) => jointGeom[jid][0])
         : b.attaches === 'stages'
           ? [...new Set(Object.values(energyIn))]
           : [];
@@ -666,108 +734,7 @@ function wide() {
     </g>`);
   });
 
-  return { W, H, base, shiftLayers, marks, markOrder, hits: [...jointHits, ...bandHits, ...layerSwitches], aria: CHAIN_COPY.aria.wide };
-}
-
-/* ═══ COMPACT PLATE — the short version ═══════════════════════════════════ */
-
-function compact() {
-  /* The canvas height FOLLOWS the band count. It was a constant 320, which
-     happened to fit the two bands the short version had; a third band was laid
-     at y=308 with a height of 30 and fell 18px outside the viewBox, so it
-     simply did not render. A generator whose output silently clips when its
-     input grows is worse than one that errors. */
-  const BAND_TOP = 236, BAND_STEP = 36, BAND_H = 30, BAND_PAD = 18;
-  const W = 1590;
-  const H = BAND_TOP + (COMPACT.bands.length - 1) * BAND_STEP + BAND_H + BAND_PAD;
-  const AX = 150;
-  const base = [];
-  const SW = 180, GW = 150, GAP = 28;
-  /* Wrapped from the data, never restated here: fifteen characters is what a
-     180-wide box holds at the stage type size. */
-  const stageLines = (id) => wrap(label(id), 15);
-  /** A box is as tall as the label the data gives it. */
-  const stageH = (id) => 20 + stageLines(id).length * 19;
-
-  /* Lay the sequence out left to right; remember each item's exits. */
-  let x = 20;
-  const placed = []; // { step, x0, x1, ports: {id: y} }
-  COMPACT.sequence.forEach((step) => {
-    if (step.kind === 'stages') {
-      const ports = {};
-      if (step.ids.length === 1) {
-        const h = stageH(step.ids[0]);
-        base.push(stage(x, AX - h / 2, SW, h, step.ids[0], stageLines(step.ids[0])));
-        ports[step.ids[0]] = AX;
-      } else {
-        // two origins, stacked; the axis runs between them
-        const hs = step.ids.map(stageH);
-        const total = hs.reduce((a, b) => a + b, 0) + 16;
-        let top = AX - total / 2;
-        step.ids.forEach((id, i) => {
-          base.push(stage(x, top, SW, hs[i], id, stageLines(id)));
-          ports[id] = top + hs[i] / 2;
-          top += hs[i] + 16;
-        });
-      }
-      placed.push({ step, x0: x, x1: x + SW, ports });
-      x += SW + GAP;
-    } else {
-      const lines = wrap(step.label, 15);
-      const h = lines.length > 1 ? 46 : 32;
-      /* A group that serves only some of the origins sits on THAT origin's
-         row, so the origins it does not serve pass it by instead of running
-         through it. */
-      const prev = placed[placed.length - 1];
-      const y = step.from && prev && Object.keys(prev.ports).length > 1 ? prev.ports[step.from[0]] : AX;
-      base.push(node(x, y - h / 2, GW, h, step.id, step.label, lines));
-      placed.push({ step, x0: x, x1: x + GW, ports: { [step.id]: y } });
-      x += GW + GAP;
-    }
-  });
-
-  /* Flows: each item feeds the next; a group with `from` takes only those
-     origins, and the other origins skip over it to the item after. A quiet
-     diamond sits on every flow at its middle: the joints, as a motif. */
-  const motifs = [];
-  const join = (x1, y1, x2, y2) => {
-    base.push(flow(x1, y1, x2, y2));
-    motifs.push(diamond((x1 + x2) / 2, (y1 + y2) / 2));
-  };
-  placed.forEach((p, i) => {
-    const next = placed[i + 1];
-    if (!next) return;
-    const targetY = Object.values(next.ports)[0];
-    Object.entries(p.ports).forEach(([id, y]) => {
-      if (next.step.kind === 'group' && next.step.from && !next.step.from.includes(id)) {
-        const after = placed[i + 2];
-        if (after) join(p.x1, y, after.x0, Object.values(after.ports)[0]);
-        return;
-      }
-      join(p.x1, y, next.x0, targetY);
-    });
-  });
-  base.push(...motifs);
-
-  /* One return arrow, no detail. */
-  const from = placed.find((p) => p.ports[COMPACT.returnArrow.from]);
-  const to = placed.find((p) => p.ports[COMPACT.returnArrow.to]);
-  const fx = (from.x0 + from.x1) / 2, tx = (to.x0 + to.x1) / 2;
-  base.push(`<g className="cp-ret" data-id="${COMPACT.returnArrow.id}">
-      <path d="M ${fx} ${AX - 26} L ${fx} 70 L ${tx} 70 L ${tx} ${AX - 30}" markerEnd="${M('cp-tip-soft')}" />
-      ${chip((fx + tx) / 2, 74, COMPACT.returnArrow.label, 'cp-ret-t')}</g>`);
-
-  /* The layers, each the whole chain. Static here: the short version has no doors. */
-  const B = byId(BANDS);
-  COMPACT.bands.forEach((id, i) => {
-    const y = BAND_TOP + i * BAND_STEP;
-    base.push(`<g className="cp-band" data-id="${id}">
-      <rect x="20" y="${y}" width="${W - 40}" height="${BAND_H}" />
-      <path className="cp-band-line" d="M 20 ${y} L ${W - 20} ${y}" />
-      ${T(32, y + 20, B[id].label, 'cp-band-t')}</g>`);
-  });
-
-  return { W, H, base, aria: CHAIN_COPY.aria.compact };
+  return { W, H, base, shiftLayers, marks, markOrder, hits: [...jointHits, ...bandHits, ...layerSwitches], aria: OV ? CHAIN_COPY.aria.compact : CHAIN_COPY.aria.wide };
 }
 
 /* ═══ EMIT ════════════════════════════════════════════════════════════════ */
@@ -775,9 +742,12 @@ function compact() {
 /* role="img" would make the browser prune every button inside the drawing
    from the accessibility tree, so the plates are groups with a title and a
    description, and the joints and layers inside them stay reachable. */
-const svgWide = (p) => `<svg className="cp-svg cp-svg--wide" viewBox="0 0 ${p.W} ${p.H}" role="group" aria-labelledby="cp-wide-title" aria-describedby="cp-wide-desc" focusable="false">
-    <title id="cp-wide-title">${esc(p.aria.title)}</title>
-    <desc id="cp-wide-desc">${esc(p.aria.desc)}</desc>
+/* ONE emitter for both levels. The overview used to be emitted as role="img"
+   with only a base layer, which is exactly why its controls could not act: an
+   image has no doors. Both plates are groups with hits and marks now. */
+const svgPlate = (kind, p) => `<svg className="cp-svg cp-svg--${kind}" viewBox="0 0 ${p.W} ${p.H}" role="group" aria-labelledby="cp-${kind}-title" aria-describedby="cp-${kind}-desc" focusable="false">
+    <title id="cp-${kind}-title">${esc(p.aria.title)}</title>
+    <desc id="cp-${kind}-desc">${esc(p.aria.desc)}</desc>
     ${defs()}
     <g className="cp-base">
       ${p.base.join('\n      ')}
@@ -793,21 +763,12 @@ const svgWide = (p) => `<svg className="cp-svg cp-svg--wide" viewBox="0 0 ${p.W}
     </g>
   </svg>`;
 
-const svgCompact = (p) => `<svg className="cp-svg cp-svg--compact" viewBox="0 0 ${p.W} ${p.H}" role="img" aria-labelledby="cp-compact-title" aria-describedby="cp-compact-desc" focusable="false">
-    <title id="cp-compact-title">${esc(p.aria.title)}</title>
-    <desc id="cp-compact-desc">${esc(p.aria.desc)}</desc>
-    ${defs()}
-    <g className="cp-base">
-      ${p.base.join('\n      ')}
-    </g>
-  </svg>`;
-
 SUF = '--wide';
-const w = wide();
-const wideJsx = svgWide(w);
+const detail = plate('detail');
+const detailJsx = svgPlate('wide', detail);
 SUF = '--compact';
-const c = compact();
-const compactJsx = svgCompact(c);
+const overview = plate('overview');
+const overviewJsx = svgPlate('compact', overview);
 
 fs.writeFileSync(path.join(OUT, 'ChainPlateSvg.tsx'), `/**
  * GENERATED by scripts/build-chain-plate.mjs — do not edit by hand.
@@ -827,13 +788,13 @@ import { ShiftMark } from './ShiftMark';
 
 export function ChainPlateWide() {
   return (
-  ${wideJsx}
+  ${detailJsx}
   );
 }
 
 export function ChainPlateCompact() {
   return (
-  ${compactJsx}
+  ${overviewJsx}
   );
 }
 `);
@@ -853,7 +814,7 @@ fs.writeFileSync(path.join(OUT, 'chainMarkOrder.ts'), `/**
  */
 import type { ShiftId } from '@/data/industryChain';
 
-export const MARK_ORDER: Record<ShiftId, readonly string[]> = ${JSON.stringify(w.markOrder, null, 2).replace(/"([\w-]+)":/g, "'$1':").replace(/"/g, "'").replace(/\n/g, '\n')} as const;
+export const MARK_ORDER: Record<ShiftId, readonly string[]> = ${JSON.stringify(detail.markOrder, null, 2).replace(/"([\w-]+)":/g, "'$1':").replace(/"/g, "'").replace(/\n/g, '\n')} as const;
 `);
 
 fs.writeFileSync(path.join(OUT, 'chain-plate.css'), `/**
@@ -931,7 +892,6 @@ fs.writeFileSync(path.join(OUT, 'chain-plate.css'), `/**
 .cp-tick--fee{fill:hsl(var(--foreground));stroke:none}
 .cp-tick--terms{fill:hsl(var(--background));stroke:hsl(var(--foreground));stroke-width:1}
 .cp-tick--up{fill:none;stroke:hsl(var(--foreground));stroke-width:1.2}
-.cp-joint-motif{fill:hsl(var(--background));stroke:hsl(var(--foreground));stroke-width:1.5}
 
 /* The reading lane: one distance name shows, from the wrapper's data-lens. */
 .cp-lens-name{display:none}

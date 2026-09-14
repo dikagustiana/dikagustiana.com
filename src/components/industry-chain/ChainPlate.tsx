@@ -35,18 +35,19 @@
  * sheet on a narrow screen, where the distance rides inside the sheet so a
  * phone reader can re-read the same element without closing it.
  *
- * The short plate carries one bounded question and one labelled action that
- * opens the single reading on this map written against evidence rather than as
- * an illustration (PILOT, below). Orientation is not explanation: naming the
- * Energy band told a stranger the noun and left them to invent the question.
+ * TWO LEVELS OF THE SAME MAP, not a taster and a map. The overview groups
+ * what can be grouped without asserting anything the detail denies, and it
+ * carries the distance, both overlays and every door, so a reader can work at
+ * it without opening the detail at all. There is no opening case and no
+ * guided route: the reader picks the relation that interests them, and the
+ * depth is in the essay the reading leads to.
  *
- * The state — overlay, distance, open door — is in the address, so an essay
- * can link into the exact reading it argues from and a reader can share what
- * they are looking at. Both variants READ that address now, and the preview
- * opens itself when one asks for something the short plate cannot draw: a link
- * that records an exploration has to restore it. See useChainUrl.ts; the
- * address carries slugs, never the numbers, because the numbers are positions
- * and the slugs are names.
+ * The state — overlay, distance, open door — is in the address at both levels,
+ * so an essay can link into the exact reading it argues from and a reader can
+ * share what they are looking at from the top of the landing page. The preview
+ * opens the detail only for an address naming an element the overview groups
+ * away. See useChainUrl.ts; the address carries slugs, never the numbers,
+ * because the numbers are positions and the slugs are names.
  *
  * Two layouts, one state. A wide screen gets the generated plate
  * (ChainPlateSvg.tsx); a narrow one gets the column (ChainColumn.tsx). The
@@ -61,6 +62,8 @@ import {
   SHIFT_BY_ID,
   SHIFTS,
   TENSIONS,
+  drawnAtOverview,
+  type ChainLevel,
   type JointId,
   type LensId,
   type ShiftId,
@@ -169,22 +172,6 @@ function focusableTrigger(trigger: Element | null): Element | null {
   return (id ? chip.ownerDocument.querySelector(`.cp-hit[data-id="${id}"]`) : null) ?? trigger;
 }
 
-/**
- * The one reading on this map written against evidence rather than as an
- * illustration, and the state it is written in: the Energy layer, read as
- * finance, under the green transition. Every other mark is a scenario and says
- * so (see `BASIS` in the data file).
- *
- * It is named here rather than inlined because three things have to agree
- * about it — the entrance that opens it, the copy that describes it, and the
- * test that checks the entrance still lands on a written reading.
- */
-export const PILOT = { lens: 'finance', shift: 'green', node: 'band-energy' } as const satisfies {
-  lens: LensId;
-  shift: ShiftId;
-  node: string;
-};
-
 /** The element on the plate a reading is anchored to: its mark under a shift, else its own door or form. */
 function anchorFor(figure: HTMLElement | null, id: string, shift: ShiftId | null): Element | null {
   if (!figure) return null;
@@ -200,10 +187,18 @@ export function ChainPlate({
   links = CHAIN_MODULE_LINKS,
   variant = 'full',
   initialShift = null,
+  heading = 'h2',
 }: {
   links?: readonly ChainModuleLink[];
   /** `preview` opens short and expands in place; `full` is the whole chain from the start. */
   variant?: 'full' | 'preview';
+  /**
+   * The rank of the map's own title. On the landing page nothing precedes the
+   * map, so the map's title IS the page's main heading and this is `h1`;
+   * inside About it sits under that page's heading and stays `h2`. A prop
+   * rather than a guess, because the component cannot see what is above it.
+   */
+  heading?: 'h1' | 'h2';
   /**
    * The overlay a page frame opens the map with when the address names none —
    * the Green Transition section mounts the same component with `green` on.
@@ -247,13 +242,18 @@ export function ChainPlate({
   // with no chain parameters, and false for `distance=economy` alone, which is
   // what the short plate already shows.
   const [expanded, setExpanded] = useState(variant === 'full' || asksForFullChain(fromUrl));
-  const urlEnabled = variant === 'full' || expanded;
   const [anchor, setAnchor] = useState<Element | null>(null);
   const triggerRef = useRef<Element | null>(null);
   const figureRef = useRef<HTMLElement>(null);
 
   const urlState = useMemo<ChainUrlState>(() => ({ lens, shift, node: selected }), [lens, shift, selected]);
-  const subscribeToUrl = useChainUrl(urlEnabled, urlState);
+  // THE ADDRESS IS LIVE AT BOTH LEVELS. It used to be written only once the
+  // preview was expanded, because the short plate had no state worth sharing:
+  // no distance, no overlay, no open door. The overview has all three, so a
+  // reader who changes one at the top of the landing page can send what they
+  // are looking at. A plain visit is still untouched — useChainUrl writes
+  // nothing until the reader changes something.
+  const subscribeToUrl = useChainUrl(true, urlState);
   useEffect(
     () =>
       subscribeToUrl((next) => {
@@ -264,7 +264,14 @@ export function ChainPlate({
     [subscribeToUrl],
   );
 
-  const showCompact = variant === 'preview' && !expanded;
+  /**
+   * WHICH LEVEL OF GROUPING IS DRAWN. Not "how much of the map is offered":
+   * both levels carry the doors, the chips and the marks, so everything below
+   * this line runs at both. The gates that used to hang off it are gone
+   * — they existed because the old short plate had nothing to act on.
+   */
+  const level: ChainLevel = variant === 'preview' && !expanded ? 'overview' : 'detail';
+  const atOverview = level === 'overview';
 
   const modulesByJoint = useMemo(() => locatedModulesByJoint(links), [links]);
 
@@ -361,48 +368,20 @@ export function ChainPlate({
 
   const toggleExpanded = useCallback(() => {
     const next = !expanded;
-    if (!next) {
-      // Back to the short plate: no shift, no reading — it has neither. The
-      // distance and the layer switches survive the round trip, because the
-      // short plate draws neither and the reader did not ask to lose them.
-      setShift(null);
-      setSelected(null);
-    }
+    // THE LEVEL CONTROL CHANGES THE LEVEL AND NOTHING ELSE, in both
+    // directions. Going back used to drop the shift and the open reading,
+    // because the short plate could draw neither; the overview draws both, so
+    // clearing them would now be the control doing something it does not say.
+    // The one case that still has to be cleared is a reading of an element the
+    // overview does not draw — a panel with no element under it is the one
+    // thing the map must never show.
+    if (!next && selected && !drawnAtOverview(selected)) setSelected(null);
     setExpanded(next);
     // Let the swapped figure paint, then land focus on it so the reader is
     // where the chain now is. No scroll of our own: focus brings it into view
     // and respects the reader's motion setting through the browser.
     requestAnimationFrame(() => figureRef.current?.focus());
-  }, [expanded]);
-
-  /**
-   * The one labelled entrance on the short plate: the assessed reading of the
-   * Energy layer, at the distance and under the scenario it was written in.
-   *
-   * It sets all three at once, which is exactly why its label has to say so —
-   * `CHAIN_COPY.opening.actionMeans` is the control's description, not
-   * decoration. Nothing here is exclusive: the reader lands in the ordinary
-   * full map with the ordinary controls, free to change any of the three or
-   * close the reading and go somewhere else.
-   */
-  const openPilot = useCallback(() => {
-    setLens(PILOT.lens);
-    setShift(PILOT.shift);
-    setSelected(PILOT.node);
-    setExpanded(true);
-    // The reading takes focus itself (ChainTargetPanel focuses its heading, with
-    // preventScroll, so the page does not jump out from under a reader who is
-    // already looking at the map). What it cannot do is bring the newly drawn
-    // figure into view, so that happens here — and only the scroll, never the
-    // focus, which would take it off the reading.
-    //
-    // An optional CALL, not merely an optional member: scrollIntoView is a
-    // browser method that jsdom and some embedded engines do not implement, and
-    // bringing the map into view is a courtesy. Nothing the reader asked for
-    // depends on it, so it must not be able to throw from inside a frame
-    // callback where no caller can catch it.
-    requestAnimationFrame(() => figureRef.current?.scrollIntoView?.({ block: 'start', behavior: scrollBehavior() }));
-  }, []);
+  }, [expanded, selected]);
 
   // A SHARED READING ARRIVES BELOW THE FOLD. An address naming an element
   // opens its reading on the first paint, and on both pages that carry the map
@@ -425,19 +404,19 @@ export function ChainPlate({
   // its mark under a shift, else its door — found after the plate has drawn
   // it, so a reading opened from the address is anchored on the first paint.
   useEffect(() => {
-    if (!wideScreen || showCompact || !selected) {
+    if (!wideScreen || !selected) {
       setAnchor(null);
       return;
     }
     setAnchor(anchorFor(figureRef.current, selected, shift));
-  }, [wideScreen, showCompact, selected, shift]);
+  }, [wideScreen, selected, shift, level]);
 
   // Isolation at the finance distance: everything not in the open reading's
   // set steps back. Done by marking the plate's own elements, because the
   // base geometry is static and knows nothing about state.
-  const isolate = wideScreen && !showCompact && lens === 'finance' && selected ? isolationSet(selected) : null;
+  const isolate = wideScreen && lens === 'finance' && selected ? isolationSet(selected) : null;
   useEffect(() => {
-    const svg = figureRef.current?.querySelector('svg.cp-svg--wide');
+    const svg = figureRef.current?.querySelector('svg.cp-svg');
     if (!svg) return;
     const all = svg.querySelectorAll<Element>('[data-dim]');
     all.forEach((el) => el.removeAttribute('data-dim'));
@@ -464,13 +443,13 @@ export function ChainPlate({
       if (el.classList.contains('cp-flow') && throughKept(el)) return;
       el.setAttribute('data-dim', '');
     });
-  }, [isolate, shift, lens]);
+  }, [isolate, shift, lens, level]);
 
   // A layer switched off must fade everywhere it is drawn, and two of those
   // places are static geometry with no handlers: the shift outline on its
   // band, and, for energy, the arrows rising into every stage.
   useEffect(() => {
-    const svg = figureRef.current?.querySelector('svg.cp-svg--wide');
+    const svg = figureRef.current?.querySelector('svg.cp-svg');
     if (!svg) return;
     svg.querySelectorAll<Element>('.cp-shifts .cp-lit[data-for]').forEach((el) => {
       if (hidden.has(el.getAttribute('data-for')!)) el.setAttribute('data-hidden', '');
@@ -480,7 +459,7 @@ export function ChainPlate({
       if (hidden.has('band-energy')) el.setAttribute('data-hidden', '');
       else el.removeAttribute('data-hidden');
     });
-  }, [hidden, shift, showCompact, wideScreen]);
+  }, [hidden, shift, level, wideScreen]);
 
   const lensState = useMemo<ChainLensState>(
     () => ({ lens, shift, selected, onSelect, hovered, onHover, hidden, onToggleLayer, panelId }),
@@ -503,7 +482,8 @@ export function ChainPlate({
     [modulesByJoint, closePanel, panelId, isolate],
   );
 
-  const { lead, shiftLead, opening } = CHAIN_COPY;
+  const { lead, shiftLead } = CHAIN_COPY;
+  const Heading = heading;
   const [reindus, green] = SHIFTS;
   const marks = shift ? markedIds(shift).length : 0;
 
@@ -512,146 +492,109 @@ export function ChainPlate({
       className="chain-plate"
       data-lens={lens}
       data-shift={shift ?? undefined}
-      data-view={showCompact ? 'compact' : 'full'}
+      data-level={level}
       data-isolate={isolate ? selected ?? undefined : undefined}
     >
       <header className="max-w-3xl">
-        <h2 className="font-display text-2xl font-semibold leading-tight tracking-tight text-foreground md:text-3xl [text-wrap:balance]">
-          {CHAIN_COPY.headline}
-        </h2>
+        {/* The map's own heading. On the landing page nothing precedes it, so
+            it is the page's h1; inside About it is an h2 under that page's
+            own heading. A title, not a hero: no artwork, no reserved empty
+            space, no call to action. */}
+        <Heading className="font-display text-2xl font-semibold leading-tight tracking-tight text-foreground md:text-3xl [text-wrap:balance]">
+          {CHAIN_COPY.title}
+        </Heading>
         <p className="mt-3 text-base leading-relaxed text-foreground md:text-lg" data-chain-standfirst>
           {CHAIN_COPY.standfirst}
         </p>
-        {/* The two distances and the two scenarios are the full chain's
-            controls, and they are shown where they do something. The short
-            plate has no chips to re-word and no marks to raise, so offering
-            them there was offering an inert control whose only observable
-            effect was to swap the plate. */}
-        {!showCompact && (
-          <>
-            <p className="mt-3 text-sm leading-relaxed text-muted-foreground md:text-base">
-              {lead.before}
-              <LensWord id="economy" active={lens === 'economy'} onChoose={chooseLens}>
-                {lead.economy}
-              </LensWord>
-              {lead.middle}
-              <LensWord id="finance" active={lens === 'finance'} onChoose={chooseLens}>
-                {lead.finance}
-              </LensWord>
-              {lead.after}
-            </p>
-            <p className="mt-2 text-sm leading-relaxed text-muted-foreground md:text-base" data-chain-shift-lead>
-              {shiftLead.before}
-              <ShiftWord id={reindus.id} active={shift === reindus.id} onToggle={toggleShift}>
-                {reindus.word}
-              </ShiftWord>
-              {shiftLead.middle}
-              <ShiftWord id={green.id} active={shift === green.id} onToggle={toggleShift}>
-                {green.word}
-              </ShiftWord>
-              {shiftLead.after}
-            </p>
-            <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
-              <button
-                type="button"
-                data-chain-control="shift"
-                aria-pressed={shift === null}
-                onClick={() => chooseShift(null)}
-                className={cn('min-h-11 border-b text-foreground', shift === null ? 'border-foreground font-medium' : 'border-transparent', FOCUS)}
-              >
-                {CHAIN_COPY.controls.noShift}
-              </button>
-              {/* The way back, beside the controls that got the reader here.
-                  The button under the map stays: one exit at each end of a
-                  figure that is taller than the screen is not two answers to
-                  the same question. */}
-              {variant === 'preview' && (
-                <button
-                  type="button"
-                  data-chain-control="detail"
-                  aria-expanded={expanded}
-                  aria-controls={figureId}
-                  onClick={toggleExpanded}
-                  className={cn('min-h-11 border-b border-transparent text-foreground hover:border-foreground', FOCUS)}
-                >
-                  {CHAIN_COPY.controls.seeCompact}
-                </button>
-              )}
-              <span role="status" aria-live="polite" aria-atomic="true">
-                {CHAIN_COPY.lensName[lens]} · {shift ? SHIFT_BY_ID[shift].label : CHAIN_COPY.controls.noShift}
-                {shift && ` · ${CHAIN_COPY.status.marks(marks)}`}
-                {selected && ` · ${targetLabel(selected)}`}
-              </span>
-            </div>
-            {/* A switched-off layer fades to near nothing and keeps its place,
-                which is what makes it useful for comparing two layers — and
-                what makes it easy to read as a claim. It is not one: the
-                service is still bought and its constraint has not gone. Said
-                here, with the way back, only while any layer is off. */}
-            {hidden.size > 0 && (
-              <p className="mt-2 flex flex-wrap items-baseline gap-x-3 text-sm text-muted-foreground" data-chain-hidden-layers>
-                <span>{CHAIN_COPY.controls.layersHidden(hidden.size)}</span>
-                <button
-                  type="button"
-                  data-chain-control="layers"
-                  onClick={() => setHidden(EMPTY_HIDDEN)}
-                  className={cn('min-h-11 border-b border-transparent text-foreground hover:border-foreground', FOCUS)}
-                >
-                  {CHAIN_COPY.controls.showAllLayers}
-                </button>
-              </p>
-            )}
-          </>
-        )}
 
-        {/* The short plate's one bounded question, and the labelled action that
-            answers it inside the same swimlane. */}
-        {showCompact && (
-          <div className="mt-5 border-l-2 border-foreground pl-4" data-chain-opening>
-            <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">{opening.kicker}</p>
-            <p className="mt-1.5 text-base font-semibold leading-snug text-foreground md:text-lg">{opening.question}</p>
-            <p className="mt-2 text-sm leading-relaxed text-muted-foreground md:text-base">{opening.relation}</p>
-            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{opening.caution}</p>
+        {/* THE CONTROLS ACT AT BOTH LEVELS. They used to be hidden on the
+            short plate because that plate had no chips to re-word and no
+            marks to raise. The overview draws both, so the controls are
+            offered where they now do something — which is everywhere. */}
+        <p className="mt-3 text-sm leading-relaxed text-muted-foreground md:text-base">
+          {lead.before}
+          <LensWord id="economy" active={lens === 'economy'} onChoose={chooseLens}>
+            {lead.economy}
+          </LensWord>
+          {lead.middle}
+          <LensWord id="finance" active={lens === 'finance'} onChoose={chooseLens}>
+            {lead.finance}
+          </LensWord>
+          {lead.after}
+        </p>
+        <p className="mt-2 text-sm leading-relaxed text-muted-foreground md:text-base" data-chain-shift-lead>
+          {shiftLead.before}
+          <ShiftWord id={reindus.id} active={shift === reindus.id} onToggle={toggleShift}>
+            {reindus.word}
+          </ShiftWord>
+          {shiftLead.middle}
+          <ShiftWord id={green.id} active={shift === green.id} onToggle={toggleShift}>
+            {green.word}
+          </ShiftWord>
+          {shiftLead.after}
+        </p>
+        <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
+          <button
+            type="button"
+            data-chain-control="shift"
+            aria-pressed={shift === null}
+            onClick={() => chooseShift(null)}
+            className={cn('min-h-11 border-b text-foreground', shift === null ? 'border-foreground font-medium' : 'border-transparent', FOCUS)}
+          >
+            {CHAIN_COPY.controls.noShift}
+          </button>
+          {/* One way back to the overview, at the top. The button under the
+              map stays: one exit at each end of a figure taller than the
+              screen is not two answers to the same question. */}
+          {variant === 'preview' && (
             <button
               type="button"
-              data-chain-control="pilot"
-              aria-describedby={`${base}-pilot-means`}
-              onClick={openPilot}
-              className={cn(
-                'mt-4 inline-block rounded border-2 border-foreground px-5 py-2.5 text-sm font-medium tracking-[0.04em] text-foreground transition-colors hover:bg-foreground/[0.06] active:bg-foreground/[0.12]',
-                FOCUS,
-              )}
+              data-chain-control="detail"
+              aria-expanded={expanded}
+              aria-controls={figureId}
+              onClick={toggleExpanded}
+              className={cn('min-h-11 border-b border-transparent text-foreground hover:border-foreground', FOCUS)}
             >
-              {opening.action}
+              {atOverview ? CHAIN_COPY.controls.seeFull : CHAIN_COPY.controls.seeCompact}
             </button>
-            <p id={`${base}-pilot-means`} className="mt-2 text-xs leading-relaxed text-muted-foreground">
-              {opening.actionMeans} {opening.case}
-            </p>
-          </div>
+          )}
+          <span role="status" aria-live="polite" aria-atomic="true">
+            {CHAIN_COPY.lensName[lens]} · {shift ? SHIFT_BY_ID[shift].label : CHAIN_COPY.controls.noShift}
+            {shift && ` · ${CHAIN_COPY.status.marks(marks)}`}
+            {selected && ` · ${targetLabel(selected)}`}
+          </span>
+        </div>
+
+        {/* A switched-off layer fades to near nothing and keeps its place,
+            which is what makes it useful for comparing two layers — and what
+            makes it easy to read as a claim. It is not one: the service is
+            still bought and its constraint has not gone. Said here, with the
+            way back, only while any layer is off. */}
+        {hidden.size > 0 && (
+          <p className="mt-2 flex flex-wrap items-baseline gap-x-3 text-sm text-muted-foreground" data-chain-hidden-layers>
+            <span>{CHAIN_COPY.controls.layersHidden(hidden.size)}</span>
+            <button
+              type="button"
+              data-chain-control="layers"
+              onClick={() => setHidden(EMPTY_HIDDEN)}
+              className={cn('min-h-11 border-b border-transparent text-foreground hover:border-foreground', FOCUS)}
+            >
+              {CHAIN_COPY.controls.showAllLayers}
+            </button>
+          </p>
         )}
-        {!showCompact && (
-          <>
-            <p className="mt-3 text-sm leading-relaxed text-muted-foreground" data-chain-doors>
-              {CHAIN_COPY.doorsLead}
-            </p>
-            <p className="mt-2 text-sm leading-relaxed text-muted-foreground" data-chain-scope>
-              {CHAIN_COPY.scopeLead}
-            </p>
-          </>
-        )}
-        {/* A numbered disc reads as a ranking unless something says otherwise,
-            and these numbers are positions on the drawing that renumber when
-            the overlay changes. Shown only while an overlay is on, which is
-            the only time numbers exist. */}
-        {!showCompact && shift && (
-          <>
-            <p className="mt-2 text-sm leading-relaxed text-muted-foreground" data-chain-mark-order>
-              {CHAIN_COPY.markOrderNote}
-            </p>
-            <p className="mt-2 text-sm leading-relaxed text-muted-foreground" data-chain-condition-note>
-              {CHAIN_COPY.conditionNote(fullDate(CONDITION_AS_OF))}
-            </p>
-          </>
+
+        <p className="mt-3 text-sm leading-relaxed text-muted-foreground" data-chain-doors>
+          {CHAIN_COPY.doorsLead}
+        </p>
+        <p className="mt-2 text-sm leading-relaxed text-muted-foreground" data-chain-scope>
+          {CHAIN_COPY.scopeLead}
+        </p>
+        {/* What the level control does, where the level control is. */}
+        {variant === 'preview' && (
+          <p className="mt-2 text-sm leading-relaxed text-muted-foreground" data-chain-level-note>
+            {CHAIN_COPY.controls.levelNote}
+          </p>
         )}
       </header>
 
@@ -669,14 +612,14 @@ export function ChainPlate({
           onMouseOver={wideScreen ? onFigureOver : undefined}
           onMouseOut={wideScreen ? onFigureOut : undefined}
         >
-          {wideScreen ? showCompact ? <ChainPlateCompact /> : <ChainPlateWide /> : <ChainColumn variant={showCompact ? 'compact' : 'full'} />}
+          {wideScreen ? atOverview ? <ChainPlateCompact /> : <ChainPlateWide /> : <ChainColumn level={level} />}
 
           {/* No label for the element whose reading is already open: the reading says it all. */}
-          {wideScreen && !showCompact && (
+          {wideScreen && (
             <HoverLabel hovered={hovered && hovered.id !== selected ? hovered : null} figure={figureRef.current} shift={shift} lens={lens} />
           )}
 
-          {wideScreen && !showCompact && selected && (
+          {wideScreen && selected && (
             <ChainPopover anchor={anchor} figure={figureRef.current} onClose={closePanel}>
               {renderPanel(selected)}
             </ChainPopover>
@@ -684,7 +627,7 @@ export function ChainPlate({
         </figure>
 
         {/* A phone has no hover and no room beside a row: a reading opens as a bottom sheet. */}
-        {!wideScreen && !showCompact && (
+        {!wideScreen && (
           <Sheet open={!!selected} onOpenChange={(open) => !open && closePanel()}>
             {selected && (
               <SheetContent
@@ -742,7 +685,7 @@ export function ChainPlate({
             That leaves a reader who has seen each alone believing both can run
             at full strength; the conflict is written out rather than drawn,
             because a second overlay would imply they compose. */}
-        {!showCompact && shift && (
+        {shift && (
           <section className="mt-8 max-w-3xl border-t border-border pt-5" data-chain-tensions>
             <h3 className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
               {CHAIN_COPY.tensionsHeading}
@@ -778,7 +721,7 @@ export function ChainPlate({
               FOCUS,
             )}
           >
-            {expanded ? CHAIN_COPY.controls.seeCompact : CHAIN_COPY.controls.seeFull}
+            {atOverview ? CHAIN_COPY.controls.seeFull : CHAIN_COPY.controls.seeCompact}
           </button>
         )}
       </ChainLensContext.Provider>
@@ -786,7 +729,7 @@ export function ChainPlate({
   );
 }
 
-/** The plate as an About section: no heading of its own — the headline is the heading. */
+/** The plate as an About section: under that page's heading, so the map's title is an h2. */
 export function IndustryChainSection() {
   return (
     <section id="industry-chain" className="border-b border-border py-12">
@@ -797,12 +740,17 @@ export function IndustryChainSection() {
   );
 }
 
-/** The short version, for the landing page: the second thing after the hero. */
+/**
+ * The map at the top of the landing page, opening at the overview.
+ *
+ * Nothing precedes it — there is no hero and no argument block above it any
+ * more — so its title carries the page's main heading.
+ */
 export function IndustryChainPreview() {
   return (
     <section id="industry-chain" className="border-b border-border py-12">
       <div className="container">
-        <ChainPlate variant="preview" />
+        <ChainPlate variant="preview" heading="h1" />
       </div>
     </section>
   );

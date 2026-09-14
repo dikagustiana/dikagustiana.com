@@ -22,14 +22,14 @@ import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactElement } from 'react';
 import { makeQueryResult } from './helpers/renderWithProviders';
-import { BANDS, CHAIN_COPY, JOINTS, MARGIN_KINDS, SHIFT_BY_ID } from '@/data/industryChain';
+import { BANDS, CHAIN_COPY, JOINTS, MARGIN_KINDS, OVERVIEW_HIDES, OVERVIEW_INTERNAL_JOINTS, SHIFT_BY_ID, jointLayers } from '@/data/industryChain';
 
 const { fromMock } = vi.hoisted(() => ({ fromMock: vi.fn() }));
 vi.mock('@/integrations/supabase/client', () => ({
   supabase: { from: (...a: unknown[]) => fromMock(...a) },
 }));
 
-import { ChainPlate, PILOT } from '@/components/industry-chain/ChainPlate';
+import { ChainPlate } from '@/components/industry-chain/ChainPlate';
 import type { ChainModuleLink } from '@/data/chainCurriculumMap';
 
 function mount(ui: ReactElement) {
@@ -54,11 +54,18 @@ beforeEach(() => {
 });
 
 describe('ChainPlate at rest', () => {
-  it('leads with the headline, verbatim', () => {
+  it('leads with the map’s own title, at the rank the page gives it', () => {
     mount(<ChainPlate />);
-    expect(screen.getByRole('heading', { name: CHAIN_COPY.headline })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Every joint in this chain is a margin.' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: CHAIN_COPY.title, level: 2 })).toBeInTheDocument();
     expect(document.querySelector('[data-chain-standfirst]')!.textContent).toBe(CHAIN_COPY.standfirst);
+    // Inside About the map sits under that page's heading. On the landing page
+    // nothing precedes it, so the same title carries the page's h1.
+    expect(document.querySelector('h1')).toBeNull();
+  });
+
+  it('takes the page’s main heading when nothing precedes it', () => {
+    mount(<ChainPlate heading="h1" />);
+    expect(screen.getByRole('heading', { name: CHAIN_COPY.title, level: 1 })).toBeInTheDocument();
   });
 
   it('reads the chain from far — economy on, finance off — with no shift and both shift words unpressed', () => {
@@ -326,7 +333,7 @@ describe('a joint as a door, with nothing mapped', () => {
     expect(within(panel).queryByText(CHAIN_COPY.panel.curriculumHeading)).not.toBeInTheDocument();
 
     // At Economy: no control test, no statement lines; the aggregate basis
-    // instead \u2014 value added, which is what actually adds up.
+    // instead — value added, which is what actually adds up.
     expect(within(panel).queryByText(MARGIN_KINDS['node-spread'].test)).not.toBeInTheDocument();
     expect(within(panel).queryByText(CHAIN_COPY.panel.linesHeading)).not.toBeInTheDocument();
     expect(within(panel).getByText(CHAIN_COPY.basis)).toBeInTheDocument();
@@ -341,19 +348,36 @@ describe('a joint as a door, with nothing mapped', () => {
     ).toBeInTheDocument();
   });
 
-  it('names the layers riding on the move — six on a whole-chain joint — and one of them leads to that layer', async () => {
+  /**
+   * Two lists, not one. A layer that attaches at the JOINT is charged at this
+   * transfer; asset finance, energy and the rules are not, and are still what
+   * makes the transfer possible. Collapsing them into one list was how a map
+   * with a single finance band said that the money which built the warehouse
+   * takes a cut of the move.
+   */
+  it('splits the layers on a joint into the ones charged there and the ones standing behind it, and each leads to its layer', async () => {
     mount(<ChainPlate links={[]} />);
     await userEvent.click(joint('Distributor → wholesaler'));
     const panel = screen.getByRole('region', { name: 'Distributor → wholesaler' });
     const layers = within(panel).getByText(CHAIN_COPY.panel.layersHeading).parentElement!;
-    expect(within(layers).getAllByRole('button')).toHaveLength(6);
+    const behind = within(panel).getByText(CHAIN_COPY.panel.layersBehindHeading).parentElement!;
+
+    for (const b of jointLayers('j-distributor-wholesaler')) {
+      const list = b.attaches === 'joints' ? layers : behind;
+      expect(within(list).getByRole('button', { name: new RegExp(b.label) }), b.id).toBeInTheDocument();
+    }
     expect(within(layers).getByRole('button', { name: /Principal–distributor contract governance/ })).toBeInTheDocument();
     expect(within(layers).getByRole('button', { name: /Cold chain/ })).toBeInTheDocument();
-    expect(within(layers).getByRole('button', { name: /Energy/ })).toBeInTheDocument();
+    expect(within(layers).getByRole('button', { name: /Working capital and trade credit/ })).toBeInTheDocument();
+    // Charged at a transfer is a claim about where the fee is cut. Neither of
+    // these is cut there, and both belong in the panel all the same.
+    expect(within(behind).getByRole('button', { name: /Energy/ })).toBeInTheDocument();
+    expect(within(behind).getByRole('button', { name: /Asset and project finance/ })).toBeInTheDocument();
+    expect(within(layers).queryByRole('button', { name: /Asset and project finance/ })).not.toBeInTheDocument();
     expect(within(layers).queryByRole('button', { name: /Contract capacity/ })).not.toBeInTheDocument();
 
-    await userEvent.click(within(layers).getByRole('button', { name: /Credit and working capital/ }));
-    const band = screen.getByRole('region', { name: 'Credit and working capital' });
+    await userEvent.click(within(layers).getByRole('button', { name: /Working capital and trade credit/ }));
+    const band = screen.getByRole('region', { name: 'Working capital and trade credit' });
     expect(band).toBeInTheDocument();
     expect(screen.queryByRole('region', { name: 'Distributor → wholesaler' })).not.toBeInTheDocument();
 
@@ -524,24 +548,43 @@ describe('a joint with a module pinned to it', () => {
   });
 });
 
-describe('the short version on the landing page', () => {
-  it('opens short — no doors, no chips, no legend — with one button that swaps in the full chain in place', async () => {
+/**
+ * THE OVERVIEW ON THE LANDING PAGE.
+ *
+ * What these tests used to pin: a short plate with no doors, no chips and no
+ * marks, whose distance and shift words were withheld because neither had
+ * anything to act on, plus one bounded question and one labelled action that
+ * flew the reader into a written case. The owner deleted the opening case and
+ * the guided route and asked for the map itself at the top of the page, so the
+ * contract is now the opposite: the overview is the same map at a coarser
+ * grouping, every control acts there, and the reader chooses.
+ */
+describe('the overview on the landing page', () => {
+  it('opens at the overview with every door and every chip, and the detail swaps in place', async () => {
     mount(<ChainPlate variant="preview" links={[]} />);
     expect(document.querySelectorAll('svg.cp-svg--compact')).toHaveLength(1);
     expect(document.querySelector('svg.cp-svg--wide')).toBeNull();
-    expect(screen.queryByRole('button', { name: 'Aggregation → processing' })).not.toBeInTheDocument();
-    expect(screen.queryByRole('heading', { name: 'How to read the map' })).not.toBeInTheDocument();
-    expect(document.querySelector('.cp-joint-chip')).toBeNull();
-    expect(document.querySelectorAll('.cp-joint-motif').length).toBeGreaterThan(0);
+    expect(plate().dataset.level).toBe('overview');
 
-    const button = screen.getByRole('button', { name: CHAIN_COPY.controls.seeFull });
-    expect(button).toHaveAttribute('aria-expanded', 'false');
-    await userEvent.click(button);
+    // Ten of the eleven joints are doors here; the eleventh is inside a group.
+    for (const j of JOINTS) {
+      const door = screen.queryByRole('button', { name: j.label });
+      if (OVERVIEW_HIDES.includes(j.id)) expect(door, j.id).toBeNull();
+      else expect(door, j.id).toBeInTheDocument();
+    }
+    expect(document.querySelector('.cp-joint-chip')).not.toBeNull();
+    expect(screen.queryByRole('heading', { name: 'How to read the map' })).not.toBeInTheDocument();
+
+    const opens = screen.getAllByRole('button', { name: CHAIN_COPY.controls.seeFull });
+    expect(opens, 'one at each end of a figure taller than the screen').toHaveLength(2);
+    for (const open of opens) expect(open).toHaveAttribute('aria-expanded', 'false');
+    await userEvent.click(opens[0]);
 
     expect(document.querySelector('svg.cp-svg--compact')).toBeNull();
     expect(document.querySelectorAll('svg.cp-svg--wide')).toHaveLength(1);
-    expect(screen.getByRole('button', { name: 'Aggregation → processing' })).toBeInTheDocument();
-    expect(screen.queryByRole('heading', { name: 'How to read the map' })).not.toBeInTheDocument();
+    expect(plate().dataset.level).toBe('detail');
+    expect(screen.getByRole('button', { name: 'Distributor → wholesaler' })).toBeInTheDocument();
+
     // Two ways back once it is open — beside the controls and under the map.
     // A figure taller than the screen has two ends, and an exit at each is not
     // two answers to the same question.
@@ -554,29 +597,34 @@ describe('the short version on the landing page', () => {
   });
 
   /*
-   * SUPERSEDED, DELIBERATELY. This pinned the opposite contract: "pressing
-   * either word opens the full chain with it on". That coupling is the U02
-   * finding — a distance and a scenario also swapped the whole plate, so
-   * pressing the ALREADY-ACTIVE Economy, or the already-active No shift, which
-   * changes nothing at all, expanded the map. A reader cannot learn what a
-   * control means while it is also doing something else.
+   * The coupling this inverts: a distance and a scenario also swapped the
+   * whole plate, so pressing the ALREADY-ACTIVE Economy, or the already-active
+   * No shift, which changes nothing at all, expanded the map. A reader cannot
+   * learn what a control means while it is also doing something else.
    *
-   * The coupling existed because the short plate cannot honour either control:
-   * it has no chips to re-word and no marks to raise. The resolution is not to
-   * make them expand, it is not to offer them where they do nothing. The
-   * coverage is kept, inverted: the words are absent while short, and once the
-   * chain is open each changes only what it names.
+   * The coupling existed because the short plate could honour neither control.
+   * The overview can honour both, so both are offered there and each changes
+   * only what it names.
    */
-  it('offers no distance and no scenario while it is short: neither has anything to change there', () => {
+  it('offers the distance and both overlays at the overview, because both now have something to change there', async () => {
     mount(<ChainPlate variant="preview" links={[]} />);
-    expect(screen.queryByRole('button', { name: 'finance', exact: true })).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'green transition', exact: true })).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: CHAIN_COPY.controls.noShift })).not.toBeInTheDocument();
+    expect(word('finance')).toBeInTheDocument();
+    expect(word('green transition')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: CHAIN_COPY.controls.noShift })).toBeInTheDocument();
+
+    await userEvent.click(word('finance'));
+    expect(plate().dataset.lens).toBe('finance');
+    expect(plate().dataset.level, 'a distance is not a level').toBe('overview');
+
+    await userEvent.click(word('green transition'));
+    expect(plate().dataset.shift).toBe('green');
+    expect(plate().dataset.level, 'a scenario is not a level').toBe('overview');
+    expect(document.querySelectorAll('.cp-mark').length).toBeGreaterThan(0);
   });
 
-  it('changes only what each control names once the chain is open, and never the detail level', async () => {
+  it('changes only what each control names, and never the detail level', async () => {
     mount(<ChainPlate variant="preview" links={[]} />);
-    await userEvent.click(screen.getByRole('button', { name: CHAIN_COPY.controls.seeFull }));
+    await userEvent.click(screen.getAllByRole('button', { name: CHAIN_COPY.controls.seeFull })[0]);
 
     await userEvent.click(word('finance'));
     expect(plate().dataset.lens).toBe('finance');
@@ -591,57 +639,54 @@ describe('the short version on the landing page', () => {
     await userEvent.click(word('economy'));
     await userEvent.click(screen.getByRole('button', { name: CHAIN_COPY.controls.noShift }));
     await userEvent.click(screen.getByRole('button', { name: CHAIN_COPY.controls.noShift }));
-    expect(plate().dataset.view).toBe('full');
+    expect(plate().dataset.level).toBe('detail');
     expect(plate().dataset.lens).toBe('economy');
     expect(plate().dataset.shift).toBeUndefined();
     expect(document.querySelectorAll('svg.cp-svg--wide')).toHaveLength(1);
+  });
 
-    // Back to the short plate drops the shift: the short version has no overlay.
+  /**
+   * Going back to the overview used to drop the shift, because the short plate
+   * had no marks to carry. It has them now, so the level control changes the
+   * level and nothing else — the same rule the other two controls obey.
+   */
+  it('carries the distance and the overlay across a change of level, in both directions', async () => {
+    mount(<ChainPlate variant="preview" links={[]} />);
+    await userEvent.click(word('finance'));
     await userEvent.click(word('green transition'));
+
+    await userEvent.click(screen.getAllByRole('button', { name: CHAIN_COPY.controls.seeFull })[0]);
+    expect(plate().dataset.level).toBe('detail');
+    expect(plate().dataset.lens).toBe('finance');
+    expect(plate().dataset.shift).toBe('green');
+
     await userEvent.click(screen.getAllByRole('button', { name: CHAIN_COPY.controls.seeCompact })[0]);
-    expect(plate().dataset.shift).toBeUndefined();
-    expect(plate().dataset.view).toBe('compact');
+    expect(plate().dataset.level).toBe('overview');
+    expect(plate().dataset.lens).toBe('finance');
+    expect(plate().dataset.shift).toBe('green');
   });
 
-  it('keeps the headline, and puts one bounded question and one labelled action in place of the control sentences', () => {
+  it('keeps the title and puts no opening case, no question and no guided route in front of the map', () => {
     mount(<ChainPlate variant="preview" links={[]} />);
-    expect(screen.getByRole('heading', { name: CHAIN_COPY.headline })).toBeInTheDocument();
-
-    const opening = document.querySelector('[data-chain-opening]') as HTMLElement;
-    expect(opening).toBeTruthy();
-    expect(opening).toHaveTextContent(CHAIN_COPY.opening.question);
-    // The relation, not just the noun — and the boundary of the case, so the
-    // one assessed reading is not advertised as a national finding.
-    expect(opening).toHaveTextContent(CHAIN_COPY.opening.relation);
-    expect(opening).toHaveTextContent(CHAIN_COPY.opening.caution);
-
-    // The control says what it will do before it does it.
-    const action = screen.getByRole('button', { name: CHAIN_COPY.opening.action });
-    expect(action).toHaveAccessibleDescription(
-      `${CHAIN_COPY.opening.actionMeans} ${CHAIN_COPY.opening.case}`,
-    );
+    expect(screen.getByRole('heading', { name: CHAIN_COPY.title })).toBeInTheDocument();
+    expect(document.querySelector('[data-chain-opening]')).toBeNull();
+    expect('opening' in CHAIN_COPY, 'v3’s pilot block is gone from the data too').toBe(false);
+    // The controls are the entrance: the sentences that name them, and the
+    // note saying what the level control does and does not do.
+    expect(document.querySelector('[data-chain-shift-lead]')).not.toBeNull();
+    expect(document.querySelector('[data-chain-level-note]')!.textContent).toBe(CHAIN_COPY.controls.levelNote);
   });
 
-  it('lands the labelled action on the one reading written against evidence, in the state it was written in', async () => {
+  it('opens a door at the overview without expanding anything', async () => {
     mount(<ChainPlate variant="preview" links={[]} />);
-    await userEvent.click(screen.getByRole('button', { name: CHAIN_COPY.opening.action }));
-
-    expect(plate().dataset.view).toBe('full');
-    expect(plate().dataset.lens).toBe(PILOT.lens);
-    expect(plate().dataset.shift).toBe(PILOT.shift);
-
-    const panel = await screen.findByRole('region', { name: 'Energy' });
-    // Assessed, not a scenario: the entrance must not open an illustration and
-    // present it as the map's worked example.
-    expect(panel.querySelector('[data-basis="assessed"]')).toBeTruthy();
-    expect(voice(panel)).toBe(PILOT.lens);
-    // The reader is in the ordinary map, free to leave the pilot.
-    expect(screen.getByRole('button', { name: CHAIN_COPY.controls.noShift })).toBeInTheDocument();
+    await userEvent.click(joint('Wholesale → retail'));
+    expect(screen.getByRole('region', { name: 'Wholesale → retail' })).toBeInTheDocument();
+    expect(plate().dataset.level).toBe('overview');
   });
 
   it('offers the way back beside the controls as well as under the map', async () => {
     mount(<ChainPlate variant="preview" links={[]} />);
-    await userEvent.click(screen.getByRole('button', { name: CHAIN_COPY.controls.seeFull }));
+    await userEvent.click(screen.getAllByRole('button', { name: CHAIN_COPY.controls.seeFull })[0]);
     const exits = screen.getAllByRole('button', { name: CHAIN_COPY.controls.seeCompact });
     expect(exits).toHaveLength(2);
     for (const exit of exits) expect(exit).toHaveAttribute('aria-expanded', 'true');

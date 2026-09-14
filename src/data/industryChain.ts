@@ -614,8 +614,8 @@ export const BANDS: Band[] = [
   },
   {
     id: 'band-credit',
-    label: 'Credit and working capital',
-    note: 'trade credit · inventory finance · who waits for payment',
+    label: 'Working capital and trade credit',
+    note: 'bridges a transfer · days, not years',
     span: ['stage-biological', 'stage-recovery'],
     spanLabel: 'The whole chain',
     margin: 'service-fee',
@@ -633,6 +633,33 @@ export const BANDS: Band[] = [
         'The channel through which monetary policy reaches the chain: the policy rate becomes the price of waiting, and who can afford to wait decides who can be a node.',
       finance:
         'What is sold here is the wait: someone holds goods they have not been paid for, so the next function can trade before it settles. DSO, DIO and DPO — the cash conversion cycle — and finance cost as the price of the gap it leaves.',
+    },
+  },
+  {
+    id: 'band-capital',
+    label: 'Asset and project finance',
+    note: 'builds or changes what the chain runs on',
+    span: ['stage-biological', 'stage-recovery'],
+    spanLabel: 'The whole chain — wherever capacity is built or replaced',
+    margin: 'service-fee',
+    // Attaches at the STAGES, not the joints: this money builds the plant, the
+    // fleet, the store and the sorting line. The band below it attaches at the
+    // joints, because that money bridges a transfer. Same layer of the
+    // drawing, two different attach points, two different questions — which
+    // is the distinction a single "Finance" band could not have made.
+    attaches: 'stages',
+    means:
+      'Funds the assets a function needs before it can trade at all, and funds replacing them when they wear out. Priced off what the asset earns across its life rather than off a trading cycle, so it is committed for years and cannot be withdrawn at a quarter’s notice. Who provides it, who pays for it over that life, and who bears the loss if it fails are three separate questions and usually three separate parties.',
+    lines: [
+      'Property, plant and equipment — and the depreciation that spreads it across the output it makes possible',
+      'Long-term borrowings and equity; where the state participates, concessional or guaranteed capital',
+      'Interest during construction — the cost of money before the asset earns anything',
+    ],
+    read: {
+      economy:
+        'Where capacity comes from. An economy can only run the functions somebody has already built, so the terms on which this money is available decide which parts of the chain can exist and at what scale. A guarantee or a concession moves who carries the risk of building; it does not make the risk disappear.',
+      finance:
+        'What is sold here is money committed for the life of an asset, priced off the coverage that asset is expected to produce rather than off a cash conversion cycle. So it fails differently from the band below it: an asset with sound lifetime returns can still miss debt service in its first years while it ramps. That is a timing problem and it needs a timing instrument — grace, sculpted amortisation, a reinvestment facility held outside senior maturity — not more subsidy.',
     },
   },
   {
@@ -1587,6 +1614,7 @@ export const SLUGS: Record<string, string> = {
   // Enabling layers
   'band-logistics': 'logistics',
   'band-cold-chain': 'cold-chain',
+  'band-capital': 'capital-finance',
   'band-credit': 'credit',
   'band-energy': 'energy',
   'band-governance': 'governance',
@@ -1625,45 +1653,116 @@ export const idOfSlug = (slug: string): string | undefined => ID_BY_SLUG[slug];
 
 /* ── The short version: a view over the same records ─────────────────────── */
 
-export type CompactStep =
-  | { kind: 'stages'; ids: string[] }
-  | {
-      kind: 'group';
-      id: string;
-      label: string;
-      members: string[];
-      /** Which of the upstream stages feed this group; the rest bypass it. */
-      from?: string[];
-    };
+/* ── The overview: one drawing, two levels of grouping ───────────────── */
 
 /**
- * Six transformation stages, three node groups, THREE layers, one return
- * arrow, and a diamond at every join so the joints read as the motif they are.
- * Readable in three seconds; every label is a record above. Packaging, the
- * trader and the principal are omitted here — the full plate has them.
+ * WHAT CHANGED, AND WHY IT IS NOT A SECOND MODEL.
  *
- * Energy is the third band, and it is here deliberately. On the short version
- * it appeared as nothing at all — the full plate draws it as arrows rising
- * into each stage, and the short one drew neither — so the entrance most
- * readers meet showed no energy while the argument this site makes turns on
- * it. Two bands to three is the smallest change that puts it in the
- * three-second read.
+ * The landing page used to carry a TASTER: a short plate with no doors, no
+ * chips and no marks, whose controls could not act, and whose meaning only
+ * arrived after pressing "See the full chain". That is the wrong shape for a
+ * map that is the site's primary object rather than an illustration after a
+ * manifesto.
+ *
+ * The overview is now the SAME DRAWING at a coarser grouping. One layout
+ * function in scripts/build-chain-plate.mjs emits both levels from these
+ * records, so the two cannot disagree about what exists, what connects to
+ * what, or where a mark sits. `detail` does one thing: it un-groups. It does
+ * not add a relation, start a tutorial, or change the distance.
+ *
+ * WHAT SURVIVES THE GROUPING, checked rather than assumed: every enabling
+ * layer, every border, every non-physical flow, every return with its own
+ * destination, and every element either shift marks. Ten of the eleven joints
+ * are drawn; the eleventh is internal to a group and named below. So the
+ * distance control has chips to re-word and both overlays have marks to
+ * raise — at the overview, without expanding anything.
+ *
+ * GROUPING MUST NOT CHANGE MEANING. Four traps, each guarded by a test:
+ *   - aggregation feeds from BIOLOGICAL only; extraction reaches processing
+ *     directly, and a grouped drawing must not imply otherwise;
+ *   - packaging is a PARALLEL INPUT to manufacturing, never a stage after it;
+ *   - recovery does not send everything back to one place — which is why the
+ *     returns are NOT grouped (see RETURNS_UNGROUPED below);
+ *   - putting two functions in one box does not make their margins addable.
  */
-export const COMPACT = {
-  sequence: [
-    { kind: 'stages', ids: ['stage-biological', 'stage-extraction'] },
-    { kind: 'group', id: 'group-aggregation', label: 'Aggregator', members: ['node-aggregation'], from: ['stage-biological'] },
-    { kind: 'stages', ids: ['stage-processing'] },
-    { kind: 'stages', ids: ['stage-manufacturing'] },
-    { kind: 'group', id: 'group-distribution', label: 'Distribution / wholesale', members: ['node-distributor', 'node-wholesaler'] },
-    { kind: 'group', id: 'group-retail', label: RETAIL_GROUP.label, members: RETAIL.map((r) => r.id) },
-    { kind: 'stages', ids: ['stage-consumption'] },
-    { kind: 'stages', ids: ['stage-recovery'] },
-  ] as CompactStep[],
-  bands: ['band-logistics', 'band-credit', 'band-energy'],
-  /** One arrow, no detail: goods come back. */
-  returnArrow: { id: 'compact-return', label: 'Returns', from: 'stage-recovery', to: 'stage-processing' },
-} as const;
+
+/**
+ * The two levels of grouping the one drawing is emitted at. `overview` is the
+ * resting level of the landing page; `detail` un-groups. There is no third.
+ */
+export type ChainLevel = 'overview' | 'detail';
+
+export interface OverviewGroup {
+  id: string;
+  label: string;
+  /** The source records this one box stands for. */
+  members: readonly string[];
+  /** What stays true of those members while they share a box. */
+  keeps: string;
+  /** What `detail` puts back. */
+  opens: string;
+}
+
+export const OVERVIEW_GROUPS: Record<string, OverviewGroup> = {
+  'group-distribution': {
+    id: 'group-distribution',
+    label: 'Distribution and wholesale',
+    members: ['node-distributor', 'node-wholesaler'],
+    keeps:
+      'Both take title and transform nothing, and both sell into retail. The transfer between them is real and is still a joint — it is simply internal to this box at this level. Their spreads are two spreads and do not add into one.',
+    opens: 'The distributor and the wholesaler as separate nodes, the joint between them, and the sub-distributor recursion.',
+  },
+  'group-retail': {
+    id: 'group-retail',
+    label: 'Retail',
+    members: ['node-retail-general', 'node-retail-modern', 'node-retail-ecommerce', 'node-retail-quick', 'node-retail-horeca'],
+    keeps:
+      'One stock-holding intermediary function. The five formats differ in shelf margin, cost to serve and who can afford to supply them; grouping them says they share a function, not a margin.',
+    opens: 'The five formats as rows.',
+  },
+};
+
+/** The joints that exist but are internal to an overview group, so are drawn only on detail. */
+export const OVERVIEW_INTERNAL_JOINTS = ['j-distributor-wholesaler'] as const;
+
+/**
+ * Everything the overview does not draw as its own element. Of these only the
+ * joint is a DOOR, so it is the only one an address can name — but the test
+ * reads this list rather than that fact, so a change of grouping cannot
+ * quietly strand a link.
+ */
+export const OVERVIEW_HIDES: readonly string[] = [
+  ...OVERVIEW_INTERNAL_JOINTS,
+  ...OVERVIEW_GROUPS['group-distribution'].members,
+  ...OVERVIEW_GROUPS['group-retail'].members,
+];
+
+/** True when the overview draws this element under its own id. */
+export const drawnAtOverview = (id: string): boolean => !OVERVIEW_HIDES.includes(id);
+
+/**
+ * Detail that the overview leaves out, named so the reduction is inspectable
+ * rather than a matter of taste. Nothing here is a RELATION; every one is an
+ * example, a sub-format or a note.
+ */
+export const OVERVIEW_OMITS = [
+  { what: 'The example lanes fanning into the two origins', why: 'They are examples of a function, not links in the chain.' },
+  { what: 'The three demand components inside consumption', why: 'They divide a destination; they do not add a transfer.' },
+  { what: 'The five retail formats', why: 'Grouped into the retail node, which keeps the function and the joint.' },
+  { what: 'The distributor\u2019s sub-distributor recursion', why: 'A note on how deep one node can nest, not another node.' },
+] as const;
+
+/**
+ * The returns are NOT grouped, deliberately.
+ *
+ * Grouping them was available and was declined: the six returns have five
+ * different destinations, and any grouping that fits on one arrow would have
+ * to pick one. "Everything comes back to processing" is exactly the false
+ * claim the brief warns about — and it is what the old taster drew, with a
+ * single "Returns → Primary processing" arrow standing for all six.
+ */
+export const RETURNS_UNGROUPED =
+  'Six returns, five destinations. Recyclate and compost leave recovery for different chains; a commercial return goes back to the distributor and a packaging return to the manufacturer. One arrow cannot say that.';
 
 /* ── Copy ────────────────────────────────────────────────────────────────── */
 
@@ -1691,18 +1790,18 @@ export const DEFINE = {
 } as const;
 
 export const CHAIN_COPY = {
-  headline: 'Every joint in this chain is a margin.',
   /**
-   * The thesis. It used to read "Add them up and you have an economy; take one
-   * apart and you have a driver tree." The second half is right and the first
-   * half is a category error the rest of this file spends a paragraph
-   * correcting: margins do not aggregate into an economy. Value added does,
-   * and value added is output less intermediate consumption — it includes
-   * labour income, and it is not gross profit. A memorable line that teaches
-   * the wrong identity is worse than a plain one.
+   * A TITLE, NOT A HEADLINE. This is the page's own heading on the landing
+   * page now that nothing precedes the map, so it names the object rather
+   * than making a claim about it. The claim it used to make — "Every joint in
+   * this chain is a margin" — and the correction under it about margins not
+   * aggregating into value added were both doing work, and neither is lost:
+   * the margin kind is on every joint's panel and `basis` below carries the
+   * value-added distinction into the Economy reading.
    */
-  standfirst:
-    'Take one apart and you get a driver tree. Add them up and you still do not get an economy \u2014 what aggregates is value added, not the margin anyone keeps.',
+  title: 'The industry chain',
+  /** The owner's line, once, as a short line under the title. */
+  standfirst: 'Nothing here is complicated. It only looks that way from the wrong distance.',
   /** The distance control is this sentence: the two lens names in it are the two positions. */
   lead: {
     before: 'Read the chain as an ',
@@ -1747,12 +1846,12 @@ export const CHAIN_COPY = {
   /** Title and description for each drawing; the title names it, the description walks it. */
   aria: {
     wide: {
-      title: 'The industry chain, in full',
-      desc: 'Left to right: two origins, primary processing, packaging and finished-goods manufacturing, then distribution, wholesale and retail into consumption and recovery. Intermediary nodes are dashed pills between the stages. Every joint is a mark on the flow — a filled diamond where a stage sells, an open diamond where a node sells, a square where a fee is paid — with a chip that reads it at the chosen distance, as an economy or as finance, and opens the margin cut there. Six enabling layers run as bands directly beneath the chain, ticked where each attaches; energy rises into every stage from below; money and information run both ways under the bands; two dashed border lines mark where goods are exported and imported. A shift, when one is chosen, marks the elements it moves with a numbered disc whose form is its status — filled for stuck, open for moving, dashed for unpriced — numbered in reading order, left to right and then top to bottom.',
+      title: 'The industry chain, in detail',
+      desc: 'Left to right: two origins, primary processing, packaging and finished-goods manufacturing, then distribution, wholesale and retail into consumption and recovery. Intermediary nodes are dashed pills between the stages. Every joint is a mark on the flow — a filled diamond where a stage sells, an open diamond where a node sells, a square where a fee is paid — with a chip that reads it at the chosen distance, as an economy or as finance, and opens the margin cut there. Seven enabling layers run as bands directly beneath the chain, ticked where each attaches — working capital at the joints it bridges, asset and project finance at the stages it builds; energy rises into every stage from below; money and information run both ways under the bands; two dashed border lines mark where goods are exported and imported. A shift, when one is chosen, marks the elements it moves with a numbered disc whose form is its status — filled for stuck, open for moving, dashed for unpriced — numbered in reading order, left to right and then top to bottom.',
     },
     compact: {
-      title: 'The industry chain, in short',
-      desc: 'Primary production, aggregation, processing, manufacturing, distribution, retail, consumption and recovery, a diamond at every join, with logistics, credit and energy running beneath and one return arrow above.',
+      title: 'The industry chain, overview',
+      desc: 'The same chain at a coarser grouping. Two origins, primary processing, packaging and finished-goods manufacturing, then one box for distribution and wholesale, one for retail, into consumption and recovery. Ten of the eleven joints are marks on the flow, each with its chip and each opening the margin cut there; the eleventh, the transfer between the distributor and the wholesaler, is inside their shared box and is drawn when the detail is shown. All seven enabling layers, both border lines, every return with its own destination and both money and information rails are here, and a chosen shift marks the same elements it marks on the detail.',
     },
     column: 'The industry chain, top to bottom',
   },
@@ -1782,7 +1881,23 @@ export const CHAIN_COPY = {
     marginHeading: 'The margin that sits here',
     whenHeading: 'Read the other way',
     linesHeading: 'Where it shows in the financial statements',
-    layersHeading: 'Layers riding on this move',
+    /**
+     * THE LAYERS ON A JOINT, IN TWO GROUPS, because they are not the same
+     * kind of thing. A layer that attaches at JOINTS cuts its fee at this
+     * transfer: the freight, the cold, the working capital that bridges it,
+     * the contract terms it happens under. A layer that attaches at STAGES
+     * or nowhere — asset finance, energy, the rules — takes nothing at this
+     * transfer and is still the reason it can happen at all.
+     *
+     * One list would have said asset finance is charged on a move. It is
+     * not: it built the warehouse and the fleet the move runs on, and it
+     * is priced off what those earn over their life. That is the whole
+     * distinction splitting the old single finance band was for, so the
+     * panel a reader actually opens should not collapse it again.
+     */
+    layersHeading: 'Layers charged at this transfer',
+    layersBehindHeading: 'Layers standing behind it',
+    layersBehindNote: 'These take nothing at this transfer. They are what makes it possible.',
     spanHeading: 'Spans',
     ridesHeading: 'Rides on',
     /** The four lines of a condition, in the order they are read. */
@@ -1815,54 +1930,18 @@ export const CHAIN_COPY = {
     essayMany: 'essays',
     essayNone: 'no essay yet',
   },
-  /**
-   * THE FIRST ENCOUNTER, on the short plate.
-   *
-   * The short plate has no doors, no chips and no marks: it is orientation,
-   * and orientation is not explanation. Version 2 put the right noun on it —
-   * Energy, beside logistics and credit — and a stranger could still only see
-   * that the band exists, not why the relation matters. This block is the one
-   * bounded question the map can put to a reader before they have chosen a
-   * distance, a shift or an element, and the labelled action that opens the
-   * one reading on this map written against evidence rather than as an
-   * illustration.
-   *
-   * It names ONE relation and bounds it. The assessed reading behind it is
-   * about the power chosen for a particular plant — asset vintage and a
-   * contract — and not about national network capacity, so `caution` says so
-   * before the reader arrives rather than after. The shared word is the trap:
-   * `distribution` on this chain is goods moving to a buyer, and the
-   * electricity network is a different network that this reading does not
-   * measure.
-   */
-  opening: {
-    kicker: 'Start with one relation',
-    question: 'Every stage on this chain buys electricity. Who chooses what kind, and when is it chosen?',
-    relation:
-      'Energy is a band beneath the chain, not a stage on it: it takes no title and sells no goods, and every stage above it is a customer. That makes the kind of power a decision someone else makes, at a moment you can name \u2014 and on the one case this map reads against evidence, it is made plant by plant rather than by the grid, in the same decision that approves the plant.',
-    caution:
-      'Distribution on this chain moves goods. The electricity network is a different network: this reading is about the power chosen for one plant, not a finding about national network capacity.',
-    action: 'Explore the power decision',
-    /** What the control does, said before it does it. */
-    actionMeans: 'Opens the full chain at the Energy layer, read as finance, under the green-transition scenario.',
-    /*
-     * No dates and no thresholds here, and that is the map's own rule rather
-     * than an omission: nothing in this file carries a figure (see the unit
-     * test 'carries no figures anywhere'). The reading names the regulation
-     * and the essay behind it carries the article, the threshold and the
-     * years.
-     */
-    case: 'The case: Indonesian nickel processing, and the captive generation built alongside it. The reading names its dates; the essay behind it carries the source.',
-  },
   controls: {
     noShift: 'No shift',
-    seeFull: 'See the full chain',
-    seeCompact: 'Back to the short version',
+    seeFull: 'Show the detail',
+    seeCompact: 'Back to the overview',
+    /** What the level control does, and the two things it does not do. */
+    levelNote:
+      'Detail un-groups: the retail formats, the distributor and the wholesaler, the example lanes into each origin and the components of demand. It adds no relation, and it does not change the distance or the scenario.',
     /**
      * Above the two distance words inside the narrow reading sheet. On a phone
      * the reading is a modal sheet and the distance control sat outside it, so
      * comparing the two readings of one element meant closing the reading,
-     * finding the control and finding the element again \u2014 the interface
+     * finding the control and finding the element again — the interface
      * interrupting the operation the map exists to demonstrate.
      */
     sheetDistance: 'Read this as',

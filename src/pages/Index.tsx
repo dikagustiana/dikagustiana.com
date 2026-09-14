@@ -7,9 +7,7 @@ import { Clock, User } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useSelectedEssays } from '@/hooks/queries/useSelectedEssays';
 import { LoadingState } from '@/components/states/LoadingState';
-import { HeroSection } from '@/components/HeroSection';
 import { IndustryChainPreview } from '@/components/industry-chain';
-import { ReadingPath } from '@/components/argument/ReadingPath';
 import { useSectionCounts } from '@/hooks/queries/useSectionCounts';
 import { sectionLabel } from '@/lib/sectionLabels';
 
@@ -84,18 +82,15 @@ const Index = () => {
         description="Finance, accounting, and green transition economics. Research and analysis by Dika Gustiana."
       />
 
-      {/* Hero */}
-      <HeroSection />
+      {/* THE MAP IS THE PAGE. It is the first thing under the header, and
+          nothing precedes it: no hero, no artwork, no argument block, no
+          reading path, no opening case. A reader meets the structure of
+          economic activity, picks the relation that interests them, and goes
+          to an essay for the depth. See docs/response-2026-09-14-v5/.
 
-      {/* The argument, and the finite path through it. Directly under the
-          hero because the hero's only call to action points here: a stranger
-          who gives this site three minutes should meet a bounded position
-          before they meet a list of subjects or a diagram. */}
-      <ReadingPath compact />
-
-      {/* The industry chain, in short — the second thing on the page. One
-          button (or either lens word) swaps in the full chain in place; the
-          About page carries the full chain from the start. */}
+          What was here before is not deleted, only moved off the entrance:
+          the argument and the reading path still exist and About still
+          carries them. */}
       <IndustryChainPreview />
 
       {/* Featured Analysis */}
@@ -106,12 +101,11 @@ const Index = () => {
               <h2 className="text-xl font-display font-semibold text-foreground mb-2">
                 Selected Analysis
               </h2>
-              {/* Says its own sort order. This strip is a browse surface and
-                  is ordered by recency; the ARGUMENT's order is editorial and
-                  lives above, in the reading path, where publishing an
-                  unrelated essay cannot reshuffle it. */}
+              {/* Says its own sort order. The sentence that used to follow
+                  it — "the ordered argument is above" — named a block that no
+                  longer precedes the map. */}
               <p className="text-sm text-muted-foreground">
-                Hand-picked across sections, newest first. The ordered argument is above.
+                Hand-picked across sections, newest first.
               </p>
             </div>
 
@@ -162,10 +156,9 @@ const Index = () => {
 
       {/* Sections list. id="sections", NOT "main-content": PageLayout's
           <main> already owns that id (the skip-link target), and the
-          duplicate made an in-page link resolve to the page top instead. The
-          hero now points at #the-argument rather than here; this stays a
-          named anchor because links to it exist. Each row IS the link; there
-          is no per-row call to action. */}
+          duplicate made an in-page link resolve to the page top instead. It
+          stays a named anchor because links to it exist. Each row IS the
+          link; there is no per-row call to action. */}
       <section id="sections" className="py-16 container">
         <div className="max-w-3xl mx-auto">
           <h2 className="text-2xl font-display font-semibold text-foreground mb-6">

@@ -24,13 +24,15 @@ import {
   BORDERS,
   BYPRODUCT,
   CHAIN_COPY,
-  COMPACT,
   DEFINE,
   JOINTS,
   LEVERS,
   MARGIN_KINDS,
   NODES,
   NON_PHYSICAL,
+  OVERVIEW_GROUPS,
+  OVERVIEW_HIDES,
+  OVERVIEW_INTERNAL_JOINTS,
   RETAIL,
   RETAIL_GROUP,
   RETURNS,
@@ -86,11 +88,11 @@ afterEach(() => {
 });
 
 describe('the column', () => {
-  it('replaces the plate: one column, no svg, the headline still first, nothing under it', () => {
+  it('replaces the plate: one column, no svg, the title still first, nothing under it', () => {
     mount(<ChainPlate links={[]} />);
-    expect(document.querySelectorAll('.cp-column[data-variant="full"]')).toHaveLength(1);
+    expect(document.querySelectorAll('.cp-column[data-level="detail"]')).toHaveLength(1);
     expect(document.querySelector('svg.cp-svg')).toBeNull();
-    expect(screen.getByRole('heading', { name: CHAIN_COPY.headline })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: CHAIN_COPY.title })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'How to read the map' })).not.toBeInTheDocument();
     expect(screen.queryByText('How the two distances relate')).not.toBeInTheDocument();
   });
@@ -149,7 +151,7 @@ describe('the column', () => {
     expect(screen.getByText('Trade credit · trade promotion · rebates')).toBeInTheDocument();
   });
 
-  it('lists the six layers as rows that open, with their span in words, and no chip word on a layer that only sets the terms', async () => {
+  it('lists every layer as a row that opens, with its span in words, and no chip word on a layer that only sets the terms', async () => {
     mount(<ChainPlate links={[]} />);
     const list = screen.getByRole('heading', { name: CHAIN_COPY.controls.layers }).parentElement!;
     for (const b of BANDS) expect(within(list).getByRole('button', { name: new RegExp(b.label) })).toHaveAttribute('aria-expanded', 'false');
@@ -159,9 +161,9 @@ describe('the column', () => {
     expect(within(list).queryByText('Terms')).not.toBeInTheDocument();
     expect(within(list).queryByText('Rules')).not.toBeInTheDocument();
 
-    const credit = within(list).getByRole('button', { name: /Credit and working capital/ });
+    const credit = within(list).getByRole('button', { name: /Working capital and trade credit/ });
     await userEvent.click(credit);
-    const panel = region('Credit and working capital');
+    const panel = region('Working capital and trade credit');
     expect(within(panel).getByText(BANDS.find((b) => b.id === 'band-credit')!.read.economy)).toBeInTheDocument();
     expect(credit).toHaveAttribute('aria-expanded', 'true');
     // The statement lines belong to the close reading; the column obeys the
@@ -172,9 +174,9 @@ describe('the column', () => {
     // is open: close, switch, reopen.
     await userEvent.click(screen.getByRole('button', { name: CHAIN_COPY.panel.close }));
     await userEvent.click(word('finance'));
-    await userEvent.click(screen.getByRole('button', { name: /Credit and working capital/ }));
+    await userEvent.click(screen.getByRole('button', { name: /Working capital and trade credit/ }));
     expect(
-      within(region('Credit and working capital')).getByText(/Finance income and finance cost/),
+      within(region('Working capital and trade credit')).getByText(/Finance income and finance cost/),
     ).toBeInTheDocument();
   });
 
@@ -270,19 +272,74 @@ describe('parity between the column and the wide plate', () => {
   });
 });
 
-describe('the short version on a narrow screen', () => {
-  it('draws exactly COMPACT — six stages, three groups, two layers, one return — with no doors', async () => {
+describe('the overview on a narrow screen', () => {
+  /**
+   * V5 asks the narrow layout to START from the existing column and reduce the
+   * initial detail by the SAME grouping rules the plate uses — not to become an
+   * article or a card per element. So this is the same column with two boxes
+   * grouped, one joint folded inside one of them, and everything else present:
+   * the joints still open, the layers still open, the marks still land.
+   */
+  it('is the same column with the same groups applied, not a different drawing', async () => {
     mount(<ChainPlate variant="preview" links={[]} />);
-    expect(document.querySelectorAll('.cp-column[data-variant="compact"]')).toHaveLength(1);
-    const expected = new Set<string>([...COMPACT.sequence.flatMap((s) => (s.kind === 'stages' ? s.ids : [s.id])), ...COMPACT.bands, COMPACT.returnArrow.id]);
-    expect(ids()).toEqual(expected);
-    for (const j of JOINTS) expect(screen.queryByRole('button', { name: j.label })).not.toBeInTheDocument();
-    expect(screen.getByText('Aggregator')).toBeInTheDocument();
-    expect(screen.getByText('Distribution / wholesale')).toBeInTheDocument();
+    expect(document.querySelectorAll('.cp-column[data-level="overview"]')).toHaveLength(1);
 
-    await userEvent.click(screen.getByRole('button', { name: CHAIN_COPY.controls.seeFull }));
-    expect(document.querySelectorAll('.cp-column[data-variant="full"]')).toHaveLength(1);
-    expect(screen.getByRole('button', { name: 'Aggregation → processing' })).toBeInTheDocument();
+    const drawn = ids();
+    for (const hidden of OVERVIEW_HIDES) expect(drawn.has(hidden), `overview draws ${hidden}`).toBe(false);
+    for (const g of Object.values(OVERVIEW_GROUPS)) {
+      if (g.id === 'group-retail') continue; // grouped into the retail node it already had
+      expect(drawn.has(g.id), `overview lacks ${g.id}`).toBe(true);
+      expect(screen.getByText(g.label)).toBeInTheDocument();
+    }
+
+    // Every stage, border, layer and by-product survives the grouping.
+    for (const st of STAGES) expect(drawn.has(st.id), st.id).toBe(true);
+    for (const b of BORDERS) expect(drawn.has(b.id), b.id).toBe(true);
+    for (const b of BANDS) expect(drawn.has(b.id), b.id).toBe(true);
+    expect(drawn.has(BYPRODUCT.id)).toBe(true);
+
+    // And the doors still open at the overview — which the old short column,
+    // with no joints and no layer list at all, could not do.
+    for (const j of JOINTS) {
+      const row = screen.queryByRole('button', { name: j.label });
+      if (OVERVIEW_INTERNAL_JOINTS.includes(j.id as (typeof OVERVIEW_INTERNAL_JOINTS)[number])) {
+        expect(row, `${j.id} is inside a group`).toBeNull();
+      } else {
+        expect(row, j.id).toHaveAttribute('aria-expanded', 'false');
+      }
+    }
+  });
+
+  it('leaves out the examples and the sub-formats, and puts them back on detail', async () => {
+    mount(<ChainPlate variant="preview" links={[]} />);
+    // The five retail formats are grouped into the retail node, which keeps
+    // its own name and both its joints.
+    for (const r of RETAIL) expect(screen.queryByText(r.label), r.id).not.toBeInTheDocument();
+    expect(document.querySelector(`[data-id="${RETAIL_GROUP.id}"]`)!.textContent).toContain(RETAIL_GROUP.label);
+    // The lanes into each origin and the components of demand are examples,
+    // not links in the chain.
+    for (const lane of STAGES.find((x) => x.id === 'stage-biological')!.lanes!) {
+      expect(screen.queryByText(new RegExp(lane)), lane).not.toBeInTheDocument();
+    }
+
+    await userEvent.click(screen.getAllByRole('button', { name: CHAIN_COPY.controls.seeFull })[0]);
+    expect(document.querySelectorAll('.cp-column[data-level="detail"]')).toHaveLength(1);
+    for (const r of RETAIL) expect(screen.getByText(r.label), r.id).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Distributor → wholesaler' })).toBeInTheDocument();
+  });
+
+  it('carries both overlays and both distances at the overview, because it has marks and chips to change', async () => {
+    mount(<ChainPlate variant="preview" links={[]} />);
+    await userEvent.click(word('green transition'));
+    expect(document.querySelectorAll('.cp-column[data-level="overview"]')).toHaveLength(1);
+    const lit = Array.from(document.querySelectorAll<HTMLElement>('[data-id][data-lit]')).map((el) => el.dataset.id!).sort();
+    expect(lit).toEqual(SHIFT_BY_ID.green.targets.map((t) => t.id).sort());
+
+    const joint = JOINTS.find((x) => x.id === 'j-wholesale-retail')!;
+    expect(screen.getByText(joint.read.economy.chip)).toBeInTheDocument();
+    await userEvent.click(word('finance'));
+    expect(screen.getByText(joint.read.finance.chip)).toBeInTheDocument();
+    expect(document.querySelectorAll('.cp-column[data-level="overview"]')).toHaveLength(1);
   });
 });
 
@@ -307,8 +364,27 @@ describe('a mark on a narrow screen', () => {
   it('renders the reading a shared address asks for, so a link made on the wide plate still lands on a phone', () => {
     window.history.replaceState({}, '', '/about?lens=green&node=recovery');
     mount(<ChainPlate links={[]} />);
-    expect(document.querySelector('.cp-column[data-variant="full"]')).not.toBeNull();
+    expect(document.querySelector('.cp-column[data-level="detail"]')).not.toBeNull();
     expect(region('Recovery')).toBeInTheDocument();
+  });
+
+  /**
+   * A link now lands at the level that can draw it. Recovery is on the
+   * overview, so a shared address opens there and stays there; the joint
+   * inside the distribution box is not, so that address opens the detail
+   * rather than a reading with no element under it.
+   */
+  it('stays at the overview for an element the overview draws, and opens the detail only for one it does not', () => {
+    window.history.replaceState({}, '', '/?lens=green&node=recovery');
+    const first = mount(<ChainPlate variant="preview" links={[]} />);
+    expect(document.querySelector('.cp-column[data-level="overview"]')).not.toBeNull();
+    expect(region('Recovery')).toBeInTheDocument();
+    first.unmount();
+
+    window.history.replaceState({}, '', '/?node=distributor-wholesaler');
+    mount(<ChainPlate variant="preview" links={[]} />);
+    expect(document.querySelector('.cp-column[data-level="detail"]')).not.toBeNull();
+    expect(region('Distributor → wholesaler')).toBeInTheDocument();
   });
 
   it('opens one reading per target, never two', async () => {

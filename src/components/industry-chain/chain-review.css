@@ -8,7 +8,10 @@
 .chain-plate .cp-reference summary{min-height:44px}
 .chain-plate .cp-text-money{border-left:2px dotted hsl(var(--muted-foreground));padding-left:12px}
 .chain-plate .cp-text-information{border-left:3px double hsl(var(--muted-foreground));padding-left:12px}
-.chain-plate .cp-column[data-variant="full"] :is(.text-xs,.text-\[12px\]){font-size:14px;line-height:1.5}
+/* Small type on a phone, at both levels. The bump used to apply only to the
+   full column because the short one carried nothing but box names; the
+   overview now carries chips, status words and layer rows like any map. */
+.chain-plate .cp-column :is(.text-xs,.text-\[12px\]){font-size:14px;line-height:1.5}
 .chain-plate .cp-column button{min-height:44px}
 .chain-plate .cp-column [data-id^="band-"] button{grid-template-columns:minmax(0,1fr);row-gap:6px}
 .chain-plate .cp-column [data-id^="band-"] button>span:last-child{justify-self:start}

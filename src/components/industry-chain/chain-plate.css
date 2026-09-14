@@ -73,7 +73,6 @@
 .cp-tick--fee{fill:hsl(var(--foreground));stroke:none}
 .cp-tick--terms{fill:hsl(var(--background));stroke:hsl(var(--foreground));stroke-width:1}
 .cp-tick--up{fill:none;stroke:hsl(var(--foreground));stroke-width:1.2}
-.cp-joint-motif{fill:hsl(var(--background));stroke:hsl(var(--foreground));stroke-width:1.5}
 
 /* The reading lane: one distance name shows, from the wrapper's data-lens. */
 .cp-lens-name{display:none}
