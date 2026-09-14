@@ -78,3 +78,15 @@ describe('error copy claims only what a failed fetch knows', () => {
     expect(offenders).toEqual([]);
   });
 });
+
+describe('share-card descriptions', () => {
+  it('collapses whitespace rather than carrying a newline into a meta attribute', async () => {
+    const { readFileSync } = await import('node:fs');
+    // Verified in production on 2026-09-14: one published essay's deck ends in
+    // a newline, and it appears inside the content attribute of five tags on
+    // https://www.dikagustiana.com/the-next-big-thing/economy/indonesias-reindustrialization-bet
+    // Both the runtime tags and the build-time ones now normalise it.
+    expect(readFileSync('src/components/SEO.tsx', 'utf-8')).toMatch(/description\.replace\(\/\\s\+\/g, ' '\)\.trim\(\)/);
+    expect(readFileSync('scripts/prerender.mjs', 'utf-8')).toMatch(/\.replace\(\/\\s\+\/g, ' '\)\.trim\(\)/);
+  });
+});

@@ -178,7 +178,13 @@ test('/about at 1280px: the marks are an index onto the overlay, the label pins 
   const region = page.getByRole('region', { name: 'Logistics and warehousing' });
   await expect(region).toBeVisible();
   await expect(region).toContainText('Reading · Green transition · Economy');
-  await expect(region.getByText('Stuck')).toBeVisible();
+  // `exact` matters now: getByText is a case-insensitive substring match, and
+  // the panel also explains what the status READS ON ("an element can be stuck
+  // and moving at once"), which the loose matcher picked up as a second hit.
+  await expect(region.getByText('Stuck', { exact: true })).toBeVisible();
+  // A mark is a promise of a diagnosis, and this one is a scenario. The panel
+  // has to say so before it says anything else.
+  await expect(region.locator('[data-basis="scenario"]')).toBeVisible();
   const near = await page.evaluate(() => {
     const m = document.querySelector('.cp-mark[data-mark="band-logistics"]')!.getBoundingClientRect();
     const p = document.querySelector('[data-chain-popover]')!.getBoundingClientRect();

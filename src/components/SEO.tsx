@@ -33,9 +33,14 @@ export function SEO({
   noindex = false,
 }: SEOProps) {
   const fullTitle = `${title} | ${SITE_NAME}`;
-  const truncatedDescription = description.length > 160
-    ? description.substring(0, 157) + '...'
-    : description;
+  // Whitespace collapsed before truncating, for the same reason the prerender
+  // does it: a deck typed with a trailing newline lands inside the content
+  // attribute of five tags, and a line break inside a share-card description
+  // is a rendering accident, not an editorial decision.
+  const cleanDescription = description.replace(/\s+/g, ' ').trim();
+  const truncatedDescription = cleanDescription.length > 160
+    ? cleanDescription.substring(0, 157) + '...'
+    : cleanDescription;
   // Crawlers reject relative og:image URLs — absolute, always.
   const absoluteImage = absoluteUrl(image);
   // Canonicalise to the PRODUCTION origin + path (no query/hash) — using
