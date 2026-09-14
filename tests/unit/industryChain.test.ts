@@ -515,6 +515,75 @@ describe('the definitions that replaced the legend', () => {
  * These tests hold the grouping to the one thing it must never do: change what
  * the map says exists, what connects to what, or what a margin is.
  */
+/**
+ * WHAT OPENS WHEN A READER CLICKS AN ELEMENT.
+ *
+ * It used to be four hundred words: the margin kind and its control test, the
+ * statement lines, the layers riding on the move, the four lines of a reading,
+ * the mechanism, who finances it, the funding-roles note, and the essays last,
+ * under all of it. That made the map the place the writing happened rather
+ * than the way into it.
+ *
+ * The owner’s rule is that a reader goes deeper into a relation THROUGH an
+ * essay. So a card is one paragraph and a door: the element read at the
+ * distance that is on, and the essay that argues it. Everything else is one
+ * disclosure below, unchanged.
+ */
+describe('the card a door opens', () => {
+  const words = (text: string) => text.trim().split(/\s+/).filter(Boolean).length;
+  const leads = () => [
+    ...JOINTS.flatMap((j) => LENSES.map((l) => [`${j.id} ${l}`, j.read[l].note] as const)),
+    ...BANDS.flatMap((b) => LENSES.map((l) => [`${b.id} ${l}`, b.read[l]] as const)),
+  ];
+
+  /**
+   * THE TARGET IS 25 TO 50 WORDS, and eight leads are outside it. All seven
+   * are the owner’s own prose: cutting an author’s sentences to fit a count,
+   * or padding one to reach it, is not a thing an implementation does quietly.
+   * They are named here so each is a known editorial item rather than a silent
+   * drift — and so a NEW lead cannot join them without being named too.
+   *
+   * The over-length ones matter more than the short one: a card that runs to
+   * ninety words is the wall the card replaced, arriving again.
+   */
+  const TOO_SHORT = new Set(['band-governance economy', 'band-regulation economy']);
+  const TO_BE_CUT = new Set([
+    'j-extraction-processing finance',
+    'j-retail-consumption finance',
+    'j-consumption-recovery finance',
+    'band-logistics finance',
+    'band-energy economy',
+    'band-energy finance',
+  ]);
+
+  it('gives every joint and every layer a lead of 25 to 50 words at both distances', () => {
+    for (const [key, text] of leads()) {
+      const n = words(text);
+      // Under any circumstances a lead is a paragraph, never a fragment.
+      expect(n, `${key} is a fragment`).toBeGreaterThanOrEqual(12);
+      if (TOO_SHORT.has(key)) continue;
+      if (TO_BE_CUT.has(key)) {
+        // Still long, and known to be. The guard here is that it has not GROWN.
+        expect(n, `${key} grew`).toBeLessThanOrEqual(95);
+        continue;
+      }
+      expect(n, `${key} is ${n} words; cut it, or name it with a reason`).toBeGreaterThanOrEqual(25);
+      expect(n, `${key} is ${n} words; cut it, or name it with a reason`).toBeLessThanOrEqual(50);
+    }
+  });
+
+  it('keeps the two lists honest: every name in them is real and still outside the target', () => {
+    expect(new Set(leads().filter(([, t]) => words(t) > 50).map(([k]) => k))).toEqual(TO_BE_CUT);
+    expect(new Set(leads().filter(([, t]) => words(t) < 25).map(([k]) => k))).toEqual(TOO_SHORT);
+  });
+
+  it('names the way deeper and the fold, and says plainly when nothing is written', () => {
+    expect(CHAIN_COPY.panel.articlesHeading.toLowerCase()).toContain('at length');
+    expect(CHAIN_COPY.panel.articlesNone.toLowerCase()).toContain('no essay');
+    expect(CHAIN_COPY.panel.readingDisclosure).toBeTruthy();
+  });
+});
+
 describe('the overview', () => {
   it('groups only nodes, and only into boxes whose members all resolve to records above', () => {
     const groups = Object.values(OVERVIEW_GROUPS);

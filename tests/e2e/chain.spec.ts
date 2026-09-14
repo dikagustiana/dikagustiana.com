@@ -96,8 +96,16 @@ test('/about at 1280px draws one wide plate whose names are readable, with every
   await page.getByRole('button', { name: 'Processing → trader / importer' }).click();
   const panel = page.getByRole('region', { name: 'Processing → trader / importer' });
   await expect(panel).toBeVisible();
-  await expect(panel.getByText(/^Conversion margin/)).toBeVisible();
   await expect(panel.getByRole('heading', { level: 3 })).toBeFocused();
+
+  // WHAT OPENS IS A CARD: one paragraph and a door into the writing. The
+  // margin kind, the statement lines and the layers riding on the move used to
+  // be the first thing a reader met; they are one disclosure below now.
+  await expect(panel.locator('[data-chain-lead]')).toBeVisible();
+  await expect(panel.locator('[data-chain-essays]')).toBeVisible();
+  await expect(panel.getByText(/^Conversion margin/)).toBeHidden();
+  await panel.getByText('The joint itself').click();
+  await expect(panel.getByText(/^Conversion margin/)).toBeVisible();
   // The reading sits inside the figure, beside its joint.
   const inside = await page.evaluate(() => {
     const f = document.querySelector('figure')!.getBoundingClientRect();
@@ -416,8 +424,14 @@ test('/ at 1280px: both distances, both overlays and every door but one act at t
   await page.locator('.cp-hit[data-id="band-energy"]').click();
   const reading = page.getByRole('region', { name: 'Energy' });
   await expect(reading).toBeVisible();
+  // The basis and the status stay ON the card: a mark that promises a
+  // diagnosis must say what kind of claim it is before anything is read.
   await expect(reading.locator('[data-basis="assessed"]')).toBeVisible();
-  // What the lever CANNOT do here is part of the mechanism, not a footnote.
+  await expect(reading.locator('[data-chain-lead]')).toBeVisible();
+  // What the lever CANNOT do here is part of the mechanism, not a footnote
+  // — it is inside the reading, which the card offers rather than dumps.
+  await expect(reading.locator('[data-mechanism="contract"]')).toBeHidden();
+  await reading.getByText('The reading in full').click();
   await expect(reading.locator('[data-mechanism="contract"]')).toBeVisible();
   await expect(page.locator('.chain-plate')).toHaveAttribute('data-level', 'overview');
 });

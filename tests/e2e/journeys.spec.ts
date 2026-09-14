@@ -201,11 +201,17 @@ test('map reading: the basis is declared, distance changes the work, and the sta
 
   const panel = page.getByRole('region', { name: 'Energy' });
   // A mark is a promise of a diagnosis; this one is the single assessed
-  // reading, and it says so before it says anything else.
+  // reading, and it says so before it says anything else. Basis and status
+  // are on the CARD, never behind its fold.
   await expect(panel.locator('[data-basis="assessed"]')).toBeVisible();
-  // The map can only draw a repricing. What moves this element is a contract.
-  await expect(panel.locator('[data-mechanism="contract"]')).toBeVisible();
+  // And the card leads where the depth actually is.
+  await expect(panel.locator('[data-chain-lead]')).toBeVisible();
   await expect(panel.getByRole('link', { name: /Reindustrialization Bet/i })).toBeVisible();
+
+  // The map can only draw a repricing. What moves this element is a contract
+  // — said inside the reading the card offers, not dumped in front of it.
+  await panel.getByText('The reading in full').click();
+  await expect(panel.locator('[data-mechanism="contract"]')).toBeVisible();
 
   const atEconomy = await panel.innerText();
   await page.getByRole('button', { name: 'finance', exact: true }).click();

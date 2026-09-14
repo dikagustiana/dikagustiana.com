@@ -44,6 +44,7 @@ import {
   type Condition,
   type ConditionStatus,
   type Joint,
+  type LensId,
   type MarginKind,
 } from '@/data/industryChain';
 import { fullDate } from '@/lib/formatDate';
@@ -143,13 +144,53 @@ function MarginBlock({ kind, note }: { kind: MarginKind; note?: string }) {
   );
 }
 
-/** The one reading that is on. The other distance is not shown: moving the control is how it is read. */
-function OneVoice({ text }: { text: string }) {
+/**
+ * THE CARD: what this element is, read at the distance that is on, and the
+ * essay that argues it. Nothing else.
+ *
+ * What this replaces: a panel that opened with four hundred words — the
+ * margin kind and its control test, the statement lines, the layers riding on
+ * the move, the four lines of a reading, the mechanism, who finances it, the
+ * funding-roles note — with the essays last, under all of it. A reader who
+ * clicked a joint got an encyclopedia entry, and the map became the place the
+ * writing happened instead of the way into it.
+ *
+ * The owner's rule is that a reader goes deeper into a relation THROUGH an
+ * essay. So the card is one paragraph and a door, and everything the panel
+ * used to say first is one disclosure below, unchanged.
+ */
+function Lead({ text }: { text: string }) {
   const { lens } = useContext(ChainLensContext);
   return (
-    <div className="mt-4" data-voice={lens}>
-      <h4 className={KICKER}>{CHAIN_COPY.lensName[lens]}</h4>
-      <p className="mt-1.5 text-sm text-foreground">{text}</p>
+    <p className="mt-3 text-sm leading-relaxed text-foreground" data-chain-lead data-voice={lens}>
+      {text}
+    </p>
+  );
+}
+
+/**
+ * The way deeper. Directly under the lead, because it is the point of the
+ * card; and honest when there is nothing there, because most of this map is
+ * not written up yet and a door that opens onto nothing is worse than a door
+ * that says so.
+ */
+function ReadAtLength({ articles }: { articles: readonly { slug: string; title: string }[] }) {
+  return (
+    <div className="mt-3" data-chain-essays>
+      <h4 className={KICKER}>{CHAIN_COPY.panel.articlesHeading}</h4>
+      {articles.length === 0 ? (
+        <p className="mt-1 text-sm text-muted-foreground">{CHAIN_COPY.panel.articlesNone}</p>
+      ) : (
+        <ul className="mt-1.5 space-y-1 text-sm">
+          {articles.map((a) => (
+            <li key={a.slug}>
+              <Link to={universalEssayUrl(a.slug)} className="text-foreground underline-offset-2 hover:text-accent hover:underline">
+                {a.title}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
@@ -179,7 +220,6 @@ function JointAnatomy({ joint }: { joint: Joint }) {
   return (
     <>
       <MarginBlock kind={joint.margin} note={joint.note} />
-      <OneVoice text={joint.read[lens].note} />
       {joint.alt && (
         <div className="mt-4">
           <h4 className={KICKER}>{CHAIN_COPY.panel.whenHeading}</h4>
@@ -240,7 +280,6 @@ function BandAnatomy({ band }: { band: Band }) {
           <p className="mt-1.5 text-sm text-foreground">{band.means}</p>
         </div>
       )}
-      <OneVoice text={band.read[lens]} />
       {band.shortages && (
         <div className="mt-4">
           <h4 className={KICKER}>{CHAIN_COPY.panel.shortagesHeading}</h4>
@@ -272,6 +311,20 @@ function Anatomy({ id }: { id: string }) {
   return band ? <BandAnatomy band={band} /> : null;
 }
 
+/**
+ * The card's paragraph: the element read at the distance that is on.
+ *
+ * Only the two DOORS have one, and that is not an omission. A joint and a
+ * layer are the two things this map claims to read; a stage or a node is a
+ * function the chain has, and what the map has to say about one under a shift
+ * is the reading, not a definition. So a marked stage gets its status, its
+ * basis and its essays, and no invented sentence about what a stage is.
+ */
+function leadFor(id: string, lens: LensId): string {
+  if (isJointId(id)) return JOINT_BY_ID[id].read[lens].note;
+  return BAND_BY_ID[id]?.read[lens] ?? '';
+}
+
 /** One of the four lines of a condition, in the voice that is on; nothing when the owner has not written it yet. */
 function ConditionLine({ heading, text, lead }: { heading: string; text: string; lead?: string }) {
   if (!text && !lead) return null;
@@ -288,39 +341,32 @@ function ConditionLine({ heading, text, lead }: { heading: string; text: string;
 }
 
 /**
- * The owner's reading: status, then the four lines in their fixed order, then
- * the essays. All in the voice that is on. The lever line always names the
- * lever, because which of the three levers moves an element is structure,
- * not diagnosis; what the lever does here is the owner's sentence.
+ * The owner's reading in full: the four lines in their fixed order, what the
+ * lever cannot do, and who pays. All in the voice that is on. The lever line
+ * always names the lever, because which of the three levers moves an element
+ * is structure, not diagnosis; what the lever does here is the owner's
+ * sentence.
  *
- * Two things the panel now says before the reading, and both are refusals.
+ * This sits behind a disclosure now, under the card. Two things do NOT, and
+ * both are refusals that would be dishonest to fold away:
  *
  *   BASIS. A mark is a promise of a diagnosis, and most of these marks are
  *   scenarios set from worked examples with their four lines unwritten. A
  *   panel that omitted the empty lines and said nothing else made sixteen
- *   illustrations look like sixteen findings — concise, and settled.
+ *   illustrations look like sixteen findings — concise, and settled. So the
+ *   card carries the basis label and what it means, before anything is read.
  *
  *   WHAT THE STATUS READS ON. Stuck, Moving and Unpriced measure an obstacle,
  *   an activity and a payment condition. They are not three values of one
- *   dial, and an element can be more than one at once.
+ *   dial, and an element can be more than one at once. That is on the card
+ *   too, beside the badge that would otherwise look like a rating.
  */
 function ConditionReading({ id, condition }: { id: string; condition: Condition }) {
-  const { shift, lens } = useContext(ChainLensContext);
-  const articles = shiftTarget(shift, id)?.articles ?? [];
+  const { lens } = useContext(ChainLensContext);
   const line = (note: typeof condition.now) => (isWritten(note, lens) ? note[lens] : '');
-  const basis = BASIS[condition.basis];
   const mechanism = condition.mechanism && condition.mechanism !== 'price' ? MECHANISMS[condition.mechanism] : null;
   return (
     <div data-condition={id} data-voice={lens}>
-      <div
-        className="mt-3 border-l-2 border-border pl-3"
-        data-basis={condition.basis}
-      >
-        <p className="text-[11px] font-semibold uppercase tracking-wider text-foreground">{basis.label}</p>
-        <p className="mt-0.5 text-sm text-muted-foreground">{basis.means}</p>
-      </div>
-      <p className="mt-3 text-sm text-foreground">{STATUS[condition.status].means}</p>
-      <p className="mt-1 text-sm text-muted-foreground">{STATUS[condition.status].reads}</p>
       <ConditionLine heading={CHAIN_COPY.panel.now} text={line(condition.now)} />
       <ConditionLine heading={CHAIN_COPY.panel.holds} text={line(condition.holds)} />
       <ConditionLine heading={CHAIN_COPY.panel.lever} lead={LEVERS[condition.lever].label} text={line(condition.action)} />
@@ -336,23 +382,6 @@ function ConditionReading({ id, condition }: { id: string; condition: Condition 
       {isWritten(condition.funds, lens) && (
         <p className="mt-1 pl-0 text-xs text-muted-foreground">{CHAIN_COPY.panel.fundsRoles}</p>
       )}
-      <div className="mt-4" data-shift-articles={id}>
-        <h4 className={KICKER}>{CHAIN_COPY.panel.articlesHeading}</h4>
-        {articles.length === 0 ? (
-          <p className="mt-1 text-sm text-muted-foreground">{CHAIN_COPY.panel.articlesNone}</p>
-        ) : (
-          <ul className="mt-1.5 space-y-1 text-sm">
-            {articles.map((a) => (
-              <li key={a.slug}>
-                <Link to={universalEssayUrl(a.slug)} className="text-foreground underline-offset-2 hover:text-accent hover:underline">
-                  {a.title}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-
       <p className="mt-4 border-t border-border pt-3 text-xs text-muted-foreground">
         {STATUS_NOTE} Reviewed {fullDate(CONDITION_AS_OF)}.
       </p>
@@ -388,6 +417,17 @@ export function ChainTargetPanel({
   const condition = target?.condition;
   const n = shift ? markNumber(shift, id) : 0;
   const reading = !!condition && n > 0;
+  // The card's one paragraph: what this element IS, read at the distance that
+  // is on. Same sentence whether a shift is on or not — a shift changes where
+  // the owner says the element stands, not what it is.
+  const lead = leadFor(id, lens);
+  // The essays that read this element. Under a shift the marked target names
+  // its own; otherwise the element's own, so a card always leads somewhere or
+  // says plainly that it does not.
+  // Under a shift, the marked target names its own essays. With no shift on
+  // there is nowhere in the data for an element to name one, so the card says
+  // so rather than pretending the door leads somewhere.
+  const articles = target?.articles ?? [];
 
   const kicker = reading
     ? `${CHAIN_COPY.panel.readingKicker} · ${SHIFT_BY_ID[shift!].label} · ${CHAIN_COPY.lensName[lens]}`
@@ -447,20 +487,43 @@ export function ChainTargetPanel({
 
       {children}
 
-      {reading && condition ? (
+      {/* THE CARD. A mark that promises a diagnosis says on the card what kind
+          of claim it is and what its status reads on: folding either away
+          would make a scenario look like a finding, which is the one thing
+          the condition layer must never do. */}
+      {reading && condition && (
         <>
-          <ConditionReading id={id} condition={condition} />
-          {door && (
-            <details className="mt-4 border-t border-border pt-3" data-anatomy={id}>
-              <summary className="cursor-pointer text-sm font-medium text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-                {joint ? CHAIN_COPY.panel.anatomyJoint : CHAIN_COPY.panel.anatomyLayer}
-              </summary>
-              <Anatomy id={id} />
-            </details>
-          )}
+          <div className="mt-3 border-l-2 border-border pl-3" data-basis={condition.basis}>
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-foreground">{BASIS[condition.basis].label}</p>
+            <p className="mt-0.5 text-sm text-muted-foreground">{BASIS[condition.basis].means}</p>
+          </div>
+          <p className="mt-3 text-sm text-foreground">{STATUS[condition.status].means}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{STATUS[condition.status].reads}</p>
         </>
+      )}
+
+      {lead && <Lead text={lead} />}
+      <ReadAtLength articles={articles} />
+
+      {/* Everything the panel used to open with, one disclosure down. */}
+      {reading && condition && (
+        <details className="mt-4 border-t border-border pt-3" data-chain-reading={id}>
+          <summary className="cursor-pointer text-sm font-medium text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+            {CHAIN_COPY.panel.readingDisclosure}
+          </summary>
+          <ConditionReading id={id} condition={condition} />
+        </details>
+      )}
+
+      {door ? (
+        <details className="mt-4 border-t border-border pt-3" data-anatomy={id}>
+          <summary className="cursor-pointer text-sm font-medium text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+            {joint ? CHAIN_COPY.panel.anatomyJoint : CHAIN_COPY.panel.anatomyLayer}
+          </summary>
+          <Anatomy id={id} />
+        </details>
       ) : (
-        <Anatomy id={id} />
+        !reading && <Anatomy id={id} />
       )}
 
       {joint && moduleSlugs.length > 0 && <ChainCurriculumList moduleSlugs={moduleSlugs} />}

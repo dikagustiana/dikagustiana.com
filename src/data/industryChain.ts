@@ -649,7 +649,7 @@ export const BANDS: Band[] = [
     // is the distinction a single "Finance" band could not have made.
     attaches: 'stages',
     means:
-      'Funds the assets a function needs before it can trade at all, and funds replacing them when they wear out. Priced off what the asset earns across its life rather than off a trading cycle, so it is committed for years and cannot be withdrawn at a quarter’s notice. Who provides it, who pays for it over that life, and who bears the loss if it fails are three separate questions and usually three separate parties.',
+      'Funds the assets a function needs before it can trade at all, and funds replacing them when they wear out. Priced off what the asset earns across its life rather than off a trading cycle, so it is committed for years and cannot be withdrawn at a quarter’s notice. Who provides it, who pays for it over that life, and who bears the loss if it fails are three separate questions and usually three separate parties. An asset that ramps can miss debt service on sound lifetime returns; that is a timing problem and it needs a timing instrument — grace, sculpted amortisation, a reinvestment facility held outside senior maturity — not more subsidy. A guarantee or a concession moves who carries the risk of building; it does not make the risk disappear.',
     lines: [
       'Property, plant and equipment — and the depreciation that spreads it across the output it makes possible',
       'Long-term borrowings and equity; where the state participates, concessional or guaranteed capital',
@@ -657,9 +657,9 @@ export const BANDS: Band[] = [
     ],
     read: {
       economy:
-        'Where capacity comes from. An economy can only run the functions somebody has already built, so the terms on which this money is available decide which parts of the chain can exist and at what scale. A guarantee or a concession moves who carries the risk of building; it does not make the risk disappear.',
+        'Where capacity comes from. An economy can only run the functions somebody has already built, so the terms on which this money is available decide which parts of the chain can exist, and at what scale.',
       finance:
-        'What is sold here is money committed for the life of an asset, priced off the coverage that asset is expected to produce rather than off a cash conversion cycle. So it fails differently from the band below it: an asset with sound lifetime returns can still miss debt service in its first years while it ramps. That is a timing problem and it needs a timing instrument — grace, sculpted amortisation, a reinvestment facility held outside senior maturity — not more subsidy.',
+        'What is sold here is money committed for the life of an asset, priced off the coverage that asset will produce rather than off a trading cycle. It fails differently from the band above it: sound lifetime returns can still miss debt service while the asset ramps.',
     },
   },
   {
@@ -1910,8 +1910,21 @@ export const CHAIN_COPY = {
       'Capital provider, payer over the asset\u2019s life, and loss bearer are three roles and usually three parties. A guarantee moves the third; it does not remove it.',
     /** Where one layer is really several constraints. */
     shortagesHeading: 'Three different shortages inside this layer',
-    articlesHeading: 'Read this in the essays',
+    /**
+     * THE WAY DEEPER IS AN ESSAY, and it sits directly under the card rather
+     * than at the bottom of four hundred words. A reader who opens an element
+     * gets what it is, in a breath, and a door into the piece that argues it.
+     */
+    articlesHeading: 'Read this at length',
     articlesNone: 'No essay reads this yet.',
+    /**
+     * What the card holds back, named so the fold is a promise rather than a
+     * mystery. The reading is the owner's diagnosis of where this element
+     * stands: four lines in a fixed order, what the lever cannot do, and who
+     * pays. Its basis and its status are NOT behind this — a mark that
+     * promises a diagnosis must say on the card what kind of claim it is.
+     */
+    readingDisclosure: 'The reading in full',
     /** The anatomy of a joint or a layer, folded under its reading while a shift is on. */
     anatomyJoint: 'The joint itself',
     anatomyLayer: 'The layer itself',
