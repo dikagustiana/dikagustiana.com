@@ -4,8 +4,9 @@ Version 5 · 14 September 2026 · branch `claude/kind-hopper-3nhkce`, from `058b
 
 Four commits: `0e2dc7e`, `543fb40`, `abdf3a5`, `78059d3`.
 
-Companion records: `decisions.md` (what the owner decided and what it supersedes) and
-`overview-map.md` (every element at both levels, with the grouping rules).
+Companion records: `decisions.md` (what the owner decided and what it supersedes),
+`overview-map.md` (every element at both levels, with the grouping rules) and
+`linking-into-the-map.md` (the address contract, for the author writing an essay).
 
 ---
 
@@ -57,11 +58,17 @@ used to open with is one disclosure below, unchanged and in the same order.
 Two things stay on the card and are not folded, because folding either would be dishonest: the
 BASIS (assessed or scenario) and what the STATUS reads on.
 
-### The address
+### The address, and the essay that links to it
 
 Live at both levels. It used to be written only once the preview was expanded, because the short
 plate had no state worth sharing. A plain visit still writes nothing; the only address that opens
 the detail is one naming an element the grouping folds away.
+
+That is the map — essay direction. The essay — map direction is an editorial act, and essay
+bodies are CMS content this pass may not publish, so what is delivered for it is the reference
+the author needs: `linking-into-the-map.md` gives every slug, what each opens and when, and
+which level a link to it lands on. Its two worked examples and its three refusals are held by
+`tests/e2e/mapLinks.spec.ts` in a real browser, so the guide cannot go stale without a red.
 
 ---
 
