@@ -104,11 +104,14 @@ describe('ChainPlate at rest', () => {
     expect(document.querySelector('[data-chain-readout]')).toBeNull();
     expect(document.querySelector('[data-chain-reference]')).toBeNull();
     expect(screen.queryByText(/Select a joint to read the margin/)).not.toBeInTheDocument();
-    // The footnote became one line over the map.
-    expect(document.querySelector('[data-chain-scope]')!.textContent).toContain('principal from agent');
-    // The figure is the last thing in the component on About: nothing follows it.
+    // The footnote became one line, and it sits UNDER the map now: it is a
+    // caveat about a drawing, and it used to stand above the drawing it was
+    // about. Nothing else follows the figure at rest.
     const figure = document.querySelector('figure')!;
-    expect(figure.nextElementSibling).toBeNull();
+    const scope = document.querySelector('[data-chain-scope]')!;
+    expect(scope.textContent).toContain('principal from agent');
+    expect(figure.nextElementSibling).toBe(scope);
+    expect(scope.nextElementSibling).toBeNull();
   });
 
   it('gives every layer its own switch, on by default, that fades the band without removing it', async () => {

@@ -1947,9 +1947,14 @@ export const CHAIN_COPY = {
     noShift: 'No shift',
     seeFull: 'Show the detail',
     seeCompact: 'Back to the overview',
-    /** What the level control does, and the two things it does not do. */
-    levelNote:
-      'Detail un-groups: the retail formats, the distributor and the wholesaler, the example lanes into each origin and the components of demand. It adds no relation, and it does not change the distance or the scenario.',
+    /**
+     * What the level control does, and the two things it does not do, in one
+     * line. It used to list the four things detail un-groups; a reader finds
+     * that out by pressing the control, and the list was a third grey
+     * paragraph standing between them and the drawing. The GUARANTEE is what
+     * cannot be found out by pressing, so the guarantee is what stays.
+     */
+    levelNote: 'Detail un-groups. It adds no relation, and changes neither the distance nor the scenario.',
     /**
      * Above the two distance words inside the narrow reading sheet. On a phone
      * the reading is a modal sheet and the distance control sat outside it, so

@@ -654,7 +654,9 @@ describe('the overview', () => {
     const note = CHAIN_COPY.controls.levelNote.toLowerCase();
     expect(note).toContain('un-group');
     expect(note).toContain('adds no relation');
-    expect(note).toMatch(/does not change the distance/);
+    expect(note).toMatch(/neither the distance nor the scenario/);
+    // One line, not a third grey paragraph between the reader and the map.
+    expect(CHAIN_COPY.controls.levelNote.split(/\s+/).length).toBeLessThanOrEqual(20);
     expect(CHAIN_COPY.controls.seeFull.toLowerCase()).toContain('detail');
     expect(CHAIN_COPY.controls.seeCompact.toLowerCase()).toContain('overview');
   });

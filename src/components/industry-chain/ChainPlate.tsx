@@ -584,12 +584,18 @@ export function ChainPlate({
           </p>
         )}
 
-        <p className="mt-3 text-sm leading-relaxed text-muted-foreground" data-chain-doors>
-          {CHAIN_COPY.doorsLead}
-        </p>
-        <p className="mt-2 text-sm leading-relaxed text-muted-foreground" data-chain-scope>
-          {CHAIN_COPY.scopeLead}
-        </p>
+        {/* WHICH SHAPES OPEN — on the plate, where a hundred paths look alike
+            and a reader with no pointer has no way to sweep for the four that
+            react. The column has no such problem: its doors are rows with a
+            chip and a diamond, and they are the only things in it that can be
+            pressed. So this is said where it is needed and nowhere else,
+            because three paragraphs of grey between a reader and the map is
+            the wall the map replaced. */}
+        {wideScreen && (
+          <p className="mt-3 text-sm leading-relaxed text-muted-foreground" data-chain-doors>
+            {CHAIN_COPY.doorsLead}
+          </p>
+        )}
         {/* What the level control does, where the level control is. */}
         {variant === 'preview' && (
           <p className="mt-2 text-sm leading-relaxed text-muted-foreground" data-chain-level-note>
@@ -625,6 +631,14 @@ export function ChainPlate({
             </ChainPopover>
           )}
         </figure>
+
+        {/* WHAT THIS MAP IS OF, under the map. It used to sit above it, where
+            it was a caveat about a drawing the reader had not seen yet; the
+            question it answers — are these firms? is this route the only one?
+            — is one a reader asks after looking. */}
+        <p className="mt-4 max-w-3xl text-sm leading-relaxed text-muted-foreground" data-chain-scope>
+          {CHAIN_COPY.scopeLead}
+        </p>
 
         {/* A phone has no hover and no room beside a row: a reading opens as a bottom sheet. */}
         {!wideScreen && (

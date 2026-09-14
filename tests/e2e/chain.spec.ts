@@ -77,8 +77,12 @@ test('/about at 1280px draws one wide plate whose names are readable, with every
   // rather than drawn as a legend — a reader without a pointer to sweep with
   // cannot discover them by moving one around.
   await expect(page.locator('[data-chain-doors]')).toContainText('Two things open');
-  // Nothing under the plate: the figure is the last child of the component.
-  expect(await page.locator('.chain-plate > figure + *').count()).toBe(0);
+  // Nothing under the plate but the one-line scope caveat, which moved there
+  // from above it: it is a caveat about a drawing, and it used to stand in
+  // front of the drawing it was about.
+  const under = page.locator('.chain-plate > figure ~ *');
+  await expect(under).toHaveCount(1);
+  await expect(under).toHaveAttribute('data-chain-scope');
 
   // Type: 18 viewBox units on a plate that is W wide, drawn at its rendered width.
   const scale = await page.locator('svg.cp-svg--wide').evaluate((svg) => {
@@ -435,6 +439,40 @@ test('/ at 1280px: both distances, both overlays and every door but one act at t
   await expect(reading.locator('[data-mechanism="contract"]')).toBeVisible();
   await expect(page.locator('.chain-plate')).toHaveAttribute('data-level', 'overview');
 });
+
+/**
+ * THE MAP IS NOT PROSE, so the figure does not keep the prose measure.
+ *
+ * Measured on 14 September 2026: the site container caps content at 1336px
+ * and the detail plate’ viewBox is 1717 units wide, so a browser drew it at
+ * 0.71 scale and its fourteen-unit labels landed at 9.9 CSS px — on a display
+ * with 280px of empty margin on either side of it. The figure now takes the
+ * width it can use. What that must never do is give the PAGE a sideways
+ * scroll, which is what a breakout done with vw units and no scrollbar
+ * allowance does.
+ */
+for (const width of [1440, 1600, 1920]) {
+  test(`the figure uses the width it can at ${width}px, and the page still never scrolls sideways`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 1000 });
+    await open(page, '/');
+    const [figure, container] = await Promise.all([
+      page.locator('.chain-plate > figure').evaluate((el) => el.getBoundingClientRect().width),
+      page.locator('.chain-plate').evaluate((el) => el.getBoundingClientRect().width),
+    ]);
+    expect(figure, 'the figure is wider than the prose it sits in').toBeGreaterThan(container);
+    expect(figure, 'and never wider than the viewport').toBeLessThanOrEqual(width);
+    expect(await scrollWidth(page)).toBeLessThanOrEqual(width);
+
+    // And the labels grow with it: on a display this wide the stage names are
+    // at or above the fourteen-pixel target the brief asks for.
+    const px = await page.locator('svg.cp-svg .cp-stage-t').first().evaluate((t) => {
+      const svg = t.closest('svg')!;
+      const scale = svg.getBoundingClientRect().width / svg.viewBox.baseVal.width;
+      return parseFloat(getComputedStyle(t).fontSize) * scale;
+    });
+    expect(px, `stage labels at ${width}px`).toBeGreaterThanOrEqual(14);
+  });
+}
 
 /**
  * U05, in a real browser and across a real page load: version 2 wrote the

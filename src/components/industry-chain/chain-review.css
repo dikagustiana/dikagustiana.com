@@ -22,3 +22,30 @@
 @media (prefers-reduced-motion:reduce){
   .chain-plate *{scroll-behavior:auto;transition:none!important}
 }
+
+/* THE MAP IS NOT PROSE, so it does not keep the prose measure.
+   Measured on 14 September 2026: the site container caps content at 1336px,
+   and the detail plate's viewBox is 1717 units wide, so the browser drew it at
+   0.71–0.78 scale and its 14-unit labels landed at 9.9–11.3 CSS px — while a
+   1600 or 1920 display left 280px of empty margin on each side of it. The
+   header keeps the measure; the figure takes the width it can use.
+   Capped at 1760 (a little over the detail plate's own width, so it never
+   upscales far) and at the viewport less 3rem, which leaves room for a
+   classic scrollbar — the no-sideways-scroll tests hold this to it. */
+@media (min-width: 1280px) {
+  .chain-plate > figure {
+    --cp-figure: min(100vw - 3rem, 1760px);
+    width: var(--cp-figure);
+    margin-inline: calc((100% - var(--cp-figure)) / 2);
+  }
+}
+
+/* Uppercase kickers and chips in the narrow layout and in the reading beside
+   or under it. Measured on 14 September 2026: eleven of them rendered at 10
+   and 11 CSS px on a 360px screen. Letter-spaced small caps at that size are
+   the first thing to go at arm's length, and they are the labels that say
+   what kind of thing a reader is looking at. 12.5px with the tracking they
+   already carry reads; the target for body labels stays 14. */
+.chain-plate .cp-column :is(.text-\[10px\],.text-\[11px\]),
+.chain-plate [data-chain-sheet] :is(.text-\[10px\],.text-\[11px\]),
+.chain-plate [data-chain-popover] :is(.text-\[10px\],.text-\[11px\]){font-size:12.5px}

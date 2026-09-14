@@ -159,7 +159,12 @@ function plate(level) {
   const T_STAGE = 18, T_NODE = 15, T_SMALL = 14;
   /* The one layout decision: how many characters a line may hold in each
      column. The words themselves always come from the data file. */
-  const CHARS = { org: 10, agg: 12, proc: 10, trad: 18, mfg: 14, dist: 12, recur: 18, ret: 14, cons: 12, demand: 15, lane: 13 };
+  // Characters per line, per column, tuned so a label wraps where it reads
+  // rather than where the box happens to end. `dist` is wider at the overview
+  // because the group's name is longer than either member's: twelve characters
+  // split "Distribution and wholesale" into three lines inside a pill built
+  // for one.
+  const CHARS = { org: 10, agg: 12, proc: 10, trad: 18, mfg: 14, dist: OV ? 17 : 12, recur: 18, ret: 14, cons: 12, demand: 15, lane: 13 };
   const lines = (id, max) => wrap(label(id), max);
   const boxW = (ls, size, pad = 24) => Math.ceil(Math.max(...ls.map((l) => est(l, size, 0.6))) + pad);
 
@@ -193,7 +198,9 @@ function plate(level) {
     // On detail the retail node holds its formats as rows, so it is as wide as
     // the widest row plus its padding. On the overview it is a node like any
     // other, as wide as its own name.
-    ret: Math.max(...L.ret.map((ls) => boxW(ls, T_SMALL, 36)), boxW([RETAIL_GROUP.label], T_NODE)),
+    ret: OV
+      ? Math.max(boxW([RETAIL_GROUP.label], T_NODE), boxW([RETAIL_GROUP.note], T_SMALL, 28))
+      : Math.max(...L.ret.map((ls) => boxW(ls, T_SMALL, 36)), boxW([RETAIL_GROUP.label], T_NODE)),
     cons: Math.max(boxW(L.cons, T_STAGE), boxW(L.rec, T_STAGE), ...L.demand.map((ls) => boxW(ls, T_SMALL) + 21)),
   };
 
@@ -229,7 +236,7 @@ function plate(level) {
      ON the axis at the overview. The joint between them is real either way;
      at the overview it is internal to the group and is not drawn, which is
      the only joint the grouping removes. */
-  const distH = 34;
+  const distH = 34 + (L.dist.length - 1) * 16;
   const distY = OV ? AX : 240, wholY = OV ? AX : 372;
   /* The retail node: on detail a kicker and one row per format, each as tall
      as its wrapped label; at the overview a node the size of its own name. */
