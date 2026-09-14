@@ -558,6 +558,13 @@ export interface Band {
   lines: string[];
   /** The layer read from far and from close. */
   read: LensNote;
+  /**
+   * Distinct shortages inside one layer, where reading the layer as a single
+   * price would merge them. Only energy carries these today; the field sits on
+   * the interface rather than being special-cased because any layer that is
+   * really several constraints at once can use it.
+   */
+  shortages?: readonly { label: string; means: string }[];
 }
 
 export const BANDS: Band[] = [
@@ -570,7 +577,7 @@ export const BANDS: Band[] = [
     margin: 'service-fee',
     attaches: 'joints',
     means:
-      'Moves and holds the goods without ever owning them, so the next function gets them in the right place, at the right time and at the right temperature. It attaches at every move and injects a cost, an energy use and an emission into each one — a floor under the unit that no single stage can remove — and it weighs most where the drops are smallest and the cold chain is unbroken.',
+      'Moves and holds the goods without ever owning them, so the next function gets them in the right place, at the right time and at the right temperature. It attaches at every move and injects a cost, an energy use and an emission into each one \u2014 a floor under the unit that no single stage can remove, for a given fleet and drop pattern \u2014 and it weighs most where the drops are smallest and the cold chain is unbroken.',
     lines: [
       'Freight and warehousing service revenue — gross when the provider controls its service; net commission when acting as an agent',
       'Freight-out, warehouse rent and handling — at the user, inside cost to serve',
@@ -644,10 +651,20 @@ export const BANDS: Band[] = [
     ],
     read: {
       economy:
-        'Energy intensity, stage by stage — heaviest in extraction and primary processing. Where the state pays part of the price, the subsidy is a fiscal line every stage draws on.',
+        'Energy intensity, stage by stage \u2014 heaviest in extraction and primary processing. Where the state pays part of the price, the subsidy is a fiscal line every stage draws on. Read as a price, this layer hides three different shortages: whether the electricity exists at all (generation), whether the network can carry it to where the plant is (network capacity), and whether the plant can attach to that network on a workable timetable (connection). Only the first is usually counted, and a stage can be short of the third while the first two are adequate.',
       finance:
-        'What is sold here is heat, motion and light: every conversion needs them and none makes them. Fuel and power sit inside cost of sales at every stage, at a price set outside the chain, so a change is passed on or absorbed in the conversion margin.',
+        'What is sold here is heat, motion and light: every conversion needs them and none makes them. Fuel and power sit inside cost of sales at every stage, at a price set outside the chain, so a change is passed on or absorbed in the conversion margin. The exception is where a stage builds its own supply: a captive plant moves energy out of cost of sales and into the capital structure, sized to the process and contracted for its life, which is a different exposure with a different remedy.',
     },
+    /**
+     * The three shortages, named so a reading can say which one it means.
+     * "Energy" used as one word lets a connection problem be answered with a
+     * tariff, and a network problem with a subsidy.
+     */
+    shortages: [
+      { label: 'Generation', means: 'The electricity does not exist, or not firm and not clean.' },
+      { label: 'Network capacity', means: 'It exists but the network cannot carry it to where the demand is.' },
+      { label: 'Connection', means: 'Both exist and the plant still cannot attach on a timetable its financing survives.' },
+    ],
   },
   {
     id: 'band-governance',
@@ -829,13 +846,30 @@ export const FLOW_KIND_LABELS: Record<FlowKind, string> = { money: 'Money', info
 /* ── Shifts: the chain in motion, as an overlay ──────────────────────────── */
 
 /**
- * There are exactly three levers that move the chain, and the two shifts on
- * the map pull them. A shift never redraws the chain: it marks the elements
- * it moves, gives each a status and a reading, adds an arrow where a cut
- * moves or a price arrives, and reads differently at each distance. The two
- * shifts are exclusive — hilirisasi and the green transition can compete for
- * fiscal space, energy and export earnings — so the map never shows them
- * together, which would imply the two are compatible.
+ * Three levers the map can DRAW, and they are not a theory of how industry
+ * changes.
+ *
+ * Each of the three corresponds to something the drawing can show happening:
+ * a cut moving along the chain, a price arriving at a joint that had none, a
+ * price every stage pays changing at once. That is a property of the diagram,
+ * not a claim about mechanisms, and the distinction matters because the field
+ * expects a price answer to every question and the map would supply one.
+ *
+ * Things that move a chain and are NOT any of these three: building capacity
+ * that does not exist, changing the terms of a contract that already exists,
+ * changing who holds the right to operate an asset, and moving who bears a
+ * risk. Each can change a price WITHOUT being a repricing, and forcing one of
+ * them into `reprice-layer` mislabels the mechanism. `MECHANISMS` below names
+ * them so a reading can say which one is actually at work; the lever stays as
+ * the thing the map draws.
+ *
+ * A shift never redraws the chain: it marks the elements it moves, gives each
+ * a status and a reading, adds an arrow where a cut moves or a price arrives,
+ * and reads differently at each distance. The two shifts are exclusive in this
+ * interface — hilirisasi and the green transition can compete for fiscal
+ * space, energy and export earnings — so the map never shows them together,
+ * which would imply the two are compatible. Where they pull against each
+ * other, `TENSIONS` says so in words rather than by overlaying them.
  */
 export type LeverId = 'move-border' | 'price-unpaid-joint' | 'reprice-layer';
 
@@ -863,13 +897,49 @@ export const LEVERS: Record<LeverId, Lever> = {
   },
 };
 
+/**
+ * What is actually doing the work at an element, which is often not the lever
+ * the map draws. `price` is the honest answer only when the thing that moves
+ * is a price; the other four are what the three levers cannot express.
+ */
+export type MechanismId = 'price' | 'capacity' | 'contract' | 'operating-rights' | 'risk-allocation';
+
+export const MECHANISMS: Record<MechanismId, { label: string; means: string }> = {
+  price: { label: 'A price changes', means: 'The amount paid at this transfer, or for this layer, is what moves.' },
+  capacity: {
+    label: 'Capacity is built',
+    means: 'The physical ability to produce, carry, store or connect does not exist at the required scale and has to be built. A price signal can prompt it; it cannot substitute for it.',
+  },
+  contract: {
+    label: 'A contract is renegotiated',
+    means: 'The asset and the price exist, but the terms binding them — tenor, take-or-pay, exclusivity, dispatch priority — prevent the change. Inflexibility is not scarcity.',
+  },
+  'operating-rights': {
+    label: 'Operating rights move',
+    means: 'Who is permitted to run, connect to or sell from an asset changes. The asset need not change at all.',
+  },
+  'risk-allocation': {
+    label: 'Risk moves to another party',
+    means: 'A guarantee, an offtake or a subordinated tranche moves who bears a loss. The risk does not disappear; the party holding it changes, and so does the price of capital.',
+  },
+};
+
 export type ShiftId = 'reindustrialisation' | 'green';
 
 /* ── Condition: where a marked element stands ────────────────────────────── */
 
 /**
- * Three statuses, and only three. A status is read without a click, so it is
- * told by FORM — a filled disc, an open disc, a dashed disc on the mark; a
+ * Three statuses — and they are NOT three positions on one dial.
+ *
+ * Stuck reads an obstacle, Moving reads activity, Unpriced reads a payment
+ * condition. Those are three different dimensions, and an element can be more
+ * than one at once: a joint can carry no price AND have an investment under
+ * way, and one that is moving can still be what holds the shift back. So a
+ * mark does not report a measurement. It shows THE ONE CONDITION THE AUTHOR
+ * JUDGED MOST DECISIVE for this shift at this element, and the panel says
+ * which dimension that is and on what basis the judgment was made.
+ *
+ * Told by FORM — a filled disc, an open disc, a dashed disc on the mark; a
  * heavy, a plain, a dashed outline on the element — and never by colour
  * alone. The words are the brief's: macet, sedang bergerak, belum berharga.
  */
@@ -880,15 +950,73 @@ export interface StatusInfo {
   label: string;
   /** One line: what the status claims about the element. */
   means: string;
+  /** Which dimension it reads on. Three dimensions, not three values of one. */
+  reads: string;
   /** The form of the mark and the outline, so the status reads without colour. */
   form: 'filled' | 'open' | 'dashed';
 }
 
 export const STATUS: Record<ConditionStatus, StatusInfo> = {
-  stuck: { id: 'stuck', label: 'Stuck', means: 'This element is what holds the shift back.', form: 'filled' },
-  moving: { id: 'moving', label: 'Moving', means: 'A policy or an investment is already under way here.', form: 'open' },
-  unpriced: { id: 'unpriced', label: 'Unpriced', means: 'This joint carries no price yet; economically it does not exist.', form: 'dashed' },
+  stuck: {
+    id: 'stuck',
+    label: 'Stuck',
+    means: 'Of the things that could hold this shift back here, this element is the one the author judges decisive.',
+    reads: 'Obstacle. It does not claim nothing is happening here, and an element can be stuck and moving at once.',
+    form: 'filled',
+  },
+  moving: {
+    id: 'moving',
+    label: 'Moving',
+    means: 'A policy or an investment is already under way at this element.',
+    reads: 'Activity, and activity has a direction. Moving does not mean moving the right way, and it does not mean the element has stopped being a constraint.',
+    form: 'open',
+  },
+  unpriced: {
+    id: 'unpriced',
+    label: 'Unpriced',
+    means: 'No money changes hands at this transfer, so nothing here is measured as a transaction.',
+    reads:
+      'A payment condition, not an existence claim. Unpriced activity is real, it is within the national-accounts production boundary, and it is often someone\u2019s livelihood \u2014 it is simply not counted where a price would be.',
+    form: 'dashed',
+  },
 };
+
+/**
+ * The one thing a status does NOT say, said once rather than three times.
+ */
+export const STATUS_NOTE =
+  'These three read different things \u2014 an obstacle, an activity, a payment condition \u2014 so they are not exclusive and not a scale. A mark shows the condition selected as most decisive for this shift at this element, not a measurement of it.';
+
+/**
+ * How a status was arrived at.
+ *
+ * `scenario` is the default and the honest label for most of this map: the
+ * status was set from the brief’s own worked examples and from the reading
+ * already written for the element, not from evidence about a present
+ * condition. `assessed` is reserved for an element whose four lines are
+ * written and whose claim can be checked against a named source.
+ *
+ * The distinction is the whole point. A status that implies an empirical
+ * present condition needs evidence appropriate to that claim, and a map that
+ * cannot tell the two apart makes sixteen scenarios look like sixteen
+ * findings.
+ */
+export type ConditionBasis = 'assessed' | 'scenario';
+
+export const BASIS: Record<ConditionBasis, { label: string; means: string }> = {
+  assessed: {
+    label: 'Assessed',
+    means: 'Read against a specific case, with the essay that carries the evidence linked below.',
+  },
+  scenario: {
+    label: 'Scenario',
+    means:
+      'A worked illustration of how this element would behave under the shift, not a finding about where it stands today. Nothing has been checked against a source, and the lines the reading would need are unwritten.',
+  },
+};
+
+/** When the condition layer’s readings were last reviewed. An undated standing claim is undated, not timeless. */
+export const CONDITION_AS_OF = '2026-09-14';
 
 /** A slot the owner has not written yet. The panel omits it; `grep UNWRITTEN` lists the work. */
 export const UNWRITTEN: LensNote = { economy: '', finance: '' };
@@ -911,11 +1039,28 @@ export const UNWRITTEN: LensNote = { economy: '', finance: '' };
  */
 export interface Condition {
   status: ConditionStatus;
+  /**
+   * Whether this is a finding or an illustration. REQUIRED: the field exists
+   * so that the answer cannot be left to the reader's assumption, and the
+   * assumption a mark invites is "assessed".
+   */
+  basis: ConditionBasis;
   now: LensNote;
   holds: LensNote;
   lever: LeverId;
+  /**
+   * What is actually doing the work here, when it is not the lever the map
+   * draws. Omitted means `price` — the lever and the mechanism agree.
+   */
+  mechanism?: MechanismId;
   /** What the lever does at this element. */
   action: LensNote;
+  /**
+   * Who finances the move. Three different roles, and they are usually
+   * different parties: who provides the capital, who pays for it over the
+   * asset's life, and who bears the loss if it fails. A reading that names
+   * only the first has answered the easiest third of the question.
+   */
   funds: LensNote;
 }
 
@@ -967,12 +1112,23 @@ export interface ShiftCallout {
   label: string;
 }
 
+export interface ShiftCriterion {
+  label: string;
+  means: string;
+  /** An evidenced or clearly-labelled hypothetical case where the shift succeeds on the map and fails on the motive. */
+  counterexample: string;
+  /** The author decision this shift forces and that nothing here settles. */
+  unresolved: string;
+}
+
 export interface Shift {
   id: ShiftId;
   label: string;
   /** The word in the sentence that is the control. */
   word: string;
   levers: LeverId[];
+  /** What the shift is FOR, where that is not the same as what the map measures. */
+  criterion?: ShiftCriterion;
   /**
    * The shift as a whole, read from far and from close. Not drawn under the
    * About plate any more — nothing is — but kept as the frame text the
@@ -1002,15 +1158,36 @@ export const SHIFTS: Shift[] = [
     levers: ['move-border'],
     read: {
       economy:
-        'Follow a downstreaming scenario: more processing takes place before export, bringing domestic value added into view. Imported equipment and inputs can offset foreign-exchange gains, especially while plants are built. The result depends on domestic capability, energy use and demand for the processed product.',
+        'Follow a downstreaming scenario: more processing takes place before export, bringing domestic value added into view. Imported equipment and inputs can offset foreign-exchange gains, especially while plants are built. The result depends on domestic capability, energy use and demand for the processed product. Note what this overlay can and cannot show: moving the border cut is ONE mechanism of reindustrialisation, and reindustrialisation is a wider agenda \u2014 industrial capability, diversification, productivity, better work \u2014 that a border cut does not stand in for.',
       finance:
         'Does the domestic processing margin justify capex and the working capital required? Test utilisation, input costs, selling prices and cost of capital together. Fixed assets need long-term funding; inventories and receivables still need working-capital finance.',
+    },
+    /**
+     * WHY THIS SHIFT IS WANTED, kept beside it because the map otherwise
+     * measures it by domestic value added alone — and value added, private
+     * profitability and employment are three different outcomes that a
+     * downstreaming scenario can move in three different directions.
+     */
+    criterion: {
+      label: 'Employment through reindustrialisation',
+      means:
+        'The stated motive is durable formal work, with decarbonisation as a vehicle rather than the goal. So a border cut that raises domestic value added has not yet shown anything about the motive. Four distinctions the map cannot draw and a reading must make: construction employment against employment once the plant runs; gross jobs against net of what the change displaces; the quality and formality of the work; and the public cost per job, counted against what the same money would have bought elsewhere.',
+      counterexample:
+        'A hypothetical that makes the gap concrete, and it is labelled hypothetical because no sourced Indonesian estimate is used here: a capital-intensive smelter can raise domestic value added, be privately profitable at a supported power price, employ fewer people per unit of output than the trade it replaced, and still cost the state more per durable job than the fiscal support it consumed. Every arrow on this overlay would point the right way.',
+      /**
+       * The trade-off the author has to settle, prepared rather than
+       * answered. A map that resolved it silently would be inventing a moral
+       * priority.
+       */
+      unresolved:
+        'Where the two objectives conflict \u2014 a configuration with more near-term jobs and higher emissions or higher public cost, against a cleaner one with fewer \u2014 which constraint governs? Naming it as a binding constraint (an emissions ceiling, a minimum durable-jobs threshold, a maximum public cost per job) is a decision, and it is not made here.',
     },
     targets: [
       {
         id: 'border-export',
         condition: {
           status: 'moving',
+          basis: 'scenario',
           now: UNWRITTEN,
           holds: UNWRITTEN,
           lever: 'move-border',
@@ -1025,6 +1202,7 @@ export const SHIFTS: Shift[] = [
         id: 'j-extraction-processing',
         condition: {
           status: 'moving',
+          basis: 'scenario',
           now: UNWRITTEN,
           holds: UNWRITTEN,
           lever: 'move-border',
@@ -1039,6 +1217,7 @@ export const SHIFTS: Shift[] = [
         id: 'stage-processing',
         condition: {
           status: 'moving',
+          basis: 'scenario',
           now: UNWRITTEN,
           holds: UNWRITTEN,
           lever: 'move-border',
@@ -1053,6 +1232,7 @@ export const SHIFTS: Shift[] = [
         id: 'j-processing-trader',
         condition: {
           status: 'moving',
+          basis: 'scenario',
           now: UNWRITTEN,
           holds: UNWRITTEN,
           lever: 'move-border',
@@ -1067,6 +1247,7 @@ export const SHIFTS: Shift[] = [
         id: 'border-import',
         condition: {
           status: 'stuck',
+          basis: 'scenario',
           now: UNWRITTEN,
           holds: UNWRITTEN,
           lever: 'move-border',
@@ -1081,6 +1262,7 @@ export const SHIFTS: Shift[] = [
         id: 'node-trader',
         condition: {
           status: 'stuck',
+          basis: 'scenario',
           now: UNWRITTEN,
           holds: UNWRITTEN,
           lever: 'move-border',
@@ -1095,6 +1277,7 @@ export const SHIFTS: Shift[] = [
         id: 'j-trader-manufacturing',
         condition: {
           status: 'stuck',
+          basis: 'scenario',
           now: UNWRITTEN,
           holds: UNWRITTEN,
           lever: 'move-border',
@@ -1109,6 +1292,7 @@ export const SHIFTS: Shift[] = [
         id: 'stage-manufacturing',
         condition: {
           status: 'stuck',
+          basis: 'scenario',
           now: UNWRITTEN,
           holds: UNWRITTEN,
           lever: 'move-border',
@@ -1135,32 +1319,72 @@ export const SHIFTS: Shift[] = [
         'Test project cash flows together with financing terms. Performance, utilisation, energy use and offtake determine operating economics; guarantees or concessional capital can change risk allocation and funding cost. Producer responsibility can support a recovery revenue line where collection costs were previously unfunded.',
     },
     targets: [
+      /*
+       * THE ONE WORKED READING. Every other mark on this map is a scenario;
+       * this one is assessed, against a bounded case — Indonesian nickel
+       * downstreaming, the RKEF and HPAL plants commissioned between 2025 and
+       * 2035, and the captive generation built alongside them. It is here, and
+       * not on a more obvious element, for two reasons: it is the element the
+       * one completed argument on this site is actually about, and it is where
+       * the three-lever vocabulary breaks usefully. The map can only draw a
+       * repricing. What moves this element is a contract.
+       *
+       * The status is `moving` and that is not good news. Investment IS under
+       * way here; its direction is the whole problem. A status that could only
+       * mean progress would have been unable to say so.
+       */
       {
         id: 'band-energy',
         condition: {
           status: 'moving',
-          now: UNWRITTEN,
-          holds: UNWRITTEN,
+          basis: 'assessed',
           lever: 'reprice-layer',
-          action: {
-            economy: 'Subsidy reform and carbon pricing can alter energy prices, fiscal costs and price transmission across the chain.',
-            finance: 'Energy price and energy use per unit both matter; efficiency can offset a price increase, with the remainder absorbed or passed on.',
+          mechanism: 'contract',
+          now: {
+            economy:
+              'Power for new processing capacity is being decided plant by plant rather than by the grid. Captive generation is built alongside the smelter, sized to it and contracted for its life, so the electricity a plant will still be using decades from now is chosen in the same decision that approves the plant. The regulation restricting new coal generation carries an exception for integrated industrial and nationally strategic projects, conditional on a commitment to cut emissions within a fixed period and to stop operating by a stated date \u2014 so the exception permits captive coal to accompany processing. The article, the threshold and the dates are in the essay.',
+            finance:
+              'A capital-structure fact before it is an energy fact. The captive plant, the smelter it powers, the offtake behind them and the security package over both are one financing, and the power contract runs the life of the asset. That is what separates this exposure from a fuel price: a fuel price can be traded out later, and there is no counterparty to trade with when the generation is yours and the contract is your own.',
           },
-          funds: UNWRITTEN,
+          holds: {
+            economy:
+              'Clean firm power at industrial-estate scale, and the network to move it. Installed variable renewable capacity here is far behind the nearest regional comparator; the figures are in the essay. The electricity supply plan, the long-term development plan, the coal-generation regulation and the finance ministry\u2019s carbon-pricing work each touch part of this, and none of them is addressed to industrial-estate power specifically. Generation, network capacity and a connection at the plant gate are three different shortages, and only the first is usually counted.',
+            finance:
+              'Not, in general, money. The headline transition-finance commitment mixes pledges, approvals, contracted finance and disbursement, so the total says little about what has reached a connection. Where finance does bind, it usually binds on TIMING rather than on lifetime returns: an early-stage clean asset can have sound economics across its life and still fail debt-service coverage in its first years. Treating a timing failure as inadequate returns spends the subsidy on the wrong problem.',
+          },
+          action: {
+            economy:
+              'Repricing energy \u2014 subsidy reform, a carbon price \u2014 changes what power costs every stage at once, which is what this map can draw. It is not what moves this element. A captive plant already under construction is choosing a vintage, not responding to a price. What changes it is clean firm power that exists where the plant is, and a power contract that can be separated from the plant\u2019s own financing.',
+            finance:
+              'Price the liability into the vintage rather than into the tariff. Screen the asset and structure its debt around one transition path: grace matched to ramp-up, amortisation sculpted to cash available for debt service, and major reinvestment \u2014 a furnace reline, a battery replacement \u2014 held outside senior maturity instead of being allowed to break coverage inside it. Extending tenor without that makes coverage worse, not better.',
+          },
+          funds: {
+            economy:
+              'Three roles, usually three different parties. Capital comes from sponsors and their lenders, and increasingly from state balance sheets: a new public allocator was established by statute at the moment this vintage is being set. Payment over the asset\u2019s life comes from the buyer of the processed product through the price, and from the public wherever a guarantee or a concession is granted. The loss, if the liability arrives, falls on whoever still holds the asset \u2014 and where that is a state entity, on the public a second time.',
+            finance:
+              'Capital provider: sponsor equity, senior lenders, and concessional or state capital where it enters. Payer over life: the offtaker through the contracted price, over a tenor set by the power contract rather than by the working-capital cycle this layer normally carries. Loss bearer: a guarantee moves a defined risk to the guarantor \u2014 grid completion, delay \u2014 and lowers the cost of capital because of that transfer. It does not remove the risk, and a guarantee written over commodity losses, or over indefinite coal dependence, has moved the wrong one.',
+          },
         },
+        articles: [
+          {
+            slug: 'indonesias-reindustrialization-bet',
+            title: 'Indonesia\u2019s Reindustrialization Bet',
+          },
+        ],
       },
       {
         id: 'band-logistics',
         condition: {
           status: 'stuck',
+          basis: 'scenario',
           now: UNWRITTEN,
           holds: UNWRITTEN,
           lever: 'reprice-layer',
           action: {
             economy:
-              'Cleaner power and tighter plants do not reach here. The layer injects its own fuel and emissions at every touch, so it sets a floor under the unit that no stage can remove on its own; where the geography is an archipelago and the trade is tiered, the touches per unit are many and that floor is high.',
+              'An improvement made at a stage does not travel with the goods: each touch adds its own energy and its own emission, so the unit carries a burden no single stage can remove on its own. Hold the fleet and the drop pattern constant \u2014 diesel road transport, tiered trade, an archipelago\u2019s touches per unit \u2014 and that burden behaves like a floor, and it is a high one. It is a floor under THAT configuration, not a minimum across all technologies: change the fleet, the drop density or the number of touches and the floor moves.',
             finance:
-              "One physical fact, booked in two places: the fleet's fuel is the provider's own direct emission and the brand owner's indirect, purchased one — the same split the gross-and-net line makes at a node. Lowering it means fewer touches, denser drops or a different fleet, and each of those is a capital decision with its own payback.",
+              'Two questions this layer invites you to merge. Cost: the fee is revenue to the provider and an operating cost to whoever buys the service. Emissions: the GHG Protocol\u2019s transport-and-distribution guidance counts fuel, purchased electricity AND refrigerant, and a purchased third-party service carries the provider\u2019s direct and purchased-energy emissions into the buyer\u2019s indirect account. Which account they land in is decided by the reporting boundary, not by whether the provider books revenue gross or net \u2014 the gross-and-net question at a node is about control of the goods and answers nothing here. Lowering the emission means fewer touches, denser drops or a different fleet, and each is a capital decision with its own payback.',
           },
           funds: UNWRITTEN,
         },
@@ -1169,14 +1393,15 @@ export const SHIFTS: Shift[] = [
         id: 'band-cold-chain',
         condition: {
           status: 'stuck',
+          basis: 'scenario',
           now: UNWRITTEN,
           holds: UNWRITTEN,
           lever: 'reprice-layer',
           action: {
             economy:
-              'A second floor on top of the first: every cold touch burns fuel to hold a standard, and the drops that need it most are the smallest and the farthest.',
+              'A second burden on top of the first, and not the same burden. Holding a temperature costs energy continuously rather than per kilometre, and the refrigerant itself leaks \u2014 an emission with no fuel behind it. A cold store on the grid follows the grid\u2019s intensity; a reefer on a vehicle burns fuel. The drops that need cold most are often the smallest and the farthest, so the cost per unit is highest exactly where the margin is thinnest.',
             finance:
-              'What is re-priced here is a temperature held between two hands. The fee, the fuel and the emission travel together, and which nodes can hold stock at all is decided by who can afford the cold.',
+              'What is priced here is a temperature held between two hands. The fee, the energy and the emission do not travel together: the energy is grid electricity or vehicle fuel depending on where the cold is held, and refrigerant loss sits outside both. Which nodes can hold stock at all is decided by who can afford the cold, so this layer sets the shape of the chain as much as its cost.',
           },
           funds: UNWRITTEN,
         },
@@ -1185,12 +1410,15 @@ export const SHIFTS: Shift[] = [
         id: 'band-credit',
         condition: {
           status: 'moving',
+          basis: 'scenario',
           now: UNWRITTEN,
           holds: UNWRITTEN,
           lever: 'reprice-layer',
           action: {
-            economy: 'Where the transition is financed: concessional and blended capital, guarantees — the cost of capital for green assets is pushed down here.',
-            finance: 'Performance and offtake risk affect funding terms; guarantees and concessional capital can help a viable project reach financial close.',
+            economy:
+              'A different instrument from the one this layer carries at rest. The credit riding on the chain normally is working capital \u2014 receivables, inventory, payables, a cycle measured in days. What a transition needs here is asset finance against a plant that must run for decades, and guarantees over the risks that stop it being built. Concessional capital and guarantees can lower the cost of capital for green assets; they do it by changing who bears which risk, not by removing the risk.',
+            finance:
+              'Read the change in tenor before anything else. A working-capital facility is priced off a cash conversion cycle; project debt against a processing asset is priced off coverage across the asset\u2019s life, and the two fail differently. Debt-service coverage \u2014 cash available for debt service over scheduled service \u2014 can fail in the first years on a project whose lifetime returns are sound, while loan-life coverage tests something else entirely. A timing failure needs a different instrument from inadequate returns. And a guarantee moves a defined risk to the guarantor: it lowers funding cost because of that transfer, and written over commodity losses it has not removed a risk, it has bought one.',
           },
           funds: UNWRITTEN,
         },
@@ -1199,6 +1427,7 @@ export const SHIFTS: Shift[] = [
         id: 'j-consumption-recovery',
         condition: {
           status: 'unpriced',
+          basis: 'scenario',
           now: UNWRITTEN,
           holds: UNWRITTEN,
           lever: 'price-unpaid-joint',
@@ -1213,6 +1442,7 @@ export const SHIFTS: Shift[] = [
         id: 'stage-recovery',
         condition: {
           status: 'unpriced',
+          basis: 'scenario',
           now: UNWRITTEN,
           holds: UNWRITTEN,
           lever: 'price-unpaid-joint',
@@ -1227,6 +1457,7 @@ export const SHIFTS: Shift[] = [
         id: 'return-postconsumer-material',
         condition: {
           status: 'unpriced',
+          basis: 'scenario',
           now: UNWRITTEN,
           holds: UNWRITTEN,
           lever: 'price-unpaid-joint',
@@ -1241,6 +1472,7 @@ export const SHIFTS: Shift[] = [
         id: 'return-postconsumer-organic',
         condition: {
           status: 'unpriced',
+          basis: 'scenario',
           now: UNWRITTEN,
           holds: UNWRITTEN,
           lever: 'price-unpaid-joint',
@@ -1254,6 +1486,38 @@ export const SHIFTS: Shift[] = [
     ],
     moves: [{ id: 'move-recovery-price', kind: 'price', at: 'j-consumption-recovery', label: 'A price arrives here' }],
     callouts: [{ id: 'callout-new-price', at: 'j-consumption-recovery', label: 'Who pays for recovery?' }],
+  },
+];
+
+/**
+ * Where the two shifts pull against each other.
+ *
+ * Showing two scenarios one at a time keeps their mechanisms separable, which
+ * is why this interface does that. What it does NOT do is explain a conflict,
+ * and a reader who sees each overlay alone can come away believing both can
+ * be run at once at full strength. These are the places they compete for the
+ * same thing, written out rather than drawn, because a second overlay would
+ * imply they compose.
+ */
+export interface Tension {
+  id: string;
+  /** The element both shifts touch. */
+  at: string;
+  label: string;
+  note: LensNote;
+}
+
+export const TENSIONS: Tension[] = [
+  {
+    id: 'tension-energy',
+    at: 'band-energy',
+    label: 'The same electricity',
+    note: {
+      economy:
+        'Both shifts land on this layer and want opposite things from it. Reindustrialisation wants power that is abundant, firm and cheap at the plant gate, soon enough to justify the plant; the green transition wants power that is clean, which today means less firm and, at industrial-estate scale, not yet built. The conflict is not about ambition. It is about which one gets the electricity that exists, and about who pays for the gap while the rest is built \u2014 and a plant approved before that is settled has answered the question by default.',
+      finance:
+        'One asset, two incompatible financings. Cheap firm power contracted for the life of a smelter is what makes the processing margin bankable; the same contract is what makes the asset\u2019s carbon liability un-tradeable. Concessional capital aimed at the second can end up lowering the cost of capital for a configuration that locks in the first. The instrument that resolves this is not a subsidy on either side but a contract that can be separated from the plant it powers.',
+    },
   },
 ];
 
@@ -1373,10 +1637,17 @@ export type CompactStep =
     };
 
 /**
- * Six transformation stages, three node groups, two layers, one return arrow,
- * and a diamond at every join so the joints read as the motif they are.
+ * Six transformation stages, three node groups, THREE layers, one return
+ * arrow, and a diamond at every join so the joints read as the motif they are.
  * Readable in three seconds; every label is a record above. Packaging, the
  * trader and the principal are omitted here — the full plate has them.
+ *
+ * Energy is the third band, and it is here deliberately. On the short version
+ * it appeared as nothing at all — the full plate draws it as arrows rising
+ * into each stage, and the short one drew neither — so the entrance most
+ * readers meet showed no energy while the argument this site makes turns on
+ * it. Two bands to three is the smallest change that puts it in the
+ * three-second read.
  */
 export const COMPACT = {
   sequence: [
@@ -1389,7 +1660,7 @@ export const COMPACT = {
     { kind: 'stages', ids: ['stage-consumption'] },
     { kind: 'stages', ids: ['stage-recovery'] },
   ] as CompactStep[],
-  bands: ['band-logistics', 'band-credit'],
+  bands: ['band-logistics', 'band-credit', 'band-energy'],
   /** One arrow, no detail: goods come back. */
   returnArrow: { id: 'compact-return', label: 'Returns', from: 'stage-recovery', to: 'stage-processing' },
 } as const;
@@ -1421,8 +1692,17 @@ export const DEFINE = {
 
 export const CHAIN_COPY = {
   headline: 'Every joint in this chain is a margin.',
-  /** The thesis, between the headline and the two controls. */
-  standfirst: 'Add them up and you have an economy; take one apart and you have a driver tree.',
+  /**
+   * The thesis. It used to read "Add them up and you have an economy; take one
+   * apart and you have a driver tree." The second half is right and the first
+   * half is a category error the rest of this file spends a paragraph
+   * correcting: margins do not aggregate into an economy. Value added does,
+   * and value added is output less intermediate consumption — it includes
+   * labour income, and it is not gross profit. A memorable line that teaches
+   * the wrong identity is worse than a plain one.
+   */
+  standfirst:
+    'Take one apart and you get a driver tree. Add them up and you still do not get an economy \u2014 what aggregates is value added, not the margin anyone keeps.',
   /** The distance control is this sentence: the two lens names in it are the two positions. */
   lead: {
     before: 'Read the chain as an ',
@@ -1456,7 +1736,7 @@ export const CHAIN_COPY = {
     },
     compact: {
       title: 'The industry chain, in short',
-      desc: 'Primary production, aggregation, processing, manufacturing, distribution, retail, consumption and recovery, a diamond at every join, with logistics and credit running beneath and one return arrow above.',
+      desc: 'Primary production, aggregation, processing, manufacturing, distribution, retail, consumption and recovery, a diamond at every join, with logistics, credit and energy running beneath and one return arrow above.',
     },
     column: 'The industry chain, top to bottom',
   },
@@ -1464,6 +1744,20 @@ export const CHAIN_COPY = {
   status: {
     marks: (n: number) => `${n} ${n === 1 ? 'mark' : 'marks'}`,
   },
+  /**
+   * What a number on a mark is, said where the marks are. It is a position in
+   * a reading order computed from where the mark lands on the drawing — left
+   * to right, then top to bottom, layers last because they are the bottom row.
+   * It renumbers when the overlay changes, which is exactly why it cannot be a
+   * ranking. Identity is the slug, which never moves.
+   */
+  markOrderNote:
+    'The numbers are where a mark sits on the drawing, read left to right and then top to bottom, with the layers last. They are not a priority, a sequence or an argument order, and they renumber when the overlay changes.',
+  /** The heading over the written-out conflict between the two shifts. */
+  tensionsHeading: 'Where the two shifts pull against each other',
+  /** Said once, over the condition layer. */
+  conditionNote: (asOf: string) =>
+    `What a shift marks is a reading of where the chain stands, reviewed ${asOf}. Most marks are scenarios rather than findings; each says which it is.`,
   panel: {
     jointKicker: 'At this joint',
     bandKicker: 'Enabling layer',
@@ -1480,6 +1774,11 @@ export const CHAIN_COPY = {
     holds: 'What holds it',
     lever: 'The lever',
     funds: 'Who finances it',
+    /** Three roles, and they are usually three parties. */
+    fundsRoles:
+      'Capital provider, payer over the asset\u2019s life, and loss bearer are three roles and usually three parties. A guarantee moves the third; it does not remove it.',
+    /** Where one layer is really several constraints. */
+    shortagesHeading: 'Three different shortages inside this layer',
     articlesHeading: 'Read this in the essays',
     articlesNone: 'No essay reads this yet.',
     /** The anatomy of a joint or a layer, folded under its reading while a shift is on. */
@@ -1487,7 +1786,8 @@ export const CHAIN_COPY = {
     anatomyLayer: 'The layer itself',
     curriculumHeading: 'Read this joint in the curriculum',
     published: 'Published',
-    comingSoon: 'Coming soon',
+    /** Same word as the curriculum uses; see src/data/curriculumContract.ts. */
+    comingSoon: 'Planned',
     close: 'Close',
   },
   /** The numbered marks a shift puts on the map. */

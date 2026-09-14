@@ -40,7 +40,17 @@
  */
 
 import { useCallback, useEffect, useId, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent, type ReactNode } from 'react';
-import { CHAIN_COPY, SHIFT_BY_ID, SHIFTS, type JointId, type LensId, type ShiftId } from '@/data/industryChain';
+import {
+  CHAIN_COPY,
+  CONDITION_AS_OF,
+  SHIFT_BY_ID,
+  SHIFTS,
+  TENSIONS,
+  type JointId,
+  type LensId,
+  type ShiftId,
+} from '@/data/industryChain';
+import { fullDate } from '@/lib/formatDate';
 import { CHAIN_MODULE_LINKS, locatedModulesByJoint, type ChainModuleLink } from '@/data/chainCurriculumMap';
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/ui/sheet';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
@@ -150,10 +160,6 @@ export function ChainPlate({
   const figureId = `${base}-chain-figure`;
   const wideScreen = useMediaQuery(WIDE_PLATE_QUERY, true);
 
-  // The short version on the landing page is a taster, not an address: it
-  // has no doors and nothing to share, so only the full plate reads and
-  // writes the URL.
-  const urlEnabled = variant === 'full';
   // An address can name an element that this overlay does not mark — an old
   // link, a hand-edited one, or one written against the other shift. Opening
   // it anyway would put a panel with a heading and nothing under it on the
@@ -161,7 +167,7 @@ export function ChainPlate({
   // validated before it becomes state, here and on every Back or Forward;
   // the rejected parameter is then dropped from the URL by the writer.
   const [fromUrl] = useState(() => {
-    const url = initialChainUrl(urlEnabled);
+    const url = initialChainUrl(variant === 'full');
     return { ...url, node: canOpen(url.node, url.shift) ? url.node : null };
   });
 
@@ -171,6 +177,17 @@ export function ChainPlate({
   const [hovered, setHovered] = useState<Hovered | null>(null);
   const [hidden, setHidden] = useState<ReadonlySet<string>>(() => new Set());
   const [expanded, setExpanded] = useState(variant === 'full');
+  // The short version on the landing page is a taster with no doors, so it
+  // carries no address. Once a reader OPENS it, it is the same map with the
+  // same doors, and what they are looking at should be shareable: the previous
+  // rule meant a reading reached from the landing page could not be sent to
+  // anyone, which is exactly when someone wants to send it.
+  //
+  // Reading the address at mount stays gated on `variant === 'full'` (see
+  // `fromUrl` above): a link arriving on the landing page must not open the
+  // compact view into a state it cannot draw. From the expansion onwards the
+  // URL follows the map.
+  const urlEnabled = variant === 'full' || expanded;
   const [anchor, setAnchor] = useState<Element | null>(null);
   const triggerRef = useRef<Element | null>(null);
   const figureRef = useRef<HTMLElement>(null);
@@ -432,6 +449,20 @@ export function ChainPlate({
             {CHAIN_COPY.scopeLead}
           </p>
         )}
+        {/* A numbered disc reads as a ranking unless something says otherwise,
+            and these numbers are positions on the drawing that renumber when
+            the overlay changes. Shown only while an overlay is on, which is
+            the only time numbers exist. */}
+        {!showCompact && shift && (
+          <>
+            <p className="mt-2 text-sm leading-relaxed text-muted-foreground" data-chain-mark-order>
+              {CHAIN_COPY.markOrderNote}
+            </p>
+            <p className="mt-2 text-sm leading-relaxed text-muted-foreground" data-chain-condition-note>
+              {CHAIN_COPY.conditionNote(fullDate(CONDITION_AS_OF))}
+            </p>
+          </>
+        )}
       </header>
 
       <ChainLensContext.Provider value={lensState}>
@@ -480,6 +511,35 @@ export function ChainPlate({
               </SheetContent>
             )}
           </Sheet>
+        )}
+
+        {/* The two overlays are exclusive so their mechanisms stay separable.
+            That leaves a reader who has seen each alone believing both can run
+            at full strength; the conflict is written out rather than drawn,
+            because a second overlay would imply they compose. */}
+        {!showCompact && shift && (
+          <section className="mt-8 max-w-3xl border-t border-border pt-5" data-chain-tensions>
+            <h3 className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+              {CHAIN_COPY.tensionsHeading}
+            </h3>
+            <ul className="mt-3 space-y-4">
+              {TENSIONS.map((t) => (
+                <li key={t.id} data-tension={t.id}>
+                  <button
+                    type="button"
+                    onClick={(e) => onSelect(t.at, e.currentTarget)}
+                    className={cn(
+                      'text-left text-sm font-medium text-foreground hover:text-accent',
+                      FOCUS,
+                    )}
+                  >
+                    {t.label} · {targetLabel(t.at)}
+                  </button>
+                  <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{t.note[lens]}</p>
+                </li>
+              ))}
+            </ul>
+          </section>
         )}
 
         {variant === 'preview' && (

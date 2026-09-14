@@ -8,6 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { LoadingState, ErrorState } from '@/components/states';
 import { ArticleShell, ArticleLayout } from '@/components/editorial';
 import { contentToHtml } from '@/lib/tiptap/serialize';
+import { isPublished } from '@/lib/publication';
 import { essayUrl } from '@/lib/essayUrl';
 
 interface Essay {
@@ -78,8 +79,7 @@ export default function NextBigThingEssayPage() {
       if (error) throw error;
 
       if (data) {
-        const isPublished = data.status === 'published';
-        if (!isPublished && !isAdmin) {
+        if (!isPublished(data) && !isAdmin) {
           setNotFound(true);
           setEssay(null);
         } else {
@@ -104,7 +104,7 @@ export default function NextBigThingEssayPage() {
         .from('essays')
         .select('slug, title')
         .eq('category_id', essay.category_id)
-        .eq('status', 'published')
+        .eq('published', true)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -118,7 +118,7 @@ export default function NextBigThingEssayPage() {
       <div className="container min-h-[60vh] flex items-center justify-center py-16">
         <ErrorState
           title="Couldn't load this essay"
-          message="The essay is still there — this page just couldn't reach the database. Check your connection and try again."
+          message="This page couldn't reach the database, so it cannot tell whether this essay is here. Check your connection and try again."
           onRetry={loadEssay}
         />
       </div>
@@ -206,6 +206,8 @@ export default function NextBigThingEssayPage() {
       keyTakeaways={presentation.key_takeaways}
       references={presentation.references}
       authorBio={presentation.author_bio}
+      genre={presentation.genre}
+      revisionNote={presentation.revision_note}
       previous={previous}
       next={next}
       getEssayUrl={getEssayUrl}

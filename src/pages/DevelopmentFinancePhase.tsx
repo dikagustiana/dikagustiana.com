@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Plus, Search, Clock, User, Calendar } from 'lucide-react';
+import { ErrorState } from '@/components/states';
 
 const phaseDetails: Record<string, { title: string; description: string }> = {
   'sovereign-wealth-funds': {
@@ -51,8 +52,8 @@ export default function DevelopmentFinancePhase() {
 
   const details = phase ? phaseDetails[phase] : null;
 
-  const { data: essays, isLoading } = useQuery({
-    queryKey: ['development-finance-phase', phase],
+  const { data: essays, isLoading, isError, refetch } = useQuery({
+    queryKey: ['development-finance-phase', phase, isAdmin],
     queryFn: async () => {
       let query = supabase
         .from('essays')
@@ -61,7 +62,7 @@ export default function DevelopmentFinancePhase() {
         .eq('phase', phase!);
 
       if (!isAdmin) {
-        query = query.eq('status', 'published');
+        query = query.eq('published', true);
       }
 
       const { data, error } = await query.order('created_at', { ascending: false });
@@ -149,6 +150,15 @@ export default function DevelopmentFinancePhase() {
               </div>
             ))}
           </div>
+        ) : isError ? (
+          /* A failed query is not an empty topic. Saying "no essays found"
+             during an outage tells the reader something false about the
+             writing. */
+          <ErrorState
+            title="Couldn't load this topic"
+            message="This page couldn't reach the essay index, so it cannot say what is in this topic. Try again in a moment."
+            onRetry={() => refetch()}
+          />
         ) : (
           <>
             <p className="text-sm text-muted-foreground mb-6">
@@ -157,7 +167,7 @@ export default function DevelopmentFinancePhase() {
 
             {filteredEssays.length === 0 ? (
               <div className="text-center py-12">
-                <p className="text-muted-foreground">No essays found in this topic yet.</p>
+                <p className="text-muted-foreground">Nothing is published in this topic yet.</p>
               </div>
             ) : (
               <div className="divide-y divide-border">

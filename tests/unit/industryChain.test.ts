@@ -413,14 +413,43 @@ describe('the condition layer', () => {
     }
   });
 
-  it('reads the enabling layer as the bearer of a per-unit burden: a floor no single stage can remove', () => {
+  it('reads the enabling layer as the bearer of a per-unit burden, and says what the floor is held constant against', () => {
     const logistics = shiftTarget('green', 'band-logistics')!.condition!;
-    expect(logistics.action.economy.toLowerCase()).toContain('floor');
-    expect(logistics.action.economy.toLowerCase()).toContain('touch');
-    // One physical fact, booked in two places — the gross/net split, again.
-    expect(logistics.action.finance.toLowerCase()).toContain('two places');
+    const economy = logistics.action.economy.toLowerCase();
+    expect(economy).toContain('floor');
+    expect(economy).toContain('touch');
+    // The useful point survives; what it is conditional on is now stated. A
+    // burden that improvements at another stage do not remove is not an
+    // immutable minimum across all technologies, and the reading says which
+    // configuration its floor is a floor under.
+    expect(economy).toMatch(/constant|configuration/);
+    expect(economy).toMatch(/fleet/);
     expect(BAND_BY_ID['band-logistics'].means.toLowerCase()).toContain('floor');
-    expect(shiftTarget('green', 'band-cold-chain')!.condition!.action.economy.toLowerCase()).toContain('floor');
+    expect(BAND_BY_ID['band-logistics'].means.toLowerCase()).toMatch(/for a given fleet/);
+  });
+
+  it('does not derive an emissions boundary from revenue presentation', () => {
+    // The finance voice used to say the fleet's fuel splits into the
+    // provider's direct and the buyer's indirect emission as "the same split
+    // the gross-and-net line makes at a node". Those are two different
+    // questions: gross-versus-net is about control of the goods, and the
+    // emission lands where the REPORTING BOUNDARY puts it. Purchased
+    // transport also carries the provider's purchased electricity and its
+    // refrigerant, which a fuel-only reading drops.
+    const finance = shiftTarget('green', 'band-logistics')!.condition!.action.finance.toLowerCase();
+    expect(finance).not.toContain('the same split the gross-and-net line makes');
+    expect(finance).toContain('reporting boundary');
+    expect(finance).toContain('refrigerant');
+  });
+
+  it('does not repeat the logistics floor as though cold chain were the same burden', () => {
+    // A temperature costs energy continuously rather than per kilometre, and
+    // refrigerant leaks without any fuel behind it. Calling it "a second
+    // floor" merged three different things.
+    const cold = shiftTarget('green', 'band-cold-chain')!.condition!.action;
+    expect(cold.economy.toLowerCase()).toContain('refrigerant');
+    expect(cold.economy.toLowerCase()).toMatch(/not the same burden|continuously/);
+    expect(cold.finance.toLowerCase()).toContain('do not travel together');
   });
 });
 
@@ -458,16 +487,31 @@ describe('the short version', () => {
       for (const m of g.members) expect(nodeIds.has(m), `${g.id} member ${m}`).toBe(true);
       for (const f of g.from ?? []) expect(stageIds.has(f), `${g.id} from ${f}`).toBe(true);
     }
-    expect(COMPACT.bands).toEqual(['band-logistics', 'band-credit']);
+    // Energy is on the short version because the entrance most readers meet
+    // showed it as nothing at all, while the argument this site makes turns
+    // on it. The full plate drew it only as arrows rising into each stage.
+    expect(COMPACT.bands).toEqual(['band-logistics', 'band-credit', 'band-energy']);
     expect(stageIds.has(COMPACT.returnArrow.from)).toBe(true);
     expect(stageIds.has(COMPACT.returnArrow.to)).toBe(true);
   });
 });
 
 describe('what the map promises', () => {
-  it('keeps the headline and the standfirst verbatim: the joint is the subject, the two distances are the claim', () => {
+  it('keeps the headline verbatim: the joint is the subject, the margin is the claim', () => {
     expect(CHAIN_COPY.headline).toBe('Every joint in this chain is a margin.');
-    expect(CHAIN_COPY.standfirst).toBe('Add them up and you have an economy; take one apart and you have a driver tree.');
+  });
+
+  it('does not let the standfirst teach that margins aggregate into an economy', () => {
+    // The line used to read "Add them up and you have an economy; take one
+    // apart and you have a driver tree." The second half is right. The first
+    // half contradicts CHAIN_COPY.basis two fields below it, which says value
+    // added is output less intermediate consumption and is NOT gross profit \u2014
+    // so the most memorable sentence on the map taught the error the rest of
+    // it spends a paragraph correcting.
+    expect(CHAIN_COPY.standfirst).toContain('driver tree');
+    expect(CHAIN_COPY.standfirst.toLowerCase()).toContain('value added');
+    expect(CHAIN_COPY.standfirst.toLowerCase()).not.toMatch(/add them up and you (have|get) an economy/);
+    expect(CHAIN_COPY.basis.toLowerCase()).toContain('not gross profit');
   });
 
   it('makes the two controls two sentences whose words are the positions', () => {

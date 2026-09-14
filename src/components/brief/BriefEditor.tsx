@@ -130,8 +130,8 @@ export function BriefEditor({ essaySlug }: BriefEditorProps) {
     return (
       <div className="flex h-screen flex-col items-center justify-center gap-3 px-6 text-center">
         <p className="text-sm text-muted-foreground">
-          Couldn't load this essay — the essay is still there; this page just couldn't reach
-          the database.
+          Couldn't load this essay. This page couldn't reach the database, so it cannot tell
+          whether the essay is there.
         </p>
         <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
           Try again

@@ -24,6 +24,15 @@ export function MainNav() {
         Home
       </Link>
 
+      {/* Second, beside Home. See the note in navConfig: the page carrying
+          the argument and the revision of judgment was footer-only. */}
+      <Link
+        to="/about"
+        className={cn('nav-link', location.pathname === '/about' && 'nav-link-active')}
+      >
+        About
+      </Link>
+
       {isAdmin && (
         <Link
           to="/finance-workspace"

@@ -63,6 +63,17 @@ export const nextBigThingItems: NavItem[] = [
 
 export const navSections: NavSection[] = [
   { label: 'Home', path: '/' },
+  /**
+   * About is a TOP-LEVEL door, not a footer link.
+   *
+   * It carries the argument in full — the case, the comparison, the strongest
+   * objection, the limits, the revision of judgment — and it was reachable
+   * only from the footer, which meant the one page that says whether to trust
+   * the work was the hardest page to find. It sits second because a stranger
+   * who wants to know who is writing looks next to Home, not at the end of a
+   * row of subjects.
+   */
+  { label: 'About', path: '/about' },
   {
     label: 'Accounting',
     basePath: '/accounting',

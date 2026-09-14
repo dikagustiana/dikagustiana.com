@@ -1,17 +1,12 @@
 import { EssayCardLink } from '@/components/EssayCardLink';
 import { IndustryChainSection } from '@/components/industry-chain';
+import { ReadingPath } from '@/components/argument/ReadingPath';
+import { ChangedMind } from '@/components/argument/ChangedMind';
 import { PageLayout } from '@/components/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
 import { useSelectedEssays } from '@/hooks/queries/useSelectedEssays';
 import { Link } from 'react-router-dom';
-
-const sectionLabels: Record<string, string> = {
-  'green-transition': 'Green Transition',
-  'development-finance': 'Development Finance',
-  finance: 'Finance',
-  accounting: 'Accounting',
-  'next-big-thing': 'The Next Big Thing',
-};
+import { sectionLabel } from '@/lib/sectionLabels';
 
 const phaseLabels: Record<string, string> = {
   'climate-finance': 'Climate Finance',
@@ -101,17 +96,46 @@ export default function About() {
     >
       <SEO
         title="About"
-        description="Finance, capital, and the green transition. A record of thinking."
+        description="What this site argues, how it is written, and what it does not yet cover. Finance, capital, and the green transition."
       />
 
-      {/* Header */}
+      {/* Header. The page used to open on one italic line and go straight to
+          the map: a reader who arrived wanting to know whether to trust the
+          work found a diagram and a bookshelf. The two paragraphs below are
+          about METHOD, not credentials — the biography is the author's to
+          write and is not invented here. */}
       <section className="py-16 border-b border-border">
         <div className="container max-w-3xl">
           <p className="text-xl md:text-2xl font-display text-muted-foreground italic leading-relaxed">
             Finance, capital, and the green transition. A record of thinking.
           </p>
+          <div className="mt-8 space-y-4 text-[17px] leading-relaxed text-foreground">
+            <p>
+              I write for someone deciding whether my account of an Indonesian industrial or
+              energy-transition problem is worth their attention. They may be a practitioner or an
+              assessor; they do not know my biography, my earlier essays, or every Indonesian
+              institution I name.
+            </p>
+            <p>
+              So the standing rules here are these. State the question, the position, its scope and
+              its consequence early. Keep observed evidence, inference and judgment visibly apart. A
+              policy argument names who can act, who pays, who benefits, the strongest objection,
+              and what would change the conclusion. Where a claim is unchecked, say so rather than
+              writing around it — which is why the{' '}
+              <Link to="/green-transition/tracker" className="text-primary underline underline-offset-2">
+                transition tracker
+              </Link>{' '}
+              carries dated corrections rather than a tidy archive.
+            </p>
+          </div>
         </div>
       </section>
+
+      {/* The argument in full: the case, the comparison, the objection, the
+          limits, and the ordered path through what exists. */}
+      <ReadingPath />
+
+      <ChangedMind />
 
       {/* The industry chain map — the artefact this page carries, sitting
           directly under the narrative it belongs to. */}
@@ -126,9 +150,9 @@ export default function About() {
             </h2>
             <div className="divide-y divide-border">
               {selectedEssays.map((essay) => {
-                const sectionLabel = sectionLabels[essay.section] || essay.section;
+                const label0 = sectionLabel(essay.section);
                 const pLabel = essay.phase ? phaseLabels[essay.phase] : null;
-                const label = pLabel ? `${sectionLabel} · ${pLabel}` : sectionLabel;
+                const label = pLabel ? `${label0} · ${pLabel}` : label0;
 
                 return (
                   <EssayCardLink

@@ -241,9 +241,9 @@ export function ChainPlateWide() {
 
 export function ChainPlateCompact() {
   return (
-  <svg className="cp-svg cp-svg--compact" viewBox="0 0 1590 320" role="img" aria-labelledby="cp-compact-title" aria-describedby="cp-compact-desc" focusable="false">
+  <svg className="cp-svg cp-svg--compact" viewBox="0 0 1590 356" role="img" aria-labelledby="cp-compact-title" aria-describedby="cp-compact-desc" focusable="false">
     <title id="cp-compact-title">The industry chain, in short</title>
-    <desc id="cp-compact-desc">Primary production, aggregation, processing, manufacturing, distribution, retail, consumption and recovery, a diamond at every join, with logistics and credit running beneath and one return arrow above.</desc>
+    <desc id="cp-compact-desc">Primary production, aggregation, processing, manufacturing, distribution, retail, consumption and recovery, a diamond at every join, with logistics, credit and energy running beneath and one return arrow above.</desc>
     <defs>
       <marker id="cp-tip--compact" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M 0 1 L 7 4 L 0 7 z" className="cp-mk" /></marker>
       <marker id="cp-tip-soft--compact" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M 0 1 L 7 4 L 0 7 z" className="cp-mk-soft" /></marker>
@@ -307,6 +307,10 @@ export function ChainPlateCompact() {
       <rect x="20" y="272" width="1550" height="30" />
       <path className="cp-band-line" d="M 20 272 L 1570 272" />
       <text x="32" y="292" className="cp-band-t" textAnchor="start">Credit and working capital</text></g>
+      <g className="cp-band" data-id="band-energy">
+      <rect x="20" y="308" width="1550" height="30" />
+      <path className="cp-band-line" d="M 20 308 L 1570 308" />
+      <text x="32" y="328" className="cp-band-t" textAnchor="start">Energy</text></g>
     </g>
   </svg>
   );

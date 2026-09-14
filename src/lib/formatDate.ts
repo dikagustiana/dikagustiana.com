@@ -22,3 +22,23 @@ export function formatDate(isoDate: string): string {
     return isoDate;
   }
 }
+
+/**
+ * A calendar date, always with its year: "26 May 2025".
+ *
+ * `formatDate` drops the year inside the current one, which is right for a
+ * feed of recent essays and wrong for anything dated against an archive: a
+ * correction shown as "14 Sep" beside an entry shown as "Jun 15, 2025" reads
+ * as the older of the two. A dated correction that hides its year is not a
+ * dated correction. Rendered in UTC for the same reason as above.
+ */
+export function fullDate(isoDate: string): string {
+  const date = new Date(isoDate);
+  if (Number.isNaN(date.getTime())) return isoDate;
+  return date.toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'UTC',
+  });
+}

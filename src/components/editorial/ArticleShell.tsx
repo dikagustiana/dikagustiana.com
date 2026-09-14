@@ -15,6 +15,8 @@
 import { ReactNode, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
+import { genreOf } from '@/data/genres';
+import { fullDate } from '@/lib/formatDate';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { ReadingProgress } from './ReadingProgress';
@@ -84,6 +86,19 @@ export interface ArticleShellProps {
   currentEssayId?: string;
   section?: string;
 
+  /**
+   * What kind of piece this is (`presentation.genre`) and what it therefore
+   * owes a reader. Optional: a piece that declares nothing renders nothing,
+   * so this makes no claim about work that predates the vocabulary.
+   */
+  genre?: string | null;
+  /**
+   * What a material revision changed (`presentation.revision_note`). Rendered
+   * above the body, because a revision a reader has to hunt for is one they
+   * will not find.
+   */
+  revisionNote?: string | null;
+
   /** Extra content before the body (rare) */
   children?: ReactNode;
 
@@ -120,9 +135,12 @@ export function ArticleShell({
   getEssayUrl,
   currentEssayId,
   section,
+  genre,
+  revisionNote,
   children,
   className,
 }: ArticleShellProps) {
+  const declaredGenre = genreOf(genre);
   const { fontSize, changeFontSize, fontSizeClass } = useFontSize();
 
   // The Brief view. A real Brief must exist for the toggle to render at all;
@@ -215,6 +233,31 @@ export function ArticleShell({
                 it navigates the long essay's headings, which a Brief has
                 none of (flowing prose only). */}
             {!showBrief && <ArticleToc className="lg:hidden" content={htmlContent || content} />}
+
+            {/* What kind of piece this is, and what it owes the reader. A
+                reader calibrates against an evidential contract, and the only
+                thing worse than not stating one is stating the wrong one, so
+                this appears only where the piece declares it. */}
+            {declaredGenre && !showBrief && (
+              <div className="mb-8 border-l-2 border-border pl-4" data-genre={declaredGenre.id}>
+                <p className="text-[11px] font-mono uppercase tracking-[0.18em] text-muted-foreground">
+                  {declaredGenre.label}
+                </p>
+                <p className="mt-1 text-[15px] leading-relaxed text-muted-foreground">
+                  {declaredGenre.contract}
+                </p>
+              </div>
+            )}
+
+            {/* What changed since this was first published. */}
+            {revisionNote?.trim() && !showBrief && (
+              <div className="mb-8 border-l-2 border-foreground bg-muted/40 py-3 pl-4 pr-4" data-revision-note>
+                <p className="text-[11px] font-mono uppercase tracking-[0.18em] text-foreground">
+                  {updatedAt ? `Revised ${fullDate(updatedAt)}` : 'Revised'}
+                </p>
+                <p className="mt-1 text-[15px] leading-relaxed text-foreground">{revisionNote}</p>
+              </div>
+            )}
 
             {/* Optional extra content before body */}
             {children}

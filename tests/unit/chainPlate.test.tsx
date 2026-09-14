@@ -8,7 +8,7 @@
  * every layer is a door whose reading opens beside it and stays open while a
  * control changes; nothing sits under the plate but the controls; the
  * curriculum follows only where a module is pinned; a draft lesson is
- * labelled "Coming soon" as inert text; and the short version expands in
+ * labelled "Planned" as inert text; and the short version expands in
  * place.
  *
  * jsdom has no matchMedia, so the layout hook falls back to the wide plate
@@ -303,7 +303,12 @@ describe('the two controls compose', () => {
 });
 
 describe('a joint as a door, with nothing mapped', () => {
-  it('opens its reading beside the plate: the margin kind, the meaning, the test, the one voice that is on, and the lines of the accounts', async () => {
+  it('opens its reading beside the plate, and keeps the accounting apparatus for the finance distance', async () => {
+    // Changing distance has to change the explanatory WORK, not just the
+    // label. The principal/agent control test and the lines of the financial
+    // statements are accounting questions; showing them at the Economy
+    // distance meant a reader stepping back to an aggregate consequence still
+    // had to pass through a gross-versus-net test to get there.
     mount(<ChainPlate links={[]} />);
     const trigger = joint('Aggregation → processing');
     await userEvent.click(trigger);
@@ -315,13 +320,25 @@ describe('a joint as a door, with nothing mapped', () => {
     expect(panel.closest('figure')).not.toBeNull();
     expect(within(panel).getByText(/At this joint/)).toBeInTheDocument();
     expect(within(panel).getByText(MARGIN_KINDS['node-spread'].label)).toBeInTheDocument();
-    expect(within(panel).getByText(MARGIN_KINDS['node-spread'].test)).toBeInTheDocument();
-    expect(within(panel).getByText(/the aggregator pays the producer before the processor pays it/)).toBeInTheDocument();
     const j = JOINTS.find((x) => x.id === 'j-aggregation-processing')!;
     expect(within(panel).getByText(j.read.economy.note)).toBeInTheDocument();
     expect(within(panel).queryByText(j.read.finance.note)).not.toBeInTheDocument();
-    expect(within(panel).getByText(CHAIN_COPY.panel.linesHeading)).toBeInTheDocument();
     expect(within(panel).queryByText(CHAIN_COPY.panel.curriculumHeading)).not.toBeInTheDocument();
+
+    // At Economy: no control test, no statement lines; the aggregate basis
+    // instead \u2014 value added, which is what actually adds up.
+    expect(within(panel).queryByText(MARGIN_KINDS['node-spread'].test)).not.toBeInTheDocument();
+    expect(within(panel).queryByText(CHAIN_COPY.panel.linesHeading)).not.toBeInTheDocument();
+    expect(within(panel).getByText(CHAIN_COPY.basis)).toBeInTheDocument();
+
+    // At Finance: both are back.
+    await userEvent.click(screen.getByRole('button', { name: 'finance' }));
+    const close = screen.getByRole('region', { name: 'Aggregation → processing' });
+    expect(within(close).getByText(MARGIN_KINDS['node-spread'].test)).toBeInTheDocument();
+    expect(within(close).getByText(CHAIN_COPY.panel.linesHeading)).toBeInTheDocument();
+    expect(
+      within(close).getByText(/the aggregator pays the producer before the processor pays it/),
+    ).toBeInTheDocument();
   });
 
   it('names the layers riding on the move — six on a whole-chain joint — and one of them leads to that layer', async () => {
@@ -399,11 +416,21 @@ describe('a layer as a door', () => {
     expect(within(panel).getByText(/Enabling layer/)).toBeInTheDocument();
     expect(within(panel).getByText('The whole chain')).toBeInTheDocument();
     expect(within(panel).getByText(MARGIN_KINDS['service-fee'].label)).toBeInTheDocument();
-    expect(within(panel).getByText(/Right-of-use assets and lease liabilities, where the warehouse is leased/)).toBeInTheDocument();
     const band = BANDS.find((b) => b.id === 'band-logistics')!;
     expect(within(panel).getByText(band.read.economy)).toBeInTheDocument();
     expect(within(panel).queryByText(band.read.finance)).not.toBeInTheDocument();
     expect(within(panel).getByText(/Production → aggregation · Extraction → processing/)).toBeInTheDocument();
+    // The statement lines are the close reading; at Economy they are the
+    // wrong unit and the wrong question.
+    expect(
+      within(panel).queryByText(/Right-of-use assets and lease liabilities, where the warehouse is leased/),
+    ).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'finance' }));
+    expect(
+      within(screen.getByRole('region', { name: 'Logistics and warehousing' })).getByText(
+        /Right-of-use assets and lease liabilities, where the warehouse is leased/,
+      ),
+    ).toBeInTheDocument();
   });
 
   it('shows a layer that only sets the terms without a margin kind or a chip word', async () => {
@@ -413,7 +440,12 @@ describe('a layer as a door', () => {
     expect(within(panel).queryByText('Terms')).not.toBeInTheDocument();
     expect(within(panel).queryByText(MARGIN_KINDS['service-fee'].label)).not.toBeInTheDocument();
     expect(within(panel).getByText(/It earns nothing itself; it decides who earns/)).toBeInTheDocument();
-    expect(within(panel).getByText(/consideration payable to a customer/)).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'finance' }));
+    expect(
+      within(screen.getByRole('region', { name: 'Principal–distributor contract governance' })).getByText(
+        /consideration payable to a customer/,
+      ),
+    ).toBeInTheDocument();
   });
 
   it('opens the cold chain and the energy layer as doors of their own', async () => {
@@ -477,7 +509,7 @@ describe('a joint with a module pinned to it', () => {
     expect(within(panel).getByRole('link', { name: 'DSO, DIO and DPO' })).toHaveAttribute('href', '/finance/operating/dso-dio-dpo');
     expect(within(panel).queryByRole('link', { name: 'Trade credit as transmission' })).not.toBeInTheDocument();
     expect(within(panel).getByText('Trade credit as transmission')).toBeInTheDocument();
-    expect(within(panel).getByText('Coming soon')).toBeInTheDocument();
+    expect(within(panel).getByText(CHAIN_COPY.panel.comingSoon)).toBeInTheDocument();
     expect(within(panel).getByText('Published')).toBeInTheDocument();
   });
 

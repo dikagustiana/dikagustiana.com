@@ -153,7 +153,14 @@ for (const essay of essays) {
     continue;
   }
   const url = `${SITE_ORIGIN}${p}`;
-  const deck = essay.presentation?.deck || essay.snippet || '';
+  // Collapse whitespace before truncating. A deck typed with a trailing
+  // newline ends up INSIDE the content attribute of four meta tags and the
+  // canonical description, which is visible in the production HTML today:
+  // `content="Carbon Liability, Capital Sequencing, and The Conditions For
+  // Payoff\n"`. Trimming here rather than in the database, because a stray
+  // newline in an editor is a normal thing for a person to do and the build
+  // should not carry it into a share card.
+  const deck = (essay.presentation?.deck || essay.snippet || '').replace(/\s+/g, ' ').trim();
   const description = deck.length > 160 ? `${deck.slice(0, 157)}...` : deck;
   const image = essay.thumbnail_url
     ? (essay.thumbnail_url.startsWith('http') ? essay.thumbnail_url : `${SITE_ORIGIN}${essay.thumbnail_url}`)

@@ -26,12 +26,16 @@ import { useContext, useEffect, useRef, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import {
   BAND_BY_ID,
+  BASIS,
   CHAIN_COPY,
+  CONDITION_AS_OF,
   JOINT_BY_ID,
   LEVERS,
   MARGIN_KINDS,
+  MECHANISMS,
   SHIFT_BY_ID,
   STATUS,
+  STATUS_NOTE,
   bandJoints,
   isWritten,
   jointLayers,
@@ -42,6 +46,7 @@ import {
   type Joint,
   type MarginKind,
 } from '@/data/industryChain';
+import { fullDate } from '@/lib/formatDate';
 import { universalEssayUrl } from '@/lib/essayUrl';
 import { cn } from '@/lib/utils';
 import { ChainCurriculumList } from './ChainCurriculumList';
@@ -109,7 +114,19 @@ function Lines({ heading, lines }: { heading: string; lines: readonly string[] }
   );
 }
 
+/**
+ * The margin cut here.
+ *
+ * The CONTROL TEST — principal or agent, who owns the goods, whether revenue
+ * is gross or net — is an accounting question, and it used to show at both
+ * distances. That is what made the two distances differ only in label: a
+ * reader stepping back to the Economy still had to pass through a
+ * gross-versus-net test to reach an aggregate consequence. It now shows at the
+ * finance distance, where it is doing work. Accounting keeps its own section
+ * of the site; what it does not get is to frame the map from far away.
+ */
 function MarginBlock({ kind, note }: { kind: MarginKind; note?: string }) {
+  const { lens } = useContext(ChainLensContext);
   const k = MARGIN_KINDS[kind];
   return (
     <div className="mt-4">
@@ -120,7 +137,8 @@ function MarginBlock({ kind, note }: { kind: MarginKind; note?: string }) {
       </p>
       {note && <p className="mt-1.5 text-sm text-foreground">{note}</p>}
       <p className="mt-1.5 text-sm text-muted-foreground">{k.means}</p>
-      <p className="mt-1 text-sm text-muted-foreground">{k.test}</p>
+      {lens === 'finance' && <p className="mt-1 text-sm text-muted-foreground">{k.test}</p>}
+      {lens === 'economy' && <p className="mt-1 text-sm text-muted-foreground">{CHAIN_COPY.basis}</p>}
     </div>
   );
 }
@@ -169,7 +187,11 @@ function JointAnatomy({ joint }: { joint: Joint }) {
           </p>
         </div>
       )}
-      <Lines heading={CHAIN_COPY.panel.linesHeading} lines={[...joint.lines, ...MARGIN_KINDS[joint.margin].lines]} />
+      {/* The lines of the financial statements are the close reading. At the
+          Economy distance they are the wrong unit and the wrong question. */}
+      {lens === 'finance' && (
+        <Lines heading={CHAIN_COPY.panel.linesHeading} lines={[...joint.lines, ...MARGIN_KINDS[joint.margin].lines]} />
+      )}
       {layers.length > 0 && (
         <div className="mt-4">
           <h4 className={KICKER}>{CHAIN_COPY.panel.layersHeading}</h4>
@@ -203,7 +225,20 @@ function BandAnatomy({ band }: { band: Band }) {
         </div>
       )}
       <OneVoice text={band.read[lens]} />
-      <Lines heading={CHAIN_COPY.panel.linesHeading} lines={band.lines} />
+      {band.shortages && (
+        <div className="mt-4">
+          <h4 className={KICKER}>{CHAIN_COPY.panel.shortagesHeading}</h4>
+          <ul className="mt-1.5 space-y-1 border-l-2 border-border pl-3 text-sm">
+            {band.shortages.map((sh) => (
+              <li key={sh.label}>
+                <span className="font-medium text-foreground">{sh.label}</span>
+                <span className="text-muted-foreground"> — {sh.means}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {lens === 'finance' && <Lines heading={CHAIN_COPY.panel.linesHeading} lines={band.lines} />}
       {joints.length > 0 && (
         <div className="mt-4">
           <h4 className={KICKER}>{CHAIN_COPY.panel.ridesHeading}</h4>
@@ -241,18 +276,50 @@ function ConditionLine({ heading, text, lead }: { heading: string; text: string;
  * the essays. All in the voice that is on. The lever line always names the
  * lever, because which of the three levers moves an element is structure,
  * not diagnosis; what the lever does here is the owner's sentence.
+ *
+ * Two things the panel now says before the reading, and both are refusals.
+ *
+ *   BASIS. A mark is a promise of a diagnosis, and most of these marks are
+ *   scenarios set from worked examples with their four lines unwritten. A
+ *   panel that omitted the empty lines and said nothing else made sixteen
+ *   illustrations look like sixteen findings — concise, and settled.
+ *
+ *   WHAT THE STATUS READS ON. Stuck, Moving and Unpriced measure an obstacle,
+ *   an activity and a payment condition. They are not three values of one
+ *   dial, and an element can be more than one at once.
  */
 function ConditionReading({ id, condition }: { id: string; condition: Condition }) {
   const { shift, lens } = useContext(ChainLensContext);
   const articles = shiftTarget(shift, id)?.articles ?? [];
   const line = (note: typeof condition.now) => (isWritten(note, lens) ? note[lens] : '');
+  const basis = BASIS[condition.basis];
+  const mechanism = condition.mechanism && condition.mechanism !== 'price' ? MECHANISMS[condition.mechanism] : null;
   return (
     <div data-condition={id} data-voice={lens}>
-      <p className="mt-3 text-sm text-muted-foreground">{STATUS[condition.status].means}</p>
+      <div
+        className="mt-3 border-l-2 border-border pl-3"
+        data-basis={condition.basis}
+      >
+        <p className="text-[11px] font-semibold uppercase tracking-wider text-foreground">{basis.label}</p>
+        <p className="mt-0.5 text-sm text-muted-foreground">{basis.means}</p>
+      </div>
+      <p className="mt-3 text-sm text-foreground">{STATUS[condition.status].means}</p>
+      <p className="mt-1 text-sm text-muted-foreground">{STATUS[condition.status].reads}</p>
       <ConditionLine heading={CHAIN_COPY.panel.now} text={line(condition.now)} />
       <ConditionLine heading={CHAIN_COPY.panel.holds} text={line(condition.holds)} />
       <ConditionLine heading={CHAIN_COPY.panel.lever} lead={LEVERS[condition.lever].label} text={line(condition.action)} />
+      {/* The lever is what the MAP can draw. Where something else is doing the
+          work, the panel says which, so a capacity or contract problem is not
+          silently relabelled as a repricing. */}
+      {mechanism && (
+        <p className="mt-1.5 border-l-2 border-border pl-3 text-sm text-muted-foreground" data-mechanism={condition.mechanism}>
+          <span className="font-medium text-foreground">{mechanism.label}.</span> {mechanism.means}
+        </p>
+      )}
       <ConditionLine heading={CHAIN_COPY.panel.funds} text={line(condition.funds)} />
+      {isWritten(condition.funds, lens) && (
+        <p className="mt-1 pl-0 text-xs text-muted-foreground">{CHAIN_COPY.panel.fundsRoles}</p>
+      )}
       <div className="mt-4" data-shift-articles={id}>
         <h4 className={KICKER}>{CHAIN_COPY.panel.articlesHeading}</h4>
         {articles.length === 0 ? (
@@ -269,6 +336,10 @@ function ConditionReading({ id, condition }: { id: string; condition: Condition 
           </ul>
         )}
       </div>
+
+      <p className="mt-4 border-t border-border pt-3 text-xs text-muted-foreground">
+        {STATUS_NOTE} Reviewed {fullDate(CONDITION_AS_OF)}.
+      </p>
     </div>
   );
 }

@@ -3,7 +3,9 @@ import { PageLayout } from '@/components/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
 import { GREEN_TRANSITION_TABS } from '@/data/greenTransitionTabs';
 import { WhatChangedPanel } from '@/components/tracker/WhatChangedPanel';
-import { trackerIssues, SECTION_META } from '@/data/trackerIssues';
+import { trackerIssues, SECTION_META, READING_META, EVIDENCE_LABEL } from '@/data/trackerIssues';
+import { CorrectionNotice } from '@/components/tracker/TrackerEvidence';
+import { CoverageNotice } from '@/components/tracker/CoverageNotice';
 import { formatDate } from '@/lib/formatDate';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 
@@ -70,15 +72,38 @@ export default function GreenTransitionTrackerDetail() {
           Transition Tracker
         </Link>
 
-        {/* Issue header */}
+        <CoverageNotice />
+
+        {/* Issue header. A one-word quarterly label is a verdict, so the two
+            sentences under it are not decoration: one says what the word
+            claims, the other says what it is not entitled to claim. */}
         <div className="space-y-2">
           <p className="font-mono text-xs text-muted-foreground uppercase tracking-widest">
-            {issue.label} · {issue.publishedAt}
+            {issue.label} · Covering {issue.periodCovered} · Published {formatDate(issue.publishedAt)}
           </p>
           <p className="text-xl font-semibold text-foreground">
             Directional Reading: {issue.directionalReading}
           </p>
+          <p className="text-[15px] leading-relaxed text-muted-foreground max-w-[640px]">
+            {READING_META[issue.directionalReading].means}
+          </p>
+          <p className="text-[15px] leading-relaxed text-muted-foreground max-w-[640px]">
+            {READING_META[issue.directionalReading].excludes}
+          </p>
+          {issue.readingBasis && (
+            <p className="text-[14px] leading-relaxed text-muted-foreground max-w-[640px] pt-1">
+              <span className="font-mono text-xs uppercase tracking-wider">Read from: </span>
+              {issue.readingBasis}
+            </p>
+          )}
         </div>
+
+        {issue.corrections?.map((correction) => (
+          <CorrectionNotice
+            key={correction.issuedAt + correction.claim.slice(0, 24)}
+            correction={correction}
+          />
+        ))}
 
         {/* What Changed */}
         <WhatChangedPanel
@@ -126,6 +151,9 @@ export default function GreenTransitionTrackerDetail() {
                         <div className="flex items-center gap-3">
                           <span className="text-xs font-mono text-muted-foreground/70">
                             {formatDate(entry.publishedAt)}
+                          </span>
+                          <span className="text-xs font-mono uppercase tracking-wider text-muted-foreground/70">
+                            {EVIDENCE_LABEL[entry.evidence ?? 'unsupported']}
                           </span>
                         </div>
                       </div>

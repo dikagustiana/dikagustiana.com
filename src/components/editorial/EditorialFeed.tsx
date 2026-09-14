@@ -62,7 +62,7 @@ export function EditorialFeed({ section, topics = [], getEssayUrl }: EditorialFe
 
       // Non-admin users only see published essays
       if (!isAdmin) {
-        query = query.eq('status', 'published');
+        query = query.eq('published', true);
       }
 
       const { data, error } = await query.order('created_at', { ascending: false });

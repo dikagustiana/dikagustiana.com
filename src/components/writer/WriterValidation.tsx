@@ -2,6 +2,7 @@ import { CheckCircle, XCircle, AlertTriangle, Image as ImageIcon } from 'lucide-
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { validateFigures, extractFiguresFromContent } from '@/lib/figureValidation';
+import { genreOf, type Genre } from '@/data/genres';
 
 export interface ValidationResult {
   canPublish: boolean;
@@ -21,6 +22,13 @@ interface ValidateParams {
   categoryId?: string;
   /** Curriculum lesson type; undefined/null for editorial essays. */
   lessonType?: string | null;
+  /**
+   * The declared genre, from `presentation.genre`. Optional: a piece that
+   * declares nothing gets the default profile, which is the old behaviour.
+   */
+  genre?: string | null;
+  /** Present when this publish materially revises something already published. */
+  revisionNote?: string | null;
 }
 
 /**
@@ -39,7 +47,22 @@ interface ValidateParams {
  */
 const TAKEAWAYS_ADVISORY_LESSON_TYPES = new Set(['case-study', 'exercise', 'model-walkthrough']);
 
-const MIN_WORD_COUNT = 500;
+/**
+ * The default profile, for a piece that declares no genre: exactly the old
+ * rules, so nothing that could be published yesterday is blocked today.
+ *
+ * What the genre profiles change is the SHAPE of the gate, not its strictness.
+ * A correction gets a much lower word floor and no takeaway requirement, and
+ * in exchange it must cite a source and say what it changes — which the old
+ * gate never asked of anything. An argued position must cite a source for the
+ * same reason: it makes claims about the present world, and a 500-word floor
+ * is not evidence.
+ */
+const DEFAULT_PROFILE: Pick<Genre, 'minWords' | 'takeaways' | 'sources'> = {
+  minWords: 500,
+  takeaways: 'required',
+  sources: 'optional',
+};
 
 export function validateEssay({
   title,
@@ -51,9 +74,13 @@ export function validateEssay({
   content,
   categoryId,
   lessonType,
+  genre,
+  revisionNote,
 }: ValidateParams): ValidationResult {
   const errors: { field: string; message: string }[] = [];
   const warnings: { field: string; message: string }[] = [];
+  const declared = genreOf(genre);
+  const profile = declared ?? DEFAULT_PROFILE;
 
   // Required: Title
   if (!title.trim()) {
@@ -74,7 +101,8 @@ export function validateEssay({
   // a null, empty, or UNKNOWN lesson type stays strict — only the three
   // explicitly artefact-shaped types relax to advisory.
   const filledTakeaways = keyTakeaways.filter(k => k.trim()).length;
-  const takeawaysAdvisory = !!lessonType && TAKEAWAYS_ADVISORY_LESSON_TYPES.has(lessonType);
+  const takeawaysAdvisory =
+    profile.takeaways === 'optional' || (!!lessonType && TAKEAWAYS_ADVISORY_LESSON_TYPES.has(lessonType));
   if (filledTakeaways > 0 && filledTakeaways < 3) {
     // Half-filled is an error under EVERY type.
     errors.push({
@@ -85,7 +113,9 @@ export function validateEssay({
     if (takeawaysAdvisory) {
       warnings.push({
         field: 'keyTakeaways',
-        message: `No key takeaways. Optional for a ${lessonType}, but three sharpen the landing.`,
+        message: declared
+          ? `No key takeaways. Optional for a ${declared.label.toLowerCase()}, but three sharpen the landing.`
+          : `No key takeaways. Optional for a ${lessonType}, but three sharpen the landing.`,
       });
     } else {
       errors.push({
@@ -95,11 +125,14 @@ export function validateEssay({
     }
   }
 
-  // Required: Minimum word count
-  if (wordCount < MIN_WORD_COUNT) {
-    errors.push({ 
-      field: 'content', 
-      message: `Body must be at least ${MIN_WORD_COUNT} words (${wordCount}/${MIN_WORD_COUNT})` 
+  // Length, scaled to what the piece is for. A bounded correction that pads to
+  // 500 words to clear a gate has buried the three sentences that matter.
+  if (wordCount < profile.minWords) {
+    errors.push({
+      field: 'content',
+      message: declared
+        ? `A ${declared.label.toLowerCase()} needs at least ${profile.minWords} words (${wordCount}/${profile.minWords})`
+        : `Body must be at least ${profile.minWords} words (${wordCount}/${profile.minWords})`,
     });
   }
 
@@ -110,11 +143,36 @@ export function validateEssay({
   errors.push(...figureValidation.errors);
   warnings.push(...figureValidation.warnings);
 
-  // Warning: No references on Green Transition posts
-  if (section === 'green-transition' && references.length === 0) {
-    warnings.push({ 
-      field: 'references', 
-      message: 'Green Transition posts should include references' 
+  // Evidence, scaled to the claim the piece is making.
+  //
+  // A non-empty reference list does not make a claim true, and this cannot
+  // check that it does. What it can do is refuse to let a piece that asserts
+  // things about the present world go out with no source at all, which the old
+  // gate permitted everywhere except one advisory warning on one section.
+  if (references.length === 0) {
+    if (profile.sources === 'required') {
+      errors.push({
+        field: 'references',
+        message: declared
+          ? `A ${declared.label.toLowerCase()} makes claims about the world as it is now. Name at least one source.`
+          : 'Name at least one source for the factual claims in this piece.',
+      });
+    } else if (profile.sources === 'expected' || section === 'green-transition') {
+      warnings.push({
+        field: 'references',
+        message: 'No sources listed. Anything asserted about the present state of the world needs one.',
+      });
+    }
+  }
+
+  // A correction that does not say what it changes is not a correction. This
+  // is an error rather than a prompt because declaring the genre IS the author
+  // saying the change is material; only they can decide that, and once they
+  // have, the note is the whole point of the piece.
+  if (declared?.id === 'correction' && !revisionNote?.trim()) {
+    errors.push({
+      field: 'revisionNote',
+      message: 'A correction has to say what changed and what it does to the conclusion.',
     });
   }
 
@@ -197,7 +255,10 @@ export function WriterValidation({ validation }: WriterValidationProps) {
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle className="h-4 w-4 text-primary" />
-              <span>500+ words</span>
+              {/* Not "500+": the floor depends on what the piece is for, and
+                  printing one number for all of them was how a bounded
+                  correction came to need padding. */}
+              <span>Long enough for what this piece is</span>
             </div>
             <div className="flex items-center gap-2">
               <ImageIcon className="h-4 w-4 text-primary" />

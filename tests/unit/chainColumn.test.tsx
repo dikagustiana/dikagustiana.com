@@ -162,8 +162,20 @@ describe('the column', () => {
     const credit = within(list).getByRole('button', { name: /Credit and working capital/ });
     await userEvent.click(credit);
     const panel = region('Credit and working capital');
-    expect(within(panel).getByText(/Finance income and finance cost/)).toBeInTheDocument();
+    expect(within(panel).getByText(BANDS.find((b) => b.id === 'band-credit')!.read.economy)).toBeInTheDocument();
     expect(credit).toHaveAttribute('aria-expanded', 'true');
+    // The statement lines belong to the close reading; the column obeys the
+    // same rule as the plate, because it renders the same panel.
+    expect(within(panel).queryByText(/Finance income and finance cost/)).not.toBeInTheDocument();
+
+    // The sheet is a modal, so the distance control is not reachable while it
+    // is open: close, switch, reopen.
+    await userEvent.click(screen.getByRole('button', { name: CHAIN_COPY.panel.close }));
+    await userEvent.click(word('finance'));
+    await userEvent.click(screen.getByRole('button', { name: /Credit and working capital/ }));
+    expect(
+      within(region('Credit and working capital')).getByText(/Finance income and finance cost/),
+    ).toBeInTheDocument();
   });
 
   it('cuts the chain with the two border lines at their joints', () => {

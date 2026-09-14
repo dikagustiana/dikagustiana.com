@@ -4,6 +4,7 @@ import { SEO } from '@/components/SEO';
 import { GREEN_TRANSITION_TABS } from '@/data/greenTransitionTabs';
 import { trackerIssues, SECTION_META, SectionKey } from '@/data/trackerIssues';
 import { formatDate } from '@/lib/formatDate';
+import { CorrectionNotice, EvidenceNote } from '@/components/tracker/TrackerEvidence';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 
 export default function GreenTransitionTrackerEssay() {
@@ -113,6 +114,23 @@ export default function GreenTransitionTrackerEssay() {
           {/* Divider */}
           <div className="border-t border-border/50 mb-10" />
 
+          {/* Corrections, BEFORE the text they correct. A correction printed
+              after the claim is a footnote; printed before it, it is the
+              reading instruction. The body below is unedited on purpose. */}
+          {entry.corrections?.map((correction) => (
+            <CorrectionNotice
+              key={correction.issuedAt + correction.claim.slice(0, 24)}
+              correction={correction}
+              className="mb-8 max-w-[620px]"
+            />
+          ))}
+
+          {entry.corrections && entry.corrections.length > 0 && (
+            <p className="text-xs font-mono uppercase tracking-widest text-muted-foreground mb-4">
+              As published {formatDate(entry.publishedAt)} — unedited
+            </p>
+          )}
+
           {/* Body */}
           <div>
             {paragraphs.map((p, i) => (
@@ -144,6 +162,8 @@ export default function GreenTransitionTrackerEssay() {
               </div>
             )
           )}
+
+          <EvidenceNote status={entry.evidence} sources={entry.sources} />
 
           {/* Prev / Next within section — hidden if only one entry */}
           {(prevEntry || nextEntry) && (
