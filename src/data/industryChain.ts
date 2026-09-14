@@ -1721,6 +1721,22 @@ export const CHAIN_COPY = {
     middle: ' or the ',
     after: ' — one at a time, over the same chain. What a shift marks is my reading of where the chain stands, not part of its anatomy.',
   },
+  /**
+   * WHAT OPENS, said once in the introduction rather than drawn as a legend.
+   *
+   * The plate has a hundred shapes and four of them are doors. A sighted
+   * reader with a mouse discovers which by moving the pointer around until
+   * something reacts; a reader using a keyboard or a touchscreen has no such
+   * sweep, and a prominent box reads as the main doorway when the small
+   * diamond beside it is the one carrying the reading. So the doors are named.
+   *
+   * The last clause is a limitation stated rather than papered over: the
+   * static geometry explains itself on hover and there is no equivalent for a
+   * pointer that does not hover. Putting a hundred decorative paths into the
+   * tab order is not the fix, and neither is pretending every box is a button.
+   */
+  doorsLead:
+    'Two things open: a diamond on the chain, and a band beneath it \u2014 each gives the margin cut there, read at the distance that is on. Under a shift, a numbered disc opens my reading of what that shift does to the element it sits on. The rest of the plate names itself under the pointer.',
   /** One line over the map, in place of the footnote it replaces. */
   scopeLead:
     'Functions, not firms: one company can occupy several. Control of the goods, not legal title, decides principal from agent. Routes are illustrative across sectors.',
@@ -1863,5 +1879,14 @@ export const CHAIN_COPY = {
     layerHide: 'Hide layer',
     /** Inside an isolated reading at the finance distance. */
     isolated: 'The rest of the chain has stepped back. Close the reading to bring it back.',
+    /**
+     * Said beside the controls while any layer is switched off, with the one
+     * thing a faded band must never be read as meaning. Hiding a layer thins
+     * the DRAWING so two layers can be compared; it does not say the service
+     * has stopped being bought, or that the constraint on it has gone.
+     */
+    layersHidden: (n: number) =>
+      `${n === 1 ? 'One layer is' : `${n} layers are`} hidden from the drawing \u2014 which changes what is drawn, not whether the service is bought or whether its constraint has gone.`,
+    showAllLayers: 'Show every layer',
   },
 } as const;

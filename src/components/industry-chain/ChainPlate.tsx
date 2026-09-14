@@ -145,6 +145,30 @@ function ShiftWord({ id, active, onToggle, children }: { id: ShiftId; active: bo
 const canOpen = (id: string | null, shift: ShiftId | null): boolean =>
   id !== null && (isDoor(id) || (shift !== null && markNumber(shift, id) > 0));
 
+/** No layer switched off. One frozen instance, so restoring the overview is a no-op when it already is. */
+const EMPTY_HIDDEN: ReadonlySet<string> = new Set();
+
+/**
+ * Where focus should go back to, given what the reader actually pressed.
+ *
+ * A joint's chip is a deliberate non-button: it is `aria-hidden`, outside the
+ * tab order, and it opens the same door the diamond does so a reader who lands
+ * on the word is not one target away from the reading. What that costs is a
+ * return path — calling focus() on an element a browser cannot focus does
+ * nothing, so closing a reading opened from a chip dropped focus to <body> and
+ * a keyboard reader was returned to the top of the document. Reproduced on
+ * /about at 1348x936 on 14 September 2026.
+ *
+ * So a chip hands back its joint, which is the door in the tab order and the
+ * one the reader means. Anything else is returned as it came.
+ */
+function focusableTrigger(trigger: Element | null): Element | null {
+  const chip = trigger?.closest?.('.cp-joint-chip');
+  if (!chip) return trigger;
+  const id = chip.getAttribute('data-for');
+  return (id ? chip.ownerDocument.querySelector(`.cp-hit[data-id="${id}"]`) : null) ?? trigger;
+}
+
 /**
  * The one reading on this map written against evidence rather than as an
  * illustration, and the state it is written in: the Energy layer, read as
@@ -207,7 +231,7 @@ export function ChainPlate({
   const [shift, setShift] = useState<ShiftId | null>(fromUrl.shift ?? initialShift);
   const [selected, setSelected] = useState<string | null>(fromUrl.node);
   const [hovered, setHovered] = useState<Hovered | null>(null);
-  const [hidden, setHidden] = useState<ReadonlySet<string>>(() => new Set());
+  const [hidden, setHidden] = useState<ReadonlySet<string>>(EMPTY_HIDDEN);
   // The preview opens short — unless the address asks for something the short
   // plate cannot draw, in which case it opens into exactly that.
   //
@@ -274,7 +298,7 @@ export function ChainPlate({
       // about to be re-rendered with it — so the door the reader actually
       // came through stays the one Close returns to.
       const panel = document.getElementById(panelId);
-      if (!(trigger && panel?.contains(trigger))) triggerRef.current = trigger;
+      if (!(trigger && panel?.contains(trigger))) triggerRef.current = focusableTrigger(trigger);
       setSelected((current) => (current === id ? null : id));
     },
     [panelId],
@@ -553,6 +577,24 @@ export function ChainPlate({
                 {selected && ` · ${targetLabel(selected)}`}
               </span>
             </div>
+            {/* A switched-off layer fades to near nothing and keeps its place,
+                which is what makes it useful for comparing two layers — and
+                what makes it easy to read as a claim. It is not one: the
+                service is still bought and its constraint has not gone. Said
+                here, with the way back, only while any layer is off. */}
+            {hidden.size > 0 && (
+              <p className="mt-2 flex flex-wrap items-baseline gap-x-3 text-sm text-muted-foreground" data-chain-hidden-layers>
+                <span>{CHAIN_COPY.controls.layersHidden(hidden.size)}</span>
+                <button
+                  type="button"
+                  data-chain-control="layers"
+                  onClick={() => setHidden(EMPTY_HIDDEN)}
+                  className={cn('min-h-11 border-b border-transparent text-foreground hover:border-foreground', FOCUS)}
+                >
+                  {CHAIN_COPY.controls.showAllLayers}
+                </button>
+              </p>
+            )}
           </>
         )}
 
@@ -582,9 +624,14 @@ export function ChainPlate({
           </div>
         )}
         {!showCompact && (
-          <p className="mt-3 text-sm leading-relaxed text-muted-foreground" data-chain-scope>
-            {CHAIN_COPY.scopeLead}
-          </p>
+          <>
+            <p className="mt-3 text-sm leading-relaxed text-muted-foreground" data-chain-doors>
+              {CHAIN_COPY.doorsLead}
+            </p>
+            <p className="mt-2 text-sm leading-relaxed text-muted-foreground" data-chain-scope>
+              {CHAIN_COPY.scopeLead}
+            </p>
+          </>
         )}
         {/* A numbered disc reads as a ranking unless something says otherwise,
             and these numbers are positions on the drawing that renumber when

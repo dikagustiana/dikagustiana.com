@@ -71,6 +71,10 @@ test('/about at 1280px draws one wide plate whose names are readable, with every
   await expect(page.locator('svg.cp-svg--wide')).toHaveCount(1);
   await expect(page.locator('.cp-column')).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Manufacturing → distribution' })).toHaveCount(1);
+  // Which of the plate's hundred shapes are doors, said in the introduction
+  // rather than drawn as a legend — a reader without a pointer to sweep with
+  // cannot discover them by moving one around.
+  await expect(page.locator('[data-chain-doors]')).toContainText('Two things open');
   // Nothing under the plate: the figure is the last child of the component.
   expect(await page.locator('.chain-plate > figure + *').count()).toBe(0);
 
@@ -100,7 +104,18 @@ test('/about at 1280px draws one wide plate whose names are readable, with every
   });
   expect(inside).toBe(true);
 
+  // A chip is a deliberate non-button — aria-hidden, outside the tab order —
+  // so that a reader who lands on the word is not one target away from the
+  // reading. Closing a reading it opened has to hand focus to the joint, not
+  // to <body>: focus() on an unfocusable element does nothing at all.
+  await page.locator('.cp-joint-chip[data-for="j-wholesale-retail"]').click({ force: true });
+  await expect(page.getByRole('region', { name: 'Wholesale → retail' })).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.locator('.cp-hit[data-id="j-wholesale-retail"]')).toBeFocused();
+
   // A reading covers part of the plate while it is open; the doors under it come back when it closes.
+  await page.getByRole('button', { name: 'Processing → trader / importer' }).click();
+  await expect(page.getByRole('region', { name: 'Processing → trader / importer' })).toBeVisible();
   await page.keyboard.press('Escape');
   await expect(page.getByRole('region', { name: 'Processing → trader / importer' })).toHaveCount(0);
   await page.getByRole('button', { name: 'Logistics and warehousing', exact: true }).click();
@@ -208,10 +223,55 @@ test('/about at 1280px: the distance re-reads every chip, a shift draws one over
   await expect(page.locator('.chain-plate')).toHaveAttribute('data-isolate', 'j-wholesale-retail');
   await expect(page.locator('.cp-base [data-id="node-wholesaler"][data-dim]')).toHaveCount(0);
   await expect(page.locator('.cp-base [data-id="stage-processing"][data-dim]')).toHaveCount(1);
-  const dimmed = await page.locator('.cp-base [data-id="stage-processing"]').evaluate((el) => Number(getComputedStyle(el).opacity));
-  expect(dimmed).toBeLessThan(0.3);
+  // What steps back is the GEOMETRY. A group faded as a whole takes its labels
+  // with it, and a reader choosing the next comparison has to read what is
+  // there — so the shapes recede and the names stay legible a step behind.
+  // Polled: the base geometry transitions its opacity, and a reading taken
+  // mid-transition is a reading of the transition.
+  const stepped = () =>
+    page.locator('.cp-base [data-id="stage-processing"]').evaluate((el) => {
+      const eff = (n: Element | null) => {
+        let acc = 1;
+        for (let e = n; e && e !== document.body; e = e.parentElement) acc *= Number(getComputedStyle(e).opacity);
+        return acc;
+      };
+      return { shape: eff(el.querySelector('rect')), label: eff(el.querySelector('text')) };
+    });
+  await expect.poll(async () => (await stepped()).shape).toBeLessThan(0.2);
+  const label = (await stepped()).label;
+  expect(label).toBeGreaterThan(0.3);
+  expect(label).toBeLessThan(0.8);
+
+  // A faded door is still a door: keyboard focus brings it back whole, so its
+  // focus ring is a focus ring and not a tenth of one.
+  await page.locator('.cp-hit[data-id="j-processing-trader"]').focus();
+  // Through the keyboard, not through focus(): :focus-visible is the whole
+  // point of the rule, and a scripted focus does not always satisfy it.
+  await page.keyboard.press('Shift+Tab');
+  await page.keyboard.press('Tab');
+  await expect
+    .poll(() =>
+      page.locator('.cp-hit[data-id="j-processing-trader"]').evaluate((el) => {
+        let acc = 1;
+        for (let e: Element | null = el.querySelector('.cp-joint-mark'); e && e !== document.body; e = e.parentElement) acc *= Number(getComputedStyle(e).opacity);
+        return acc;
+      }),
+    )
+    .toBe(1);
+
   await page.keyboard.press('Escape');
   await expect(page.locator('[data-dim]')).toHaveCount(0);
+
+  // A switched-off layer fades and keeps its place, which is what makes it
+  // useful and what makes it easy to misread. It says what it means, and the
+  // way back to the whole drawing is beside the control that thinned it.
+  await page.locator('.cp-switch[data-switch="band-logistics"]').click();
+  const notice = page.locator('[data-chain-hidden-layers]');
+  await expect(notice).toContainText('not whether the service is bought');
+  await expect(page.locator('.cp-band-hit[data-id="band-logistics"][data-hidden]')).toHaveCount(1);
+  await page.getByRole('button', { name: 'Show every layer' }).click();
+  await expect(page.locator('[data-hidden]')).toHaveCount(0);
+  await expect(notice).toHaveCount(0);
 });
 
 test('/about at 1280px: the marks are an index onto the overlay, the label pins beside the pointer without covering a box, and the reading opens beside its mark', async ({ page }) => {
