@@ -107,6 +107,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Search, Clock, User, Calendar } from 'lucide-react';
+import { ErrorState } from '@/components/states';
 
 interface Essay {
   id: string;
@@ -131,42 +132,39 @@ function GreenTransitionPhaseFeed({ phase, getEssayUrl }: GreenTransitionPhaseFe
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('newest');
 
-  // Fetch essays via category FK chain: categories.section_id → sections
-  // Step 1: Find the category matching this phase under green-transition section
-  const { data: essays, isLoading } = useQuery({
-    queryKey: ['green-transition-phase', phase],
+  /**
+   * Essays in this phase.
+   *
+   * This used to try the category FK chain first and fall back to the
+   * denormalised section+phase columns. The first branch could never fire:
+   * the projection selected `id` and the joined section's slug and NOT the
+   * category's own `slug`, then filtered on `c.slug`, which was therefore
+   * always undefined. `categoryIds` came back empty every time, so the
+   * fallback ran on every request and the category path was dead code that
+   * looked like a working preference.
+   *
+   * Rather than repair a preference nobody could observe working, this reads
+   * the one path that was actually serving the page. `section` and `phase` are
+   * the columns essayUrl and the writer both use for placement, so this now
+   * matches how the rest of the site resolves an essay's home. If the category
+   * chain is ever wanted as the authority, it needs a deliberate migration and
+   * its own test — not a silent first branch.
+   *
+   * The publication filter is `published`, the column RLS gates on; it stays
+   * belt-and-braces over RLS for a reader and is lifted for an admin, who is
+   * entitled to see drafts and needs to.
+   */
+  const { data: essays, isLoading, isError, refetch } = useQuery({
+    queryKey: ['green-transition-phase', phase, isAdmin],
     queryFn: async () => {
-      // Find categories for green-transition section that match this phase
-      const { data: cats } = await supabase
-        .from('categories')
-        .select('id, sections!categories_section_id_fkey(slug)')
-        .eq('sections.slug', 'green-transition');
-
-      // Filter categories whose slug matches the phase pattern
-      const categoryIds = (cats || [])
-        .filter((c: any) => {
-          const slug = (c as any).slug || '';
-          return slug === `green-transition-${phase}` || slug === phase;
-        })
-        .map((c: any) => c.id);
-
-      // Fallback: use denormalized section+phase if no categories found yet
-      let query;
-      if (categoryIds.length > 0) {
-        query = supabase
-          .from('essays')
-          .select('id, slug, title, snippet, author, date, read_time, thumbnail_url, phase, status')
-          .in('category_id', categoryIds);
-      } else {
-        query = supabase
-          .from('essays')
-          .select('id, slug, title, snippet, author, date, read_time, thumbnail_url, phase, status')
-          .eq('section', 'green-transition')
-          .eq('phase', phase);
-      }
+      let query = supabase
+        .from('essays')
+        .select('id, slug, title, snippet, author, date, read_time, thumbnail_url, phase, status')
+        .eq('section', 'green-transition')
+        .eq('phase', phase);
 
       if (!isAdmin) {
-        query = query.eq('status', 'published');
+        query = query.eq('published', true);
       }
 
       const { data, error } = await query.order('created_at', { ascending: false });
@@ -227,6 +225,19 @@ function GreenTransitionPhaseFeed({ phase, getEssayUrl }: GreenTransitionPhaseFe
     );
   }
 
+  // A failed query and an empty phase are different facts, and they used to
+  // render the same sentence: "No essays found in this phase yet." A reader
+  // told that during an outage learns something false about the writing.
+  if (isError) {
+    return (
+      <ErrorState
+        title="Couldn't load this phase"
+        message="This page couldn't reach the essay index, so it cannot say what is in this phase. Try again in a moment."
+        onRetry={() => refetch()}
+      />
+    );
+  }
+
   return (
     <div className="space-y-8">
       {/* Filters */}
@@ -258,7 +269,7 @@ function GreenTransitionPhaseFeed({ phase, getEssayUrl }: GreenTransitionPhaseFe
 
       {filteredEssays.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-muted-foreground">No essays found in this phase yet.</p>
+          <p className="text-muted-foreground">Nothing is published in this phase yet.</p>
         </div>
       ) : (
         <div className="divide-y divide-border">

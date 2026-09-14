@@ -21,6 +21,7 @@ import { ArticleShell } from '@/components/editorial';
 import { contentToHtml } from '@/lib/tiptap/serialize';
 import { resolvePresentation, type EssayPresentation } from '@/lib/presentation';
 import { essayUrl, universalEssayUrl } from '@/lib/essayUrl';
+import { sectionLabel } from '@/lib/sectionLabels';
 import NotFound from './NotFound';
 
 interface Row {
@@ -92,7 +93,7 @@ export default function EssayBySlug() {
     return (
       <ErrorState
         title="Couldn't load this essay"
-        message="The essay is still there — this page just couldn't reach the database. Check your connection and try again."
+        message="This page couldn't reach the database, so it cannot tell whether this essay is here. Check your connection and try again."
         onRetry={() => refetch()}
       />
     );
@@ -148,8 +149,11 @@ export default function EssayBySlug() {
       references={presentation.references}
       authorBio={presentation.author_bio}
       currentEssayId={essay.id}
-      section="finance"
-      topic={essay.section}
+      // The ESSAY's section, not a literal. This prop is what RelatedEssays
+      // queries on, so hard-coding "finance" showed a placement-less
+      // next-big-thing essay three finance essays under "Continue reading".
+      section={essay.section}
+      topic={sectionLabel(essay.section)}
     />
   );
 }

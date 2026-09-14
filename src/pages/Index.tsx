@@ -11,6 +11,7 @@ import { HeroSection } from '@/components/HeroSection';
 import { IndustryChainPreview } from '@/components/industry-chain';
 import { ReadingPath } from '@/components/argument/ReadingPath';
 import { useSectionCounts } from '@/hooks/queries/useSectionCounts';
+import { sectionLabel } from '@/lib/sectionLabels';
 
 /**
  * The Sections list: titles and destinations, nothing else.
@@ -67,22 +68,7 @@ function sectionStanding(loaded: boolean, count: number | undefined, alsoHolds?:
   return alsoHolds ? `${essays} \u00b7 ${alsoHolds}` : essays;
 }
 
-/**
- * A section slug is not a label. Falling through to the raw slug printed
- * "finance" and "accounting" in lower case on the card badges, beside two
- * hand-written ones — which reads as an unfinished mapping, because it was.
- */
-const SECTION_LABELS: Record<string, string> = {
-  finance: 'Finance',
-  accounting: 'Accounting',
-  'green-transition': 'Green Transition',
-  'next-big-thing': 'The Next Big Thing',
-  'development-finance': 'Development Finance',
-  'critical-thinking': 'Critical Thinking',
-  'critical-thinking-research': 'Critical Thinking',
-};
 
-const getSectionLabel = (section: string) => SECTION_LABELS[section] ?? section;
 
 
 const Index = () => {
@@ -135,7 +121,7 @@ const Index = () => {
                   <Card className="h-full hover:shadow-lg transition-[transform,box-shadow] hover:-translate-y-1 cursor-pointer group">
                     <CardContent className="p-5">
                       <Badge variant="secondary" className="mb-3 text-xs">
-                        {getSectionLabel(essay.section)}
+                        {sectionLabel(essay.section)}
                       </Badge>
                       <h3 className="font-semibold text-foreground mb-2 line-clamp-2 group-hover:text-accent transition-colors">
                         {essay.title}

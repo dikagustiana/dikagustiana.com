@@ -44,3 +44,17 @@ export const PUBLISHED_COLUMN = 'published' as const;
 export function onlyPublished<T extends { eq(column: string, value: unknown): T }>(query: T): T {
   return query.eq(PUBLISHED_COLUMN, true);
 }
+
+/**
+ * Whether a fetched row is published for a reader.
+ *
+ * Same rule, applied to a row already in hand rather than to a query. The
+ * essay pages used `row.status === 'published'` to decide whether to show a
+ * non-admin the essay, which is a SECOND gate behind RLS keyed on a field RLS
+ * does not read: a row RLS served (`published = true`) whose `status` had
+ * drifted would be hidden from the reader who is entitled to it, and the page
+ * would say "not found" about an essay that is published.
+ */
+export function isPublished(row: { published?: boolean | null }): boolean {
+  return row.published === true;
+}

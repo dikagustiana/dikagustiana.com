@@ -21,6 +21,7 @@ import { LoadingState, ErrorState } from '@/components/states';
 import { ArticleShell, ArticleLayout } from '@/components/editorial';
 import { LongformArticleShell } from '@/components/editorial/LongformArticleShell';
 import { contentToHtml } from '@/lib/tiptap/serialize';
+import { isPublished } from '@/lib/publication';
 
 interface Essay {
   id: string;
@@ -108,8 +109,7 @@ export default function FinanceEssayPage() {
       }
 
       if (data) {
-        const isPublished = data.status === 'published';
-        if (!isPublished && !isAdmin) {
+        if (!isPublished(data) && !isAdmin) {
           setNotFound(true);
           setEssay(null);
         } else {
@@ -135,7 +135,7 @@ export default function FinanceEssayPage() {
         .from('essays')
         .select('slug, title')
         .eq('module_id', (essay as any).module_id)
-        .eq('status', 'published')
+        .eq('published', true)
         .order('finance_order', { ascending: true, nullsFirst: false })
         .order('created_at', { ascending: false });
 
@@ -150,7 +150,7 @@ export default function FinanceEssayPage() {
       <div className="container min-h-[60vh] flex items-center justify-center py-16">
         <ErrorState
           title="Couldn't load this essay"
-          message="The essay is still there — this page just couldn't reach the database. Check your connection and try again."
+          message="This page couldn't reach the database, so it cannot tell whether this essay is here. Check your connection and try again."
           onRetry={loadEssay}
         />
       </div>

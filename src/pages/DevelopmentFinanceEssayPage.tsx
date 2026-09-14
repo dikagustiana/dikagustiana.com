@@ -1,6 +1,6 @@
 import NotFound from './NotFound';
 import { resolvePresentation, type EssayPresentation } from '@/lib/presentation';
-import { useParams } from 'react-router-dom';
+import { Navigate, useLocation, useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -8,6 +8,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { LoadingState, ErrorState } from '@/components/states';
 import { ArticleShell, ArticleLayout } from '@/components/editorial';
 import { contentToHtml } from '@/lib/tiptap/serialize';
+import { essayUrl, universalEssayUrl } from '@/lib/essayUrl';
+import { isPublished } from '@/lib/publication';
 
 const phaseLabels: Record<string, string> = {
   'sovereign-wealth-funds': 'Sovereign Wealth Funds',
@@ -26,6 +28,8 @@ interface Essay {
   read_time: string | null;
   thumbnail_url: string | null;
   content: string | null;
+  /** The essay's own section. This, not the route, decides where it lives. */
+  section: string;
   phase: string | null;
   status: string | null;
   published: boolean | null;
@@ -37,7 +41,8 @@ interface Essay {
 }
 
 export default function DevelopmentFinanceEssayPage() {
-  const { phase, slug } = useParams<{ phase: string; slug: string }>();
+  const { phase, slug } = useParams<{ phase?: string; slug: string }>();
+  const { pathname } = useLocation();
   const { isAdmin } = useAuth();
   const [essay, setEssay] = useState<Essay | null>(null);
   const [loading, setLoading] = useState(true);
@@ -64,7 +69,7 @@ export default function DevelopmentFinanceEssayPage() {
 
       if (error) throw error;
       if (data) {
-        if (data.status !== 'published' && !isAdmin) {
+        if (!isPublished(data) && !isAdmin) {
           setNotFound(true);
           setEssay(null);
         } else {
@@ -88,7 +93,7 @@ export default function DevelopmentFinanceEssayPage() {
         .select('slug, title')
         .eq('section', 'development-finance')
         .eq('phase', essay!.phase!)
-        .eq('status', 'published')
+        .eq('published', true)
         .order('created_at', { ascending: false });
       if (error) throw error;
       return data as { slug: string; title: string }[];
@@ -96,14 +101,12 @@ export default function DevelopmentFinanceEssayPage() {
     enabled: !!essay?.phase,
   });
 
-  const phaseLabel = phase ? phaseLabels[phase] || phase : '';
-
   if (loadError && !loading) {
     return (
       <div className="container min-h-[60vh] flex items-center justify-center py-16">
         <ErrorState
           title="Couldn't load this essay"
-          message="The essay is still there — this page just couldn't reach the database. Check your connection and try again."
+          message="This page couldn't reach the database, so it cannot tell whether this essay is here. Check your connection and try again."
           onRetry={loadEssay}
         />
       </div>
@@ -129,13 +132,39 @@ export default function DevelopmentFinanceEssayPage() {
   // NotFound also offers the nearest real essay for a near-miss slug.
   if (!essay) return <NotFound />;
 
+  /**
+   * WHERE THE ESSAY ACTUALLY LIVES. The route matched on the slug alone, so
+   * until here nothing has checked that this address is the essay's own home.
+   * Its row decides; a URL that disagrees redirects to the canonical one
+   * rather than rendering under a false section or phase. See the longer note
+   * in GreenTransitionEssayPage.
+   */
+  const canonical = essayUrl({
+    slug: essay.slug,
+    section: essay.section,
+    phase: essay.phase,
+  });
+  if (canonical && canonical !== pathname) {
+    return <Navigate to={canonical} replace />;
+  }
+  if (!canonical) {
+    return <Navigate to={universalEssayUrl(essay.slug)} replace />;
+  }
+
+  const essayPhase = essay.phase ?? '';
+  const phaseLabel = phaseLabels[essayPhase] || essayPhase;
+  const phaseHome = canonical.slice(0, canonical.lastIndexOf('/')) || '/development-finance';
+
   const currentIndex = siblings?.findIndex((e) => e.slug === slug) ?? -1;
   const previous = currentIndex > 0 ? siblings![currentIndex - 1] : null;
   const next = siblings && currentIndex >= 0 && currentIndex < siblings.length - 1
     ? siblings[currentIndex + 1]
     : null;
 
-  const getEssayUrl = (essaySlug: string) => `/development-finance/${phase}/${essaySlug}`;
+  // The essay's phase, never the URL's.
+  const getEssayUrl = (essaySlug: string) =>
+    essayUrl({ slug: essaySlug, section: 'development-finance', phase: essay.phase }) ??
+    universalEssayUrl(essaySlug);
 
   const presentation = resolvePresentation(essay);
   const deck = presentation.deck || essay.snippet;
@@ -147,8 +176,8 @@ export default function DevelopmentFinanceEssayPage() {
       seoDescription={deck || 'Development finance analysis.'}
       seoAuthor={essay.author || undefined}
       backLink={{
-        label: `Back to ${phaseLabel}`,
-        path: `/development-finance/${phase || ''}`,
+        label: `Back to ${phaseLabel || 'Development Finance'}`,
+        path: phaseHome,
       }}
       title={essay.title}
       deck={deck}

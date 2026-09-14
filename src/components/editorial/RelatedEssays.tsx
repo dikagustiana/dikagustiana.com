@@ -44,7 +44,7 @@ export function RelatedEssays({ currentEssayId, section, className }: RelatedEss
           finance_modules!essays_module_id_fkey ( slug, track_slug )
         `)
         .eq('section', section)
-        .eq('status', 'published')
+        .eq('published', true)
         .neq('id', currentEssayId)
         .order('created_at', { ascending: false })
         .limit(3);

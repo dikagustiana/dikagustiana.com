@@ -30,7 +30,7 @@ export function ChainCurriculumList({ moduleSlugs }: { moduleSlugs: string[] }) 
 
       {isError && (
         <p className="mt-3 text-sm text-muted-foreground">
-          The curriculum could not be loaded. The modules for this joint are still there; try again in a moment.
+          The curriculum could not be loaded, so this panel cannot say which modules read this joint. Try again in a moment.
         </p>
       )}
 

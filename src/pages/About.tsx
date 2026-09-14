@@ -6,14 +6,7 @@ import { PageLayout } from '@/components/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
 import { useSelectedEssays } from '@/hooks/queries/useSelectedEssays';
 import { Link } from 'react-router-dom';
-
-const sectionLabels: Record<string, string> = {
-  'green-transition': 'Green Transition',
-  'development-finance': 'Development Finance',
-  finance: 'Finance',
-  accounting: 'Accounting',
-  'next-big-thing': 'The Next Big Thing',
-};
+import { sectionLabel } from '@/lib/sectionLabels';
 
 const phaseLabels: Record<string, string> = {
   'climate-finance': 'Climate Finance',
@@ -157,9 +150,9 @@ export default function About() {
             </h2>
             <div className="divide-y divide-border">
               {selectedEssays.map((essay) => {
-                const sectionLabel = sectionLabels[essay.section] || essay.section;
+                const label0 = sectionLabel(essay.section);
                 const pLabel = essay.phase ? phaseLabels[essay.phase] : null;
-                const label = pLabel ? `${sectionLabel} · ${pLabel}` : sectionLabel;
+                const label = pLabel ? `${label0} · ${pLabel}` : label0;
 
                 return (
                   <EssayCardLink
