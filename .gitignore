@@ -43,3 +43,7 @@ supabase/.branches
 # Archives — never track source-of-truth code inside zips again
 *.zip
 backups/
+
+# The JSON report CI writes for scripts/assert-test-count.mjs. A contributor who
+# reproduces the CI step locally should not commit its output.
+vitest-report.json

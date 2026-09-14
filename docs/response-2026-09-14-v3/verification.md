@@ -125,11 +125,27 @@ apex render is therefore neither confirmed nor refuted here.
 
 | | before | after |
 | --- | --- | --- |
-| Unit (vitest) | 519 in 37 files | **525 in 37 files** |
+| Unit (vitest) | 519 in 37 files | **529 in 38 files** |
 | End-to-end (Playwright, Chromium) | 46 | **63** |
 | Typecheck | clean | clean |
 | Lint | 0 errors, 26 warnings | 0 errors, 26 warnings (all pre-existing) |
 | Generated files | — | regenerated through `npm run build:chain`; the generator was changed, never its output |
+
+**One failure this pass introduced and CI caught, recorded rather than quietly
+fixed.** `prefersReducedMotion()` checked that `window` exists but not that
+`window.matchMedia` does — jsdom has no such function, and neither do some
+embedded browsers. The first caller to reach it from inside a
+`requestAnimationFrame` (this pass's scroll-into-view) therefore threw
+`window.matchMedia is not a function` *after* the test that scheduled it had
+already passed, so vitest reported an unhandled error and a non-zero exit while
+every test still read green. The local check that missed it grepped the output
+for failures instead of reading the exit code; the CI job did not. `motion.ts`
+now guards the function as `useMediaQuery` always has, `scrollIntoView` is called
+optionally because jsdom does not implement it either, and four tests in
+`tests/unit/motion.test.ts` pin both the absent-matchMedia path and the reading
+of the query. All five CI steps — eslint at its warning ceiling, typecheck,
+vitest under `TZ=America/Chicago` with the JSON reporter, the count floor, and
+the build — were then run locally as CI runs them, each exit code checked.
 
 **Baseline failures: none.** Four tests pinned behaviour this pass deliberately
 changed — three unit and one end-to-end, covering the control coupling and the

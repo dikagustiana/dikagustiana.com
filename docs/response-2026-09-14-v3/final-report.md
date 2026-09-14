@@ -93,7 +93,7 @@ weakened, and the test-count floor rose in the same commit that added the tests.
 
 | | |
 | --- | --- |
-| Unit | **525 passing**, 37 files (was 519) |
+| Unit | **529 passing**, 38 files (was 519) |
 | End-to-end | **63 passing** (was 46) |
 | Typecheck | clean |
 | Lint | 0 errors, 26 warnings — all pre-existing |
@@ -105,6 +105,14 @@ weakened, and the test-count floor rose in the same commit that added the tests.
 Everything above ran against a local production build with **no backend**: every
 Supabase call intercepted, three essay rows seeded as a **labelled local
 fixture**. No production data was read or written.
+
+CI caught one defect this pass introduced that the local run hid:
+`prefersReducedMotion()` checked for `window` but not for `window.matchMedia`,
+so the first caller reaching it from inside a `requestAnimationFrame` threw after
+its test had already passed — an unhandled error and a non-zero exit while every
+test read green. The guard now matches `useMediaQuery`'s, which has always
+checked for both, and four tests pin it. All five CI steps were afterwards run
+locally exactly as CI runs them, each exit code read rather than grepped for.
 
 Details, measurements and the list of what was *not* exercised are in
 [`verification.md`](./verification.md).

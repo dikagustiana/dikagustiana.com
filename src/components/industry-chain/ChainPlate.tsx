@@ -395,7 +395,13 @@ export function ChainPlate({
     // already looking at the map). What it cannot do is bring the newly drawn
     // figure into view, so that happens here — and only the scroll, never the
     // focus, which would take it off the reading.
-    requestAnimationFrame(() => figureRef.current?.scrollIntoView({ block: 'start', behavior: scrollBehavior() }));
+    //
+    // An optional CALL, not merely an optional member: scrollIntoView is a
+    // browser method that jsdom and some embedded engines do not implement, and
+    // bringing the map into view is a courtesy. Nothing the reader asked for
+    // depends on it, so it must not be able to throw from inside a frame
+    // callback where no caller can catch it.
+    requestAnimationFrame(() => figureRef.current?.scrollIntoView?.({ block: 'start', behavior: scrollBehavior() }));
   }, []);
 
   // A SHARED READING ARRIVES BELOW THE FOLD. An address naming an element
@@ -411,7 +417,7 @@ export function ChainPlate({
     if (!arrivedOpen.current) return;
     arrivedOpen.current = false;
     if (typeof window === 'undefined' || window.location.hash) return;
-    const frame = requestAnimationFrame(() => figureRef.current?.scrollIntoView({ block: 'start', behavior: scrollBehavior() }));
+    const frame = requestAnimationFrame(() => figureRef.current?.scrollIntoView?.({ block: 'start', behavior: scrollBehavior() }));
     return () => cancelAnimationFrame(frame);
   }, []);
 
