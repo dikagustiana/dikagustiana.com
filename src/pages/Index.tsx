@@ -9,6 +9,8 @@ import { useSelectedEssays } from '@/hooks/queries/useSelectedEssays';
 import { LoadingState } from '@/components/states/LoadingState';
 import { HeroSection } from '@/components/HeroSection';
 import { IndustryChainPreview } from '@/components/industry-chain';
+import { ReadingPath } from '@/components/argument/ReadingPath';
+import { useSectionCounts } from '@/hooks/queries/useSectionCounts';
 
 /**
  * The Sections list: titles and destinations, nothing else.
@@ -26,12 +28,38 @@ import { IndustryChainPreview } from '@/components/industry-chain';
  *     it is an audience asset, not a top-level door.
  */
 const sections = [
-  { title: 'Finance', path: '/finance' },
-  { title: 'Accounting', path: '/accounting' },
-  { title: 'Green Transition', path: '/green-transition' },
-  { title: 'The Next Big Thing', path: '/the-next-big-thing' },
-  { title: 'Development Finance', path: '/development-finance' },
+  { title: 'Finance', path: '/finance', section: 'finance' },
+  { title: 'Accounting', path: '/accounting', section: 'accounting' },
+  {
+    title: 'Green Transition',
+    path: '/green-transition',
+    section: 'green-transition',
+    // The tracker is not in `essays`, so an essay count would report this
+    // section as entirely empty when it carries a two-issue archive. Named
+    // here rather than folded into the number.
+    alsoHolds: 'a paused tracker archive',
+  },
+  { title: 'The Next Big Thing', path: '/the-next-big-thing', section: 'next-big-thing' },
+  { title: 'Development Finance', path: '/development-finance', section: 'development-finance' },
 ];
+
+/**
+ * What is behind a door, in as few words as the truth needs.
+ *
+ * On 14 September 2026 three of these five sections held nothing at all, and
+ * the list could not show it: every row looked identical, so a stranger found
+ * the emptiness only by walking in. This is a COUNT, not a description — the
+ * rule against six sibling sentences under six headings (docs/DECISIONS.md,
+ * 2026-08-03) is about generated prose, and a number is not prose.
+ *
+ * Returns null while the count is loading: no number is better than a zero
+ * that turns into a two.
+ */
+function sectionStanding(count: number | undefined, alsoHolds?: string): string | null {
+  if (count === undefined) return null;
+  const essays = count === 0 ? 'Nothing written yet' : `${count} essay${count === 1 ? '' : 's'}`;
+  return alsoHolds ? `${essays} \u00b7 ${alsoHolds}` : essays;
+}
 
 const getSectionLabel = (section: string, phase: string | null) => {
   if (section === 'green-transition') return 'Green Transition';
@@ -44,6 +72,7 @@ const Index = () => {
   // Manual curation, not recency — recency is what put a database-rebuild
   // notice on the homepage. Zero selected essays hides the section entirely.
   const { data: featuredEssays, isLoading } = useSelectedEssays(4);
+  const { data: sectionCounts } = useSectionCounts();
 
   return (
     <PageLayout role="hybrid">
@@ -54,6 +83,12 @@ const Index = () => {
 
       {/* Hero */}
       <HeroSection />
+
+      {/* The argument, and the finite path through it. Directly under the
+          hero because the hero's only call to action points here: a stranger
+          who gives this site three minutes should meet a bounded position
+          before they meet a list of subjects or a diagram. */}
+      <ReadingPath compact />
 
       {/* The industry chain, in short — the second thing on the page. One
           button (or either lens word) swaps in the full chain in place; the
@@ -68,8 +103,12 @@ const Index = () => {
               <h2 className="text-xl font-display font-semibold text-foreground mb-2">
                 Selected Analysis
               </h2>
+              {/* Says its own sort order. This strip is a browse surface and
+                  is ordered by recency; the ARGUMENT's order is editorial and
+                  lives above, in the reading path, where publishing an
+                  unrelated essay cannot reshuffle it. */}
               <p className="text-sm text-muted-foreground">
-                Hand-picked essays across sections.
+                Hand-picked across sections, newest first. The ordered argument is above.
               </p>
             </div>
 
@@ -120,8 +159,10 @@ const Index = () => {
 
       {/* Sections list. id="sections", NOT "main-content": PageLayout's
           <main> already owns that id (the skip-link target), and the
-          duplicate made the hero CTA resolve to the page top — it scrolled
-          nowhere. Each row IS the link; there is no per-row call to action. */}
+          duplicate made an in-page link resolve to the page top instead. The
+          hero now points at #the-argument rather than here; this stays a
+          named anchor because links to it exist. Each row IS the link; there
+          is no per-row call to action. */}
       <section id="sections" className="py-16 container">
         <div className="max-w-3xl mx-auto">
           <h2 className="text-2xl font-display font-semibold text-foreground mb-6">
@@ -133,11 +174,22 @@ const Index = () => {
               <li key={section.path}>
                 <Link
                   to={section.path}
-                  className="group block py-5"
+                  className="group flex items-baseline justify-between gap-4 py-5"
                 >
                   <span className="text-lg font-display font-semibold text-foreground group-hover:text-accent transition-colors">
                     {section.title}
                   </span>
+                  {(() => {
+                    const standing = sectionStanding(
+                      sectionCounts?.[section.section],
+                      section.alsoHolds,
+                    );
+                    return standing ? (
+                      <span className="flex-shrink-0 text-xs font-mono text-muted-foreground">
+                        {standing}
+                      </span>
+                    ) : null;
+                  })()}
                 </Link>
               </li>
             ))}
