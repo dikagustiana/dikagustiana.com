@@ -83,7 +83,7 @@ test('/about at 1280px draws one wide plate whose names are readable, with every
   expect(14 * scale).toBeGreaterThanOrEqual(9.5);
 
   // A joint's hit area is at least 24px across on screen, and its chip is on at rest.
-  const hit = await page.locator('.cp-hit[data-id="j-processing-trader"] circle').boundingBox();
+  const hit = await page.locator('.cp-hit[data-id="j-processing-trader"] circle.cp-hit-area').boundingBox();
   expect(hit!.width).toBeGreaterThanOrEqual(24);
   await expect(page.locator('.cp-joint-chip[data-for="j-processing-trader"] text')).toHaveText('Producer prices');
 
@@ -106,6 +106,83 @@ test('/about at 1280px draws one wide plate whose names are readable, with every
   await page.getByRole('button', { name: 'Logistics and warehousing', exact: true }).click();
   await expect(page.getByRole('region', { name: 'Logistics and warehousing' })).toBeVisible();
   await expect(page.getByRole('region', { name: 'Processing → trader / importer' })).toHaveCount(0);
+});
+
+/**
+ * TARGET SIZE AT THE BREAKPOINT, measured rather than declared.
+ *
+ * The plate is drawn at width:100%, so a unit of its geometry is not a screen
+ * pixel: at 1280px the figure is about 1216px wide and one unit is ~0.708px.
+ * Measured there on 14 September 2026, three doors were below a comfortable
+ * target — a chip 12.7px tall, a layer switch 8.5px, a numbered mark 15.6px —
+ * while the drawing looked composed. Each is now enlarged by a transparent
+ * hit shape around the drawn one, which costs the plate height and not scale.
+ *
+ * The band is the deliberate exception and is asserted as such: it is a strip
+ * a thousand pixels wide, and the only way to make it taller is to take the
+ * gap out from under the band beneath it — overlapping an adjacent action to
+ * fix a target that is already easy to hit.
+ */
+test('/about at 1280px: every door on the plate is big enough to aim at, and no two of them overlap', async ({ page }) => {
+  await page.setViewportSize(LAPTOP);
+  await open(page, '/about?lens=green');
+
+  const measured = await page.evaluate(() => {
+    const kinds: Array<[string, string]> = [
+      ['joint', '.cp-hit.cp-joint > circle.cp-hit-area'],
+      ['chip', '.cp-joint-chip > rect.cp-hit-area'],
+      ['switch', '.cp-switch > rect.cp-hit-area'],
+      ['mark', '.cp-marks--green .cp-mark > circle.cp-hit-area'],
+      ['band', '.cp-band-hit rect.cp-band-rect'],
+    ];
+    const all: Array<{ kind: string; id: string | null; r: DOMRect; round: boolean }> = [];
+    const smallest: Record<string, number> = {};
+    for (const [kind, sel] of kinds) {
+      for (const el of Array.from(document.querySelectorAll(sel))) {
+        const r = el.getBoundingClientRect();
+        if (r.width === 0) continue;
+        const owner = el.closest('[data-id],[data-for],[data-switch],[data-mark]');
+        const id =
+          owner?.getAttribute('data-id') ??
+          owner?.getAttribute('data-for') ??
+          owner?.getAttribute('data-switch') ??
+          owner?.getAttribute('data-mark') ??
+          null;
+        all.push({ kind, id, r, round: el.tagName === 'circle' });
+        const d = Math.min(r.width, r.height);
+        if (smallest[kind] === undefined || d < smallest[kind]) smallest[kind] = d;
+      }
+    }
+    // Two targets overlap when the shapes do, not when their boxes clip: two
+    // circles set diagonally have boxes that cross and edges that do not.
+    const overlapping: string[] = [];
+    for (let i = 0; i < all.length; i++)
+      for (let j = i + 1; j < all.length; j++) {
+        const a = all[i];
+        const b = all[j];
+        if (a.id === b.id) continue;
+        if (a.round && b.round) {
+          const ax = a.r.x + a.r.width / 2;
+          const ay = a.r.y + a.r.height / 2;
+          const bx = b.r.x + b.r.width / 2;
+          const by = b.r.y + b.r.height / 2;
+          if (Math.hypot(ax - bx, ay - by) < (a.r.width + b.r.width) / 2 - 1) overlapping.push(`${a.kind}:${a.id} × ${b.kind}:${b.id}`);
+          continue;
+        }
+        const ow = Math.min(a.r.right, b.r.right) - Math.max(a.r.left, b.r.left);
+        const oh = Math.min(a.r.bottom, b.r.bottom) - Math.max(a.r.top, b.r.top);
+        if (ow > 1 && oh > 1) overlapping.push(`${a.kind}:${a.id} × ${b.kind}:${b.id} (${ow.toFixed(0)}×${oh.toFixed(0)}px)`);
+      }
+    return { smallest, count: all.length, overlapping, figW: document.querySelector('svg.cp-svg--wide')!.getBoundingClientRect().width };
+  });
+
+  expect(measured.count).toBeGreaterThan(30);
+  for (const kind of ['joint', 'chip', 'switch', 'mark']) {
+    expect(measured.smallest[kind], `${kind} at ${Math.round(measured.figW)}px of figure`).toBeGreaterThanOrEqual(24);
+  }
+  // The band: a strip the width of the plate, and its height is the row gap.
+  expect(measured.smallest.band).toBeGreaterThanOrEqual(18);
+  expect(measured.overlapping, measured.overlapping.join('; ')).toEqual([]);
 });
 
 test('/about at 1280px: the distance re-reads every chip, a shift draws one overlay at a time, and finance isolates an open joint', async ({ page }) => {
@@ -152,10 +229,10 @@ test('/about at 1280px: the marks are an index onto the overlay, the label pins 
   expect(order).toEqual([1, 2, 3, 4, 5, 6, 7, 8]);
 
   // Status by form: the stuck disc is filled, the unpriced disc dashed.
-  const stuckFill = await page.locator('.cp-mark[data-mark="band-logistics"] circle').evaluate((c) => getComputedStyle(c).fill);
-  const movingFill = await page.locator('.cp-mark[data-mark="band-energy"] circle').evaluate((c) => getComputedStyle(c).fill);
+  const stuckFill = await page.locator('.cp-mark[data-mark="band-logistics"] circle:not(.cp-hit-area)').evaluate((c) => getComputedStyle(c).fill);
+  const movingFill = await page.locator('.cp-mark[data-mark="band-energy"] circle:not(.cp-hit-area)').evaluate((c) => getComputedStyle(c).fill);
   expect(stuckFill).not.toBe(movingFill);
-  const dash = await page.locator('.cp-mark[data-mark="stage-recovery"] circle').evaluate((c) => getComputedStyle(c).strokeDasharray);
+  const dash = await page.locator('.cp-mark[data-mark="stage-recovery"] circle:not(.cp-hit-area)').evaluate((c) => getComputedStyle(c).strokeDasharray);
   expect(dash).not.toBe('none');
 
   // Pointing pins one line beside the mark; it covers no box on the plate and raises no tooltip role.
@@ -416,6 +493,13 @@ test('the narrow sheet switches distance without losing the target', async ({ pa
   await inSheet.getByRole('button', { name: 'Economy', exact: true }).click();
   await expect.poll(voices).toEqual(['economy']);
   expect(await region.textContent()).toBe(economyText);
+
+  // The control does not scroll away with the evidence: the sheet's own
+  // scrolling happens in a box beneath it, so the distance and the sheet's
+  // Close both stay put through a long reading.
+  await sheet.locator('.overflow-y-auto').evaluate((el) => el.scrollTo(0, el.scrollHeight));
+  await expect(inSheet).toBeInViewport();
+  await expect(sheet.getByRole('button', { name: 'Close' })).toBeInViewport();
 
   // Dismissal still works, and returns to the row that opened the reading.
   await page.keyboard.press('Escape');

@@ -637,12 +637,15 @@ export function ChainPlate({
               <SheetContent
                 side="bottom"
                 data-chain-sheet=""
-                // The sheet does NOT scroll; the box inside it does. The
-                // sheet's own Close is positioned against the sheet, so a
-                // sheet that scrolled carried its dismissal off the top of a
-                // long reading — the phone form of the same defect the popover
-                // had beside the plate.
-                className="max-h-[85vh] rounded-t-lg p-0"
+                // The sheet does NOT scroll; the box inside it does, and the
+                // distance control stays outside that box. Two reasons, one
+                // shape: the sheet's own Close is positioned against the sheet,
+                // so a sheet that scrolled carried its dismissal off the top of
+                // a long reading — the phone form of the defect the popover had
+                // beside the plate; and a distance control that scrolls away is
+                // a distance control the reader has to go and find, which is
+                // the finding this one exists to answer.
+                className="flex max-h-[85vh] flex-col gap-0 rounded-t-lg p-0"
                 // Close returns focus to the row that opened the reading, once the trap is down.
                 onCloseAutoFocus={(e) => {
                   e.preventDefault();
@@ -651,7 +654,6 @@ export function ChainPlate({
               >
                 <SheetTitle className="sr-only">{targetLabel(selected)}</SheetTitle>
                 <SheetDescription className="sr-only">{CHAIN_COPY.panel.close}</SheetDescription>
-                <div className="max-h-[85vh] overflow-y-auto p-4 pt-3">
                 {/* The distance, inside the reading.
                     The state already supported keeping a target while the
                     distance changes — what a phone reader could not do was
@@ -662,7 +664,7 @@ export function ChainPlate({
                     interrupting the one operation the map exists to show.
                     Still one voice at a time; the panel below re-reads. */}
                 <div
-                  className="flex flex-wrap items-baseline gap-x-3 gap-y-1 pr-12 text-sm text-muted-foreground"
+                  className="flex shrink-0 flex-wrap items-baseline gap-x-3 gap-y-1 px-4 pr-14 pt-3 text-sm text-muted-foreground"
                   data-chain-sheet-distance
                 >
                   <span id={`${base}-sheet-distance`}>{CHAIN_COPY.controls.sheetDistance}</span>
@@ -675,7 +677,8 @@ export function ChainPlate({
                     </LensWord>
                   </span>
                 </div>
-                {renderPanel(selected, { inline: true, hideClose: true })}
+                <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-4">
+                  {renderPanel(selected, { inline: true, hideClose: true })}
                 </div>
               </SheetContent>
             )}

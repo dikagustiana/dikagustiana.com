@@ -82,6 +82,14 @@
 
 /* Interactive marks: joints and layers. Every target is a button and opens
    the panel on click, tap or Enter; hover only strengthens the mark. */
+/* The shape that takes the pointer, never the ink. A drawn door on this plate
+   is small — a 22-unit disc is 15.6 screen pixels at the 1280px breakpoint —
+   so every door carries a larger invisible shape behind it. It has to beat the
+   element rules that paint a bare circle or rect inside a mark or a chip: a
+   presentation attribute loses to any stylesheet rule, which is how the first
+   attempt at this drew the hit areas as rings. Two classes of specificity, so
+   it wins, and it is never a visual. */
+.chain-plate .cp-hit-area{fill:transparent;stroke:none;pointer-events:all}
 .cp-hit{cursor:pointer}
 .cp-hit:focus{outline:none}
 .cp-joint .cp-joint-mark{fill:hsl(var(--background));stroke:hsl(var(--foreground));stroke-width:1.8}

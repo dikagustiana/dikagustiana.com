@@ -16,7 +16,7 @@ import { ShiftMark } from './ShiftMark';
 
 export function ChainPlateWide() {
   return (
-  <svg className="cp-svg cp-svg--wide" viewBox="0 0 1717 851" role="group" aria-labelledby="cp-wide-title" aria-describedby="cp-wide-desc" focusable="false">
+  <svg className="cp-svg cp-svg--wide" viewBox="0 0 1717 919" role="group" aria-labelledby="cp-wide-title" aria-describedby="cp-wide-desc" focusable="false">
     <title id="cp-wide-title">The industry chain, in full</title>
     <desc id="cp-wide-desc">Left to right: two origins, primary processing, packaging and finished-goods manufacturing, then distribution, wholesale and retail into consumption and recovery. Intermediary nodes are dashed pills between the stages. Every joint is a mark on the flow — a filled diamond where a stage sells, an open diamond where a node sells, a square where a fee is paid — with a chip that reads it at the chosen distance, as an economy or as finance, and opens the margin cut there. Six enabling layers run as bands directly beneath the chain, ticked where each attaches; energy rises into every stage from below; money and information run both ways under the bands; two dashed border lines mark where goods are exported and imported. A shift, when one is chosen, marks the elements it moves with a numbered disc whose form is its status — filled for stuck, open for moving, dashed for unpriced — numbered in reading order, left to right and then top to bottom.</desc>
     <defs>
@@ -143,22 +143,22 @@ export function ChainPlateWide() {
       <text x="1581" y="97" className="cp-ret-t" textAnchor="end">Secondary market</text><text x="1581" y="112" className="cp-ret-t" textAnchor="end">and refurbishment</text></g>
       <g className="cp-byp" data-id="branch-byproduct"><path d="M 539 304 L 581 356" markerEnd="url(#cp-tip-soft--wide)" />
       <rect x="355.15999999999997" y="364" width="215.84000000000003" height="18" rx="2" className="cp-chip" /><text x="571" y="378" className="cp-ret-t" textAnchor="end">By-product → another chain</text></g>
-      <g className="cp-lens-name cp-lens-name--economy" data-id="lane-economy"><text x="118" y="509" className="cp-kind-t" textAnchor="end">Economy</text></g>
-      <g className="cp-lens-name cp-lens-name--finance" data-id="lane-finance"><text x="118" y="509" className="cp-kind-t" textAnchor="end">Finance</text></g>
+      <g className="cp-lens-name cp-lens-name--economy" data-id="lane-economy"><text x="118" y="513" className="cp-kind-t" textAnchor="end">Economy</text></g>
+      <g className="cp-lens-name cp-lens-name--finance" data-id="lane-finance"><text x="118" y="513" className="cp-kind-t" textAnchor="end">Finance</text></g>
       <g className="cp-nonphys" data-id="flow-money-payment">
-      <path className="cp-money" d="M 1587 765 L 182 765" markerEnd="url(#cp-tip-money--wide)" />
-      <rect x="1411.36" y="755" width="176.64000000000001" height="18" rx="2" className="cp-chip" /><text x="1588" y="769" className="cp-rail-t" textAnchor="end">Payment for the goods</text></g>
+      <path className="cp-money" d="M 1587 833 L 182 833" markerEnd="url(#cp-tip-money--wide)" />
+      <rect x="1411.36" y="823" width="176.64000000000001" height="18" rx="2" className="cp-chip" /><text x="1588" y="837" className="cp-rail-t" textAnchor="end">Payment for the goods</text></g>
       <g className="cp-nonphys" data-id="flow-money-credit">
-      <path className="cp-money" d="M 176 785 L 1581 785" markerEnd="url(#cp-tip-money--wide)" />
-      <rect x="175" y="775" width="325.6" height="18" rx="2" className="cp-chip" /><text x="175" y="789" className="cp-rail-t" textAnchor="start">Trade credit · trade promotion · rebates</text></g>
+      <path className="cp-money" d="M 176 853 L 1581 853" markerEnd="url(#cp-tip-money--wide)" />
+      <rect x="175" y="843" width="325.6" height="18" rx="2" className="cp-chip" /><text x="175" y="857" className="cp-rail-t" textAnchor="start">Trade credit · trade promotion · rebates</text></g>
       <g className="cp-nonphys" data-id="flow-info-demand">
-      <path className="cp-info" d="M 1587 805 L 182 805" markerEnd="url(#cp-tip-info--wide)" />
-      <rect x="1474.08" y="795" width="113.92000000000002" height="18" rx="2" className="cp-chip" /><text x="1588" y="809" className="cp-rail-t" textAnchor="end">Demand signal</text></g>
+      <path className="cp-info" d="M 1587 873 L 182 873" markerEnd="url(#cp-tip-info--wide)" />
+      <rect x="1474.08" y="863" width="113.92000000000002" height="18" rx="2" className="cp-chip" /><text x="1588" y="877" className="cp-rail-t" textAnchor="end">Demand signal</text></g>
       <g className="cp-nonphys" data-id="flow-info-spec">
-      <path className="cp-info" d="M 176 825 L 1581 825" markerEnd="url(#cp-tip-info--wide)" />
-      <rect x="175" y="815" width="231.52" height="18" rx="2" className="cp-chip" /><text x="175" y="829" className="cp-rail-t" textAnchor="start">Specifications and standards</text></g>
-      <text x="118" y="779" className="cp-kind-t" textAnchor="end">Money</text>
-      <text x="118" y="819" className="cp-kind-t" textAnchor="end">Information</text>
+      <path className="cp-info" d="M 176 893 L 1581 893" markerEnd="url(#cp-tip-info--wide)" />
+      <rect x="175" y="883" width="231.52" height="18" rx="2" className="cp-chip" /><text x="175" y="897" className="cp-rail-t" textAnchor="start">Specifications and standards</text></g>
+      <text x="118" y="847" className="cp-kind-t" textAnchor="end">Money</text>
+      <text x="118" y="887" className="cp-kind-t" textAnchor="end">Information</text>
     </g>
     <g className="cp-shifts" aria-hidden="true">
       <g className="cp-shift cp-shift--reindustrialisation" data-id="reindustrialisation">
@@ -176,51 +176,51 @@ export function ChainPlateWide() {
       <g className="cp-callout" data-id="callout-import-share"><rect x="875" y="69" width="188.4" height="20" rx="2" className="cp-chip" /><text x="875" y="85" className="cp-callout-t" textAnchor="start">Domestic input option</text></g>
     </g>
       <g className="cp-shift cp-shift--green" data-id="green">
-      <g className="cp-lit" data-for="band-energy" data-status="moving"><rect className="cp-lit-rect cp-lit--moving" x="173" y="650" width="1417" height="32" rx="3" /></g>
-      <g className="cp-lit" data-for="band-logistics" data-status="stuck"><rect className="cp-lit-rect cp-lit--stuck" x="173" y="560" width="1417" height="32" rx="3" /></g>
-      <g className="cp-lit" data-for="band-cold-chain" data-status="stuck"><rect className="cp-lit-rect cp-lit--stuck" x="173" y="590" width="1417" height="32" rx="3" /></g>
-      <g className="cp-lit" data-for="band-credit" data-status="moving"><rect className="cp-lit-rect cp-lit--moving" x="173" y="620" width="1417" height="32" rx="3" /></g>
+      <g className="cp-lit" data-for="band-energy" data-status="moving"><rect className="cp-lit-rect cp-lit--moving" x="173" y="694" width="1417" height="32" rx="3" /></g>
+      <g className="cp-lit" data-for="band-logistics" data-status="stuck"><rect className="cp-lit-rect cp-lit--stuck" x="173" y="580" width="1417" height="32" rx="3" /></g>
+      <g className="cp-lit" data-for="band-cold-chain" data-status="stuck"><rect className="cp-lit-rect cp-lit--stuck" x="173" y="618" width="1417" height="32" rx="3" /></g>
+      <g className="cp-lit" data-for="band-credit" data-status="moving"><rect className="cp-lit-rect cp-lit--moving" x="173" y="656" width="1417" height="32" rx="3" /></g>
       <g className="cp-lit" data-for="j-consumption-recovery" data-status="unpriced"><circle className="cp-lit-ring cp-lit--unpriced" cx="1536" cy="412" r="17" /></g>
       <g className="cp-lit" data-for="stage-recovery" data-status="unpriced"><rect className="cp-lit-rect cp-lit--unpriced" x="1419" y="424" width="173" height="54" rx="4" /></g>
       <g className="cp-lit" data-for="return-postconsumer-material" data-status="unpriced"><path className="cp-lit-path cp-lit--unpriced" d="M 1587 451 L 1659 451 L 1659 56 L 549 56 L 549 242" markerEnd="url(#cp-tip-shift--wide)" /><rect x="548.76" y="46" width="184.48000000000002" height="18" rx="2" className="cp-chip" /><text x="641" y="60" className="cp-ret-t" textAnchor="middle">Post-consumer material</text></g>
       <g className="cp-lit" data-for="return-postconsumer-organic" data-status="unpriced"><path className="cp-lit-path cp-lit--unpriced" d="M 1587 437 L 1677 437 L 1677 34 L 242 34 L 242 134" markerEnd="url(#cp-tip-shift--wide)" /><rect x="957.68" y="24" width="176.64000000000001" height="18" rx="2" className="cp-chip" /><text x="1046" y="38" className="cp-ret-t" textAnchor="middle">Post-consumer organic</text></g>
       <g className="cp-move cp-move--price" data-id="move-recovery-price"><path className="cp-move-hit" d="M 1598 420 L 1558 420" /><path className="cp-move-path" d="M 1598 420 L 1558 420" markerEnd="url(#cp-tip-shift--wide)" /></g>
-      <g className="cp-callout" data-id="callout-new-price"><rect x="1437.6" y="517" width="196.79999999999998" height="20" rx="2" className="cp-chip" /><text x="1536" y="533" className="cp-callout-t" textAnchor="middle">Who pays for recovery?</text></g>
+      <g className="cp-callout" data-id="callout-new-price"><rect x="1437.6" y="533" width="196.79999999999998" height="20" rx="2" className="cp-chip" /><text x="1536" y="549" className="cp-callout-t" textAnchor="middle">Who pays for recovery?</text></g>
     </g>
     </g>
     <g className="cp-hits">
-      <JointHit id="j-production-aggregation" cx={321} cy={177} chipX={301} chipY={495} chipAt="rowA" />
-      <JointHit id="j-extraction-processing" cx={424} cy={298} chipX={424} chipY={519} chipAt="rowB" />
-      <JointHit id="j-aggregation-processing" cx={470} cy={226} chipX={490} chipY={495} chipAt="rowA" />
-      <JointHit id="j-processing-trader" cx={628} cy={275} chipX={628} chipY={519} chipAt="rowB" />
-      <JointHit id="j-trader-manufacturing" cx={831} cy={275} chipX={831} chipY={519} chipAt="rowB" />
+      <JointHit id="j-production-aggregation" cx={321} cy={177} chipX={301} chipY={499} chipAt="rowA" />
+      <JointHit id="j-extraction-processing" cx={424} cy={298} chipX={424} chipY={535} chipAt="rowB" />
+      <JointHit id="j-aggregation-processing" cx={470} cy={226} chipX={490} chipY={499} chipAt="rowA" />
+      <JointHit id="j-processing-trader" cx={628} cy={275} chipX={628} chipY={535} chipAt="rowB" />
+      <JointHit id="j-trader-manufacturing" cx={831} cy={275} chipX={831} chipY={535} chipAt="rowB" />
       <JointHit id="j-packaging-manufacturing" cx={892} cy={200} chipX={906} chipY={191} chipAt="right" />
-      <JointHit id="j-manufacturing-distribution" cx={1033} cy={275} chipX={1033} chipY={495} chipAt="rowA" />
+      <JointHit id="j-manufacturing-distribution" cx={1033} cy={275} chipX={1033} chipY={499} chipAt="rowA" />
       <JointHit id="j-distributor-wholesaler" cx={1054} cy={306} chipX={1068} chipY={297} chipAt="right" />
-      <JointHit id="j-wholesale-retail" cx={1231} cy={372} chipX={1231} chipY={495} chipAt="rowA" />
-      <JointHit id="j-retail-consumption" cx={1411} cy={275} chipX={1411} chipY={495} chipAt="rowA" />
+      <JointHit id="j-wholesale-retail" cx={1231} cy={372} chipX={1231} chipY={499} chipAt="rowA" />
+      <JointHit id="j-retail-consumption" cx={1411} cy={275} chipX={1411} chipY={499} chipAt="rowA" />
       <JointHit id="j-consumption-recovery" cx={1536} cy={412} chipX={1522} chipY={403} chipAt="left" />
-      <BandHit id="band-logistics" x={176} y={563} width={1411} height={26} noteX={518} ticks={[321, 424, 470, 628, 831, 892, 1033, 1054, 1231, 1411, 1536]} />
-      <BandHit id="band-cold-chain" x={176} y={593} width={1411} height={26} noteX={350} ticks={[321, 424, 470, 628, 831, 892, 1033, 1054, 1231, 1411]} />
-      <BandHit id="band-credit" x={176} y={623} width={1411} height={26} noteX={529} ticks={[321, 424, 470, 628, 831, 892, 1033, 1054, 1231, 1411, 1536]} />
-      <BandHit id="band-energy" x={176} y={653} width={1411} height={26} noteX={305} ticks={[242, 503, 864, 932, 1567, 1476]} />
-      <BandHit id="band-governance" x={844} y={683} width={554} height={26} noteX={null} ticks={[1033, 1054, 1231]} />
-      <BandHit id="band-regulation" x={176} y={713} width={1411} height={26} noteX={null} ticks={[]} />
-      <LayerSwitch id="band-logistics" x={149} y={570} />
-      <LayerSwitch id="band-cold-chain" x={149} y={600} />
-      <LayerSwitch id="band-credit" x={149} y={630} />
-      <LayerSwitch id="band-energy" x={149} y={660} />
-      <LayerSwitch id="band-governance" x={817} y={690} />
-      <LayerSwitch id="band-regulation" x={149} y={720} />
+      <BandHit id="band-logistics" x={176} y={583} width={1411} height={26} noteX={518} ticks={[321, 424, 470, 628, 831, 892, 1033, 1054, 1231, 1411, 1536]} />
+      <BandHit id="band-cold-chain" x={176} y={621} width={1411} height={26} noteX={350} ticks={[321, 424, 470, 628, 831, 892, 1033, 1054, 1231, 1411]} />
+      <BandHit id="band-credit" x={176} y={659} width={1411} height={26} noteX={529} ticks={[321, 424, 470, 628, 831, 892, 1033, 1054, 1231, 1411, 1536]} />
+      <BandHit id="band-energy" x={176} y={697} width={1411} height={26} noteX={305} ticks={[242, 503, 864, 932, 1567, 1476]} />
+      <BandHit id="band-governance" x={844} y={735} width={554} height={26} noteX={null} ticks={[1033, 1054, 1231]} />
+      <BandHit id="band-regulation" x={176} y={773} width={1411} height={26} noteX={null} ticks={[]} />
+      <LayerSwitch id="band-logistics" x={149} y={590} />
+      <LayerSwitch id="band-cold-chain" x={149} y={628} />
+      <LayerSwitch id="band-credit" x={149} y={666} />
+      <LayerSwitch id="band-energy" x={149} y={704} />
+      <LayerSwitch id="band-governance" x={817} y={742} />
+      <LayerSwitch id="band-regulation" x={149} y={780} />
     </g>
     <g className="cp-mark-layer">
       <g className="cp-marks cp-marks--reindustrialisation">
       <ShiftMark shift="reindustrialisation" id="border-export" cx={366} cy={318} />
       <ShiftMark shift="reindustrialisation" id="j-extraction-processing" cx={410} cy={284} />
       <ShiftMark shift="reindustrialisation" id="stage-processing" cx={472} cy={315} />
-      <ShiftMark shift="reindustrialisation" id="j-processing-trader" cx={541} cy={528} />
+      <ShiftMark shift="reindustrialisation" id="j-processing-trader" cx={541} cy={544} />
       <ShiftMark shift="reindustrialisation" id="node-trader" cx={730} cy={248} />
-      <ShiftMark shift="reindustrialisation" id="j-trader-manufacturing" cx={751} cy={528} />
+      <ShiftMark shift="reindustrialisation" id="j-trader-manufacturing" cx={751} cy={544} />
       <ShiftMark shift="reindustrialisation" id="border-import" cx={831} cy={104} />
       <ShiftMark shift="reindustrialisation" id="stage-manufacturing" cx={1031} cy={235} />
     </g>
@@ -229,10 +229,10 @@ export function ChainPlateWide() {
       <ShiftMark shift="green" id="return-postconsumer-organic" cx={945} cy={33} />
       <ShiftMark shift="green" id="j-consumption-recovery" cx={1352} cy={412} />
       <ShiftMark shift="green" id="stage-recovery" cx={1598} cy={484} />
-      <ShiftMark shift="green" id="band-logistics" cx={131} cy={576} />
-      <ShiftMark shift="green" id="band-cold-chain" cx={131} cy={606} />
-      <ShiftMark shift="green" id="band-credit" cx={131} cy={636} />
-      <ShiftMark shift="green" id="band-energy" cx={131} cy={666} />
+      <ShiftMark shift="green" id="band-logistics" cx={131} cy={596} />
+      <ShiftMark shift="green" id="band-cold-chain" cx={131} cy={634} />
+      <ShiftMark shift="green" id="band-credit" cx={131} cy={672} />
+      <ShiftMark shift="green" id="band-energy" cx={131} cy={710} />
     </g>
     </g>
   </svg>
