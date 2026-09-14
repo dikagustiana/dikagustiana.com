@@ -82,6 +82,14 @@
 
 /* Interactive marks: joints and layers. Every target is a button and opens
    the panel on click, tap or Enter; hover only strengthens the mark. */
+/* The shape that takes the pointer, never the ink. A drawn door on this plate
+   is small — a 22-unit disc is 15.6 screen pixels at the 1280px breakpoint —
+   so every door carries a larger invisible shape behind it. It has to beat the
+   element rules that paint a bare circle or rect inside a mark or a chip: a
+   presentation attribute loses to any stylesheet rule, which is how the first
+   attempt at this drew the hit areas as rings. Two classes of specificity, so
+   it wins, and it is never a visual. */
+.chain-plate .cp-hit-area{fill:transparent;stroke:none;pointer-events:all}
 .cp-hit{cursor:pointer}
 .cp-hit:focus{outline:none}
 .cp-joint .cp-joint-mark{fill:hsl(var(--background));stroke:hsl(var(--foreground));stroke-width:1.8}
@@ -104,6 +112,14 @@
 
 /* A layer switched off recedes but stays in place; its switch stays crisp. */
 .cp-band-hit[data-hidden],.chain-plate .cp-lit[data-hidden],.chain-plate .cp-mark[data-hidden],.chain-plate .cp-energy-in[data-hidden]{opacity:.18}
+/* A faded door is still a door. Fading is an opacity on the group, and CSS
+   cannot restore a child through its parent's opacity, so a focus ring inside
+   a faded element is drawn at the faded element's opacity: measured at .18 on
+   a switched-off layer, which is not a visible focus indicator. Focus brings
+   the element back to full while it holds it, and it goes back when focus
+   leaves. It is never applied to a pointer: a mouse reader has the pointer to
+   tell them where they are. */
+.chain-plate .cp-band-hit[data-hidden]:focus-visible,.chain-plate .cp-mark[data-hidden]:focus-visible{opacity:1}
 .cp-switch{cursor:pointer}
 .cp-switch:focus{outline:none}
 .cp-switch .cp-switch-box{fill:hsl(var(--background));stroke:hsl(var(--muted-foreground));stroke-width:1}
@@ -138,8 +154,20 @@
 /* Isolation: at the finance distance an open reading keeps its joint, the
    two hands either side of it and the layers that touch it; the rest of the
    plate steps back until the reading closes. */
-.chain-plate[data-isolate] .cp-svg [data-dim]{opacity:.1}
-.chain-plate[data-isolate] .cp-svg [data-dim] :is(path,rect,circle,ellipse,line,polygon,polyline){opacity:1}
+/* What steps back is the GEOMETRY. Fading a group takes its labels with it,
+   and a reader deciding which comparison to make next has to be able to read
+   what is there: measured, a stage name inside a stepped-back group came out
+   at an effective .1, which is a name you cannot read. So the shapes recede
+   and the names stay legible a step behind the reading. */
+.chain-plate[data-isolate] .cp-svg [data-dim]{opacity:1}
+.chain-plate[data-isolate] .cp-svg [data-dim]:is(path,rect,circle,ellipse,line,polygon,polyline),
+.chain-plate[data-isolate] .cp-svg [data-dim] :is(path,rect,circle,ellipse,line,polygon,polyline){opacity:.1}
+.chain-plate[data-isolate] .cp-svg [data-dim] text{opacity:.45}
+/* Same rule, the other fade: a stepped-back joint that a keyboard reader has
+   tabbed to comes back whole while it holds focus, so its focus ring is a
+   focus ring and not a tenth of one. */
+.chain-plate[data-isolate] .cp-svg [data-dim]:focus-visible :is(path,rect,circle,ellipse,line,polygon,polyline),
+.chain-plate[data-isolate] .cp-svg [data-dim]:focus-visible text{opacity:1}
 
 /* The numbered marks: an index onto the shift that is on, drawn last so a
    mark is never buried, and carried on an opaque disc so it stays legible

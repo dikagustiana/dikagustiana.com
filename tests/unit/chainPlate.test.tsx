@@ -29,7 +29,7 @@ vi.mock('@/integrations/supabase/client', () => ({
   supabase: { from: (...a: unknown[]) => fromMock(...a) },
 }));
 
-import { ChainPlate } from '@/components/industry-chain/ChainPlate';
+import { ChainPlate, PILOT } from '@/components/industry-chain/ChainPlate';
 import type { ChainModuleLink } from '@/data/chainCurriculumMap';
 
 function mount(ui: ReactElement) {
@@ -542,33 +542,108 @@ describe('the short version on the landing page', () => {
     expect(document.querySelectorAll('svg.cp-svg--wide')).toHaveLength(1);
     expect(screen.getByRole('button', { name: 'Aggregation → processing' })).toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: 'How to read the map' })).not.toBeInTheDocument();
-    const back = screen.getByRole('button', { name: CHAIN_COPY.controls.seeCompact });
-    expect(back).toHaveAttribute('aria-expanded', 'true');
+    // Two ways back once it is open — beside the controls and under the map.
+    // A figure taller than the screen has two ends, and an exit at each is not
+    // two answers to the same question.
+    const back = screen.getAllByRole('button', { name: CHAIN_COPY.controls.seeCompact });
+    expect(back).toHaveLength(2);
+    expect(back[0]).toHaveAttribute('aria-expanded', 'true');
 
-    await userEvent.click(back);
+    await userEvent.click(back[0]);
     expect(document.querySelectorAll('svg.cp-svg--compact')).toHaveLength(1);
   });
 
-  it('treats a distance or a shift as a closer look: pressing either word opens the full chain with it on', async () => {
+  /*
+   * SUPERSEDED, DELIBERATELY. This pinned the opposite contract: "pressing
+   * either word opens the full chain with it on". That coupling is the U02
+   * finding — a distance and a scenario also swapped the whole plate, so
+   * pressing the ALREADY-ACTIVE Economy, or the already-active No shift, which
+   * changes nothing at all, expanded the map. A reader cannot learn what a
+   * control means while it is also doing something else.
+   *
+   * The coupling existed because the short plate cannot honour either control:
+   * it has no chips to re-word and no marks to raise. The resolution is not to
+   * make them expand, it is not to offer them where they do nothing. The
+   * coverage is kept, inverted: the words are absent while short, and once the
+   * chain is open each changes only what it names.
+   */
+  it('offers no distance and no scenario while it is short: neither has anything to change there', () => {
     mount(<ChainPlate variant="preview" links={[]} />);
+    expect(screen.queryByRole('button', { name: 'finance', exact: true })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'green transition', exact: true })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: CHAIN_COPY.controls.noShift })).not.toBeInTheDocument();
+  });
+
+  it('changes only what each control names once the chain is open, and never the detail level', async () => {
+    mount(<ChainPlate variant="preview" links={[]} />);
+    await userEvent.click(screen.getByRole('button', { name: CHAIN_COPY.controls.seeFull }));
+
     await userEvent.click(word('finance'));
     expect(plate().dataset.lens).toBe('finance');
     expect(document.querySelectorAll('svg.cp-svg--wide')).toHaveLength(1);
 
-    await userEvent.click(screen.getByRole('button', { name: CHAIN_COPY.controls.seeCompact }));
     await userEvent.click(word('green transition'));
     expect(plate().dataset.shift).toBe('green');
+    expect(plate().dataset.lens).toBe('finance');
+
+    // Pressing an already-active neutral state changes nothing, including the
+    // detail level. This is the click that used to swap the whole plate.
+    await userEvent.click(word('economy'));
+    await userEvent.click(screen.getByRole('button', { name: CHAIN_COPY.controls.noShift }));
+    await userEvent.click(screen.getByRole('button', { name: CHAIN_COPY.controls.noShift }));
+    expect(plate().dataset.view).toBe('full');
+    expect(plate().dataset.lens).toBe('economy');
+    expect(plate().dataset.shift).toBeUndefined();
     expect(document.querySelectorAll('svg.cp-svg--wide')).toHaveLength(1);
 
     // Back to the short plate drops the shift: the short version has no overlay.
-    await userEvent.click(screen.getByRole('button', { name: CHAIN_COPY.controls.seeCompact }));
+    await userEvent.click(word('green transition'));
+    await userEvent.click(screen.getAllByRole('button', { name: CHAIN_COPY.controls.seeCompact })[0]);
     expect(plate().dataset.shift).toBeUndefined();
+    expect(plate().dataset.view).toBe('compact');
   });
 
-  it('keeps the same headline and both control sentences as the full version', () => {
+  it('keeps the headline, and puts one bounded question and one labelled action in place of the control sentences', () => {
     mount(<ChainPlate variant="preview" links={[]} />);
     expect(screen.getByRole('heading', { name: CHAIN_COPY.headline })).toBeInTheDocument();
-    expect(word('finance')).toBeInTheDocument();
-    expect(word('reindustrialisation')).toBeInTheDocument();
+
+    const opening = document.querySelector('[data-chain-opening]') as HTMLElement;
+    expect(opening).toBeTruthy();
+    expect(opening).toHaveTextContent(CHAIN_COPY.opening.question);
+    // The relation, not just the noun — and the boundary of the case, so the
+    // one assessed reading is not advertised as a national finding.
+    expect(opening).toHaveTextContent(CHAIN_COPY.opening.relation);
+    expect(opening).toHaveTextContent(CHAIN_COPY.opening.caution);
+
+    // The control says what it will do before it does it.
+    const action = screen.getByRole('button', { name: CHAIN_COPY.opening.action });
+    expect(action).toHaveAccessibleDescription(
+      `${CHAIN_COPY.opening.actionMeans} ${CHAIN_COPY.opening.case}`,
+    );
+  });
+
+  it('lands the labelled action on the one reading written against evidence, in the state it was written in', async () => {
+    mount(<ChainPlate variant="preview" links={[]} />);
+    await userEvent.click(screen.getByRole('button', { name: CHAIN_COPY.opening.action }));
+
+    expect(plate().dataset.view).toBe('full');
+    expect(plate().dataset.lens).toBe(PILOT.lens);
+    expect(plate().dataset.shift).toBe(PILOT.shift);
+
+    const panel = await screen.findByRole('region', { name: 'Energy' });
+    // Assessed, not a scenario: the entrance must not open an illustration and
+    // present it as the map's worked example.
+    expect(panel.querySelector('[data-basis="assessed"]')).toBeTruthy();
+    expect(voice(panel)).toBe(PILOT.lens);
+    // The reader is in the ordinary map, free to leave the pilot.
+    expect(screen.getByRole('button', { name: CHAIN_COPY.controls.noShift })).toBeInTheDocument();
+  });
+
+  it('offers the way back beside the controls as well as under the map', async () => {
+    mount(<ChainPlate variant="preview" links={[]} />);
+    await userEvent.click(screen.getByRole('button', { name: CHAIN_COPY.controls.seeFull }));
+    const exits = screen.getAllByRole('button', { name: CHAIN_COPY.controls.seeCompact });
+    expect(exits).toHaveLength(2);
+    for (const exit of exits) expect(exit).toHaveAttribute('aria-expanded', 'true');
   });
 });

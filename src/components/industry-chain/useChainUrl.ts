@@ -68,9 +68,28 @@ const hasChainParams = (search: string) => {
 };
 
 /** The state the current address asks for, read once, before the first paint. */
-export function initialChainUrl(enabled: boolean): ChainUrlState {
+export function initialChainUrl(enabled = true): ChainUrlState {
   if (!enabled || typeof window === 'undefined') return { lens: null, shift: null, node: null };
   return readChainUrl(window.location.search);
+}
+
+/**
+ * Whether an incoming address asks for something the SHORT plate cannot draw.
+ *
+ * The short plate has no doors, no marks and no chips: it is the chain at the
+ * economy distance with no shift on. So an address naming a shift, an element
+ * or the finance distance is asking for the full chain, and the preview has to
+ * open to honour it. An address naming nothing — or naming only
+ * `distance=economy`, which is what the short plate already shows — leaves a
+ * plain visit short, which is the whole point of the preview.
+ *
+ * `writeChainUrl` never emits `distance=economy` for exactly this reason: the
+ * resting distance is not worth carrying, so its presence in an address is a
+ * hand-edit, and the honest reading of a hand-edit asking for the resting
+ * state is to show the resting state.
+ */
+export function asksForFullChain(state: ChainUrlState): boolean {
+  return state.shift !== null || state.node !== null || state.lens === 'finance';
 }
 
 /**

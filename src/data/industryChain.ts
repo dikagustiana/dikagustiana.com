@@ -1721,6 +1721,22 @@ export const CHAIN_COPY = {
     middle: ' or the ',
     after: ' — one at a time, over the same chain. What a shift marks is my reading of where the chain stands, not part of its anatomy.',
   },
+  /**
+   * WHAT OPENS, said once in the introduction rather than drawn as a legend.
+   *
+   * The plate has a hundred shapes and four of them are doors. A sighted
+   * reader with a mouse discovers which by moving the pointer around until
+   * something reacts; a reader using a keyboard or a touchscreen has no such
+   * sweep, and a prominent box reads as the main doorway when the small
+   * diamond beside it is the one carrying the reading. So the doors are named.
+   *
+   * The last clause is a limitation stated rather than papered over: the
+   * static geometry explains itself on hover and there is no equivalent for a
+   * pointer that does not hover. Putting a hundred decorative paths into the
+   * tab order is not the fix, and neither is pretending every box is a button.
+   */
+  doorsLead:
+    'Two things open: a diamond on the chain, and a band beneath it \u2014 each gives the margin cut there, read at the distance that is on. Under a shift, a numbered disc opens my reading of what that shift does to the element it sits on. The rest of the plate names itself under the pointer.',
   /** One line over the map, in place of the footnote it replaces. */
   scopeLead:
     'Functions, not firms: one company can occupy several. Control of the goods, not legal title, decides principal from agent. Routes are illustrative across sectors.',
@@ -1799,10 +1815,57 @@ export const CHAIN_COPY = {
     essayMany: 'essays',
     essayNone: 'no essay yet',
   },
+  /**
+   * THE FIRST ENCOUNTER, on the short plate.
+   *
+   * The short plate has no doors, no chips and no marks: it is orientation,
+   * and orientation is not explanation. Version 2 put the right noun on it —
+   * Energy, beside logistics and credit — and a stranger could still only see
+   * that the band exists, not why the relation matters. This block is the one
+   * bounded question the map can put to a reader before they have chosen a
+   * distance, a shift or an element, and the labelled action that opens the
+   * one reading on this map written against evidence rather than as an
+   * illustration.
+   *
+   * It names ONE relation and bounds it. The assessed reading behind it is
+   * about the power chosen for a particular plant — asset vintage and a
+   * contract — and not about national network capacity, so `caution` says so
+   * before the reader arrives rather than after. The shared word is the trap:
+   * `distribution` on this chain is goods moving to a buyer, and the
+   * electricity network is a different network that this reading does not
+   * measure.
+   */
+  opening: {
+    kicker: 'Start with one relation',
+    question: 'Every stage on this chain buys electricity. Who chooses what kind, and when is it chosen?',
+    relation:
+      'Energy is a band beneath the chain, not a stage on it: it takes no title and sells no goods, and every stage above it is a customer. That makes the kind of power a decision someone else makes, at a moment you can name \u2014 and on the one case this map reads against evidence, it is made plant by plant rather than by the grid, in the same decision that approves the plant.',
+    caution:
+      'Distribution on this chain moves goods. The electricity network is a different network: this reading is about the power chosen for one plant, not a finding about national network capacity.',
+    action: 'Explore the power decision',
+    /** What the control does, said before it does it. */
+    actionMeans: 'Opens the full chain at the Energy layer, read as finance, under the green-transition scenario.',
+    /*
+     * No dates and no thresholds here, and that is the map's own rule rather
+     * than an omission: nothing in this file carries a figure (see the unit
+     * test 'carries no figures anywhere'). The reading names the regulation
+     * and the essay behind it carries the article, the threshold and the
+     * years.
+     */
+    case: 'The case: Indonesian nickel processing, and the captive generation built alongside it. The reading names its dates; the essay behind it carries the source.',
+  },
   controls: {
     noShift: 'No shift',
     seeFull: 'See the full chain',
     seeCompact: 'Back to the short version',
+    /**
+     * Above the two distance words inside the narrow reading sheet. On a phone
+     * the reading is a modal sheet and the distance control sat outside it, so
+     * comparing the two readings of one element meant closing the reading,
+     * finding the control and finding the element again \u2014 the interface
+     * interrupting the operation the map exists to demonstrate.
+     */
+    sheetDistance: 'Read this as',
     returns: 'Return flows',
     nonPhysical: 'Money and information',
     layers: 'Enabling layers',
@@ -1816,5 +1879,14 @@ export const CHAIN_COPY = {
     layerHide: 'Hide layer',
     /** Inside an isolated reading at the finance distance. */
     isolated: 'The rest of the chain has stepped back. Close the reading to bring it back.',
+    /**
+     * Said beside the controls while any layer is switched off, with the one
+     * thing a faded band must never be read as meaning. Hiding a layer thins
+     * the DRAWING so two layers can be compared; it does not say the service
+     * has stopped being bought, or that the constraint on it has gone.
+     */
+    layersHidden: (n: number) =>
+      `${n === 1 ? 'One layer is' : `${n} layers are`} hidden from the drawing \u2014 which changes what is drawn, not whether the service is bought or whether its constraint has gone.`,
+    showAllLayers: 'Show every layer',
   },
 } as const;

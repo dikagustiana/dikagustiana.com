@@ -218,8 +218,24 @@ function wide() {
      the enabling layers as bands directly beneath it, and the four rails of
      money and information at the very bottom. */
   const CHIP_H = 18;
-  const ROW_A = CHAIN_BOTTOM + 22, ROW_B = ROW_A + 24;
-  const BAND0 = ROW_B + CHIP_H + 26, BAND_H = 26, BAND_DY = 30;
+  /** The chip's transparent hit box; mirrored in JointHit.tsx. */
+  const CHIP_HIT_H = 34;
+  /* TARGET SIZE, and why these two numbers are what they are.
+     The plate is drawn at width:100%, so every unit here scales with the
+     figure: at the 1280px breakpoint the figure is about 1216px wide and one
+     unit is ~0.708px. Measured there on 14 September 2026, a chip's own box
+     was 12.7px tall, a layer switch 8.5px and a numbered mark 15.6px across —
+     all of them doors, all of them below a comfortable target.
+     They are enlarged by a TRANSPARENT hit shape around the drawn one (the
+     idiom JointHit already used for its diamond), which needs 34 units to
+     clear 24px on screen. That needs room between the rows, and room is the
+     one dimension this costs nothing: the scale is set by the plate's WIDTH,
+     so a taller plate is not a smaller plate. Raising the type instead was
+     tried and measured — 14 to 16 units grew the viewBox from 1717 to 1789,
+     which handed back most of the gain and shrank every target and every
+     stage label by 4% to do it. */
+  const ROW_A = CHAIN_BOTTOM + 26, ROW_B = ROW_A + 36;
+  const BAND0 = ROW_B + CHIP_H + 30, BAND_H = 26, BAND_DY = 38;
   const RAIL0 = BAND0 + BANDS.length * BAND_DY + 22, RAIL_DY = 20;
   const H = RAIL0 + NON_PHYSICAL.length * RAIL_DY + 6;
   const W = C.cons[1] + 130;
@@ -438,7 +454,11 @@ function wide() {
     const w = Math.max(jointChipW(j.read.economy.chip), jointChipW(j.read.finance.chip));
     const rx = at === 'left' ? chipX - w : at === 'right' ? chipX : chipX - w / 2;
     jointChipRect[j.id] = [rx, chipY, w, CHIP_H];
-    block(rx, chipY, w, CHIP_H, `chip ${j.id}`);
+    // The chip's TARGET, not its ink: JointHit draws a transparent box around
+    // it so the door is big enough to aim at, and a numbered mark placed on
+    // that box would shadow part of it. What the mark has to keep clear of is
+    // what the reader can press.
+    block(rx - 4, chipY - (CHIP_HIT_H - CHIP_H) / 2, w + 8, CHIP_HIT_H, `chip ${j.id}`);
     // the ring a shift draws around the joint
     block(x - 17, y - 17, 34, 34, `ring ${j.id}`);
     jointHits.push(`<JointHit id="${j.id}" cx={${x}} cy={${y}} chipX={${chipX}} chipY={${chipY}} chipAt="${at}" />`);
@@ -579,9 +599,16 @@ function wide() {
      the layers last because they are the bottom row of the plate. The runtime
      numbers targets by their position in this list, so a target the owner
      parks (no condition) simply drops out and the rest close up. ── */
-  const MARK_R = 12;
+  /* A mark has two radii and they do different jobs. MARK_INK_R is the drawn
+     disc plus a hair, and it is what keeps a mark off the plate's ink.
+     MARK_HIT_R is the transparent disc ShiftMark.tsx puts behind it so the
+     door clears 24 screen pixels at the 1280px breakpoint, and it is what
+     keeps two marks from shadowing each other. Using the ink radius for both
+     is how a mark's target came to sit on a chip's target. */
+  const MARK_INK_R = 12;
+  const MARK_HIT_R = 17;
   const hits = (cx, cy, own) =>
-    obstacles.some(([x, y, w, h, tag]) => !own.includes(tag) && cx + MARK_R > x && cx - MARK_R < x + w && cy + MARK_R > y && cy - MARK_R < y + h);
+    obstacles.some(([x, y, w, h, tag]) => !own.includes(tag) && cx + MARK_INK_R > x && cx - MARK_INK_R < x + w && cy + MARK_INK_R > y && cy - MARK_INK_R < y + h);
   const markCandidates = (id) => {
     if (jointGeom[id]) {
       const [x, y, at] = jointGeom[id];
@@ -628,7 +655,7 @@ function wide() {
       })
       .sort((a, b) => a.row - b.row || a.ox - b.ox || a.oy - b.oy);
     ordered.forEach((m) => {
-      const free = m.at.find(([cx, cy]) => !hits(cx, cy, m.own) && !placedMarks.some((o) => Math.hypot(o.x - cx, o.y - cy) < MARK_R * 2 + 3));
+      const free = m.at.find(([cx, cy]) => !hits(cx, cy, m.own) && !placedMarks.some((o) => Math.hypot(o.x - cx, o.y - cy) < MARK_HIT_R * 2));
       const [x, y] = free ?? m.at[0];
       if (!free) console.warn(`mark for ${m.id} under ${s.id} found no clear place; using its first candidate`);
       placedMarks.push({ id: m.id, x, y });
@@ -913,6 +940,14 @@ fs.writeFileSync(path.join(OUT, 'chain-plate.css'), `/**
 
 /* Interactive marks: joints and layers. Every target is a button and opens
    the panel on click, tap or Enter; hover only strengthens the mark. */
+/* The shape that takes the pointer, never the ink. A drawn door on this plate
+   is small — a 22-unit disc is 15.6 screen pixels at the 1280px breakpoint —
+   so every door carries a larger invisible shape behind it. It has to beat the
+   element rules that paint a bare circle or rect inside a mark or a chip: a
+   presentation attribute loses to any stylesheet rule, which is how the first
+   attempt at this drew the hit areas as rings. Two classes of specificity, so
+   it wins, and it is never a visual. */
+.chain-plate .cp-hit-area{fill:transparent;stroke:none;pointer-events:all}
 .cp-hit{cursor:pointer}
 .cp-hit:focus{outline:none}
 .cp-joint .cp-joint-mark{fill:hsl(var(--background));stroke:hsl(var(--foreground));stroke-width:1.8}
@@ -935,6 +970,14 @@ fs.writeFileSync(path.join(OUT, 'chain-plate.css'), `/**
 
 /* A layer switched off recedes but stays in place; its switch stays crisp. */
 .cp-band-hit[data-hidden],.chain-plate .cp-lit[data-hidden],.chain-plate .cp-mark[data-hidden],.chain-plate .cp-energy-in[data-hidden]{opacity:.18}
+/* A faded door is still a door. Fading is an opacity on the group, and CSS
+   cannot restore a child through its parent's opacity, so a focus ring inside
+   a faded element is drawn at the faded element's opacity: measured at .18 on
+   a switched-off layer, which is not a visible focus indicator. Focus brings
+   the element back to full while it holds it, and it goes back when focus
+   leaves. It is never applied to a pointer: a mouse reader has the pointer to
+   tell them where they are. */
+.chain-plate .cp-band-hit[data-hidden]:focus-visible,.chain-plate .cp-mark[data-hidden]:focus-visible{opacity:1}
 .cp-switch{cursor:pointer}
 .cp-switch:focus{outline:none}
 .cp-switch .cp-switch-box{fill:hsl(var(--background));stroke:hsl(var(--muted-foreground));stroke-width:1}
@@ -969,8 +1012,20 @@ fs.writeFileSync(path.join(OUT, 'chain-plate.css'), `/**
 /* Isolation: at the finance distance an open reading keeps its joint, the
    two hands either side of it and the layers that touch it; the rest of the
    plate steps back until the reading closes. */
-.chain-plate[data-isolate] .cp-svg [data-dim]{opacity:.1}
-.chain-plate[data-isolate] .cp-svg [data-dim] :is(path,rect,circle,ellipse,line,polygon,polyline){opacity:1}
+/* What steps back is the GEOMETRY. Fading a group takes its labels with it,
+   and a reader deciding which comparison to make next has to be able to read
+   what is there: measured, a stage name inside a stepped-back group came out
+   at an effective .1, which is a name you cannot read. So the shapes recede
+   and the names stay legible a step behind the reading. */
+.chain-plate[data-isolate] .cp-svg [data-dim]{opacity:1}
+.chain-plate[data-isolate] .cp-svg [data-dim]:is(path,rect,circle,ellipse,line,polygon,polyline),
+.chain-plate[data-isolate] .cp-svg [data-dim] :is(path,rect,circle,ellipse,line,polygon,polyline){opacity:.1}
+.chain-plate[data-isolate] .cp-svg [data-dim] text{opacity:.45}
+/* Same rule, the other fade: a stepped-back joint that a keyboard reader has
+   tabbed to comes back whole while it holds focus, so its focus ring is a
+   focus ring and not a tenth of one. */
+.chain-plate[data-isolate] .cp-svg [data-dim]:focus-visible :is(path,rect,circle,ellipse,line,polygon,polyline),
+.chain-plate[data-isolate] .cp-svg [data-dim]:focus-visible text{opacity:1}
 
 /* The numbered marks: an index onto the shift that is on, drawn last so a
    mark is never buried, and carried on an opaque disc so it stays legible

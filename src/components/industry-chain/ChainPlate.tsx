@@ -20,23 +20,38 @@
  * control and the marks stay where they are, saying something else. The
  * control says how many marks it would raise before it raises them.
  *
- * Nothing lives under the map. There is no legend, no caption, no list of
- * what moves and no hint line: every definition is read on the element that
+ *   detail     how much of the chain is drawn. `variant="preview"` opens with
+ *              the short plate; the button under it, and the one beside the
+ *              controls once it is open, swap the two. It is a THIRD question,
+ *              not a side effect of the other two — a distance and a scenario
+ *              now change only what they name, and a control that would have
+ *              nothing to change on the short plate is not offered there.
+ *
+ * Nothing lives under the map but the way back and, under a shift, the written
+ * conflict between the two scenarios. There is no legend, no caption, no list
+ * of what moves and no hint line: every definition is read on the element that
  * raises the question (hover or focus pins one line beside it), and every
  * reading opens as a popover beside the element that opened it — a bottom
- * sheet on a narrow screen. Under the map there is only the button back to
- * the short version, where the map has one.
+ * sheet on a narrow screen, where the distance rides inside the sheet so a
+ * phone reader can re-read the same element without closing it.
+ *
+ * The short plate carries one bounded question and one labelled action that
+ * opens the single reading on this map written against evidence rather than as
+ * an illustration (PILOT, below). Orientation is not explanation: naming the
+ * Energy band told a stranger the noun and left them to invent the question.
  *
  * The state — overlay, distance, open door — is in the address, so an essay
  * can link into the exact reading it argues from and a reader can share what
- * they are looking at. See useChainUrl.ts; the address carries slugs, never
- * the numbers, because the numbers are positions and the slugs are names.
+ * they are looking at. Both variants READ that address now, and the preview
+ * opens itself when one asks for something the short plate cannot draw: a link
+ * that records an exploration has to restore it. See useChainUrl.ts; the
+ * address carries slugs, never the numbers, because the numbers are positions
+ * and the slugs are names.
  *
  * Two layouts, one state. A wide screen gets the generated plate
  * (ChainPlateSvg.tsx); a narrow one gets the column (ChainColumn.tsx). The
  * choice is a media query read on the first render, so only one is ever in
- * the document. `variant="preview"` opens with the short plate and one
- * button; the button, a lens word or a shift word swaps in the full chain.
+ * the document.
  */
 
 import { useCallback, useEffect, useId, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent, type ReactNode } from 'react';
@@ -51,6 +66,7 @@ import {
   type ShiftId,
 } from '@/data/industryChain';
 import { fullDate } from '@/lib/formatDate';
+import { scrollBehavior } from '@/lib/motion';
 import { CHAIN_MODULE_LINKS, locatedModulesByJoint, type ChainModuleLink } from '@/data/chainCurriculumMap';
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/ui/sheet';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
@@ -62,7 +78,7 @@ import { ChainPopover } from './ChainPopover';
 import { ChainTargetPanel } from './ChainTargetPanel';
 import { HoverLabel } from './HoverLabel';
 import { isDoor, isJointId, isolationSet, markNumber, markedIds, targetLabel } from './chainTargets';
-import { initialChainUrl, useChainUrl, type ChainUrlState } from './useChainUrl';
+import { asksForFullChain, initialChainUrl, useChainUrl, type ChainUrlState } from './useChainUrl';
 import './chain-plate.css';
 import './chain-review.css';
 
@@ -129,6 +145,46 @@ function ShiftWord({ id, active, onToggle, children }: { id: ShiftId; active: bo
 const canOpen = (id: string | null, shift: ShiftId | null): boolean =>
   id !== null && (isDoor(id) || (shift !== null && markNumber(shift, id) > 0));
 
+/** No layer switched off. One frozen instance, so restoring the overview is a no-op when it already is. */
+const EMPTY_HIDDEN: ReadonlySet<string> = new Set();
+
+/**
+ * Where focus should go back to, given what the reader actually pressed.
+ *
+ * A joint's chip is a deliberate non-button: it is `aria-hidden`, outside the
+ * tab order, and it opens the same door the diamond does so a reader who lands
+ * on the word is not one target away from the reading. What that costs is a
+ * return path — calling focus() on an element a browser cannot focus does
+ * nothing, so closing a reading opened from a chip dropped focus to <body> and
+ * a keyboard reader was returned to the top of the document. Reproduced on
+ * /about at 1348x936 on 14 September 2026.
+ *
+ * So a chip hands back its joint, which is the door in the tab order and the
+ * one the reader means. Anything else is returned as it came.
+ */
+function focusableTrigger(trigger: Element | null): Element | null {
+  const chip = trigger?.closest?.('.cp-joint-chip');
+  if (!chip) return trigger;
+  const id = chip.getAttribute('data-for');
+  return (id ? chip.ownerDocument.querySelector(`.cp-hit[data-id="${id}"]`) : null) ?? trigger;
+}
+
+/**
+ * The one reading on this map written against evidence rather than as an
+ * illustration, and the state it is written in: the Energy layer, read as
+ * finance, under the green transition. Every other mark is a scenario and says
+ * so (see `BASIS` in the data file).
+ *
+ * It is named here rather than inlined because three things have to agree
+ * about it — the entrance that opens it, the copy that describes it, and the
+ * test that checks the entrance still lands on a written reading.
+ */
+export const PILOT = { lens: 'finance', shift: 'green', node: 'band-energy' } as const satisfies {
+  lens: LensId;
+  shift: ShiftId;
+  node: string;
+};
+
 /** The element on the plate a reading is anchored to: its mark under a shift, else its own door or form. */
 function anchorFor(figure: HTMLElement | null, id: string, shift: ShiftId | null): Element | null {
   if (!figure) return null;
@@ -167,7 +223,7 @@ export function ChainPlate({
   // validated before it becomes state, here and on every Back or Forward;
   // the rejected parameter is then dropped from the URL by the writer.
   const [fromUrl] = useState(() => {
-    const url = initialChainUrl(variant === 'full');
+    const url = initialChainUrl();
     return { ...url, node: canOpen(url.node, url.shift) ? url.node : null };
   });
 
@@ -175,18 +231,22 @@ export function ChainPlate({
   const [shift, setShift] = useState<ShiftId | null>(fromUrl.shift ?? initialShift);
   const [selected, setSelected] = useState<string | null>(fromUrl.node);
   const [hovered, setHovered] = useState<Hovered | null>(null);
-  const [hidden, setHidden] = useState<ReadonlySet<string>>(() => new Set());
-  const [expanded, setExpanded] = useState(variant === 'full');
-  // The short version on the landing page is a taster with no doors, so it
-  // carries no address. Once a reader OPENS it, it is the same map with the
-  // same doors, and what they are looking at should be shareable: the previous
-  // rule meant a reading reached from the landing page could not be sent to
-  // anyone, which is exactly when someone wants to send it.
+  const [hidden, setHidden] = useState<ReadonlySet<string>>(EMPTY_HIDDEN);
+  // The preview opens short — unless the address asks for something the short
+  // plate cannot draw, in which case it opens into exactly that.
   //
-  // Reading the address at mount stays gated on `variant === 'full'` (see
-  // `fromUrl` above): a link arriving on the landing page must not open the
-  // compact view into a state it cannot draw. From the expansion onwards the
-  // URL follows the map.
+  // This is the second half of a contract version 2 left open. From the
+  // expansion onwards the map wrote its state into the address, so a reader
+  // could copy a link to what they were looking at; the address was then read
+  // back only on the `full` variant, so that link opened the landing page at
+  // Economy, no shift, short — parameters intact and reading gone. A URL that
+  // records an exploration without restoring it is worse than no URL: it
+  // promises a shared reading and hands over a different one.
+  //
+  // A plain visit is untouched. `asksForFullChain` is false for an address
+  // with no chain parameters, and false for `distance=economy` alone, which is
+  // what the short plate already shows.
+  const [expanded, setExpanded] = useState(variant === 'full' || asksForFullChain(fromUrl));
   const urlEnabled = variant === 'full' || expanded;
   const [anchor, setAnchor] = useState<Element | null>(null);
   const triggerRef = useRef<Element | null>(null);
@@ -208,14 +268,22 @@ export function ChainPlate({
 
   const modulesByJoint = useMemo(() => locatedModulesByJoint(links), [links]);
 
-  const chooseLens = useCallback((next: LensId) => {
-    // A distance is a closer (or a farther) look; on the short plate it opens the full chain.
-    setExpanded(true);
-    setLens(next);
-  }, []);
+  // THREE CONTROLS, THREE CONTRACTS. How much of the chain is drawn, which
+  // distance it is read at, and which scenario is on are three different
+  // questions, and each control now changes only its own. They used to be
+  // coupled: both of these set `expanded`, so pressing the already-active
+  // Economy — or the already-active No shift, which changes nothing at all —
+  // swapped the whole short plate for the full one. A reader cannot learn what
+  // a control means while it also does something else.
+  //
+  // The coupling was there because the short plate cannot honour either
+  // control: it has no chips to re-word and no marks to raise. The answer is
+  // not to make them expand; it is not to offer them where they do nothing.
+  // The short plate shows its one labelled entrance and the button to the full
+  // chain, and these two appear where they mean something.
+  const chooseLens = useCallback((next: LensId) => setLens(next), []);
 
   const chooseShift = useCallback((next: ShiftId | null) => {
-    setExpanded(true);
     setShift((current) => {
       const after = current === next ? null : next;
       setSelected((open) => (canOpen(open, after) ? open : null));
@@ -230,7 +298,7 @@ export function ChainPlate({
       // about to be re-rendered with it — so the door the reader actually
       // came through stays the one Close returns to.
       const panel = document.getElementById(panelId);
-      if (!(trigger && panel?.contains(trigger))) triggerRef.current = trigger;
+      if (!(trigger && panel?.contains(trigger))) triggerRef.current = focusableTrigger(trigger);
       setSelected((current) => (current === id ? null : id));
     },
     [panelId],
@@ -294,7 +362,9 @@ export function ChainPlate({
   const toggleExpanded = useCallback(() => {
     const next = !expanded;
     if (!next) {
-      // Back to the short plate: no shift, no reading — it has neither.
+      // Back to the short plate: no shift, no reading — it has neither. The
+      // distance and the layer switches survive the round trip, because the
+      // short plate draws neither and the reader did not ask to lose them.
       setShift(null);
       setSelected(null);
     }
@@ -304,6 +374,52 @@ export function ChainPlate({
     // and respects the reader's motion setting through the browser.
     requestAnimationFrame(() => figureRef.current?.focus());
   }, [expanded]);
+
+  /**
+   * The one labelled entrance on the short plate: the assessed reading of the
+   * Energy layer, at the distance and under the scenario it was written in.
+   *
+   * It sets all three at once, which is exactly why its label has to say so —
+   * `CHAIN_COPY.opening.actionMeans` is the control's description, not
+   * decoration. Nothing here is exclusive: the reader lands in the ordinary
+   * full map with the ordinary controls, free to change any of the three or
+   * close the reading and go somewhere else.
+   */
+  const openPilot = useCallback(() => {
+    setLens(PILOT.lens);
+    setShift(PILOT.shift);
+    setSelected(PILOT.node);
+    setExpanded(true);
+    // The reading takes focus itself (ChainTargetPanel focuses its heading, with
+    // preventScroll, so the page does not jump out from under a reader who is
+    // already looking at the map). What it cannot do is bring the newly drawn
+    // figure into view, so that happens here — and only the scroll, never the
+    // focus, which would take it off the reading.
+    //
+    // An optional CALL, not merely an optional member: scrollIntoView is a
+    // browser method that jsdom and some embedded engines do not implement, and
+    // bringing the map into view is a courtesy. Nothing the reader asked for
+    // depends on it, so it must not be able to throw from inside a frame
+    // callback where no caller can catch it.
+    requestAnimationFrame(() => figureRef.current?.scrollIntoView?.({ block: 'start', behavior: scrollBehavior() }));
+  }, []);
+
+  // A SHARED READING ARRIVES BELOW THE FOLD. An address naming an element
+  // opens its reading on the first paint, and on both pages that carry the map
+  // the figure is thousands of pixels down. The panel focuses its own heading
+  // with preventScroll — deliberately, so the page does not jump under a reader
+  // who is already looking at the map — which leaves an incoming link opening a
+  // reading the recipient cannot see. So the figure is brought to them once,
+  // and only when the address actually asked for a reading. A fragment in the
+  // same address is the reader's own instruction and wins.
+  const arrivedOpen = useRef(fromUrl.node !== null);
+  useEffect(() => {
+    if (!arrivedOpen.current) return;
+    arrivedOpen.current = false;
+    if (typeof window === 'undefined' || window.location.hash) return;
+    const frame = requestAnimationFrame(() => figureRef.current?.scrollIntoView?.({ block: 'start', behavior: scrollBehavior() }));
+    return () => cancelAnimationFrame(frame);
+  }, []);
 
   // The popover is anchored to the element that carries the open reading —
   // its mark under a shift, else its door — found after the plate has drawn
@@ -387,7 +503,7 @@ export function ChainPlate({
     [modulesByJoint, closePanel, panelId, isolate],
   );
 
-  const { lead, shiftLead } = CHAIN_COPY;
+  const { lead, shiftLead, opening } = CHAIN_COPY;
   const [reindus, green] = SHIFTS;
   const marks = shift ? markedIds(shift).length : 0;
 
@@ -406,48 +522,122 @@ export function ChainPlate({
         <p className="mt-3 text-base leading-relaxed text-foreground md:text-lg" data-chain-standfirst>
           {CHAIN_COPY.standfirst}
         </p>
-        <p className="mt-3 text-sm leading-relaxed text-muted-foreground md:text-base">
-          {lead.before}
-          <LensWord id="economy" active={lens === 'economy'} onChoose={chooseLens}>
-            {lead.economy}
-          </LensWord>
-          {lead.middle}
-          <LensWord id="finance" active={lens === 'finance'} onChoose={chooseLens}>
-            {lead.finance}
-          </LensWord>
-          {lead.after}
-        </p>
-        <p className="mt-2 text-sm leading-relaxed text-muted-foreground md:text-base" data-chain-shift-lead>
-          {shiftLead.before}
-          <ShiftWord id={reindus.id} active={shift === reindus.id} onToggle={toggleShift}>
-            {reindus.word}
-          </ShiftWord>
-          {shiftLead.middle}
-          <ShiftWord id={green.id} active={shift === green.id} onToggle={toggleShift}>
-            {green.word}
-          </ShiftWord>
-          {shiftLead.after}
-        </p>
-        <div className="mt-2 flex flex-wrap items-center gap-x-4 text-sm text-muted-foreground">
-          <button
-            type="button"
-            data-chain-control="shift"
-            aria-pressed={shift === null}
-            onClick={() => chooseShift(null)}
-            className={cn('min-h-11 border-b text-foreground', shift === null ? 'border-foreground font-medium' : 'border-transparent', FOCUS)}
-          >
-            {CHAIN_COPY.controls.noShift}
-          </button>
-          <span role="status" aria-live="polite" aria-atomic="true">
-            {CHAIN_COPY.lensName[lens]} · {shift ? SHIFT_BY_ID[shift].label : CHAIN_COPY.controls.noShift}
-            {shift && ` · ${CHAIN_COPY.status.marks(marks)}`}
-            {selected && ` · ${targetLabel(selected)}`}
-          </span>
-        </div>
+        {/* The two distances and the two scenarios are the full chain's
+            controls, and they are shown where they do something. The short
+            plate has no chips to re-word and no marks to raise, so offering
+            them there was offering an inert control whose only observable
+            effect was to swap the plate. */}
         {!showCompact && (
-          <p className="mt-3 text-sm leading-relaxed text-muted-foreground" data-chain-scope>
-            {CHAIN_COPY.scopeLead}
-          </p>
+          <>
+            <p className="mt-3 text-sm leading-relaxed text-muted-foreground md:text-base">
+              {lead.before}
+              <LensWord id="economy" active={lens === 'economy'} onChoose={chooseLens}>
+                {lead.economy}
+              </LensWord>
+              {lead.middle}
+              <LensWord id="finance" active={lens === 'finance'} onChoose={chooseLens}>
+                {lead.finance}
+              </LensWord>
+              {lead.after}
+            </p>
+            <p className="mt-2 text-sm leading-relaxed text-muted-foreground md:text-base" data-chain-shift-lead>
+              {shiftLead.before}
+              <ShiftWord id={reindus.id} active={shift === reindus.id} onToggle={toggleShift}>
+                {reindus.word}
+              </ShiftWord>
+              {shiftLead.middle}
+              <ShiftWord id={green.id} active={shift === green.id} onToggle={toggleShift}>
+                {green.word}
+              </ShiftWord>
+              {shiftLead.after}
+            </p>
+            <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
+              <button
+                type="button"
+                data-chain-control="shift"
+                aria-pressed={shift === null}
+                onClick={() => chooseShift(null)}
+                className={cn('min-h-11 border-b text-foreground', shift === null ? 'border-foreground font-medium' : 'border-transparent', FOCUS)}
+              >
+                {CHAIN_COPY.controls.noShift}
+              </button>
+              {/* The way back, beside the controls that got the reader here.
+                  The button under the map stays: one exit at each end of a
+                  figure that is taller than the screen is not two answers to
+                  the same question. */}
+              {variant === 'preview' && (
+                <button
+                  type="button"
+                  data-chain-control="detail"
+                  aria-expanded={expanded}
+                  aria-controls={figureId}
+                  onClick={toggleExpanded}
+                  className={cn('min-h-11 border-b border-transparent text-foreground hover:border-foreground', FOCUS)}
+                >
+                  {CHAIN_COPY.controls.seeCompact}
+                </button>
+              )}
+              <span role="status" aria-live="polite" aria-atomic="true">
+                {CHAIN_COPY.lensName[lens]} · {shift ? SHIFT_BY_ID[shift].label : CHAIN_COPY.controls.noShift}
+                {shift && ` · ${CHAIN_COPY.status.marks(marks)}`}
+                {selected && ` · ${targetLabel(selected)}`}
+              </span>
+            </div>
+            {/* A switched-off layer fades to near nothing and keeps its place,
+                which is what makes it useful for comparing two layers — and
+                what makes it easy to read as a claim. It is not one: the
+                service is still bought and its constraint has not gone. Said
+                here, with the way back, only while any layer is off. */}
+            {hidden.size > 0 && (
+              <p className="mt-2 flex flex-wrap items-baseline gap-x-3 text-sm text-muted-foreground" data-chain-hidden-layers>
+                <span>{CHAIN_COPY.controls.layersHidden(hidden.size)}</span>
+                <button
+                  type="button"
+                  data-chain-control="layers"
+                  onClick={() => setHidden(EMPTY_HIDDEN)}
+                  className={cn('min-h-11 border-b border-transparent text-foreground hover:border-foreground', FOCUS)}
+                >
+                  {CHAIN_COPY.controls.showAllLayers}
+                </button>
+              </p>
+            )}
+          </>
+        )}
+
+        {/* The short plate's one bounded question, and the labelled action that
+            answers it inside the same swimlane. */}
+        {showCompact && (
+          <div className="mt-5 border-l-2 border-foreground pl-4" data-chain-opening>
+            <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">{opening.kicker}</p>
+            <p className="mt-1.5 text-base font-semibold leading-snug text-foreground md:text-lg">{opening.question}</p>
+            <p className="mt-2 text-sm leading-relaxed text-muted-foreground md:text-base">{opening.relation}</p>
+            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{opening.caution}</p>
+            <button
+              type="button"
+              data-chain-control="pilot"
+              aria-describedby={`${base}-pilot-means`}
+              onClick={openPilot}
+              className={cn(
+                'mt-4 inline-block rounded border-2 border-foreground px-5 py-2.5 text-sm font-medium tracking-[0.04em] text-foreground transition-colors hover:bg-foreground/[0.06] active:bg-foreground/[0.12]',
+                FOCUS,
+              )}
+            >
+              {opening.action}
+            </button>
+            <p id={`${base}-pilot-means`} className="mt-2 text-xs leading-relaxed text-muted-foreground">
+              {opening.actionMeans} {opening.case}
+            </p>
+          </div>
+        )}
+        {!showCompact && (
+          <>
+            <p className="mt-3 text-sm leading-relaxed text-muted-foreground" data-chain-doors>
+              {CHAIN_COPY.doorsLead}
+            </p>
+            <p className="mt-2 text-sm leading-relaxed text-muted-foreground" data-chain-scope>
+              {CHAIN_COPY.scopeLead}
+            </p>
+          </>
         )}
         {/* A numbered disc reads as a ranking unless something says otherwise,
             and these numbers are positions on the drawing that renumber when
@@ -473,7 +663,9 @@ export function ChainPlate({
           id={figureId}
           ref={figureRef}
           tabIndex={-1}
-          className={cn('relative mt-8 outline-none', !wideScreen && 'max-w-2xl', FOCUS)}
+          /* scroll-mt: every scroll to this figure is programmatic and the page
+             header is sticky — without it the map lands under the header. */
+          className={cn('relative mt-8 scroll-mt-20 outline-none', !wideScreen && 'max-w-2xl', FOCUS)}
           onMouseOver={wideScreen ? onFigureOver : undefined}
           onMouseOut={wideScreen ? onFigureOut : undefined}
         >
@@ -498,7 +690,15 @@ export function ChainPlate({
               <SheetContent
                 side="bottom"
                 data-chain-sheet=""
-                className="max-h-[85vh] overflow-y-auto rounded-t-lg p-4 pt-3"
+                // The sheet does NOT scroll; the box inside it does, and the
+                // distance control stays outside that box. Two reasons, one
+                // shape: the sheet's own Close is positioned against the sheet,
+                // so a sheet that scrolled carried its dismissal off the top of
+                // a long reading — the phone form of the defect the popover had
+                // beside the plate; and a distance control that scrolls away is
+                // a distance control the reader has to go and find, which is
+                // the finding this one exists to answer.
+                className="flex max-h-[85vh] flex-col gap-0 rounded-t-lg p-0"
                 // Close returns focus to the row that opened the reading, once the trap is down.
                 onCloseAutoFocus={(e) => {
                   e.preventDefault();
@@ -507,7 +707,32 @@ export function ChainPlate({
               >
                 <SheetTitle className="sr-only">{targetLabel(selected)}</SheetTitle>
                 <SheetDescription className="sr-only">{CHAIN_COPY.panel.close}</SheetDescription>
-                {renderPanel(selected, { inline: true, hideClose: true })}
+                {/* The distance, inside the reading.
+                    The state already supported keeping a target while the
+                    distance changes — what a phone reader could not do was
+                    reach the control without closing the reading, because it
+                    lived outside a modal sheet. So comparing the two readings
+                    of one element meant dismissing it, finding the words in the
+                    lead paragraph, and finding the element again: the interface
+                    interrupting the one operation the map exists to show.
+                    Still one voice at a time; the panel below re-reads. */}
+                <div
+                  className="flex shrink-0 flex-wrap items-baseline gap-x-3 gap-y-1 px-4 pr-14 pt-3 text-sm text-muted-foreground"
+                  data-chain-sheet-distance
+                >
+                  <span id={`${base}-sheet-distance`}>{CHAIN_COPY.controls.sheetDistance}</span>
+                  <span className="flex flex-wrap items-baseline gap-x-3" role="group" aria-labelledby={`${base}-sheet-distance`}>
+                    <LensWord id="economy" active={lens === 'economy'} onChoose={chooseLens}>
+                      {CHAIN_COPY.lensName.economy}
+                    </LensWord>
+                    <LensWord id="finance" active={lens === 'finance'} onChoose={chooseLens}>
+                      {CHAIN_COPY.lensName.finance}
+                    </LensWord>
+                  </span>
+                </div>
+                <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-4">
+                  {renderPanel(selected, { inline: true, hideClose: true })}
+                </div>
               </SheetContent>
             )}
           </Sheet>

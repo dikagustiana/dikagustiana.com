@@ -390,7 +390,19 @@ export function ChainTargetPanel({
       data-panel={reading ? 'reading' : 'anatomy'}
       className={cn('rounded-md border border-border bg-card p-5 text-card-foreground', inline ? 'mt-2' : '')}
     >
-      <div className="flex items-start justify-between gap-4">
+      {/* WHO AM I, AND HOW DO I LEAVE — kept on screen while the evidence
+          scrolls. A long reading has its own scroll area, and beside the plate
+          that scroll used to carry the reading's title and its Close control
+          away with it, so the reader lost the name of the thing they were
+          reading exactly when it got detailed. In the sheet the sheet owns the
+          scrolling and its own Close is already pinned, so this only sticks
+          where it is the scroll container itself. */}
+      <div
+        className={cn(
+          'flex items-start justify-between gap-4',
+          !inline && 'sticky top-0 z-10 -mx-5 -mt-5 rounded-t-md bg-card px-5 pb-3 pt-5',
+        )}
+      >
         <div className="min-w-0">
           <p className={KICKER}>
             {n > 0 && <span className="mr-2 tabular-nums text-foreground">{n}</span>}

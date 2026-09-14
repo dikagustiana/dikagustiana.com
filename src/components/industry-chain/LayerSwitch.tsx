@@ -12,6 +12,12 @@ import { BAND_BY_ID, CHAIN_COPY } from '@/data/industryChain';
 import { ChainLensContext } from './chainLensContext';
 
 const SIZE = 12;
+/**
+ * The drawn box is 12 units — 8.5 screen pixels at the 1280px breakpoint. The
+ * transparent pad around it is what the reader actually hits, and it is sized
+ * to clear 24px there: 34 units, which fits inside the band row's pitch.
+ */
+const HIT = 34;
 
 export function LayerSwitch({ id, x, y }: { id: string; x: number; y: number }) {
   const { hidden, onToggleLayer } = useContext(ChainLensContext);
@@ -34,7 +40,7 @@ export function LayerSwitch({ id, x, y }: { id: string; x: number; y: number }) 
       onClick={() => onToggleLayer(id)}
       onKeyDown={onKey}
     >
-      <rect x={x - 6} y={y - 6} width={SIZE + 12} height={SIZE + 12} fill="transparent" stroke="none" />
+      <rect className="cp-hit-area" x={x - (HIT - SIZE) / 2} y={y - (HIT - SIZE) / 2} width={HIT} height={HIT} />
       <rect className="cp-switch-box" x={x} y={y} width={SIZE} height={SIZE} rx={1.5} />
       {on && <rect className="cp-switch-dot" x={x + 3} y={y + 3} width={SIZE - 6} height={SIZE - 6} rx={0.5} />}
     </g>

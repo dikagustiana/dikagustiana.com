@@ -28,6 +28,15 @@ import { ChainLensContext } from './chainLensContext';
 import { markNumber, targetLabel } from './chainTargets';
 
 const R = 11;
+/**
+ * The transparent disc that takes the tap, larger than the one that takes the
+ * ink. The drawn mark is 22 units across, which at the 1280px breakpoint is
+ * 15.6 screen pixels — a door too small to aim at. 34 units clears 24px there
+ * and stays clear of its neighbours; the generator already places marks so
+ * they land on nothing, and the unit test checks the enlarged discs still do
+ * not reach each other.
+ */
+const HIT = 17;
 
 export function ShiftMark({ shift, id, cx, cy }: { shift: ShiftId; id: string; cx: number; cy: number }) {
   const { selected, onSelect, onHover, hidden, panelId } = useContext(ChainLensContext);
@@ -66,6 +75,7 @@ export function ShiftMark({ shift, id, cx, cy }: { shift: ShiftId; id: string; c
       onFocus={(e) => onHover(id, e.currentTarget)}
       onBlur={() => onHover(null)}
     >
+      <circle className="cp-hit-area" cx={cx} cy={cy} r={HIT} />
       <circle cx={cx} cy={cy} r={R} />
       <text x={cx} y={cy + 5} textAnchor="middle">
         {n}
