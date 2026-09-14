@@ -11,7 +11,7 @@
  */
 import fs from 'node:fs';
 
-const MIN_TESTS = 430; // 433 after the condition layer, the cold chain, the popover, the hover label, isolation, the layer switches and their review fixes; slack of 3, not 30.
+const MIN_TESTS = 515; // 519 after the audit response: the tracker's evidence contract, the reading path, essay ownership, the publication predicate, the map's condition layer and the genre gate; slack of 4, not 40.
 
 const reportPath = process.argv[2] ?? 'vitest-report.json';
 if (!fs.existsSync(reportPath)) {
