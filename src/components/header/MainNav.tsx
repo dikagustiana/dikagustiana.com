@@ -16,7 +16,17 @@ export function MainNav() {
   const { isAdmin } = useAuth();
 
   return (
-    <nav className="hidden lg:flex items-center gap-1" aria-label="Main navigation">
+    /* TWO CAPACITY RULES, both measured.
+       `xl` and not `lg`: at 1024px the seven labels did not fit and the row did
+       not wrap, so flexbox compressed them — "The Green Transition" ran to
+       three lines inside a 64px header and "The Next Big Thing" was clipped
+       mid-word. A truncated destination is worse than a drawer, and the drawer
+       carries every one of them.
+       `flex-wrap`: above that width the labels still grow with the reader's
+       default font. At a 24px root they ran to 1,394px inside a 1,348px page
+       and gave the document a horizontal scrollbar. The row becomes two rather
+       than dropping anything: every label here is a section of the site. */
+    <nav className="hidden flex-wrap items-center justify-end gap-1 xl:flex" aria-label="Main navigation">
       <Link
         to="/"
         className={cn('nav-link', location.pathname === '/' && 'nav-link-active')}

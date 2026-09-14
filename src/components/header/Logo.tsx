@@ -46,14 +46,16 @@ export function Logo() {
       {!user && (
         <Link
           to="/auth"
-          className="nav-link hidden lg:flex min-h-[44px] items-center opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100 transition-opacity"
+          className="nav-link hidden xl:flex min-h-[44px] items-center opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100 transition-opacity"
         >
           Sign In
         </Link>
       )}
 
       {user && (
-        <div className="hidden lg:flex items-center gap-2">
+        /* Same breakpoint as the nav it sits beside: below it the drawer
+           carries the account controls. */
+        <div className="hidden xl:flex items-center gap-2">
           <Badge
             className={`text-xs font-bold uppercase tracking-wide ${
               // Same reason as MainNav: a navy chip on the dark slate header

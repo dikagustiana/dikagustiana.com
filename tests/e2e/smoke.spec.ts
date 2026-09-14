@@ -73,3 +73,53 @@ for (const route of PUBLIC_ROUTES) {
     expect(text.length, `visible text length on ${route.path}`).toBeGreaterThan(20);
   });
 }
+
+/**
+ * HEADER CAPACITY. The header row is sized in rem and its seven labels grow
+ * with the reader's default font, in a flex row that used not to wrap. Two
+ * defects, both measured on /about on 14 September 2026:
+ *
+ *   at 1024px and the default font, the row could not hold seven labels and
+ *   flexbox compressed them — "The Green Transition" ran to three lines inside
+ *   a 64px header and "The Next Big Thing" was clipped mid-word;
+ *
+ *   at a 24px root font the navigation ran to 1,394px inside a 1,348px page and
+ *   gave the whole document a horizontal scrollbar, at every width up to 1,440.
+ *
+ * The desktop row and the drawer now swap at the width where the row actually
+ * fits, and above it the row wraps rather than overrunning. Nothing is dropped:
+ * every label is a section of the site.
+ */
+test.describe('the header holds its navigation', () => {
+  for (const font of [16, 20, 24]) {
+    for (const width of [1024, 1280, 1348, 1440]) {
+      test(`no sideways scroll at ${width}px with a ${font}px root font`, async ({ page }) => {
+        await page.setViewportSize({ width, height: 900 });
+        await page.goto('/about');
+        if (font !== 16) await page.addStyleTag({ content: `html{font-size:${font}px}` });
+        await page.waitForTimeout(500);
+
+        const m = await page.evaluate(() => {
+          const nav = document.querySelector('header nav');
+          const items = nav && getComputedStyle(nav).display !== 'none' ? Array.from(nav.children) : [];
+          const navBox = nav?.getBoundingClientRect();
+          return {
+            scrollWidth: document.documentElement.scrollWidth,
+            clientWidth: document.documentElement.clientWidth,
+            navShown: items.length > 0,
+            // Every label whole and inside the row it is drawn in.
+            clipped: items.some((el) => {
+              const r = el.getBoundingClientRect();
+              return el.scrollHeight > el.clientHeight + 1 || r.bottom > (navBox?.bottom ?? 0) + 1;
+            }),
+            drawer: !!document.querySelector('header button[aria-haspopup], header [data-state]'),
+          };
+        });
+
+        expect(m.scrollWidth, 'document must not scroll sideways').toBeLessThanOrEqual(m.clientWidth);
+        // Either the row holds every label whole, or the drawer carries them.
+        if (m.navShown) expect(m.clipped, 'a navigation label is clipped').toBe(false);
+      });
+    }
+  }
+});

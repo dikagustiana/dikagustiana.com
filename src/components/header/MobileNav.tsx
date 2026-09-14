@@ -47,7 +47,9 @@ export function MobileNav() {
   };
 
   return (
-    <div className="lg:hidden">
+    // Paired with MainNav's `xl:flex` — see the capacity note there. Below that
+    // width the desktop row cannot hold seven labels without truncating one.
+    <div className="xl:hidden">
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
         <SheetTrigger asChild>
           <Button
