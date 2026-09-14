@@ -14,10 +14,12 @@ import { mockSupabase } from './mockSupabase';
 const PHONE = { width: 360, height: 740 };
 const LAPTOP = { width: 1280, height: 800 };
 
+const TITLE = 'The industry chain';
+
 async function open(page: Page, path: string) {
   await mockSupabase(page);
   await page.goto(path);
-  await expect(page.getByRole('heading', { name: /Every joint in this chain is a margin/ })).toBeVisible();
+  await expect(page.getByRole('heading', { name: TITLE, exact: true })).toBeVisible();
 }
 
 const scrollWidth = (page: Page) => page.evaluate(() => document.documentElement.scrollWidth);
@@ -29,11 +31,11 @@ for (const path of ['/', '/about']) {
     await open(page, path);
 
     if (path === '/') {
-      await expect(page.locator('.cp-column[data-variant="compact"]')).toHaveCount(1);
+      await expect(page.locator('.cp-column[data-level="overview"]')).toHaveCount(1);
       expect(await scrollWidth(page)).toBeLessThanOrEqual(PHONE.width);
-      await page.getByRole('button', { name: 'See the full chain' }).click();
+      await page.getByRole('button', { name: 'Show the detail' }).first().click();
     }
-    await expect(page.locator('.cp-column[data-variant="full"]')).toHaveCount(1);
+    await expect(page.locator('.cp-column[data-level="detail"]')).toHaveCount(1);
     await expect(page.locator('svg.cp-svg')).toHaveCount(0);
     // No legend, no reference, no hint under the column.
     await expect(page.getByRole('button', { name: 'How to read the map' })).toHaveCount(0);
@@ -352,61 +354,72 @@ test('/about?lens=green&distance=finance&node=energy opens the overlay and the r
   expect(await voices(region)).toEqual(['economy']);
 });
 
-test('/ at 1280px opens short, expands in place, and keeps the hero above it', async ({ page }) => {
+test('/ at 1280px opens at the overview, with the map first on the page and the detail swapping in place', async ({ page }) => {
   await page.setViewportSize(LAPTOP);
   await open(page, '/');
 
-  await expect(page.getByRole('heading', { name: /insanely, damn good at numbers/ })).toBeVisible();
   await expect(page.locator('svg.cp-svg--compact')).toHaveCount(1);
   await expect(page.locator('svg.cp-svg--wide')).toHaveCount(0);
 
-  const hero = await page.getByRole('heading', { name: /insanely, damn good at numbers/ }).boundingBox();
-  const chain = await page.getByRole('heading', { name: /Every joint in this chain is a margin/ }).boundingBox();
-  expect(hero!.y).toBeLessThan(chain!.y);
+  // NOTHING PRECEDES THE MAP. The hero, its artwork, the argument block and
+  // the reading path are gone from the entrance by owner decision, so the
+  // map's own title is the page's main heading and the first heading in the
+  // document. What was there is not deleted, only moved: About still carries
+  // the argument and the reading path.
+  const title = page.getByRole('heading', { name: TITLE, exact: true });
+  await expect(title).toHaveRole('heading');
+  expect(await title.evaluate((el) => el.tagName)).toBe('H1');
+  const headings = page.locator('main :is(h1, h2, h3)');
+  expect(await headings.first().textContent()).toBe(TITLE);
+  await expect(page.getByRole('heading', { name: /insanely, damn good at numbers/ })).toHaveCount(0);
 
-  const button = page.getByRole('button', { name: 'See the full chain' });
+  const button = page.getByRole('button', { name: 'Show the detail' }).first();
   await button.click();
   await expect(page.locator('svg.cp-svg--wide')).toHaveCount(1);
   // Two exits once it is open: one beside the controls, one under the map.
   // A figure taller than the screen has two ends.
-  const exits = page.getByRole('button', { name: 'Back to the short version' });
+  const exits = page.getByRole('button', { name: 'Back to the overview' });
   await expect(exits).toHaveCount(2);
   await expect(exits.first()).toHaveAttribute('aria-expanded', 'true');
   await expect(exits.last()).toHaveAttribute('aria-expanded', 'true');
 });
 
 /**
- * The short plate's first encounter. Orientation is not explanation: naming
- * the Energy band told a stranger the noun and left them to invent the
- * question, choose among two distances, two scenarios and sixteen marks, and
- * discover for themselves which of them had been written against evidence.
+ * THE OVERVIEW IS A MAP THE READER CAN WORK AT. What this replaces: a short
+ * plate with no doors, no chips and no marks, whose distance and scenario
+ * words were withheld because neither had anything to act on, plus one
+ * bounded question and one labelled action that flew the reader into a single
+ * written case. The owner deleted the opening case and the guided route, so
+ * every control acts here and the reader picks the relation.
  */
-test('/ at 1280px: the short plate asks one bounded question and its action lands on the assessed reading', async ({ page }) => {
+test('/ at 1280px: both distances, both overlays and every door but one act at the overview', async ({ page }) => {
   await page.setViewportSize(LAPTOP);
   await open(page, '/');
 
-  const opening = page.locator('[data-chain-opening]');
-  await expect(opening).toBeVisible();
-  // The relation, and the boundary of the case: the shared word "distribution"
-  // must not hand the reading a claim about the electricity network.
-  await expect(opening).toContainText('Energy is a band beneath the chain');
-  await expect(opening).toContainText('The electricity network is a different network');
+  await expect(page.locator('[data-chain-opening]')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Explore the power decision' })).toHaveCount(0);
 
-  // Neither inert control is offered while the plate has nothing to change.
-  await expect(page.getByRole('button', { name: 'economy', exact: true })).toHaveCount(0);
-  await expect(page.getByRole('button', { name: 'No shift' })).toHaveCount(0);
+  // The controls the short plate could not offer.
+  await expect(word(page, 'economy')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'No shift' })).toBeVisible();
 
-  await page.getByRole('button', { name: 'Explore the power decision' }).click();
+  await word(page, 'finance').click();
   await expect(page.locator('.chain-plate')).toHaveAttribute('data-lens', 'finance');
+  await expect(page.locator('.chain-plate')).toHaveAttribute('data-level', 'overview');
+
+  await word(page, 'green transition').click();
   await expect(page.locator('.chain-plate')).toHaveAttribute('data-shift', 'green');
+  await expect(page.locator('.chain-plate')).toHaveAttribute('data-level', 'overview');
+  await expect(page.locator('.cp-marks--green .cp-mark')).toHaveCount(8);
+
+  // A door opens a reading here, without expanding anything.
+  await page.locator('.cp-hit[data-id="band-energy"]').click();
   const reading = page.getByRole('region', { name: 'Energy' });
   await expect(reading).toBeVisible();
   await expect(reading.locator('[data-basis="assessed"]')).toBeVisible();
   // What the lever CANNOT do here is part of the mechanism, not a footnote.
   await expect(reading.locator('[data-mechanism="contract"]')).toBeVisible();
-  // And the reader is in the ordinary map, free to leave the pilot.
-  await expect(page.getByRole('button', { name: 'No shift' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Back to the short version' })).toHaveCount(2);
+  await expect(page.locator('.chain-plate')).toHaveAttribute('data-level', 'overview');
 });
 
 /**
@@ -418,19 +431,29 @@ test('/ at 1280px: the short plate asks one bounded question and its action land
 test('an address explored on / restores the same reading in a fresh page load', async ({ page }) => {
   await page.setViewportSize(LAPTOP);
   await open(page, '/');
-  await page.getByRole('button', { name: 'Explore the power decision' }).click();
+  // Explored at the overview, where the reader now starts: the distance, the
+  // overlay and the door, none of which the old short plate could offer.
+  await word(page, 'finance').click();
+  await word(page, 'green transition').click();
+  await page.locator('.cp-hit[data-id="band-energy"]').click();
   await expect(page.getByRole('region', { name: 'Energy' })).toBeVisible();
 
   const shared = page.url();
-  // The writer's own parameter order; the reader only ever copies it whole.
-  expect(new URL(shared).search).toBe('?lens=green&distance=finance&node=energy');
+  // The three values, not the order they happen to be written in: that follows
+  // the order the reader pressed things, and the reader only ever copies the
+  // address whole.
+  const params = new URL(shared).searchParams;
+  expect(Object.fromEntries(params)).toEqual({ lens: 'green', distance: 'finance', node: 'energy' });
 
   // A fresh load of exactly that address — not a client-side navigation.
   await page.goto('about:blank');
   await page.goto(shared);
   await expect(page.locator('.chain-plate')).toHaveAttribute('data-lens', 'finance');
   await expect(page.locator('.chain-plate')).toHaveAttribute('data-shift', 'green');
-  await expect(page.locator('.chain-plate')).toHaveAttribute('data-view', 'full');
+  // At the OVERVIEW, which draws the energy layer, its door and its mark. The
+  // link restores where the reader was, and expanding on their behalf would be
+  // a level control they never touched.
+  await expect(page.locator('.chain-plate')).toHaveAttribute('data-level', 'overview');
   await expect(page.getByRole('region', { name: 'Energy' })).toBeVisible();
   // And it is brought into view rather than left four thousand pixels down.
   // Polled, because that scroll is smooth for a reader who has not asked
@@ -444,9 +467,9 @@ test('an address explored on / restores the same reading in a fresh page load', 
     )
     .toBe(true);
 
-  // A plain visit is untouched: no parameters, and the short plate.
+  // A plain visit is untouched: no parameters, and the overview.
   await page.goto('/');
-  await expect(page.locator('.chain-plate')).toHaveAttribute('data-view', 'compact');
+  await expect(page.locator('.chain-plate')).toHaveAttribute('data-level', 'overview');
   expect(new URL(page.url()).search).toBe('');
 });
 

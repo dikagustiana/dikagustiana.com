@@ -135,19 +135,25 @@ async function seed(page: Page) {
 
 test.beforeEach(async ({ page }) => seed(page));
 
-test('thirty seconds: the hero leads to a bounded position, and a completed piece is one click away', async ({ page }) => {
+/**
+ * Thirty seconds, after the owner deleted the entrance that used to run them.
+ *
+ * The hero, its artwork, the argument block and the reading path are gone from
+ * the landing page; the map is the first thing under the header, and the
+ * reader goes deeper into a relation through the essays. So the thirty-second
+ * journey is: meet the structure, pick something, land on a written piece.
+ * The argument is not deleted — About still carries it, which the next test
+ * checks — it is no longer the door.
+ */
+test('thirty seconds: the map is the entrance, and a completed piece is one click away', async ({ page }) => {
   await page.goto('/');
 
-  // "Read the essays" pointed at six subject doors below the curated strip.
-  const cta = page.getByRole('link', { name: /Start with the argument/i });
-  await expect(cta).toBeVisible();
-  await cta.click();
-
-  const argument = page.locator('#the-argument');
-  await expect(argument).toBeVisible();
-  // Bounded to a case, not a claim about a country.
-  await expect(argument).toContainText(/captive/i);
-  await expect(argument).toContainText(/nickel/i);
+  // Nothing precedes the map, and no call to action stands in front of it.
+  await expect(page.getByRole('heading', { name: 'The industry chain', exact: true })).toBeVisible();
+  await expect(page.getByRole('link', { name: /Start with the argument/i })).toHaveCount(0);
+  await expect(page.locator('#the-argument')).toHaveCount(0);
+  const first = page.locator('main :is(h1, h2, h3)').first();
+  expect(await first.textContent()).toBe('The industry chain');
 
   const flagship = page
     .getByRole('link', { name: /Indonesia.s Reindustrialization Bet/i })
@@ -221,12 +227,12 @@ test('map reading: the basis is declared, distance changes the work, and the sta
   await fresh.close();
 });
 
-test('a reading opened from the landing page can be sent, which it previously could not', async ({ page }) => {
+test('a reading opened from the landing page can be sent, from the overview, without expanding anything', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 1000 });
   await page.goto('/');
-  await page.getByRole('button', { name: 'See the full chain' }).click();
   await page.getByRole('button', { name: 'green transition', exact: true }).click();
   await expect.poll(() => page.url()).toContain('lens=green');
+  await expect(page.locator('.chain-plate')).toHaveAttribute('data-level', 'overview');
 });
 
 test('curriculum: the syllabus says what it is, and promises no dates', async ({ page }) => {
