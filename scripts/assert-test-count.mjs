@@ -11,7 +11,7 @@
  */
 import fs from 'node:fs';
 
-const MIN_TESTS = 515; // 519 after the audit response: the tracker's evidence contract, the reading path, essay ownership, the publication predicate, the map's condition layer and the genre gate; slack of 4, not 40.
+const MIN_TESTS = 521; // 525 after the v3 UI pass: the shared-reading URL contract in both directions, the three separated control contracts, the labelled entrance onto the assessed reading, and the two exits; slack of 4, not 40.
 
 const reportPath = process.argv[2] ?? 'vitest-report.json';
 if (!fs.existsSync(reportPath)) {

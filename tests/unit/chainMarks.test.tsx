@@ -359,7 +359,52 @@ describe('the map in the address bar', () => {
     // same map with the same doors, so it becomes shareable then.
     window.history.replaceState({}, '', '/');
     mount(<ChainPlate links={[]} variant="preview" />);
+    //
+    // The click that opens it is no longer a shift word: a distance and a
+    // scenario are not offered while the plate is short, because neither has
+    // anything to change there (U02). The button that says what it does is.
+    await userEvent.click(screen.getByRole('button', { name: CHAIN_COPY.controls.seeFull }));
     await userEvent.click(word('green transition'));
     expect(window.location.search).toBe('?lens=green');
+  });
+
+  /*
+   * THE OTHER HALF OF THE SAME CONTRACT. Writing the address without reading
+   * it back is worse than not writing it: the link looks like a shared reading
+   * and opens a different one. Reproduced on the landing page at 1348x936 on
+   * 14 September 2026 - ?distance=finance&lens=green&node=energy kept every
+   * parameter and rendered Economy, No shift, short.
+   */
+  it('restores a shared reading on the landing page, opening the short plate to draw it', () => {
+    window.history.replaceState({}, '', '/?distance=finance&lens=green&node=energy');
+    mount(<ChainPlate links={[]} variant="preview" />);
+    const plate = document.querySelector('.chain-plate') as HTMLElement;
+    expect(plate.dataset.view).toBe('full');
+    expect(plate.dataset.lens).toBe('finance');
+    expect(plate.dataset.shift).toBe('green');
+    const panel = screen.getByRole('region', { name: 'Energy' });
+    expect(panel.getAttribute('data-panel')).toBe('reading');
+    expect(window.location.search).toBe('?distance=finance&lens=green&node=energy');
+  });
+
+  it('leaves the landing page short when the address asks only for what the short plate already shows', () => {
+    // `distance=economy` is never written by the map (the resting distance is
+    // not worth carrying), so it can only be a hand-edit - and the honest
+    // reading of a hand-edit asking for the resting state is the resting state.
+    window.history.replaceState({}, '', '/?distance=economy');
+    mount(<ChainPlate links={[]} variant="preview" />);
+    expect((document.querySelector('.chain-plate') as HTMLElement).dataset.view).toBe('compact');
+  });
+
+  it('does not honour an address that names an element this overlay does not mark, on the landing page either', () => {
+    window.history.replaceState({}, '', '/?lens=reindustrialisation&node=recovery');
+    mount(<ChainPlate links={[]} variant="preview" />);
+    const plate = document.querySelector('.chain-plate') as HTMLElement;
+    // The overlay is real and opens the chain; the rejected element does not
+    // leave a panel with a heading and nothing under it.
+    expect(plate.dataset.view).toBe('full');
+    expect(plate.dataset.shift).toBe('reindustrialisation');
+    expect(screen.queryByRole('region', { name: 'Recovery' })).not.toBeInTheDocument();
+    expect(window.location.search).toBe('?lens=reindustrialisation');
   });
 });

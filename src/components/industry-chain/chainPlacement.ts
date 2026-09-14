@@ -16,20 +16,48 @@ const POP_GAP = 10;
 const POP_PAD = 8;
 
 /**
- * Where a popover of `size` should sit beside `anchor`, inside `figure`.
- * Below and above are the natural reading positions; a side placement is
- * taken only when neither fits, and a clamped one only when none does — in
- * which case the popover is kept clear of the anchor's own column.
+ * The band of the figure a popover may occupy, in the figure's own
+ * coordinates. Defaults to the whole figure, less its padding.
+ *
+ * It exists because the figure is not the reader's viewport. The plate is
+ * taller than the space under a fixed page header on an ordinary laptop, so a
+ * popover clamped to the FIGURE could be correct by the figure's geometry and
+ * still put its own title and Close control behind that header — or above the
+ * top of the screen entirely, leaving a reader scrolling to find the start of
+ * a reading whose middle they can see. Reproduced at 1348×936 on 14 September
+ * 2026: with the figure's top just above the viewport, Close sat at y≈21–47
+ * under a header occupying y=0–65.
  */
-export function placePopover(anchor: Box, figure: Box, size: { width: number; height: number }): { top: number; left: number } {
+export interface Band {
+  top: number;
+  bottom: number;
+}
+
+/**
+ * Where a popover of `size` should sit beside `anchor`, inside `figure` and
+ * within `band`. Below and above are the natural reading positions; a side
+ * placement is taken only when neither fits, and a clamped one only when none
+ * does — in which case the popover is kept clear of the anchor's own column.
+ */
+export function placePopover(
+  anchor: Box,
+  figure: Box,
+  size: { width: number; height: number },
+  band?: Band,
+): { top: number; left: number } {
   const ax = anchor.left - figure.left;
   const ay = anchor.top - figure.top;
   const acx = ax + anchor.width / 2;
   const acy = ay + anchor.height / 2;
   const w = Math.min(size.width, figure.width - POP_PAD * 2);
   const h = size.height;
+  // The band never escapes the figure, and never inverts: a figure scrolled
+  // wholly out of the readable area falls back to its own top, which is the
+  // old behaviour and the only sane one when nothing is visible anyway.
+  const lo = Math.max(POP_PAD, Math.min(band?.top ?? POP_PAD, figure.height - POP_PAD));
+  const hi = Math.min(figure.height - POP_PAD, Math.max(band?.bottom ?? figure.height - POP_PAD, lo));
   const fits = (top: number, left: number) =>
-    top >= POP_PAD && left >= POP_PAD && top + h <= figure.height - POP_PAD && left + w <= figure.width - POP_PAD;
+    top >= lo && left >= POP_PAD && top + h <= hi && left + w <= figure.width - POP_PAD;
   const candidates: Array<[number, number]> = [
     [ay + anchor.height + POP_GAP, acx - w / 2], // below
     [ay - POP_GAP - h, acx - w / 2], // above
@@ -37,7 +65,7 @@ export function placePopover(anchor: Box, figure: Box, size: { width: number; he
     [acy - h / 2, ax - POP_GAP - w], // left
   ];
   const clamp = ([top, left]: [number, number]) => ({
-    top: Math.max(POP_PAD, Math.min(top, Math.max(POP_PAD, figure.height - POP_PAD - h))),
+    top: Math.max(lo, Math.min(top, Math.max(lo, hi - h))),
     left: Math.max(POP_PAD, Math.min(left, Math.max(POP_PAD, figure.width - POP_PAD - w))),
   });
   for (const c of candidates) if (fits(c[0], c[1])) return { top: c[0], left: c[1] };

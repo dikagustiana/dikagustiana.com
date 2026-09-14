@@ -230,5 +230,195 @@ test('/ at 1280px opens short, expands in place, and keeps the hero above it', a
   const button = page.getByRole('button', { name: 'See the full chain' });
   await button.click();
   await expect(page.locator('svg.cp-svg--wide')).toHaveCount(1);
-  await expect(page.getByRole('button', { name: 'Back to the short version' })).toHaveAttribute('aria-expanded', 'true');
+  // Two exits once it is open: one beside the controls, one under the map.
+  // A figure taller than the screen has two ends.
+  const exits = page.getByRole('button', { name: 'Back to the short version' });
+  await expect(exits).toHaveCount(2);
+  await expect(exits.first()).toHaveAttribute('aria-expanded', 'true');
+  await expect(exits.last()).toHaveAttribute('aria-expanded', 'true');
+});
+
+/**
+ * The short plate's first encounter. Orientation is not explanation: naming
+ * the Energy band told a stranger the noun and left them to invent the
+ * question, choose among two distances, two scenarios and sixteen marks, and
+ * discover for themselves which of them had been written against evidence.
+ */
+test('/ at 1280px: the short plate asks one bounded question and its action lands on the assessed reading', async ({ page }) => {
+  await page.setViewportSize(LAPTOP);
+  await open(page, '/');
+
+  const opening = page.locator('[data-chain-opening]');
+  await expect(opening).toBeVisible();
+  // The relation, and the boundary of the case: the shared word "distribution"
+  // must not hand the reading a claim about the electricity network.
+  await expect(opening).toContainText('Energy is a band beneath the chain');
+  await expect(opening).toContainText('The electricity network is a different network');
+
+  // Neither inert control is offered while the plate has nothing to change.
+  await expect(page.getByRole('button', { name: 'economy', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'No shift' })).toHaveCount(0);
+
+  await page.getByRole('button', { name: 'Explore the power decision' }).click();
+  await expect(page.locator('.chain-plate')).toHaveAttribute('data-lens', 'finance');
+  await expect(page.locator('.chain-plate')).toHaveAttribute('data-shift', 'green');
+  const reading = page.getByRole('region', { name: 'Energy' });
+  await expect(reading).toBeVisible();
+  await expect(reading.locator('[data-basis="assessed"]')).toBeVisible();
+  // What the lever CANNOT do here is part of the mechanism, not a footnote.
+  await expect(reading.locator('[data-mechanism="contract"]')).toBeVisible();
+  // And the reader is in the ordinary map, free to leave the pilot.
+  await expect(page.getByRole('button', { name: 'No shift' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Back to the short version' })).toHaveCount(2);
+});
+
+/**
+ * U05, in a real browser and across a real page load: version 2 wrote the
+ * address from the landing page and read it back only on /about, so the link a
+ * reader copied opened Economy, No shift, short — every parameter intact and
+ * the reading gone.
+ */
+test('an address explored on / restores the same reading in a fresh page load', async ({ page }) => {
+  await page.setViewportSize(LAPTOP);
+  await open(page, '/');
+  await page.getByRole('button', { name: 'Explore the power decision' }).click();
+  await expect(page.getByRole('region', { name: 'Energy' })).toBeVisible();
+
+  const shared = page.url();
+  // The writer's own parameter order; the reader only ever copies it whole.
+  expect(new URL(shared).search).toBe('?lens=green&distance=finance&node=energy');
+
+  // A fresh load of exactly that address — not a client-side navigation.
+  await page.goto('about:blank');
+  await page.goto(shared);
+  await expect(page.locator('.chain-plate')).toHaveAttribute('data-lens', 'finance');
+  await expect(page.locator('.chain-plate')).toHaveAttribute('data-shift', 'green');
+  await expect(page.locator('.chain-plate')).toHaveAttribute('data-view', 'full');
+  await expect(page.getByRole('region', { name: 'Energy' })).toBeVisible();
+  // And it is brought into view rather than left four thousand pixels down.
+  // Polled, because that scroll is smooth for a reader who has not asked
+  // otherwise — which is the point of routing it through scrollBehavior().
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        const f = document.querySelector('figure')!.getBoundingClientRect();
+        return f.top < window.innerHeight && f.bottom > 0;
+      }),
+    )
+    .toBe(true);
+
+  // A plain visit is untouched: no parameters, and the short plate.
+  await page.goto('/');
+  await expect(page.locator('.chain-plate')).toHaveAttribute('data-view', 'compact');
+  expect(new URL(page.url()).search).toBe('');
+});
+
+/**
+ * U08. The figure is not the reader's viewport: the wide plate is taller than
+ * the space under the site's sticky header, so a popover clamped to the FIGURE
+ * could be correct by the figure's geometry and still hide the reading's own
+ * title and Close behind that header.
+ */
+test('a long reading keeps its title and Close clear of the sticky header at every scroll position', async ({ page }) => {
+  await page.setViewportSize({ width: 1348, height: 936 });
+  await open(page, '/about?lens=green&distance=finance&node=energy');
+  const popover = page.locator('[data-chain-popover]');
+  await expect(popover).toBeVisible();
+
+  for (const target of [0, -8, -100, -300, -600]) {
+    await page.evaluate((t) => {
+      const fig = document.querySelector('figure')!;
+      // `instant`, explicitly: the page sets scroll-behavior: smooth for
+      // readers who have not asked otherwise, and a measurement taken mid-glide
+      // measures the glide.
+      window.scrollTo({ top: window.scrollY + fig.getBoundingClientRect().top - t, behavior: 'instant' });
+    }, target);
+    // The popover re-places itself once per frame; give it that frame.
+    await page.evaluate(() => new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r()))));
+    const clear = await page.evaluate(() => {
+      const pop = document.querySelector('[data-chain-popover]')!;
+      const head = pop.querySelector('h3')!.getBoundingClientRect();
+      const close = Array.from(pop.querySelectorAll('button')).find((b) => b.textContent?.trim() === 'Close')!.getBoundingClientRect();
+      const header = document.querySelector('header')!.getBoundingClientRect();
+      const fig = document.querySelector('figure')!.getBoundingClientRect();
+      const p = pop.getBoundingClientRect();
+      return {
+        headClear: head.top >= header.bottom && head.bottom <= window.innerHeight,
+        closeClear: close.top >= header.bottom && close.bottom <= window.innerHeight,
+        // Still inside the figure: the brief's rule that the eye stays near
+        // the element is not traded away for the fix.
+        inside: p.top >= fig.top - 1 && p.bottom <= fig.bottom + 1,
+        // The readable band: what is both inside the figure and inside the
+        // window below the sticky header. 220px is the component's own floor.
+        hasRoom:
+          Math.min(fig.height - 8, window.innerHeight - fig.top - 8) - Math.max(8, header.bottom - fig.top + 8) >= 220,
+        scrolls: pop.scrollHeight > pop.clientHeight,
+      };
+    });
+    // The popover lives inside the figure and scrolls with the plate, so once
+    // the figure itself has left the readable band there is nothing left to
+    // keep on screen — and a reading that detached and floated over the page
+    // would break the rule it exists to serve. Where there IS room, its title
+    // and its Close are in it.
+    expect(clear.inside, `inside the figure at ${target}`).toBe(true);
+    if (!clear.hasRoom) continue;
+    expect(clear.headClear, `heading at figure offset ${target}`).toBe(true);
+    expect(clear.closeClear, `Close at figure offset ${target}`).toBe(true);
+  }
+
+  // The long reading owns its own scrolling, and its head stays put while it
+  // scrolls: the title and Close are pinned inside the popover.
+  await popover.evaluate((el) => el.scrollTo(0, el.scrollHeight));
+  const stillThere = await page.evaluate(() => {
+    const pop = document.querySelector('[data-chain-popover]')!;
+    const p = pop.getBoundingClientRect();
+    const close = Array.from(pop.querySelectorAll('button')).find((b) => b.textContent?.trim() === 'Close')!.getBoundingClientRect();
+    return close.top >= p.top - 1 && close.bottom <= p.bottom + 1;
+  });
+  expect(stillThere).toBe(true);
+
+  await page.keyboard.press('Escape');
+  await expect(popover).toHaveCount(0);
+});
+
+/**
+ * U04. The narrow reading is a modal sheet and the distance control lived
+ * outside it, so comparing the two readings of one element meant dismissing
+ * the reading, finding the control, and finding the element again — the
+ * interface interrupting the one operation the map exists to demonstrate.
+ */
+test('the narrow sheet switches distance without losing the target', async ({ page }) => {
+  await page.setViewportSize(PHONE);
+  // Not `open()`: the address opens the reading on the first paint, and a modal
+  // sheet takes the page behind it out of the accessibility tree — so the
+  // headline that helper waits for is legitimately not there.
+  await mockSupabase(page);
+  await page.goto('/about?lens=green&node=energy');
+
+  const sheet = page.locator('[data-chain-sheet]');
+  await expect(sheet).toBeVisible();
+  const region = sheet.getByRole('region', { name: 'Energy' });
+  await expect(region).toBeVisible();
+  // ONE voice at a time, wherever it speaks in the reading — the folded
+  // anatomy beneath it included. Not one element: one value.
+  const voices = () => region.locator('[data-voice]').evaluateAll((els) => Array.from(new Set(els.map((e) => e.getAttribute('data-voice')))));
+  expect(await voices()).toEqual(['economy']);
+
+  const inSheet = sheet.locator('[data-chain-sheet-distance]');
+  await expect(inSheet).toBeVisible();
+  const economyText = await region.textContent();
+
+  await inSheet.getByRole('button', { name: 'Finance', exact: true }).click();
+  await expect(region).toBeVisible();
+  await expect.poll(voices).toEqual(['finance']);
+  expect(await region.textContent()).not.toBe(economyText);
+
+  await inSheet.getByRole('button', { name: 'Economy', exact: true }).click();
+  await expect.poll(voices).toEqual(['economy']);
+  expect(await region.textContent()).toBe(economyText);
+
+  // Dismissal still works, and returns to the row that opened the reading.
+  await page.keyboard.press('Escape');
+  await expect(sheet).toHaveCount(0);
+  expect(await scrollWidth(page)).toBeLessThanOrEqual(PHONE.width);
 });

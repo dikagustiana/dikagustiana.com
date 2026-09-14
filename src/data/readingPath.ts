@@ -150,8 +150,17 @@ export const READING_PATH: ReadingStep[] = [
     links: ['carbon-price'],
     why: 'The fourth link is the one the written work does not carry. The author reports having argued as an undergraduate for the highest feasible carbon tax and having reversed that position; nothing published states the original argument, the assumption that failed, or what remains uncertain.',
     establishes: '',
+    /*
+     * The public form of a checked claim, not a softer one. The earlier
+     * wording reported the check as an operation on the database — "all 165
+     * essay records, published and draft" — which tells a reader about the
+     * tooling rather than about what they can go and read. The check itself
+     * stands and its trail is in the response record
+     * (docs/response-2026-09-14/, and the v3 note); what belongs on the page is
+     * what the reader can inspect and when it was last true.
+     */
     missing:
-      'Not written. Checked on 14 September 2026 against all 165 essay records, published and draft: one essay mentions carbon pricing at all, and none contains the reversal. Until it exists, the sequence that ends in carbon pricing is a claim about the author’s thinking that a reader cannot inspect.',
+      'Not written. As of 14 September 2026 nothing published on this site states the original argument, the assumption that failed, or what remains uncertain. Until it exists, the sequence that ends in carbon pricing is a claim about the author’s thinking that a reader cannot inspect.',
   },
   {
     title: 'Which constraint binds on one Indonesian corridor',
