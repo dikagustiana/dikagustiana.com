@@ -22,7 +22,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactElement } from 'react';
 import { makeQueryResult } from './helpers/renderWithProviders';
-import { BANDS, CHAIN_COPY, JOINTS, MARGIN_KINDS, OVERVIEW_HIDES, OVERVIEW_INTERNAL_JOINTS, SHIFT_BY_ID, jointLayers } from '@/data/industryChain';
+import { BANDS, CHAIN_COPY, JOINTS, MARGIN_KINDS, OVERVIEW_GROUPS, OVERVIEW_HIDES, SHIFT_BY_ID, jointLayers } from '@/data/industryChain';
 
 const { fromMock } = vi.hoisted(() => ({ fromMock: vi.fn() }));
 vi.mock('@/integrations/supabase/client', () => ({
@@ -234,7 +234,7 @@ describe('the shift control', () => {
     expect(plate().dataset.shift).toBe('green');
     expect(word('reindustrialisation')).toHaveAttribute('aria-pressed', 'false');
     expect(word('green transition')).toHaveAttribute('aria-pressed', 'true');
-    expect(litIds()).toEqual(['band-cold-chain', 'band-credit', 'band-energy', 'band-logistics', 'j-consumption-recovery']);
+    expect(litIds()).toEqual(['band-capital', 'band-cold-chain', 'band-energy', 'band-logistics', 'j-consumption-recovery']);
 
     await userEvent.click(word('green transition'));
     expect(plate().dataset.shift).toBeUndefined();
@@ -352,24 +352,28 @@ describe('a joint as a door, with nothing mapped', () => {
   });
 
   /**
-   * Two lists, not one. A layer that attaches at the JOINT is charged at this
-   * transfer; asset finance, energy and the rules are not, and are still what
-   * makes the transfer possible. Collapsing them into one list was how a map
-   * with a single finance band said that the money which built the warehouse
-   * takes a cut of the move.
+   * Three lists, not one. A layer that attaches at the joint AND earns a fee
+   * is charged at this transfer; one that attaches there and earns nothing
+   * sets its terms; asset finance and energy attach under the functions and
+   * stand behind it. V5's two lists used attachment alone as the test, which
+   * put contract governance under "charged at this transfer" — a layer that
+   * earns nothing was said to take a cut of the move.
    */
-  it('splits the layers on a joint into the ones charged there and the ones standing behind it, and each leads to its layer', async () => {
+  it('splits the layers on a joint into the ones charged there, the ones setting its terms and the ones standing behind it, and each leads to its layer', async () => {
     mount(<ChainPlate links={[]} />);
     await userEvent.click(joint('Distributor → wholesaler'));
     const panel = screen.getByRole('region', { name: 'Distributor → wholesaler' });
     const layers = within(panel).getByText(CHAIN_COPY.panel.layersHeading).parentElement!;
+    const terms = within(panel).getByText(CHAIN_COPY.panel.layersTermsHeading).parentElement!;
     const behind = within(panel).getByText(CHAIN_COPY.panel.layersBehindHeading).parentElement!;
 
     for (const b of jointLayers('j-distributor-wholesaler')) {
-      const list = b.attaches === 'joints' ? layers : behind;
+      const list = b.attaches === 'joints' && b.margin ? layers : b.margin === undefined ? terms : behind;
       expect(within(list).getByRole('button', { name: new RegExp(b.label) }), b.id).toBeInTheDocument();
     }
-    expect(within(layers).getByRole('button', { name: /Principal–distributor contract governance/ })).toBeInTheDocument();
+    expect(within(terms).getByRole('button', { name: /Principal–distributor contract governance/ })).toBeInTheDocument();
+    expect(within(terms).getByRole('button', { name: /Regulation and standards/ })).toBeInTheDocument();
+    expect(within(layers).queryByRole('button', { name: /Principal–distributor contract governance/ })).not.toBeInTheDocument();
     expect(within(layers).getByRole('button', { name: /Cold chain/ })).toBeInTheDocument();
     expect(within(layers).getByRole('button', { name: /Working capital and trade credit/ })).toBeInTheDocument();
     // Charged at a transfer is a claim about where the fee is cut. Neither of
@@ -682,9 +686,39 @@ describe('the overview on the landing page', () => {
 
   it('opens a door at the overview without expanding anything', async () => {
     mount(<ChainPlate variant="preview" links={[]} />);
-    await userEvent.click(joint('Wholesale → retail'));
-    expect(screen.getByRole('region', { name: 'Wholesale → retail' })).toBeInTheDocument();
+    // The transfer into use crosses a group's edge, so it is a door at the overview.
+    await userEvent.click(joint('Retail → consumption'));
+    expect(screen.getByRole('region', { name: 'Retail → consumption' })).toBeInTheDocument();
     expect(plate().dataset.level).toBe('overview');
+    // A transfer inside the collapsed box is not: it comes back with the detail.
+    expect(screen.queryByRole('button', { name: 'Wholesale → retail' })).toBeNull();
+  });
+
+  it('draws the five groups as frames at both levels, and the asset-finance band under its recipients', () => {
+    mount(<ChainPlate variant="preview" links={[]} />);
+    for (const g of Object.values(OVERVIEW_GROUPS)) expect(document.querySelector(`.cp-group[data-id="${g.id}"]`), g.id).not.toBeNull();
+    const capital = document.querySelector('.cp-band-hit[data-id="band-capital"]')!;
+    expect(capital.getAttribute('data-attaches')).toBe('recipients');
+    expect(capital.querySelectorAll('.cp-tick--asset').length).toBeGreaterThanOrEqual(4);
+    // The energy band carries its own anatomy: generation, the network along its edge, a connection under each function.
+    const energy = document.querySelector('.cp-band-hit[data-id="band-energy"]')!;
+    expect(energy.querySelector('.cp-energy-gen')).not.toBeNull();
+    expect(energy.querySelector('.cp-energy-net')).not.toBeNull();
+    expect(energy.querySelectorAll('.cp-energy-conn').length).toBeGreaterThanOrEqual(5);
+    expect(energy.querySelector('[data-energy-legend]')!.textContent).toContain(CHAIN_COPY.energy.connection);
+  });
+
+  it('names what moves a lit layer inside its band under the shift — a contract on energy, a risk transfer on asset finance — and nothing at rest', async () => {
+    mount(<ChainPlate variant="preview" links={[]} />);
+    expect(document.querySelector('.cp-band-hit .cp-callout--mechanism')).toBeNull();
+    await userEvent.click(word('green transition'));
+    expect(document.querySelector('.cp-band-hit[data-id="band-energy"] .cp-callout--mechanism')).toHaveAttribute('data-mechanism', 'contract');
+    expect(document.querySelector('.cp-band-hit[data-id="band-energy"] .cp-callout--mechanism')!.textContent).toBe('A contract is renegotiated');
+    expect(document.querySelector('.cp-band-hit[data-id="band-capital"] .cp-callout--mechanism')).toHaveAttribute('data-mechanism', 'risk-allocation');
+    // Logistics is re-priced in the plain sense: no mechanism chip.
+    expect(document.querySelector('.cp-band-hit[data-id="band-logistics"] .cp-callout--mechanism')).toBeNull();
+    await userEvent.click(word('reindustrialisation'));
+    expect(document.querySelector('.cp-band-hit .cp-callout--mechanism')).toBeNull();
   });
 
   it('offers the way back beside the controls as well as under the map', async () => {

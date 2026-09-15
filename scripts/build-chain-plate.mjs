@@ -10,9 +10,8 @@
  * generated:
  *
  *   src/components/industry-chain/ChainPlateSvg.tsx   two plates, as JSX:
- *       ChainPlateWide     the full chain, for the About page and the
- *                          landing page once the reader asks for it
- *       ChainPlateCompact  the short version for the landing page
+ *       ChainPlateWide     the DETAIL: every function under its own box
+ *       ChainPlateCompact  the OVERVIEW: the same records in five groups
  *   src/components/industry-chain/chain-plate.css     scoped, token-only CSS
  *   src/components/industry-chain/chainMarkOrder.ts   the reading order of
  *                          each shift's numbered marks, from where they land
@@ -20,6 +19,18 @@
  * The narrow-screen layout is NOT generated: it is a React component
  * (ChainColumn.tsx) that reads the same data file, because on a phone the
  * layers become a list and the flows become toggles — HTML, not geometry.
+ *
+ * TWO LAYOUT FUNCTIONS, ONE SET OF RECORDS. V5 drew both levels from one
+ * function with an `overview` flag, which kept the two plates from disagreeing
+ * about what exists but left the overview with eight function columns and a
+ * 1660-unit canvas — labels at ten pixels on a laptop. The overview now has
+ * its own layout (`plateOverview`) built around five groups, and the detail
+ * keeps its columns (`plateDetail`). What prevents drift is not one function
+ * but one source and one emitter: both layouts read the same records, both
+ * hand their geometry to the same `overlays()` for the shift outlines and the
+ * numbered marks, both use the same `bands()` for the enabling layers, and
+ * the unit tests check that the overview draws exactly the detail's elements
+ * less the ones OVERVIEW_HIDES names, plus the group boxes.
  *
  * Geometry is computed rather than hand-placed because two hundred
  * coordinates do not stay on one grid by hand. Nothing here claims a shape:
@@ -30,36 +41,53 @@
  * whose word is the joint read at the chosen distance. The chips live in a
  * reading lane directly under the chain, one or two rows deep, each on a
  * short leader to its diamond. The enabling layers are bands directly under
- * that lane, ticked where each attaches to the chain; energy rises into
- * every stage from below; money and information are rails at the very
- * bottom, because they run the length of the chain and attach nowhere in
- * particular.
+ * that lane, ticked where each attaches; energy rises into every stage from
+ * below; money and information are rails at the very bottom, because they
+ * run the length of the chain and attach nowhere in particular.
  *
  * Interactive marks (the joint markers, the layer bands and their switches)
  * are emitted as React components — <JointHit>, <BandHit>, <LayerSwitch> —
  * with their geometry as props, so the label, the chip word and the aria text
  * come from the data file at run time and never go stale in this file. A
  * shift overlay is static geometry: outlines whose form is the status of the
- * element, one arrow where a cut moves, one where a price arrives, and a
- * callout, shown by CSS from the wrapper's data-shift attribute. The numbered
- * marks are <ShiftMark>s placed here so that a mark never lands on a chip, a
- * box or another mark; their ORDER is computed from where they land.
+ * element, one arrow where a cut moves, one where a price arrives, a callout,
+ * and — where what moves an element is not the price the map can draw — the
+ * mechanism named beside its outline, shown by CSS from the wrapper's
+ * data-shift attribute. The numbered marks are <ShiftMark>s placed here so
+ * that a mark never lands on a chip, a box or another mark.
+ *
+ * TARGET SIZES. Both plates now render at or above one CSS pixel per unit
+ * from the 1280px breakpoint up: the overview because its canvas fits the
+ * figure, the detail because the figure scrolls sideways under it rather than
+ * shrinking it (chain-review.css). So a unit is a pixel, and the transparent
+ * hit shapes are sized in pixels: 26 for a chip or a switch, a 13-unit radius
+ * for a mark, which clears the 24px target everywhere the plates are drawn.
  */
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   STAGES, NODES, RETAIL, RETAIL_GROUP, BANDS, BORDERS, JOINTS, RETURNS, BYPRODUCT, NON_PHYSICAL,
-  FLOW_KIND_LABELS, CHAIN_COPY, SHIFTS, bandJoints,
-  OVERVIEW_GROUPS, OVERVIEW_INTERNAL_JOINTS,
+  FLOW_KIND_LABELS, CHAIN_COPY, SHIFTS, MECHANISMS, bandJoints,
+  OVERVIEW_GROUPS, OVERVIEW_INTERNAL_JOINTS, drawnAtOverview,
 } from '../src/data/industryChain.ts';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const OUT = path.join(here, '..', 'src', 'components', 'industry-chain');
 
 const byId = (list) => Object.fromEntries(list.map((x) => [x.id, x]));
-const S = byId(STAGES), N = byId(NODES), R = byId(RETURNS);
+const S = byId(STAGES), N = byId(NODES), R = byId(RETURNS), G = OVERVIEW_GROUPS;
 const label = (id) => (S[id] ?? N[id] ?? RETAIL.find((r) => r.id === id) ?? (id === RETAIL_GROUP.id ? RETAIL_GROUP : null))?.label ?? id;
+
+/* Type sizes, mirrored in the generated CSS. Every box is sized FROM its
+   text at these sizes, so a longer label in the data widens its box
+   instead of overrunning it — and nothing here restates a label. */
+const T_STAGE = 18, T_NODE = 15, T_SMALL = 14;
+/** Hit shapes, in units that are pixels from the breakpoint up (see the header). */
+const CHIP_H = 18, CHIP_HIT_H = 26, MARK_INK_R = 12, MARK_HIT_R = 13;
+/** The band rows: the strip, the gap under it, and the switch at its left end. */
+const BAND_H = 24, BAND_GAP = 10, BAND_DY = BAND_H + BAND_GAP;
+const RAIL_DY = 18;
 
 /* ── JSX helpers ─────────────────────────────────────────────────────────── */
 
@@ -75,6 +103,7 @@ const wrap = (str, max) => str.split(' ').reduce((lines, word) => {
 }, []);
 /** Rough text width in viewBox units, for "does this fit" decisions only. */
 const est = (s, size, perEm = 0.55) => s.length * size * perEm;
+const mid = (c) => Math.round((c[0] + c[1]) / 2);
 
 /** Everything a numbered mark must not land on. Reset per plate. */
 let obstacles = [];
@@ -95,7 +124,7 @@ const chip = (x, y, s, cls, anchor = 'middle', size = 14, perEm = 0.56, h = 18) 
 };
 
 /** Transformation stage: one style for every stage. An origin gets a small bar, never a fill. */
-const stage = (x, y, w, h, id, lines, { titleTop = false, size = 18 } = {}) => {
+const stage = (x, y, w, h, id, lines, { titleTop = false, size = T_STAGE } = {}) => {
   const L = [].concat(lines);
   const lh = size + 1;
   const y0 = titleTop ? y + size + 4 : y + h / 2 + size * 0.36 - ((L.length - 1) * lh) / 2;
@@ -106,12 +135,26 @@ const stage = (x, y, w, h, id, lines, { titleTop = false, size = 18 } = {}) => {
 };
 
 /** Intermediary node: never filled, always dashed, always a pill. */
-const node = (x, y, w, h, id, text = label(id), lines = [text]) => {
+const node = (x, y, w, h, id, text = label(id), lines = [text], cls = 'cp-node') => {
   const lh = 16;
   const y0 = y + h / 2 + 5 - ((lines.length - 1) * lh) / 2;
-  return `<g className="cp-node" data-id="${id}">
-    <rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${h / 2}" />
+  return `<g className="${cls}" data-id="${id}">
+    <rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${Math.min(h / 2, 17)}" />
     ${lines.map((t, i) => T(x + 12, y0 + i * lh, t, 'cp-node-t')).join('')}</g>`;
+};
+
+/**
+ * A group frame: one of the five major groups, at either level. Drawn under
+ * the boxes, labelled above its top edge, and never a door — a group is a way
+ * of drawing, not a margin to read. Its hover line is the group's own account
+ * of what stays true while its members share the frame.
+ */
+const frame = (g, x, y, w, h) => {
+  // Uppercase and tracked, about four fifths of an em per character; wrapped to the frame, stacked up from its top edge.
+  const lines = wrap(g.label, Math.max(8, Math.floor((w - 4) / (T_SMALL * 0.8))));
+  return `<g className="cp-group" data-id="${g.id}">
+    <rect x="${x}" y="${y}" width="${w}" height="${h}" rx="6" />
+    ${lines.map((t, i) => T(x + 2, y - 7 - (lines.length - 1 - i) * 16, t, 'cp-group-t')).join('')}</g>`;
 };
 
 /** Marker ids carry the plate's suffix so two plates on one page never share a def. */
@@ -129,42 +172,325 @@ const defs = () => `<defs>
 const flow = (x1, y1, x2, y2, cls = 'cp-flow', marker = '') =>
   `<path className="${cls}" d="M ${x1} ${y1} C ${(x1 + x2) / 2} ${y1}, ${(x1 + x2) / 2} ${y2}, ${x2} ${y2}"${marker ? ` markerEnd="${M(marker)}"` : ''} />`;
 
-
-/* ═══ THE PLATE — one layout, two levels of grouping ════════════════════ */
+/* ═══ SHARED: the parts both layouts emit the same way ═══════════════════ */
 
 /**
- * ONE FUNCTION, TWO LEVELS. `overview` groups the retail formats into their
- * node, the distributor and the wholesaler into one box, and drops the origin
- * lane fans, the demand components and the recursion note. `detail` un-groups
- * them. Everything else — every joint chip, every band and its ticks, every
- * border, every return, every rail, every shift mark — is emitted by the code
- * below at BOTH levels, which is what makes it impossible for the two
- * drawings to disagree about what exists or what connects to what.
- *
- * The overview is therefore a working map rather than a taster: its distance
- * control has chips to re-word and both overlays have marks to raise, without
- * expanding anything. OVERVIEW_GROUPS in src/data/industryChain.ts records
- * what each group keeps true of its members.
+ * Energy is an input into every stage, not only a band: a short arrow rises
+ * into the bottom edge of each drawn stage box, at an x the layout has chosen
+ * clear of the flows, arcs and chips around that box. The band below is
+ * ticked at the same x, so the eye joins the two. A full riser is not drawn
+ * because the stages are stacked in pairs and a riser to the upper box would
+ * have to cross the lower one.
  */
-function plate(level) {
-  /** Grouped, not reduced: see the note above. */
-  const OV = level === 'overview';
+const STUB = 14;
+function energyStubs(base, boxes, energyIn) {
+  for (const [id, x] of Object.entries(energyIn)) {
+    const [, y, , h] = boxes[id];
+    const bottom = y + h;
+    base.push(`<path className="cp-energy-in" data-for="${id}" d="M ${x} ${bottom + STUB} L ${x} ${bottom + 3}" markerEnd="${M('cp-tip-energy')}" />`);
+  }
+}
+
+/**
+ * The reading lane's name — the distance that is on — and the four rails of
+ * money and information at the bottom, with their kind labels in the gutter.
+ */
+function laneNames(base, fanT, ROW_A) {
+  base.push(
+    `<g className="cp-lens-name cp-lens-name--economy" data-id="lane-economy">${T(fanT, ROW_A + 14, CHAIN_COPY.lensName.economy, 'cp-kind-t', 'end')}</g>`,
+    `<g className="cp-lens-name cp-lens-name--finance" data-id="lane-finance">${T(fanT, ROW_A + 14, CHAIN_COPY.lensName.finance, 'cp-kind-t', 'end')}</g>`,
+  );
+}
+function rails(base, fanT, RX0, RX1, RAIL0) {
+  NON_PHYSICAL.forEach((f, i) => {
+    const y = RAIL0 + i * RAIL_DY;
+    const up = f.direction === 'upstream';
+    const cls = f.kind === 'money' ? 'cp-money' : 'cp-info';
+    const tip = f.kind === 'money' ? 'cp-tip-money' : 'cp-tip-info';
+    base.push(`<g className="cp-nonphys" data-id="${f.id}">
+      <path className="${cls}" d="${up ? `M ${RX1} ${y} L ${RX0 + 6} ${y}` : `M ${RX0} ${y} L ${RX1 - 6} ${y}`}" markerEnd="${M(tip)}" />
+      ${up ? chip(RX1 + 1, y + 4, f.label, 'cp-rail-t', 'end') : chip(RX0 - 1, y + 4, f.label, 'cp-rail-t', 'start')}</g>`);
+  });
+  ['money', 'information'].forEach((k, i) => base.push(T(fanT, RAIL0 + i * 2 * RAIL_DY + 14, FLOW_KIND_LABELS[k], 'cp-kind-t', 'end')));
+}
+
+/**
+ * Joint markers: one per drawn joint, always present, with its chip always
+ * on. Row chips line up in the reading lane under the chain, on one of two
+ * rows so neighbours never touch, and a chip may sit off its joint's x on an
+ * elbowed leader where joints crowd one stretch. A side chip sits where a
+ * leader down would have to cross a box.
+ */
+function joints(ctx) {
+  const { jointGeom, drawnJoints, ROW_A, ROW_B } = ctx;
+  const jointChipW = (text) => Math.round(text.length * 14 * 0.56 + 16);
+  ctx.jointChipRect = {};
+  drawnJoints.forEach((j) => {
+    const [x, y, at, d] = jointGeom[j.id];
+    // The fourth entry is an elbow for a row chip (dx along the lane) and a nudge for a side chip (dy down the flow).
+    const chipX = at === 'left' ? x - 14 : at === 'right' ? x + 14 : x + d;
+    const chipY = at === 'rowA' ? ROW_A : at === 'rowB' ? ROW_B : y - 9 + (at === 'left' || at === 'right' ? d : 0);
+    const w = Math.max(jointChipW(j.read.economy.chip), jointChipW(j.read.finance.chip));
+    const rx = at === 'left' ? chipX - w : at === 'right' ? chipX : chipX - w / 2;
+    ctx.jointChipRect[j.id] = [rx, chipY, w, CHIP_H];
+    // The chip's TARGET, not its ink: what a mark has to keep clear of is what the reader can press.
+    block(rx - 4, chipY - (CHIP_HIT_H - CHIP_H) / 2, w + 8, CHIP_HIT_H, `chip ${j.id}`);
+    // the ring a shift draws around the joint
+    block(x - 17, y - 17, 34, 34, `ring ${j.id}`);
+    ctx.jointHits.push(`<JointHit id="${j.id}" cx={${x}} cy={${y}} chipX={${chipX}} chipY={${chipY}} chipAt="${at}" />`);
+  });
+}
+
+/**
+ * Enabling layers: bands directly under the reading lane, each exactly over
+ * its span, ticked where it attaches — at the drawn joints it rides on, under
+ * the stages energy rises into, under the functions asset finance builds.
+ * Interactive, so emitted as <BandHit>; label, note and fee glyph come from
+ * the data at run time. Each band has a small switch at its left end.
+ *
+ * The energy band's top edge is the NETWORK: a filled point at its left end is
+ * generation, an open point under each function is the connection, and the
+ * words for both sit in the band's own note row. Where the plate cannot fit a
+ * band's full label, the band shows its short form and keeps its full name
+ * for the reader who asks.
+ */
+function bands(ctx) {
+  const { colX, jointGeom, drawnJoints, energyIn, recipientX, BAND0 } = ctx;
+  ctx.bandGeom = {};
+  BANDS.forEach((b, i) => {
+    const x0 = colX[b.span[0]][0], x1 = colX[b.span[1]][1];
+    const y = BAND0 + i * BAND_DY;
+    ctx.bandGeom[b.id] = [x0, y, x1 - x0, BAND_H];
+    block(x0, y, x1 - x0, BAND_H, b.id);
+    const width = x1 - x0;
+    // Uppercase, tracked: about four fifths of an em per character.
+    const shortLabel = 10 + est(b.label, T_SMALL, 0.8) + (b.margin ? 52 : 16) > width - 40;
+    const shown = shortLabel ? b.short : b.label;
+    const labelEnd = 10 + est(shown, T_SMALL, 0.8) + (b.margin ? 52 : 16);
+    // The note row: the note itself, or for energy the words of its anatomy.
+    // A note only fits where it clears the label and the fee glyph.
+    const noteText = b.id === 'band-energy'
+      ? `● ${CHAIN_COPY.energy.generation} — ${CHAIN_COPY.energy.network} — ○ ${CHAIN_COPY.energy.connection} · ${CHAIN_COPY.energy.selfSupply}`
+      : b.note ?? '';
+    const noteFits = noteText.trim() ? labelEnd + est(noteText, T_SMALL, 0.6) + 40 < width : false;
+    const fundsText = b.financesLayers ? `· ${CHAIN_COPY.panel.financesLayersRun} ${b.financesLayers.map((id) => BANDS.find((x) => x.id === id).short).join(' · ')}` : '';
+    const showFunds = noteFits && fundsText ? labelEnd + est(noteText, T_SMALL, 0.6) + est(fundsText, T_SMALL, 0.6) + 60 < width : false;
+    const ticks =
+      b.attaches === 'joints'
+        ? bandJoints(b)
+            .filter((jid) => drawnJoints.some((j) => j.id === jid))
+            .map((jid) => jointGeom[jid][0])
+        : b.attaches === 'stages'
+          ? [...new Set(Object.values(energyIn))]
+          : b.attaches === 'recipients'
+            ? [...new Set(b.recipients.map(recipientX).filter((x) => x !== null))].sort((p, q) => p - q)
+            : [];
+    ctx.bandHits.push(
+      `<BandHit id="${b.id}" x={${x0}} y={${y}} width={${width}} height={${BAND_H}} noteX={${noteFits ? Math.round(x0 + labelEnd) : 'null'}} shortLabel={${shortLabel}} showFunds={${showFunds}} ticks={[${ticks.join(', ')}]} />`,
+    );
+    ctx.layerSwitches.push(`<LayerSwitch id="${b.id}" x={${x0 - 27}} y={${y + (BAND_H - 12) / 2}} />`);
+  });
+  return BAND0 + BANDS.length * BAND_DY;
+}
+
+/* ── Shift overlays and numbered marks — ONE emitter for both levels ───────
+   Static geometry per shift: an outline on every target whose FORM is the
+   target's status (heavy for stuck, plain for moving, dashed for unpriced),
+   one arrow where a cut moves, one where a price arrives, a callout, and the
+   mechanism named where it is not the price the map draws — shown by CSS from
+   data-shift. Nothing here redraws the chain; the base stays where it is and
+   recedes.
+
+   The numbered marks are the index onto a shift's targets. A mark is drawn
+   beside the thing it belongs to: each kind of target has a list of candidate
+   places, in order of preference, and the first that lands on nothing — no
+   box, no chip, no band, no arrow, no earlier mark — is taken.
+
+   The ORDER is computed from where the marks land on the DETAIL plate — left
+   to right, then top to bottom, layers last because they are the bottom row —
+   and the overview takes that order as given, so a number means one thing at
+   both levels. The runtime numbers targets by their position in this list. ── */
+function overlays(ctx, orderFrom = null) {
+  const { jointGeom, bandGeom, borderGeom, returnPath, returnChip, returnLabel, boxes, jointChipRect, AX, ROW_B } = ctx;
+  const shiftLayers = [], marks = [];
+  const statusOf = (s, id) => s.targets.find((t) => t.id === id)?.condition?.status ?? 'moving';
+  const isNodeBox = (id) => N[id] || id === RETAIL_GROUP.id || (G[id] && G[id].collapsed);
+  const lit = (id, status) => {
+    const cls = (kind) => `${kind} cp-lit--${status}`;
+    if (jointGeom[id]) {
+      const [x, y] = jointGeom[id];
+      return `<circle className="${cls('cp-lit-ring')}" cx="${x}" cy="${y}" r="17" />`;
+    }
+    if (bandGeom[id]) {
+      const [x, y, w, h] = bandGeom[id];
+      return `<rect className="${cls('cp-lit-rect')}" x="${x - 3}" y="${y - 3}" width="${w + 6}" height="${h + 6}" rx="3" />`;
+    }
+    if (borderGeom[id]) {
+      const [x, [y0, y1]] = borderGeom[id];
+      return `<path className="${cls('cp-lit-line')}" d="M ${x} ${y0} L ${x} ${y1}" />`;
+    }
+    if (returnPath[id]) {
+      // The lit path is drawn over the base, so the return's own label is painted back on top of it.
+      return `<path className="${cls('cp-lit-path')}" d="${returnPath[id]}" markerEnd="${M('cp-tip-shift')}" />${returnChip[id] ?? ''}`;
+    }
+    if (boxes[id]) {
+      const [x, y, w, h] = boxes[id];
+      return `<rect className="${cls('cp-lit-rect')}" x="${x - 5}" y="${y - 5}" width="${w + 10}" height="${h + 10}" rx="${isNodeBox(id) ? 12 : 4}" />`;
+    }
+    throw new Error(`shift target ${id} has no geometry on this plate`);
+  };
+  /**
+   * What is actually doing the work, named on the overlay where it is not
+   * the price the map draws: a chip on the outline's top-right corner, so
+   * a contract or a capacity problem is not read as a repricing.
+   */
+  const mechanism = (t) => {
+    const m = t.condition.mechanism;
+    if (!m || m === 'price') return '';
+    const text = MECHANISMS[m].label;
+    let x, y;
+    // A band names its own mechanism at run time (BandHit), inside its strip:
+    // the band is drawn in the interactive layer above this overlay, so a
+    // static chip inside it would be painted over by the band's own fill.
+    if (bandGeom[t.id]) return '';
+    if (boxes[t.id]) {
+      const [bx, by, bw] = boxes[t.id];
+      x = bx + bw + 4; y = by - 6;
+    } else if (jointGeom[t.id]) {
+      const [jx, jy] = jointGeom[t.id];
+      x = jx + 24; y = jy - 20;
+    } else return '';
+    return `<g className="cp-callout cp-callout--mechanism" data-id="mechanism-${t.id}" data-mechanism="${m}">${chip(x, y, text, 'cp-callout-t', 'end', 14, 0.62, 18)}</g>`;
+  };
+  const xOf = (id) => (jointGeom[id]?.[0] ?? borderGeom[id]?.[0] ?? (boxes[id] ? boxes[id][0] + boxes[id][2] / 2 : null));
+  const move = (m) => {
+    if (m.kind === 'price') {
+      // A price arrives at a joint that had none: a short arrow into the
+      // ring from the right, in the gap between the two boxes the joint
+      // sits between. The words are the callout's; the arrow is the glyph.
+      const [x, y] = jointGeom[m.at];
+      block(x + 22, y + 2, 44, 12, m.id);
+      const d = `M ${x + 62} ${y + 8} L ${x + 22} ${y + 8}`;
+      return `<g className="cp-move cp-move--price" data-id="${m.id}"><path className="cp-move-hit" d="${d}" /><path className="cp-move-path" d="${d}" markerEnd="${M('cp-tip-shift')}" /></g>`;
+    }
+    const x0 = xOf(m.from), x1 = xOf(m.to);
+    if (x0 === null || x1 === null) throw new Error(`move ${m.id} has an end with no x`);
+    // Above the chain, clear of the processing box, then down onto the joint.
+    const y = ctx.moveY, land = jointGeom[m.to] ? jointGeom[m.to][1] - 22 : AX - 22;
+    block(Math.min(x0, x1), y - 3, Math.abs(x1 - x0), 6, m.id);
+    block(x1 - 3, y, 6, land - y, `${m.id} landing`);
+    block(x0, y - 22, est(m.label, T_SMALL, 0.6), 16, `${m.id} label`);
+    const d = `M ${x0} ${y} L ${x1} ${y} L ${x1} ${land}`;
+    return `<g className="cp-move cp-move--cut" data-id="${m.id}"><path className="cp-move-hit" d="${d}" />
+      <path className="cp-move-path" d="${d}" markerEnd="${M('cp-tip-shift')}" />
+      ${T(x0, y - 8, m.label, 'cp-move-t')}</g>`;
+  };
+  const callout = (c) => {
+    if (borderGeom[c.at]) {
+      // Beside the border's own chip, on its row: the risers above leave no clear line there.
+      const [x, [y0]] = borderGeom[c.at];
+      return `<g className="cp-callout" data-id="${c.id}">${chip(x + 44, y0 - 1, c.label, 'cp-callout-t', 'start', 14, 0.6, 20)}</g>`;
+    }
+    const at = xOf(c.at);
+    if (at === null) throw new Error(`callout ${c.id} has no x`);
+    // Under the chain, on the lower row of the reading lane — and inside the plate, whatever the chip's width.
+    const half = (est(c.label, T_SMALL, 0.66) + 12) / 2;
+    const x = Math.max(half + 8, Math.min(at, ctx.W - 8 - half));
+    return `<g className="cp-callout" data-id="${c.id}">${chip(x, ROW_B + 14, c.label, 'cp-callout-t', 'middle', 14, 0.6, 20)}</g>`;
+  };
+  SHIFTS.forEach((s) => {
+    const targets = s.targets.filter((t) => t.condition);
+    shiftLayers.push(`<g className="cp-shift cp-shift--${s.id}" data-id="${s.id}">
+      ${targets.map((t) => `<g className="cp-lit" data-for="${t.id}" data-status="${statusOf(s, t.id)}">${lit(t.id, statusOf(s, t.id))}</g>`).join('\n      ')}
+      ${s.moves.map(move).join('\n      ')}
+      ${s.callouts.map(callout).join('\n      ')}
+      ${targets.map(mechanism).filter(Boolean).join('\n      ')}
+    </g>`);
+  });
+
+  const hits = (cx, cy, own) =>
+    obstacles.some(([x, y, w, h, tag]) => !own.includes(tag) && cx + MARK_INK_R > x && cx - MARK_INK_R < x + w && cy + MARK_INK_R > y && cy - MARK_INK_R < y + h);
+  const markCandidates = (id) => {
+    if (jointGeom[id]) {
+      const [x, y, at] = jointGeom[id];
+      const [cx0, cy0, cw, ch] = jointChipRect[id];
+      const own = [`ring ${id}`, `chip ${id}`];
+      // Beside the chip where the chip sits beside the joint; otherwise around
+      // the diamond, and failing that at either end of the chip in the lane.
+      const side = at === 'left' ? [[cx0 - 13, y]] : at === 'right' ? [[cx0 + cw + 13, y]] : [];
+      // Where a side chip's far end is taken, the side opposite the chip, level with the diamond.
+      const across = at === 'left' ? [[x + 27, y]] : at === 'right' ? [[x - 27, y]] : [];
+      const lane = side.length ? [] : [[cx0 - 13, cy0 + ch / 2], [cx0 + cw + 13, cy0 + ch / 2]];
+      return { own, at: [...side, [x - 14, y - 14], [x + 14, y - 14], [x - 14, y + 14], [x + 14, y + 14], ...across, ...lane] };
+    }
+    if (bandGeom[id]) {
+      const [x, y, , h] = bandGeom[id];
+      return { own: [id], at: [[x - 45, y + h / 2]] };
+    }
+    if (borderGeom[id]) {
+      const [x, [y0]] = borderGeom[id];
+      // On the line under its chip; failing that, above the chip, then beside the line.
+      return { own: [BORDERS.find((b) => b.id === id).label, id], at: [[x, y0 + 18], [x, y0 + 44], [x, y0 - 28], [x + 16, y0 + 18]] };
+    }
+    if (returnLabel[id]) {
+      const [x, y, w, h] = returnLabel[id];
+      return { own: [R[id].label, id], at: [[x - 13, y + h / 2], [x + w + 13, y + h / 2]] };
+    }
+    if (boxes[id]) {
+      const [x, y, w, h] = boxes[id];
+      return {
+        own: [id],
+        at: [[x - 11, y - 11], [x + w + 11, y - 11], [x - 11, y + h + 11], [x + w + 11, y + h + 11], [x + w / 2, y - 11], [x + w / 2, y + h + 11], [x - 11, y + h / 2]],
+      };
+    }
+    throw new Error(`shift target ${id} has no place for a mark on this plate`);
+  };
+  const markOrder = {};
+  SHIFTS.forEach((s) => {
+    const placedMarks = [];
+    const given = orderFrom?.[s.id];
+    const ordered = s.targets
+      .filter((t) => t.condition)
+      .map((t) => {
+        const { own, at } = markCandidates(t.id);
+        // Reading order is decided by the FIRST candidate — where the mark
+        // belongs — even if it has to step aside; so the numbers still run
+        // left to right along the chain.
+        return { id: t.id, own, at, ox: at[0][0], oy: at[0][1], row: bandGeom[t.id] ? 1 : 0 };
+      })
+      .sort((a, b) => (given ? given.indexOf(a.id) - given.indexOf(b.id) : a.row - b.row || a.ox - b.ox || a.oy - b.oy));
+    ordered.forEach((m) => {
+      const free = m.at.find(([cx, cy]) => !hits(cx, cy, m.own) && !placedMarks.some((o) => Math.hypot(o.x - cx, o.y - cy) < MARK_HIT_R * 2));
+      const [x, y] = free ?? m.at[0];
+      if (!free) console.warn(`mark for ${m.id} under ${s.id} found no clear place on the ${ctx.level}; using its first candidate`);
+      if (!free && process.env.CHAIN_DEBUG) {
+        for (const [cx, cy] of m.at) {
+          const blockers = obstacles.filter(([ox, oy, ow, oh, tag]) => !m.own.includes(tag) && cx + MARK_INK_R > ox && cx - MARK_INK_R < ox + ow && cy + MARK_INK_R > oy && cy - MARK_INK_R < oy + oh).map((o) => o[4]);
+          const near = placedMarks.filter((o) => Math.hypot(o.x - cx, o.y - cy) < MARK_HIT_R * 2).map((o) => o.id);
+          console.warn(`   candidate (${cx}, ${cy}): ${[...blockers, ...near].join(', ') || 'free?'}`);
+        }
+      }
+      placedMarks.push({ id: m.id, x, y });
+    });
+    markOrder[s.id] = placedMarks.map((m) => m.id);
+    marks.push(`<g className="cp-marks cp-marks--${s.id}">
+      ${placedMarks.map((m) => `<ShiftMark shift="${s.id}" id="${m.id}" cx={${Math.round(m.x)}} cy={${Math.round(m.y)}} />`).join('\n      ')}
+    </g>`);
+  });
+  return { shiftLayers, marks, markOrder };
+}
+
+/* ═══ THE DETAIL — every function under its own box ═══════════════════════ */
+
+function plateDetail() {
   obstacles = [];
   const AX = 275;
-  const base = [], jointHits = [], bandHits = [], shiftLayers = [], marks = [];
+  const base = [], jointHits = [], bandHits = [], layerSwitches = [];
 
-  /* Type sizes, mirrored in the generated CSS. Every box is sized FROM its
-     text at these sizes, so a longer label in the data widens its box
-     instead of overrunning it — and nothing here restates a label. */
-  const T_STAGE = 18, T_NODE = 15, T_SMALL = 14;
-  /* The one layout decision: how many characters a line may hold in each
-     column. The words themselves always come from the data file. */
   // Characters per line, per column, tuned so a label wraps where it reads
-  // rather than where the box happens to end. `dist` is wider at the overview
-  // because the group's name is longer than either member's: twelve characters
-  // split "Distribution and wholesale" into three lines inside a pill built
-  // for one.
-  const CHARS = { org: 10, agg: 12, proc: 10, trad: 18, mfg: 14, dist: OV ? 17 : 12, recur: 18, ret: 14, cons: 12, demand: 15, lane: 13 };
+  // rather than where the box happens to end. The words themselves always
+  // come from the data file.
+  const CHARS = { org: 10, agg: 12, proc: 10, trad: 18, mfg: 14, dist: 12, recur: 18, ret: 14, cons: 12, demand: 15, lane: 13 };
   const lines = (id, max) => wrap(label(id), max);
   const boxW = (ls, size, pad = 24) => Math.ceil(Math.max(...ls.map((l) => est(l, size, 0.6))) + pad);
 
@@ -177,15 +503,15 @@ function plate(level) {
     pack: lines('stage-packaging', CHARS.mfg),
     mfg: lines('stage-manufacturing', CHARS.mfg),
     princ: lines('node-principal', CHARS.mfg),
-    dist: OV ? wrap(OVERVIEW_GROUPS['group-distribution'].label, CHARS.dist) : lines('node-distributor', CHARS.dist),
+    dist: lines('node-distributor', CHARS.dist),
     whol: lines('node-wholesaler', CHARS.dist),
-    recur: OV ? [] : wrap(N['node-distributor'].recursion, CHARS.recur).map((t, i) => (i === 0 ? '↳ ' : '') + t),
-    ret: OV ? [] : RETAIL.map((r) => wrap(r.label, CHARS.ret)),
+    recur: wrap(N['node-distributor'].recursion, CHARS.recur).map((t, i) => (i === 0 ? '↳ ' : '') + t),
+    ret: RETAIL.map((r) => wrap(r.label, CHARS.ret)),
     cons: lines('stage-consumption', CHARS.cons),
     rec: lines('stage-recovery', CHARS.cons),
-    demand: OV ? [] : S['stage-consumption'].demand.map((d) => wrap(d, CHARS.demand)),
-    bioLanes: OV ? [] : S['stage-biological'].lanes.map((l) => wrap(l, CHARS.lane)),
-    geoLanes: OV ? [] : S['stage-extraction'].lanes.map((l) => wrap(l, CHARS.lane)),
+    demand: S['stage-consumption'].demand.map((d) => wrap(d, CHARS.demand)),
+    bioLanes: S['stage-biological'].lanes.map((l) => wrap(l, CHARS.lane)),
+    geoLanes: S['stage-extraction'].lanes.map((l) => wrap(l, CHARS.lane)),
   };
 
   const widths = {
@@ -194,24 +520,14 @@ function plate(level) {
     proc: boxW(L.proc, T_STAGE),
     trad: boxW(L.trad, T_NODE),
     mfg: Math.max(boxW(L.pack, T_STAGE), boxW(L.mfg, T_STAGE), boxW(L.princ, T_NODE)),
-    dist: Math.max(boxW(L.dist, T_NODE), OV ? 0 : boxW(L.whol, T_NODE), OV ? 0 : boxW(L.recur, T_SMALL, 12)),
-    // On detail the retail node holds its formats as rows, so it is as wide as
-    // the widest row plus its padding. On the overview it is a node like any
-    // other, as wide as its own name.
-    ret: OV
-      ? Math.max(boxW([RETAIL_GROUP.label], T_NODE), boxW([RETAIL_GROUP.note], T_SMALL, 28))
-      : Math.max(...L.ret.map((ls) => boxW(ls, T_SMALL, 36)), boxW([RETAIL_GROUP.label], T_NODE)),
+    dist: Math.max(boxW(L.dist, T_NODE), boxW(L.whol, T_NODE), boxW(L.recur, T_SMALL, 12)),
+    // The retail node holds its formats as rows, so it is as wide as the widest row plus its padding.
+    ret: Math.max(...L.ret.map((ls) => boxW(ls, T_SMALL, 36)), boxW([RETAIL_GROUP.label], T_NODE)),
     cons: Math.max(boxW(L.cons, T_STAGE), boxW(L.rec, T_STAGE), ...L.demand.map((ls) => boxW(ls, T_SMALL) + 21)),
   };
 
-  /* The left margin is set by whatever is end-anchored in it. On detail that
-     is the fan of example lanes; on the overview, where there is no fan, it is
-     the reading-lane name and the two flow-kind names, which are drawn at both
-     levels and would otherwise run off the left edge. */
-  const gutterText = OV
-    ? [CHAIN_COPY.lensName.economy, CHAIN_COPY.lensName.finance, ...Object.values(FLOW_KIND_LABELS)]
-    : [...L.bioLanes, ...L.geoLanes].flat();
-  const laneW = Math.ceil(Math.max(...gutterText.map((l) => est(l, T_SMALL, 0.6))));
+  /* The left margin is set by the fan of example lanes, end-anchored in it. */
+  const laneW = Math.ceil(Math.max(...[...L.bioLanes, ...L.geoLanes].flat().map((l) => est(l, T_SMALL, 0.6))));
   const GAP = 26, LEFT = laneW + 66;
   const C = { fanT: LEFT - 58, fanL: LEFT - 50 };
   let cx = LEFT;
@@ -221,7 +537,6 @@ function plate(level) {
   }
   C.princ = C.mfg;
   C.rec = C.cons;
-  const mid = (c) => Math.round((c[0] + c[1]) / 2);
 
   /* Rows. The chain runs on AX; everything else hangs off it. */
   const LANE_DY = 34;
@@ -232,61 +547,40 @@ function plate(level) {
   const packB = [96, 20 + L.pack.length * (T_STAGE + 1)];
   const tradH = 16 + L.trad.length * 16, tradB = [AX - Math.round(tradH / 2), tradH];
   const princB = [398, 16 + L.princ.length * 16];
-  /* Distribution: two nodes stacked off the axis on detail, one grouped box
-     ON the axis at the overview. The joint between them is real either way;
-     at the overview it is internal to the group and is not drawn, which is
-     the only joint the grouping removes. */
   const distH = 34 + (L.dist.length - 1) * 16;
-  const distY = OV ? AX : 240, wholY = OV ? AX : 372;
-  /* The retail node: on detail a kicker and one row per format, each as tall
-     as its wrapped label; at the overview a node the size of its own name. */
+  const distY = 240, wholY = 372;
   const RET_ROW_GAP = 9, RET_PAD = 12;
   const retRowH = L.ret.map((ls) => ls.length * 15 + 6);
   const retInner = retRowH.reduce((a, b) => a + b, 0) + Math.max(0, retRowH.length - 1) * RET_ROW_GAP;
   const RET_HEAD = 33; // the kicker and, under it, the note
-  const retH = OV ? 44 : RET_PAD + RET_HEAD + retInner + RET_PAD;
+  const retH = RET_PAD + RET_HEAD + retInner + RET_PAD;
   const retB = [AX - Math.round(retH / 2), retH];
-  /* Consumption is as tall as the retail node on detail, because the two read
-     as a pair. At the overview retail is small, so consumption is sized from
-     its own label and its demand components are not drawn. */
-  const consH = OV ? 20 + L.cons.length * (T_STAGE + 1) : retH + 12;
-  const consB = [OV ? AX - Math.round(consH / 2) : retB[0] - 6, consH];
+  // Consumption is as tall as the retail node, because the two read as a pair.
+  const consH = retH + 12;
+  const consB = [retB[0] - 6, consH];
   const recB = [consB[0] + consB[1] + 34, 44];
-  /* The lowest edge of anything on the chain. It used to be recovery, because
-     on detail recovery always is; at the overview the chain is short enough
-     that extraction or the principal can sit lower, and the rows beneath have
-     to clear whichever it is. */
-  const CHAIN_BOTTOM = Math.max(
-    recB[0] + recB[1],
-    geoB[0] + geoB[1],
-    princB[0] + princB[1],
-    Math.max(distY, wholY) + distH / 2,
-  );
-  /* Under the chain, in this order: the reading lane (two rows of chips),
-     the enabling layers as bands directly beneath it, and the four rails of
-     money and information at the very bottom. */
-  const CHIP_H = 18;
-  /** The chip's transparent hit box; mirrored in JointHit.tsx. */
-  const CHIP_HIT_H = 34;
-  /* TARGET SIZE, and why these two numbers are what they are.
-     The plate is drawn at width:100%, so every unit here scales with the
-     figure: at the 1280px breakpoint the figure is about 1216px wide and one
-     unit is ~0.708px. Measured there on 14 September 2026, a chip's own box
-     was 12.7px tall, a layer switch 8.5px and a numbered mark 15.6px across —
-     all of them doors, all of them below a comfortable target.
-     They are enlarged by a TRANSPARENT hit shape around the drawn one (the
-     idiom JointHit already used for its diamond), which needs 34 units to
-     clear 24px on screen. That needs room between the rows, and room is the
-     one dimension this costs nothing: the scale is set by the plate's WIDTH,
-     so a taller plate is not a smaller plate. Raising the type instead was
-     tried and measured — 14 to 16 units grew the viewBox from 1717 to 1789,
-     which handed back most of the gain and shrank every target and every
-     stage label by 4% to do it. */
-  const ROW_A = CHAIN_BOTTOM + 26, ROW_B = ROW_A + 36;
-  const BAND0 = ROW_B + CHIP_H + 30, BAND_H = 26, BAND_DY = 38;
-  const RAIL0 = BAND0 + BANDS.length * BAND_DY + 22, RAIL_DY = 20;
-  const H = RAIL0 + NON_PHYSICAL.length * RAIL_DY + 6;
+  const CHAIN_BOTTOM = Math.max(recB[0] + recB[1], geoB[0] + geoB[1], princB[0] + princB[1], wholY + distH / 2);
+  /* Under the chain, in this order: the reading lane (two rows of chips), the
+     enabling layers as bands directly beneath it, and the four rails of money
+     and information at the very bottom. */
+  const ROW_A = CHAIN_BOTTOM + 30, ROW_B = ROW_A + 30;
+  const BAND0 = ROW_B + CHIP_H + 26;
+  const RAIL0 = BAND0 + BANDS.length * BAND_DY + 14;
+  const H = RAIL0 + NON_PHYSICAL.length * RAIL_DY + 16;
   const W = C.cons[1] + 130;
+
+  /* The five groups, as frames under the columns they span. The same five the
+     overview is built from, so a reader moving between the levels finds the
+     same structure with its members un-grouped. */
+  const FT = 74;
+  const frames = {
+    'group-origins': [C.org[0] - 8, C.org[1] + 8],
+    'group-processing': [C.agg[0] - 8, C.trad[1] + 8],
+    'group-manufacturing': [C.mfg[0] - 8, C.mfg[1] + 8],
+    'group-distribution-retail': [C.dist[0] - 8, C.ret[1] + 8],
+    'group-use-recovery': [C.cons[0] - 8, C.cons[1] + 8],
+  };
+  for (const [gid, [x0, x1]] of Object.entries(frames)) base.push(frame(G[gid], x0, FT, x1 - x0, CHAIN_BOTTOM + 8 - FT));
 
   /* Fan lanes into the two origins: examples of a function, not a shape. */
   const fan = (ls, i, y0, portY) => {
@@ -307,17 +601,13 @@ function plate(level) {
     flow(C.org[1], geoY, C.proc[0], AX),
     flow(C.proc[1], AX, C.trad[0], AX),
     flow(C.trad[1], AX, C.mfg[0], AX),
-    ...(OV
-      ? [flow(C.mfg[1], AX, C.dist[0], AX), flow(C.dist[1], AX, C.ret[0], AX)]
-      : [
-          flow(C.mfg[1], AX, C.dist[0], distY),
-          flow(C.mfg[1], AX, C.dist[0], wholY),
-          // the distributor sells on to the wholesaler
-          `<path className="cp-flow" d="M ${C.dist[0] + 8} ${distY + distH / 2} L ${C.dist[0] + 8} ${wholY - distH / 2 - 3}" markerEnd="${M('cp-tip')}" />`,
-          // the distributor and the wholesaler both sell into the retail node
-          flow(C.dist[1], distY, C.ret[0], distY),
-          flow(C.dist[1], wholY, C.ret[0], wholY),
-        ]),
+    flow(C.mfg[1], AX, C.dist[0], distY),
+    flow(C.mfg[1], AX, C.dist[0], wholY),
+    // the distributor sells on to the wholesaler
+    `<path className="cp-flow" d="M ${C.dist[0] + 8} ${distY + distH / 2} L ${C.dist[0] + 8} ${wholY - distH / 2 - 3}" markerEnd="${M('cp-tip')}" />`,
+    // the distributor and the wholesaler both sell into the retail node
+    flow(C.dist[1], distY, C.ret[0], distY),
+    flow(C.dist[1], wholY, C.ret[0], wholY),
     // retail sells to consumption on the axis
     `<path className="cp-flow" d="M ${C.ret[1]} ${AX} L ${C.cons[0]} ${AX}" />`,
     // packaging joins manufacturing from above
@@ -339,28 +629,17 @@ function plate(level) {
   place('stage-packaging', C.mfg[0], packB[0], widths.mfg, packB[1]);
   place('stage-manufacturing', C.mfg[0], mfgB[0], widths.mfg, mfgB[1]);
   place('node-principal', C.princ[0], princB[0], widths.mfg, princB[1]);
-  if (OV) place('group-distribution', C.dist[0], distY - distH / 2, widths.dist, distH);
-  else {
-    place('node-distributor', C.dist[0], distY - distH / 2, widths.dist, distH);
-    place('node-wholesaler', C.dist[0], wholY - distH / 2, widths.dist, distH);
-  }
+  place('node-distributor', C.dist[0], distY - distH / 2, widths.dist, distH);
+  place('node-wholesaler', C.dist[0], wholY - distH / 2, widths.dist, distH);
   place(RETAIL_GROUP.id, C.ret[0], retB[0], widths.ret, retB[1]);
   place('stage-consumption', C.cons[0], consB[0], widths.cons, consB[1]);
   place('stage-recovery', C.rec[0], recB[0], widths.cons, recB[1]);
-  // the distributor's recursion note hangs under its pill (detail only)
-  if (!OV) block(C.dist[0] + 14, distY + distH / 2 + 4, est(L.recur[0], T_SMALL, 0.6), L.recur.length * 15, 'recursion');
+  // the distributor's recursion note hangs under its pill
+  block(C.dist[0] + 14, distY + distH / 2 + 4, est(L.recur[0], T_SMALL, 0.6), L.recur.length * 15, 'recursion');
 
-  /* The retail node: one dashed node holding its five formats as rows on
-     detail, and at the overview the same node carrying only its own name and
-     note. Same id, same door, same joint — the formats are what is grouped,
-     not the function. */
+  /* The retail node: one dashed node holding its five formats as rows. */
   const retail = () => {
     const [x, y, w, h] = boxes[RETAIL_GROUP.id];
-    if (OV) {
-      return `<g className="cp-node cp-retail" data-id="${RETAIL_GROUP.id}">
-      <rect x="${x}" y="${y}" width="${w}" height="${h}" rx="14" />
-      ${T(x + 14, y + 19, RETAIL_GROUP.label, 'cp-node-t')}${T(x + 14, y + 34, RETAIL_GROUP.note, 'cp-recur')}</g>`;
-    }
     let ry = y + RET_PAD + RET_HEAD + 6;
     const rows = RETAIL.map((r, i) => {
       const ls = L.ret[i];
@@ -376,7 +655,7 @@ function plate(level) {
   };
 
   base.push(
-    stage(...boxes['stage-biological'].slice(0, 2), widths.org, bioB[1], 'stage-biological', L.bio),
+    stage(C.org[0], bioB[0], widths.org, bioB[1], 'stage-biological', L.bio),
     stage(C.org[0], geoB[0], widths.org, geoB[1], 'stage-extraction', L.geo),
     node(C.agg[0], bioY - 17, widths.agg, 34, 'node-aggregation', undefined, L.agg),
     stage(C.proc[0], procB[0], widths.proc, procB[1], 'stage-processing', L.proc),
@@ -384,13 +663,9 @@ function plate(level) {
     stage(C.mfg[0], packB[0], widths.mfg, packB[1], 'stage-packaging', L.pack),
     stage(C.mfg[0], mfgB[0], widths.mfg, mfgB[1], 'stage-manufacturing', L.mfg),
     node(C.princ[0], princB[0], widths.mfg, princB[1], 'node-principal', undefined, L.princ),
-    ...(OV
-      ? [node(C.dist[0], distY - distH / 2, widths.dist, distH, 'group-distribution', L.dist[0], L.dist)]
-      : [
-          node(C.dist[0], distY - distH / 2, widths.dist, distH, 'node-distributor', undefined, L.dist),
-          ...L.recur.map((t, i) => T(C.dist[0] + 14, distY + distH / 2 + 16 + i * 15, t, 'cp-recur')),
-          node(C.dist[0], wholY - distH / 2, widths.dist, distH, 'node-wholesaler', undefined, L.whol),
-        ]),
+    node(C.dist[0], distY - distH / 2, widths.dist, distH, 'node-distributor', undefined, L.dist),
+    ...L.recur.map((t, i) => T(C.dist[0] + 14, distY + distH / 2 + 16 + i * 15, t, 'cp-recur')),
+    node(C.dist[0], wholY - distH / 2, widths.dist, distH, 'node-wholesaler', undefined, L.whol),
     retail(),
     stage(C.cons[0], consB[0], widths.cons, consB[1], 'stage-consumption', L.cons, { titleTop: true }),
     ...L.demand.map((ls, i) => {
@@ -402,13 +677,6 @@ function plate(level) {
     stage(C.rec[0], recB[0], widths.cons, recB[1], 'stage-recovery', L.rec),
   );
 
-  /* Energy is an input into every stage, not only a band: a short arrow rises
-     into the bottom edge of each stage box, at an x the generator has checked
-     clear of the flows, arcs and chips around that box. The band below is
-     ticked at the same x, so the eye joins the two. A full riser is not drawn
-     because the stages are stacked in pairs — packaging over manufacturing,
-     the two origins, consumption over recovery — and a riser to the upper
-     box would have to cross the lower one. */
   const energyIn = {
     'stage-biological': mid(C.org),
     'stage-extraction': mid(C.org),
@@ -418,36 +686,27 @@ function plate(level) {
     'stage-consumption': C.cons[1] - 20,
     'stage-recovery': mid(C.cons) - 30,
   };
-  const STUB = 14;
-  for (const [id, x] of Object.entries(energyIn)) {
-    const [, y, , h] = boxes[id];
-    const bottom = y + h;
-    base.push(`<path className="cp-energy-in" data-for="${id}" d="M ${x} ${bottom + STUB} L ${x} ${bottom + 3}" markerEnd="${M('cp-tip-energy')}" />`);
-  }
+  energyStubs(base, boxes, energyIn);
+  /* Where asset finance lands: under the centre of each recipient's own box. */
+  const recipientX = (id) => (boxes[id] ? mid([boxes[id][0], boxes[id][0] + boxes[id][2]]) : null);
 
   /* Borders: the external sector as two dashed cuts through the chain, at
      the two joints where goods actually leave and enter. Drawn before the
      returns so a return's chip paints over the dash, never under it. */
   const borderGeom = {
     'border-export': [Math.round((C.org[1] + C.proc[0]) / 2) - 30, [300, CHAIN_BOTTOM]],
-    'border-import': [Math.round((C.trad[1] + C.mfg[0]) / 2), [86, CHAIN_BOTTOM]],
+    'border-import': [Math.round((C.trad[1] + C.mfg[0]) / 2), [44, CHAIN_BOTTOM]],
   };
   BORDERS.forEach((b) => {
     const [x, [y0, y1]] = borderGeom[b.id];
-    // The line itself is something a mark must not sit on — except the border's own mark.
     block(x - 2, y0, 4, y1 - y0, b.id);
     base.push(`<g className="cp-border" data-id="${b.id}"><path d="M ${x} ${y0} L ${x} ${y1}" />
       ${chip(x, y0 - 2, b.label, 'cp-border-t')}</g>`);
   });
 
   /* Physical returns: dashed, above the chain, each spanning exactly its
-     joints, and never crossing a node it does not connect. The path of each
-     is kept so a shift can redraw it lit, and its label chip is kept so the
-     lit redraw can paint the label back on top of itself. */
-  const returnPath = {};
-  const returnChip = {};
-  /** The rectangle of a return's own label, where its mark is read with it. */
-  const returnLabel = {};
+     joints, and never crossing a node it does not connect. */
+  const returnPath = {}, returnChip = {}, returnLabel = {};
   const retChip = (id, x, y, anchor = 'middle') => {
     returnLabel[id] = chipRect(x, y, R[id].label, anchor);
     returnChip[id] = chip(x, y, R[id].label, 'cp-ret-t', anchor);
@@ -460,8 +719,9 @@ function plate(level) {
       ${retChip(r.id, lx, ly, anchor)}</g>`;
   };
   const RISER_A = W - 40, RISER_B = W - 58;
-  returnPath['return-postconsumer-organic'] = `M ${C.rec[1]} ${recB[0] + 8} L ${RISER_A} ${recB[0] + 8} L ${RISER_A} 34 L ${mid(C.org)} 34 L ${mid(C.org)} ${bioB[0] - 4}`;
-  returnPath['return-postconsumer-material'] = `M ${C.rec[1]} ${recB[0] + 22} L ${RISER_B} ${recB[0] + 22} L ${RISER_B} 56 L ${mid(C.proc)} 56 L ${mid(C.proc)} ${procB[0] - 4}`;
+  // The two post-consumer corridors run along the top, above the frames' kickers.
+  returnPath['return-postconsumer-organic'] = `M ${C.rec[1]} ${recB[0] + 8} L ${RISER_A} ${recB[0] + 8} L ${RISER_A} 22 L ${mid(C.org)} 22 L ${mid(C.org)} ${bioB[0] - 4}`;
+  returnPath['return-postconsumer-material'] = `M ${C.rec[1]} ${recB[0] + 22} L ${RISER_B} ${recB[0] + 22} L ${RISER_B} 42 L ${mid(C.proc)} 42 L ${mid(C.proc)} ${procB[0] - 4}`;
   returnPath['return-secondary'] = `M ${C.cons[1] - 60} ${consB[0]} C ${C.cons[1] - 60} ${consB[0] - 42}, ${C.cons[1] - 10} ${consB[0] - 42}, ${C.cons[1] - 10} ${consB[0]}`;
   const secondaryLines = wrap(R['return-secondary'].label, 18);
   returnLabel['return-secondary'] = [C.cons[1] - 6 - est(secondaryLines[0], T_SMALL, 0.56), consB[0] - 72, est(secondaryLines[0], T_SMALL, 0.56), 30];
@@ -472,10 +732,10 @@ function plate(level) {
     arc(R['return-packaging'], C.ret[0] + 60, retB[0] - 2, C.mfg[0] + 20, mfgB[0] - 4, 138, Math.round((C.mfg[1] + C.ret[0]) / 2), 144),
     `<g className="cp-ret" data-id="return-postconsumer-organic">
       <path d="${returnPath['return-postconsumer-organic']}" markerEnd="${M('cp-tip-soft')}" />
-      ${retChip('return-postconsumer-organic', C.dist[0], 38)}</g>`,
+      ${retChip('return-postconsumer-organic', C.dist[0], 26)}</g>`,
     `<g className="cp-ret" data-id="return-postconsumer-material">
       <path d="${returnPath['return-postconsumer-material']}" markerEnd="${M('cp-tip-soft')}" />
-      ${retChip('return-postconsumer-material', C.trad[0], 60)}</g>`,
+      ${retChip('return-postconsumer-material', C.trad[0], 46)}</g>`,
     `<g className="cp-ret" data-id="return-secondary">
       <path d="${returnPath['return-secondary']}" markerEnd="${M('cp-tip-soft')}" />
       ${secondaryLines.map((t, i) => T(C.cons[1] - 6, consB[0] - 58 + i * 15, t, 'cp-ret-t', 'end')).join('')}</g>`,
@@ -485,20 +745,8 @@ function plate(level) {
       ${chip(C.proc[1] - 44, procB[0] + procB[1] + 74, BYPRODUCT.label, 'cp-ret-t', 'end')}</g>`,
   );
 
-  /* The reading lane: the chips of the joints sit here, and its label is the
-     distance that is on. Both names are drawn; CSS shows the one that is. */
-  base.push(
-    `<g className="cp-lens-name cp-lens-name--economy" data-id="lane-economy">${T(C.fanT, ROW_A + 14, CHAIN_COPY.lensName.economy, 'cp-kind-t', 'end')}</g>`,
-    `<g className="cp-lens-name cp-lens-name--finance" data-id="lane-finance">${T(C.fanT, ROW_A + 14, CHAIN_COPY.lensName.finance, 'cp-kind-t', 'end')}</g>`,
-  );
+  laneNames(base, C.fanT, ROW_A);
 
-  /* Joint markers: one per joint, always present, with its chip always on.
-     Row chips line up in the reading lane under the chain, on one of two
-     rows so neighbours never touch, and a chip may sit off its joint's x on
-     an elbowed leader where three joints share one stretch. A side chip sits
-     where a leader down would have to cross a box. The joint that shares its
-     x with a border takes the lower row, so its chip is never read as the
-     border's label. */
   const jointGeom = {
     'j-production-aggregation': [Math.round((C.org[1] + C.agg[0]) / 2), bioY, 'rowA', -20],
     'j-extraction-processing': [C.org[1] + 116, 298, 'rowB', 0],
@@ -512,236 +760,271 @@ function plate(level) {
     'j-retail-consumption': [Math.round((C.ret[1] + C.cons[0]) / 2), AX, 'rowA', 0],
     'j-consumption-recovery': [mid(C.cons) + 30, Math.round((consB[0] + consB[1] + recB[0]) / 2), 'left', 0],
   };
-  /** The chip's box, for both words a joint can carry — the wider of the two blocks the lane. */
-  const jointChipW = (text) => Math.round(text.length * 14 * 0.56 + 16);
-  const jointChipRect = {};
-  /* Ten joints at the overview, eleven on detail. The missing one is the
-     transfer between the distributor and the wholesaler, which is internal to
-     the grouped box — the only relation the grouping takes off the drawing,
-     and it comes back with the group. */
-  const drawnJoints = JOINTS.filter((j) => !(OV && OVERVIEW_INTERNAL_JOINTS.includes(j.id)));
-  drawnJoints.forEach((j) => {
-    const [x, y, at, dx] = jointGeom[j.id];
-    const chipX = at === 'left' ? x - 14 : at === 'right' ? x + 14 : x + dx;
-    const chipY = at === 'rowA' ? ROW_A : at === 'rowB' ? ROW_B : y - 9;
-    const w = Math.max(jointChipW(j.read.economy.chip), jointChipW(j.read.finance.chip));
-    const rx = at === 'left' ? chipX - w : at === 'right' ? chipX : chipX - w / 2;
-    jointChipRect[j.id] = [rx, chipY, w, CHIP_H];
-    // The chip's TARGET, not its ink: JointHit draws a transparent box around
-    // it so the door is big enough to aim at, and a numbered mark placed on
-    // that box would shadow part of it. What the mark has to keep clear of is
-    // what the reader can press.
-    block(rx - 4, chipY - (CHIP_HIT_H - CHIP_H) / 2, w + 8, CHIP_HIT_H, `chip ${j.id}`);
-    // the ring a shift draws around the joint
-    block(x - 17, y - 17, 34, 34, `ring ${j.id}`);
-    jointHits.push(`<JointHit id="${j.id}" cx={${x}} cy={${y}} chipX={${chipX}} chipY={${chipY}} chipAt="${at}" />`);
-  });
-
-  /* Enabling layers: bands directly under the reading lane, each exactly
-     over its span, ticked where it attaches — at the joints it rides on, or
-     at the stages energy rises into. Interactive, so emitted as <BandHit>;
-     label, note and fee glyph come from the data at run time. Each band has
-     a small switch at its left end so a layer can be turned off on its own. */
   const colX = {
     'stage-biological': C.org, 'stage-extraction': C.org, 'node-aggregation': C.agg, 'stage-processing': C.proc,
     'node-trader': C.trad, 'stage-packaging': C.mfg, 'stage-manufacturing': C.mfg, 'node-distributor': C.dist,
     'node-wholesaler': C.dist, 'node-retail': C.ret, 'stage-consumption': C.cons, 'stage-recovery': C.cons,
   };
-  const bandGeom = {};
-  const layerSwitches = [];
-  BANDS.forEach((b, i) => {
-    const x0 = colX[b.span[0]][0], x1 = colX[b.span[1]][1];
-    const y = BAND0 + i * BAND_DY;
-    bandGeom[b.id] = [x0, y, x1 - x0, BAND_H];
-    block(x0, y, x1 - x0, BAND_H, b.id);
-    // Uppercase, tracked: about four fifths of an em per character.
-    const labelEnd = 10 + est(b.label, T_SMALL, 0.8) + (b.margin ? 52 : 16);
-    // A note only fits where it clears the label and the fee glyph.
-    const noteFits = b.note ? labelEnd + est(b.note, T_SMALL, 0.6) + 24 < x1 - x0 : false;
-    const ticks =
-      b.attaches === 'joints'
-        ? bandJoints(b)
-            .filter((jid) => drawnJoints.some((j) => j.id === jid))
-            .map((jid) => jointGeom[jid][0])
-        : b.attaches === 'stages'
-          ? [...new Set(Object.values(energyIn))]
-          : [];
-    bandHits.push(
-      `<BandHit id="${b.id}" x={${x0}} y={${y}} width={${x1 - x0}} height={${BAND_H}} noteX={${noteFits ? Math.round(x0 + labelEnd) : 'null'}} ticks={[${ticks.join(', ')}]} />`,
-    );
-    layerSwitches.push(`<LayerSwitch id="${b.id}" x={${x0 - 27}} y={${y + (BAND_H - 12) / 2}} />`);
+
+  const ctx = {
+    level: 'detail', W, AX, ROW_A, ROW_B, BAND0, moveY: 222,
+    base, jointHits, bandHits, layerSwitches, boxes, jointGeom, drawnJoints: JOINTS, colX, energyIn, recipientX,
+    borderGeom, returnPath, returnChip, returnLabel,
+  };
+  joints(ctx);
+  bands(ctx);
+  rails(base, C.fanT, C.org[0], C.cons[1], RAIL0);
+  const { shiftLayers, marks, markOrder } = overlays(ctx);
+  return { W, H, base, shiftLayers, marks, markOrder, hits: [...jointHits, ...bandHits, ...layerSwitches], aria: CHAIN_COPY.aria.wide };
+}
+
+/* ═══ THE OVERVIEW — the same records in five groups ══════════════════════ */
+
+/**
+ * FIVE GROUPS, ONE CHAIN. Origins; processing with the aggregator before it
+ * and the trader after it; manufacturing with packaging above and the
+ * principal alongside; distribution, wholesale and retail as one box; use and
+ * recovery. Every group but the fourth is a frame with its members drawn
+ * inside it under their own ids, so their joints stay doors and their marks
+ * stay where they are; the fourth is collapsed, and the two joints inside it
+ * come back with the detail. Nine of the eleven joints are drawn — every
+ * joint that crosses a group's edge, and every joint whose two ends are drawn.
+ *
+ * The point of the grouping is ROOM: five columns instead of eight, so the
+ * canvas fits a laptop and a fourteen-unit label is a fourteen-pixel one.
+ */
+function plateOverview(orderFrom) {
+  obstacles = [];
+  const AX = 300;
+  const base = [], jointHits = [], bandHits = [], layerSwitches = [];
+  const lines = (id, max) => wrap(label(id), max);
+  const boxW = (ls, size, pad = 24) => Math.ceil(Math.max(...ls.map((l) => est(l, size, 0.6))) + pad);
+  const PAD = 8, GAP = 20;
+
+  const L = {
+    bio: lines('stage-biological', 11), geo: lines('stage-extraction', 11),
+    agg: lines('node-aggregation', 12), proc: lines('stage-processing', 10), trad: lines('node-trader', 9),
+    pack: lines('stage-packaging', 14), mfg: lines('stage-manufacturing', 14), princ: lines('node-principal', 13),
+    dist: ['node-distributor', 'node-wholesaler', RETAIL_GROUP.id].map((id) => label(id)),
+    distNote: wrap(`↳ ${CHAIN_COPY.controls.transfersInside(OVERVIEW_INTERNAL_JOINTS.length)}`, 17),
+    cons: lines('stage-consumption', 12), rec: lines('stage-recovery', 12),
+  };
+  const w = {
+    org: Math.max(boxW(L.bio, T_STAGE), boxW(L.geo, T_STAGE)),
+    agg: boxW(L.agg, T_NODE), proc: boxW(L.proc, T_STAGE), trad: boxW(L.trad, T_NODE),
+    mfg: Math.max(boxW(L.pack, T_STAGE), boxW(L.mfg, T_STAGE), boxW(L.princ, T_NODE)),
+    dist: Math.max(boxW(L.dist, T_NODE), boxW(L.distNote, T_SMALL, 12)),
+    cons: Math.max(boxW(L.cons, T_STAGE), boxW(L.rec, T_STAGE)),
+  };
+  const groupW = {
+    'group-origins': w.org + 2 * PAD,
+    'group-processing': Math.max(w.proc + 16 + w.trad, w.agg) + 2 * PAD,
+    'group-manufacturing': w.mfg + 2 * PAD,
+    'group-distribution-retail': w.dist + 2 * PAD,
+    'group-use-recovery': w.cons + 2 * PAD,
+  };
+
+  /* The left margin holds the reading-lane name and the two flow-kind names, end-anchored. */
+  const gutter = [CHAIN_COPY.lensName.economy, CHAIN_COPY.lensName.finance, ...Object.values(FLOW_KIND_LABELS)];
+  const laneW = Math.ceil(Math.max(...gutter.map((l) => est(l, T_SMALL, 0.84))));
+  const LEFT = laneW + 24, fanT = LEFT - 12;
+  const F = {};
+  let x = LEFT;
+  for (const gid of Object.keys(G)) {
+    F[gid] = [x, x + groupW[gid]];
+    x += groupW[gid] + GAP;
+  }
+  const W = x - GAP + 48;
+  const gapMid = (a, b) => Math.round((F[a][1] + F[b][0]) / 2);
+
+  /* Rows. */
+  const FT = 150;
+  const bioB = [177, 20 + L.bio.length * (T_STAGE + 1)], bioY = bioB[0] + Math.round(bioB[1] / 2);
+  const geoB = [336, 20 + L.geo.length * (T_STAGE + 1)], geoY = geoB[0] + Math.round(geoB[1] / 2);
+  const procH = 20 + L.proc.length * (T_STAGE + 1), procB = [AX - Math.round(procH / 2), procH];
+  const tradH = 16 + L.trad.length * 16, tradB = [AX - Math.round(tradH / 2), tradH];
+  const aggB = [bioY - 17, 34];
+  const mfgH = 20 + L.mfg.length * (T_STAGE + 1), mfgB = [AX - Math.round(mfgH / 2), mfgH];
+  const packH = 20 + L.pack.length * (T_STAGE + 1), packB = [mfgB[0] - 42 - packH, packH];
+  const princB = [mfgB[0] + mfgB[1] + 26, 16 + L.princ.length * 16];
+  const distH = 34 + (L.dist.length - 1) * 16, distB = [AX - Math.round(distH / 2), distH];
+  const consH = 20 + L.cons.length * (T_STAGE + 1), consB = [AX - Math.round(consH / 2), consH];
+  // Room under consumption for the joint into recovery, its mark and the green overlay's price arrow beside it.
+  const recH = 20 + L.rec.length * (T_STAGE + 1), recB = [consB[0] + consB[1] + 52, recH];
+  const distNoteBottom = distB[0] + distB[1] + 16 + L.distNote.length * 15;
+  const CHAIN_BOTTOM = Math.max(geoB[0] + geoB[1], princB[0] + princB[1], recB[0] + recB[1], distNoteBottom);
+  const FB = CHAIN_BOTTOM + 8;
+  const ROW_A = FB + 22, ROW_B = ROW_A + 30;
+  const BAND0 = ROW_B + CHIP_H + 24;
+  const RAIL0 = BAND0 + BANDS.length * BAND_DY + 14;
+  const H = RAIL0 + NON_PHYSICAL.length * RAIL_DY + 16;
+
+  /* Box positions inside their frames. */
+  const boxes = {};
+  const place = (id, bx, by, bw, bh) => { boxes[id] = [bx, by, bw, bh]; block(bx, by, bw, bh, id); };
+  const g1 = F['group-origins'], g2 = F['group-processing'], g3 = F['group-manufacturing'], g4 = F['group-distribution-retail'], g5 = F['group-use-recovery'];
+  place('stage-biological', g1[0] + PAD, bioB[0], w.org, bioB[1]);
+  place('stage-extraction', g1[0] + PAD, geoB[0], w.org, geoB[1]);
+  place('node-aggregation', g2[0] + PAD, aggB[0], w.agg, aggB[1]);
+  place('stage-processing', g2[0] + PAD, procB[0], w.proc, procB[1]);
+  place('node-trader', g2[0] + PAD + w.proc + 16, tradB[0], w.trad, tradB[1]);
+  place('stage-packaging', g3[0] + PAD, packB[0], w.mfg, packB[1]);
+  place('stage-manufacturing', g3[0] + PAD, mfgB[0], w.mfg, mfgB[1]);
+  place('node-principal', g3[0] + PAD, princB[0], w.mfg, princB[1]);
+  place('group-distribution-retail', g4[0] + PAD, distB[0], w.dist, distB[1]);
+  place('stage-consumption', g5[0] + PAD, consB[0], w.cons, consB[1]);
+  place('stage-recovery', g5[0] + PAD, recB[0], w.cons, recB[1]);
+  block(g4[0] + PAD + 14, distB[0] + distB[1] + 4, est(L.distNote[0], T_SMALL, 0.6), L.distNote.length * 15, 'transfers inside');
+  const bx = (id) => boxes[id];
+  const right = (id) => bx(id)[0] + bx(id)[2];
+  const bottom = (id) => bx(id)[1] + bx(id)[3];
+  const midX = (id) => mid([bx(id)[0], right(id)]);
+
+  /* The frames first, so everything paints over them. */
+  for (const gid of Object.keys(G)) base.push(frame(G[gid], F[gid][0], FT, F[gid][1] - F[gid][0], FB - FT));
+
+  /* Forward flows. */
+  const procX0 = bx('stage-processing')[0];
+  base.push(
+    flow(right('stage-biological'), bioY, bx('node-aggregation')[0], bioY),
+    // the aggregator sells down into processing
+    `<path className="cp-flow" d="M ${midX('node-aggregation')} ${bottom('node-aggregation')} L ${midX('node-aggregation')} ${procB[0] - 3}" markerEnd="${M('cp-tip')}" />`,
+    flow(right('stage-extraction'), geoY, procX0, AX),
+    `<path className="cp-flow" d="M ${right('stage-processing')} ${AX} L ${bx('node-trader')[0]} ${AX}" />`,
+    flow(right('node-trader'), AX, bx('stage-manufacturing')[0], AX),
+    flow(right('stage-manufacturing'), AX, bx('group-distribution-retail')[0], AX),
+    flow(right('group-distribution-retail'), AX, bx('stage-consumption')[0], AX),
+    // packaging joins manufacturing from above
+    `<path className="cp-flow" d="M ${midX('stage-manufacturing') - 40} ${bottom('stage-packaging')} L ${midX('stage-manufacturing') - 40} ${mfgB[0] - 3}" markerEnd="${M('cp-tip')}" />`,
+    // the principal takes title alongside manufacturing
+    `<path className="cp-flow-thin" d="M ${bx('stage-manufacturing')[0] + 20} ${bottom('stage-manufacturing')} L ${bx('stage-manufacturing')[0] + 20} ${princB[0]}" />`,
+    // consumption → recovery
+    `<path className="cp-flow" d="M ${midX('stage-consumption') + 30} ${bottom('stage-consumption')} L ${midX('stage-consumption') + 30} ${recB[0] - 3}" markerEnd="${M('cp-tip')}" />`,
+  );
+
+  /* The forms. */
+  base.push(
+    stage(...bx('stage-biological'), 'stage-biological', L.bio),
+    stage(...bx('stage-extraction'), 'stage-extraction', L.geo),
+    node(...bx('node-aggregation'), 'node-aggregation', undefined, L.agg),
+    stage(...bx('stage-processing'), 'stage-processing', L.proc),
+    node(...bx('node-trader'), 'node-trader', undefined, L.trad),
+    stage(...bx('stage-packaging'), 'stage-packaging', L.pack),
+    stage(...bx('stage-manufacturing'), 'stage-manufacturing', L.mfg),
+    node(...bx('node-principal'), 'node-principal', undefined, L.princ),
+    // The collapsed group: one dashed box naming its three functions in the
+    // order goods pass through them, and a note that the transfers between
+    // them are inside it. Not a door: the margins inside are read on detail.
+    node(...bx('group-distribution-retail'), 'group-distribution-retail', undefined, L.dist, 'cp-node cp-group-box'),
+    ...L.distNote.map((t, i) => T(g4[0] + PAD + 14, distB[0] + distB[1] + 16 + i * 15, t, 'cp-recur')),
+    stage(...bx('stage-consumption'), 'stage-consumption', L.cons),
+    stage(...bx('stage-recovery'), 'stage-recovery', L.rec),
+  );
+
+  const energyIn = {
+    'stage-biological': midX('stage-biological'),
+    'stage-extraction': midX('stage-biological'),
+    'stage-processing': procX0 + 20,
+    'stage-packaging': bx('stage-packaging')[0] + 20,
+    'stage-manufacturing': midX('stage-manufacturing'),
+    'stage-consumption': right('stage-consumption') - 20,
+    'stage-recovery': midX('stage-consumption') - 30,
+  };
+  energyStubs(base, boxes, energyIn);
+  /* Asset finance lands under a recipient's own box, or under the box that stands for it. */
+  const standsFor = (id) => (boxes[id] ? id : Object.values(G).find((gr) => gr.collapsed && gr.members.includes(id))?.id);
+  const recipientX = (id) => { const b = standsFor(id); return b ? midX(b) : null; };
+
+  /* Borders. Export cuts the extraction → processing route below the biological one; import cuts trader → manufacturing. */
+  const exportX = gapMid('group-origins', 'group-processing') - 12;
+  const borderGeom = {
+    'border-export': [exportX, [316, CHAIN_BOTTOM]],
+    'border-import': [gapMid('group-processing', 'group-manufacturing'), [108, CHAIN_BOTTOM]],
+  };
+  BORDERS.forEach((b) => {
+    const [bxx, [y0, y1]] = borderGeom[b.id];
+    block(bxx - 2, y0, 4, y1 - y0, b.id);
+    base.push(`<g className="cp-border" data-id="${b.id}"><path d="M ${bxx} ${y0} L ${bxx} ${y1}" />
+      ${chip(bxx, y0 - 2, b.label, 'cp-border-t')}</g>`);
   });
 
-  /* Non-physical flows: four rails at the bottom. Money is dotted with a
-     filled head; information is dash-dot with an open head. Upstream runs
-     right to left; downstream left to right. Labels sit on the tail end. */
-  const RX0 = C.org[0], RX1 = C.cons[1];
-  NON_PHYSICAL.forEach((f, i) => {
-    const y = RAIL0 + i * RAIL_DY;
-    const up = f.direction === 'upstream';
-    const cls = f.kind === 'money' ? 'cp-money' : 'cp-info';
-    const tip = f.kind === 'money' ? 'cp-tip-money' : 'cp-tip-info';
-    base.push(`<g className="cp-nonphys" data-id="${f.id}">
-      <path className="${cls}" d="${up ? `M ${RX1} ${y} L ${RX0 + 6} ${y}` : `M ${RX0} ${y} L ${RX1 - 6} ${y}`}" markerEnd="${M(tip)}" />
-      ${up ? chip(RX1 + 1, y + 4, f.label, 'cp-rail-t', 'end') : chip(RX0 - 1, y + 4, f.label, 'cp-rail-t', 'start')}</g>`);
-  });
-  ['money', 'information'].forEach((k, i) => base.push(T(C.fanT, RAIL0 + i * 2 * RAIL_DY + 14, FLOW_KIND_LABELS[k], 'cp-kind-t', 'end')));
-
-  /* ── Shift overlays: static geometry per shift — an outline on every target
-     whose FORM is the target's status (heavy for stuck, plain for moving,
-     dashed for unpriced), one arrow where a cut moves, one where a price
-     arrives, and a callout — shown by CSS from data-shift. Nothing here
-     redraws the chain; the base stays where it is and recedes. ── */
-  const statusOf = (s, id) => s.targets.find((t) => t.id === id)?.condition?.status ?? 'moving';
-  const lit = (id, status) => {
-    const cls = (kind) => `${kind} cp-lit--${status}`;
-    if (jointGeom[id]) {
-      const [x, y] = jointGeom[id];
-      return `<circle className="${cls('cp-lit-ring')}" cx="${x}" cy="${y}" r="17" />`;
-    }
-    if (bandGeom[id]) {
-      const [x, y, w, h] = bandGeom[id];
-      return `<rect className="${cls('cp-lit-rect')}" x="${x - 3}" y="${y - 3}" width="${w + 6}" height="${h + 6}" rx="3" />`;
-    }
-    if (borderGeom[id]) {
-      const [x, [y0, y1]] = borderGeom[id];
-      return `<path className="${cls('cp-lit-line')}" d="M ${x} ${y0} L ${x} ${y1}" />`;
-    }
-    if (returnPath[id]) {
-      // The lit path is drawn over the base, so the return's own label is painted back on top of it.
-      return `<path className="${cls('cp-lit-path')}" d="${returnPath[id]}" markerEnd="${M('cp-tip-shift')}" />${returnChip[id] ?? ''}`;
-    }
-    if (boxes[id]) {
-      const [x, y, w, h] = boxes[id];
-      return `<rect className="${cls('cp-lit-rect')}" x="${x - 5}" y="${y - 5}" width="${w + 10}" height="${h + 10}" rx="${N[id] || id === RETAIL_GROUP.id ? 12 : 4}" />`;
-    }
-    throw new Error(`shift target ${id} has no geometry on the wide plate`);
+  /* Returns: every one drawn, each to its own destination. Commercial returns
+     run inside the collapsed box, so they are drawn as a loop on it — a
+     return that leaves retail and arrives at the distributor, both of which
+     are in the box — not merged into any other. */
+  const returnPath = {}, returnChip = {}, returnLabel = {};
+  const retChip = (id, rx, ry, anchor = 'middle') => {
+    returnLabel[id] = chipRect(rx, ry, R[id].label, anchor);
+    returnChip[id] = chip(rx, ry, R[id].label, 'cp-ret-t', anchor);
+    return returnChip[id];
   };
-  const xOf = (id) => (jointGeom[id]?.[0] ?? borderGeom[id]?.[0] ?? (boxes[id] ? boxes[id][0] + boxes[id][2] / 2 : null));
-  const move = (m) => {
-    if (m.kind === 'price') {
-      // A price arrives at a joint that had none: a short arrow into the
-      // ring from the right, in the gap between the two boxes the joint
-      // sits between. The words are the callout's; the arrow is the glyph.
-      const [x, y] = jointGeom[m.at];
-      block(x + 22, y + 2, 44, 12, m.id);
-      const d = `M ${x + 62} ${y + 8} L ${x + 22} ${y + 8}`;
-      return `<g className="cp-move cp-move--price" data-id="${m.id}"><path className="cp-move-hit" d="${d}" /><path className="cp-move-path" d="${d}" markerEnd="${M('cp-tip-shift')}" /></g>`;
-    }
-    const x0 = xOf(m.from), x1 = xOf(m.to);
-    if (x0 === null || x1 === null) throw new Error(`move ${m.id} has an end with no x`);
-    // Above the chain, clear of the processing box, then down onto the joint.
-    const y = 222, land = jointGeom[m.to] ? jointGeom[m.to][1] - 22 : AX - 22;
-    block(Math.min(x0, x1), y - 3, Math.abs(x1 - x0), 6, m.id);
-    block(x1 - 3, y, 6, land - y, `${m.id} landing`);
-    block(x0, y - 22, est(m.label, T_SMALL, 0.6), 16, `${m.id} label`);
-    const d = `M ${x0} ${y} L ${x1} ${y} L ${x1} ${land}`;
-    return `<g className="cp-move cp-move--cut" data-id="${m.id}"><path className="cp-move-hit" d="${d}" />
-      <path className="cp-move-path" d="${d}" markerEnd="${M('cp-tip-shift')}" />
-      ${T(x0, y - 8, m.label, 'cp-move-t')}</g>`;
+  const arc = (r, x1, y1, x2, y2, peak, lx, ly, anchor = 'middle') => {
+    returnPath[r.id] = `M ${x1} ${y1} C ${x1} ${peak}, ${x2} ${peak}, ${x2} ${y2}`;
+    return `<g className="cp-ret" data-id="${r.id}">
+      <path d="${returnPath[r.id]}" markerEnd="${M('cp-tip-soft')}" />
+      ${retChip(r.id, lx, ly, anchor)}</g>`;
   };
-  const callout = (c) => {
-    if (borderGeom[c.at]) {
-      // Beside the border's own chip, on its row: the two risers above leave no clear line there.
-      const [x, [y0]] = borderGeom[c.at];
-      return `<g className="cp-callout" data-id="${c.id}">${chip(x + 44, y0 - 1, c.label, 'cp-callout-t', 'start', 14, 0.6, 20)}</g>`;
-    }
-    const x = xOf(c.at);
-    if (x === null) throw new Error(`callout ${c.id} has no x`);
-    // Under the chain, on the lower row of the reading lane.
-    return `<g className="cp-callout" data-id="${c.id}">${chip(x, ROW_B + 14, c.label, 'cp-callout-t', 'middle', 14, 0.6, 20)}</g>`;
+  const RISER_A = W - 22, RISER_B = W - 40;
+  const mfgX0 = bx('stage-manufacturing')[0], mfgX1 = right('stage-manufacturing');
+  const distX0 = bx('group-distribution-retail')[0], distX1 = right('group-distribution-retail');
+  const consX1 = right('stage-consumption');
+  returnPath['return-postconsumer-organic'] = `M ${right('stage-recovery')} ${recB[0] + 8} L ${RISER_A} ${recB[0] + 8} L ${RISER_A} 34 L ${midX('stage-biological')} 34 L ${midX('stage-biological')} ${bioB[0] - 4}`;
+  returnPath['return-postconsumer-material'] = `M ${right('stage-recovery')} ${recB[0] + 22} L ${RISER_B} ${recB[0] + 22} L ${RISER_B} 56 L ${midX('stage-processing')} 56 L ${midX('stage-processing')} ${procB[0] - 4}`;
+  returnPath['return-secondary'] = `M ${consX1 - 60} ${consB[0]} C ${consX1 - 60} ${consB[0] - 42}, ${consX1 - 10} ${consB[0] - 42}, ${consX1 - 10} ${consB[0]}`;
+  const secondaryLines = wrap(R['return-secondary'].label, 18);
+  returnLabel['return-secondary'] = [consX1 - 6 - est(secondaryLines[0], T_SMALL, 0.56), consB[0] - 72, est(secondaryLines[0], T_SMALL, 0.56), 30];
+  block(...returnLabel['return-secondary'], 'return-secondary');
+  base.push(
+    arc(R['return-scrap'], mfgX0 + 20, mfgB[0] - 4, right('stage-processing') - 20, procB[0] - 4, 200, Math.round((right('stage-processing') + mfgX0) / 2) - 30, 214),
+    arc(R['return-commercial'], distX1 - 24, distB[0] - 2, distX1 - 60, distB[0] - 2, distB[0] - 38, distX0 + 4, distB[0] - 54, 'start'),
+    arc(R['return-packaging'], distX0 + 34, distB[0] - 2, mfgX1 - 20, mfgB[0] - 4, 236, distX0 + 26, distB[0] - 27),
+    `<g className="cp-ret" data-id="return-postconsumer-organic">
+      <path d="${returnPath['return-postconsumer-organic']}" markerEnd="${M('cp-tip-soft')}" />
+      ${retChip('return-postconsumer-organic', midX('group-distribution-retail'), 38)}</g>`,
+    `<g className="cp-ret" data-id="return-postconsumer-material">
+      <path d="${returnPath['return-postconsumer-material']}" markerEnd="${M('cp-tip-soft')}" />
+      ${retChip('return-postconsumer-material', midX('stage-manufacturing'), 60)}</g>`,
+    `<g className="cp-ret" data-id="return-secondary">
+      <path d="${returnPath['return-secondary']}" markerEnd="${M('cp-tip-soft')}" />
+      ${secondaryLines.map((t, i) => T(consX1 - 6, consB[0] - 58 + i * 15, t, 'cp-ret-t', 'end')).join('')}</g>`,
+    `<g className="cp-byp" data-id="${BYPRODUCT.id}"><path d="M ${midX('stage-processing') + 10} ${bottom('stage-processing')} L ${midX('stage-processing') + 46} ${bottom('stage-processing')} L ${midX('stage-processing') + 46} ${bottom('stage-processing') + 46}" markerEnd="${M('cp-tip-soft')}" />
+      ${chip(procX0 + 6, bottom('stage-processing') + 70, BYPRODUCT.label, 'cp-ret-t', 'start')}</g>`,
+  );
+
+  laneNames(base, fanT, ROW_A);
+
+  /* Joints: the nine the overview draws, in the gaps between the frames and inside the frames whose members are drawn. */
+  const aggX = midX('node-aggregation');
+  const jointGeom = {
+    'j-production-aggregation': [gapMid('group-origins', 'group-processing'), bioY, 'rowA', -24],
+    'j-extraction-processing': [exportX + 24, Math.round((geoY + AX) / 2) + 4, 'rowB', 0],
+    'j-aggregation-processing': [aggX, Math.round((bottom('node-aggregation') + procB[0]) / 2), 'rowA', 56],
+    'j-processing-trader': [Math.round((right('stage-processing') + bx('node-trader')[0]) / 2), AX, 'rowB', 0],
+    'j-trader-manufacturing': [gapMid('group-processing', 'group-manufacturing'), AX, 'rowA', 0],
+    // Its chip sits low on the flow, so the returns' labels above the distribution box have the row to themselves.
+    'j-packaging-manufacturing': [midX('stage-manufacturing') - 40, Math.round((bottom('stage-packaging') + mfgB[0]) / 2), 'right', 11],
+    'j-manufacturing-distribution': [gapMid('group-manufacturing', 'group-distribution-retail'), AX, 'rowB', 0],
+    'j-retail-consumption': [gapMid('group-distribution-retail', 'group-use-recovery'), AX, 'rowA', 0],
+    'j-consumption-recovery': [midX('stage-consumption') + 30, Math.round((bottom('stage-consumption') + recB[0]) / 2), 'left', 0],
   };
-  SHIFTS.forEach((s) => {
-    shiftLayers.push(`<g className="cp-shift cp-shift--${s.id}" data-id="${s.id}">
-      ${s.targets.filter((t) => t.condition).map((t) => `<g className="cp-lit" data-for="${t.id}" data-status="${statusOf(s, t.id)}">${lit(t.id, statusOf(s, t.id))}</g>`).join('\n      ')}
-      ${s.moves.map(move).join('\n      ')}
-      ${s.callouts.map(callout).join('\n      ')}
-    </g>`);
-  });
-
-  /* ── Numbered marks: the index onto a shift's targets ──────────────────────
-     A mark is drawn beside the thing it belongs to. Each kind of target has
-     a list of candidate places, in order of preference; the first that lands
-     on nothing — no box, no chip, no band, no arrow, no earlier mark — is
-     taken. A joint's mark sits up-left of its diamond, or at the outer end of
-     its chip where the chip sits beside it; a layer's off the left end of its
-     band, past the layer switch; a border's on its line under its chip; a
-     return's beside its own label, because a return is read at its label; a
-     box's at one of its corners.
-
-     The ORDER is computed here, from where the marks actually land, and never
-     from the order of the data file: left to right, then top to bottom, with
-     the layers last because they are the bottom row of the plate. The runtime
-     numbers targets by their position in this list, so a target the owner
-     parks (no condition) simply drops out and the rest close up. ── */
-  /* A mark has two radii and they do different jobs. MARK_INK_R is the drawn
-     disc plus a hair, and it is what keeps a mark off the plate's ink.
-     MARK_HIT_R is the transparent disc ShiftMark.tsx puts behind it so the
-     door clears 24 screen pixels at the 1280px breakpoint, and it is what
-     keeps two marks from shadowing each other. Using the ink radius for both
-     is how a mark's target came to sit on a chip's target. */
-  const MARK_INK_R = 12;
-  const MARK_HIT_R = 17;
-  const hits = (cx, cy, own) =>
-    obstacles.some(([x, y, w, h, tag]) => !own.includes(tag) && cx + MARK_INK_R > x && cx - MARK_INK_R < x + w && cy + MARK_INK_R > y && cy - MARK_INK_R < y + h);
-  const markCandidates = (id) => {
-    if (jointGeom[id]) {
-      const [x, y, at] = jointGeom[id];
-      const [cx0, cy0, cw, ch] = jointChipRect[id];
-      const own = [`ring ${id}`, `chip ${id}`];
-      // Beside the chip where the chip sits beside the joint; otherwise around
-      // the diamond, and failing that at either end of the chip in the lane.
-      const side = at === 'left' ? [[cx0 - 13, y]] : at === 'right' ? [[cx0 + cw + 13, y]] : [];
-      const lane = side.length ? [] : [[cx0 - 13, cy0 + ch / 2], [cx0 + cw + 13, cy0 + ch / 2]];
-      return { own, at: [...side, [x - 14, y - 14], [x + 14, y - 14], [x - 14, y + 14], [x + 14, y + 14], ...lane] };
-    }
-    if (bandGeom[id]) {
-      const [x, y, , h] = bandGeom[id];
-      return { own: [id], at: [[x - 45, y + h / 2]] };
-    }
-    if (borderGeom[id]) {
-      const [x, [y0]] = borderGeom[id];
-      return { own: [BORDERS.find((b) => b.id === id).label, id], at: [[x, y0 + 18], [x, y0 + 44]] };
-    }
-    if (returnLabel[id]) {
-      const [x, y, w, h] = returnLabel[id];
-      return { own: [R[id].label, id], at: [[x - 13, y + h / 2], [x + w + 13, y + h / 2]] };
-    }
-    if (boxes[id]) {
-      const [x, y, w, h] = boxes[id];
-      return {
-        own: [id],
-        at: [[x - 11, y - 11], [x + w + 11, y - 11], [x - 11, y + h + 11], [x + w + 11, y + h + 11], [x + w / 2, y - 11], [x + w / 2, y + h + 11], [x - 11, y + h / 2]],
-      };
-    }
-    throw new Error(`shift target ${id} has no place for a mark on the wide plate`);
+  const drawnJoints = JOINTS.filter((j) => drawnAtOverview(j.id));
+  for (const j of drawnJoints) if (!jointGeom[j.id]) throw new Error(`the overview draws ${j.id} but has no geometry for it`);
+  const colX = {
+    'stage-biological': g1, 'stage-extraction': g1, 'node-aggregation': g2, 'stage-processing': g2, 'node-trader': g2,
+    'stage-packaging': g3, 'stage-manufacturing': g3, 'node-distributor': g4, 'node-wholesaler': g4, 'node-retail': g4,
+    'stage-consumption': g5, 'stage-recovery': g5,
   };
-  const markOrder = {};
-  SHIFTS.forEach((s) => {
-    const placedMarks = [];
-    const ordered = s.targets
-      .filter((t) => t.condition)
-      .map((t) => {
-        const { own, at } = markCandidates(t.id);
-        // Reading order is decided by the FIRST candidate — where the mark
-        // belongs — even if it has to step aside; so the numbers still run
-        // left to right along the chain.
-        return { id: t.id, own, at, ox: at[0][0], oy: at[0][1], row: bandGeom[t.id] ? 1 : 0 };
-      })
-      .sort((a, b) => a.row - b.row || a.ox - b.ox || a.oy - b.oy);
-    ordered.forEach((m) => {
-      const free = m.at.find(([cx, cy]) => !hits(cx, cy, m.own) && !placedMarks.some((o) => Math.hypot(o.x - cx, o.y - cy) < MARK_HIT_R * 2));
-      const [x, y] = free ?? m.at[0];
-      if (!free) console.warn(`mark for ${m.id} under ${s.id} found no clear place; using its first candidate`);
-      placedMarks.push({ id: m.id, x, y });
-    });
-    markOrder[s.id] = placedMarks.map((m) => m.id);
-    marks.push(`<g className="cp-marks cp-marks--${s.id}">
-      ${placedMarks.map((m) => `<ShiftMark shift="${s.id}" id="${m.id}" cx={${Math.round(m.x)}} cy={${Math.round(m.y)}} />`).join('\n      ')}
-    </g>`);
-  });
 
-  return { W, H, base, shiftLayers, marks, markOrder, hits: [...jointHits, ...bandHits, ...layerSwitches], aria: OV ? CHAIN_COPY.aria.compact : CHAIN_COPY.aria.wide };
+  const ctx = {
+    level: 'overview', W, AX, ROW_A, ROW_B, BAND0, moveY: 228,
+    base, jointHits, bandHits, layerSwitches, boxes, jointGeom, drawnJoints, colX, energyIn, recipientX,
+    borderGeom, returnPath, returnChip, returnLabel,
+  };
+  joints(ctx);
+  bands(ctx);
+  rails(base, fanT, g1[0], g5[1], RAIL0);
+  const { shiftLayers, marks, markOrder } = overlays(ctx, orderFrom);
+  return { W, H, base, shiftLayers, marks, markOrder, hits: [...jointHits, ...bandHits, ...layerSwitches], aria: CHAIN_COPY.aria.compact };
 }
 
 /* ═══ EMIT ════════════════════════════════════════════════════════════════ */
@@ -749,9 +1032,6 @@ function plate(level) {
 /* role="img" would make the browser prune every button inside the drawing
    from the accessibility tree, so the plates are groups with a title and a
    description, and the joints and layers inside them stay reachable. */
-/* ONE emitter for both levels. The overview used to be emitted as role="img"
-   with only a base layer, which is exactly why its controls could not act: an
-   image has no doors. Both plates are groups with hits and marks now. */
 const svgPlate = (kind, p) => `<svg className="cp-svg cp-svg--${kind}" viewBox="0 0 ${p.W} ${p.H}" role="group" aria-labelledby="cp-${kind}-title" aria-describedby="cp-${kind}-desc" focusable="false">
     <title id="cp-${kind}-title">${esc(p.aria.title)}</title>
     <desc id="cp-${kind}-desc">${esc(p.aria.desc)}</desc>
@@ -771,22 +1051,28 @@ const svgPlate = (kind, p) => `<svg className="cp-svg cp-svg--${kind}" viewBox="
   </svg>`;
 
 SUF = '--wide';
-const detail = plate('detail');
+const detail = plateDetail();
 const detailJsx = svgPlate('wide', detail);
 SUF = '--compact';
-const overview = plate('overview');
+const overview = plateOverview(detail.markOrder);
 const overviewJsx = svgPlate('compact', overview);
+for (const s of SHIFTS) {
+  if (overview.markOrder[s.id].join() !== detail.markOrder[s.id].join()) throw new Error(`the two levels number ${s.id} differently`);
+}
 
 fs.writeFileSync(path.join(OUT, 'ChainPlateSvg.tsx'), `/**
  * GENERATED by scripts/build-chain-plate.mjs — do not edit by hand.
  * Content: src/data/industryChain.ts. Layout: the generator.
  * Regenerate with \`npm run build:chain\`.
  *
- * Two plates for a wide screen, one content: the full chain and the short
- * version. The joint markers and the layer bands are React components so
- * their text comes from the data at run time; the shift overlays are static
- * geometry shown by CSS from the wrapper's data-shift attribute. The
- * narrow-screen layout is ChainColumn.tsx, not generated.
+ * Two plates for a wide screen, one content: the detail, with every function
+ * under its own box, and the overview, the same records in five groups. The
+ * joint markers and the layer bands are React components so their text comes
+ * from the data at run time; the shift overlays are static geometry shown by
+ * CSS from the wrapper's data-shift attribute. The narrow-screen layout is
+ * ChainColumn.tsx, not generated.
+ *
+ * viewBox: detail ${detail.W} × ${detail.H}; overview ${overview.W} × ${overview.H}.
  */
 import { BandHit } from './BandHit';
 import { JointHit } from './JointHit';
@@ -810,10 +1096,11 @@ fs.writeFileSync(path.join(OUT, 'chainMarkOrder.ts'), `/**
  * GENERATED by scripts/build-chain-plate.mjs — do not edit by hand.
  *
  * The reading order of a shift's marks, computed from where they land on the
- * wide plate: left to right, then top to bottom, with the enabling layers
- * last because they are the bottom row. It is deliberately NOT the order of
- * src/data/industryChain.ts, and it is shared with the narrow-screen column
- * so a number means the same thing on a phone as on a laptop.
+ * detail plate: left to right, then top to bottom, with the enabling layers
+ * last because they are the bottom row. The overview takes the same order,
+ * and so does the narrow-screen column, so a number means the same thing on
+ * a phone, at the overview and on the detail. It is deliberately NOT the
+ * order of src/data/industryChain.ts.
  *
  * A target whose reading is empty at either distance carries no mark; the
  * runtime filters this list and numbers what is left from one, so the numbers
@@ -837,13 +1124,15 @@ fs.writeFileSync(path.join(OUT, 'chain-plate.css'), `/**
  * is on.
  *
  * Every category is told by form before colour: stages are solid boxes,
- * nodes are dashed pills, layers are filled bands ticked where they attach,
- * returns are dashed arcs, money is dotted with a filled head, information
- * is dash-dot with an open head, borders are vertical dashes with a chip,
- * energy is a short dotted arrow rising into each stage. The margin kinds
- * are told by the joint mark on the flow: a filled diamond where a stage
- * sells (conversion), an open diamond where a node sells (spread), a square
- * where a fee is paid.
+ * nodes are dashed pills, groups are faint frames with a kicker, layers are
+ * filled bands ticked where they attach, returns are dashed arcs, money is
+ * dotted with a filled head, information is dash-dot with an open head,
+ * borders are vertical dashes with a chip, energy is a short dotted arrow
+ * rising into each stage from a dotted network line whose left end is
+ * generation and whose open points are connections. The margin kinds are
+ * told by the joint mark on the flow: a filled diamond where a stage sells
+ * (conversion), an open diamond where a node sells (spread), a square where
+ * a fee is paid.
  *
  * A status is told by form too, never by colour alone: a marked element is
  * outlined heavy when it is stuck, plain when it is moving, dashed when it is
@@ -851,54 +1140,64 @@ fs.writeFileSync(path.join(OUT, 'chain-plate.css'), `/**
  *
  * Weight: the flow is the heaviest line on the plate and the joint mark the
  * heaviest form, so the chain and its joints read first; the boxes are drawn
- * a step lighter. Under a shift the base geometry and every unmarked joint
- * recede to a fixed opacity; labels never dim. At the finance distance an
- * open reading isolates its joint: everything else steps back further.
+ * a step lighter and the group frames lighter still. Under a shift the base
+ * geometry and every unmarked joint recede to a fixed opacity; labels never
+ * dim. At the finance distance an open reading isolates its joint: everything
+ * else steps back further.
  */
 .chain-plate{
   --cp-shift: hsl(var(--accent-editorial));
+  /* The detail plate's own width in units, so the figure can hold it at one pixel per unit and scroll (chain-review.css). */
+  --cp-detail-w: ${detail.W}px;
 }
 .chain-plate .cp-svg{display:block;width:100%;height:auto}
 
 /* Base — quiet where it is not the chain. */
 .cp-base :is(path,rect,circle,ellipse,line,polygon,polyline){transition:opacity .22s ease}
+.cp-group rect{fill:hsl(var(--muted));fill-opacity:.32;stroke:hsl(var(--border));stroke-width:1}
+.cp-group-t{font-size:${T_SMALL}px;fill:hsl(var(--muted-foreground));letter-spacing:.09em;text-transform:uppercase}
 .cp-stage rect{fill:hsl(var(--background));stroke:hsl(var(--foreground));stroke-width:1}
 .cp-stage .cp-origin{fill:hsl(var(--primary));stroke:none}
-.cp-stage-t{font-size:18px;font-weight:600;fill:hsl(var(--foreground));letter-spacing:-.005em}
+.cp-stage-t{font-size:${T_STAGE}px;font-weight:600;fill:hsl(var(--foreground));letter-spacing:-.005em}
 .cp-node rect{fill:hsl(var(--background));stroke:hsl(var(--muted-foreground));stroke-width:1;stroke-dasharray:3 2.5}
-.cp-node-t{font-size:15px;fill:hsl(var(--foreground))}
+.cp-node-t{font-size:${T_NODE}px;fill:hsl(var(--foreground))}
 .cp-retail-sep{fill:none;stroke:hsl(var(--border));stroke-width:1}
-.cp-recur{font-size:14px;fill:hsl(var(--muted-foreground))}
-.cp-lane-t{font-size:14px;fill:hsl(var(--muted-foreground))}
+.cp-recur{font-size:${T_SMALL}px;fill:hsl(var(--muted-foreground))}
+.cp-lane-t{font-size:${T_SMALL}px;fill:hsl(var(--muted-foreground))}
 .cp-demand path{stroke:hsl(var(--foreground));stroke-width:2}
-.cp-demand-t{font-size:14px;fill:hsl(var(--foreground))}
+.cp-demand-t{font-size:${T_SMALL}px;fill:hsl(var(--foreground))}
 .cp-flow{fill:none;stroke:hsl(var(--foreground));stroke-width:1.7}
 .cp-flow-thin{fill:none;stroke:hsl(var(--muted-foreground));stroke-width:.8}
 .cp-mk{fill:hsl(var(--foreground))}
 .cp-mk-soft{fill:hsl(var(--muted-foreground))}
 .cp-mk-open{fill:hsl(var(--background));stroke:hsl(var(--muted-foreground));stroke-width:1}
 .cp-mk-shift{fill:var(--cp-shift)}
-.cp-kind-t{font-size:14px;fill:hsl(var(--muted-foreground));letter-spacing:.09em;text-transform:uppercase}
+.cp-kind-t{font-size:${T_SMALL}px;fill:hsl(var(--muted-foreground));letter-spacing:.09em;text-transform:uppercase}
 .cp-chip{fill:hsl(var(--background))}
 .cp-money{fill:none;stroke:hsl(var(--muted-foreground));stroke-width:1.4;stroke-dasharray:2 3.5;stroke-linecap:round}
 .cp-info{fill:none;stroke:hsl(var(--muted-foreground));stroke-width:1.1;stroke-dasharray:9 3 1.5 3}
-.cp-rail-t{font-size:14px;fill:hsl(var(--muted-foreground))}
+.cp-rail-t{font-size:${T_SMALL}px;fill:hsl(var(--muted-foreground))}
 .cp-ret path{fill:none;stroke:hsl(var(--muted-foreground));stroke-width:1;stroke-dasharray:5 3;stroke-linejoin:round}
-.cp-ret-t{font-size:14px;fill:hsl(var(--muted-foreground))}
+.cp-ret-t{font-size:${T_SMALL}px;fill:hsl(var(--muted-foreground))}
 .cp-byp path{fill:none;stroke:hsl(var(--muted-foreground));stroke-width:1}
 .cp-border path{fill:none;stroke:hsl(var(--foreground));stroke-width:1.2;stroke-dasharray:6 4}
-.cp-border-t{font-size:14px;fill:hsl(var(--foreground));letter-spacing:.09em;text-transform:uppercase;font-weight:600}
+.cp-border-t{font-size:${T_SMALL}px;fill:hsl(var(--foreground));letter-spacing:.09em;text-transform:uppercase;font-weight:600}
 /* Energy rises into every stage: a short dotted arrow at the bottom edge of each box. */
 .cp-energy-in{fill:none;stroke:hsl(var(--muted-foreground));stroke-width:1.3;stroke-dasharray:1.5 2.5;stroke-linecap:round}
 .cp-band rect{fill:hsl(var(--secondary))}
 .cp-band-line{stroke:hsl(var(--border));stroke-width:1}
-.cp-band-t{font-size:14px;fill:hsl(var(--foreground));letter-spacing:.09em;text-transform:uppercase}
-.cp-band-n{font-size:14px;fill:hsl(var(--muted-foreground))}
-.cp-band-fee{font-size:14px;fill:hsl(var(--muted-foreground));letter-spacing:.02em;text-transform:none}
-/* Where a layer attaches: a filled square where its fee is paid, an open one where only its terms apply, a rising tick where it is an input. */
+.cp-band-t{font-size:${T_SMALL}px;fill:hsl(var(--foreground));letter-spacing:.09em;text-transform:uppercase}
+.cp-band-n{font-size:${T_SMALL}px;fill:hsl(var(--muted-foreground))}
+.cp-band-fee{font-size:${T_SMALL}px;fill:hsl(var(--muted-foreground));letter-spacing:.02em;text-transform:none}
+/* Where a layer attaches: a filled square where its fee is paid, an open one where only its terms apply, a rising tick where it is an input, a block on a post where it builds the asset. */
 .cp-tick--fee{fill:hsl(var(--foreground));stroke:none}
 .cp-tick--terms{fill:hsl(var(--background));stroke:hsl(var(--foreground));stroke-width:1}
 .cp-tick--up{fill:none;stroke:hsl(var(--foreground));stroke-width:1.2}
+.cp-tick--asset{fill:hsl(var(--foreground));stroke:hsl(var(--foreground));stroke-width:1.2}
+/* The energy band's top edge is the network: dotted like the risers, a filled point for generation at its left end, an open point at every connection. */
+.cp-energy-net{fill:none;stroke:hsl(var(--foreground));stroke-width:1.4;stroke-dasharray:1.5 2.5;stroke-linecap:round}
+.cp-energy-gen{fill:hsl(var(--foreground));stroke:none}
+.cp-energy-conn{fill:hsl(var(--background));stroke:hsl(var(--foreground));stroke-width:1.2}
 
 /* The reading lane: one distance name shows, from the wrapper's data-lens. */
 .cp-lens-name{display:none}
@@ -907,10 +1206,9 @@ fs.writeFileSync(path.join(OUT, 'chain-plate.css'), `/**
 
 /* Interactive marks: joints and layers. Every target is a button and opens
    the panel on click, tap or Enter; hover only strengthens the mark. */
-/* The shape that takes the pointer, never the ink. A drawn door on this plate
-   is small — a 22-unit disc is 15.6 screen pixels at the 1280px breakpoint —
-   so every door carries a larger invisible shape behind it. It has to beat the
-   element rules that paint a bare circle or rect inside a mark or a chip: a
+/* The shape that takes the pointer, never the ink. Every door carries a
+   larger invisible shape behind its drawn one. It has to beat the element
+   rules that paint a bare circle or rect inside a mark or a chip: a
    presentation attribute loses to any stylesheet rule, which is how the first
    attempt at this drew the hit areas as rings. Two classes of specificity, so
    it wins, and it is never a visual. */
@@ -923,7 +1221,7 @@ fs.writeFileSync(path.join(OUT, 'chain-plate.css'), `/**
 .cp-joint-lead{fill:none;stroke:hsl(var(--muted-foreground));stroke-width:.9}
 .cp-joint-chip{cursor:pointer}
 .cp-joint-chip rect{fill:hsl(var(--background));stroke:hsl(var(--foreground));stroke-width:1}
-.cp-joint-chip text{font-size:14px;fill:hsl(var(--foreground))}
+.cp-joint-chip text{font-size:${T_SMALL}px;fill:hsl(var(--foreground))}
 .cp-band-hit rect.cp-band-rect{fill:hsl(var(--secondary))}
 @media (hover:hover) and (pointer:fine){
   .cp-joint:hover .cp-joint-mark{stroke-width:2.6}
@@ -936,7 +1234,7 @@ fs.writeFileSync(path.join(OUT, 'chain-plate.css'), `/**
 .cp-band-hit:focus-visible rect.cp-band-rect{stroke:hsl(var(--ring));stroke-width:2}
 
 /* A layer switched off recedes but stays in place; its switch stays crisp. */
-.cp-band-hit[data-hidden],.chain-plate .cp-lit[data-hidden],.chain-plate .cp-mark[data-hidden],.chain-plate .cp-energy-in[data-hidden]{opacity:.18}
+.cp-band-hit[data-hidden],.chain-plate .cp-lit[data-hidden],.chain-plate .cp-mark[data-hidden],.chain-plate .cp-energy-in[data-hidden],.chain-plate .cp-callout--mechanism[data-hidden]{opacity:.18}
 /* A faded door is still a door. Fading is an opacity on the group, and CSS
    cannot restore a child through its parent's opacity, so a focus ring inside
    a faded element is drawn at the faded element's opacity: measured at .18 on
@@ -970,9 +1268,12 @@ fs.writeFileSync(path.join(OUT, 'chain-plate.css'), `/**
 .cp-lit--unpriced.cp-lit-path{stroke-dasharray:3 4;stroke-width:1.8}
 .cp-move-path{fill:none;stroke:var(--cp-shift);stroke-width:2}
 .cp-move-hit{fill:none;stroke:transparent;stroke-width:14;cursor:help}
-.cp-move-t{font-size:14px;fill:hsl(var(--foreground));font-weight:600}
+.cp-move-t{font-size:${T_SMALL}px;fill:hsl(var(--foreground));font-weight:600}
 .cp-callout rect{fill:hsl(var(--background));stroke:var(--cp-shift);stroke-width:1.6}
-.cp-callout-t{font-size:14px;fill:hsl(var(--foreground));font-weight:600}
+.cp-callout-t{font-size:${T_SMALL}px;fill:hsl(var(--foreground));font-weight:600}
+/* What moves an element, named on the overlay where it is not the price the map draws. */
+.cp-callout--mechanism rect{stroke-dasharray:3 2}
+.cp-callout--mechanism text{font-weight:500}
 .cp-hit[data-lit] .cp-joint-mark{stroke:var(--cp-shift);stroke-width:2.4}
 .cp-hit[data-lit] rect.cp-band-rect{stroke:var(--cp-shift);stroke-width:1.5}
 
@@ -1005,7 +1306,7 @@ fs.writeFileSync(path.join(OUT, 'chain-plate.css'), `/**
 .cp-mark{cursor:pointer}
 .cp-mark:focus{outline:none}
 .cp-mark circle{fill:hsl(var(--background));stroke:var(--cp-shift);stroke-width:1.8}
-.cp-mark text{font-size:14px;font-weight:700;fill:hsl(var(--foreground));letter-spacing:0}
+.cp-mark text{font-size:${T_SMALL}px;font-weight:700;fill:hsl(var(--foreground));letter-spacing:0}
 .cp-mark--stuck circle{fill:var(--cp-shift)}
 .cp-mark--stuck text{fill:hsl(var(--background))}
 .cp-mark--unpriced circle{stroke-dasharray:3 2.5}
@@ -1021,4 +1322,4 @@ fs.writeFileSync(path.join(OUT, 'chain-plate.css'), `/**
 @media (prefers-reduced-motion:reduce){.cp-base :is(path,rect,circle,ellipse,line,polygon,polyline){transition:none}}
 `);
 
-console.log('generated ChainPlateSvg.tsx and chain-plate.css');
+console.log(`generated ChainPlateSvg.tsx (detail ${detail.W}×${detail.H}, overview ${overview.W}×${overview.H}) and chain-plate.css`);

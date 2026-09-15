@@ -11,7 +11,7 @@
  */
 import fs from 'node:fs';
 
-const MIN_TESTS = 538; // 542 after the v5 map pass: the overview as the same drawing at a coarser grouping (what it hides, what it keeps, the marks numbered alike at both levels), the two attach points of finance, and the address live at both levels; slack of 4, not 40.
+const MIN_TESTS = 561; // 565 after the v5.1 pass: essay associations with their context and publication state, the five-group overview and its mapping, asset finance under its recipients, the energy anatomy, the narrow layer bars, and the card qualifications; slack of 4, not 40.
 
 const reportPath = process.argv[2] ?? 'vitest-report.json';
 if (!fs.existsSync(reportPath)) {

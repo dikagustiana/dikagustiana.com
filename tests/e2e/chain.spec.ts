@@ -32,6 +32,12 @@ for (const path of ['/', '/about']) {
 
     if (path === '/') {
       await expect(page.locator('.cp-column[data-level="overview"]')).toHaveCount(1);
+      // The swimlane on its side: seven layer bars beside the five groups, no catalogue after the chain.
+      await expect(page.locator('.cp-column .cp-bar')).toHaveCount(7);
+      await expect(page.getByRole('heading', { name: 'Enabling layers' })).toHaveCount(0);
+      const bar = await page.getByRole('button', { name: 'Energy', exact: true }).boundingBox();
+      expect(bar!.width, 'a bar is a target').toBeGreaterThanOrEqual(20);
+      expect(bar!.height, 'a bar spans the chain').toBeGreaterThan(400);
       expect(await scrollWidth(page)).toBeLessThanOrEqual(PHONE.width);
       await page.getByRole('button', { name: 'Show the detail' }).first().click();
     }
@@ -77,20 +83,28 @@ test('/about at 1280px draws one wide plate whose names are readable, with every
   // rather than drawn as a legend — a reader without a pointer to sweep with
   // cannot discover them by moving one around.
   await expect(page.locator('[data-chain-doors]')).toContainText('Two things open');
-  // Nothing under the plate but the one-line scope caveat, which moved there
-  // from above it: it is a caveat about a drawing, and it used to stand in
-  // front of the drawing it was about.
+  // Under the plate: the one-line scope caveat last, and before it — only
+  // while the detail is wider than its window — the line saying the detail
+  // scrolls sideways inside the map. V5 asserted that nothing but the scope
+  // line followed the figure; the V5.1 decision to let the detail scroll
+  // locally rather than shrink supersedes that, and the note is the reader's
+  // orientation.
   const under = page.locator('.chain-plate > figure ~ *');
-  await expect(under).toHaveCount(1);
-  await expect(under).toHaveAttribute('data-chain-scope');
+  await expect(under.last()).toHaveAttribute('data-chain-scope');
+  await expect(page.locator('[data-chain-scrolls]')).toBeVisible();
+  const scroller = page.locator('[data-chain-scroll]');
+  const box = await scroller.evaluate((el) => ({ sw: el.scrollWidth, cw: el.clientWidth }));
+  expect(box.sw, 'the detail scrolls inside the map').toBeGreaterThan(box.cw);
+  expect(await scrollWidth(page), 'and the page does not').toBeLessThanOrEqual(LAPTOP.width);
 
-  // Type: 18 viewBox units on a plate that is W wide, drawn at its rendered width.
+  // Type: the detail is drawn at no less than one CSS pixel per unit, so its
+  // eighteen-unit stage names and fourteen-unit labels render at that size.
   const scale = await page.locator('svg.cp-svg--wide').evaluate((svg) => {
     const el = svg as SVGSVGElement;
     return el.getBoundingClientRect().width / el.viewBox.baseVal.width;
   });
-  expect(18 * scale).toBeGreaterThanOrEqual(12);
-  expect(14 * scale).toBeGreaterThanOrEqual(9.5);
+  expect(18 * scale).toBeGreaterThanOrEqual(18);
+  expect(14 * scale).toBeGreaterThanOrEqual(14);
 
   // A joint's hit area is at least 24px across on screen, and its chip is on at rest.
   const hit = await page.locator('.cp-hit[data-id="j-processing-trader"] circle.cp-hit-area').boundingBox();
@@ -429,9 +443,18 @@ test('/ at 1280px: both distances, both overlays and every door but one act at t
   const reading = page.getByRole('region', { name: 'Energy' });
   await expect(reading).toBeVisible();
   // The basis and the status stay ON the card: a mark that promises a
-  // diagnosis must say what kind of claim it is before anything is read.
+  // diagnosis must say what kind of claim it is before anything is read —
+  // and an assessed one names its case.
   await expect(reading.locator('[data-basis="assessed"]')).toBeVisible();
+  await expect(reading.locator('[data-assessed-case]')).toContainText(/nickel/i);
   await expect(reading.locator('[data-chain-lead]')).toBeVisible();
+  // The essay is the evidence behind this reading. This fixture's index holds
+  // no essays, so the card says so rather than linking to a page that is not
+  // there: the title is inert text, labelled not published.
+  const essay = reading.locator('[data-essay="indonesias-reindustrialization-bet"]');
+  await expect(essay).toHaveAttribute('data-essay-evidence', 'true');
+  await expect(essay).toHaveAttribute('data-essay-state', 'not-published');
+  await expect(essay.getByRole('link')).toHaveCount(0);
   // What the lever CANNOT do here is part of the mechanism, not a footnote
   // — it is inside the reading, which the card offers rather than dumps.
   await expect(reading.locator('[data-mechanism="contract"]')).toBeHidden();
@@ -471,6 +494,38 @@ for (const width of [1440, 1600, 1920]) {
       return parseFloat(getComputedStyle(t).fontSize) * scale;
     });
     expect(px, `stage labels at ${width}px`).toBeGreaterThanOrEqual(14);
+  });
+}
+
+/**
+ * THE LAPTOP TARGET, measured rather than inferred. V5 read a 14-unit font
+ * size off the source and reported 1600px as the width where the plate met
+ * the target; measured, the overview at 1280px drew at 0.74 scale and its
+ * labels at 10.4 CSS pixels. The overview now fits the figure at one pixel per
+ * unit or more from the breakpoint up, without scrolling, and the page never
+ * scrolls sideways.
+ */
+for (const width of [1280, 1440]) {
+  test(`/ at ${width}px: every label a reader needs to read or operate the overview renders at fourteen pixels or more`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 900 });
+    await open(page, '/');
+    await page.evaluate(() => document.fonts.ready);
+    const m = await page.evaluate(() => {
+      const svg = document.querySelector('svg.cp-svg--compact') as SVGSVGElement;
+      const scale = svg.getBoundingClientRect().width / svg.viewBox.baseVal.width;
+      const px = (sel: string) => Array.from(svg.querySelectorAll(sel)).filter((t) => t.textContent?.trim()).map((t) => parseFloat(getComputedStyle(t).fontSize) * scale);
+      const min = (xs: number[]) => Math.min(...xs);
+      const scroller = document.querySelector('[data-chain-scroll]')!;
+      return {
+        stage: min(px('.cp-stage-t')), node: min(px('.cp-node-t')), chip: min(px('.cp-joint-chip text')), band: min(px('.cp-band-t')),
+        group: min(px('.cp-group-t')), note: min(px('.cp-band-n')), ret: min(px('.cp-ret-t')), rail: min(px('.cp-rail-t')), kind: min(px('.cp-kind-t')),
+        overviewScrolls: scroller.scrollWidth > scroller.clientWidth + 1,
+        pageScroll: document.documentElement.scrollWidth, pageClient: document.documentElement.clientWidth,
+      };
+    });
+    for (const [k, v] of Object.entries(m)) if (typeof v === 'number' && !['pageScroll', 'pageClient'].includes(k)) expect(v, `${k} at ${width}px`).toBeGreaterThanOrEqual(14);
+    expect(m.overviewScrolls, 'the overview fits without scrolling').toBe(false);
+    expect(m.pageScroll).toBeLessThanOrEqual(m.pageClient);
   });
 }
 
@@ -641,3 +696,45 @@ test('the narrow sheet switches distance without losing the target', async ({ pa
   await expect(sheet).toHaveCount(0);
   expect(await scrollWidth(page)).toBeLessThanOrEqual(PHONE.width);
 });
+
+/**
+ * U05. The narrow overview writes each layer's short name down a rail 24px
+ * wide and ticks that rail where the layer attaches. Asset finance attaches
+ * at its recipients, the first of which is the first group on the page, so
+ * its name and its first tick wanted the same pixels and the name was set
+ * straight through the mark. The rail now holds a name lane and a tick lane;
+ * this holds it to that, and to the two facts that make the rails legible at
+ * all — the name stays inside its own rail, and the page does not scroll
+ * sideways to fit them.
+ */
+for (const width of [360, 390]) {
+  test(`the layer rails at ${width}px keep every name inside its own rail and clear of its ticks`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 800 });
+    await open(page, '/');
+    await page.evaluate(() => document.fonts.ready);
+
+    const trouble = await page.evaluate(() => {
+      const bad: string[] = [];
+      const over = (a: DOMRect, b: DOMRect) =>
+        Math.min(a.right, b.right) - Math.max(a.left, b.left) > 0.5 && Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top) > 0.5;
+      for (const bar of document.querySelectorAll('.cp-bar')) {
+        const id = bar.getAttribute('data-id');
+        const rail = bar.getBoundingClientRect();
+        const column = getComputedStyle(bar).gridColumnStart;
+        const spans = [...bar.querySelectorAll('span')];
+        const name = spans.filter((s) => !s.hasAttribute('data-mark-n')).pop()!.getBoundingClientRect();
+        if (name.left < rail.left - 0.5 || name.right > rail.right + 0.5) bad.push(`${id}: its name is written outside its rail`);
+        for (const tick of document.querySelectorAll('[data-bar-tick]')) {
+          if (getComputedStyle(tick.parentElement!).gridColumnStart !== column) continue;
+          const mark = tick.getBoundingClientRect();
+          if (over(mark, name)) bad.push(`${id}: a tick is drawn over its name at y=${Math.round(mark.y)}`);
+          if (mark.left < rail.left - 0.5 || mark.right > rail.right + 0.5) bad.push(`${id}: a tick sits outside its rail`);
+        }
+      }
+      return bad;
+    });
+    expect(trouble, 'the rails').toEqual([]);
+    expect(await page.locator('[data-bar-tick]').count(), 'the rails say where each layer attaches').toBeGreaterThan(20);
+    expect(await scrollWidth(page)).toBeLessThanOrEqual(width);
+  });
+}

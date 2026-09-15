@@ -287,9 +287,8 @@ describe('the overview on a narrow screen', () => {
     const drawn = ids();
     for (const hidden of OVERVIEW_HIDES) expect(drawn.has(hidden), `overview draws ${hidden}`).toBe(false);
     for (const g of Object.values(OVERVIEW_GROUPS)) {
-      if (g.id === 'group-retail') continue; // grouped into the retail node it already had
       expect(drawn.has(g.id), `overview lacks ${g.id}`).toBe(true);
-      expect(screen.getByText(g.label)).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: g.label })).toBeInTheDocument();
     }
 
     // Every stage, border, layer and by-product survives the grouping.
@@ -312,10 +311,14 @@ describe('the overview on a narrow screen', () => {
 
   it('leaves out the examples and the sub-formats, and puts them back on detail', async () => {
     mount(<ChainPlate variant="preview" links={[]} />);
-    // The five retail formats are grouped into the retail node, which keeps
-    // its own name and both its joints.
+    // The five retail formats, the retail node, the distributor and the
+    // wholesaler are one box, which names the three functions inside it.
     for (const r of RETAIL) expect(screen.queryByText(r.label), r.id).not.toBeInTheDocument();
-    expect(document.querySelector(`[data-id="${RETAIL_GROUP.id}"]`)!.textContent).toContain(RETAIL_GROUP.label);
+    const box = document.querySelector('[data-id="group-distribution-retail"]')!;
+    expect(box.textContent).toContain(RETAIL_GROUP.label);
+    expect(box.textContent).toContain('Distributor');
+    expect(box.textContent).toContain(CHAIN_COPY.controls.transfersInside(2));
+    expect(screen.queryByRole('button', { name: 'Wholesale → retail' })).toBeNull();
     // The lanes into each origin and the components of demand are examples,
     // not links in the chain.
     for (const lane of STAGES.find((x) => x.id === 'stage-biological')!.lanes!) {
@@ -335,11 +338,79 @@ describe('the overview on a narrow screen', () => {
     const lit = Array.from(document.querySelectorAll<HTMLElement>('[data-id][data-lit]')).map((el) => el.dataset.id!).sort();
     expect(lit).toEqual(SHIFT_BY_ID.green.targets.map((t) => t.id).sort());
 
-    const joint = JOINTS.find((x) => x.id === 'j-wholesale-retail')!;
+    const joint = JOINTS.find((x) => x.id === 'j-retail-consumption')!;
     expect(screen.getByText(joint.read.economy.chip)).toBeInTheDocument();
     await userEvent.click(word('finance'));
     expect(screen.getByText(joint.read.finance.chip)).toBeInTheDocument();
     expect(document.querySelectorAll('.cp-column[data-level="overview"]')).toHaveLength(1);
+  });
+});
+
+/**
+ * THE NARROW OVERVIEW IS THE SWIMLANE ON ITS SIDE. V5's narrow overview ran
+ * every joint row in sequence and then listed the seven layers as a catalogue
+ * after all of them. The layers now run beside the groups they span, as bars
+ * ticked where each attaches, so a phone reader meets the enabling conditions
+ * beside the functions they enable.
+ */
+describe('the layers alongside the narrow overview', () => {
+  it('draws every layer as a bar beside the groups it spans, ticked where it attaches, and no catalogue after the chain', () => {
+    mount(<ChainPlate variant="preview" links={[]} />);
+    expect(screen.queryByRole('heading', { name: CHAIN_COPY.controls.layers })).not.toBeInTheDocument();
+    expect(screen.getByText(CHAIN_COPY.controls.layersAlongside)).toBeInTheDocument();
+    for (const b of BANDS) {
+      const bar = screen.getByRole('button', { name: b.label });
+      expect(bar.classList.contains('cp-bar'), b.id).toBe(true);
+      expect(bar.textContent, b.id).toContain(b.short);
+      expect(bar.getAttribute('aria-expanded'), b.id).toBe('false');
+      const row = bar.style.gridRow;
+      expect(row, `${b.id} spans grid rows`).toMatch(/^\d+ \/ \d+$/);
+    }
+    // A whole-chain layer spans from the first group to the last; governance only the downstream half.
+    const rows = (label: string) => screen.getByRole('button', { name: label }).style.gridRow.split(' / ').map(Number);
+    const [lStart, lEnd] = rows('Logistics and warehousing');
+    const [gStart, gEnd] = rows('Principal–distributor contract governance');
+    expect(gStart).toBeGreaterThan(lStart);
+    expect(gEnd).toBeLessThan(lEnd);
+    expect(rows('Energy')).toEqual([lStart, lEnd]);
+    // Ticks: a fee at the joints for logistics, an input under the groups for energy, an asset under the recipients for capital, none for the rules.
+    expect(document.querySelectorAll('[data-bar-tick="fee"]').length).toBeGreaterThan(0);
+    // Energy is an input into every stage, so its bar is ticked at every group that holds one — four of the five; the distribution box holds none.
+    const groupsWithAStage = Object.values(OVERVIEW_GROUPS).filter((g) => g.members.some((m) => STAGES.some((s) => s.id === m))).length;
+    expect(groupsWithAStage).toBe(4);
+    expect(document.querySelectorAll('[data-bar-tick="up"]').length).toBe(groupsWithAStage);
+    expect(document.querySelectorAll('[data-bar-tick="asset"]').length).toBeGreaterThanOrEqual(4);
+    expect(document.querySelectorAll('[data-bar-tick="terms"]').length).toBeGreaterThan(0);
+  });
+
+  it('opens a layer’s reading from its bar, and carries the mark’s number on the bar under a shift', async () => {
+    mount(<ChainPlate variant="preview" links={[]} />);
+    await userEvent.click(word('green transition'));
+    const energy = screen.getByRole('button', { name: /Green transition · Energy · Moving$/ });
+    expect(energy.classList.contains('cp-bar')).toBe(true);
+    expect(energy.querySelector('[data-mark-n]')!.textContent).toBe(String(SHIFT_BY_ID.green.targets.length));
+    // Working capital carries no green mark; asset finance does.
+    expect(screen.getByRole('button', { name: 'Working capital and trade credit' }).querySelector('[data-mark-n]')).toBeNull();
+    expect(screen.getByRole('button', { name: /Green transition · Asset and project finance · Moving$/ })).toBeInTheDocument();
+    await userEvent.click(energy);
+    const panel = region('Energy');
+    expect(panel.closest('[data-chain-sheet]')).not.toBeNull();
+    expect(panel.querySelector('[data-basis="assessed"]')).not.toBeNull();
+    expect(energy).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  it('folds the transfers inside an open group, but shows one the shift marks without the fold', async () => {
+    mount(<ChainPlate variant="preview" links={[]} />);
+    const fold = document.querySelector('[data-group-fold="group-processing"]') as HTMLDetailsElement;
+    expect(fold).not.toBeNull();
+    expect(fold.open).toBe(false);
+    expect(fold.textContent).toContain(CHAIN_COPY.controls.transfersInside(2));
+    await userEvent.click(word('reindustrialisation'));
+    // Processing → trader is marked, so it comes out of the fold; aggregation → processing stays in it.
+    const marked = screen.getByRole('button', { name: 'Processing → trader / importer' });
+    expect(marked.closest('details')).toBeNull();
+    expect(screen.getByRole('button', { name: 'Aggregation → processing' }).closest('details')).not.toBeNull();
+    expect(document.querySelector('[data-lit-note="j-processing-trader"]')).not.toBeNull();
   });
 });
 

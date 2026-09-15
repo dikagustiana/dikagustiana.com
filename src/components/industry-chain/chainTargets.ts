@@ -15,14 +15,17 @@ import {
   JOINT_IDS,
   JOINTS,
   MARGIN_KINDS,
+  MECHANISMS,
   NODES,
   NON_PHYSICAL,
+  OVERVIEW_GROUPS,
   RETAIL,
   RETAIL_GROUP,
   RETURNS,
   SHIFT_BY_ID,
   STAGES,
   STATUS,
+  essaysFor,
   isMarked,
   jointLayers,
   shiftTarget,
@@ -46,6 +49,7 @@ export function targetLabel(id: string): string {
   if (BAND_BY_ID[id]) return BAND_BY_ID[id].label;
   if (id === RETAIL_GROUP.id) return RETAIL_GROUP.label;
   if (id === BYPRODUCT.id) return BYPRODUCT.label;
+  if (OVERVIEW_GROUPS[id]) return OVERVIEW_GROUPS[id].label;
   const named =
     stageOf(id) ??
     nodeOf(id) ??
@@ -93,9 +97,9 @@ export function markNumber(shift: ShiftId, id: string): number {
   return markedIds(shift).indexOf(id) + 1;
 }
 
-/** How many essays the owner has attached to a target under a shift. */
+/** The essays that read an element, in the context of the shift that is on. */
 export function markArticles(shift: ShiftId | null, id: string) {
-  return shiftTarget(shift, id)?.articles ?? [];
+  return essaysFor(id, shift);
 }
 
 /** "no essay yet" / "one essay" / "three essays". */
@@ -114,12 +118,17 @@ export function essayCount(n: number): string {
 export function hoverLine(id: string, shift: ShiftId | null, lens: LensId): { lead: string; detail: string } {
   const n = shift ? markNumber(shift, id) : 0;
   if (n > 0) {
-    const status = targetStatus(shift, id)!;
+    const condition = shiftTarget(shift, id)!.condition!;
+    // The mechanism, where it is not the price the map draws: a contract or a
+    // capacity problem is named before the essay count, not relabelled.
+    const mechanism = condition.mechanism && condition.mechanism !== 'price' ? ` · ${MECHANISMS[condition.mechanism].label.toLowerCase()}` : '';
     return {
       lead: `${n}. ${targetLabel(id)}`,
-      detail: `${STATUS[status].label} · ${essayCount(markArticles(shift, id).length)}`,
+      detail: `${STATUS[condition.status].label}${mechanism} · ${essayCount(markArticles(shift, id).length)}`,
     };
   }
+  // A group frame or box at the overview: its own account of what stays true inside it.
+  if (OVERVIEW_GROUPS[id]) return { lead: OVERVIEW_GROUPS[id].label, detail: OVERVIEW_GROUPS[id].keeps };
   if (isJointId(id)) {
     const joint = JOINT_BY_ID[id];
     // The margin kind, then the service performed here — what finance sees —

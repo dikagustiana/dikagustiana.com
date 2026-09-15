@@ -104,6 +104,9 @@ export function ChainPopover({
     };
     window.addEventListener('resize', schedule);
     window.addEventListener('scroll', schedule, { passive: true });
+    // The plate can scroll sideways inside the figure; the anchor moves with it, so the reading follows.
+    const scroller = figure.querySelector('[data-chain-scroll]');
+    scroller?.addEventListener('scroll', schedule, { passive: true });
     // The reading can change height (a folded anatomy opened, a longer line);
     // re-measure when it does, where the browser can say so.
     const ro = typeof ResizeObserver === 'function' ? new ResizeObserver(schedule) : null;
@@ -112,6 +115,7 @@ export function ChainPopover({
       if (frame) cancelAnimationFrame(frame);
       window.removeEventListener('resize', schedule);
       window.removeEventListener('scroll', schedule);
+      scroller?.removeEventListener('scroll', schedule);
       ro?.disconnect();
     };
   }, [measure, figure]);

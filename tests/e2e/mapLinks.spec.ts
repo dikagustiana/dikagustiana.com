@@ -28,9 +28,21 @@ test('an address into the map does what the author guide says it does', async ({
   await expect(page.locator('.chain-plate')).toHaveAttribute('data-lens', 'economy');
   await expect(panel).toHaveAttribute('data-panel', 'anatomy');
 
-  // A detail-only element opens the detail.
+  // A detail-only element opens the detail: both transfers inside the
+  // distribution-and-retail box, which the overview draws as one.
   await page.goto('/?node=distributor-wholesaler');
   await expect(page.getByRole('region', { name: 'Distributor → wholesaler' })).toBeVisible();
+  await expect(page.locator('.chain-plate')).toHaveAttribute('data-level', 'detail');
+  await page.goto('/?node=wholesale-retail');
+  await expect(page.getByRole('region', { name: 'Wholesale → retail' })).toBeVisible();
+  await expect(page.locator('.chain-plate')).toHaveAttribute('data-level', 'detail');
+  // A transfer that crosses a group's edge stays at the overview.
+  await page.goto('/?node=retail-consumption');
+  await expect(page.getByRole('region', { name: 'Retail → consumption' })).toBeVisible();
+  await expect(page.locator('.chain-plate')).toHaveAttribute('data-level', 'overview');
+  // And Back returns to the reading the address named, with focus on the map.
+  await page.goBack();
+  await expect(page.getByRole('region', { name: 'Wholesale → retail' })).toBeVisible();
   await expect(page.locator('.chain-plate')).toHaveAttribute('data-level', 'detail');
 
   // An element the named shift does not mark is not opened, and is dropped.

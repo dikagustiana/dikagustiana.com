@@ -245,6 +245,13 @@ export function ChainPlate({
   const [anchor, setAnchor] = useState<Element | null>(null);
   const triggerRef = useRef<Element | null>(null);
   const figureRef = useRef<HTMLElement>(null);
+  const scrollerRef = useRef<HTMLDivElement>(null);
+  // THE DETAIL SCROLLS INSIDE THE MAP, THE PAGE DOES NOT. The detail plate is
+  // drawn at no less than one CSS pixel per unit (chain-review.css), so below
+  // about 1760px of figure it is wider than its window and the box around it
+  // scrolls sideways. Measured, not assumed: the note under the figure that
+  // says so appears only while the box actually overflows.
+  const [scrollable, setScrollable] = useState(false);
 
   const urlState = useMemo<ChainUrlState>(() => ({ lens, shift, node: selected }), [lens, shift, selected]);
   // THE ADDRESS IS LIVE AT BOTH LEVELS. It used to be written only once the
@@ -272,6 +279,19 @@ export function ChainPlate({
    */
   const level: ChainLevel = variant === 'preview' && !expanded ? 'overview' : 'detail';
   const atOverview = level === 'overview';
+
+  useEffect(() => {
+    const el = scrollerRef.current;
+    if (!el || typeof ResizeObserver !== 'function') {
+      setScrollable(false);
+      return;
+    }
+    const check = () => setScrollable(el.scrollWidth > el.clientWidth + 1);
+    check();
+    const ro = new ResizeObserver(check);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [wideScreen, level]);
 
   const modulesByJoint = useMemo(() => locatedModulesByJoint(links), [links]);
 
@@ -408,7 +428,18 @@ export function ChainPlate({
       setAnchor(null);
       return;
     }
-    setAnchor(anchorFor(figureRef.current, selected, shift));
+    const next = anchorFor(figureRef.current, selected, shift);
+    setAnchor(next);
+    // The detail can be wider than its window, and an address can open an
+    // element that sits in the part scrolled out of view — the transfer inside
+    // the distribution box, say. The map is scrolled so the element is in
+    // view, once, when the reading opens; a reader's own scrolling is left alone.
+    const scroller = scrollerRef.current;
+    if (!next || !scroller || scroller.scrollWidth <= scroller.clientWidth + 1) return;
+    const a = next.getBoundingClientRect();
+    const s = scroller.getBoundingClientRect();
+    if (a.left >= s.left + 8 && a.right <= s.right - 8) return;
+    scroller.scrollTo({ left: scroller.scrollLeft + (a.left + a.width / 2 - s.left) - s.width / 2, behavior: scrollBehavior() });
   }, [wideScreen, selected, shift, level]);
 
   // Isolation at the finance distance: everything not in the open reading's
@@ -618,7 +649,13 @@ export function ChainPlate({
           onMouseOver={wideScreen ? onFigureOver : undefined}
           onMouseOut={wideScreen ? onFigureOut : undefined}
         >
-          {wideScreen ? atOverview ? <ChainPlateCompact /> : <ChainPlateWide /> : <ChainColumn level={level} />}
+          {wideScreen ? (
+            <div ref={scrollerRef} data-chain-scroll data-chain-scrollable={scrollable || undefined} className="cp-scroll">
+              {atOverview ? <ChainPlateCompact /> : <ChainPlateWide />}
+            </div>
+          ) : (
+            <ChainColumn level={level} />
+          )}
 
           {/* No label for the element whose reading is already open: the reading says it all. */}
           {wideScreen && (
@@ -636,6 +673,11 @@ export function ChainPlate({
             it was a caveat about a drawing the reader had not seen yet; the
             question it answers — are these firms? is this route the only one?
             — is one a reader asks after looking. */}
+        {scrollable && (
+          <p className="mt-2 text-xs leading-relaxed text-muted-foreground" data-chain-scrolls>
+            {CHAIN_COPY.controls.scrolls}
+          </p>
+        )}
         <p className="mt-4 max-w-3xl text-sm leading-relaxed text-muted-foreground" data-chain-scope>
           {CHAIN_COPY.scopeLead}
         </p>

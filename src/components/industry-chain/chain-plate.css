@@ -11,13 +11,15 @@
  * is on.
  *
  * Every category is told by form before colour: stages are solid boxes,
- * nodes are dashed pills, layers are filled bands ticked where they attach,
- * returns are dashed arcs, money is dotted with a filled head, information
- * is dash-dot with an open head, borders are vertical dashes with a chip,
- * energy is a short dotted arrow rising into each stage. The margin kinds
- * are told by the joint mark on the flow: a filled diamond where a stage
- * sells (conversion), an open diamond where a node sells (spread), a square
- * where a fee is paid.
+ * nodes are dashed pills, groups are faint frames with a kicker, layers are
+ * filled bands ticked where they attach, returns are dashed arcs, money is
+ * dotted with a filled head, information is dash-dot with an open head,
+ * borders are vertical dashes with a chip, energy is a short dotted arrow
+ * rising into each stage from a dotted network line whose left end is
+ * generation and whose open points are connections. The margin kinds are
+ * told by the joint mark on the flow: a filled diamond where a stage sells
+ * (conversion), an open diamond where a node sells (spread), a square where
+ * a fee is paid.
  *
  * A status is told by form too, never by colour alone: a marked element is
  * outlined heavy when it is stuck, plain when it is moving, dashed when it is
@@ -25,17 +27,22 @@
  *
  * Weight: the flow is the heaviest line on the plate and the joint mark the
  * heaviest form, so the chain and its joints read first; the boxes are drawn
- * a step lighter. Under a shift the base geometry and every unmarked joint
- * recede to a fixed opacity; labels never dim. At the finance distance an
- * open reading isolates its joint: everything else steps back further.
+ * a step lighter and the group frames lighter still. Under a shift the base
+ * geometry and every unmarked joint recede to a fixed opacity; labels never
+ * dim. At the finance distance an open reading isolates its joint: everything
+ * else steps back further.
  */
 .chain-plate{
   --cp-shift: hsl(var(--accent-editorial));
+  /* The detail plate's own width in units, so the figure can hold it at one pixel per unit and scroll (chain-review.css). */
+  --cp-detail-w: 1717px;
 }
 .chain-plate .cp-svg{display:block;width:100%;height:auto}
 
 /* Base — quiet where it is not the chain. */
 .cp-base :is(path,rect,circle,ellipse,line,polygon,polyline){transition:opacity .22s ease}
+.cp-group rect{fill:hsl(var(--muted));fill-opacity:.32;stroke:hsl(var(--border));stroke-width:1}
+.cp-group-t{font-size:14px;fill:hsl(var(--muted-foreground));letter-spacing:.09em;text-transform:uppercase}
 .cp-stage rect{fill:hsl(var(--background));stroke:hsl(var(--foreground));stroke-width:1}
 .cp-stage .cp-origin{fill:hsl(var(--primary));stroke:none}
 .cp-stage-t{font-size:18px;font-weight:600;fill:hsl(var(--foreground));letter-spacing:-.005em}
@@ -69,10 +76,15 @@
 .cp-band-t{font-size:14px;fill:hsl(var(--foreground));letter-spacing:.09em;text-transform:uppercase}
 .cp-band-n{font-size:14px;fill:hsl(var(--muted-foreground))}
 .cp-band-fee{font-size:14px;fill:hsl(var(--muted-foreground));letter-spacing:.02em;text-transform:none}
-/* Where a layer attaches: a filled square where its fee is paid, an open one where only its terms apply, a rising tick where it is an input. */
+/* Where a layer attaches: a filled square where its fee is paid, an open one where only its terms apply, a rising tick where it is an input, a block on a post where it builds the asset. */
 .cp-tick--fee{fill:hsl(var(--foreground));stroke:none}
 .cp-tick--terms{fill:hsl(var(--background));stroke:hsl(var(--foreground));stroke-width:1}
 .cp-tick--up{fill:none;stroke:hsl(var(--foreground));stroke-width:1.2}
+.cp-tick--asset{fill:hsl(var(--foreground));stroke:hsl(var(--foreground));stroke-width:1.2}
+/* The energy band's top edge is the network: dotted like the risers, a filled point for generation at its left end, an open point at every connection. */
+.cp-energy-net{fill:none;stroke:hsl(var(--foreground));stroke-width:1.4;stroke-dasharray:1.5 2.5;stroke-linecap:round}
+.cp-energy-gen{fill:hsl(var(--foreground));stroke:none}
+.cp-energy-conn{fill:hsl(var(--background));stroke:hsl(var(--foreground));stroke-width:1.2}
 
 /* The reading lane: one distance name shows, from the wrapper's data-lens. */
 .cp-lens-name{display:none}
@@ -81,10 +93,9 @@
 
 /* Interactive marks: joints and layers. Every target is a button and opens
    the panel on click, tap or Enter; hover only strengthens the mark. */
-/* The shape that takes the pointer, never the ink. A drawn door on this plate
-   is small — a 22-unit disc is 15.6 screen pixels at the 1280px breakpoint —
-   so every door carries a larger invisible shape behind it. It has to beat the
-   element rules that paint a bare circle or rect inside a mark or a chip: a
+/* The shape that takes the pointer, never the ink. Every door carries a
+   larger invisible shape behind its drawn one. It has to beat the element
+   rules that paint a bare circle or rect inside a mark or a chip: a
    presentation attribute loses to any stylesheet rule, which is how the first
    attempt at this drew the hit areas as rings. Two classes of specificity, so
    it wins, and it is never a visual. */
@@ -110,7 +121,7 @@
 .cp-band-hit:focus-visible rect.cp-band-rect{stroke:hsl(var(--ring));stroke-width:2}
 
 /* A layer switched off recedes but stays in place; its switch stays crisp. */
-.cp-band-hit[data-hidden],.chain-plate .cp-lit[data-hidden],.chain-plate .cp-mark[data-hidden],.chain-plate .cp-energy-in[data-hidden]{opacity:.18}
+.cp-band-hit[data-hidden],.chain-plate .cp-lit[data-hidden],.chain-plate .cp-mark[data-hidden],.chain-plate .cp-energy-in[data-hidden],.chain-plate .cp-callout--mechanism[data-hidden]{opacity:.18}
 /* A faded door is still a door. Fading is an opacity on the group, and CSS
    cannot restore a child through its parent's opacity, so a focus ring inside
    a faded element is drawn at the faded element's opacity: measured at .18 on
@@ -147,6 +158,9 @@
 .cp-move-t{font-size:14px;fill:hsl(var(--foreground));font-weight:600}
 .cp-callout rect{fill:hsl(var(--background));stroke:var(--cp-shift);stroke-width:1.6}
 .cp-callout-t{font-size:14px;fill:hsl(var(--foreground));font-weight:600}
+/* What moves an element, named on the overlay where it is not the price the map draws. */
+.cp-callout--mechanism rect{stroke-dasharray:3 2}
+.cp-callout--mechanism text{font-weight:500}
 .cp-hit[data-lit] .cp-joint-mark{stroke:var(--cp-shift);stroke-width:2.4}
 .cp-hit[data-lit] rect.cp-band-rect{stroke:var(--cp-shift);stroke-width:1.5}
 

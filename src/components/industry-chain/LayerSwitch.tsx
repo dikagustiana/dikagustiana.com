@@ -13,11 +13,12 @@ import { ChainLensContext } from './chainLensContext';
 
 const SIZE = 12;
 /**
- * The drawn box is 12 units — 8.5 screen pixels at the 1280px breakpoint. The
- * transparent pad around it is what the reader actually hits, and it is sized
- * to clear 24px there: 34 units, which fits inside the band row's pitch.
+ * The drawn box is 12 units. The transparent pad around it is what the reader
+ * actually hits: 26 units, which clears the 24px target now that a unit is a
+ * CSS pixel or more from the 1280px breakpoint up, and fits inside the band
+ * row's pitch of 34.
  */
-const HIT = 34;
+const HIT = 26;
 
 export function LayerSwitch({ id, x, y }: { id: string; x: number; y: number }) {
   const { hidden, onToggleLayer } = useContext(ChainLensContext);

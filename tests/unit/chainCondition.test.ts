@@ -15,6 +15,7 @@ import {
   STATUS_NOTE,
   TENSIONS,
   drawnAtOverview,
+  essaysFor,
   isWritten,
   markedTargets,
   type LensId,
@@ -81,10 +82,11 @@ describe('scenario against finding', () => {
     }
   });
 
-  it('backs an assessed mark with at least one essay', () => {
-    for (const { shift, id, condition, target } of allConditions()) {
+  it('backs an assessed mark with at least one essay read under that shift, and names the case it was read against', () => {
+    for (const { shift, id, condition } of allConditions()) {
       if (condition.basis !== 'assessed') continue;
-      expect(target.articles?.length, `${shift} ${id}`).toBeGreaterThan(0);
+      expect(essaysFor(id, shift).filter((e) => e.evidence).length, `${shift} ${id}`).toBeGreaterThan(0);
+      expect(condition.case, `${shift} ${id}`).toBeTruthy();
     }
   });
 

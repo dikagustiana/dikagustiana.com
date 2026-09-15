@@ -204,9 +204,15 @@ test('map reading: the basis is declared, distance changes the work, and the sta
   // reading, and it says so before it says anything else. Basis and status
   // are on the CARD, never behind its fold.
   await expect(panel.locator('[data-basis="assessed"]')).toBeVisible();
-  // And the card leads where the depth actually is.
+  // And the card leads where the depth actually is: the essay, checked
+  // against the index this fixture seeds as published, at its canonical
+  // address, labelled as the evidence behind this reading.
   await expect(panel.locator('[data-chain-lead]')).toBeVisible();
-  await expect(panel.getByRole('link', { name: /Reindustrialization Bet/i })).toBeVisible();
+  const link = panel.getByRole('link', { name: /Reindustrialization Bet/i });
+  await expect(link).toBeVisible();
+  await expect(link).toHaveAttribute('href', '/the-next-big-thing/economy/indonesias-reindustrialization-bet');
+  await expect(panel.locator('[data-essay="indonesias-reindustrialization-bet"]')).toHaveAttribute('data-essay-state', 'published');
+  await expect(panel.locator('[data-essay="indonesias-reindustrialization-bet"]')).toHaveAttribute('data-essay-evidence', 'true');
 
   // The map can only draw a repricing. What moves this element is a contract
   // — said inside the reading the card offers, not dumped in front of it.
@@ -239,6 +245,36 @@ test('a reading opened from the landing page can be sent, from the overview, wit
   await page.getByRole('button', { name: 'green transition', exact: true }).click();
   await expect.poll(() => page.url()).toContain('lens=green');
   await expect(page.locator('.chain-plate')).toHaveAttribute('data-level', 'overview');
+});
+
+/**
+ * THE DEFAULT PATH INTO WRITING, with no overlay on. V5 took a card's essays
+ * from the active shift's target, so Energy at rest said "No essay reads this
+ * yet" while the site's one completed argument is about it. The association
+ * lives on the element now, with the context it was read in kept beside it.
+ */
+test('Energy leads to its essay with no overlay on, at the overview, with its context kept and its publication checked', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 1000 });
+  await page.goto('/');
+  await page.locator('.cp-hit[data-id="band-energy"]').click();
+  const panel = page.getByRole('region', { name: 'Energy' });
+  await expect(panel).toBeVisible();
+  await expect(panel).toHaveAttribute('data-panel', 'anatomy');
+  await expect(panel.getByText('No essay reads this yet.')).toHaveCount(0);
+  const essay = panel.locator('[data-essay="indonesias-reindustrialization-bet"]');
+  await expect(essay).toBeVisible();
+  // Related writing with its context, not evidence for a reading that is not open.
+  await expect(essay).not.toHaveAttribute('data-essay-evidence', 'true');
+  await expect(essay).toContainText(/Reads this under the green transition/i);
+  await expect(essay).toHaveAttribute('data-essay-state', 'published');
+  await expect(essay.getByRole('link')).toHaveAttribute('href', '/the-next-big-thing/economy/indonesias-reindustrialization-bet');
+  // Changing the distance does not erase it.
+  await page.getByRole('button', { name: 'finance', exact: true }).click();
+  await expect(page.getByRole('region', { name: 'Energy' }).locator('[data-essay="indonesias-reindustrialization-bet"]')).toBeVisible();
+  // A genuinely empty card says so.
+  await page.keyboard.press('Escape');
+  await page.locator('.cp-hit[data-id="band-credit"]').click();
+  await expect(page.getByRole('region', { name: 'Working capital and trade credit' }).getByText('No essay reads this yet.')).toBeVisible();
 });
 
 test('curriculum: the syllabus says what it is, and promises no dates', async ({ page }) => {

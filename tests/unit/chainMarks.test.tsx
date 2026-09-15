@@ -13,7 +13,7 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -57,7 +57,8 @@ describe('the reading order of a shift', () => {
   it('puts the green transition at eight marks, with the four layers last because they are the bottom row', () => {
     const ids = markedIds('green');
     expect(ids).toHaveLength(8);
-    expect(ids.slice(-4)).toEqual(['band-logistics', 'band-cold-chain', 'band-credit', 'band-energy']);
+    // Asset finance, not working capital: the project-finance reading moved to the band that finances projects.
+    expect(ids.slice(-4)).toEqual(['band-logistics', 'band-cold-chain', 'band-capital', 'band-energy']);
   });
 
   it('runs left to right along the chain before the layers', () => {
@@ -134,7 +135,9 @@ describe('the marks on the plate', () => {
     const condition = SHIFT_BY_ID.green.targets.find((t) => t.id === 'stage-recovery')!.condition!;
     expect(within(panel).getByText(condition.action.economy)).toBeInTheDocument();
     expect(within(panel).getByText('Unpriced')).toBeInTheDocument();
-    expect(within(panel).getByText(STATUS.unpriced.means)).toBeInTheDocument();
+    // One line beside the badge, not the long definition; that is in the reading in full.
+    expect(within(panel).getByText(STATUS.unpriced.card)).toBeInTheDocument();
+    expect(within(panel).queryByText(STATUS.unpriced.means)).not.toBeInTheDocument();
     expect(mark).toHaveAttribute('aria-expanded', 'true');
 
     await userEvent.click(word('reindustrialisation'));
@@ -158,7 +161,7 @@ describe('the marks on the plate', () => {
     expect(within(panel).getByText(LEVERS['reprice-layer'].label)).toBeInTheDocument();
     expect(within(panel).getByText(CHAIN_COPY.panel.articlesNone)).toBeInTheDocument();
     expect(panel.querySelector('[data-basis="scenario"]')).not.toBeNull();
-    expect(within(panel).getByText(BASIS.scenario.means)).toBeInTheDocument();
+    expect(within(panel).getByText(BASIS.scenario.card)).toBeInTheDocument();
     // The title carries the badge, and the badge comes before the lines.
     const title = within(panel).getByRole('heading', { level: 3 });
     expect(within(title).getByText('Stuck')).toBeInTheDocument();
@@ -181,9 +184,56 @@ describe('the marks on the plate', () => {
       CHAIN_COPY.panel.funds,
     ]);
     expect(panel.querySelector('[data-basis="assessed"]')).not.toBeNull();
+    // The case is named on the card, not left as "a specific case".
+    expect(panel.querySelector('[data-assessed-case]')!.textContent!.toLowerCase()).toContain('nickel');
+    // What moves it is on the card too — a contract, not a price alone — and in full in the reading.
+    expect(panel.querySelector('[data-mechanism-card="contract"]')).not.toBeNull();
     expect(panel.querySelector('[data-mechanism="contract"]')).not.toBeNull();
     expect(within(panel).getByText(CHAIN_COPY.panel.fundsRoles)).toBeInTheDocument();
     expect(within(panel).queryByText(CHAIN_COPY.panel.articlesNone)).not.toBeInTheDocument();
+    expect(panel.querySelector('[data-essay="indonesias-reindustrialization-bet"][data-essay-evidence]')).not.toBeNull();
+    expect(within(panel).getByText(CHAIN_COPY.panel.essayEvidence)).toBeInTheDocument();
+  });
+
+  /**
+   * THE DEFAULT PATH INTO WRITING. V5 took a card's essays from the active
+   * shift's target, so with no overlay every card said "No essay reads this
+   * yet" — Energy included. The association lives on the element now, and the
+   * card keeps its context.
+   */
+  it('leads from Energy to its essay with no overlay on, keeps the context, and says so when the index cannot be reached', async () => {
+    mount(<ChainPlate links={[]} />);
+    await userEvent.click(screen.getByRole('button', { name: 'Energy' }));
+    const panel = screen.getByRole('region', { name: 'Energy' });
+    expect(within(panel).queryByText(CHAIN_COPY.panel.articlesNone)).not.toBeInTheDocument();
+    const row = panel.querySelector('[data-essay="indonesias-reindustrialization-bet"]')!;
+    expect(row).not.toBeNull();
+    expect(row.hasAttribute('data-essay-evidence')).toBe(false);
+    expect(within(panel).getByText(CHAIN_COPY.panel.essayUnder('Green transition'))).toBeInTheDocument();
+    // The supabase client is a stub here, so the index cannot be reached: the
+    // card says it could not check, and still offers the universal route.
+    await waitFor(() => expect(row.getAttribute('data-essay-state')).toBe('unchecked'));
+    expect(within(panel).getByRole('link', { name: /Reindustrialization Bet/ })).toHaveAttribute('href', '/essays/indonesias-reindustrialization-bet');
+    expect(within(panel).getByText(CHAIN_COPY.panel.essayUnchecked)).toBeInTheDocument();
+
+    // Changing the distance does not erase the association.
+    await userEvent.click(word('finance'));
+    expect(screen.getByRole('region', { name: 'Energy' }).querySelector('[data-essay="indonesias-reindustrialization-bet"]')).not.toBeNull();
+
+    // Under the other overlay the essay is still there, as related writing with its context — never as evidence for a reading that does not exist.
+    await userEvent.click(word('reindustrialisation'));
+    const under = screen.getByRole('region', { name: 'Energy' });
+    expect(under.getAttribute('data-panel')).toBe('anatomy');
+    expect(under.querySelector('[data-essay="indonesias-reindustrialization-bet"]')).not.toBeNull();
+    expect(under.querySelector('[data-essay-evidence]')).toBeNull();
+  });
+
+  it('says plainly when nothing reads an element, and never borrows a neighbour’s essay', async () => {
+    mount(<ChainPlate links={[]} />);
+    await userEvent.click(screen.getByRole('button', { name: 'Working capital and trade credit' }));
+    const panel = screen.getByRole('region', { name: 'Working capital and trade credit' });
+    expect(within(panel).getByText(CHAIN_COPY.panel.articlesNone)).toBeInTheDocument();
+    expect(panel.querySelector('[data-essay]')).toBeNull();
   });
 
   it('pins one line beside a mark on hover — number, title, status, essays — and raises no tooltip role', async () => {
@@ -239,6 +289,12 @@ describe('the line read on hover', () => {
   it('reads a marked element as its mark under the shift that marks it, and as itself under the other', () => {
     expect(hoverLine('band-logistics', 'green', 'finance')).toEqual({ lead: '5. Logistics and warehousing', detail: 'Stuck · no essay yet' });
     expect(hoverLine('band-logistics', 'reindustrialisation', 'finance').detail).toContain('takes no title');
+    // Where what moves the element is not a price, the line says so before it counts the essays.
+    expect(hoverLine('band-energy', 'green', 'economy').detail).toBe('Moving · a contract is renegotiated · 1 essay');
+    expect(hoverLine('band-capital', 'green', 'economy').detail).toContain('risk moves to another party');
+    // A group frame at the overview reads as its own account of what it keeps.
+    expect(hoverLine('group-processing', null, 'economy').lead).toBe('Processing and intermediation');
+    expect(hoverLine('group-processing', null, 'economy').detail).toContain('do not add');
   });
 
   it('pins the definition beside a stage or a node on the plate, not in a list below it', async () => {
@@ -374,8 +430,9 @@ describe('the map in the address bar', () => {
     expect(window.location.search).toBe('?lens=green');
     expect((document.querySelector('.chain-plate') as HTMLElement).dataset.level).toBe('overview');
 
-    await userEvent.click(word('Wholesale → retail'));
-    expect(window.location.search).toBe('?lens=green&node=wholesale-retail');
+    // A joint the overview draws: the transfer into use crosses a group's edge.
+    await userEvent.click(word('Retail → consumption'));
+    expect(window.location.search).toBe('?lens=green&node=retail-consumption');
   });
 
   /*

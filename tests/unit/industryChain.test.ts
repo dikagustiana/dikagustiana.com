@@ -15,11 +15,14 @@ import { describe, expect, it } from 'vitest';
 import {
   BANDS,
   BAND_BY_ID,
+  BASIS,
   BORDERS,
   BYPRODUCT,
   CHAIN_COPY,
   COLUMNS,
   DEFINE,
+  ESSAY_ASSOCIATIONS,
+  ESSAY_SLUGS,
   JOINTS,
   JOINT_BY_ID,
   JOINT_IDS,
@@ -45,11 +48,18 @@ import {
   UNWRITTEN,
   bandChip,
   bandJoints,
+  boundaryJoints,
+  chargedAtJoints,
+  essaysFor,
+  groupOf,
+  groupReturns,
   idOfSlug,
+  internalJoints,
   isMarked,
   isWritten,
   jointLayers,
   markedTargets,
+  setsTerms,
   shiftTarget,
   slugOf,
   targetStatus,
@@ -193,12 +203,66 @@ describe('the enabling layers', () => {
     const working = BAND_BY_ID['band-credit'];
     const asset = BAND_BY_ID['band-capital'];
     expect(working.attaches).toBe('joints');
-    expect(asset.attaches).toBe('stages');
     expect(working.label.toLowerCase()).toContain('working capital');
     expect(asset.label.toLowerCase()).toMatch(/asset|project/);
     expect(asset.means.toLowerCase()).toContain('before it can trade');
-    // Three roles, usually three parties — the point a single finance band lost.
-    expect(asset.means.toLowerCase()).toContain('three separate parties');
+    // V5 ticked asset finance at the energy arrows' x — an unrelated layer's
+    // geometry as its economic definition. It now has its own attachment: the
+    // functions whose activity needs a built asset, not only the shapes called
+    // transformation stages, and the supporting layers whose capacity it funds.
+    expect(asset.attaches).toBe('recipients');
+    expect(asset.recipients).toBeDefined();
+    const recipients = asset.recipients!;
+    for (const id of recipients) expect(endIds.has(id), `recipient ${id}`).toBe(true);
+    expect(recipients.some((id) => stageIds.has(id))).toBe(true);
+    expect(recipients.some((id) => nodeIds.has(id) || id === RETAIL_GROUP.id)).toBe(true);
+    expect(recipients).toContain('node-distributor');
+    expect(recipients).toContain('node-retail');
+    expect(recipients).not.toContain('stage-consumption');
+    expect(asset.financesLayers).toEqual(['band-logistics', 'band-cold-chain', 'band-energy']);
+    for (const id of asset.financesLayers!) expect(BAND_BY_ID[id], id).toBeTruthy();
+  });
+
+  /**
+   * The V5.1 brief's corrections, held. Asset finance is not universally
+   * committed for the life of the asset; tenor and availability depend on the
+   * arrangement; provider, payer and risk bearer are three roles that need not
+   * be three parties.
+   */
+  it('does not claim asset finance is committed for life, or that its three roles are always three parties', () => {
+    const asset = BAND_BY_ID['band-capital'];
+    const text = `${asset.means} ${asset.read.economy} ${asset.read.finance}`.toLowerCase();
+    expect(text).not.toContain('committed for years');
+    expect(text).not.toContain('committed for the life');
+    expect(text).not.toContain('usually three separate parties');
+    expect(text).toContain('depends on the arrangement');
+    expect(text).toContain('three separate questions');
+    expect(text).toMatch(/one party or with several/);
+    expect(CHAIN_COPY.panel.fundsRoles.toLowerCase()).not.toContain('usually three parties');
+    expect(CHAIN_COPY.panel.fundsRoles.toLowerCase()).toMatch(/one party or with several/);
+  });
+
+  it('tells a fee charged at a transfer from terms set over it: attaching at a joint is not the test', () => {
+    // Governance rides on three joints and takes no fee at any of them.
+    expect(chargedAtJoints(BAND_BY_ID['band-governance'])).toBe(false);
+    expect(setsTerms(BAND_BY_ID['band-governance'])).toBe(true);
+    expect(setsTerms(BAND_BY_ID['band-regulation'])).toBe(true);
+    for (const id of ['band-logistics', 'band-cold-chain', 'band-credit']) {
+      expect(chargedAtJoints(BAND_BY_ID[id]), id).toBe(true);
+      expect(setsTerms(BAND_BY_ID[id]), id).toBe(false);
+    }
+    // Attaching under the functions is neither: asset finance and energy stand behind a transfer.
+    expect(chargedAtJoints(BAND_BY_ID['band-capital'])).toBe(false);
+    expect(chargedAtJoints(BAND_BY_ID['band-energy'])).toBe(false);
+    expect(CHAIN_COPY.panel.layersTermsHeading).toBeTruthy();
+  });
+
+  it('gives every layer a short name for a bar, never a number', () => {
+    for (const b of BANDS) {
+      expect(b.short, b.id).toBeTruthy();
+      expect(b.short.length, b.id).toBeLessThan(b.label.length + 1);
+      noFigures(b.short);
+    }
   });
 
   it('do not carry contract capacity as a layer of its own — withdrawn — while makloon survives where a toller actually appears', () => {
@@ -217,7 +281,9 @@ describe('the enabling layers', () => {
       expect(b.spanLabel, b.id).toBeTruthy();
       expect(b.means, b.id).toBeTruthy();
       expect(b.lines.length, b.id).toBeGreaterThan(0);
-      expect(['joints', 'stages', 'none'], b.id).toContain(b.attaches);
+      expect(['joints', 'stages', 'recipients', 'none'], b.id).toContain(b.attaches);
+      if (b.attaches === 'recipients') expect(b.recipients?.length, b.id).toBeGreaterThan(0);
+      else expect(b.recipients, b.id).toBeUndefined();
       for (const l of LENSES) expect(b.read[l], `${b.id} ${l}`).toBeTruthy();
     }
   });
@@ -239,6 +305,30 @@ describe('the enabling layers', () => {
     expect(`${energy.note} ${energy.means} ${energy.read.economy}`.toLowerCase()).toContain('subsid');
     expect(`${energy.note} ${energy.means}`.toLowerCase()).toContain('every stage');
     expect(bandJoints(energy)).toEqual([...JOINT_IDS]);
+  });
+
+  /**
+   * The V5 finance lead said a captive plant "moves energy out of cost of
+   * sales and into the capital structure". Owning generation adds investment
+   * and funding commitments; fuel, maintenance and other operating costs
+   * remain. The leads now say so, and name the three parts a single price
+   * hides, without painting any one as the binding constraint.
+   */
+  it('reads energy as generation, network and connection — and self-generation as a different exposure, not a vanished operating cost', () => {
+    const energy = BAND_BY_ID['band-energy'];
+    expect(energy.read.finance.toLowerCase()).not.toContain('out of cost of sales');
+    expect(energy.read.finance.toLowerCase()).toMatch(/fuel, maintenance and other operating costs remain/);
+    expect(energy.read.finance.toLowerCase()).toContain('on what terms');
+    expect(energy.read.economy.toLowerCase()).toContain('generation, network capacity and connection');
+    expect(energy.read.economy.toLowerCase()).toMatch(/a price change alone does not/);
+    expect(energy.read.economy.toLowerCase()).not.toMatch(/binding constraint/);
+    expect(energy.means.toLowerCase()).toContain('generation at the function itself');
+    expect(energy.lines.join(' ').toLowerCase()).toContain('own generation');
+    for (const word of Object.values(CHAIN_COPY.energy)) {
+      expect(word).toBeTruthy();
+      noFigures(word);
+    }
+    expect(CHAIN_COPY.energy.selfSupply.toLowerCase()).toContain('generation on site');
   });
 
   it('split the cold chain out of logistics: production → consumption, a fee, attaching at the moves, deciding which nodes can hold stock', () => {
@@ -376,9 +466,21 @@ describe('the shifts', () => {
     ]);
 
     const gr = lit('green');
-    for (const must of ['band-energy', 'band-credit', 'band-logistics', 'band-cold-chain', 'stage-recovery', 'j-consumption-recovery', 'return-postconsumer-material', 'return-postconsumer-organic']) {
+    for (const must of ['band-energy', 'band-capital', 'band-logistics', 'band-cold-chain', 'stage-recovery', 'j-consumption-recovery', 'return-postconsumer-material', 'return-postconsumer-organic']) {
       expect(gr.has(must), `green marks ${must}`).toBe(true);
     }
+    // V5 put the project-finance reading on the working-capital band, whose
+    // own first sentence said a transition needs a different instrument. The
+    // reading sits on the band that finances projects; working capital carries
+    // no green mark because nothing written concerns operating cycles under
+    // the scenario, and a status is not manufactured to fill a band.
+    expect(gr.has('band-credit')).toBe(false);
+    const capital = shiftTarget('green', 'band-capital')!.condition!;
+    expect(capital.basis).toBe('scenario');
+    expect(capital.mechanism).toBe('risk-allocation');
+    expect(capital.action.finance.toLowerCase()).toContain('tenor');
+    expect(capital.action.finance.toLowerCase()).toContain('coverage');
+    expect(capital.action.economy.toLowerCase()).toContain('who bears which risk');
     expect(SHIFT_BY_ID.green.moves.map((m) => [m.kind, 'at' in m ? m.at : ''])).toEqual([['price', 'j-consumption-recovery']]);
     expect(SHIFT_BY_ID.green.levers).toEqual(['price-unpaid-joint', 'reprice-layer']);
     expect(SHIFT_BY_ID.reindustrialisation.levers).toEqual(['move-border']);
@@ -547,13 +649,17 @@ describe('the card a door opens', () => {
    * ninety words is the wall the card replaced, arriving again.
    */
   const TOO_SHORT = new Set(['band-governance economy', 'band-regulation economy']);
+  /**
+   * The two energy leads were the longest on the map, at ninety and
+   * ninety-five words. They are rewritten from the V5.1 brief's suggested
+   * leads and sit inside the target; the four that remain over it are the
+   * owner's prose, whose qualifications are not cut to satisfy a counter.
+   */
   const TO_BE_CUT = new Set([
     'j-extraction-processing finance',
     'j-retail-consumption finance',
     'j-consumption-recovery finance',
     'band-logistics finance',
-    'band-energy economy',
-    'band-energy finance',
   ]);
 
   it('gives every joint and every layer a lead of 25 to 50 words at both distances', () => {
@@ -582,34 +688,176 @@ describe('the card a door opens', () => {
     expect(CHAIN_COPY.panel.articlesNone.toLowerCase()).toContain('no essay');
     expect(CHAIN_COPY.panel.readingDisclosure).toBeTruthy();
   });
+
+  /**
+   * The card says what kind of claim a mark is in one line each, close to the
+   * badge, instead of four lines of generic definition. An assessed mark names
+   * its case: "assessed against a specific case" tells a reader nothing they
+   * can check.
+   */
+  it('qualifies a mark in one line each, and names the case an assessed status was read against', () => {
+    for (const s of Object.values(STATUS)) {
+      expect(s.card, s.id).toBeTruthy();
+      expect(s.card.length, s.id).toBeLessThan(`${s.means} ${s.reads}`.length);
+    }
+    expect(BASIS.scenario.card.toLowerCase()).toContain('not a finding');
+    expect(BASIS.assessed.card.toLowerCase()).toContain('read against');
+    for (const s of SHIFTS) {
+      for (const t of s.targets) {
+        const c = t.condition!;
+        if (c.basis === 'assessed') {
+          expect(c.case, `${s.id} ${t.id} names its case`).toBeTruthy();
+          expect(c.case!.toLowerCase(), `${s.id} ${t.id}`).toContain('nickel');
+          noFigures(c.case!);
+        } else expect(c.case, `${s.id} ${t.id} is a scenario and claims no case`).toBeUndefined();
+      }
+    }
+  });
+});
+
+/**
+ * WHERE THE MAP LEADS. An association lives on the element with the context
+ * it was made in; publication is checked at run time, not assumed here.
+ */
+describe('the essays an element leads to', () => {
+  it('are made from the repository’s own account of an essay, each with its context and its grounds, never from a matching word', () => {
+    expect(Object.keys(ESSAY_ASSOCIATIONS).length).toBeGreaterThan(0);
+    for (const [id, rows] of Object.entries(ESSAY_ASSOCIATIONS)) {
+      expect(targetIds.has(id), `${id} is on the map`).toBe(true);
+      for (const a of rows) {
+        expect(a.slug).toMatch(/^[a-z0-9-]+$/);
+        expect(a.title).toBeTruthy();
+        expect(a.reads.length, `${id} ${a.slug} says what the essay reads here`).toBeGreaterThan(40);
+        expect(a.basis.length, `${id} ${a.slug} says where the association is grounded`).toBeGreaterThan(20);
+        if (a.under) expect(SHIFT_BY_ID[a.under], `${id} ${a.slug} under a real shift`).toBeTruthy();
+      }
+    }
+    expect(ESSAY_SLUGS).toContain('indonesias-reindustrialization-bet');
+  });
+
+  it('gives energy its essay with no overlay on — the first case the brief names', () => {
+    const atRest = essaysFor('band-energy', null);
+    expect(atRest).toHaveLength(1);
+    expect(atRest[0].slug).toBe('indonesias-reindustrialization-bet');
+    // Context kept, and not relabelled as a general finding: no overlay is on, so it is not evidence for a reading.
+    expect(atRest[0].under).toBe('green');
+    expect(atRest[0].evidence).toBe(false);
+  });
+
+  it('keeps scenario evidence in its context: evidence under the shift it was read against, related writing under any other', () => {
+    const underGreen = essaysFor('band-energy', 'green');
+    expect(underGreen[0].evidence).toBe(true);
+    const underReindus = essaysFor('band-energy', 'reindustrialisation');
+    expect(underReindus).toHaveLength(1);
+    expect(underReindus[0].evidence).toBe(false);
+    expect(underReindus[0].under).toBe('green');
+    // The same essay reads the asset-finance band under green, but that mark is a scenario, so it is context, not evidence.
+    const capital = essaysFor('band-capital', 'green');
+    expect(capital).toHaveLength(1);
+    expect(capital[0].evidence).toBe(false);
+    // A stage the reindustrialisation overlay marks as a scenario: context under the shift, and still listed with no shift.
+    expect(essaysFor('stage-processing', 'reindustrialisation')[0].evidence).toBe(false);
+    expect(essaysFor('stage-processing', null)).toHaveLength(1);
+    // Changing the distance never changes the list: it takes no lens.
+  });
+
+  it('lists nothing for an element no essay reads, rather than borrowing a neighbour’s', () => {
+    expect(essaysFor('band-logistics', 'green')).toEqual([]);
+    expect(essaysFor('j-processing-trader', null)).toEqual([]);
+    expect(essaysFor('band-credit', 'green')).toEqual([]);
+  });
+
+  it('says, beside each link, what the link claims and whether the index confirmed it', () => {
+    expect(CHAIN_COPY.panel.essayEvidence.toLowerCase()).toContain('evidence');
+    expect(CHAIN_COPY.panel.essayUnder('Green transition').toLowerCase()).toContain('green transition');
+    expect(CHAIN_COPY.panel.essayPublished).toBe('Published');
+    expect(CHAIN_COPY.panel.essayUnchecked.toLowerCase()).toContain('not checked');
+    expect(CHAIN_COPY.panel.essayNotPublished.toLowerCase()).toContain('not published');
+  });
 });
 
 describe('the overview', () => {
-  it('groups only nodes, and only into boxes whose members all resolve to records above', () => {
-    const groups = Object.values(OVERVIEW_GROUPS);
-    expect(groups.length).toBeGreaterThan(0);
+  const groups = Object.values(OVERVIEW_GROUPS);
+
+  it('puts every function in exactly one of five groups, each of which says what it keeps, what detail opens, and what an overlay may say', () => {
+    expect(groups).toHaveLength(5);
+    const functions = [...STAGES.map((s) => s.id), ...NODES.map((n) => n.id), ...RETAIL.map((r) => r.id), RETAIL_GROUP.id];
+    for (const id of functions) {
+      const owners = groups.filter((g) => g.members.includes(id));
+      expect(owners, `${id} belongs to one group`).toHaveLength(1);
+      expect(groupOf(id)?.id).toBe(owners[0].id);
+    }
     for (const g of groups) {
       expect(g.label, g.id).toBeTruthy();
       expect(g.members.length, g.id).toBeGreaterThan(1);
-      for (const m of g.members) expect(nodeIds.has(m), `${g.id} member ${m}`).toBe(true);
-      // Every group says what survives the grouping and what detail puts back.
+      for (const m of g.members) expect(endIds.has(m), `${g.id} member ${m}`).toBe(true);
       expect(g.keeps, g.id).toBeTruthy();
       expect(g.opens, g.id).toBeTruthy();
+      expect(g.overlay, g.id).toBeTruthy();
     }
+    // The groups follow the goods: origins first, use and recovery last.
+    expect(groups[0].members).toContain('stage-biological');
+    expect(groups.at(-1)!.members).toContain('stage-recovery');
   });
 
-  it('hides exactly the grouped members and the joints internal to them, and nothing else', () => {
-    const expected = new Set([
-      ...OVERVIEW_INTERNAL_JOINTS,
-      ...Object.values(OVERVIEW_GROUPS).flatMap((g) => g.members),
-    ]);
+  /**
+   * A collapsed group is one box standing for several records. It may hold
+   * only nodes: a stage is a conversion, and a box that folded one away could
+   * masquerade as a conversion stage — and its members' spreads are never
+   * added. Only the distribution group is collapsed; the rest are frames whose
+   * members keep their own boxes.
+   */
+  it('collapses only nodes, never a stage, and never merges a conversion into a box', () => {
+    const collapsed = groups.filter((g) => g.collapsed);
+    expect(collapsed.map((g) => g.id)).toEqual(['group-distribution-retail']);
+    for (const g of collapsed) {
+      for (const m of g.members) expect(stageIds.has(m), `${g.id} folds a stage ${m}`).toBe(false);
+      expect(g.keeps.toLowerCase(), g.id).toMatch(/do not add/);
+    }
+    for (const g of groups.filter((x) => !x.collapsed)) expect(g.members.some((m) => stageIds.has(m)), `${g.id} keeps its conversion drawn`).toBe(true);
+  });
+
+  it('keeps every joint that crosses a group’s edge, and hides only the joints inside a collapsed box', () => {
+    for (const g of groups) {
+      for (const j of boundaryJoints(g)) expect(drawnAtOverview(j), `${g.id} boundary ${j}`).toBe(true);
+      for (const j of internalJoints(g)) expect(drawnAtOverview(j), `${g.id} internal ${j}`).toBe(!g.collapsed);
+      // Internal and boundary are the whole of what touches the group.
+      const touching = JOINTS.filter((j) => g.members.includes(j.from) || g.members.includes(j.to)).map((j) => j.id).sort();
+      expect([...internalJoints(g), ...boundaryJoints(g)].sort(), g.id).toEqual(touching);
+    }
+    expect(OVERVIEW_INTERNAL_JOINTS).toEqual(['j-distributor-wholesaler', 'j-wholesale-retail']);
+    const expected = new Set([...OVERVIEW_INTERNAL_JOINTS, ...groups.filter((g) => g.collapsed).flatMap((g) => g.members)]);
     expect(new Set(OVERVIEW_HIDES)).toEqual(expected);
     for (const id of OVERVIEW_HIDES) expect(drawnAtOverview(id), id).toBe(false);
-    for (const j of JOINT_IDS) {
-      if (OVERVIEW_INTERNAL_JOINTS.includes(j as (typeof OVERVIEW_INTERNAL_JOINTS)[number])) continue;
-      expect(drawnAtOverview(j), j).toBe(true);
-    }
     for (const b of BANDS) expect(drawnAtOverview(b.id), b.id).toBe(true);
+    for (const b of BORDERS) expect(drawnAtOverview(b.id), b.id).toBe(true);
+  });
+
+  it('keeps every return’s own destination through the grouping, with the one inside a box still drawn as its own loop', () => {
+    for (const g of groups) {
+      for (const r of groupReturns(g)) {
+        expect(drawnAtOverview(r.id), r.id).toBe(true);
+        // A return that stays inside a COLLAPSED box is drawn as a loop on the box and named in what the box keeps — never merged into another return. Inside an open frame its ends are drawn, so it is an arc like any other.
+        const inside = g.members.includes(r.from) && g.members.includes(r.to);
+        if (inside && g.collapsed) expect(g.keeps.toLowerCase(), `${g.id} names ${r.id}`).toContain(r.label.toLowerCase());
+      }
+    }
+    expect(groupReturns(OVERVIEW_GROUPS['group-use-recovery']).map((r) => r.id).sort()).toEqual(
+      ['return-postconsumer-material', 'return-postconsumer-organic', 'return-secondary'].sort(),
+    );
+  });
+
+  /**
+   * How a public address resolves through the grouping: an element the
+   * overview draws opens at the overview; one a collapsed box folds away opens
+   * the detail — asksForFullChain reads this list, not a hand-kept one.
+   */
+  it('resolves an address to the level that can draw it, from the same list the layout uses', () => {
+    for (const id of OVERVIEW_HIDES) expect(drawnAtOverview(id)).toBe(false);
+    expect(drawnAtOverview('j-wholesale-retail')).toBe(false);
+    expect(drawnAtOverview('j-retail-consumption')).toBe(true);
+    expect(drawnAtOverview('j-processing-trader')).toBe(true);
+    expect(drawnAtOverview('node-trader')).toBe(true);
   });
 
   it('keeps every element either shift marks, so both overlays have something to raise at the overview', () => {
@@ -744,13 +992,19 @@ describe('the generated plates', () => {
     // one; what changes is that two node boxes become one, under the group's
     // own label rather than either member's.
     for (const st of STAGES) expect(overviewDrawn, `${st.id} at the overview`).toContain(st.label);
+    const overviewIds = dataIds(overviewSrc);
     for (const g of Object.values(OVERVIEW_GROUPS)) {
-      const labelIsDrawn = overviewDrawn.includes(g.label) || overviewDrawn.includes(RETAIL_GROUP.label);
-      expect(labelIsDrawn, `${g.id} draws a group label`).toBe(true);
+      // Every group is drawn at the overview under its own label — wrapped to its frame, so a long label is drawn in parts.
+      for (const word of g.label.split(' ')) expect(overviewDrawn, `${g.id} draws its label`).toContain(word);
+      expect(overviewIds, `${g.id} is drawn`).toContain(g.id);
       for (const m of g.members) {
-        const member = [...NODES, ...RETAIL].find((n) => n.id === m)!;
-        expect(overviewDrawn, `${m} is grouped away`).not.toContain(member.label);
+        // A member of a collapsed box is not drawn under its own id — the box
+        // may name it, but it is not an element, a door or a mark there. A
+        // member of a frame keeps its own id.
+        expect(overviewIds.has(m), `${m} at the overview`).toBe(!g.collapsed);
       }
+      // The retail formats are never drawn as text at the overview.
+      for (const r of RETAIL) expect(overviewDrawn, r.id).not.toContain(r.label);
     }
     // The lanes, the demand components and the recursion note are detail only.
     expect(drawn, 'the distributor recursion comes from the data too').toContain(NODES.find((n) => n.id === 'node-distributor')!.recursion!);
@@ -828,6 +1082,28 @@ describe('the generated plates', () => {
     expect(ticks('band-governance')).toHaveLength(3);
     expect(ticks('band-regulation')).toHaveLength(0);
     expect(ticks('band-energy').length).toBeGreaterThanOrEqual(5);
+    // Asset finance is ticked under its recipients' own boxes, not at the energy arrows: the two sets of x differ.
+    const capital = ticks('band-capital').map(Number);
+    expect(capital.length).toBeGreaterThanOrEqual(5);
+    expect(capital.join()).not.toBe(ticks('band-energy').map(Number).join());
+    const overviewTicks = (id: string) => overviewSrc.match(new RegExp(`<BandHit id="${id}"[^>]*ticks=\\{\\[([^\\]]*)\\]\\}`))![1].split(',').filter((s) => s.trim());
+    expect(overviewTicks('band-capital').length).toBeGreaterThanOrEqual(4);
+    expect(overviewTicks('band-capital').join()).not.toBe(overviewTicks('band-energy').join());
+  });
+
+  it('carries the forms for the mechanism callout and the energy band’s own edge, and declares the detail width', () => {
+    // A band names its mechanism at run time (BandHit), inside its strip; the
+    // overlay's static chip is for boxes and joints, none of which carries a
+    // non-price mechanism yet.
+    for (const src of [detailSrc, overviewSrc]) expect(src).not.toMatch(/data-id="mechanism-/);
+    expect(css).toContain('.cp-callout--mechanism');
+    // The energy band draws its anatomy at run time (BandHit); the CSS carries its three forms.
+    expect(css).toContain('.cp-energy-net');
+    expect(css).toContain('.cp-energy-gen');
+    expect(css).toContain('.cp-energy-conn');
+    expect(css).toContain('.cp-tick--asset');
+    // The detail plate declares its own width so the figure can hold it at one pixel per unit.
+    expect(css).toMatch(/--cp-detail-w: 1717px/);
   });
 
   it('give the partial layer a shorter band than the whole-chain ones, and energy the whole chain', () => {
@@ -901,14 +1177,23 @@ describe('the generated plates', () => {
    * plus the group boxes that stand for them. A relation cannot be dropped
    * from the overview without failing here.
    */
-  it('draws the same elements at both levels but for the grouped ones, which become the group boxes', () => {
+  it('draws the same elements at both levels but for the ones a collapsed box folds away, and the same five group frames at both', () => {
     const detailIds = dataIds(detailSrc);
     const overviewIds = dataIds(overviewSrc);
     const groupIds = Object.values(OVERVIEW_GROUPS).map((g) => g.id);
     const missing = [...detailIds].filter((id) => !overviewIds.has(id));
     expect(new Set(missing)).toEqual(new Set(OVERVIEW_HIDES.filter((id) => detailIds.has(id))));
+    // Nothing is drawn at the overview that the detail does not have: the
+    // group frames are drawn at both levels, so a reader moving between them
+    // finds the same five groups with their members un-grouped.
     const extra = [...overviewIds].filter((id) => !detailIds.has(id));
-    expect(new Set(extra)).toEqual(new Set(groupIds.filter((id) => overviewIds.has(id))));
+    expect(extra).toEqual([]);
+    for (const id of groupIds) {
+      expect(detailIds, `${id} framed on the detail`).toContain(id);
+      expect(overviewIds, `${id} framed on the overview`).toContain(id);
+    }
+    // Nine of eleven joints are doors at the overview: every boundary joint and every joint whose two ends are drawn.
+    expect(JOINT_IDS.filter(drawnAtOverview)).toHaveLength(9);
     // Nothing structural is lost: every relation is present at both levels.
     for (const r of RETURNS) expect(overviewIds, r.id).toContain(r.id);
     for (const b of BORDERS) expect(overviewIds, b.id).toContain(b.id);

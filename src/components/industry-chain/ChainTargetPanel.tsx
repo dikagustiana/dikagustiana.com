@@ -1,22 +1,19 @@
 /**
  * The reading of one target, in one voice.
  *
- * Under a shift that marks the target, the panel is the owner's READING of
- * its condition, in the order the brief fixes and never reorders: the name
- * and its status badge; where it stands; what holds it; the lever and what it
- * does here; who finances it; the essays that read it. Every line is written
- * in the voice of the distance that is on — the other distance is not shown
- * beneath it, because two voices at once would mean the distance control did
- * nothing. A line the owner has not written is omitted, never faked. The
- * anatomy of a joint or a layer is folded beneath the reading, closed.
+ * What opens is a CARD: the element named, read at the distance that is on;
+ * under a shift that marks it, one line saying what kind of claim the mark
+ * is — a scenario, or an assessment against a named case — and one saying
+ * what its status reads on; where what moves the element is not the price the
+ * map can draw, the mechanism, named; then the essays that read the element,
+ * each with the context it was read in and whether it is published. The
+ * owner's reading in full and the anatomy of a joint or a layer are one
+ * disclosure below, closed.
  *
- * At rest — or for a joint or layer a shift does not mark — the panel is the
- * ANATOMY: the margin kind cut there, what it means, the control test that
- * puts it in that class, the joint read at the distance that is on, the lines
- * of the financial statements that carry it, and the layers riding on the
- * same move; for a layer, what it does, its span, its lines and the joints
- * it rides on. Where the curriculum has pinned modules to a joint, they
- * follow, one level down.
+ * Every line is written in the voice of the distance that is on — the other
+ * distance is not shown beneath it, because two voices at once would mean the
+ * distance control did nothing. A line the owner has not written is omitted,
+ * never faked.
  *
  * The same body serves the popover beside the wide plate and the bottom
  * sheet on a narrow screen. All text comes from the data file.
@@ -37,22 +34,27 @@ import {
   STATUS,
   STATUS_NOTE,
   bandJoints,
+  chargedAtJoints,
+  essaysFor,
   isWritten,
   jointLayers,
+  setsTerms,
   shiftTarget,
   type Band,
   type Condition,
   type ConditionStatus,
+  type EssayLink,
   type Joint,
   type LensId,
   type MarginKind,
 } from '@/data/industryChain';
 import { fullDate } from '@/lib/formatDate';
-import { universalEssayUrl } from '@/lib/essayUrl';
+import { essayUrl, universalEssayUrl } from '@/lib/essayUrl';
 import { cn } from '@/lib/utils';
 import { ChainCurriculumList } from './ChainCurriculumList';
 import { ChainLensContext } from './chainLensContext';
 import { isDoor, isJointId, markNumber, targetLabel } from './chainTargets';
+import { useChainEssays } from './useChainEssays';
 
 const KICKER = 'text-[11px] uppercase tracking-[0.18em] text-muted-foreground';
 
@@ -119,12 +121,9 @@ function Lines({ heading, lines }: { heading: string; lines: readonly string[] }
  * The margin cut here.
  *
  * The CONTROL TEST — principal or agent, who owns the goods, whether revenue
- * is gross or net — is an accounting question, and it used to show at both
- * distances. That is what made the two distances differ only in label: a
- * reader stepping back to the Economy still had to pass through a
- * gross-versus-net test to reach an aggregate consequence. It now shows at the
- * finance distance, where it is doing work. Accounting keeps its own section
- * of the site; what it does not get is to frame the map from far away.
+ * is gross or net — is an accounting question, and it shows at the finance
+ * distance, where it is doing work. At the Economy distance the aggregate
+ * basis — value added — is the right frame.
  */
 function MarginBlock({ kind, note }: { kind: MarginKind; note?: string }) {
   const { lens } = useContext(ChainLensContext);
@@ -144,21 +143,7 @@ function MarginBlock({ kind, note }: { kind: MarginKind; note?: string }) {
   );
 }
 
-/**
- * THE CARD: what this element is, read at the distance that is on, and the
- * essay that argues it. Nothing else.
- *
- * What this replaces: a panel that opened with four hundred words — the
- * margin kind and its control test, the statement lines, the layers riding on
- * the move, the four lines of a reading, the mechanism, who finances it, the
- * funding-roles note — with the essays last, under all of it. A reader who
- * clicked a joint got an encyclopedia entry, and the map became the place the
- * writing happened instead of the way into it.
- *
- * The owner's rule is that a reader goes deeper into a relation THROUGH an
- * essay. So the card is one paragraph and a door, and everything the panel
- * used to say first is one disclosure below, unchanged.
- */
+/** The card's one paragraph: what this element is, read at the distance that is on. */
 function Lead({ text }: { text: string }) {
   const { lens } = useContext(ChainLensContext);
   return (
@@ -169,28 +154,85 @@ function Lead({ text }: { text: string }) {
 }
 
 /**
+ * One essay, with what it claims about this element and whether it is there
+ * to be read. The link is the essay's canonical address once the index has
+ * confirmed it is published; until then the universal route, which resolves
+ * for every published essay. A slug the index says is not published is shown
+ * as inert text, the same rule the curriculum list follows for a planned
+ * lesson; an index that could not be reached is said to be unreachable,
+ * which is not the same as saying no.
+ */
+function EssayRow({ link, row, checked, failed }: { link: EssayLink; row: ReturnType<typeof useChainEssays>['data'] extends Record<string, infer R> | undefined ? R | undefined : never; checked: boolean; failed: boolean }) {
+  const published = !!row;
+  const notPublished = checked && !failed && !row;
+  const href = row
+    ? essayUrl({
+        slug: row.slug,
+        section: row.section,
+        phase: row.phase,
+        track: row.finance_modules?.track_slug ?? row.finance_section ?? null,
+        moduleSlug: row.finance_modules?.slug ?? null,
+        fsliSlug: row.fsli_slug,
+        topic: row.topic,
+      }) ?? universalEssayUrl(link.slug)
+    : universalEssayUrl(link.slug);
+  const context = link.evidence
+    ? CHAIN_COPY.panel.essayEvidence
+    : link.under
+      ? CHAIN_COPY.panel.essayUnder(SHIFT_BY_ID[link.under].label)
+      : null;
+  const state = published
+    ? CHAIN_COPY.panel.essayPublished
+    : notPublished
+      ? CHAIN_COPY.panel.essayNotPublished
+      : failed
+        ? CHAIN_COPY.panel.essayUnchecked
+        : null;
+  return (
+    <li data-essay={link.slug} data-essay-evidence={link.evidence || undefined} data-essay-state={published ? 'published' : notPublished ? 'not-published' : failed ? 'unchecked' : 'checking'}>
+      {notPublished ? (
+        <span className="cursor-default text-sm text-muted-foreground">{link.title}</span>
+      ) : (
+        <Link to={href} className="text-sm font-medium text-foreground underline-offset-2 hover:text-accent hover:underline">
+          {link.title}
+        </Link>
+      )}
+      {(context || state) && (
+        <p className="mt-0.5 flex flex-wrap gap-x-2 text-[11px] uppercase tracking-wider text-muted-foreground">
+          {context && <span className={cn(link.evidence && 'text-foreground')}>{context}</span>}
+          {state && <span>{state}</span>}
+        </p>
+      )}
+      <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{link.reads}</p>
+    </li>
+  );
+}
+
+/** The essays that read this element, checked against the index once, for the whole list. */
+function EssayLinks({ links }: { links: EssayLink[] }) {
+  const { data, isError, isSuccess } = useChainEssays(links.map((l) => l.slug));
+  return (
+    <ul className="mt-1.5 space-y-3">
+      {links.map((l) => (
+        <EssayRow key={`${l.slug}:${l.under ?? ''}`} link={l} row={data?.[l.slug]} checked={isSuccess} failed={isError} />
+      ))}
+    </ul>
+  );
+}
+
+/**
  * The way deeper. Directly under the lead, because it is the point of the
  * card; and honest when there is nothing there, because most of this map is
  * not written up yet and a door that opens onto nothing is worse than a door
  * that says so.
  */
-function ReadAtLength({ articles }: { articles: readonly { slug: string; title: string }[] }) {
+function ReadAtLength({ id }: { id: string }) {
+  const { shift } = useContext(ChainLensContext);
+  const links = essaysFor(id, shift);
   return (
-    <div className="mt-3" data-chain-essays>
+    <div className="mt-3" data-chain-essays data-chain-essays-count={links.length}>
       <h4 className={KICKER}>{CHAIN_COPY.panel.articlesHeading}</h4>
-      {articles.length === 0 ? (
-        <p className="mt-1 text-sm text-muted-foreground">{CHAIN_COPY.panel.articlesNone}</p>
-      ) : (
-        <ul className="mt-1.5 space-y-1 text-sm">
-          {articles.map((a) => (
-            <li key={a.slug}>
-              <Link to={universalEssayUrl(a.slug)} className="text-foreground underline-offset-2 hover:text-accent hover:underline">
-                {a.title}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      )}
+      {links.length === 0 ? <p className="mt-1 text-sm text-muted-foreground">{CHAIN_COPY.panel.articlesNone}</p> : <EssayLinks links={links} />}
     </div>
   );
 }
@@ -212,11 +254,38 @@ function LayerRef({ band }: { band: Band }) {
   );
 }
 
+function LayerList({ heading, note, bands }: { heading: string; note?: string; bands: Band[] }) {
+  if (bands.length === 0) return null;
+  return (
+    <div className="mt-4" data-layer-list={heading}>
+      <h4 className={KICKER}>{heading}</h4>
+      {note && <p className="mt-1 text-xs text-muted-foreground">{note}</p>}
+      <ul className="mt-1.5 space-y-1">
+        {bands.map((b) => (
+          <LayerRef key={b.id} band={b} />
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+/**
+ * THE LAYERS ON A JOINT, IN THREE GROUPS, because they are not the same kind
+ * of thing. A layer that attaches at the joints AND earns a fee is charged
+ * at this transfer: the freight, the cold, the working capital that bridges
+ * it. A layer that attaches at the joints and earns nothing sets the terms
+ * the transfer happens on: the contract governing who may sell where, and the
+ * rules. A layer that attaches under the functions takes nothing at this
+ * transfer and is still the reason it can happen at all: asset finance and
+ * energy. Attachment location alone was the test before, and it put contract
+ * governance under "charged here".
+ */
 function JointAnatomy({ joint }: { joint: Joint }) {
   const { lens } = useContext(ChainLensContext);
   const layers = jointLayers(joint.id);
-  const charged = layers.filter((b) => b.attaches === 'joints');
-  const behind = layers.filter((b) => b.attaches !== 'joints');
+  const charged = layers.filter(chargedAtJoints);
+  const terms = layers.filter(setsTerms);
+  const behind = layers.filter((b) => !chargedAtJoints(b) && !setsTerms(b));
   return (
     <>
       <MarginBlock kind={joint.margin} note={joint.note} />
@@ -234,30 +303,9 @@ function JointAnatomy({ joint }: { joint: Joint }) {
       {lens === 'finance' && (
         <Lines heading={CHAIN_COPY.panel.linesHeading} lines={[...joint.lines, ...MARGIN_KINDS[joint.margin].lines]} />
       )}
-      {/* Two groups, because they are two different claims. See
-          CHAIN_COPY.panel.layersHeading for why one list would have said that
-          the money which built the warehouse takes a cut of the move. */}
-      {charged.length > 0 && (
-        <div className="mt-4">
-          <h4 className={KICKER}>{CHAIN_COPY.panel.layersHeading}</h4>
-          <ul className="mt-1.5 space-y-1">
-            {charged.map((b) => (
-              <LayerRef key={b.id} band={b} />
-            ))}
-          </ul>
-        </div>
-      )}
-      {behind.length > 0 && (
-        <div className="mt-4">
-          <h4 className={KICKER}>{CHAIN_COPY.panel.layersBehindHeading}</h4>
-          <p className="mt-1 text-xs text-muted-foreground">{CHAIN_COPY.panel.layersBehindNote}</p>
-          <ul className="mt-1.5 space-y-1">
-            {behind.map((b) => (
-              <LayerRef key={b.id} band={b} />
-            ))}
-          </ul>
-        </div>
-      )}
+      <LayerList heading={CHAIN_COPY.panel.layersHeading} bands={charged} />
+      <LayerList heading={CHAIN_COPY.panel.layersTermsHeading} note={CHAIN_COPY.panel.layersTermsNote} bands={terms} />
+      <LayerList heading={CHAIN_COPY.panel.layersBehindHeading} note={CHAIN_COPY.panel.layersBehindNote} bands={behind} />
     </>
   );
 }
@@ -293,6 +341,19 @@ function BandAnatomy({ band }: { band: Band }) {
           </ul>
         </div>
       )}
+      {/* Where asset finance lands: the functions whose capacity it builds, and the layers whose capacity it also funds. */}
+      {band.recipients && (
+        <div className="mt-4" data-recipients={band.id}>
+          <h4 className={KICKER}>{CHAIN_COPY.panel.recipientsHeading}</h4>
+          <p className="mt-1.5 text-sm text-muted-foreground">{band.recipients.map((id) => targetLabel(id)).join(' · ')}</p>
+          {band.financesLayers && (
+            <>
+              <h4 className={cn(KICKER, 'mt-2')}>{CHAIN_COPY.panel.financesLayersHeading}</h4>
+              <p className="mt-1.5 text-sm text-muted-foreground">{band.financesLayers.map((id) => BAND_BY_ID[id].label).join(' · ')}</p>
+            </>
+          )}
+        </div>
+      )}
       {lens === 'finance' && <Lines heading={CHAIN_COPY.panel.linesHeading} lines={band.lines} />}
       {joints.length > 0 && (
         <div className="mt-4">
@@ -317,8 +378,7 @@ function Anatomy({ id }: { id: string }) {
  * Only the two DOORS have one, and that is not an omission. A joint and a
  * layer are the two things this map claims to read; a stage or a node is a
  * function the chain has, and what the map has to say about one under a shift
- * is the reading, not a definition. So a marked stage gets its status, its
- * basis and its essays, and no invented sentence about what a stage is.
+ * is the reading, not a definition.
  */
 function leadFor(id: string, lens: LensId): string {
   if (isJointId(id)) return JOINT_BY_ID[id].read[lens].note;
@@ -345,21 +405,7 @@ function ConditionLine({ heading, text, lead }: { heading: string; text: string;
  * lever cannot do, and who pays. All in the voice that is on. The lever line
  * always names the lever, because which of the three levers moves an element
  * is structure, not diagnosis; what the lever does here is the owner's
- * sentence.
- *
- * This sits behind a disclosure now, under the card. Two things do NOT, and
- * both are refusals that would be dishonest to fold away:
- *
- *   BASIS. A mark is a promise of a diagnosis, and most of these marks are
- *   scenarios set from worked examples with their four lines unwritten. A
- *   panel that omitted the empty lines and said nothing else made sixteen
- *   illustrations look like sixteen findings — concise, and settled. So the
- *   card carries the basis label and what it means, before anything is read.
- *
- *   WHAT THE STATUS READS ON. Stuck, Moving and Unpriced measure an obstacle,
- *   an activity and a payment condition. They are not three values of one
- *   dial, and an element can be more than one at once. That is on the card
- *   too, beside the badge that would otherwise look like a rating.
+ * sentence. Behind a disclosure, under the card.
  */
 function ConditionReading({ id, condition }: { id: string; condition: Condition }) {
   const { lens } = useContext(ChainLensContext);
@@ -367,6 +413,13 @@ function ConditionReading({ id, condition }: { id: string; condition: Condition 
   const mechanism = condition.mechanism && condition.mechanism !== 'price' ? MECHANISMS[condition.mechanism] : null;
   return (
     <div data-condition={id} data-voice={lens}>
+      <p className="mt-3 text-sm text-muted-foreground">
+        <span className="font-semibold text-foreground">{BASIS[condition.basis].label}.</span> {BASIS[condition.basis].means}
+      </p>
+      <p className="mt-2 text-sm text-muted-foreground">
+        <span className="font-semibold text-foreground">{STATUS[condition.status].label}.</span> {STATUS[condition.status].means}{' '}
+        {STATUS[condition.status].reads}
+      </p>
       <ConditionLine heading={CHAIN_COPY.panel.now} text={line(condition.now)} />
       <ConditionLine heading={CHAIN_COPY.panel.holds} text={line(condition.holds)} />
       <ConditionLine heading={CHAIN_COPY.panel.lever} lead={LEVERS[condition.lever].label} text={line(condition.action)} />
@@ -421,13 +474,7 @@ export function ChainTargetPanel({
   // is on. Same sentence whether a shift is on or not — a shift changes where
   // the owner says the element stands, not what it is.
   const lead = leadFor(id, lens);
-  // The essays that read this element. Under a shift the marked target names
-  // its own; otherwise the element's own, so a card always leads somewhere or
-  // says plainly that it does not.
-  // Under a shift, the marked target names its own essays. With no shift on
-  // there is nowhere in the data for an element to name one, so the card says
-  // so rather than pretending the door leads somewhere.
-  const articles = target?.articles ?? [];
+  const mechanism = condition?.mechanism && condition.mechanism !== 'price' ? MECHANISMS[condition.mechanism] : null;
 
   const kicker = reading
     ? `${CHAIN_COPY.panel.readingKicker} · ${SHIFT_BY_ID[shift!].label} · ${CHAIN_COPY.lensName[lens]}`
@@ -447,12 +494,9 @@ export function ChainTargetPanel({
       className={cn('rounded-md border border-border bg-card p-5 text-card-foreground', inline ? 'mt-2' : '')}
     >
       {/* WHO AM I, AND HOW DO I LEAVE — kept on screen while the evidence
-          scrolls. A long reading has its own scroll area, and beside the plate
-          that scroll used to carry the reading's title and its Close control
-          away with it, so the reader lost the name of the thing they were
-          reading exactly when it got detailed. In the sheet the sheet owns the
-          scrolling and its own Close is already pinned, so this only sticks
-          where it is the scroll container itself. */}
+          scrolls. Beside the plate the panel is the scroll container, so its
+          head sticks; in the sheet the sheet owns the scrolling and its own
+          Close is already pinned. */}
       <div
         className={cn(
           'flex items-start justify-between gap-4',
@@ -487,23 +531,39 @@ export function ChainTargetPanel({
 
       {children}
 
-      {/* THE CARD. A mark that promises a diagnosis says on the card what kind
-          of claim it is and what its status reads on: folding either away
-          would make a scenario look like a finding, which is the one thing
-          the condition layer must never do. */}
+      {/* WHAT KIND OF CLAIM THE MARK IS, in one line each: the basis — with the
+          case named where there is one — and what the status reads on. Kept
+          close to the badge rather than folded, because folding either would
+          make a scenario look like a finding; kept short because the long
+          definitions are in the reading in full. */}
       {reading && condition && (
-        <>
-          <div className="mt-3 border-l-2 border-border pl-3" data-basis={condition.basis}>
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-foreground">{BASIS[condition.basis].label}</p>
-            <p className="mt-0.5 text-sm text-muted-foreground">{BASIS[condition.basis].means}</p>
-          </div>
-          <p className="mt-3 text-sm text-foreground">{STATUS[condition.status].means}</p>
-          <p className="mt-1 text-sm text-muted-foreground">{STATUS[condition.status].reads}</p>
-        </>
+        <div className="mt-3 border-l-2 border-border pl-3" data-basis={condition.basis}>
+          <p className="text-sm text-muted-foreground">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-foreground">{BASIS[condition.basis].label}</span>
+            <span aria-hidden="true"> — </span>
+            {condition.basis === 'assessed' ? (
+              <>
+                {BASIS.assessed.card} <span className="text-foreground" data-assessed-case>{condition.case}</span>.
+              </>
+            ) : (
+              BASIS.scenario.card
+            )}
+          </p>
+          <p className="mt-1 text-sm text-muted-foreground" data-status-card={condition.status}>
+            {STATUS[condition.status].card}
+          </p>
+          {mechanism && (
+            <p className="mt-1 text-sm text-muted-foreground" data-mechanism-card={condition.mechanism}>
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-foreground">{CHAIN_COPY.panel.mechanismKicker}</span>
+              <span aria-hidden="true"> — </span>
+              {mechanism.label}, not a price alone.
+            </p>
+          )}
+        </div>
       )}
 
       {lead && <Lead text={lead} />}
-      <ReadAtLength articles={articles} />
+      <ReadAtLength id={id} />
 
       {/* Everything the panel used to open with, one disclosure down. */}
       {reading && condition && (
