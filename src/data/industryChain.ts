@@ -10,9 +10,9 @@
  * WHERE things sit is the generator's job
  * (scripts/build-chain-plate.mjs) for the two wide-screen plates, and the
  * column's job (src/components/industry-chain/ChainColumn.tsx) for a narrow
- * screen. Both read this file and nothing else; the short version on the
- * landing page is a VIEW over the same records (COMPACT, at the bottom), never
- * a second copy of them.
+ * screen. Both read this file and nothing else; the overview on the landing
+ * page is the same records at a coarser grouping (OVERVIEW_GROUPS, at the
+ * bottom), never a second copy of them.
  *
  * Three properties hold everywhere here:
  *   - Generic across sectors. Sectors appear only as examples of a function.
@@ -65,7 +65,8 @@
  *   SLUGS      one permanent public address per element. Displayed numbers
  *              are a reading order and change with the overlay; a slug never
  *              does, so it is what an essay links to and what the URL holds.
- *   articles   the essays that read a target under a shift. Owner-filled.
+ *   ESSAY_ASSOCIATIONS   the essays that read an element, each with the
+ *              context the association was made in. Owner-filled.
  */
 
 /* ── Distance: the two readings of every joint ───────────────────────────── */
@@ -534,11 +535,22 @@ export const JOINT_BY_ID = Object.fromEntries(JOINTS.map((j) => [j.id, j])) as R
 
 /* ── Spanning layers: take no title, earn a fee or set the terms ─────────── */
 
-export type BandAttach = 'joints' | 'stages' | 'none';
+/**
+ * Where a layer touches the chain.
+ *   joints      a service charged at every MOVE: ticked at the joints it rides on
+ *   stages      an input into every CONVERSION: ticked under the stages
+ *   recipients  finance that builds capacity: ticked under the functions whose
+ *               activity needs a built asset, and named on the supporting layers
+ *               whose fleets, cold stores and generation it also funds
+ *   none        rules attach everywhere and are ticked nowhere
+ */
+export type BandAttach = 'joints' | 'stages' | 'recipients' | 'none';
 
 export interface Band {
   id: string;
   label: string;
+  /** The label where a bar is too narrow for the whole of it: the narrow overview's span-bars. */
+  short: string;
   /** The local terms, kept: cold chain, trade credit. */
   note?: string;
   /** First and last column the band runs under, by id (COLUMNS order). */
@@ -554,6 +566,16 @@ export interface Band {
    * stages; rules attach everywhere and are ticked nowhere.
    */
   attaches: BandAttach;
+  /**
+   * For `attaches: 'recipients'`: the functions whose activity is defined by a
+   * built asset — a plant, a fleet, a store, a sorting line — so the layer is
+   * ticked under each of them. Asset finance is not restricted to the shapes
+   * called transformation stages: distribution, wholesale and retail hold
+   * warehouses, fleets and stores too.
+   */
+  recipients?: readonly string[];
+  /** The supporting layers whose own capacity this layer funds: fleets, cold stores, generation. */
+  financesLayers?: readonly string[];
   means: string;
   lines: string[];
   /** The layer read from far and from close. */
@@ -571,6 +593,7 @@ export const BANDS: Band[] = [
   {
     id: 'band-logistics',
     label: 'Logistics and warehousing',
+    short: 'Logistics',
     note: 'ambient · every move',
     span: ['stage-biological', 'stage-recovery'],
     spanLabel: 'The whole chain',
@@ -593,6 +616,7 @@ export const BANDS: Band[] = [
   {
     id: 'band-cold-chain',
     label: 'Cold chain',
+    short: 'Cold chain',
     note: 'temperature held · decides which nodes can hold stock',
     span: ['stage-biological', 'stage-consumption'],
     spanLabel: 'Production → consumption, on the chains that need it',
@@ -614,8 +638,9 @@ export const BANDS: Band[] = [
   },
   {
     id: 'band-credit',
-    label: 'Credit and working capital',
-    note: 'trade credit · inventory finance · who waits for payment',
+    label: 'Working capital and trade credit',
+    short: 'Working capital',
+    note: 'bridges a transfer · days, not years',
     span: ['stage-biological', 'stage-recovery'],
     spanLabel: 'The whole chain',
     margin: 'service-fee',
@@ -636,24 +661,79 @@ export const BANDS: Band[] = [
     },
   },
   {
+    id: 'band-capital',
+    label: 'Asset and project finance',
+    short: 'Asset finance',
+    note: 'builds or changes what the chain runs on',
+    span: ['stage-biological', 'stage-recovery'],
+    spanLabel: 'The whole chain — wherever capacity is built or replaced',
+    margin: 'service-fee',
+    /*
+     * ITS OWN ATTACHMENT MODEL. V5 ticked this band at the same x as the
+     * energy arrows — asset finance borrowed an unrelated layer's geometry as
+     * its economic definition. It attaches where capacity is built: under the
+     * functions whose activity needs a built asset (a farm or a mine, a
+     * plant, a warehouse and a fleet, a store, a sorting line), and it funds
+     * the fleets, cold stores and generation of three supporting layers as
+     * well. The band directly above attaches at the joints, because that
+     * money bridges a transfer. Two different attach points, two different
+     * questions — the distinction one "Finance" band could not make.
+     */
+    attaches: 'recipients',
+    recipients: [
+      'stage-biological',
+      'stage-extraction',
+      'stage-processing',
+      'stage-packaging',
+      'stage-manufacturing',
+      'node-distributor',
+      'node-wholesaler',
+      'node-retail',
+      'stage-recovery',
+    ],
+    financesLayers: ['band-logistics', 'band-cold-chain', 'band-energy'],
+    means:
+      'Funds the assets a function needs before it can trade at all, and funds replacing them when they wear out. It is priced off what the asset can earn rather than off a trading cycle; how long it is committed, and on what terms it can be drawn or withdrawn, depends on the arrangement — a term loan, a lease, project debt and sponsor equity each answer differently. Who provides it, who pays for it over the asset’s life, and who bears the loss if it fails are three separate questions; they can sit with one party or with several. An asset that ramps can miss debt service on sound lifetime returns; that is a timing problem and it needs a timing instrument — grace, sculpted amortisation, a reinvestment facility held outside senior maturity — not more subsidy. A guarantee or a concession moves who carries the risk of building; it does not make the risk disappear.',
+    lines: [
+      'Property, plant and equipment — and the depreciation that spreads it across the output it makes possible',
+      'Long-term borrowings, leases and equity; where the state participates, concessional or guaranteed capital',
+      'Interest during construction — the cost of money before the asset earns anything',
+    ],
+    read: {
+      economy:
+        'Where capacity comes from. An economy can only run the functions somebody has already built, so the terms on which this money is available decide which parts of the chain can exist, and at what scale.',
+      finance:
+        'What is sold here is money against an asset rather than against a trading cycle: priced off what the asset can earn, on a tenor and terms the arrangement sets. It fails differently from working capital: sound lifetime returns can still miss debt service while the asset ramps.',
+    },
+  },
+  {
     id: 'band-energy',
     label: 'Energy',
-    note: 'enters every stage from below · fuel · power · subsidy',
+    short: 'Energy',
+    note: 'fuel and power into every function · purchased, or generated on site · subsidy',
     span: ['stage-biological', 'stage-recovery'],
     spanLabel: 'The whole chain — an input into every stage',
     margin: 'service-fee',
     attaches: 'stages',
     means:
-      'Fuel and power enter each function as purchased inputs or through self-supply — drawn as an input rising into every stage, because every conversion needs heat, motion and light and none makes them. This layer describes their cross-cutting role; it does not imply that energy cannot be owned or that its sale is a net commission. Market prices, tariffs and subsidies affect the cost.',
+      'Fuel and power enter each function as purchased inputs or through self-supply — drawn as an input rising into every stage, because every conversion needs heat, motion and light and none makes them. For electricity the input has three parts a single price hides: generation, the network that carries it, and the connection at the function — or generation at the function itself. This layer describes their cross-cutting role; it does not imply that energy cannot be owned or that its sale is a net commission. Market prices, tariffs and subsidies affect the cost.',
     lines: [
       'Energy cost — fuel and power inside cost of sales at every stage; heaviest in extraction and primary processing',
       'Energy revenue — at the utility or the fuel seller; the subsidy, where the state pays part of the price, on the fiscal line',
+      'Own generation — the plant on the balance sheet and its financing, with fuel and maintenance still inside cost of sales',
     ],
+    /*
+     * THE LEADS, refined from the V5.1 brief against the voice of the map.
+     * What they replace is recorded in docs/response-2026-09-14-v5.1/:
+     * the economy lead ran to ninety-five words, and the finance lead said a
+     * captive plant moves energy out of cost of sales — it does not; fuel,
+     * maintenance and other operating costs remain.
+     */
     read: {
       economy:
-        'Energy intensity, stage by stage \u2014 heaviest in extraction and primary processing. Where the state pays part of the price, the subsidy is a fiscal line every stage draws on. Read as a price, this layer hides three different shortages: whether the electricity exists at all (generation), whether the network can carry it to where the plant is (network capacity), and whether the plant can attach to that network on a workable timetable (connection). Only the first is usually counted, and a stage can be short of the third while the first two are adequate.',
+        'Electricity can be available in aggregate yet unavailable to a particular function. Generation, network capacity and connection are distinct constraints, and which one binds depends on location and timing; a price change alone does not say which.',
       finance:
-        'What is sold here is heat, motion and light: every conversion needs them and none makes them. Fuel and power sit inside cost of sales at every stage, at a price set outside the chain, so a change is passed on or absorbed in the conversion margin. The exception is where a stage builds its own supply: a captive plant moves energy out of cost of sales and into the capital structure, sized to the process and contracted for its life, which is a different exposure with a different remedy.',
+        'What is sold here is heat, motion and light, purchased or generated on site, and the two configurations carry different exposures. Owning generation adds investment and funding commitments while fuel, maintenance and other operating costs remain. The question is which configuration can serve the process reliably, and on what terms.',
     },
     /**
      * The three shortages, named so a reading can say which one it means.
@@ -669,6 +749,7 @@ export const BANDS: Band[] = [
   {
     id: 'band-governance',
     label: 'Principal–distributor contract governance',
+    short: 'Contract governance',
     note: 'territory · exclusivity · trade terms · how an appointment ends',
     span: ['stage-manufacturing', RETAIL_GROUP.id],
     spanLabel: 'Manufacturing → retail',
@@ -688,6 +769,7 @@ export const BANDS: Band[] = [
   {
     id: 'band-regulation',
     label: 'Regulation and standards',
+    short: 'Regulation',
     span: ['stage-biological', 'stage-recovery'],
     spanLabel: 'The whole chain',
     attaches: 'none',
@@ -708,6 +790,16 @@ export const BAND_BY_ID = Object.fromEntries(BANDS.map((b) => [b.id, b])) as Rec
 
 /** The word on a layer's marker: its margin kind where it earns a fee, and nothing where it only sets the terms. */
 export const bandChip = (band: Band): string => (band.margin ? MARGIN_KINDS[band.margin].chip : '');
+
+/**
+ * Whether a layer takes a fee AT a transfer. Attaching at the joints is not
+ * enough: contract governance rides on three joints and earns nothing there —
+ * it sets the terms the transfer happens on. Only a layer that both attaches
+ * at the joints and earns a fee is charged at the move.
+ */
+export const chargedAtJoints = (band: Band): boolean => band.attaches === 'joints' && band.margin !== undefined;
+/** Whether a layer sets the terms of a transfer without taking a fee there: governance at its joints, the rules everywhere. */
+export const setsTerms = (band: Band): boolean => band.margin === undefined;
 
 /** The column a joint end belongs to: a retail format reads as the retail column. */
 const columnOf = (id: string) => (RETAIL.some((r) => r.id === id) ? RETAIL_GROUP.id : id);
@@ -954,6 +1046,12 @@ export interface StatusInfo {
   reads: string;
   /** The form of the mark and the outline, so the status reads without colour. */
   form: 'filled' | 'open' | 'dashed';
+  /**
+   * The one-line form for the card: the qualification the status needs, next
+   * to the badge, and nothing the reader has not asked for. `means` and
+   * `reads` stay for the reading in full.
+   */
+  card: string;
 }
 
 export const STATUS: Record<ConditionStatus, StatusInfo> = {
@@ -963,6 +1061,7 @@ export const STATUS: Record<ConditionStatus, StatusInfo> = {
     means: 'Of the things that could hold this shift back here, this element is the one the author judges decisive.',
     reads: 'Obstacle. It does not claim nothing is happening here, and an element can be stuck and moving at once.',
     form: 'filled',
+    card: 'Judged the decisive obstacle here. It does not say nothing is happening.',
   },
   moving: {
     id: 'moving',
@@ -970,6 +1069,7 @@ export const STATUS: Record<ConditionStatus, StatusInfo> = {
     means: 'A policy or an investment is already under way at this element.',
     reads: 'Activity, and activity has a direction. Moving does not mean moving the right way, and it does not mean the element has stopped being a constraint.',
     form: 'open',
+    card: 'Something is under way here. Its direction is not implied.',
   },
   unpriced: {
     id: 'unpriced',
@@ -978,6 +1078,7 @@ export const STATUS: Record<ConditionStatus, StatusInfo> = {
     reads:
       'A payment condition, not an existence claim. Unpriced activity is real, it is within the national-accounts production boundary, and it is often someone\u2019s livelihood \u2014 it is simply not counted where a price would be.',
     form: 'dashed',
+    card: 'No money changes hands at this transfer. The activity is real; it is not counted where a price would be.',
   },
 };
 
@@ -1003,15 +1104,18 @@ export const STATUS_NOTE =
  */
 export type ConditionBasis = 'assessed' | 'scenario';
 
-export const BASIS: Record<ConditionBasis, { label: string; means: string }> = {
+export const BASIS: Record<ConditionBasis, { label: string; means: string; card: string }> = {
   assessed: {
     label: 'Assessed',
     means: 'Read against a specific case, with the essay that carries the evidence linked below.',
+    /** Followed on the card by the case itself — a label saying "specific case" is insufficient when the case is unnamed. */
+    card: 'Read against',
   },
   scenario: {
     label: 'Scenario',
     means:
       'A worked illustration of how this element would behave under the shift, not a finding about where it stands today. Nothing has been checked against a source, and the lines the reading would need are unwritten.',
+    card: 'A worked illustration, not a finding about where this stands today.',
   },
 };
 
@@ -1045,6 +1149,12 @@ export interface Condition {
    * assumption a mark invites is "assessed".
    */
   basis: ConditionBasis;
+  /**
+   * The case an ASSESSED status was read against, named. Required for an
+   * assessed mark: a card that says "assessed against a specific case" and
+   * does not name the case has told the reader nothing they can check.
+   */
+  case?: string;
   now: LensNote;
   holds: LensNote;
   lever: LeverId;
@@ -1056,26 +1166,15 @@ export interface Condition {
   /** What the lever does at this element. */
   action: LensNote;
   /**
-   * Who finances the move. Three different roles, and they are usually
-   * different parties: who provides the capital, who pays for it over the
-   * asset's life, and who bears the loss if it fails. A reading that names
+   * Who finances the move. Three different roles — who provides the
+   * capital, who pays for it over the asset's life, and who bears the loss
+   * if it fails — and they need not be three parties: one balance sheet can
+   * hold all three, or a guarantee can move one of them. A reading that names
    * only the first has answered the easiest third of the question.
    */
   funds: LensNote;
 }
 
-/**
- * An essay that reads one target under one shift. The owner fills these in;
- * nothing is inferred from a title. `/essays/:slug` resolves for every
- * published essay and redirects to the canonical URL where one exists, so a
- * row needs no placement fields to be a working link.
- */
-export interface ShiftArticle {
-  /** essays.slug — the essay itself, never a module. */
-  slug: string;
-  /** How the title should read in the panel. */
-  title: string;
-}
 
 /**
  * A joint, layer, stage, node, border or return the shift moves, and the
@@ -1092,8 +1191,6 @@ export interface ShiftArticle {
 export interface ShiftTarget {
   id: string;
   condition?: Condition;
-  /** Owner-maintained. Empty until an essay actually reads this target. */
-  articles?: readonly ShiftArticle[];
 }
 
 /**
@@ -1338,6 +1435,7 @@ export const SHIFTS: Shift[] = [
         condition: {
           status: 'moving',
           basis: 'assessed',
+          case: 'Indonesian nickel downstreaming — RKEF and HPAL plants and the captive generation built alongside them, in the commissioning window the essay dates',
           lever: 'reprice-layer',
           mechanism: 'contract',
           now: {
@@ -1360,17 +1458,11 @@ export const SHIFTS: Shift[] = [
           },
           funds: {
             economy:
-              'Three roles, usually three different parties. Capital comes from sponsors and their lenders, and increasingly from state balance sheets: a new public allocator was established by statute at the moment this vintage is being set. Payment over the asset\u2019s life comes from the buyer of the processed product through the price, and from the public wherever a guarantee or a concession is granted. The loss, if the liability arrives, falls on whoever still holds the asset \u2014 and where that is a state entity, on the public a second time.',
+              'Three roles, and in this case they fall on different parties. Capital comes from sponsors and their lenders, and increasingly from state balance sheets: a new public allocator was established by statute at the moment this vintage is being set. Payment over the asset\u2019s life comes from the buyer of the processed product through the price, and from the public wherever a guarantee or a concession is granted. The loss, if the liability arrives, falls on whoever still holds the asset \u2014 and where that is a state entity, on the public a second time.',
             finance:
               'Capital provider: sponsor equity, senior lenders, and concessional or state capital where it enters. Payer over life: the offtaker through the contracted price, over a tenor set by the power contract rather than by the working-capital cycle this layer normally carries. Loss bearer: a guarantee moves a defined risk to the guarantor \u2014 grid completion, delay \u2014 and lowers the cost of capital because of that transfer. It does not remove the risk, and a guarantee written over commodity losses, or over indefinite coal dependence, has moved the wrong one.',
           },
         },
-        articles: [
-          {
-            slug: 'indonesias-reindustrialization-bet',
-            title: 'Indonesia\u2019s Reindustrialization Bet',
-          },
-        ],
       },
       {
         id: 'band-logistics',
@@ -1406,19 +1498,34 @@ export const SHIFTS: Shift[] = [
           funds: UNWRITTEN,
         },
       },
+      /*
+       * ASSET FINANCE, ON THE ASSET-FINANCE BAND. V5 placed this reading on
+       * the working-capital band while it said, in its own first sentence,
+       * that what a transition needs is "a different instrument from the one
+       * this layer carries at rest". The reading concerns project debt,
+       * coverage, tenor and guarantees, so it sits here. The working-capital
+       * band carries no green mark: nothing written concerns operating cycles
+       * under this scenario, and a status is not manufactured to fill a band.
+       * The status is the same provisional one the reading carried before it
+       * moved; its basis is still a scenario.
+       */
       {
-        id: 'band-credit',
+        id: 'band-capital',
         condition: {
           status: 'moving',
           basis: 'scenario',
           now: UNWRITTEN,
           holds: UNWRITTEN,
           lever: 'reprice-layer',
+          // The lever the map draws is a repricing — the cost of capital for
+          // green assets pushed down. What the reading says does the work is
+          // a move of who bears which risk.
+          mechanism: 'risk-allocation',
           action: {
             economy:
-              'A different instrument from the one this layer carries at rest. The credit riding on the chain normally is working capital \u2014 receivables, inventory, payables, a cycle measured in days. What a transition needs here is asset finance against a plant that must run for decades, and guarantees over the risks that stop it being built. Concessional capital and guarantees can lower the cost of capital for green assets; they do it by changing who bears which risk, not by removing the risk.',
+              'This is the layer a transition draws on: asset finance against plants and networks that must run for decades, and guarantees over the risks that stop them being built. Concessional capital and guarantees can lower the cost of capital for green assets; they do it by changing who bears which risk, not by removing the risk.',
             finance:
-              'Read the change in tenor before anything else. A working-capital facility is priced off a cash conversion cycle; project debt against a processing asset is priced off coverage across the asset\u2019s life, and the two fail differently. Debt-service coverage \u2014 cash available for debt service over scheduled service \u2014 can fail in the first years on a project whose lifetime returns are sound, while loan-life coverage tests something else entirely. A timing failure needs a different instrument from inadequate returns. And a guarantee moves a defined risk to the guarantor: it lowers funding cost because of that transfer, and written over commodity losses it has not removed a risk, it has bought one.',
+              'Read tenor and coverage together. Debt against a processing asset or a network is priced off the cash the asset can produce across its life, on terms the arrangement sets, and it fails differently from a trading facility: debt-service coverage \u2014 cash available for debt service over scheduled service \u2014 can fail in the first years on a project whose lifetime returns are sound, while loan-life coverage tests something else entirely. A timing failure needs a different instrument from inadequate returns. And a guarantee moves a defined risk to the guarantor: it lowers funding cost because of that transfer, and written over commodity losses it has not removed a risk, it has bought one.',
           },
           funds: UNWRITTEN,
         },
@@ -1587,6 +1694,7 @@ export const SLUGS: Record<string, string> = {
   // Enabling layers
   'band-logistics': 'logistics',
   'band-cold-chain': 'cold-chain',
+  'band-capital': 'capital-finance',
   'band-credit': 'credit',
   'band-energy': 'energy',
   'band-governance': 'governance',
@@ -1623,47 +1731,283 @@ export const slugOf = (id: string): string => SLUGS[id] ?? id;
 /** The element a public address names, or nothing when the address is unknown. */
 export const idOfSlug = (slug: string): string | undefined => ID_BY_SLUG[slug];
 
-/* ── The short version: a view over the same records ─────────────────────── */
-
-export type CompactStep =
-  | { kind: 'stages'; ids: string[] }
-  | {
-      kind: 'group';
-      id: string;
-      label: string;
-      members: string[];
-      /** Which of the upstream stages feed this group; the rest bypass it. */
-      from?: string[];
-    };
+/* ── Essays: the writing that reads an element, with its context ─────────── */
 
 /**
- * Six transformation stages, three node groups, THREE layers, one return
- * arrow, and a diamond at every join so the joints read as the motif they are.
- * Readable in three seconds; every label is a record above. Packaging, the
- * trader and the principal are omitted here — the full plate has them.
+ * WHERE THE MAP LEADS. An element may have relevant writing independently of
+ * any scenario, and V5 could not say so: the only place an essay could be
+ * named was on a shift's target, so with no overlay on every card said "No
+ * essay reads this yet" — including Energy, the one element the site's
+ * completed argument is about.
  *
- * Energy is the third band, and it is here deliberately. On the short version
- * it appeared as nothing at all — the full plate draws it as arrows rising
- * into each stage, and the short one drew neither — so the entrance most
- * readers meet showed no energy while the argument this site makes turns on
- * it. Two bands to three is the smallest change that puts it in the
- * three-second read.
+ * So an association lives on the ELEMENT, and it carries the context it was
+ * made in. `under` names the scenario the essay was read against; an essay
+ * read under the green transition is evidence for that reading and only that
+ * reading, and on the same element under another overlay, or under none, the
+ * card shows it as related writing with its context kept — never relabelled
+ * as a general finding, and never dropped because it was stored under another
+ * state.
+ *
+ * Every row here was made from what the repository itself records about an
+ * essay — the reading path's account of what it establishes, the argument
+ * frame's named case, the revision record — and never from a matching word
+ * in a title. Essay bodies are CMS content this repository does not hold, so
+ * PUBLICATION IS NOT ASSUMED: the card checks it at run time through the same
+ * query the reading path uses, and says what it found.
  */
-export const COMPACT = {
-  sequence: [
-    { kind: 'stages', ids: ['stage-biological', 'stage-extraction'] },
-    { kind: 'group', id: 'group-aggregation', label: 'Aggregator', members: ['node-aggregation'], from: ['stage-biological'] },
-    { kind: 'stages', ids: ['stage-processing'] },
-    { kind: 'stages', ids: ['stage-manufacturing'] },
-    { kind: 'group', id: 'group-distribution', label: 'Distribution / wholesale', members: ['node-distributor', 'node-wholesaler'] },
-    { kind: 'group', id: 'group-retail', label: RETAIL_GROUP.label, members: RETAIL.map((r) => r.id) },
-    { kind: 'stages', ids: ['stage-consumption'] },
-    { kind: 'stages', ids: ['stage-recovery'] },
-  ] as CompactStep[],
-  bands: ['band-logistics', 'band-credit', 'band-energy'],
-  /** One arrow, no detail: goods come back. */
-  returnArrow: { id: 'compact-return', label: 'Returns', from: 'stage-recovery', to: 'stage-processing' },
-} as const;
+export interface EssayAssociation {
+  /** essays.slug — the essay itself, never a module. `/essays/:slug` resolves for every published essay. */
+  slug: string;
+  /** How the title should read in the card. */
+  title: string;
+  /** What the essay says about THIS element, in one clause: the context the association was made in. */
+  reads: string;
+  /** The scenario the essay was read against, where it was one. Omitted for writing about the element as such. */
+  under?: ShiftId;
+  /** Where in the repository the association is grounded, for the review record. Not shown. */
+  basis: string;
+}
+
+export const ESSAY_ASSOCIATIONS: Record<string, readonly EssayAssociation[]> = {
+  'band-energy': [
+    {
+      slug: 'indonesias-reindustrialization-bet',
+      title: 'Indonesia\u2019s Reindustrialization Bet',
+      reads:
+        'Argues from this layer: the electricity a new smelter will run on is chosen with the plant, and captive generation contracted for its life fixes the asset\u2019s carbon exposure before any carbon price arrives.',
+      under: 'green',
+      basis: 'The V5 assessed condition on band-energy under the green transition; src/data/readingPath.ts (claim, caseStudy, establishes).',
+    },
+  ],
+  'band-capital': [
+    {
+      slug: 'indonesias-reindustrialization-bet',
+      title: 'Indonesia\u2019s Reindustrialization Bet',
+      reads:
+        'Reads the plant, its captive power and their financing as one structure, and asks which constraint \u2014 capacity, access, contract or risk allocation \u2014 binds for a given asset.',
+      under: 'green',
+      basis: 'src/data/readingPath.ts: the essay\u2019s subtitle names capital sequencing, and the path records that it establishes whether infrastructure or finance binds as a question about a specific asset.',
+    },
+  ],
+  'stage-processing': [
+    {
+      slug: 'indonesias-reindustrialization-bet',
+      title: 'Indonesia\u2019s Reindustrialization Bet',
+      reads:
+        'The case it is made on is processing capacity built for downstreaming \u2014 nickel smelting \u2014 and whether those assets are configured for the market they will have to sell into.',
+      under: 'reindustrialisation',
+      basis: 'src/data/readingPath.ts ARGUMENT.caseStudy and claim; src/data/changedMind.ts revisedSource.',
+    },
+  ],
+};
+
+/** An association as the card sees it: whether it is evidence for the reading that is open, or related writing with its context. */
+export interface EssayLink extends EssayAssociation {
+  /** True only when the essay was read under the shift that is on AND that shift marks this element as assessed. */
+  evidence: boolean;
+}
+
+/**
+ * The essays that read an element, in the context of the overlay that is on.
+ * The list does not change when the overlay does — what changes is what each
+ * link is allowed to claim.
+ */
+export function essaysFor(id: string, shift: ShiftId | null): EssayLink[] {
+  const rows = ESSAY_ASSOCIATIONS[id] ?? [];
+  const condition = shiftTarget(shift, id)?.condition;
+  return rows.map((a) => ({ ...a, evidence: a.under !== undefined && a.under === shift && condition?.basis === 'assessed' }));
+}
+
+/** Every essay slug the map refers to, once, for a publication check. */
+export const ESSAY_SLUGS: readonly string[] = Array.from(new Set(Object.values(ESSAY_ASSOCIATIONS).flat().map((a) => a.slug)));
+
+/* ── The overview: one drawing, two levels of grouping ───────────────── */
+
+/**
+ * ONE SET OF RECORDS, TWO LEVELS. The overview on the landing page is these
+ * records at a coarser grouping, not a second model. V5 drew it as the detail
+ * with two boxes grouped — eight function columns on a canvas that rendered
+ * its labels at ten pixels on a laptop. V5.1 groups the columns into the five
+ * groups below, so the canvas fits the figure at one pixel per unit and a
+ * first-time reader meets five things before forty. The detail keeps every
+ * function under its own box; both plates draw the same five frames, so a
+ * reader moving between them finds the same structure with its members
+ * un-grouped.
+ *
+ * WHAT SURVIVES THE GROUPING, checked rather than assumed: every stage, every
+ * enabling layer with its switch, every border, every non-physical flow,
+ * every return with its own destination, every element either shift marks,
+ * and every joint that crosses a group's edge. Only one group is collapsed
+ * into a single box — distribution, wholesale and retail — and the two joints
+ * inside it are drawn when the detail is shown. So the distance control has
+ * chips to re-word and both overlays have marks to raise at the overview,
+ * without expanding anything.
+ *
+ * GROUPING MUST NOT CHANGE MEANING. Four traps, each guarded by a test:
+ *   - aggregation feeds from BIOLOGICAL only; extraction reaches processing
+ *     directly, and a grouped drawing must not imply otherwise;
+ *   - packaging is a PARALLEL INPUT to manufacturing, never a stage after it;
+ *   - recovery does not send everything back to one place — which is why the
+ *     returns are NOT grouped (see RETURNS_UNGROUPED below);
+ *   - putting several functions in one box does not make their margins
+ *     addable, and a box never masquerades as one conversion stage: a
+ *     collapsed group holds nodes only.
+ */
+
+/**
+ * The two levels of grouping the one drawing is emitted at. `overview` is the
+ * resting level of the landing page; `detail` un-groups. There is no third.
+ */
+export type ChainLevel = 'overview' | 'detail';
+
+export interface OverviewGroup {
+  id: string;
+  label: string;
+  /** The source records this group stands for. */
+  members: readonly string[];
+  /**
+   * Drawn as ONE box standing for its members (collapsed), or as a labelled
+   * frame with every member drawn inside it under its own id. A collapsed
+   * group may hold only nodes: a stage is a conversion, and folding one into
+   * a box would let the box masquerade as a conversion stage.
+   */
+  collapsed: boolean;
+  /** What stays true of those members while they share a frame or a box. */
+  keeps: string;
+  /** What `detail` puts back. */
+  opens: string;
+  /**
+   * What an overlay can legitimately say about the group: nothing, as a
+   * whole. A mark sits on a member, and a group's status is never the status
+   * of one child.
+   */
+  overlay: string;
+}
+
+/**
+ * FIVE MAJOR GROUPS, and what each is for. The V5 overview kept eight
+ * function columns and grouped only the distribution nodes and the retail
+ * formats; at a laptop width its labels rendered at ten pixels. Grouping the
+ * columns is what gives the drawing back its room, so the groups are chosen
+ * for what a first-time reader has to recognise: where goods come from, where
+ * they are converted, where they are finished, how they reach a buyer, and
+ * what happens after use. Only the distribution group is collapsed into one
+ * box; the others are frames, and their members keep their own boxes, doors
+ * and marks.
+ */
+export const OVERVIEW_GROUPS: Record<string, OverviewGroup> = {
+  'group-origins': {
+    id: 'group-origins',
+    label: 'Origins',
+    members: ['stage-biological', 'stage-extraction'],
+    collapsed: false,
+    keeps:
+      'Two routes into the chain, and they do not merge: biological output goes through aggregation, extracted material goes straight to processing, and the export cut leaves before processing on the second route.',
+    opens: 'The example lanes fanning into each origin.',
+    overlay: 'Neither shift marks an origin as such; the export cut belongs to the joint it cuts, and that joint is drawn.',
+  },
+  'group-processing': {
+    id: 'group-processing',
+    label: 'Processing and intermediation',
+    members: ['node-aggregation', 'stage-processing', 'node-trader'],
+    collapsed: false,
+    keeps:
+      'One conversion, and the intermediation either side of it: the aggregator bulks the lots before the plant, the trader lands the inputs after it. Three margins — a spread, a conversion margin, a spread — and they do not add.',
+    opens: 'The same three functions with more room, and the by-product branch at full length.',
+    overlay: 'Reindustrialisation marks the processing stage, the trader and the joint between them, each under its own id; the group carries no status of its own.',
+  },
+  'group-manufacturing': {
+    id: 'group-manufacturing',
+    label: 'Manufacturing and packaging',
+    members: ['stage-packaging', 'stage-manufacturing', 'node-principal'],
+    collapsed: false,
+    keeps:
+      'Packaging is a parallel input into the finished good, never a stage after it; the principal takes title alongside manufacturing and transforms nothing. Two conversion margins and a spread, kept apart.',
+    opens: 'The same three functions with more room.',
+    overlay: 'Reindustrialisation marks the manufacturing stage under its own id; packaging and the principal carry no mark.',
+  },
+  'group-distribution-retail': {
+    id: 'group-distribution-retail',
+    label: 'Distribution and retail',
+    members: ['node-distributor', 'node-wholesaler', 'node-retail', 'node-retail-general', 'node-retail-modern', 'node-retail-ecommerce', 'node-retail-quick', 'node-retail-horeca'],
+    collapsed: true,
+    keeps:
+      'Three functions that take title and transform nothing, selling in ever smaller drops. The two transfers between them are real joints, inside this box at this level; their spreads are three spreads and do not add into one. Commercial returns run back from retail to the distributor inside the box.',
+    opens: 'The distributor, the wholesaler and the retail node as separate boxes, the two joints between them, the five retail formats, and the sub-distributor recursion.',
+    overlay: 'Neither shift marks anything inside this box, so it never carries a mark; if one did, the mark would open the detail and sit on the member.',
+  },
+  'group-use-recovery': {
+    id: 'group-use-recovery',
+    label: 'Use and recovery',
+    members: ['stage-consumption', 'stage-recovery'],
+    collapsed: false,
+    keeps:
+      'Use is a destination, not a conversion margin. Recovery is paid to take what has no value and sells what still has some back up the chain — to processing as material, to biological production as compost, never to one place.',
+    opens: 'The three demand components inside consumption.',
+    overlay: 'The green transition marks recovery, the joint into it and the two post-consumer returns, each under its own id.',
+  },
+};
+
+/** The group a function belongs to at the overview, or nothing for an element that is not a function. */
+export const groupOf = (id: string): OverviewGroup | undefined => Object.values(OVERVIEW_GROUPS).find((g) => g.members.includes(id));
+
+/** The transfers inside a group: both ends are members. Drawn at the overview only where the group is a frame, always on detail. */
+export const internalJoints = (group: OverviewGroup): JointId[] =>
+  JOINTS.filter((j) => group.members.includes(j.from) && group.members.includes(j.to)).map((j) => j.id);
+
+/** The transfers across a group's edge, in or out. Drawn at the overview whatever the grouping does. */
+export const boundaryJoints = (group: OverviewGroup): JointId[] =>
+  JOINTS.filter((j) => group.members.includes(j.from) !== group.members.includes(j.to)).map((j) => j.id);
+
+/** The returns that leave or enter a group, or run inside it — each with its own destination, never merged. */
+export const groupReturns = (group: OverviewGroup): ReturnFlow[] =>
+  RETURNS.filter((r) => group.members.includes(r.from) || group.members.includes(r.to));
+
+/** The joints that exist but are internal to a collapsed group, so are drawn only on detail. */
+export const OVERVIEW_INTERNAL_JOINTS: readonly JointId[] = Object.values(OVERVIEW_GROUPS)
+  .filter((g) => g.collapsed)
+  .flatMap((g) => internalJoints(g));
+
+/**
+ * Everything the overview does not draw as its own element: the members of a
+ * collapsed group and the joints internal to it. Of these only the joints are
+ * DOORS, so they are the only ones an address can name — but the test reads
+ * this list rather than that fact, so a change of grouping cannot quietly
+ * strand a link.
+ */
+export const OVERVIEW_HIDES: readonly string[] = [
+  ...OVERVIEW_INTERNAL_JOINTS,
+  ...Object.values(OVERVIEW_GROUPS)
+    .filter((g) => g.collapsed)
+    .flatMap((g) => g.members),
+];
+
+/** True when the overview draws this element under its own id. */
+export const drawnAtOverview = (id: string): boolean => !OVERVIEW_HIDES.includes(id);
+
+/**
+ * Detail that the overview leaves out, named so the reduction is inspectable
+ * rather than a matter of taste. Nothing here is a RELATION; every one is an
+ * example, a sub-format or a note.
+ */
+export const OVERVIEW_OMITS = [
+  { what: 'The example lanes fanning into the two origins', why: 'They are examples of a function, not links in the chain.' },
+  { what: 'The three demand components inside consumption', why: 'They divide a destination; they do not add a transfer.' },
+  { what: 'The five retail formats', why: 'Grouped, with the distributor and the wholesaler, into the distribution-and-retail box, which keeps every joint at its edges.' },
+  { what: 'The distributor\u2019s sub-distributor recursion', why: 'A note on how deep one node can nest, not another node.' },
+] as const;
+
+/**
+ * The returns are NOT grouped, deliberately.
+ *
+ * Grouping them was available and was declined: the six returns have five
+ * different destinations, and any grouping that fits on one arrow would have
+ * to pick one. "Everything comes back to processing" is exactly the false
+ * claim the brief warns about — and it is what the old taster drew, with a
+ * single "Returns → Primary processing" arrow standing for all six.
+ */
+export const RETURNS_UNGROUPED =
+  'Six returns, five destinations. Recyclate and compost leave recovery for different chains; a commercial return goes back to the distributor and a packaging return to the manufacturer. One arrow cannot say that.';
 
 /* ── Copy ────────────────────────────────────────────────────────────────── */
 
@@ -1691,18 +2035,18 @@ export const DEFINE = {
 } as const;
 
 export const CHAIN_COPY = {
-  headline: 'Every joint in this chain is a margin.',
   /**
-   * The thesis. It used to read "Add them up and you have an economy; take one
-   * apart and you have a driver tree." The second half is right and the first
-   * half is a category error the rest of this file spends a paragraph
-   * correcting: margins do not aggregate into an economy. Value added does,
-   * and value added is output less intermediate consumption — it includes
-   * labour income, and it is not gross profit. A memorable line that teaches
-   * the wrong identity is worse than a plain one.
+   * A TITLE, NOT A HEADLINE. This is the page's own heading on the landing
+   * page now that nothing precedes the map, so it names the object rather
+   * than making a claim about it. The claim it used to make — "Every joint in
+   * this chain is a margin" — and the correction under it about margins not
+   * aggregating into value added were both doing work, and neither is lost:
+   * the margin kind is on every joint's panel and `basis` below carries the
+   * value-added distinction into the Economy reading.
    */
-  standfirst:
-    'Take one apart and you get a driver tree. Add them up and you still do not get an economy \u2014 what aggregates is value added, not the margin anyone keeps.',
+  title: 'The industry chain',
+  /** The owner's line, once, as a short line under the title. */
+  standfirst: 'Nothing here is complicated. It only looks that way from the wrong distance.',
   /** The distance control is this sentence: the two lens names in it are the two positions. */
   lead: {
     before: 'Read the chain as an ',
@@ -1747,12 +2091,12 @@ export const CHAIN_COPY = {
   /** Title and description for each drawing; the title names it, the description walks it. */
   aria: {
     wide: {
-      title: 'The industry chain, in full',
-      desc: 'Left to right: two origins, primary processing, packaging and finished-goods manufacturing, then distribution, wholesale and retail into consumption and recovery. Intermediary nodes are dashed pills between the stages. Every joint is a mark on the flow — a filled diamond where a stage sells, an open diamond where a node sells, a square where a fee is paid — with a chip that reads it at the chosen distance, as an economy or as finance, and opens the margin cut there. Six enabling layers run as bands directly beneath the chain, ticked where each attaches; energy rises into every stage from below; money and information run both ways under the bands; two dashed border lines mark where goods are exported and imported. A shift, when one is chosen, marks the elements it moves with a numbered disc whose form is its status — filled for stuck, open for moving, dashed for unpriced — numbered in reading order, left to right and then top to bottom.',
+      title: 'The industry chain, in detail',
+      desc: 'Left to right: two origins, primary processing, packaging and finished-goods manufacturing, then distribution, wholesale and retail into consumption and recovery. Intermediary nodes are dashed pills between the stages. Every joint is a mark on the flow — a filled diamond where a stage sells, an open diamond where a node sells, a square where a fee is paid — with a chip that reads it at the chosen distance, as an economy or as finance, and opens the margin cut there. Seven enabling layers run as bands directly beneath the chain, ticked where each attaches — working capital at the joints it bridges, asset and project finance under the functions whose capacity it builds; energy rises into every stage from a dotted network line, generation at its left end and a connection under each function; money and information run both ways under the bands; two dashed border lines mark where goods are exported and imported. A shift, when one is chosen, marks the elements it moves with a numbered disc whose form is its status — filled for stuck, open for moving, dashed for unpriced — numbered in reading order, left to right and then top to bottom.',
     },
     compact: {
-      title: 'The industry chain, in short',
-      desc: 'Primary production, aggregation, processing, manufacturing, distribution, retail, consumption and recovery, a diamond at every join, with logistics, credit and energy running beneath and one return arrow above.',
+      title: 'The industry chain, overview',
+      desc: 'The same chain in five groups, left to right: the two origins; processing with the aggregator before it and the trader after it; manufacturing with packaging as a parallel input and the principal alongside; one box for distribution, wholesale and retail; then use and recovery. Nine of the eleven joints are marks on the flow, each with its chip and each opening the margin cut there; the two transfers inside the distribution-and-retail box are drawn when the detail is shown. All seven enabling layers run as bands beneath, ticked where each attaches — working capital at the joints it bridges, asset finance under the functions whose capacity it builds, energy as generation, network and a connection at every function; both border lines, every return with its own destination and both money and information rails are here, and a chosen shift marks the same elements it marks on the detail.',
     },
     column: 'The industry chain, top to bottom',
   },
@@ -1782,7 +2126,36 @@ export const CHAIN_COPY = {
     marginHeading: 'The margin that sits here',
     whenHeading: 'Read the other way',
     linesHeading: 'Where it shows in the financial statements',
-    layersHeading: 'Layers riding on this move',
+    /**
+     * THE LAYERS ON A JOINT, IN TWO GROUPS, because they are not the same
+     * kind of thing. A layer that attaches at JOINTS cuts its fee at this
+     * transfer: the freight, the cold, the working capital that bridges it,
+     * the contract terms it happens under. A layer that attaches at STAGES
+     * or nowhere — asset finance, energy, the rules — takes nothing at this
+     * transfer and is still the reason it can happen at all.
+     *
+     * One list would have said asset finance is charged on a move. It is
+     * not: it built the warehouse and the fleet the move runs on, and it
+     * is priced off what those earn over their life. That is the whole
+     * distinction splitting the old single finance band was for, so the
+     * panel a reader actually opens should not collapse it again.
+     */
+    layersHeading: 'Layers charged at this transfer',
+    /**
+     * A third list, because attaching at a joint is not the same as being
+     * paid there. Contract governance rides on three joints and takes no fee
+     * at any of them; it decides the terms they happen on. One list under
+     * "charged at this transfer" said it earned one.
+     */
+    layersTermsHeading: 'Layers setting its terms',
+    layersTermsNote: 'These take no fee here. They decide who may sell, on what terms, and what may be claimed.',
+    layersBehindHeading: 'Layers standing behind it',
+    layersBehindNote: 'These take nothing at this transfer. They are what makes it possible.',
+    /** Over the functions and layers asset finance reaches, in a layer's own panel. */
+    recipientsHeading: 'Builds capacity at',
+    financesLayersHeading: 'And funds the capacity of',
+    /** On the band itself, before the short names of the layers asset finance also funds. */
+    financesLayersRun: 'also funds',
     spanHeading: 'Spans',
     ridesHeading: 'Rides on',
     /** The four lines of a condition, in the order they are read. */
@@ -1790,13 +2163,41 @@ export const CHAIN_COPY = {
     holds: 'What holds it',
     lever: 'The lever',
     funds: 'Who finances it',
-    /** Three roles, and they are usually three parties. */
+    /** Three roles; they need not be three parties. */
     fundsRoles:
-      'Capital provider, payer over the asset\u2019s life, and loss bearer are three roles and usually three parties. A guarantee moves the third; it does not remove it.',
+      'Capital provider, payer over the asset\u2019s life and loss bearer are three roles; they can sit with one party or with several. A guarantee moves the third; it does not remove it.',
     /** Where one layer is really several constraints. */
     shortagesHeading: 'Three different shortages inside this layer',
-    articlesHeading: 'Read this in the essays',
+    /**
+     * THE WAY DEEPER IS AN ESSAY, and it sits directly under the card rather
+     * than at the bottom of four hundred words. A reader who opens an element
+     * gets what it is, in a breath, and a door into the piece that argues it.
+     */
+    articlesHeading: 'Read this at length',
     articlesNone: 'No essay reads this yet.',
+    /**
+     * WHAT AN ESSAY LINK CLAIMS, said beside it. An association is made in a
+     * context — this essay reads this element under that scenario — and the
+     * card keeps the context: evidence for the reading that is open, or a
+     * related piece that argues from another one. Publication is a fact about
+     * the database, so it is checked at run time through the same query the
+     * reading path uses, and the card says what it found.
+     */
+    essayEvidence: 'The evidence behind this reading',
+    essayUnder: (shift: string) => `Reads this under the ${shift.toLowerCase()}`,
+    essayPublished: 'Published',
+    essayUnchecked: 'Not checked — this page could not reach the essay index',
+    essayNotPublished: 'Not published',
+    /** The kicker over what actually does the work, when it is not the lever the map draws. */
+    mechanismKicker: 'What moves it',
+    /**
+     * What the card holds back, named so the fold is a promise rather than a
+     * mystery. The reading is the owner's diagnosis of where this element
+     * stands: four lines in a fixed order, what the lever cannot do, and who
+     * pays. Its basis and its status are NOT behind this — a mark that
+     * promises a diagnosis must say on the card what kind of claim it is.
+     */
+    readingDisclosure: 'The reading in full',
     /** The anatomy of a joint or a layer, folded under its reading while a shift is on. */
     anatomyJoint: 'The joint itself',
     anatomyLayer: 'The layer itself',
@@ -1805,6 +2206,18 @@ export const CHAIN_COPY = {
     /** Same word as the curriculum uses; see src/data/curriculumContract.ts. */
     comingSoon: 'Planned',
     close: 'Close',
+  },
+  /**
+   * The electricity part of Energy, as the band draws it: supply, the network
+   * that carries it, and the connection at the consuming function — or
+   * generation at the function itself. Four words on the band, so the layer
+   * is not read as one undifferentiated input.
+   */
+  energy: {
+    generation: 'generation',
+    network: 'network',
+    connection: 'connection at the function',
+    selfSupply: 'or generation on site',
   },
   /** The numbered marks a shift puts on the map. */
   mark: {
@@ -1815,54 +2228,23 @@ export const CHAIN_COPY = {
     essayMany: 'essays',
     essayNone: 'no essay yet',
   },
-  /**
-   * THE FIRST ENCOUNTER, on the short plate.
-   *
-   * The short plate has no doors, no chips and no marks: it is orientation,
-   * and orientation is not explanation. Version 2 put the right noun on it —
-   * Energy, beside logistics and credit — and a stranger could still only see
-   * that the band exists, not why the relation matters. This block is the one
-   * bounded question the map can put to a reader before they have chosen a
-   * distance, a shift or an element, and the labelled action that opens the
-   * one reading on this map written against evidence rather than as an
-   * illustration.
-   *
-   * It names ONE relation and bounds it. The assessed reading behind it is
-   * about the power chosen for a particular plant — asset vintage and a
-   * contract — and not about national network capacity, so `caution` says so
-   * before the reader arrives rather than after. The shared word is the trap:
-   * `distribution` on this chain is goods moving to a buyer, and the
-   * electricity network is a different network that this reading does not
-   * measure.
-   */
-  opening: {
-    kicker: 'Start with one relation',
-    question: 'Every stage on this chain buys electricity. Who chooses what kind, and when is it chosen?',
-    relation:
-      'Energy is a band beneath the chain, not a stage on it: it takes no title and sells no goods, and every stage above it is a customer. That makes the kind of power a decision someone else makes, at a moment you can name \u2014 and on the one case this map reads against evidence, it is made plant by plant rather than by the grid, in the same decision that approves the plant.',
-    caution:
-      'Distribution on this chain moves goods. The electricity network is a different network: this reading is about the power chosen for one plant, not a finding about national network capacity.',
-    action: 'Explore the power decision',
-    /** What the control does, said before it does it. */
-    actionMeans: 'Opens the full chain at the Energy layer, read as finance, under the green-transition scenario.',
-    /*
-     * No dates and no thresholds here, and that is the map's own rule rather
-     * than an omission: nothing in this file carries a figure (see the unit
-     * test 'carries no figures anywhere'). The reading names the regulation
-     * and the essay behind it carries the article, the threshold and the
-     * years.
-     */
-    case: 'The case: Indonesian nickel processing, and the captive generation built alongside it. The reading names its dates; the essay behind it carries the source.',
-  },
   controls: {
     noShift: 'No shift',
-    seeFull: 'See the full chain',
-    seeCompact: 'Back to the short version',
+    seeFull: 'Show the detail',
+    seeCompact: 'Back to the overview',
+    /**
+     * What the level control does, and the two things it does not do, in one
+     * line. It used to list the four things detail un-groups; a reader finds
+     * that out by pressing the control, and the list was a third grey
+     * paragraph standing between them and the drawing. The GUARANTEE is what
+     * cannot be found out by pressing, so the guarantee is what stays.
+     */
+    levelNote: 'Detail un-groups. It adds no relation, and changes neither the distance nor the scenario.',
     /**
      * Above the two distance words inside the narrow reading sheet. On a phone
      * the reading is a modal sheet and the distance control sat outside it, so
      * comparing the two readings of one element meant closing the reading,
-     * finding the control and finding the element again \u2014 the interface
+     * finding the control and finding the element again — the interface
      * interrupting the operation the map exists to demonstrate.
      */
     sheetDistance: 'Read this as',
@@ -1877,6 +2259,25 @@ export const CHAIN_COPY = {
     /** The switch at the left end of a layer band. */
     layerShow: 'Show layer',
     layerHide: 'Hide layer',
+    /**
+     * Under the figure while the detail plate is wider than the window. The
+     * detail scrolls sideways inside the map so its labels stay at reading
+     * size; the page itself never does. Said so the reader knows where the
+     * rest of the chain is.
+     */
+    scrolls: 'The detail is wider than this window. It scrolls sideways inside the map; the page does not.',
+    /**
+     * The transfers inside a group, one tap away in the narrow overview and
+     * named on the collapsed box on the wide one. Counted in words: the map
+     * carries no digits, and a count of transfers is not a magnitude.
+     */
+    transfersInside: (n: number) => {
+      const words = ['no', 'one', 'two', 'three', 'four', 'five'];
+      const count = words[n] ?? 'several';
+      return `${count} ${n === 1 ? 'transfer' : 'transfers'} inside this group`;
+    },
+    /** Over the span-bars beside the narrow overview. */
+    layersAlongside: 'Enabling layers, alongside the functions they span',
     /** Inside an isolated reading at the finance distance. */
     isolated: 'The rest of the chain has stepped back. Close the reading to bring it back.',
     /**

@@ -24,13 +24,15 @@ import {
   BORDERS,
   BYPRODUCT,
   CHAIN_COPY,
-  COMPACT,
   DEFINE,
   JOINTS,
   LEVERS,
   MARGIN_KINDS,
   NODES,
   NON_PHYSICAL,
+  OVERVIEW_GROUPS,
+  OVERVIEW_HIDES,
+  OVERVIEW_INTERNAL_JOINTS,
   RETAIL,
   RETAIL_GROUP,
   RETURNS,
@@ -86,11 +88,11 @@ afterEach(() => {
 });
 
 describe('the column', () => {
-  it('replaces the plate: one column, no svg, the headline still first, nothing under it', () => {
+  it('replaces the plate: one column, no svg, the title still first, nothing under it', () => {
     mount(<ChainPlate links={[]} />);
-    expect(document.querySelectorAll('.cp-column[data-variant="full"]')).toHaveLength(1);
+    expect(document.querySelectorAll('.cp-column[data-level="detail"]')).toHaveLength(1);
     expect(document.querySelector('svg.cp-svg')).toBeNull();
-    expect(screen.getByRole('heading', { name: CHAIN_COPY.headline })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: CHAIN_COPY.title })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'How to read the map' })).not.toBeInTheDocument();
     expect(screen.queryByText('How the two distances relate')).not.toBeInTheDocument();
   });
@@ -149,7 +151,7 @@ describe('the column', () => {
     expect(screen.getByText('Trade credit · trade promotion · rebates')).toBeInTheDocument();
   });
 
-  it('lists the six layers as rows that open, with their span in words, and no chip word on a layer that only sets the terms', async () => {
+  it('lists every layer as a row that opens, with its span in words, and no chip word on a layer that only sets the terms', async () => {
     mount(<ChainPlate links={[]} />);
     const list = screen.getByRole('heading', { name: CHAIN_COPY.controls.layers }).parentElement!;
     for (const b of BANDS) expect(within(list).getByRole('button', { name: new RegExp(b.label) })).toHaveAttribute('aria-expanded', 'false');
@@ -159,9 +161,9 @@ describe('the column', () => {
     expect(within(list).queryByText('Terms')).not.toBeInTheDocument();
     expect(within(list).queryByText('Rules')).not.toBeInTheDocument();
 
-    const credit = within(list).getByRole('button', { name: /Credit and working capital/ });
+    const credit = within(list).getByRole('button', { name: /Working capital and trade credit/ });
     await userEvent.click(credit);
-    const panel = region('Credit and working capital');
+    const panel = region('Working capital and trade credit');
     expect(within(panel).getByText(BANDS.find((b) => b.id === 'band-credit')!.read.economy)).toBeInTheDocument();
     expect(credit).toHaveAttribute('aria-expanded', 'true');
     // The statement lines belong to the close reading; the column obeys the
@@ -172,9 +174,9 @@ describe('the column', () => {
     // is open: close, switch, reopen.
     await userEvent.click(screen.getByRole('button', { name: CHAIN_COPY.panel.close }));
     await userEvent.click(word('finance'));
-    await userEvent.click(screen.getByRole('button', { name: /Credit and working capital/ }));
+    await userEvent.click(screen.getByRole('button', { name: /Working capital and trade credit/ }));
     expect(
-      within(region('Credit and working capital')).getByText(/Finance income and finance cost/),
+      within(region('Working capital and trade credit')).getByText(/Finance income and finance cost/),
     ).toBeInTheDocument();
   });
 
@@ -270,19 +272,145 @@ describe('parity between the column and the wide plate', () => {
   });
 });
 
-describe('the short version on a narrow screen', () => {
-  it('draws exactly COMPACT — six stages, three groups, two layers, one return — with no doors', async () => {
+describe('the overview on a narrow screen', () => {
+  /**
+   * V5 asks the narrow layout to START from the existing column and reduce the
+   * initial detail by the SAME grouping rules the plate uses — not to become an
+   * article or a card per element. So this is the same column with two boxes
+   * grouped, one joint folded inside one of them, and everything else present:
+   * the joints still open, the layers still open, the marks still land.
+   */
+  it('is the same column with the same groups applied, not a different drawing', async () => {
     mount(<ChainPlate variant="preview" links={[]} />);
-    expect(document.querySelectorAll('.cp-column[data-variant="compact"]')).toHaveLength(1);
-    const expected = new Set<string>([...COMPACT.sequence.flatMap((s) => (s.kind === 'stages' ? s.ids : [s.id])), ...COMPACT.bands, COMPACT.returnArrow.id]);
-    expect(ids()).toEqual(expected);
-    for (const j of JOINTS) expect(screen.queryByRole('button', { name: j.label })).not.toBeInTheDocument();
-    expect(screen.getByText('Aggregator')).toBeInTheDocument();
-    expect(screen.getByText('Distribution / wholesale')).toBeInTheDocument();
+    expect(document.querySelectorAll('.cp-column[data-level="overview"]')).toHaveLength(1);
 
-    await userEvent.click(screen.getByRole('button', { name: CHAIN_COPY.controls.seeFull }));
-    expect(document.querySelectorAll('.cp-column[data-variant="full"]')).toHaveLength(1);
-    expect(screen.getByRole('button', { name: 'Aggregation → processing' })).toBeInTheDocument();
+    const drawn = ids();
+    for (const hidden of OVERVIEW_HIDES) expect(drawn.has(hidden), `overview draws ${hidden}`).toBe(false);
+    for (const g of Object.values(OVERVIEW_GROUPS)) {
+      expect(drawn.has(g.id), `overview lacks ${g.id}`).toBe(true);
+      expect(screen.getByRole('heading', { name: g.label })).toBeInTheDocument();
+    }
+
+    // Every stage, border, layer and by-product survives the grouping.
+    for (const st of STAGES) expect(drawn.has(st.id), st.id).toBe(true);
+    for (const b of BORDERS) expect(drawn.has(b.id), b.id).toBe(true);
+    for (const b of BANDS) expect(drawn.has(b.id), b.id).toBe(true);
+    expect(drawn.has(BYPRODUCT.id)).toBe(true);
+
+    // And the doors still open at the overview — which the old short column,
+    // with no joints and no layer list at all, could not do.
+    for (const j of JOINTS) {
+      const row = screen.queryByRole('button', { name: j.label });
+      if (OVERVIEW_INTERNAL_JOINTS.includes(j.id as (typeof OVERVIEW_INTERNAL_JOINTS)[number])) {
+        expect(row, `${j.id} is inside a group`).toBeNull();
+      } else {
+        expect(row, j.id).toHaveAttribute('aria-expanded', 'false');
+      }
+    }
+  });
+
+  it('leaves out the examples and the sub-formats, and puts them back on detail', async () => {
+    mount(<ChainPlate variant="preview" links={[]} />);
+    // The five retail formats, the retail node, the distributor and the
+    // wholesaler are one box, which names the three functions inside it.
+    for (const r of RETAIL) expect(screen.queryByText(r.label), r.id).not.toBeInTheDocument();
+    const box = document.querySelector('[data-id="group-distribution-retail"]')!;
+    expect(box.textContent).toContain(RETAIL_GROUP.label);
+    expect(box.textContent).toContain('Distributor');
+    expect(box.textContent).toContain(CHAIN_COPY.controls.transfersInside(2));
+    expect(screen.queryByRole('button', { name: 'Wholesale → retail' })).toBeNull();
+    // The lanes into each origin and the components of demand are examples,
+    // not links in the chain.
+    for (const lane of STAGES.find((x) => x.id === 'stage-biological')!.lanes!) {
+      expect(screen.queryByText(new RegExp(lane)), lane).not.toBeInTheDocument();
+    }
+
+    await userEvent.click(screen.getAllByRole('button', { name: CHAIN_COPY.controls.seeFull })[0]);
+    expect(document.querySelectorAll('.cp-column[data-level="detail"]')).toHaveLength(1);
+    for (const r of RETAIL) expect(screen.getByText(r.label), r.id).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Distributor → wholesaler' })).toBeInTheDocument();
+  });
+
+  it('carries both overlays and both distances at the overview, because it has marks and chips to change', async () => {
+    mount(<ChainPlate variant="preview" links={[]} />);
+    await userEvent.click(word('green transition'));
+    expect(document.querySelectorAll('.cp-column[data-level="overview"]')).toHaveLength(1);
+    const lit = Array.from(document.querySelectorAll<HTMLElement>('[data-id][data-lit]')).map((el) => el.dataset.id!).sort();
+    expect(lit).toEqual(SHIFT_BY_ID.green.targets.map((t) => t.id).sort());
+
+    const joint = JOINTS.find((x) => x.id === 'j-retail-consumption')!;
+    expect(screen.getByText(joint.read.economy.chip)).toBeInTheDocument();
+    await userEvent.click(word('finance'));
+    expect(screen.getByText(joint.read.finance.chip)).toBeInTheDocument();
+    expect(document.querySelectorAll('.cp-column[data-level="overview"]')).toHaveLength(1);
+  });
+});
+
+/**
+ * THE NARROW OVERVIEW IS THE SWIMLANE ON ITS SIDE. V5's narrow overview ran
+ * every joint row in sequence and then listed the seven layers as a catalogue
+ * after all of them. The layers now run beside the groups they span, as bars
+ * ticked where each attaches, so a phone reader meets the enabling conditions
+ * beside the functions they enable.
+ */
+describe('the layers alongside the narrow overview', () => {
+  it('draws every layer as a bar beside the groups it spans, ticked where it attaches, and no catalogue after the chain', () => {
+    mount(<ChainPlate variant="preview" links={[]} />);
+    expect(screen.queryByRole('heading', { name: CHAIN_COPY.controls.layers })).not.toBeInTheDocument();
+    expect(screen.getByText(CHAIN_COPY.controls.layersAlongside)).toBeInTheDocument();
+    for (const b of BANDS) {
+      const bar = screen.getByRole('button', { name: b.label });
+      expect(bar.classList.contains('cp-bar'), b.id).toBe(true);
+      expect(bar.textContent, b.id).toContain(b.short);
+      expect(bar.getAttribute('aria-expanded'), b.id).toBe('false');
+      const row = bar.style.gridRow;
+      expect(row, `${b.id} spans grid rows`).toMatch(/^\d+ \/ \d+$/);
+    }
+    // A whole-chain layer spans from the first group to the last; governance only the downstream half.
+    const rows = (label: string) => screen.getByRole('button', { name: label }).style.gridRow.split(' / ').map(Number);
+    const [lStart, lEnd] = rows('Logistics and warehousing');
+    const [gStart, gEnd] = rows('Principal–distributor contract governance');
+    expect(gStart).toBeGreaterThan(lStart);
+    expect(gEnd).toBeLessThan(lEnd);
+    expect(rows('Energy')).toEqual([lStart, lEnd]);
+    // Ticks: a fee at the joints for logistics, an input under the groups for energy, an asset under the recipients for capital, none for the rules.
+    expect(document.querySelectorAll('[data-bar-tick="fee"]').length).toBeGreaterThan(0);
+    // Energy is an input into every stage, so its bar is ticked at every group that holds one — four of the five; the distribution box holds none.
+    const groupsWithAStage = Object.values(OVERVIEW_GROUPS).filter((g) => g.members.some((m) => STAGES.some((s) => s.id === m))).length;
+    expect(groupsWithAStage).toBe(4);
+    expect(document.querySelectorAll('[data-bar-tick="up"]').length).toBe(groupsWithAStage);
+    expect(document.querySelectorAll('[data-bar-tick="asset"]').length).toBeGreaterThanOrEqual(4);
+    expect(document.querySelectorAll('[data-bar-tick="terms"]').length).toBeGreaterThan(0);
+  });
+
+  it('opens a layer’s reading from its bar, and carries the mark’s number on the bar under a shift', async () => {
+    mount(<ChainPlate variant="preview" links={[]} />);
+    await userEvent.click(word('green transition'));
+    const energy = screen.getByRole('button', { name: /Green transition · Energy · Moving$/ });
+    expect(energy.classList.contains('cp-bar')).toBe(true);
+    expect(energy.querySelector('[data-mark-n]')!.textContent).toBe(String(SHIFT_BY_ID.green.targets.length));
+    // Working capital carries no green mark; asset finance does.
+    expect(screen.getByRole('button', { name: 'Working capital and trade credit' }).querySelector('[data-mark-n]')).toBeNull();
+    expect(screen.getByRole('button', { name: /Green transition · Asset and project finance · Moving$/ })).toBeInTheDocument();
+    await userEvent.click(energy);
+    const panel = region('Energy');
+    expect(panel.closest('[data-chain-sheet]')).not.toBeNull();
+    expect(panel.querySelector('[data-basis="assessed"]')).not.toBeNull();
+    expect(energy).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  it('folds the transfers inside an open group, but shows one the shift marks without the fold', async () => {
+    mount(<ChainPlate variant="preview" links={[]} />);
+    const fold = document.querySelector('[data-group-fold="group-processing"]') as HTMLDetailsElement;
+    expect(fold).not.toBeNull();
+    expect(fold.open).toBe(false);
+    expect(fold.textContent).toContain(CHAIN_COPY.controls.transfersInside(2));
+    await userEvent.click(word('reindustrialisation'));
+    // Processing → trader is marked, so it comes out of the fold; aggregation → processing stays in it.
+    const marked = screen.getByRole('button', { name: 'Processing → trader / importer' });
+    expect(marked.closest('details')).toBeNull();
+    expect(screen.getByRole('button', { name: 'Aggregation → processing' }).closest('details')).not.toBeNull();
+    expect(document.querySelector('[data-lit-note="j-processing-trader"]')).not.toBeNull();
   });
 });
 
@@ -307,8 +435,27 @@ describe('a mark on a narrow screen', () => {
   it('renders the reading a shared address asks for, so a link made on the wide plate still lands on a phone', () => {
     window.history.replaceState({}, '', '/about?lens=green&node=recovery');
     mount(<ChainPlate links={[]} />);
-    expect(document.querySelector('.cp-column[data-variant="full"]')).not.toBeNull();
+    expect(document.querySelector('.cp-column[data-level="detail"]')).not.toBeNull();
     expect(region('Recovery')).toBeInTheDocument();
+  });
+
+  /**
+   * A link now lands at the level that can draw it. Recovery is on the
+   * overview, so a shared address opens there and stays there; the joint
+   * inside the distribution box is not, so that address opens the detail
+   * rather than a reading with no element under it.
+   */
+  it('stays at the overview for an element the overview draws, and opens the detail only for one it does not', () => {
+    window.history.replaceState({}, '', '/?lens=green&node=recovery');
+    const first = mount(<ChainPlate variant="preview" links={[]} />);
+    expect(document.querySelector('.cp-column[data-level="overview"]')).not.toBeNull();
+    expect(region('Recovery')).toBeInTheDocument();
+    first.unmount();
+
+    window.history.replaceState({}, '', '/?node=distributor-wholesaler');
+    mount(<ChainPlate variant="preview" links={[]} />);
+    expect(document.querySelector('.cp-column[data-level="detail"]')).not.toBeNull();
+    expect(region('Distributor → wholesaler')).toBeInTheDocument();
   });
 
   it('opens one reading per target, never two', async () => {

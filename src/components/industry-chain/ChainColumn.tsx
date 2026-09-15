@@ -16,18 +16,23 @@
  *
  * Same data file, same controls, same panel as the wide plate. The order of
  * rows here is layout; every word is a record in src/data/industryChain.ts.
- * `variant="compact"` draws the short version from COMPACT: no joints, no
- * layers list, no toggles, no small labels. There is no legend: every form
- * carries its own definition in its accessible description.
+ * There is no legend: every form carries its own definition in its accessible
+ * description.
+ *
+ * ONE COLUMN, TWO LEVELS. `detail` is the column above; `overview` is the
+ * swimlane turned on its side — the five groups down the left, the seven
+ * enabling layers as bars down the right, exactly as tall as the groups they
+ * span — so a phone reader meets the enabling conditions beside the functions
+ * they enable rather than in a catalogue after every transfer. Same groups,
+ * same hides, same marks as the wide overview; see the section below.
  */
 
-import { useContext, useId, useState, type ReactNode } from 'react';
+import { useContext, useId, useState } from 'react';
 import {
   BANDS,
   BORDERS,
   BYPRODUCT,
   CHAIN_COPY,
-  COMPACT,
   DEFINE,
   FLOW_KIND_LABELS,
   JOINT_BY_ID,
@@ -35,6 +40,8 @@ import {
   MARGIN_KINDS,
   NODES,
   NON_PHYSICAL,
+  JOINTS,
+  OVERVIEW_GROUPS,
   RETAIL,
   RETAIL_GROUP,
   RETURNS,
@@ -42,12 +49,15 @@ import {
   SHIFT_BY_ID,
   STATUS,
   bandChip,
+  bandJoints,
+  internalJoints,
   isWritten,
   shiftTarget,
   type Band,
-  type CompactStep,
+  type ChainLevel,
   type JointId,
   type MarginKind,
+  type OverviewGroup,
 } from '@/data/industryChain';
 import { cn } from '@/lib/utils';
 import { StatusBadge } from './ChainTargetPanel';
@@ -153,6 +163,13 @@ function LitNote({ id }: { id: string }) {
 
 /* ── The forms ───────────────────────────────────────────────────────────── */
 
+/**
+ * A transformation stage. `detail` gates the material the overview groups
+ * away — the example lanes into an origin, the stage's own gloss, and the
+ * components of demand — and nothing else. The origin bar stays, because the
+ * plate keeps it at both levels, and the shift's reading stays, because the
+ * overview is a map to work at rather than a picture of one.
+ */
 function StageBox({ id, detail = true }: { id: string; detail?: boolean }) {
   const stage = S[id];
   const lit = useLit(id);
@@ -163,9 +180,12 @@ function StageBox({ id, detail = true }: { id: string; detail?: boolean }) {
         data-id={id}
         data-lit={lit || undefined}
         title={stage.origin ? DEFINE.origin : DEFINE.stage}
-        className={cn('rounded-sm border border-foreground bg-background px-3 py-2', lit && litForm(status))}
+        // px-2, not px-3: the layer rails run beside the groups now, so the
+        // functions column is 138px on a 360px screen and the name inside a
+        // box is what the padding is taken from.
+        className={cn('rounded-sm border border-foreground bg-background px-2 py-2', lit && litForm(status))}
       >
-        {detail && stage.origin && <p className={KICKER}>{CHAIN_COPY.controls.origin}</p>}
+        {stage.origin && <p className={KICKER}>{CHAIN_COPY.controls.origin}</p>}
         <p className="break-words text-[15px] font-semibold leading-snug text-foreground">{stage.label}</p>
         {detail && stage.lanes && <p className="mt-1 text-xs leading-snug text-muted-foreground">{stage.lanes.join(' · ')}</p>}
         {detail && stage.detail && <p className="mt-1 text-xs leading-snug text-muted-foreground">{stage.detail}</p>}
@@ -177,7 +197,7 @@ function StageBox({ id, detail = true }: { id: string; detail?: boolean }) {
           </ul>
         )}
       </div>
-      {detail && <LitNote id={id} />}
+      <LitNote id={id} />
     </div>
   );
 }
@@ -202,7 +222,13 @@ function NodePill({ id, label }: { id: string; label?: string }) {
   );
 }
 
-function RetailGroup() {
+/**
+ * The retail function. Its five formats are rows on detail and are grouped
+ * away on the overview; the node, its note and its joints are the same at
+ * both levels. Grouping them says they share a FUNCTION — not a margin, which
+ * is why the formats come back rather than being summed.
+ */
+function RetailGroup({ formats = true }: { formats?: boolean }) {
   const lit = useLit(RETAIL_GROUP.id);
   const status = useStatus(RETAIL_GROUP.id);
   return (
@@ -211,13 +237,15 @@ function RetailGroup() {
         <p className={KICKER}>
           {RETAIL_GROUP.label} <span className="normal-case tracking-normal">· {RETAIL_GROUP.note}</span>
         </p>
-        <ul className="mt-1.5 flex flex-wrap gap-1.5">
-          {RETAIL.map((r) => (
-            <li key={r.id} data-id={r.id} className="rounded-full border border-dashed border-muted-foreground bg-background px-2 py-0.5 text-xs text-foreground">
-              {r.label}
-            </li>
-          ))}
-        </ul>
+        {formats && (
+          <ul className="mt-1.5 flex flex-wrap gap-1.5">
+            {RETAIL.map((r) => (
+              <li key={r.id} data-id={r.id} className="rounded-full border border-dashed border-muted-foreground bg-background px-2 py-0.5 text-xs text-foreground">
+                {r.label}
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
       <LitNote id={RETAIL_GROUP.id} />
     </div>
@@ -437,16 +465,307 @@ function LayerRow({ band }: { band: Band }) {
   );
 }
 
-/* ── The two columns ─────────────────────────────────────────────────────── */
+/* ── One column, two levels of grouping ───────────────────────── */
 
-function FullColumn() {
+/**
+ * THE NARROW OVERVIEW IS THE SWIMLANE TURNED ON ITS SIDE.
+ *
+ * V5's narrow overview was the detail column with two boxes grouped: eleven
+ * boxes and nine joint rows in a long sequence, and then, after all of it, a
+ * catalogue of the seven enabling layers. A reader on a phone met energy,
+ * finance and the rules only after traversing every transfer, and never saw
+ * which functions each one spanned.
+ *
+ * So the overview now runs the five groups down the left, with the joints
+ * that cross a group's edge between them, and the seven layers down the
+ * right as BARS exactly as tall as the groups they span — ticked at the rows
+ * where each attaches. The physical sequence and the cross-cutting support
+ * are read side by side, which is what the wide swimlane does with rows and
+ * bands. Every bar is the same door its band is; every group's members keep
+ * their own boxes and marks; the transfers inside a group are one tap away,
+ * and any the shift marks are shown without the tap. `detail` puts back the
+ * column V5 had, with every joint in sequence and the layers as a list.
+ */
+
+const GROUPS = Object.values(OVERVIEW_GROUPS);
+
+type OverviewRow =
+  | { kind: 'group'; group: OverviewGroup }
+  | { kind: 'joints'; joints: JointId[]; borders: string[] };
+
+/** The rows of the narrow overview: a group, the joints into the next group, the next group … */
+function overviewRows(): OverviewRow[] {
+  const rows: OverviewRow[] = [];
+  GROUPS.forEach((group, i) => {
+    rows.push({ kind: 'group', group });
+    const next = GROUPS[i + 1];
+    if (!next) return;
+    const joints = JOINTS.filter(
+      (j) => (group.members.includes(j.from) && next.members.includes(j.to)) || (next.members.includes(j.from) && group.members.includes(j.to)),
+    ).map((j) => j.id);
+    const borders = BORDERS.filter((b) => joints.includes(b.at)).map((b) => b.id);
+    rows.push({ kind: 'joints', joints, borders });
+  });
+  return rows;
+}
+
+/** The first and last grid rows a layer spans: the groups holding the two ends of its span. */
+function barRows(band: Band, rows: OverviewRow[]): [number, number] {
+  const rowOf = (id: string) => rows.findIndex((r) => r.kind === 'group' && r.group.members.includes(id));
+  return [rowOf(band.span[0]), rowOf(band.span[1])];
+}
+
+/** The rows at which a layer attaches: joints rows for a joint-attaching layer, group rows where it reaches inside. */
+function tickRows(band: Band, rows: OverviewRow[]): number[] {
+  const rides = new Set(bandJoints(band));
+  const out: number[] = [];
+  rows.forEach((row, i) => {
+    if (band.attaches === 'joints') {
+      if (row.kind === 'joints' && row.joints.some((j) => rides.has(j))) out.push(i);
+      if (row.kind === 'group' && internalJoints(row.group).some((j) => rides.has(j))) out.push(i);
+    } else if (band.attaches === 'stages') {
+      if (row.kind === 'group' && row.group.members.some((m) => STAGES.some((s) => s.id === m))) out.push(i);
+    } else if (band.attaches === 'recipients') {
+      if (row.kind === 'group' && row.group.members.some((m) => band.recipients?.includes(m))) out.push(i);
+    }
+  });
+  return out;
+}
+
+/** A tick on a bar, in the form the wide plate's band uses: fee, terms, input, asset. */
+function BarTick({ band }: { band: Band }) {
+  const form = band.attaches === 'stages' ? 'up' : band.attaches === 'recipients' ? 'asset' : band.margin ? 'fee' : 'terms';
+  return (
+    <span
+      aria-hidden="true"
+      data-bar-tick={form}
+      className={cn(
+        'pointer-events-none relative z-10 block',
+        form === 'fee' && 'h-1.5 w-1.5 bg-foreground',
+        form === 'terms' && 'h-1.5 w-1.5 border border-foreground bg-background',
+        form === 'up' && 'h-0 w-0 border-x-[3px] border-b-[5px] border-x-transparent border-b-foreground',
+        form === 'asset' && 'h-2.5 w-1.5 border-b-2 border-background bg-foreground',
+      )}
+    />
+  );
+}
+
+/**
+ * One layer as a bar beside the groups it spans: the same door its band is on
+ * the wide plate, reading its short name vertically and keeping its full name
+ * as its accessible name. Under a shift that marks it the bar carries the
+ * mark's number at its head and its outline takes the form of its status.
+ */
+function LayerBar({ band, start, end, column }: { band: Band; start: number; end: number; column: number }) {
+  const { shift, selected, onSelect, panelId } = useContext(ChainLensContext);
+  const open = selected === band.id;
+  const condition = shiftTarget(shift, band.id)?.condition;
+  const n = shift && condition ? markNumber(shift, band.id) : 0;
+  const status = condition?.status;
+  return (
+    <button
+      type="button"
+      data-id={band.id}
+      data-lit={condition ? true : undefined}
+      data-status={status}
+      aria-label={shift && condition ? `${n}. ${SHIFT_BY_ID[shift].label} · ${band.label} · ${STATUS[condition.status].label}` : band.label}
+      aria-expanded={open}
+      aria-controls={open ? panelId : undefined}
+      onClick={(e) => onSelect(band.id, e.currentTarget)}
+      style={{ gridColumn: column, gridRow: `${start} / ${end + 1}` }}
+      className={cn(
+        // Block, not flex: under a vertical writing mode a flex column's axes
+        // turn sideways, which is how the labels came to sit mid-bar. Text
+        // starts at the top, where the reader's eye enters the bar.
+        'cp-bar block w-6 rounded-sm border border-border bg-secondary py-2 pl-px pr-[7px] text-left text-[12px] font-medium uppercase leading-none tracking-wider text-foreground',
+        condition && litForm(status),
+        open && 'ring-2 ring-ring ring-offset-1',
+        FOCUS,
+      )}
+    >
+      {n > 0 && (
+        <span
+          data-mark-n={n}
+          className={cn(
+            '-mr-[7px] mb-1 inline-flex size-[18px] items-center justify-center rounded-full border text-[11px] font-semibold leading-none tabular-nums [writing-mode:horizontal-tb]',
+            status === 'stuck' && 'border-foreground bg-foreground text-background',
+            status === 'moving' && 'border-foreground bg-background',
+            status === 'unpriced' && 'border-dashed border-foreground bg-background',
+          )}
+        >
+          {n}
+        </span>
+      )}
+      <span>{band.short}</span>
+    </button>
+  );
+}
+
+/** A joint row between two groups: the borders cut there, then the transfers. */
+function BoundaryRow({ row }: { row: Extract<OverviewRow, { kind: 'joints' }> }) {
+  return (
+    <div className="min-w-0 py-1">
+      {row.borders.map((b) => (
+        <BorderRule key={b} id={b} />
+      ))}
+      {row.joints.map((j) => (
+        <JointRow key={j} id={j} />
+      ))}
+    </div>
+  );
+}
+
+/** A member of an uncollapsed group, in its own form. */
+function Member({ id }: { id: string }) {
+  if (S[id]) return <StageBox id={id} detail={false} />;
+  if (id === RETAIL_GROUP.id) return <RetailGroup formats={false} />;
+  return <NodePill id={id} />;
+}
+
+/**
+ * One of the five groups. A frame with its members drawn inside it — or, for
+ * the collapsed group, one dashed box naming the functions inside it in the
+ * order goods pass through them. The transfers inside an open group are one
+ * tap away; any the shift marks are shown without the tap, so a mark never
+ * hides behind a fold.
+ */
+function OverviewGroupRow({ group }: { group: OverviewGroup }) {
+  const { shift } = useContext(ChainLensContext);
+  const headingId = useId();
+  const internal = internalJoints(group);
+  const lit = internal.filter((j) => shiftTarget(shift, j)?.condition);
+  const folded = internal.filter((j) => !lit.includes(j));
+  const named = group.members.filter((m) => !RETAIL.some((r) => r.id === m));
+  return (
+    <section
+      data-id={group.id}
+      data-group=""
+      data-collapsed={group.collapsed || undefined}
+      aria-labelledby={headingId}
+      className="min-w-0 rounded-md border border-border bg-muted/30 p-1"
+    >
+      <h4 id={headingId} className={KICKER}>
+        {group.label}
+      </h4>
+      {group.collapsed ? (
+        <div
+          title={`${DEFINE.node} — ${group.keeps}`}
+          className="mt-1.5 rounded-md border border-dashed border-muted-foreground bg-background px-3 py-2"
+        >
+          {named.map((m) => (
+            <p key={m} className="text-sm leading-snug text-foreground">
+              {labelOf(m)}
+            </p>
+          ))}
+          <p className="mt-1 text-xs leading-snug text-muted-foreground">↳ {CHAIN_COPY.controls.transfersInside(internal.length)}</p>
+        </div>
+      ) : (
+        <div className="mt-1.5 flex min-w-0 flex-col gap-1.5">
+          {group.members.map((m) => (
+            <Member key={m} id={m} />
+          ))}
+          {group.id === 'group-processing' && (
+            <p data-id={BYPRODUCT.id} className="text-right text-xs text-muted-foreground">
+              ↘ {BYPRODUCT.label}
+            </p>
+          )}
+          {lit.map((j) => (
+            <JointRow key={j} id={j} />
+          ))}
+          {folded.length > 0 && (
+            <details className="min-w-0" data-group-fold={group.id}>
+              <summary className={cn('cursor-pointer rounded-sm py-1 text-xs text-muted-foreground', FOCUS)}>
+                {CHAIN_COPY.controls.transfersInside(folded.length)}
+              </summary>
+              {folded.map((j) => (
+                <JointRow key={j} id={j} />
+              ))}
+            </details>
+          )}
+          {group.members.includes('stage-recovery') && <LitReturns from="stage-recovery" />}
+        </div>
+      )}
+    </section>
+  );
+}
+
+function OverviewColumn() {
+  const base = useId();
+  const returnsId = `${base}-returns`, flowsId = `${base}-flows`;
+  const [showReturns, setShowReturns] = useState(false);
+  const [showFlows, setShowFlows] = useState(false);
+  const rows = overviewRows();
+  // Grid row 1 is the heading row; the chain's rows start at 2.
+  const gridRow = (i: number) => i + 2;
+
+  return (
+    <div className="cp-column flex min-w-0 flex-col" data-level="overview" role="group" aria-label={CHAIN_COPY.aria.compact.title}>
+      {/* Seven bars at twenty pixels with four between them: each door is
+          twenty-four pixels from edge to the next door's far edge, which is
+          the target-size spacing rule. On a phone the grid takes the
+          container's own gutter, because the groups on the left need the
+          width more than the margin does; the page keeps sixteen pixels. */}
+      <div
+        className="cp-bars -mx-4 grid min-w-0 gap-y-2 sm:mx-0"
+        style={{ gridTemplateColumns: `minmax(0, 1fr) repeat(${BANDS.length}, 1.5rem)`, columnGap: '1px' }}
+      >
+        <p className="mr-2 border-l-2 border-border pl-3 text-sm leading-relaxed text-muted-foreground" style={{ gridColumn: 1, gridRow: 1 }}>
+          {CHAIN_COPY.mobileFlows}
+        </p>
+        <p className={cn(KICKER, 'self-end pb-1 leading-snug')} style={{ gridColumn: `2 / ${BANDS.length + 2}`, gridRow: 1 }}>
+          {CHAIN_COPY.controls.layersAlongside}
+        </p>
+        {rows.map((row, i) => (
+          <div key={row.kind === 'group' ? row.group.id : `joints-${i}`} className="mr-2 min-w-0" style={{ gridColumn: 1, gridRow: gridRow(i) }}>
+            {row.kind === 'group' ? <OverviewGroupRow group={row.group} /> : <BoundaryRow row={row} />}
+          </div>
+        ))}
+        {BANDS.map((band, b) => {
+          const [start, end] = barRows(band, rows);
+          return <LayerBar key={band.id} band={band} start={gridRow(start)} end={gridRow(end)} column={b + 2} />;
+        })}
+        {BANDS.flatMap((band, b) =>
+          tickRows(band, rows).map((i) => (
+            <span
+              key={`${band.id}-${i}`}
+              className="flex items-center justify-end pr-px"
+              style={{ gridColumn: b + 2, gridRow: gridRow(i) }}
+            >
+              <BarTick band={band} />
+            </span>
+          )),
+        )}
+      </div>
+
+      <div className="mt-5 flex flex-wrap gap-2">
+        <Toggle id={returnsId} pressed={showReturns} onToggle={() => setShowReturns((v) => !v)}>
+          {CHAIN_COPY.controls.returns}
+        </Toggle>
+        <Toggle id={flowsId} pressed={showFlows} onToggle={() => setShowFlows((v) => !v)}>
+          {CHAIN_COPY.controls.nonPhysical}
+        </Toggle>
+      </div>
+      {showReturns && <ReturnsList id={returnsId} />}
+      {showFlows && <NonPhysicalList id={flowsId} />}
+    </div>
+  );
+}
+
+/**
+ * The chain, top to bottom, at the detail: every function under its own box,
+ * every joint a row in sequence, every border, every enabling layer as a row
+ * that opens, and both non-physical flow lists behind toggles. What the
+ * overview groups away is named in OVERVIEW_GROUPS and OVERVIEW_OMITS and is
+ * all here.
+ */
+function DetailColumn() {
   const base = useId();
   const returnsId = `${base}-returns`, flowsId = `${base}-flows`, layersId = `${base}-layers`;
   const [showReturns, setShowReturns] = useState(false);
   const [showFlows, setShowFlows] = useState(false);
 
   return (
-    <div className="cp-column flex min-w-0 flex-col" data-variant="full" role="group" aria-label={CHAIN_COPY.aria.column}>
+    <div className="cp-column flex min-w-0 flex-col" data-level="detail" role="group" aria-label={CHAIN_COPY.aria.column}>
       <p className="mb-4 border-l-2 border-border pl-3 text-sm leading-relaxed text-muted-foreground">{CHAIN_COPY.mobileFlows}</p>
       <div className="grid min-w-0 grid-cols-2 gap-3">
         <div className="flex min-w-0 flex-col">
@@ -487,7 +806,6 @@ function FullColumn() {
       </div>
       <NodePill id="node-principal" />
       <JointRow id="j-manufacturing-distribution" />
-
       <NodePill id="node-distributor" />
       <JointRow id="j-distributor-wholesaler" />
       <NodePill id="node-wholesaler" />
@@ -524,71 +842,6 @@ function FullColumn() {
   );
 }
 
-function GroupPill({ step }: { step: Extract<CompactStep, { kind: 'group' }> }) {
-  return (
-    <div data-id={step.id} className="rounded-full border border-dashed border-muted-foreground bg-background px-3 py-1.5">
-      <p className="break-words text-sm leading-snug text-foreground">{step.label}</p>
-    </div>
-  );
-}
-
-function CompactColumn() {
-  const steps = COMPACT.sequence;
-  const out: ReactNode[] = [];
-  let i = 0;
-  while (i < steps.length) {
-    const step = steps[i];
-    if (step.kind === 'stages' && step.ids.length === 2) {
-      const next = steps[i + 1];
-      const groupForFirst = next && next.kind === 'group' && next.from?.includes(step.ids[0]) ? next : null;
-      out.push(
-        <div key={step.ids.join('+')} className="grid min-w-0 grid-cols-2 gap-3">
-          <div className="flex min-w-0 flex-col">
-            <StageBox id={step.ids[0]} detail={false} />
-            {groupForFirst && (
-              <>
-                <Arrow />
-                <GroupPill step={groupForFirst} />
-              </>
-            )}
-          </div>
-          <div className="flex min-w-0 flex-col">
-            <StageBox id={step.ids[1]} detail={false} />
-          </div>
-        </div>,
-      );
-      i += groupForFirst ? 2 : 1;
-    } else {
-      out.push(step.kind === 'stages' ? <StageBox key={step.ids[0]} id={step.ids[0]} detail={false} /> : <GroupPill key={step.id} step={step} />);
-      i += 1;
-    }
-    if (i < steps.length) out.push(<Arrow key={`arrow-${i}`} />);
-  }
-
-  const ret = COMPACT.returnArrow;
-  return (
-    <div className="cp-column flex min-w-0 flex-col" data-variant="compact" role="group" aria-label={CHAIN_COPY.aria.compact.title}>
-      {out}
-      <div data-id={ret.id} className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
-        <span aria-hidden="true" className="flex-1 border-t border-dashed border-muted-foreground" />
-        <span>
-          ↑ {ret.label} · {CHAIN_COPY.controls.back} {labelOf(ret.to)}
-        </span>
-      </div>
-      <ul className="mt-3 space-y-1.5">
-        {COMPACT.bands.map((id) => {
-          const band = BANDS.find((b) => b.id === id)!;
-          return (
-            <li key={id} data-id={id} className="rounded-sm border-t border-border bg-secondary px-3 py-2 text-xs font-medium uppercase tracking-wider text-foreground">
-              {band.label}
-            </li>
-          );
-        })}
-      </ul>
-    </div>
-  );
-}
-
-export function ChainColumn({ variant }: { variant: 'full' | 'compact' }) {
-  return variant === 'compact' ? <CompactColumn /> : <FullColumn />;
+export function ChainColumn({ level }: { level: ChainLevel }) {
+  return level === 'overview' ? <OverviewColumn /> : <DetailColumn />;
 }

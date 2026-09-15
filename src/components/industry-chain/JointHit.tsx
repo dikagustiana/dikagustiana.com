@@ -31,13 +31,14 @@ export type ChipAt = 'rowA' | 'rowB' | 'left' | 'right';
 const CHIP_H = 18;
 /**
  * The chip reads the joint at the distance that is on, and it opens the same
- * door the diamond does — so it is a target, and a target 18 units tall is
- * 12.7 screen pixels at the 1280px breakpoint. The transparent box behind it
- * is what the reader hits: 34 units, which clears 24px there and fits inside
- * the reading lane's row pitch (the generator holds 36 units between the two
- * chip rows for exactly this).
+ * door the diamond does — so it is a target. Both plates now render at one
+ * CSS pixel per unit or more from the 1280px breakpoint up (the overview
+ * because its canvas fits the figure, the detail because the figure scrolls
+ * sideways under it), so the transparent box behind the chip is sized in
+ * pixels: 26 units, which clears the 24px target and fits inside the reading
+ * lane's row pitch of 30. Mirrored in scripts/build-chain-plate.mjs.
  */
-const CHIP_HIT_H = 34;
+const CHIP_HIT_H = 26;
 const R = 8;
 const chipWidth = (text: string) => Math.round(text.length * 14 * 0.56 + 16);
 
@@ -115,7 +116,7 @@ export function JointHit({
         onBlur={() => onHover(null)}
       >
         <desc id={descriptionId}>{kind.label}. {joint.read[lens].chip}. {joint.read[lens].note}</desc>
-        <circle className="cp-hit-area" cx={cx} cy={cy} r={18} />
+        <circle className="cp-hit-area" cx={cx} cy={cy} r={15} />
         <path className={cn('cp-joint-mark', `cp-joint-mark--${kind.mark}`)} d={markPath(kind.mark, cx, cy)} />
       </g>
       {/* The chip reads the same line as the diamond and opens the same door,

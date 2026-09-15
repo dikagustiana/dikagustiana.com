@@ -13,12 +13,12 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactElement } from 'react';
-import { BASIS, CHAIN_COPY, LEVERS, SHIFT_BY_ID, STATUS, slugOf } from '@/data/industryChain';
+import { BASIS, CHAIN_COPY, LEVERS, OVERVIEW_HIDES, SHIFT_BY_ID, STATUS, drawnAtOverview, jointLayers, slugOf } from '@/data/industryChain';
 
 vi.mock('@/integrations/supabase/client', () => ({ supabase: { from: () => ({}) } }));
 
@@ -57,7 +57,8 @@ describe('the reading order of a shift', () => {
   it('puts the green transition at eight marks, with the four layers last because they are the bottom row', () => {
     const ids = markedIds('green');
     expect(ids).toHaveLength(8);
-    expect(ids.slice(-4)).toEqual(['band-logistics', 'band-cold-chain', 'band-credit', 'band-energy']);
+    // Asset finance, not working capital: the project-finance reading moved to the band that finances projects.
+    expect(ids.slice(-4)).toEqual(['band-logistics', 'band-cold-chain', 'band-capital', 'band-energy']);
   });
 
   it('runs left to right along the chain before the layers', () => {
@@ -134,7 +135,9 @@ describe('the marks on the plate', () => {
     const condition = SHIFT_BY_ID.green.targets.find((t) => t.id === 'stage-recovery')!.condition!;
     expect(within(panel).getByText(condition.action.economy)).toBeInTheDocument();
     expect(within(panel).getByText('Unpriced')).toBeInTheDocument();
-    expect(within(panel).getByText(STATUS.unpriced.means)).toBeInTheDocument();
+    // One line beside the badge, not the long definition; that is in the reading in full.
+    expect(within(panel).getByText(STATUS.unpriced.card)).toBeInTheDocument();
+    expect(within(panel).queryByText(STATUS.unpriced.means)).not.toBeInTheDocument();
     expect(mark).toHaveAttribute('aria-expanded', 'true');
 
     await userEvent.click(word('reindustrialisation'));
@@ -158,7 +161,7 @@ describe('the marks on the plate', () => {
     expect(within(panel).getByText(LEVERS['reprice-layer'].label)).toBeInTheDocument();
     expect(within(panel).getByText(CHAIN_COPY.panel.articlesNone)).toBeInTheDocument();
     expect(panel.querySelector('[data-basis="scenario"]')).not.toBeNull();
-    expect(within(panel).getByText(BASIS.scenario.means)).toBeInTheDocument();
+    expect(within(panel).getByText(BASIS.scenario.card)).toBeInTheDocument();
     // The title carries the badge, and the badge comes before the lines.
     const title = within(panel).getByRole('heading', { level: 3 });
     expect(within(title).getByText('Stuck')).toBeInTheDocument();
@@ -168,7 +171,7 @@ describe('the marks on the plate', () => {
   it('keeps the panel in the order the brief fixes on the one mark that is fully written', async () => {
     // Energy under the green shift is the one ASSESSED mark. All four lines
     // are written, in order, and the lever line is followed by the mechanism
-    // that is actually at work \u2014 a contract, which the map cannot draw.
+    // that is actually at work — a contract, which the map cannot draw.
     mount(<ChainPlate links={[]} />);
     await userEvent.click(word('green transition'));
     await userEvent.click(screen.getByRole('button', { name: /Green transition · Energy · Moving$/ }));
@@ -181,9 +184,56 @@ describe('the marks on the plate', () => {
       CHAIN_COPY.panel.funds,
     ]);
     expect(panel.querySelector('[data-basis="assessed"]')).not.toBeNull();
+    // The case is named on the card, not left as "a specific case".
+    expect(panel.querySelector('[data-assessed-case]')!.textContent!.toLowerCase()).toContain('nickel');
+    // What moves it is on the card too — a contract, not a price alone — and in full in the reading.
+    expect(panel.querySelector('[data-mechanism-card="contract"]')).not.toBeNull();
     expect(panel.querySelector('[data-mechanism="contract"]')).not.toBeNull();
     expect(within(panel).getByText(CHAIN_COPY.panel.fundsRoles)).toBeInTheDocument();
     expect(within(panel).queryByText(CHAIN_COPY.panel.articlesNone)).not.toBeInTheDocument();
+    expect(panel.querySelector('[data-essay="indonesias-reindustrialization-bet"][data-essay-evidence]')).not.toBeNull();
+    expect(within(panel).getByText(CHAIN_COPY.panel.essayEvidence)).toBeInTheDocument();
+  });
+
+  /**
+   * THE DEFAULT PATH INTO WRITING. V5 took a card's essays from the active
+   * shift's target, so with no overlay every card said "No essay reads this
+   * yet" — Energy included. The association lives on the element now, and the
+   * card keeps its context.
+   */
+  it('leads from Energy to its essay with no overlay on, keeps the context, and says so when the index cannot be reached', async () => {
+    mount(<ChainPlate links={[]} />);
+    await userEvent.click(screen.getByRole('button', { name: 'Energy' }));
+    const panel = screen.getByRole('region', { name: 'Energy' });
+    expect(within(panel).queryByText(CHAIN_COPY.panel.articlesNone)).not.toBeInTheDocument();
+    const row = panel.querySelector('[data-essay="indonesias-reindustrialization-bet"]')!;
+    expect(row).not.toBeNull();
+    expect(row.hasAttribute('data-essay-evidence')).toBe(false);
+    expect(within(panel).getByText(CHAIN_COPY.panel.essayUnder('Green transition'))).toBeInTheDocument();
+    // The supabase client is a stub here, so the index cannot be reached: the
+    // card says it could not check, and still offers the universal route.
+    await waitFor(() => expect(row.getAttribute('data-essay-state')).toBe('unchecked'));
+    expect(within(panel).getByRole('link', { name: /Reindustrialization Bet/ })).toHaveAttribute('href', '/essays/indonesias-reindustrialization-bet');
+    expect(within(panel).getByText(CHAIN_COPY.panel.essayUnchecked)).toBeInTheDocument();
+
+    // Changing the distance does not erase the association.
+    await userEvent.click(word('finance'));
+    expect(screen.getByRole('region', { name: 'Energy' }).querySelector('[data-essay="indonesias-reindustrialization-bet"]')).not.toBeNull();
+
+    // Under the other overlay the essay is still there, as related writing with its context — never as evidence for a reading that does not exist.
+    await userEvent.click(word('reindustrialisation'));
+    const under = screen.getByRole('region', { name: 'Energy' });
+    expect(under.getAttribute('data-panel')).toBe('anatomy');
+    expect(under.querySelector('[data-essay="indonesias-reindustrialization-bet"]')).not.toBeNull();
+    expect(under.querySelector('[data-essay-evidence]')).toBeNull();
+  });
+
+  it('says plainly when nothing reads an element, and never borrows a neighbour’s essay', async () => {
+    mount(<ChainPlate links={[]} />);
+    await userEvent.click(screen.getByRole('button', { name: 'Working capital and trade credit' }));
+    const panel = screen.getByRole('region', { name: 'Working capital and trade credit' });
+    expect(within(panel).getByText(CHAIN_COPY.panel.articlesNone)).toBeInTheDocument();
+    expect(panel.querySelector('[data-essay]')).toBeNull();
   });
 
   it('pins one line beside a mark on hover — number, title, status, essays — and raises no tooltip role', async () => {
@@ -239,6 +289,12 @@ describe('the line read on hover', () => {
   it('reads a marked element as its mark under the shift that marks it, and as itself under the other', () => {
     expect(hoverLine('band-logistics', 'green', 'finance')).toEqual({ lead: '5. Logistics and warehousing', detail: 'Stuck · no essay yet' });
     expect(hoverLine('band-logistics', 'reindustrialisation', 'finance').detail).toContain('takes no title');
+    // Where what moves the element is not a price, the line says so before it counts the essays.
+    expect(hoverLine('band-energy', 'green', 'economy').detail).toBe('Moving · a contract is renegotiated · 1 essay');
+    expect(hoverLine('band-capital', 'green', 'economy').detail).toContain('risk moves to another party');
+    // A group frame at the overview reads as its own account of what it keeps.
+    expect(hoverLine('group-processing', null, 'economy').lead).toBe('Processing and intermediation');
+    expect(hoverLine('group-processing', null, 'economy').detail).toContain('do not add');
   });
 
   it('pins the definition beside a stage or a node on the plate, not in a list below it', async () => {
@@ -276,9 +332,19 @@ describe('where a reading and a label are placed', () => {
   });
 
   it('isolates a joint to its two hands and its layers, a stage to the joints that touch it, and a layer to nothing', () => {
+    // Every layer whose span covers the joint stays, both the ones charged
+    // there and the ones standing behind it — stepping into one unit of goods
+    // does not make the warehouse that holds it disappear. Which of the two a
+    // layer is, is said in the panel, not by dropping it from the drawing.
     expect(isolationSet('j-processing-trader')).toEqual(
-      new Set(['j-processing-trader', 'stage-processing', 'node-trader', 'band-logistics', 'band-cold-chain', 'band-credit', 'band-energy', 'band-regulation']),
+      new Set([
+        'j-processing-trader',
+        'stage-processing',
+        'node-trader',
+        ...jointLayers('j-processing-trader').map((b) => b.id),
+      ]),
     );
+    expect(jointLayers('j-processing-trader').map((b) => b.id)).toContain('band-capital');
     expect(isolationSet('stage-processing')).toContain('j-extraction-processing');
     expect(isolationSet('stage-processing')).toContain('j-processing-trader');
     expect(isolationSet('band-energy')).toBeNull();
@@ -342,7 +408,7 @@ describe('the map in the address bar', () => {
   it('still opens a joint or a layer named with no overlay, because those are doors at all times', () => {
     window.history.replaceState({}, '', '/about?node=credit');
     mount(<ChainPlate links={[]} />);
-    expect(screen.getByRole('region', { name: 'Credit and working capital' })).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: 'Working capital and trade credit' })).toBeInTheDocument();
     expect(window.location.search).toBe('?node=credit');
   });
 
@@ -352,20 +418,21 @@ describe('the map in the address bar', () => {
     expect(window.location.search).toBe('');
   });
 
-  it('puts the state in the address once the reader opens the full chain from the landing page', async () => {
+  it('puts the state in the address as soon as the reader changes anything, at the overview', async () => {
     // The old rule was "the preview never writes the URL", which meant a
-    // reading reached from the landing page could not be sent to anyone \u2014
-    // precisely the moment someone wants to send it. Opening it makes it the
-    // same map with the same doors, so it becomes shareable then.
+    // reading reached from the landing page could not be sent to anyone —
+    // precisely the moment someone wants to send it. Then it wrote only once
+    // the chain was expanded, because the short plate had no state worth
+    // sharing. The overview has all of it, so it is shareable from the start.
     window.history.replaceState({}, '', '/');
     mount(<ChainPlate links={[]} variant="preview" />);
-    //
-    // The click that opens it is no longer a shift word: a distance and a
-    // scenario are not offered while the plate is short, because neither has
-    // anything to change there (U02). The button that says what it does is.
-    await userEvent.click(screen.getByRole('button', { name: CHAIN_COPY.controls.seeFull }));
     await userEvent.click(word('green transition'));
     expect(window.location.search).toBe('?lens=green');
+    expect((document.querySelector('.chain-plate') as HTMLElement).dataset.level).toBe('overview');
+
+    // A joint the overview draws: the transfer into use crosses a group's edge.
+    await userEvent.click(word('Retail → consumption'));
+    expect(window.location.search).toBe('?lens=green&node=retail-consumption');
   });
 
   /*
@@ -375,11 +442,13 @@ describe('the map in the address bar', () => {
    * 14 September 2026 - ?distance=finance&lens=green&node=energy kept every
    * parameter and rendered Economy, No shift, short.
    */
-  it('restores a shared reading on the landing page, opening the short plate to draw it', () => {
+  it('restores a shared reading on the landing page, at the overview, which can draw it', () => {
     window.history.replaceState({}, '', '/?distance=finance&lens=green&node=energy');
     mount(<ChainPlate links={[]} variant="preview" />);
     const plate = document.querySelector('.chain-plate') as HTMLElement;
-    expect(plate.dataset.view).toBe('full');
+    // The whole state arrives, and the level stays where the reader would have
+    // been: the overview draws the energy layer, its door and its mark.
+    expect(plate.dataset.level).toBe('overview');
     expect(plate.dataset.lens).toBe('finance');
     expect(plate.dataset.shift).toBe('green');
     const panel = screen.getByRole('region', { name: 'Energy' });
@@ -387,22 +456,44 @@ describe('the map in the address bar', () => {
     expect(window.location.search).toBe('?distance=finance&lens=green&node=energy');
   });
 
-  it('leaves the landing page short when the address asks only for what the short plate already shows', () => {
+  /**
+   * The one address that still has to open the detail: an element the
+   * overview groups away. Opening a reading for something not on the drawing
+   * would put a panel on the page with no element under it.
+   */
+  it('opens the detail only for an element the overview does not draw', () => {
+    window.history.replaceState({}, '', '/?node=distributor-wholesaler');
+    mount(<ChainPlate links={[]} variant="preview" />);
+    const plate = document.querySelector('.chain-plate') as HTMLElement;
+    expect(plate.dataset.level).toBe('detail');
+    expect(screen.getByRole('region', { name: 'Distributor → wholesaler' })).toBeInTheDocument();
+    for (const id of OVERVIEW_HIDES) expect(drawnAtOverview(id), id).toBe(false);
+  });
+
+  it('leaves the landing page at the overview for any address the overview can draw', () => {
     // `distance=economy` is never written by the map (the resting distance is
     // not worth carrying), so it can only be a hand-edit - and the honest
     // reading of a hand-edit asking for the resting state is the resting state.
     window.history.replaceState({}, '', '/?distance=economy');
+    const first = mount(<ChainPlate links={[]} variant="preview" />);
+    expect((document.querySelector('.chain-plate') as HTMLElement).dataset.level).toBe('overview');
+    first.unmount();
+
+    // And an address naming a distance, an overlay and a door the overview
+    // draws stays there too: expanding would be the address being honoured by
+    // a control the reader did not touch.
+    window.history.replaceState({}, '', '/?distance=finance&lens=green&node=recovery');
     mount(<ChainPlate links={[]} variant="preview" />);
-    expect((document.querySelector('.chain-plate') as HTMLElement).dataset.view).toBe('compact');
+    expect((document.querySelector('.chain-plate') as HTMLElement).dataset.level).toBe('overview');
   });
 
   it('does not honour an address that names an element this overlay does not mark, on the landing page either', () => {
     window.history.replaceState({}, '', '/?lens=reindustrialisation&node=recovery');
     mount(<ChainPlate links={[]} variant="preview" />);
     const plate = document.querySelector('.chain-plate') as HTMLElement;
-    // The overlay is real and opens the chain; the rejected element does not
-    // leave a panel with a heading and nothing under it.
-    expect(plate.dataset.view).toBe('full');
+    // The overlay is real and is honoured; the rejected element does not leave
+    // a panel with a heading and nothing under it.
+    expect(plate.dataset.level).toBe('overview');
     expect(plate.dataset.shift).toBe('reindustrialisation');
     expect(screen.queryByRole('region', { name: 'Recovery' })).not.toBeInTheDocument();
     expect(window.location.search).toBe('?lens=reindustrialisation');

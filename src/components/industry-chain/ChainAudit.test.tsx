@@ -2,13 +2,19 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { render as rtlRender, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactElement } from 'react';
 import { BANDS, CHAIN_COPY, DEFINE, JOINTS, MARGIN_KINDS, STAGES, STATUS } from '@/data/industryChain';
 vi.mock('@/integrations/supabase/client', () => ({ supabase: {} }));
 import { ChainPlate } from './ChainPlate';
 
 const choose = (name: string) => screen.getByRole('button', { name });
-const render = (ui: ReactElement) => rtlRender(<MemoryRouter>{ui}</MemoryRouter>);
+const render = (ui: ReactElement) =>
+  rtlRender(
+    <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+      <MemoryRouter>{ui}</MemoryRouter>
+    </QueryClientProvider>,
+  );
 
 // The map keeps its state in the address; one test's map must not seed the next.
 beforeEach(() => window.history.replaceState({}, '', '/about'));

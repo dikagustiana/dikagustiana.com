@@ -30,13 +30,13 @@ import { markNumber, targetLabel } from './chainTargets';
 const R = 11;
 /**
  * The transparent disc that takes the tap, larger than the one that takes the
- * ink. The drawn mark is 22 units across, which at the 1280px breakpoint is
- * 15.6 screen pixels — a door too small to aim at. 34 units clears 24px there
- * and stays clear of its neighbours; the generator already places marks so
- * they land on nothing, and the unit test checks the enlarged discs still do
- * not reach each other.
+ * ink. The drawn mark is 22 units across; a unit is a CSS pixel or more from
+ * the 1280px breakpoint up, so a 13-unit radius clears the 24px target and
+ * stays clear of its neighbours. The generator places marks so they land on
+ * nothing, and the unit test checks the enlarged discs still do not reach
+ * each other. Mirrored as MARK_HIT_R in scripts/build-chain-plate.mjs.
  */
-const HIT = 17;
+const HIT = 13;
 
 export function ShiftMark({ shift, id, cx, cy }: { shift: ShiftId; id: string; cx: number; cy: number }) {
   const { selected, onSelect, onHover, hidden, panelId } = useContext(ChainLensContext);

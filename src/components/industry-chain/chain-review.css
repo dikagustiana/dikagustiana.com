@@ -8,7 +8,16 @@
 .chain-plate .cp-reference summary{min-height:44px}
 .chain-plate .cp-text-money{border-left:2px dotted hsl(var(--muted-foreground));padding-left:12px}
 .chain-plate .cp-text-information{border-left:3px double hsl(var(--muted-foreground));padding-left:12px}
-.chain-plate .cp-column[data-variant="full"] :is(.text-xs,.text-\[12px\]){font-size:14px;line-height:1.5}
+/* Small type on a phone, at both levels. The bump used to apply only to the
+   full column because the short one carried nothing but box names; the
+   overview now carries chips, status words and layer rows like any map. */
+.chain-plate .cp-column :is(.text-xs,.text-\[12px\]):not(.cp-bar){font-size:14px;line-height:1.5}
+/* The exception: a layer bar's short name is written down the side of a rail
+   ~24px wide, beside the ticks that say where that layer attaches. At 14px the
+   line box is wider than the rail and the name is set over its own ticks. It
+   stays at 12px, as a secondary label: the bar's accessible name is the
+   layer's full name, the same layer is named at full size in the reading the
+   bar opens, and nothing has to be read off the bar to operate the map. */
 .chain-plate .cp-column button{min-height:44px}
 .chain-plate .cp-column [data-id^="band-"] button{grid-template-columns:minmax(0,1fr);row-gap:6px}
 .chain-plate .cp-column [data-id^="band-"] button>span:last-child{justify-self:start}
@@ -18,4 +27,77 @@
 .chain-plate .stroke-accent-editorial{stroke:hsl(var(--accent))}
 @media (prefers-reduced-motion:reduce){
   .chain-plate *{scroll-behavior:auto;transition:none!important}
+}
+
+/* THE MAP IS NOT PROSE, so it does not keep the prose measure.
+   Measured on 14 September 2026: the site container caps content at 1336px,
+   and the detail plate's viewBox is 1717 units wide, so the browser drew it at
+   0.71–0.78 scale and its 14-unit labels landed at 9.9–11.3 CSS px — while a
+   1600 or 1920 display left 280px of empty margin on each side of it. The
+   header keeps the measure; the figure takes the width it can use.
+   Capped at 1760 (a little over the detail plate's own width, so it never
+   upscales far) and at the viewport less 3rem, which leaves room for a
+   classic scrollbar — the no-sideways-scroll tests hold this to it. */
+@media (min-width: 1280px) {
+  .chain-plate > figure {
+    --cp-figure: min(100vw - 3rem, 1760px);
+    width: var(--cp-figure);
+    margin-inline: calc((100% - var(--cp-figure)) / 2);
+  }
+}
+
+/* Uppercase kickers and chips in the narrow layout and in the reading beside
+   or under it. Measured on 14 September 2026: eleven of them rendered at 10
+   and 11 CSS px on a 360px screen. Letter-spaced small caps at that size are
+   the first thing to go at arm's length, and they are the labels that say
+   what kind of thing a reader is looking at. 12.5px with the tracking they
+   already carry reads; the target for body labels stays 14. */
+.chain-plate .cp-column :is(.text-\[10px\],.text-\[11px\]),
+.chain-plate [data-chain-sheet] :is(.text-\[10px\],.text-\[11px\]),
+.chain-plate [data-chain-popover] :is(.text-\[10px\],.text-\[11px\]){font-size:12.5px}
+
+/* THE DETAIL SCROLLS INSIDE THE MAP; THE PAGE DOES NOT.
+   V5 measured the detail plate at 0.72 scale on a 1280px window — 1717 units
+   drawn into 1232 pixels — and its fourteen-unit labels at ten pixels, and
+   recorded that no breakout could fix it. The V5.1 brief settled the choice
+   that V5 declined: a map-local sideways scroll is permitted for the detail,
+   and the ban on horizontal overflow is a ban on the PAGE scrolling. So the
+   detail is drawn at no less than one CSS pixel per unit, the box around it
+   scrolls when the window is narrower than that, and the overview — the
+   level a reader meets — fits the figure without scrolling at all. The
+   e2e assertion that nothing but the scope line follows the figure was
+   written for the old shape and is superseded by the note that appears
+   only while the box actually overflows. */
+@media (min-width: 1280px) {
+  .chain-plate [data-chain-scroll] {
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+  .chain-plate [data-chain-scroll] .cp-svg--wide {
+    width: max(100%, var(--cp-detail-w));
+  }
+}
+
+/* THE NARROW OVERVIEW IS THE SWIMLANE TURNED ON ITS SIDE. The five groups run
+   down the left; the seven enabling layers run down beside them as bars
+   exactly as tall as the groups they span, ticked at the rows where each
+   attaches, and each bar is the same door its band is on the wide plate. A
+   bar reads its short name vertically; its full name is its accessible name
+   and is on the card it opens. Twenty-four pixels wide, so the door meets the
+   minimum target size even where the label inside it is small. */
+.chain-plate .cp-bar {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+}
+/* A word longer than its line is hyphenated where the browser can do it.
+   Measured on 15 September 2026: the functions column gives a box name a
+   106px line on a 360px screen and "manufacturing" is 108px, which came out
+   as "manufacturin / g". The document is lang="en", but a browser without a
+   hyphenation dictionary ignores this, so the column is also given the width
+   the words need — this rule only improves the break where it is supported. */
+.chain-plate .cp-column {
+  hyphens: auto;
+}
+.chain-plate .cp-bars {
+  grid-auto-flow: dense;
 }
