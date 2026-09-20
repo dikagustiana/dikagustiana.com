@@ -105,10 +105,20 @@ Every table has RLS enabled with policies. Public content (`sections`, `categori
 `has_role(auth.uid(),'admin')`. User-owned data (`finance_*` tracking, `profiles`,
 `remora_watchlist`) is owner-scoped by `auth.uid() = user_id`. `essay_revisions` is admin-only.
 
-> **Note:** since migration `20260301073018`, **all essays are publicly selectable (even
-> unpublished/draft)** — visibility is gated in the app layer, not the DB. Drafts are therefore
-> reachable by anyone who knows the slug. Flagged for product decision (see UPGRADE_REPORT "When you
-> wake up").
+> **Note (corrected 2026-09-20):** this used to say that since migration `20260301073018`
+> **all** essays are publicly selectable including drafts, that visibility is gated only in the app
+> layer, and that a draft is reachable by anyone who knows its slug. That is **false** against the
+> live policies, and it was the wrong thing for a future session to believe. Measured:
+>
+> | policy | role | `USING` |
+> |---|---|---|
+> | `essays_select_anon_published` | `anon` | `published = true` |
+> | `essays_select_authenticated` | `authenticated` | `published = true OR <caller is admin>` |
+>
+> A draft is invisible to `anon` **at the database**, not merely hidden by the app: an anonymous
+> select by a draft's slug returns `[]`. The app's `isPublished(row) && !isAdmin` check in the essay
+> pages is a second line, not the only one. The "flagged for product decision" this note asked for
+> does not exist — the hole it described is closed.
 
 ## 6. Functions / triggers / enums
 

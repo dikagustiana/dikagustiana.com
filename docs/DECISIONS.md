@@ -5,6 +5,119 @@ alternatives. Newest first.
 
 ---
 
+# 2026-09-20 — The first Society essay, and the three things the brief and the repo disagreed about
+
+One essay written into `next-big-thing` / Society: "Thinking Was Expensive, but Attention
+with Discernment and Curiosity Is Appreciating", at
+`/the-next-big-thing/society/thinking-was-expensive-but-attention-with-discernment-and-curiosity-is-appreciating`.
+It is the first essay under that category (0 before, 1 now) and it landed as a **draft**,
+deliberately.
+
+## "Society" is a category, not a section — reported rather than reconciled
+
+The brief asked for the Society *section* and The Next Big Thing *module inside it*. The
+repo has both names, nested the other way round: `next-big-thing` is the section (sort 4,
+`sections`), `next-big-thing-society` is the third of its five categories
+(`20260802131648_next_big_thing_categories`). There is no "module" anywhere in the
+editorial tree at all — `finance_modules` belongs to the curriculum hierarchy, and
+`validate_essay_placement` raises 23514 on any row carrying both a curriculum `module_id`
+and an editorial category.
+
+Nothing was created to make the brief's shape true. Rejected: adding a `society` section,
+or a `modules` notion under it — either would have split the taxonomy that
+`derivePhase()` and every reading-side filter depend on, to match a description rather
+than the thing described.
+
+## Section breaks are h2, over the h4 that the sibling NBT essay uses
+
+Three essays in the whole site have body headings: `driver-tree-construction` (h2 x11 +
+h3), `macro-scenario-construction-for-cfos` (h2 x19), and
+`indonesias-reindustrialization-bet` (h4 x6). The nearest neighbour — same section, same
+shape — says h4; the rest of the site and the app's own machinery say h2.
+
+h2 wins because it is the level the app *treats* as a section break, not merely the more
+common one. `ArticleToc.extractHeadings` lists **h2 and h3 only**, so five h4 section
+headers would have been invisible to the "On this page" rail while still counting toward
+its numbering; and the measured type scale puts h2 at 1.625em against h4's 1.125em, which
+is 21px next to 19px body text — a break the reader has to look for. The consequence is
+named rather than hidden: at five headings the shell's automatic ToC now renders for this
+essay. That rail is the shell's, not authored furniture; no summary, pull quote or
+hand-written contents list was added, and no heading exists that the source did not have.
+
+`indonesias-reindustrialization-bet` is left alone. Its h4s are an anomaly worth a
+separate decision, not a precedent to propagate, and rewriting a published essay's body
+was not this session's mandate.
+
+## It is a draft, because the publish gate wants a summary the piece was told not to have
+
+`WriterValidation.validateEssay` hard-blocks publish on three key takeaways for every
+editorial essay (all four real published essays carry exactly three), and the brief
+excluded a summary. The two cannot both be honoured, so neither was quietly broken: the
+essay is saved at `status='draft'`, which no gate applies to, and the publish decision —
+takeaways or not — stays with the author in the studio.
+
+Rejected: declaring `genre: 'exploratory'` to make takeaways optional. It would have
+cleared the gate, but the repo defines that genre as work "the author has not settled"
+which "must not be read as, or written as, a position", and this essay closes on one
+("Curiosity and discernment are the most bullish assets of this decade"). Clearing a gate
+by mislabelling the contract the piece offers a reader is worse than not clearing it.
+
+The deck (`snippet` + `presentation.deck`) is a hard error under every genre and the
+source supplied none, so one was drafted — "Melange was never the variable, and neither is
+compute. What the rare thing does depends on who is holding it." — from the essay's own
+sentences, for the author to keep or replace before publishing. It is the only prose on
+the page that the author did not write.
+
+## The row was written directly, as an authorised exception, and made indistinguishable
+
+The house rule is one authoring surface: the writer studio at
+`/admin/writer/:section/new` (the NBT landing's quick-add dialog was deleted to enforce
+exactly this). This row did not come through it. The live project has one auth user and
+one admin, so no studio session was available without provisioning a probe admin against
+production auth; the owner chose the direct write over that, explicitly.
+
+What the exception cost was paid back by matching `WriterEditor`'s save exactly rather
+than writing a convenient row: the same column set, `phase` derived from the category
+slug by the `derivePhase` convention instead of typed, `voice_role='economist'`,
+`lesson_type='concept'` (the studio's state default, which it writes on editorial essays
+too — copied as-is rather than "corrected", so the row is not distinguishable from a
+studio save), `presentation` in full shape with empty takeaways and references, every
+finance and accounting column left NULL, and revision 1 `create` in `essay_revisions`.
+`changed_by` is NULL, which is the truthful record: no authenticated studio session made
+this write.
+
+Both body columns were derived by Postgres from ONE source array in the same statement,
+so `content` and `content_json` cannot describe different documents — the failure
+`EssayEditor` carries a comment about, where the HTML column advanced while the JSON
+column froze. Measured after the write: `content` md5 `e353dc5916cf0066a98f8cf8196167fe`
+at 9,032 bytes, identical to the locally built HTML; `content_json` 32 nodes, 5 of them
+headings, every one level 2, first node a paragraph.
+
+## Verified by rendering, not by reasoning about the route table
+
+The production bundle, served locally: the canonical URL resolves with no redirect, the
+two-segment resolver `/the-next-big-thing/:slug` redirects to it, the SOCIETY chip
+renders, and the five questions come out as `H2` at **30.875px / 700 / Plus Jakarta
+Sans** — the measured h2 spec in `index.css` — above 19px Spectral body. The intro
+paragraph is the article's first child and precedes every heading. `essayUrl` and
+`buildCanonicalUrl` agree on the address, and `extractHeadings` returns all five.
+
+Because RLS correctly hides a draft from anon (see the correction below), the browser
+could not fetch the row over the wire; it was served the row read back out of the live
+database, whose body had been checked md5-identical to what was stored. Every other
+Supabase call in that render went to the real project.
+
+## Correction to CONTENT_MODEL §5: drafts are NOT publicly readable
+
+The note claiming "all essays are publicly selectable (even unpublished/draft)" and
+"drafts are therefore reachable by anyone who knows the slug" is false against the live
+policies. `essays_select_anon_published` is `published = true` for `anon`, and
+`essays_select_authenticated` is `published = true OR is admin`. An anonymous select for
+this draft's slug returns `[]`, measured. The doc is corrected in place; the flagged
+"product decision" it asked for does not exist, because the hole it describes is closed.
+
+---
+
 # 2026-09-14 (v3) — The UI pass: an inert control is not offered, a figure is not a viewport, and a door is sized to the screen
 
 Continues the executed v2 at `66d78b4`. Ten findings (U01–U10) of a focused UI audit; the record is
