@@ -10,8 +10,8 @@ alternatives. Newest first.
 One essay written into `next-big-thing` / Society: "Thinking Was Expensive, but Attention
 with Discernment and Curiosity Is Appreciating", at
 `/the-next-big-thing/society/thinking-was-expensive-but-attention-with-discernment-and-curiosity-is-appreciating`.
-It is the first essay under that category (0 before, 1 now) and it landed as a **draft**,
-deliberately.
+It is the first essay under that category (0 before, 1 now). It was written as a draft and
+then **published on the author's instruction**, with zero key takeaways — see below.
 
 ## "Society" is a category, not a section — reported rather than reconciled
 
@@ -48,19 +48,28 @@ hand-written contents list was added, and no heading exists that the source did 
 separate decision, not a precedent to propagate, and rewriting a published essay's body
 was not this session's mandate.
 
-## It is a draft, because the publish gate wants a summary the piece was told not to have
+## Published with no key takeaways, which the studio gate would have refused
 
 `WriterValidation.validateEssay` hard-blocks publish on three key takeaways for every
-editorial essay (all four real published essays carry exactly three), and the brief
-excluded a summary. The two cannot both be honoured, so neither was quietly broken: the
-essay is saved at `status='draft'`, which no gate applies to, and the publish decision —
-takeaways or not — stays with the author in the studio.
+editorial essay (all four previously published essays carry exactly three), and the brief
+excluded a summary. The two cannot both be honoured. The essay was first saved at
+`status='draft'`, which no gate applies to, so the choice stayed with the author; the
+author then chose to publish it as written. It is therefore the first published essay on
+the site with an empty `presentation.key_takeaways`, and the standing takeaways block
+does not render on it.
+
+Recorded because it is a real divergence, not an oversight: a row that the studio's own
+Publish button would have refused now exists, reached by a direct write. If the gate is
+meant to hold for editorial essays, this row is the counter-example to reconcile — either
+the three-takeaway rule is not absolute for this section, or this essay is an exception
+that should be named as one. That is the author's call and it is not made here.
 
 Rejected: declaring `genre: 'exploratory'` to make takeaways optional. It would have
-cleared the gate, but the repo defines that genre as work "the author has not settled"
-which "must not be read as, or written as, a position", and this essay closes on one
-("Curiosity and discernment are the most bullish assets of this decade"). Clearing a gate
-by mislabelling the contract the piece offers a reader is worse than not clearing it.
+cleared the gate honestly-looking, but the repo defines that genre as work "the author has
+not settled" which "must not be read as, or written as, a position", and this essay closes
+on one ("Curiosity and discernment are the most bullish assets of this decade"). Publishing
+past the gate with the genre left NULL is visible in the row; mislabelling the contract the
+piece offers a reader would not have been.
 
 The deck (`snippet` + `presentation.deck`) is a hard error under every genre and the
 source supplied none, so one was drafted — "Melange was never the variable, and neither is
@@ -102,10 +111,33 @@ Sans** — the measured h2 spec in `index.css` — above 19px Spectral body. The
 paragraph is the article's first child and precedes every heading. `essayUrl` and
 `buildCanonicalUrl` agree on the address, and `extractHeadings` returns all five.
 
-Because RLS correctly hides a draft from anon (see the correction below), the browser
-could not fetch the row over the wire; it was served the row read back out of the live
-database, whose body had been checked md5-identical to what was stored. Every other
-Supabase call in that render went to the real project.
+That first pass ran while the essay was still a draft, so the browser could not fetch the
+row over the wire (RLS correctly hides a draft from anon — see the correction below) and
+was served the row read back out of the live database, md5-identical to what was stored.
+After publishing, the same page was re-rendered **signed out, with nothing synthesised and
+no response edited**: all three REST calls returned 200 under the anon policy, the essay
+fetch carrying the real 22,245-byte row, and the section landing listed the essay with its
+canonical href. The container's Chromium cannot complete TLS to `*.supabase.co`, so each
+request was re-issued verbatim by Node with the same anon key the bundle was built with.
+
+Not verified, and worth saying so: the DEPLOYED page could not be driven in a browser from
+this container — the egress proxy re-terminates TLS with a CA that Playwright's bundled
+Chromium does not trust (`ERR_CERT_AUTHORITY_INVALID`), and disabling verification to get a
+screenshot is not a trade worth making. What was checked on the deploy instead: it serves
+200 for the canonical URL, its bundle carries the Supabase project ref, and its route table
+carries BOTH `the-next-big-thing/:slug` and `the-next-big-thing/:theme/:slug` — so the
+three-segment canonical resolves there, and the two-segment-only bundle the GATE E notes
+worried about is long gone.
+
+## The share card stays generic until the next deploy
+
+`scripts/prerender.mjs` writes a static per-essay `index.html` at BUILD time for every
+PUBLISHED essay. This one was published after the last deploy, so the live URL currently
+serves the SPA shell with the site-wide `<title>Dika Gustiana</title>` and the generic
+og tags, while `indonesias-reindustrialization-bet` (published before that build) serves
+its own. A reader is unaffected — the SPA fetches the row at runtime and renders it — but
+any share of the link previews as the generic site card until the site is rebuilt. No
+deploy was triggered from here; that is an outward-facing action nobody asked for.
 
 ## Correction to CONTENT_MODEL §5: drafts are NOT publicly readable
 
