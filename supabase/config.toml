@@ -2,15 +2,26 @@
 # The old ref (rhwzvgklasvitocbbhvi) is a deleted project.
 project_id = "asypkbkiebjvvpimewfp"
 
-# No edge functions. `council-review` was the last one; it was removed on
-# 2026-08-01 with the Writing Council (design archived at
-# docs/archive/COUNCIL_DESIGN.md), and the quant, remora and personal-finance
-# functions were cut earlier with their modules. Nothing in the app calls an AI
-# provider any more, so there is no gateway URL or key to configure.
+# One edge function: `link-preview` (2026-09-27). It resolves a pasted URL to
+# plain-text card metadata at authoring time, for admins only; see
+# supabase/functions/link-preview/ and docs/DECISIONS.md, "Link previews:
+# server-resolved, metadata only". Nothing in the app calls an AI provider, so
+# there is no gateway URL or key to configure.
 #
-# If a function is ever added back it must run verify_jwt = true AND re-check
-# authorisation server-side rather than trusting a frontend guard. The eight
-# historical quant-* and remora-* functions ran verify_jwt = false while each
-# constructed a SUPABASE_SERVICE_ROLE_KEY client internally, meaning any
-# unauthenticated caller could drive service-role writes that bypass RLS.
-# Nothing in this project ships with verify_jwt = false.
+# Before it there were none. `council-review` was removed on 2026-08-01 with
+# the Writing Council (design archived at docs/archive/COUNCIL_DESIGN.md). Its
+# slug survives on the project only as a 410 tombstone, because deleting a
+# slug needs an access token; the owner removes it with
+# `supabase functions delete council-review`. The quant, remora and
+# personal-finance functions were cut earlier with their modules.
+#
+# Every function must run verify_jwt = true AND re-check authorisation
+# server-side rather than trusting a frontend guard. The eight historical
+# quant-* and remora-* functions ran verify_jwt = false while each constructed
+# a SUPABASE_SERVICE_ROLE_KEY client internally, meaning any unauthenticated
+# caller could drive service-role writes that bypass RLS. Nothing in this
+# project ships with verify_jwt = false. link-preview checks the caller's own
+# token against public.user_roles and constructs no privileged client at all.
+
+[functions.link-preview]
+verify_jwt = true

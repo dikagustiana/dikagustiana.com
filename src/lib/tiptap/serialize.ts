@@ -11,6 +11,7 @@
 import type { JSONContent } from '@tiptap/core';
 import type { FigureBlockData } from '@/components/editorial/FigureBlock';
 import { attrJsonAttribute } from './attrJson';
+import { linkCardMarkup, normalizeLinkCard } from './linkCardData';
 
 // ---------------------------------------------------------------------------
 // Format detection
@@ -182,21 +183,25 @@ function renderNode(node: JSONContent): string {
       return renderFigureHtml(node.attrs as unknown as FigureBlockData);
 
     case 'linkCard': {
-      const url = String(node.attrs?.url ?? '');
-      if (!url) return '';
+      // The COMPLETE record. This blob used to name three fields by hand, and
+      // anything else a card carried was dropped here, on publish and on
+      // revision restore, while the editor still showed it.
+      const card = normalizeLinkCard(node.attrs);
+      if (!card.url) return '';
       // Escaped here, because this builds an HTML *string* — nothing downstream
       // will escape it for us. `renderHTML` writes the same blob raw, because
       // there the DOM does the escaping. See src/lib/tiptap/attrJson.ts.
-      const data = attrJsonAttribute({
-        url,
-        title: String(node.attrs?.title ?? ''),
-        description: String(node.attrs?.description ?? ''),
-      });
-      const label = String(node.attrs?.title ?? '') || url;
+      const data = attrJsonAttribute(card);
+      const visible = linkCardMarkup(card)
+        .map(piece =>
+          piece.className
+            ? `<span class="${piece.className}">${escapeHtml(piece.text)}</span>`
+            : escapeHtml(piece.text),
+        )
+        .join('');
       return (
-        `<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer" ` +
-        `data-type="link-card" data-link-card="${data}" class="link-card">` +
-        `<span class="link-card__title">${escapeHtml(label)}</span></a>`
+        `<a href="${escapeHtml(card.url)}" target="_blank" rel="noopener noreferrer" ` +
+        `data-type="link-card" data-link-card="${data}" class="link-card">${visible}</a>`
       );
     }
 
@@ -392,9 +397,13 @@ function blockMarkdown(node: JSONContent): string {
       return `![${String(node.attrs?.alt ?? 'image')}](${src})`;
     }
     case 'linkCard': {
-      const url = String(node.attrs?.url ?? '');
-      if (!url) return '';
-      return `[${String(node.attrs?.title ?? '') || url}](${url})`;
+      const card = normalizeLinkCard(node.attrs);
+      if (!card.url) return '';
+      // Carries the attribution, not just the link: on a curation entry, whose
+      // post it is IS the substance. Same words the HTML card shows:
+      // "[Title](url) — Author · Source · Date".
+      const [title, ...rest] = linkCardMarkup(card);
+      return `[${title.text}](${card.url})${rest.map(piece => piece.text).join('')}`;
     }
     case 'table': {
       const rows = (node.content ?? []).map(row =>

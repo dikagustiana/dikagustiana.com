@@ -5,16 +5,23 @@ import {
   buildCanonicalUrl,
   isReachable,
 } from '@/domains/writing/schema/placement';
+import { NEXT_BIG_THING_THEMES } from '@/config/nextBigThingThemes';
 
 describe('derivePhase', () => {
   it('strips the section prefix from a category slug', () => {
     expect(derivePhase('green-transition', 'green-transition-where-we-are-now')).toBe('where-we-are-now');
     expect(derivePhase('critical-thinking', 'critical-thinking-clarify')).toBe('clarify');
   });
-  it('maps the five live next-big-thing category slugs to the theme ids the reader filters on', () => {
-    for (const theme of ['technology', 'economy', 'society', 'environment', 'governance']) {
+  it('maps the six live next-big-thing category slugs to the theme ids the reader filters on', () => {
+    // Written out, not derived: these are the category rows in the database.
+    const themes = ['technology', 'economy', 'society', 'environment', 'governance', 'growth'];
+    for (const theme of themes) {
       expect(derivePhase('next-big-thing', `next-big-thing-${theme}`)).toBe(theme);
     }
+    // Tied to the frontend list, so a theme cannot be added to one without the
+    // other (a new theme also needs its category row — a migration).
+    expect(themes).toHaveLength(NEXT_BIG_THING_THEMES.length);
+    expect(new Set(themes)).toEqual(new Set(NEXT_BIG_THING_THEMES.map(t => t.id)));
   });
   it('returns the slug unchanged when there is no prefix', () => {
     expect(derivePhase('development-finance', 'sovereign-wealth-funds')).toBe('sovereign-wealth-funds');

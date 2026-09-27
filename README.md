@@ -7,7 +7,8 @@ pages are anonymous-readable; authoring is admin-only.
 - **Frontend:** Vite 5 · React 18 · TypeScript 5.8 · Tailwind 3 · shadcn/ui · React Router 6 ·
   TanStack Query 5 · TipTap 3 · Recharts · Zod · DOMPurify · KaTeX
 - **Backend:** Supabase (Postgres + Auth + Storage) via `@supabase/supabase-js`, one edge
-  function (`council-review`, the AI "Writing Council")
+  function (`link-preview`, which resolves a pasted URL to plain-text link-card metadata
+  for the editor)
 - **Hosting:** Vercel
 
 ## Running locally
@@ -33,15 +34,32 @@ Vite inlines `import.meta.env` **at build time**, so changing these requires a r
 setting them on the hosting platform without redeploying changes nothing. `.env` is
 gitignored; production values live on Vercel.
 
-The `council-review` edge function additionally needs, set as Supabase function secrets:
+## Edge function: `link-preview`
 
-| secret | what |
-|---|---|
-| `AI_GATEWAY_URL` | base URL of an OpenAI-compatible chat-completions API |
-| `AI_GATEWAY_API_KEY` | key for that API |
+`supabase/functions/link-preview/` resolves a pasted URL to plain-text metadata (title,
+description, author, source, published date) for the editor's link card. The editor calls
+it at **authoring time** from the link-card dialog's **Fetch details** button. Published
+pages never call it: they render the snapshot stored in the essay.
 
-Without them, `/admin/council` renders an explicit "not configured" state rather than
-erroring. `SUPABASE_URL` and the anon/publishable key are injected by the platform.
+- **It needs no secrets.** It reads only what the platform injects: `SUPABASE_URL` and the
+  project's publishable key (`SUPABASE_PUBLISHABLE_KEYS`, falling back to the legacy
+  `SUPABASE_ANON_KEY`). There is no AI provider and nothing to configure.
+- **Admin-only, checked twice.** It is deployed with `verify_jwt = true`
+  (`supabase/config.toml`). The function also re-checks the caller's own token: Auth must
+  return a user, and `public.user_roles` (read under that user's RLS) must hold their admin
+  row. It constructs no service-role or secret-key client.
+- **SSRF-hardened.** It accepts https only and port 443 only, and refuses any host that
+  resolves to a non-public address. It follows at most 3 redirects, re-checking each hop,
+  within a 5 s budget per fetch and a 512 KiB body cap. See the header of `resolve.ts`.
+- **Metadata only.** Provider oEmbed HTML is read for its text and discarded. No markup
+  reaches the editor or the database.
+- **Deploy** through the Supabase MCP `deploy_edge_function` with `verify_jwt: true`,
+  behind the owner's human gate. The resolver's logic is tested offline in
+  `tests/unit/linkPreview.test.ts`.
+
+The earlier `council-review` function (the AI "Writing Council") was removed on 2026-08-01;
+its slug survives on the project only as a 410 tombstone until the owner runs
+`supabase functions delete council-review`. Its `AI_GATEWAY_*` secrets are no longer used.
 
 ## Database & migrations
 
@@ -60,5 +78,5 @@ migration history and must not be deleted.
 - `src/` — the application
 - `src/integrations/supabase/types.ts` — auto-generated from the live schema; replace, never hand-edit
 - `src/lib/tiptap/` — the editor's node schema (`extensions.ts`) and HTML serialization (`serialize.ts`)
-- `supabase/functions/council-review/` — the one edge function
+- `supabase/functions/link-preview/` — the one edge function (admin-only link-card metadata)
 - `docs/` — schema plan, decisions, session log, and per-session reports

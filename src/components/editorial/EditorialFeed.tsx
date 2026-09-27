@@ -26,7 +26,8 @@ interface Essay {
 
 interface EditorialFeedProps {
   section: 'next-big-thing' | 'green-transition';
-  topics?: { id: string; label: string }[];
+  /** Read-only: the feed only lists topics, so it takes a theme constant as-is. */
+  topics?: readonly { id: string; label: string }[];
   getEssayUrl: (essay: Essay) => string;
 }
 

@@ -6,6 +6,8 @@
  * will hide the Phase field entirely.
  */
 
+import { NEXT_BIG_THING_THEMES } from '@/config/nextBigThingThemes';
+
 export interface PhaseOption {
   value: string;
   label: string;
@@ -70,13 +72,7 @@ export const SECTION_PHASE_CONFIG: Record<string, SectionPhaseEntry> = {
   },
   'next-big-thing': {
     phaseLabel: 'Theme',
-    options: [
-      { value: 'technology', label: 'Technology' },
-      { value: 'economy', label: 'Economy' },
-      { value: 'society', label: 'Society' },
-      { value: 'environment', label: 'Environment' },
-      { value: 'governance', label: 'Governance' },
-    ],
+    options: NEXT_BIG_THING_THEMES.map(({ id, label }) => ({ value: id, label })),
   },
   'critical-thinking': {
     phaseLabel: 'Phase',

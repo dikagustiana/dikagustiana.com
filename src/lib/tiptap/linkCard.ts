@@ -1,29 +1,45 @@
 /**
- * `linkCard` — the Embed / link-preview block. Place ONE of the four-place
- * contract (extensions → serialize → ArticleBody → sanitizeHtml).
+ * `linkCard` — the link-preview block. Place ONE of the four-place contract
+ * (extensions → serialize → ArticleBody → sanitizeHtml).
  *
- * Scope decision (docs/DECISIONS.md): this is the client-side card, built from
- * the URL alone. It fetches nothing and embeds nothing. The alternative —
- * real oEmbed/Open Graph metadata — needs a server round trip via an edge
- * function AND, for the embeds people actually want (YouTube, Twitter), an
- * `iframe`, which `sanitizeHtml` currently forbids. That version would need
- * both a new edge function and a widened sanitizer allowlist, so it is not
- * built without asking.
+ * Scope decision (docs/DECISIONS.md, "Link previews: server-resolved,
+ * metadata only"). This card used to be built from the URL alone, and real
+ * oEmbed was deferred because it needs a server round trip and, for iframe
+ * embeds, a wider sanitizer. The owner asked for it and chose the METADATA-ONLY
+ * variant: no iframe, no third-party script, no provider HTML rendered.
  *
- * Every tag and attribute below (`a`, `span`, `href`, `target`, `rel`, `class`,
- * `data-type`, `data-link-card`) is already in the sanitizer's allowlist, so
- * this block survives publish unchanged.
+ *   - Resolution happens at AUTHORING time. When the author asks, the editor
+ *     calls the `link-preview` edge function, which returns plain text (title,
+ *     description, author, source, date). The result is written into this
+ *     node's attributes and stored with the essay. The author can edit every
+ *     field, and a manual value always wins over a fetched one.
+ *   - The public page renders the stored snapshot and calls nothing. A deleted
+ *     or unreachable source post never blanks an existing card.
+ *   - `resolvedAt` records when the snapshot was taken, so the author can see
+ *     its age. It shows in the editor only.
+ *
+ * Every tag and attribute this block emits (`a`, `span`, `href`, `target`,
+ * `rel`, `class`, `data-type`, `data-link-card`) was already in the
+ * sanitizer's allowlist. Every field rides inside the one `data-link-card`
+ * blob, so the sanitizer and the CSP needed no change for any of it.
  */
 
 import { Node, mergeAttributes } from '@tiptap/core';
 import { ReactNodeViewRenderer, NodeViewWrapper, type NodeViewProps } from '@tiptap/react';
-import { LinkCardBlock, type LinkCardData } from '@/components/editorial/LinkCardBlock';
+import { LinkCardBlock } from '@/components/editorial/LinkCardBlock';
 import { createElement } from 'react';
 import { Trash2 } from 'lucide-react';
-import { attrJsonRaw, parseAttrJson } from './attrJson';
+import { attrJsonRaw } from './attrJson';
+import {
+  LINK_CARD_FIELDS,
+  linkCardFromElement,
+  linkCardMarkup,
+  normalizeLinkCard,
+  type LinkCardData,
+} from './linkCardData';
 
 function LinkCardNodeView({ node, deleteNode, selected }: NodeViewProps) {
-  const attrs = node.attrs as unknown as LinkCardData;
+  const attrs = normalizeLinkCard(node.attrs);
   return createElement(
     NodeViewWrapper,
     null,
@@ -54,11 +70,8 @@ export const LinkCardExtension = Node.create({
 
 
   addAttributes() {
-    return {
-      url: { default: '' },
-      title: { default: '' },
-      description: { default: '' },
-    };
+    // One attribute per stored field (linkCardData.ts), all plain strings.
+    return Object.fromEntries(LINK_CARD_FIELDS.map(field => [field, { default: '' }]));
   },
 
   parseHTML() {
@@ -72,37 +85,30 @@ export const LinkCardExtension = Node.create({
         // styled link. Insert one, reload, and the block was simply gone.
         // Covered by tests/unit/editorHtmlRoundTrip.test.ts.
         priority: 100,
-        getAttrs: dom => {
-          if (typeof dom === 'string') return {};
-          const el = dom as HTMLElement;
-          const stored = parseAttrJson<Record<string, unknown>>(el.getAttribute('data-link-card'));
-          if (stored) return stored;
-          // No blob (hand-written HTML, or a sanitiser that dropped it): rebuild
-          // from what the card renders.
-          return {
-            url: el.getAttribute('href') ?? '',
-            title: el.querySelector('.link-card__title')?.textContent ?? '',
-            description: el.querySelector('.link-card__description')?.textContent ?? '',
-          };
-        },
+        // The blob when present; with no blob (hand-written HTML, or a
+        // sanitiser that dropped it), rebuilt from what the card renders.
+        getAttrs: dom => (typeof dom === 'string' ? {} : linkCardFromElement(dom as HTMLElement)),
       },
     ];
   },
 
   renderHTML({ node }) {
-    const attrs = node.attrs as unknown as LinkCardData;
+    const card = normalizeLinkCard(node.attrs);
     return [
       'a',
       mergeAttributes({
-        href: attrs.url,
+        href: card.url,
         target: '_blank',
         rel: 'noopener noreferrer',
         'data-type': 'link-card',
         // Raw: this builds real DOM, which escapes attribute values itself.
-        'data-link-card': attrJsonRaw(attrs),
+        'data-link-card': attrJsonRaw(card),
         class: 'link-card',
       }),
-      ['span', { class: 'link-card__title' }, attrs.title || attrs.url || ''],
+      // "Title — Author · Source · Date". The same pieces serialize.ts writes.
+      ...linkCardMarkup(card).map(piece =>
+        piece.className ? ['span', { class: piece.className }, piece.text] : piece.text,
+      ),
     ];
   },
 

@@ -13,19 +13,21 @@ import { describe, it, expect, vi } from 'vitest';
 import { screen } from '@testing-library/react';
 import { PublishModal } from '@/components/writer/PublishModal';
 import { essayUrl } from '@/lib/essayUrl';
+import { NEXT_BIG_THING_THEMES } from '@/config/nextBigThingThemes';
 import { renderWithRouter } from './helpers/renderWithProviders';
 
 vi.mock('@/hooks/queries/useFinance', () => ({
   useAllFinanceModules: () => ({ data: [] }),
 }));
 
-const NBT_CATEGORIES = [
-  { id: 'cat-tech', name: 'Technology', slug: 'next-big-thing-technology' },
-  { id: 'cat-econ', name: 'Economy', slug: 'next-big-thing-economy' },
-  { id: 'cat-soc', name: 'Society', slug: 'next-big-thing-society' },
-  { id: 'cat-env', name: 'Environment', slug: 'next-big-thing-environment' },
-  { id: 'cat-gov', name: 'Governance', slug: 'next-big-thing-governance' },
-];
+// The section's categories as the modal receives them from public.categories
+// (slug `next-big-thing-<theme id>`), derived from the theme list rather than
+// written out as one more copy of it.
+const NBT_CATEGORIES = NEXT_BIG_THING_THEMES.map(({ id, label }) => ({
+  id: `cat-${id}`,
+  name: label,
+  slug: `next-big-thing-${id}`,
+}));
 
 function renderModal(overrides: Partial<Parameters<typeof PublishModal>[0]>) {
   const noop = () => {};
@@ -69,7 +71,7 @@ describe('publish modal placement fork', () => {
   });
 
   it('editorial section with a category chosen: the URL preview IS the canonical builder output', () => {
-    renderModal({ categoryId: 'cat-tech' });
+    renderModal({ categoryId: 'cat-technology' });
     const expected = essayUrl({ slug: '…', section: 'next-big-thing', phase: 'technology' });
     expect(expected).toBe('/the-next-big-thing/technology/…');
     expect(screen.getByText(expected!)).toBeInTheDocument();

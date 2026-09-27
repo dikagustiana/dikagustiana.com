@@ -11,7 +11,7 @@
  */
 import fs from 'node:fs';
 
-const MIN_TESTS = 561; // 565 after the v5.1 pass: essay associations with their context and publication state, the five-group overview and its mapping, asset finance under its recipients, the energy anatomy, the narrow layer bars, and the card qualifications; slack of 4, not 40.
+const MIN_TESTS = 662; // 666 after the growth-and-link-preview pass (PR #35): the link-preview resolver's SSRF and resolution suite (76), the link card through publish and on the page, the link-card dialog and its client, Growth's nav route, and the markdown attribution; slack of 4, not 40.
 
 const reportPath = process.argv[2] ?? 'vitest-report.json';
 if (!fs.existsSync(reportPath)) {

@@ -38,6 +38,7 @@ import { generateUniqueSlug } from '@/domains/writing/hooks/useWriterEssay';
 import { useEssayAutosave, useDraftRecovery } from '@/hooks/useEssayAutosave';
 import { tiptapJsonToHtml } from '@/lib/tiptap/serialize';
 import { resolvePresentation, type EssayPresentation } from '@/lib/presentation';
+import { NEXT_BIG_THING_THEMES } from '@/config/nextBigThingThemes';
 
 interface WriterEditorProps {
   section: string;
@@ -69,13 +70,7 @@ interface EssayData {
 const DEFAULT_AUTHOR = 'Dika Gustiana';
 
 const PHASE_OPTIONS: Record<string, { id: string; label: string }[]> = {
-  'next-big-thing': [
-    { id: 'technology', label: 'Technology' },
-    { id: 'economy', label: 'Economy' },
-    { id: 'society', label: 'Society' },
-    { id: 'environment', label: 'Environment' },
-    { id: 'governance', label: 'Governance' },
-  ],
+  'next-big-thing': [...NEXT_BIG_THING_THEMES],
   'green-transition': [
     { id: 'where-we-are-now', label: 'Where We Are Now' },
     { id: 'challenges-ahead', label: 'Challenges Ahead' },

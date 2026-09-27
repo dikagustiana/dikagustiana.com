@@ -10,6 +10,7 @@ import { ArticleShell, ArticleLayout } from '@/components/editorial';
 import { contentToHtml } from '@/lib/tiptap/serialize';
 import { isPublished } from '@/lib/publication';
 import { essayUrl } from '@/lib/essayUrl';
+import { NEXT_BIG_THING_THEMES, nextBigThingThemePath } from '@/config/nextBigThingThemes';
 
 interface Essay {
   id: string;
@@ -38,13 +39,10 @@ interface EssayListItem {
   title: string;
 }
 
-const categoryLabels: Record<string, string> = {
-  technology: 'Technology',
-  economy: 'Economy',
-  society: 'Society',
-  environment: 'Environment',
-  governance: 'Governance',
-};
+/** Theme id (the row's `phase`) → the label the article header prints. */
+const categoryLabels: Record<string, string> = Object.fromEntries(
+  NEXT_BIG_THING_THEMES.map(({ id, label }) => [id, label]),
+);
 
 export default function NextBigThingEssayPage() {
   // Two route shapes land here: the canonical three segments
@@ -179,7 +177,7 @@ export default function NextBigThingEssayPage() {
   const deck = presentation.deck || essay.snippet;
   const topic = essay.phase ? categoryLabels[essay.phase] || essay.phase : undefined;
   const backPath = essay.phase
-    ? `/the-next-big-thing?theme=${essay.phase}`
+    ? nextBigThingThemePath(essay.phase)
     : '/the-next-big-thing';
 
   const htmlContent = contentToHtml(essay.content || '');
