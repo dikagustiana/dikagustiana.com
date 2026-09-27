@@ -1,3 +1,5 @@
+import { NEXT_BIG_THING_THEMES, nextBigThingThemePath } from './nextBigThingThemes';
+
 export interface NavItem {
   label: string;
   path: string;
@@ -53,13 +55,14 @@ export const learningItems: NavItem[] = [
   { label: 'IELTS', path: '/english-ielts' },
 ];
 
-export const nextBigThingItems: NavItem[] = [
-  { label: 'Technology', path: '/the-next-big-thing?theme=technology' },
-  { label: 'Economy', path: '/the-next-big-thing?theme=economy' },
-  { label: 'Society', path: '/the-next-big-thing?theme=society' },
-  { label: 'Environment', path: '/the-next-big-thing?theme=environment' },
-  { label: 'Governance', path: '/the-next-big-thing?theme=governance' },
-];
+/**
+ * Derived from NEXT_BIG_THING_THEMES, never written out. The section page's
+ * sub-navigation tabs are this same array, not a copy of it.
+ */
+export const nextBigThingItems: NavItem[] = NEXT_BIG_THING_THEMES.map(({ id, label }) => ({
+  label,
+  path: nextBigThingThemePath(id),
+}));
 
 export const navSections: NavSection[] = [
   { label: 'Home', path: '/' },

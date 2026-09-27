@@ -6,22 +6,8 @@ import { Button } from '@/components/ui/button';
 import { PenLine } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { essayUrl } from '@/lib/essayUrl';
-
-const TOPICS = [
-  { id: 'technology', label: 'Technology' },
-  { id: 'economy', label: 'Economy' },
-  { id: 'society', label: 'Society' },
-  { id: 'environment', label: 'Environment' },
-  { id: 'governance', label: 'Governance' },
-];
-
-const NEXT_BIG_THING_TABS = [
-  { label: 'Technology', path: '/the-next-big-thing?theme=technology' },
-  { label: 'Economy', path: '/the-next-big-thing?theme=economy' },
-  { label: 'Society', path: '/the-next-big-thing?theme=society' },
-  { label: 'Environment', path: '/the-next-big-thing?theme=environment' },
-  { label: 'Governance', path: '/the-next-big-thing?theme=governance' },
-];
+import { nextBigThingItems } from '@/config/navConfig';
+import { NEXT_BIG_THING_THEMES } from '@/config/nextBigThingThemes';
 
 export default function TheNextBigThing() {
   const { isAdmin } = useAuth();
@@ -41,7 +27,9 @@ export default function TheNextBigThing() {
         { label: 'The Next Big Thing' },
       ]}
       subNav={{
-        tabs: NEXT_BIG_THING_TABS,
+        // The header dropdown's items, reused: the tabs used to be a second
+        // hand-written copy of the same five links.
+        tabs: nextBigThingItems,
       }}
     >
       <SEO
@@ -101,7 +89,7 @@ export default function TheNextBigThing() {
 
         <EditorialFeed
           section="next-big-thing"
-          topics={TOPICS}
+          topics={NEXT_BIG_THING_THEMES}
           getEssayUrl={getEssayUrl}
         />
       </div>
