@@ -20,7 +20,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { LinkCardBlock, linkCardHost, type LinkCardData } from './LinkCardBlock';
+import { LinkCardBlock, type LinkCardData } from './LinkCardBlock';
+import { linkCardHost } from '@/lib/tiptap/linkCardData';
 
 interface LinkCardDialogProps {
   open: boolean;

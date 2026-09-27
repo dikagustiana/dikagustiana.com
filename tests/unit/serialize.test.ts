@@ -145,4 +145,24 @@ describe('tiptapJsonToMarkdown', () => {
     expect(tiptapJsonToMarkdown(null)).toBe('');
     expect(tiptapJsonToMarkdown({ type: 'doc' } as JSONContent)).toBe('');
   });
+
+  it('carries a link card\'s attribution, not just a bare link', () => {
+    const card = (attrs: Record<string, string>) => doc({ type: 'linkCard', attrs });
+    expect(
+      tiptapJsonToMarkdown(
+        card({
+          url: 'https://x.com/jack/status/20',
+          title: 'just setting up my twttr',
+          author: 'jack',
+          siteName: 'X',
+          publishedAt: '2006-03-21',
+        }),
+      ),
+    ).toBe('[just setting up my twttr](https://x.com/jack/status/20) — jack · X · 21 March 2006');
+    // A hand-typed card with only a URL and title still names its source.
+    expect(tiptapJsonToMarkdown(card({ url: 'https://www.example.com/a', title: 'T' }))).toBe(
+      '[T](https://www.example.com/a) — example.com',
+    );
+    expect(tiptapJsonToMarkdown(card({ url: '' }))).toBe('');
+  });
 });

@@ -25,6 +25,7 @@ import { LinkCardBlock } from './LinkCardBlock';
 import { cn } from '@/lib/utils';
 import { parseTiptapJson, isLegacyHtmlContent } from '@/lib/tiptap/serialize';
 import { parseAttrJson } from '@/lib/tiptap/attrJson';
+import { linkCardFromElement, normalizeLinkCard } from '@/lib/tiptap/linkCardData';
 import type { JSONContent } from '@tiptap/core';
 import type { CSSProperties } from 'react';
 
@@ -332,18 +333,11 @@ function renderJsonNode(
     }
 
     case 'linkCard': {
-      const url = String(node.attrs?.url ?? '');
-      if (!url) return null;
-      return (
-        <LinkCardBlock
-          key={key}
-          data={{
-            url,
-            title: String(node.attrs?.title ?? ''),
-            description: String(node.attrs?.description ?? ''),
-          }}
-        />
-      );
+      // Every stored field, not a hand-picked few: the card's attribution
+      // (author, source, date) is what a curation entry is about.
+      const card = normalizeLinkCard(node.attrs);
+      if (!card.url) return null;
+      return <LinkCardBlock key={key} data={card} />;
     }
 
     case 'image': {
@@ -543,12 +537,9 @@ function renderLegacyHtml(htmlContent: string, ctx: RenderCtx): ReactNode {
       // link — otherwise the block degrades every time content round-trips
       // through the `content` column.
       if (element.getAttribute('data-type') === 'link-card') {
-        const stored = parseAttrJson<Partial<{ url: string; title: string; description: string }>>(
-          element.getAttribute('data-link-card'),
-        );
-        const data = stored
-          ? { url: href, title: '', description: '', ...stored }
-          : { url: href, title: element.textContent ?? '', description: '' };
+        // The same reader the editor's parseHTML uses: the whole blob when
+        // present, else what the markup shows.
+        const data = linkCardFromElement(element);
         return data.url ? <LinkCardBlock key={key} data={data} /> : null;
       }
 

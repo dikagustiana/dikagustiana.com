@@ -16,8 +16,63 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { Editor } from '@tiptap/core';
+import { Editor, type JSONContent } from '@tiptap/core';
 import { getSchemaExtensions, getBriefExtensions } from '@/lib/tiptap/extensions';
+import { tiptapJsonToHtml } from '@/lib/tiptap/serialize';
+import { sanitizeHtml } from '@/lib/sanitizeHtml';
+import { LINK_CARD_FIELDS } from '@/lib/tiptap/linkCardData';
+
+/**
+ * A card with every field set, and every value hostile to naive escaping:
+ * double quotes, an apostrophe, ampersands (also inside both URLs), angle
+ * brackets and a non-ASCII curly quote.
+ */
+const FULL_CARD = {
+  url: 'https://www.noahpinion.blog/p/the-case-for?utm_source=a&utm_medium=b',
+  title: 'A title with "quotes", it\'s got an ampersand & <angle> brackets ’',
+  description: 'One line with "quotes" & an ampersand.',
+  author: 'Noah Smith & "Friends"',
+  authorUrl: 'https://www.noahpinion.blog/about?a=1&b=2',
+  siteName: 'Noahpinion <newsletter>',
+  publishedAt: '2024-03-21',
+  resolvedAt: '2026-09-27T08:00:00.000Z',
+};
+
+/**
+ * The same shape with ordinary values: none of the characters an HTML
+ * serializer spells differently from serialize.ts in text (' " < >), though the
+ * URL still carries an ampersand and the blob still carries JSON quotes.
+ */
+const PLAIN_CARD = {
+  url: 'https://x.com/jack/status/20?s=20&t=abc',
+  title: 'just setting up my twttr',
+  description: 'The first post on the service.',
+  author: 'jack',
+  authorUrl: 'https://x.com/jack',
+  siteName: 'X',
+  publishedAt: '2006-03-21',
+  resolvedAt: '2026-09-27T08:00:00.000Z',
+};
+
+const cardDoc = (attrs: Record<string, string>): JSONContent => ({
+  type: 'doc',
+  content: [{ type: 'linkCard', attrs }],
+});
+
+/** The first linkCard's attrs after the editor parses `html`. */
+function parsedCardAttrs(html: string): Record<string, unknown> | undefined {
+  const editor = new Editor({ extensions: getSchemaExtensions(), content: html });
+  const node = editor.getJSON().content?.find(n => n.type === 'linkCard');
+  editor.destroy();
+  return node?.attrs;
+}
+
+/** What the DOM serializer makes of `html` with nothing removed. */
+function reserialized(html: string): string {
+  const template = document.createElement('template');
+  template.innerHTML = html;
+  return template.innerHTML;
+}
 
 function editorWith(html: string): Editor {
   return new Editor({
@@ -110,6 +165,16 @@ describe('editor HTML round-trip', () => {
     expect(node?.attrs?.title).toBe('A title with "quotes" & an ampersand');
   });
 
+  it('a fully populated linkCard round-trips byte-stable with every field intact', () => {
+    const editor = new Editor({ extensions: getSchemaExtensions(), content: '<p></p>' });
+    editor.commands.insertLinkCard(FULL_CARD);
+    const once = editor.getHTML();
+    editor.destroy();
+
+    expect(roundTrip(once)).toBe(once);
+    expect(parsedCardAttrs(once)).toEqual(FULL_CARD);
+  });
+
   it('figure survives a parse/serialise round trip', () => {
     const editor = new Editor({ extensions: getSchemaExtensions(), content: '<p></p>' });
     editor.commands.insertFigure({
@@ -194,6 +259,89 @@ describe('editor HTML round-trip', () => {
     });
     reparsed.destroy();
     expect(noteText).toBe('See BIS Quarterly, "Q1 2024" & annexes <3');
+  });
+});
+
+// ── The link card through publish. The editor's own round trip above cannot
+//    see the trap this block exists for: serialize.ts (JSON → HTML, used on
+//    publish surfaces and on revision restore) used to write a hand-picked
+//    three-field blob, so every other field was dropped on the way out while
+//    the editor still showed it. Every field must survive
+//    serialize → sanitizeHtml → parseHTML, and the sanitizer must remove
+//    nothing: that is the proof no allowlist change was needed. ──
+
+describe('link card through publish (serialize → sanitizeHtml → parseHTML)', () => {
+  it('a fully populated card comes back into the editor with EVERY field intact', () => {
+    const published = sanitizeHtml(tiptapJsonToHtml(cardDoc(FULL_CARD)));
+    const attrs = parsedCardAttrs(published);
+    expect(attrs).toEqual(FULL_CARD);
+    // Spelled out, so a field added to the record but not to this fixture
+    // fails here rather than passing by omission.
+    for (const field of LINK_CARD_FIELDS) {
+      expect(attrs?.[field], field).toBe(FULL_CARD[field]);
+    }
+  });
+
+  it('sanitizeHtml returns the serialized enriched card byte-for-byte', () => {
+    const html = tiptapJsonToHtml(cardDoc(PLAIN_CARD));
+    expect(html).toContain('data-link-card=');
+    expect(sanitizeHtml(html)).toBe(html);
+  });
+
+  it("sanitizeHtml returns the editor's own card HTML byte-for-byte, hostile values included", () => {
+    // `content` stores exactly this: the editor's getHTML(), which published
+    // pages render. It is already in the serializer's canonical spelling.
+    const editor = new Editor({ extensions: getSchemaExtensions(), content: '<p></p>' });
+    editor.commands.insertLinkCard(FULL_CARD);
+    const html = editor.getHTML();
+    editor.destroy();
+    expect(sanitizeHtml(html)).toBe(html);
+  });
+
+  it('with hostile values, sanitizeHtml removes nothing from the serialized card', () => {
+    // serialize.ts spells a text-node quote as &quot; and an apostrophe as
+    // &#39;; the DOM serializer writes both raw. So compare against the
+    // untouched DOM round trip: equal means only the spelling changed.
+    const html = tiptapJsonToHtml(cardDoc(FULL_CARD));
+    expect(sanitizeHtml(html)).toBe(reserialized(html));
+  });
+
+  it("the stored HTML carries title, author, source and date as plain text", () => {
+    const text = new DOMParser()
+      .parseFromString(tiptapJsonToHtml(cardDoc(PLAIN_CARD)), 'text/html')
+      .body.textContent;
+    expect(text).toBe('just setting up my twttr — jack · X · 21 March 2006');
+  });
+
+  it('a card stored before the widening (three-field blob) still opens, new fields empty', () => {
+    const legacy =
+      '<a href="https://example.com/a" target="_blank" rel="noopener noreferrer" data-type="link-card" ' +
+      'data-link-card="{&quot;url&quot;:&quot;https://example.com/a&quot;,&quot;title&quot;:&quot;Old&quot;,&quot;description&quot;:&quot;Kept&quot;}" ' +
+      'class="link-card"><span class="link-card__title">Old</span></a>';
+    expect(parsedCardAttrs(legacy)).toEqual({
+      url: 'https://example.com/a',
+      title: 'Old',
+      description: 'Kept',
+      author: '',
+      authorUrl: '',
+      siteName: '',
+      publishedAt: '',
+      resolvedAt: '',
+    });
+  });
+
+  it('with no blob at all, the card is rebuilt from what its markup shows', () => {
+    const bare =
+      '<a href="https://example.com/b" data-type="link-card" class="link-card">' +
+      '<span class="link-card__title">Shown title</span> — ' +
+      '<span class="link-card__author">A. Writer</span> · <span class="link-card__source">Example</span></a>';
+    const attrs = parsedCardAttrs(bare);
+    expect(attrs).toMatchObject({
+      url: 'https://example.com/b',
+      title: 'Shown title',
+      author: 'A. Writer',
+      siteName: 'Example',
+    });
   });
 });
 
