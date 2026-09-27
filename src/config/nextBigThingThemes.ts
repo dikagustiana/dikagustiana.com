@@ -21,6 +21,9 @@ export const NEXT_BIG_THING_THEMES = [
   { id: 'society', label: 'Society' },
   { id: 'environment', label: 'Environment' },
   { id: 'governance', label: 'Governance' },
+  // Curation: entries built around someone else's post, with the commentary
+  // as the substance. Last on purpose — category sort_order 6.
+  { id: 'growth', label: 'Growth' },
 ] as const;
 
 export type NextBigThingThemeId = (typeof NEXT_BIG_THING_THEMES)[number]['id'];
