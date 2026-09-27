@@ -3,12 +3,21 @@
 Append-only. Newest entry first. A fresh session must be able to resume from this file.
 
 ## NEXT ACTION (single)
-**Open and merge the PR for `claude/draft-structure-coming-soon` (base `main`), let
-Vercel deploy, then — as a separate later step — apply the staged `essay_count`
-removal below once the deployed pages are confirmed reading the derived counts.**
-The `essay_structure` view is ALREADY LIVE (backward-compatible: the deployed bundle
-never queries it), so the DB/deploy window is open but harmless. Gates S1–S7 all
-PASSED (`docs/GATE_LEDGER.md`, "Structure-visibility session").
+**Review and merge the PR for `claude/nbt-growth-and-link-preview` (base `main`), then
+let Vercel deploy.** Both live pieces it depends on are ALREADY LIVE on
+`asypkbkiebjvvpimewfp`, and neither breaks the currently deployed bundle:
+- the `next-big-thing-growth` category row. The deployed bundle's nav still lists five
+  themes, but the admin publish modal already offers Growth, because it reads categories
+  from the DB;
+- the `link-preview` edge function (v1, `verify_jwt = true`). Nothing calls it until this
+  branch's editor ships.
+
+Gates A–D and E/F all PASSED (`docs/GATE_LEDGER.md`, "Growth-and-link-preview session").
+
+*Previous NEXT ACTION, updated in place:* its merge item is done
+(`claude/draft-structure-coming-soon` is in `main`, checked 2026-09-27). The staged removal
+below is **still not applied**: all 49 of 49 `finance_modules` rows still carry `essay_count`,
+re-read 2026-09-27. It stays a separate, later step:
 
 **Staged follow-up migration (do NOT apply until the derived read path is confirmed
 in production — the *_fields precedent; name it e.g. `drop_module_meta_essay_count`):**
@@ -18,9 +27,82 @@ in production — the *_fields precedent; name it e.g. `drop_module_meta_essay_c
 UPDATE public.finance_modules SET module_meta = module_meta - 'essay_count'
 WHERE module_meta ? 'essay_count';
 ```
-Standing item unchanged: set the two backup secrets and flip the backup workflow's
-first run green. Owner items still pending: the `/about` biography, and the two
-copy-linter decisions.
+Standing items, not touched or checked by the 2026-09-27 session:
+- set the two backup secrets and flip the backup workflow's first run green;
+- delete the `council-review` 410 tombstone slug (`supabase functions delete
+  council-review`; needs an access token).
+
+Owner items still pending: the `/about` biography, and the two copy-linter decisions.
+
+## 2026-09-27 (growth-and-link-preview session) — Growth, one theme list, link previews resolved server-side
+
+Branch `claude/nbt-growth-and-link-preview`, base `main` @ `1c33310`. **Pushed, NOT merged.**
+Commits: `3ee2608` (one theme list), `474e302` (Growth), `12d1c07` (category row mirror),
+`841ace2` (widened link card), `cd777d1` (edge function), `0fe2444` (editor wiring), plus
+this records commit.
+
+**Applied to the database (`asypkbkiebjvvpimewfp`, via `apply_migration` only):**
+`next_big_thing_growth_category` → version **`20260927072835`**. It inserts one row,
+`next-big-thing-growth` / Growth / sort_order 6, plus an in-migration assert of 6 rows.
+The owner pre-approved the exact SQL at gate C, and it was applied only after gates A and
+B were green. The mirror is byte-identical to what ran. No schema change, no RLS change,
+`types.ts` untouched.
+
+**Deployed:** edge function **`link-preview` v1** (`verify_jwt = true`, id `441dd893…`),
+owner-approved at the deploy gate. Admin-only. It resolves a URL to plain-text card
+metadata. No DB writes, and no service-role or secret-key client.
+
+**Temporary, then removed (owner-approved protocol):** one throwaway email user,
+`gate-link-preview-20260927@example.com`, id `8916cbb9-…`. It was created by SQL with a
+password generated privately and never printed. It was tested as a non-admin (403), granted
+admin for **2 min 2 s** (08:12:22–08:14:24 UTC) for the SSRF, real-URL and editor checks,
+then deleted. Every trace read back 0; `auth.users` is back to 1. No content was saved
+(autosave cannot run on an unsaved essay; 0 REST writes recorded).
+
+**What changed in the app:**
+- `src/config/nextBigThingThemes.ts` is the one theme list. The six sites and the test
+  fixture derive from it (owner decision on the unlisted seventh copy).
+- Growth is the sixth theme, last.
+- The `linkCard` node carries `author`, `authorUrl`, `siteName`, `publishedAt` and
+  `resolvedAt`, through all four contract places. `serialize.ts` no longer drops fields.
+- The link-card dialog gained **Fetch details**. Manual values win, the snapshot's date is
+  shown, and a failure leaves manual entry intact.
+- `vercel.json` and `sanitizeHtml.ts` are unchanged.
+
+**Real URLs, verbatim from the deployed function (2026-09-27 ~08:12 UTC):**
+- `https://x.com/jack/status/20` →
+  `{"ok":true,"data":{"title":"just setting up my twttr","description":"","author":"jack","authorUrl":"https://x.com/jack","siteName":"X","publishedAt":"2006-03-21","resolvedAt":"2026-09-27T08:12:46.609Z"},"finalUrl":"https://x.com/jack/status/20","sources":["oembed-discovery","meta","title"]}`
+  (2.7 s)
+- `https://www.noahpinion.blog/p/wheres-the-intelligence-explosion` →
+  `{"ok":true,"data":{"title":"Where’s the “intelligence explosion”?","description":"Ramez Naam gives a skeptic’s take on Recursive Self-Improvement.","author":"Ramez Naam","authorUrl":"https://substack.com/@rameznaam","siteName":"Noahpinion","publishedAt":"2026-09-27","resolvedAt":"2026-09-27T08:12:48.136Z"},"finalUrl":"https://www.noahpinion.blog/p/wheres-the-intelligence-explosion","sources":["meta","title"]}`
+  (1.5 s)
+- `https://www.bbc.co.uk/news/articles/cqrm99mm9l84o` →
+  `{"ok":true,"data":{"title":"Men held under Explosives Act as major incident declared","description":"A major incident is declared and villagers have been evacuated from their homes in Whelford near RAF Fairford.","author":"","authorUrl":"","siteName":"BBC News","publishedAt":"2026-09-27","resolvedAt":"2026-09-27T08:12:49.003Z"},"finalUrl":"https://www.bbc.co.uk/news/articles/cqrm99mm9l84o","sources":["meta","title"]}`
+  (0.8 s)
+
+X resolved **anonymously** via oEmbed discovery, so the owner's X-fallback question did not
+arise. No credentials, scraping or headless browser were added.
+
+**Premises in the brief that did not hold, reported before acting and resolved by the owner:**
+- the seventh enumeration (the fixture now derives from the constant);
+- prerender writes head tags only, so no body reaches static HTML (the check was restated:
+  stored `content` HTML carries the attribution as text);
+- only one editor is live (`WriterStudio` redirects; `sectionPhaseConfig.ts` has no
+  importers), so only `LinkCardDialog` was wired;
+- the project was not function-free: a `council-review` 410 tombstone remains (owner action
+  above);
+- the only auth user was the owner, hence the throwaway-user protocol.
+
+**Found, not acted on:**
+- four applied migrations have no repo mirror (listed in DECISIONS 2026-09-27);
+- README still lists Recharts, which `package.json` no longer has. Its edge-function
+  section is now corrected.
+
+**Resume from here:** nothing is half-done. Merge is the only open step. If the PR changes
+before merge, re-run `npm run typecheck && npm run test:unit && npm run build` (floor
+**42 files / 666 tests**). The function needs no redeploy unless
+`supabase/functions/link-preview/` changes. If it does, redeploy through the MCP with
+`verify_jwt: true`, behind the same human gate.
 
 ## 2026-08-03 (structure-visibility session) — draft titles and decks go public, gates S1–S7
 

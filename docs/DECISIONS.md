@@ -5,6 +5,173 @@ alternatives. Newest first.
 
 ---
 
+# 2026-09-27 — The Growth theme, one theme list, and link previews resolved server-side
+
+Branch `claude/nbt-growth-and-link-preview`, base `main` @ `1c33310`, not merged. Gates are in
+`docs/GATE_LEDGER.md` ("Growth-and-link-preview session").
+
+## One source of truth for The Next Big Thing's themes
+
+**The list lives in `src/config/nextBigThingThemes.ts` (`NEXT_BIG_THING_THEMES`), and every
+surface derives from it.** It had been written out six times in `src/`, in four field-name
+conventions, plus a seventh copy the brief had not listed (the `NBT_CATEGORIES` fixture in
+`tests/unit/publishModalPlacement.test.tsx`). None of them had drifted. The home follows the
+precedent already in that directory: `consolidationTopics.ts` is the single source for another
+topic list, read by public pages and the writer. Rejected homes: `navConfig.ts`, which would make
+the admin editors depend on navigation config, and `sectionLabels.ts`, which names sections, not the
+themes inside one.
+
+- Each consumer adapts the shape at its own site (`{ value, label }`, `{ label, path }`, an id →
+  label map). The constant does not try to fit anyone's field names.
+- The section page's tabs are `nextBigThingItems` itself (the second copy is deleted). Its topic filter
+  takes the constant as-is: `EditorialFeed`'s `topics` prop became `readonly`.
+- The `?theme=` URL has one builder, `nextBigThingThemePath()`, used by the nav and by the essay page's
+  back link.
+- The test fixture derives from the constant (owner decision, 2026-09-27). The only change is that its
+  test-internal id `cat-tech` became `cat-technology`.
+- `src/lib/admin/sectionPhaseConfig.ts` has no importers at all. It was rewritten as asked anyway, so
+  that a later revival cannot resurrect a stale copy. Deleting it is a separate decision, not taken here.
+- **Array order is display order everywhere, and it equals `sort_order` on the `next-big-thing-<id>`
+  rows of `public.categories`.** Adding a theme is two edits: the constant, and a category row
+  (migration). `tests/unit/placement.test.ts` ties its written-out slug loop to the constant by length
+  and by members, so a theme cannot be added to one side alone.
+
+## Growth: last, visible while empty
+
+Growth is the sixth theme: curation entries built around someone else's post, with the owner's
+commentary as the substance.
+- **Position:** last, after Governance (`sort_order` 6; migration `20260927072835`). Placing it beside
+  Economy would have needed four rows' `sort_order` bumped and the array reordered. Not asked for.
+- **Empty but visible:** the owner's assumed default, unchanged. `?theme=growth` renders the feed's
+  own empty state ("0 essays / No essays found"), measured.
+
+## Link previews: server-resolved, metadata only
+
+**The link card's metadata is resolved on the server at authoring time, never at read time, and only
+plain text comes back.** This takes the door the 2026-08-01 entry below left open ("Embed stays a
+client-side link card"), narrowly. The owner asked and chose the metadata-only variant: no iframe, no
+third-party script, no provider HTML rendered.
+
+- **Authoring time.** In the editor's link-card dialog, the author presses **Fetch details**. The
+  `link-preview` edge function returns title, description, author, author link, source and published
+  date, and they land in ordinary editable fields.
+  - Manual values always win: a field the author has typed in, before or during the fetch, is never
+    overwritten.
+  - `resolvedAt` records when the snapshot was taken. It shows in the editor only.
+  - A snapshot belongs to its link: changing the URL drops untouched fetched values.
+  - A failed fetch shows a plain sentence and leaves manual entry, the old floor, exactly as it was.
+    Publishing never waits on a fetch.
+- **Read time: nothing.** The public page renders the stored snapshot (both `ArticleBody` paths,
+  measured with zero fetch/XHR). A deleted or unreachable source post never blanks a published card.
+- **Consequences, all verified.**
+  - `vercel.json`'s CSP is unchanged: the editor's call goes to `*.supabase.co`, already in
+    `connect-src`, and the reading path makes no request.
+  - `src/lib/sanitizeHtml.ts` is unchanged: every field rides inside the existing `data-link-card`
+    blob, and the visible markup is `span` + `class`. The sanitizer returns the enriched card
+    byte-for-byte.
+  - No new `data-*` attribute was introduced.
+- **The four-place contract, and the trap in it.**
+  - One field list (`src/lib/tiptap/linkCardData.ts`) now feeds the node's attributes, `serialize.ts`,
+    both `ArticleBody` paths and the fallback reader.
+  - `serialize.ts` used to write a hand-picked three-field blob. Any other field was dropped on every
+    publish surface and on revision restore (`WriterEditor` restores a revision through
+    `tiptapJsonToHtml`), while the editor still showed it. It now writes the complete record, and a
+    test fails if it does not.
+- **What the card shows.** It is still one `<a>` to the source.
+  - The card itself shows source (site name, else the host), title, description, and a byline of
+    author and date.
+  - The date is formatted by `fullDate`: UTC, always with its year, so stored HTML cannot drift with
+    the viewer's zone or the calendar year.
+  - Stored HTML reads "Title — Author · Source · Date" in class-named spans. That is plain text where
+    raw HTML is shown, and it can be read back if the blob is ever lost.
+  - Markdown carries the attribution too: on a curation entry, whose post it is is the substance.
+  - No remote thumbnail. This page has had a hot-linked third-party image removed once already.
+- **Rejected:**
+  - resolving at read time: a request per reader, a CSP change, and cards that blank when the source
+    dies;
+  - iframe embeds (the sanitizer stance below stands);
+  - remote thumbnails;
+  - rendering provider HTML;
+  - the `@supabase/server` wrapper (it builds a secret-key admin client on `ctx`);
+  - supabase-js inside the function. Plain `fetch` means no privileged client can exist in it.
+
+## The function trusts the caller's token, not the gateway alone
+
+`supabase/functions/link-preview` is deployed with `verify_jwt = true` AND re-checks authorisation
+server-side:
+- Auth must return a user for the caller's token.
+- PostgREST, called with that same token, must return the caller's admin row from `user_roles`. RLS
+  `user_roles_select_own` lets a user see only their own roles.
+- No service-role or secret-key client exists in it.
+
+**Measured on the deployed function: `verify_jwt` alone stopped only a request with no auth header and
+one with a bad signature.** Three anonymous variants reached the handler, and the handler refused all
+three with 401:
+- the publishable key alone;
+- the legacy anon key as a Bearer (a valid JWT);
+- the publishable key as a Bearer.
+
+A signed-in non-admin got 403. A deleted user's still-unexpired token got 401. The server-side check
+is load-bearing, not belt-and-braces.
+
+## The function's SSRF policy, and what it leaves
+
+The URL is typed by a human and fetched by a server:
+- https only, port 443 only, no credentials, no single-label or local-only names;
+- A and AAAA resolved, and **any** non-public address refuses the host: private, loopback,
+  link-local including 169.254.169.254, CGNAT, multicast, reserved, documentation, ULA, and the IPv6
+  forms that tunnel to IPv4. IPv6 is allowlisted to global unicast;
+- at most 3 redirects, every hop re-checked from scratch;
+- one 5 s budget per fetch covering DNS, hops and body; a 512 KiB cap with the stream cancelled;
+- only `text/html` pages and JSON oEmbed parsed.
+
+`Deno.resolveDns` works in the deployed runtime; the function logs name the resolver on every
+isolate, and the DNS-over-HTTPS fallback was never used. **Residual, accepted:** `fetch` resolves the
+host again after the check. That is a rebinding window, closed in practice by HTTPS, because an
+internal address will not present a valid certificate for the attacker's host name. The callers are
+admins only.
+
+## Prerender carries no essay body, so the crawler check was restated
+
+The brief expected `scripts/prerender.mjs` output to contain card metadata as plain HTML. **It cannot,
+for any body content:** prerender rewrites only `<head>` tags per published essay, and the body is the
+empty SPA root that React fills.
+
+The owner chose to restate the check (2026-09-27): verified instead that the card's title, author,
+source and date are plain text in the stored `content` HTML, and that the page renders them with no
+request. It follows that a crawler that does not run JavaScript sees no essay body today, card or
+otherwise. Making it see one means prerendering bodies, a separate piece of work.
+
+## X resolves anonymously, today
+
+Measured on the deployed function, from Supabase's egress: `x.com/jack/status/20` resolved through
+oEmbed discovery. X's logged-out page links `publish.x.com/oembed`, which answered with author, author
+link, provider and the post in a blockquote; the post text and date were kept and the markup
+discarded. If X closes that door, the known-endpoint fallback is next and manual entry is the floor.
+**No API key, no scraping workaround and no headless browser were added**, and none should be without
+the owner.
+
+## What a future session must not undo by accident
+
+- Do not narrow the link card's blob or pick fields by hand anywhere. Read `LINK_CARD_FIELDS`.
+- Do not call `link-preview` from any read path, and do not add a remote image to the card.
+- Do not render provider HTML, and do not widen `FORBID_TAGS` for an embed.
+- Keep `verify_jwt = true` AND the handler's own user and admin check. Never add a service-role or
+  secret-key client to this function.
+- A new theme is the constant plus a migration. Never a list written out somewhere else.
+
+## Found, not acted on (out of scope)
+
+- `council-review` still exists on the project as a 410 tombstone. Deleting a slug needs an access
+  token: `supabase functions delete council-review`.
+- Four applied migrations have no repo mirror: `essay_revisions_fk_restrict`,
+  `sync_essay_publication_state`, `slug_unique_code_column_human_slugs` and
+  `consolidate_featuring_on_is_selected`.
+- `WriterEditor`'s Green Transition phase list lacks `climate-finance`, and its finance ids differ from
+  `FINANCE_DOMAIN_OPTIONS`. That is drift in other sections' lists; it only labels the preview.
+
+---
+
 # 2026-09-14 (v3) — The UI pass: an inert control is not offered, a figure is not a viewport, and a door is sized to the screen
 
 Continues the executed v2 at `66d78b4`. Ten findings (U01–U10) of a focused UI audit; the record is
@@ -1238,29 +1405,33 @@ the reasoning on record so it is not relitigated:**
   The specification is a description of the target, not a list of things to
   remove.
 
-## Embed stays a client-side link card
+## Embed stays an anchor card, never an iframe (metadata server-resolved since 2026-09-27)
 
-**Decision, with the door left open.** The block ships as a card built from the
-URL alone — hostname, title, optional description, linking out. Real oEmbed /
-Open Graph metadata is not built. Three reasons, in the order they matter:
+**Updated in place, 2026-09-27.** The card's metadata is no longer typed only by hand.
+The owner asked, and the edge function this entry priced in reason 3 now exists,
+metadata-only. See "Link previews: server-resolved, metadata only" (2026-09-27, at the
+top of this file). What this entry decided about the *iframe* still stands unchanged.
+The card is an anchor plus text, and the sanitizer was not widened.
 
-1. **Widening the sanitizer is the one change on the list whose mistake becomes a
+1. **Still the rule: widening the sanitizer is the one change whose mistake becomes a
    vulnerability rather than a broken block.** `sanitizeHtml` forbids `iframe`
-   (`FORBID_TAGS`, line 34). Allowing arbitrary iframes on this domain is a
+   (`FORBID_TAGS`). Allowing arbitrary iframes on this domain is a
    clickjacking and phishing surface — an attacker with any content-write path
    gets a same-origin frame to overlay or impersonate with. Every other block in
-   this menu fails safe; this one would fail open.
-2. **There is no demand for it.** These essays cite BIS papers, IMF working
-   papers and textbooks. They link to sources; they do not embed video. A clean
-   labelled card is what a reader of a 3,000-word finance lesson actually wants
-   from a citation.
-3. **The cost is a server, not a component.** The browser cannot read another
-   origin's `<meta>` tags, so real metadata needs an edge function that fetches,
-   parses, caches and rate-limits, and handles the sites that block bots.
+   this menu fails safe; this one would fail open. The 2026-09-27 work returns
+   plain text only, so this reason was never tested, let alone overturned.
+2. ~~There is no demand for it.~~ **Superseded 2026-09-27.** The Growth theme is
+   curation: entries built around someone else's post, where whose post it is IS the
+   substance. That is demand for attribution metadata (author, source, date). It is
+   still not demand for embedded video or iframes.
+3. **The cost was a server, not a component, and it has been paid.** The browser
+   cannot read another origin's `<meta>` tags. `supabase/functions/link-preview`
+   fetches under an SSRF policy, parses, and returns text, at authoring time only.
+   Caching is the stored card itself, and rate-limiting is the admin-only gate.
 
-**The door:** if a specific need appears — a named source whose preview genuinely
-helps — the work is an edge function plus a *narrow* allowlist (specific hosts,
-`sandbox` attribute, no `allow-top-navigation`), not a general `iframe` permit.
+**The door, now half-taken:** metadata was taken, narrowly. Any *embed* is still
+the separate work described here, an edge function plus a *narrow* allowlist (specific
+hosts, `sandbox` attribute, no `allow-top-navigation`), not a general `iframe` permit.
 Ask for it as scoped work; do not widen `FORBID_TAGS`.
 
 # 2026-08-01 — Writing-surface session: what the insert menu offers, and why
@@ -1286,8 +1457,12 @@ ported.
   the alternative — pasting them as ordinary paragraphs — loses that silently.
   It is an insertion, the node already exists in the schema, and it costs one
   row. Kept.
-- **Embed / link preview — built as the client-side card. The other version was
-  not built, and needs a decision from the owner.** `sanitizeHtml` forbids
+- **Embed / link preview — built as the client-side card.** *Updated in place
+  2026-09-27: the owner took the decision this bullet asked for. Real metadata is
+  now server-resolved at authoring time and metadata-only, with no iframe, as the
+  recommendation below pointed. See "Link previews: server-resolved, metadata only"
+  at the top of this file. The iframe version remains unbuilt, for the reasons
+  given here.* `sanitizeHtml` forbids
   `iframe` outright (`FORBID_TAGS: ['script','style','iframe','object','embed','form']`).
   So the version people usually mean by "embed" — a YouTube or Twitter iframe —
   would render perfectly in the editor and be stripped on publish: the exact
