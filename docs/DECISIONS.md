@@ -7,8 +7,8 @@ alternatives. Newest first.
 
 # 2026-09-27 — The Growth theme, one theme list, and link previews resolved server-side
 
-Branch `claude/nbt-growth-and-link-preview`, base `main` @ `1c33310`, not merged. Gates are in
-`docs/GATE_LEDGER.md` ("Growth-and-link-preview session").
+Branch `claude/nbt-growth-and-link-preview`, base `main` @ `1c33310`, merged as PR #35 on the
+owner's instruction. Gates are in `docs/GATE_LEDGER.md` ("Growth-and-link-preview session").
 
 ## One source of truth for The Next Big Thing's themes
 

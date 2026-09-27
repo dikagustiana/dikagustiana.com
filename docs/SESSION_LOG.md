@@ -3,21 +3,20 @@
 Append-only. Newest entry first. A fresh session must be able to resume from this file.
 
 ## NEXT ACTION (single)
-**Review and merge the PR for `claude/nbt-growth-and-link-preview` (base `main`), then
-let Vercel deploy.** Both live pieces it depends on are ALREADY LIVE on
-`asypkbkiebjvvpimewfp`, and neither breaks the currently deployed bundle:
-- the `next-big-thing-growth` category row. The deployed bundle's nav still lists five
-  themes, but the admin publish modal already offers Growth, because it reads categories
-  from the DB;
-- the `link-preview` edge function (v1, `verify_jwt = true`). Nothing calls it until this
-  branch's editor ships.
+**Nothing from the 2026-09-27 session is open.** It merged into `main` as **PR #35** on the
+owner's instruction, and Vercel deploys `main`. Its two live pieces were already live on
+`asypkbkiebjvvpimewfp` before the merge:
+- the `next-big-thing-growth` category row;
+- the `link-preview` edge function (v1, `verify_jwt = true`).
 
 Gates A–D and E/F all PASSED (`docs/GATE_LEDGER.md`, "Growth-and-link-preview session").
+A production spot check, whenever convenient: the header's The Next Big Thing dropdown lists
+six themes, and **Fetch details** fills the link-card dialog.
 
-*Previous NEXT ACTION, updated in place:* its merge item is done
-(`claude/draft-structure-coming-soon` is in `main`, checked 2026-09-27). The staged removal
-below is **still not applied**: all 49 of 49 `finance_modules` rows still carry `essay_count`,
-re-read 2026-09-27. It stays a separate, later step:
+**The next action is the staged removal below**, which is still pending. The previous
+NEXT ACTION's merge item is also done (`claude/draft-structure-coming-soon` is in `main`,
+checked 2026-09-27). The staged removal is **still not applied**: all 49 of 49
+`finance_modules` rows still carry `essay_count`, re-read 2026-09-27.
 
 **Staged follow-up migration (do NOT apply until the derived read path is confirmed
 in production — the *_fields precedent; name it e.g. `drop_module_meta_essay_count`):**
@@ -36,10 +35,19 @@ Owner items still pending: the `/about` biography, and the two copy-linter decis
 
 ## 2026-09-27 (growth-and-link-preview session) — Growth, one theme list, link previews resolved server-side
 
-Branch `claude/nbt-growth-and-link-preview`, base `main` @ `1c33310`. **Pushed, NOT merged.**
+Branch `claude/nbt-growth-and-link-preview`, base `main` @ `1c33310`. **Merged into `main` as
+PR #35.** The brief said "do not merge"; the owner then instructed the merge ("langsung merge
+aja") after the gates report. Before merging, the exact CI steps were run locally with CI's
+settings:
+- `eslint . --max-warnings=35`: 0 errors, 25 warnings (`main` had 26);
+- `tsc -b --force`: clean;
+- vitest under `TZ=America/Chicago`: 42 files / 666 tests;
+- the count floor, raised to 662 in this PR per its own rule;
+- the keyless build.
+
 Commits: `3ee2608` (one theme list), `474e302` (Growth), `12d1c07` (category row mirror),
-`841ace2` (widened link card), `cd777d1` (edge function), `0fe2444` (editor wiring), plus
-this records commit.
+`841ace2` (widened link card), `cd777d1` (edge function), `0fe2444` (editor wiring),
+`9b50ab5` (records), plus the pre-merge commit (floor + these merge notes).
 
 **Applied to the database (`asypkbkiebjvvpimewfp`, via `apply_migration` only):**
 `next_big_thing_growth_category` → version **`20260927072835`**. It inserts one row,
@@ -98,9 +106,9 @@ arise. No credentials, scraping or headless browser were added.
 - README still lists Recharts, which `package.json` no longer has. Its edge-function
   section is now corrected.
 
-**Resume from here:** nothing is half-done. Merge is the only open step. If the PR changes
-before merge, re-run `npm run typecheck && npm run test:unit && npm run build` (floor
-**42 files / 666 tests**). The function needs no redeploy unless
+**Resume from here:** nothing is half-done. PR #35 merged the branch, so start from `main`.
+The CI floor is now **662**, and the suite is **42 files / 666 tests**. The function needs no
+redeploy unless
 `supabase/functions/link-preview/` changes. If it does, redeploy through the MCP with
 `verify_jwt: true`, behind the same human gate.
 
