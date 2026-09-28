@@ -3,7 +3,12 @@
 Append-only. Newest entry first. A fresh session must be able to resume from this file.
 
 ## NEXT ACTION (single)
-**Nothing from the 2026-09-27 session is open.** It merged into `main` as **PR #35** on the
+**Owner: check the Vercel preview of `claude/auth-tab-focus-unmount`, then merge it.** The
+branch stops a tab switch from wiping the Writer Studio. The five steps are in the 2026-09-28
+entry below. It is **not merged**. It changes nothing on Supabase, so the merge is the whole
+deployment.
+
+Nothing from the 2026-09-27 session is open. It merged into `main` as **PR #35** on the
 owner's instruction, and Vercel deploys `main`. Its two live pieces were already live on
 `asypkbkiebjvvpimewfp` before the merge:
 - the `next-big-thing-growth` category row;
@@ -13,9 +18,9 @@ Gates A–D and E/F all PASSED (`docs/GATE_LEDGER.md`, "Growth-and-link-preview 
 A production spot check, whenever convenient: the header's The Next Big Thing dropdown lists
 six themes, and **Fetch details** fills the link-card dialog.
 
-**The next action is the staged removal below**, which is still pending. The previous
-NEXT ACTION's merge item is also done (`claude/draft-structure-coming-soon` is in `main`,
-checked 2026-09-27). The staged removal is **still not applied**: all 49 of 49
+**After that merge, the next action is the staged removal below**, which is still pending.
+The previous NEXT ACTION's merge item is also done (`claude/draft-structure-coming-soon` is in
+`main`, checked 2026-09-27). The staged removal is **still not applied**: all 49 of 49
 `finance_modules` rows still carry `essay_count`, re-read 2026-09-27.
 
 **Staged follow-up migration (do NOT apply until the derived read path is confirmed
@@ -26,12 +31,85 @@ in production — the *_fields precedent; name it e.g. `drop_module_meta_essay_c
 UPDATE public.finance_modules SET module_meta = module_meta - 'essay_count'
 WHERE module_meta ? 'essay_count';
 ```
-Standing items, not touched or checked by the 2026-09-27 session:
+Standing items, not touched by the 2026-09-27 or 2026-09-28 sessions:
 - set the two backup secrets and flip the backup workflow's first run green;
 - delete the `council-review` 410 tombstone slug (`supabase functions delete
-  council-review`; needs an access token).
+  council-review`; needs an access token). Still ACTIVE, v3, per `list_edge_functions` on
+  2026-09-28.
 
-Owner items still pending: the `/about` biography, and the two copy-linter decisions.
+Owner items still pending: the `/about` biography, the two copy-linter decisions, and the three
+decisions from 2026-09-28 (listed in that entry).
+
+## 2026-09-28 (auth tab-focus session) — a tab switch no longer wipes the Writer Studio, and the deployed link-preview is the commit
+
+Branch `claude/auth-tab-focus-unmount`, base `main` @ `85cdf51` (the PR #35 merge). **Not
+merged.** The merge gate is the owner's check on this branch's Vercel preview (steps below).
+
+**Applied to the database: nothing.** No migration, no SQL, no RLS change, no row written.
+**Deployed: nothing.** No edge function was deployed or changed. **No identity was created:** no
+user, role or session in the live project. The only Supabase calls were two reads on
+`asypkbkiebjvvpimewfp` (`list_edge_functions`, `get_edge_function`). `dikagustiana-prod` was not
+touched.
+
+**The bug.** Every tab switch wiped what the owner had typed. auth-js 2.89.0 emits `SIGNED_IN`
+(or `TOKEN_REFRESHED`) on every hidden → visible transition. `AuthProvider` answered every event
+with `isLoading = true` and a fresh role query. `RequireAdmin` swapped the route for a spinner for
+that round-trip, so `WriterEditor` unmounted, remounted and reloaded the row without the unsaved
+work. An open link-card dialog went too. That put the Growth curation loop (copy a URL in another
+tab, come back, Fetch details) directly in the bug's path.
+
+**What the branch contains (3 commits):**
+- `c195c09`: the reviewed Appendix A patch, applied as written. `AuthContext` resolves the admin
+  role once per user id. A same-user event never touches `isLoading`, and a failed check is
+  forgotten, so the next event retries. With it, `tests/unit/authTabFocus.test.tsx` (2 tests),
+  which failed on `main` first (`expected 2 to be 1`) and passes on the branch.
+- `39f3a67`: the CI floor, 662 → 664.
+- the records commit: this entry, GATE_LEDGER gates A–C, and DECISIONS 2026-09-28 ("Admin role is
+  resolved once per user id").
+
+`WriterEditor.tsx`, `useEssayAutosave.ts`, `revisions.ts` and `types.ts` are untouched. Run locally:
+`tsc -b --force` clean; vitest **43 files / 668 tests** (`main`: 42 / 666); `npm run build` green,
+with prerender skipped for want of a key; eslint 0 errors on the touched files.
+
+**Audited, not changed:** `AdminDashboard`, `AdminContent` and `FsliDetail` read `authLoading`
+only as a render condition, and none refetched on its toggle. No other component unmounts or
+resets on a same-user auth event. GATE_LEDGER gate A has the per-file reading.
+
+**PR #35's residual, closed:** the deployed `link-preview` source is byte-identical to the
+commit. `index.ts` is sha256 `0fbe64a2…` and `resolve.ts` is `e5e982d0…`, the same on both sides
+(full hashes in gate C). No redeploy was needed, and none was done.
+
+**Merge gate — the owner, on the Vercel preview of this branch:**
+1. Sign in on the preview.
+2. Open an existing draft, type a sentence, and do not click Save.
+3. Switch to another browser tab for about 10 seconds, then come back.
+4. The sentence must still be there, with no spinner flash.
+5. Repeat with the link-card dialog open and a URL pasted but not inserted.
+
+**Owner decisions still open:**
+1. A safety net for never-saved essays. `canAutosave` (`src/lib/revisions.ts`) needs an essay id,
+   a title, a section and a category. A new essay, or a saved one with no category, therefore has
+   none until a manual Save. The options:
+   - (a) a `localStorage` draft keyed by section plus a client id, cleared on the first successful
+     save;
+   - (b) create the `essays` row as a draft on the first non-empty title, without racing
+     `generateUniqueSlug`;
+   - (c) keep today's behaviour.
+
+   The reviewer leans (a): no DB writes and no slug race. It also covers tab discard (Chrome
+   Memory Saver, mobile), which this fix does not.
+2. `src/lib/admin/sectionPhaseConfig.ts` has zero importers. Delete it, or keep it on purpose and
+   say why.
+3. Mid-session role changes now need a reload or re-sign-in. Assumed acceptable (DECISIONS
+   2026-09-28).
+
+**Found, not acted on:** a role check that answers after a newer auth event still applies its
+answer (a sign-out, or a switch to another account, during the round-trip). This is pre-existing,
+and the patch leaves it as it was. It is UI-only, because RLS enforces every query.
+
+**Resume from here:** nothing is half-done. Once merged, the CI floor is **664** and the suite is
+**43 files / 668 tests**. If a preview step fails, record which one: the unit test proves the
+mechanism, not the product.
 
 ## 2026-09-27 (growth-and-link-preview session) — Growth, one theme list, link previews resolved server-side
 

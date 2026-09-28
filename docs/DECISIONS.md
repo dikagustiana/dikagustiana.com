@@ -5,6 +5,69 @@ alternatives. Newest first.
 
 ---
 
+# 2026-09-28 — Admin role is resolved once per user id
+
+Branch `claude/auth-tab-focus-unmount`, base `main` @ `85cdf51`. Not merged. Gates are in
+`docs/GATE_LEDGER.md` ("Auth tab-focus session").
+
+## Same-user auth events never blank the route tree
+
+**`AuthProvider` resolves the admin role once per user id** (`src/contexts/AuthContext.tsx`). A ref
+holds the id whose role is resolved. An auth event for that same id updates `session` and `user` and
+leaves `isLoading` alone, so `RequireAdmin` keeps its children mounted. A different id, or sign-out
+(`null`), resolves exactly as before: spinner, role check, redirect.
+
+**The cause.** `@supabase/auth-js` 2.89.0 re-reads the session on every hidden → visible transition.
+It emits `SIGNED_IN` for a valid session, or refreshes it and emits `TOKEN_REFRESHED`
+(`GoTrueClient._onVisibilityChanged` → `_recoverAndRefresh`). That is the library working as
+documented. The fault was in `resolveSession`, which set `isLoading = true` on every event.
+`RequireAdmin` then swapped the page for a spinner for one round-trip, and the Writer Studio unmounted
+with everything unsaved. Tab focus is also the Growth workflow's own trigger: copy a URL in another
+tab, come back, press Fetch details. The open link-card dialog was lost along with the editor.
+
+## A failed check is not an answer
+
+`checkAdminRole` reports whether the query itself completed. A network or RLS error clears the ref,
+so the next auth event (the next tab focus, say) tries again instead of caching "not admin" for the
+rest of the session. The old code healed a transient failure on the next focus by accident. The
+retry is now kept on purpose.
+
+## The trade-off, accepted
+
+A role granted or revoked mid-session is picked up on reload or re-sign-in, not on the next tab
+focus. The old code "picking it up on focus" was an accident of the bug, not a feature. Revocation is
+still enforced server-side by RLS on every query, and by `link-preview`'s own admin check. A UI that
+lags a revocation exposes nothing.
+
+Rejected:
+- **Filtering by event name** (ignoring `SIGNED_IN` and `TOKEN_REFRESHED`). auth-js re-emits other
+  tabs' events here (`GoTrueClient.ts:394`), so signing in to another account in another tab also
+  arrives as `SIGNED_IN`. The name cannot tell that apart from a tab focus; the user id can.
+- **Re-checking the role on focus, without the spinner.** It still queries `user_roles` on every
+  focus, and a transient failure there turns `isAdmin` false. `RequireAdmin` then redirects to
+  `/auth`, which loses the same work, only less often.
+
+## What a future session must not undo by accident
+
+- Do not set `isLoading` for a same-user auth event, and do not treat a failed role check as an
+  answer.
+- Keep the 30 ms delay in the role mock of `tests/unit/authTabFocus.test.tsx`. With an instant mock,
+  React batches `isLoading` true → false into one render and the spinner never commits. The test then
+  passes against the broken code (checked 2026-09-28).
+- Do not key an effect on the `user` or `session` object in anything that holds unsaved work.
+  auth-js hands over a new object on every tab focus. Key on `user?.id`. Nothing does so today
+  (audited 2026-09-28).
+
+## Found, not acted on (out of scope)
+
+- A role check that answers after a newer auth event still applies its answer: a sign-out, or a
+  switch to another account, during the round-trip. This is pre-existing, and the patch leaves it as
+  it was. It is UI-only, because RLS enforces every query.
+- Tab discard (Chrome Memory Saver, mobile) is not covered: a discarded tab reloads from scratch, and
+  a never-saved essay has no autosave to reload from. See owner decision 1, SESSION_LOG 2026-09-28.
+
+---
+
 # 2026-09-27 — The Growth theme, one theme list, and link previews resolved server-side
 
 Branch `claude/nbt-growth-and-link-preview`, base `main` @ `1c33310`, merged as PR #35 on the
