@@ -61,6 +61,44 @@ The earlier `council-review` function (the AI "Writing Council") was removed on 
 its slug survives on the project only as a 410 tombstone until the owner runs
 `supabase functions delete council-review`. Its `AI_GATEWAY_*` secrets are no longer used.
 
+## Build pipeline
+
+`npm run build` is `vite build && node scripts/prerender.mjs`, and Vercel runs it on every deploy.
+
+1. `vite build` writes the single-page app into `dist/`.
+2. `scripts/prerender.mjs` fetches the published essays with the publishable key. RLS returns
+   published rows only. For each essay that owns its URL, the script does three things:
+   - it writes `dist/<canonical path>/index.html`: the app's shell carrying that essay's
+     `<title>`, description, Open Graph and Twitter tags, and canonical, for crawlers that run no
+     JavaScript, WhatsApp's included;
+   - it draws the essay's share card, `dist/og/<slug>.png` (1200 × 630,
+     `scripts/lib/shareCard.mjs`);
+   - it sets `og:image` to the essay's hero image when it has one, else to that card
+     (`src/lib/shareImage.mjs`). The app imports the same formula, so hydration keeps the image.
+   It then writes `dist/sitemap.xml` and `dist/rss.xml` from the same list, so there is no second
+   route table. An accounting essay whose canonical is a page (an FSLI or topic page) is skipped.
+3. **The build fails rather than ship a generic card.** Each of these exits 1:
+   - a Vercel build without the key;
+   - a failed fetch, or zero published essays;
+   - a title the font cannot draw;
+   - a card over 300 KB;
+   - a tag that did not land.
+
+   A keyless build outside Vercel, which is what CI runs, skips the prerender and says so.
+
+The card renderer (satori and resvg, both devDependencies) runs only in this script, and nothing
+of it reaches `dist/assets/`. Its fonts, and where they came from, are in `scripts/og-fonts/`.
+Two scripts check the result without a deploy:
+- `VITE_SUPABASE_PUBLISHABLE_KEY=… node scripts/render-share-card-review.mjs` redraws the review
+  set in `docs/review/share-cards/`;
+- after a keyed build, `node scripts/check-share-parity.mjs` compares each page's raw `og:image`
+  with the hydrated one in Chromium.
+
+**Freshness:** the pages, cards, sitemap and feed are as fresh as the last deploy. Publishing,
+editing or unpublishing does not rebuild the site yet. The database-driven rebuild (WO-R05 Part 4)
+is staged in `docs/db/pending/wo-r05-rebuild/` and **not applied**; until it is, redeploy after a
+change. When it lands, this section gains the rebuild hook and how to rotate it.
+
 ## Database & migrations
 
 The schema and its rationale are documented in `docs/SCHEMA_PLAN.md`; design decisions in
@@ -79,4 +117,5 @@ migration history and must not be deleted.
 - `src/integrations/supabase/types.ts` — auto-generated from the live schema; replace, never hand-edit
 - `src/lib/tiptap/` — the editor's node schema (`extensions.ts`) and HTML serialization (`serialize.ts`)
 - `supabase/functions/link-preview/` — the one edge function (admin-only link-card metadata)
+- `scripts/prerender.mjs`, `scripts/lib/` — the build's post-step: pre-rendered essay pages, share cards, sitemap and feed
 - `docs/` — schema plan, decisions, session log, and per-session reports

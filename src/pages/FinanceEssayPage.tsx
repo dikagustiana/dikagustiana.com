@@ -210,6 +210,7 @@ export default function FinanceEssayPage() {
 
   const sharedProps = {
     seoTitle: essay.title,
+    slug: essay.slug,
     seoDescription: deck || 'Finance knowledge for decision-making.',
     seoAuthor: essay.author || undefined,
     backLink: actualModule

@@ -2,6 +2,9 @@
 
 > **The SQL that used to live here has been fixed and moved.** This directory is now
 > the *record* of how it was written and reviewed, not pending work.
+>
+> **One exception, added 2026-09-28:** `wo-r05-rebuild/` IS pending work. It holds SQL that
+> has not run anywhere, waiting on the owner's gates. See its README.
 
 ## Where the SQL is now
 

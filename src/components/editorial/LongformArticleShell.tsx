@@ -22,11 +22,14 @@ import { AuthorBox } from './AuthorBox';
 import { EssayNavigation } from './EssayNavigation';
 import { RelatedEssays } from './RelatedEssays';
 import { SEO } from '@/components/SEO';
+import { essayShareImage } from '@/lib/shareImage.mjs';
 
 export interface LongformArticleShellProps {
   seoTitle: string;
   seoDescription?: string;
   seoAuthor?: string;
+  /** The essay's slug: names its build-time share card (src/lib/shareImage.mjs). */
+  slug?: string;
   backLink: { label: string; path: string };
   title: string;
   deck?: string | null;
@@ -68,6 +71,7 @@ export function LongformArticleShell({
   seoTitle,
   seoDescription,
   seoAuthor,
+  slug,
   backLink,
   title,
   deck,
@@ -130,6 +134,9 @@ export function LongformArticleShell({
             description={seoDescription}
             type="article"
             author={seoAuthor || author || 'Dika Gustiana'}
+            // The og:image the prerender wrote into this page's raw HTML
+            // (hero, else the essay's card), from the same formula.
+            image={slug ? essayShareImage({ slug, thumbnail_url: heroImage, updated_at: updatedAt }).url : undefined}
           />
 
           {/* Back link */}

@@ -14,9 +14,18 @@
  * Fails LOUDLY if the essay list cannot be fetched: a silent skip would be
  * a silent return to generic cards, the same failure class as a backup
  * that "succeeds" with nothing in it.
+ *
+ * Each written route also gets its own share card, drawn here into
+ * dist/og/<slug>.png (scripts/lib/shareCard.mjs). Its og:image is the hero
+ * image when the essay has one, else that card; the formula lives in
+ * src/lib/shareImage.mjs, which the essay pages import too, so the og:image
+ * after hydration is the one in the raw HTML.
  */
 import fs from 'node:fs';
 import path from 'node:path';
+import { fetchPublishedEssays } from './lib/publishedEssays.mjs';
+import { essayShareImage } from '../src/lib/shareImage.mjs';
+import { FEED_SIZE, buildFeed, buildSitemap } from './lib/siteFeeds.mjs';
 
 const ROOT = path.resolve(process.cwd());
 const DIST = path.join(ROOT, 'dist');
@@ -111,23 +120,29 @@ const esc = s =>
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
 
-const select =
-  'slug,title,snippet,section,phase,finance_section,fsli_slug,topic,thumbnail_url,date,created_at,updated_at,presentation,finance_modules!essays_module_id_fkey(slug,track_slug)';
-const res = await fetch(
-  `${SUPABASE_URL}/rest/v1/essays?published=eq.true&select=${encodeURIComponent(select)}`,
-  { headers: { apikey: KEY, authorization: `Bearer ${KEY}` } },
-);
-if (!res.ok) {
-  console.error(`prerender: essay fetch failed — HTTP ${res.status}`);
+// The select lives in scripts/lib/publishedEssays.mjs, shared with the
+// share-card review script. It also carries each card's label: the section's
+// name, the finance track's title and the category's name, from the database.
+let essays;
+try {
+  essays = await fetchPublishedEssays({ supabaseUrl: SUPABASE_URL, key: KEY });
+} catch (error) {
+  console.error(`prerender: ${error.message}`);
   process.exit(1);
 }
-const essays = await res.json();
 if (!Array.isArray(essays) || essays.length === 0) {
   console.error('prerender: zero published essays returned — refusing to write nothing silently');
   process.exit(1);
 }
 
 const template = fs.readFileSync(path.join(DIST, 'index.html'), 'utf8');
+
+// Loaded only now, past the skip above: a keyless CI build never loads the
+// renderer's native binary.
+const { renderShareCard, shareCardLabel } = await import('./lib/shareCard.mjs');
+const OG_DIR = path.join(DIST, 'og');
+fs.mkdirSync(OG_DIR, { recursive: true });
+const CARD_MAX_BYTES = 300 * 1024;
 
 // Two essays resolving to ONE path would make the last writer speak for both.
 // Detect it here rather than discovering it as a wrong card in a chat client.
@@ -140,7 +155,8 @@ for (const essay of essays) {
 const collisions = [...byPath.entries()].filter(([, slugs]) => slugs.length > 1);
 
 let written = 0;
-let sampleCheck = null;
+const landed = []; // per written page: the tags that must be in it, and its card
+const listed = []; // per written page: what the sitemap and the feed say about it
 const skipped = [];
 for (const essay of essays) {
   const p = canonicalPath(essay);
@@ -162,10 +178,42 @@ for (const essay of essays) {
   // should not carry it into a share card.
   const deck = (essay.presentation?.deck || essay.snippet || '').replace(/\s+/g, ' ').trim();
   const description = deck.length > 160 ? `${deck.slice(0, 157)}...` : deck;
-  const image = essay.thumbnail_url
-    ? (essay.thumbnail_url.startsWith('http') ? essay.thumbnail_url : `${SITE_ORIGIN}${essay.thumbnail_url}`)
-    : `${SITE_ORIGIN}/og-image.png`;
+  // Hero image first (the owner's override), else this essay's own card.
+  // /og-image.png is never the image of a pre-rendered route.
+  const share = essayShareImage(essay);
+  const image = share.url;
   const fullTitle = `${essay.title} | Dika Gustiana`;
+
+  // The card is drawn for every written route, hero or not, so replacing a
+  // hero later never leaves an essay without one. A title the font cannot
+  // draw stops the build, naming the essay, the same as a path collision.
+  let card;
+  try {
+    card = await renderShareCard({ title: essay.title, label: shareCardLabel(essay) });
+  } catch (error) {
+    console.error(`prerender: the share card for ${essay.slug} cannot be drawn: ${error.message}`);
+    process.exit(1);
+  }
+  if (card.length > CARD_MAX_BYTES) {
+    console.error(`prerender: the share card for ${essay.slug} is ${card.length} bytes, over ${CARD_MAX_BYTES}`);
+    process.exit(1);
+  }
+  const cardFile = path.join(OG_DIR, `${essay.slug}.png`);
+  fs.writeFileSync(cardFile, card);
+
+  // Dimensions and type only for the generated card: a hero image's are not
+  // known here, and a wrong og:image:width is worse than none.
+  const imageTags = [
+    ...(share.generated
+      ? [
+          '<meta property="og:image:width" content="1200" />',
+          '<meta property="og:image:height" content="630" />',
+          '<meta property="og:image:type" content="image/png" />',
+        ]
+      : []),
+    `<meta property="og:image:alt" content="${esc(essay.title)}" />`,
+    '<meta property="og:site_name" content="Dika Gustiana" />',
+  ];
 
   let html = template;
   html = html.replace(/<title>[^<]*<\/title>/, `<title>${esc(fullTitle)}</title>`);
@@ -181,6 +229,9 @@ for (const essay of essays) {
   html = html.replace(/<meta property="og:type" content="[^"]*" \/>/, '<meta property="og:type" content="article" />');
   html = html.replace(/<meta property="og:url" content="[^"]*" \/>/, `<meta property="og:url" content="${esc(url)}" />`);
   html = html.replace(/<meta property="og:image" content="[^"]*" \/>/, `<meta property="og:image" content="${esc(image)}" />`);
+  // The image's own tags, anchored on the og:image tag just written, the way
+  // canonical is anchored on twitter:card below.
+  html = html.replace(`<meta property="og:image" content="${esc(image)}" />`, anchor => [anchor, ...imageTags].join('\n    '));
   html = html.replace(/<meta name="twitter:image" content="[^"]*" \/>/, `<meta name="twitter:image" content="${esc(image)}" />`);
   html = html.replace(
     '<meta name="twitter:card" content="summary_large_image" />',
@@ -195,7 +246,18 @@ for (const essay of essays) {
   fs.mkdirSync(outDir, { recursive: true });
   fs.writeFileSync(path.join(outDir, 'index.html'), html);
   written += 1;
-  sampleCheck ??= { file: path.join(outDir, 'index.html'), needle: esc(fullTitle) };
+  landed.push({
+    file: path.join(outDir, 'index.html'),
+    card: cardFile,
+    needles: [
+      `<title>${esc(fullTitle)}</title>`,
+      `<meta property="og:image" content="${esc(image)}" />`,
+      `<meta name="twitter:image" content="${esc(image)}" />`,
+      ...imageTags,
+      `<link rel="canonical" href="${esc(url)}" />`,
+    ],
+  });
+  listed.push({ url, title: essay.title, deck, published: essay.date || essay.created_at, updated: essay.updated_at });
   console.log(`prerender: ${p}`);
 }
 
@@ -212,9 +274,49 @@ if (written === 0) {
 }
 
 // The template must actually have changed per page — guard against a
-// template drift that makes every replace silently no-op.
-if (!fs.readFileSync(sampleCheck.file, 'utf8').includes(sampleCheck.needle)) {
+// template drift that makes every replace silently no-op. Every written page
+// is read back for every tag it should carry, and every card for its size.
+const missing = [];
+for (const page of landed) {
+  const html = fs.readFileSync(page.file, 'utf8');
+  for (const needle of page.needles) {
+    if (!html.includes(needle)) missing.push(`${path.relative(DIST, page.file)} lacks ${needle}`);
+  }
+  const png = fs.readFileSync(page.card);
+  if (png.readUInt32BE(16) !== 1200 || png.readUInt32BE(20) !== 630) {
+    missing.push(`${path.relative(DIST, page.card)} is not 1200×630`);
+  }
+}
+if (missing.length > 0) {
+  for (const m of missing) console.error(`prerender: ${m}`);
   console.error('prerender: replacements did not land — template drift?');
   process.exit(1);
 }
+
+// ---------------------------------------------------------------------------
+// sitemap.xml and rss.xml (scripts/lib/siteFeeds.mjs): from this same fetch
+// and this same canonicalPath(), so they list exactly the pages written above
+// and there is never a second route table.
+// ---------------------------------------------------------------------------
+
+// index.html's meta description, HTML-unescaped; siteFeeds escapes it for XML.
+const siteDescription = (/<meta name="description" content="([^"]*)" \/>/.exec(template)?.[1] ?? '')
+  .replace(/&quot;/g, '"')
+  .replace(/&lt;/g, '<')
+  .replace(/&gt;/g, '>')
+  .replace(/&amp;/g, '&');
+fs.writeFileSync(path.join(DIST, 'sitemap.xml'), buildSitemap(listed, { origin: SITE_ORIGIN }));
+fs.writeFileSync(path.join(DIST, 'rss.xml'), buildFeed(listed, { origin: SITE_ORIGIN, description: siteDescription }));
+
+// Read both back: one <url> per written page plus the home page, and one
+// <item> per written page up to the feed's size.
+const urlCount = (fs.readFileSync(path.join(DIST, 'sitemap.xml'), 'utf8').match(/<url>/g) ?? []).length;
+const itemCount = (fs.readFileSync(path.join(DIST, 'rss.xml'), 'utf8').match(/<item>/g) ?? []).length;
+if (urlCount !== written + 1 || itemCount !== Math.min(FEED_SIZE, written)) {
+  console.error(`prerender: sitemap has ${urlCount} url(s) and the feed ${itemCount} item(s) for ${written} written page(s)`);
+  process.exit(1);
+}
+
 console.log(`prerender: ${written} route(s) written, ${skipped.length} skipped`);
+console.log(`prerender: ${landed.length} share card(s) in dist/og/`);
+console.log(`prerender: sitemap.xml ${urlCount} url(s), rss.xml ${itemCount} item(s)`);

@@ -130,6 +130,7 @@ export default function EssayBySlug() {
   return (
     <ArticleShell
       seoTitle={essay.title}
+      slug={essay.slug}
       seoDescription={deck || undefined}
       seoAuthor={essay.author || undefined}
       backLink={{ label: 'Back to home', path: '/' }}

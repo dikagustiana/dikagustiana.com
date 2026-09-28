@@ -1,6 +1,7 @@
 import { useParams, Navigate } from 'react-router-dom';
 import { PageLayout } from '@/components/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
+import { essayShareImage } from '@/lib/shareImage.mjs';
 import { useEssay } from '@/hooks/queries/useEssays';
 import { RelatedContent } from '@/components/RelatedContent';
 import { contentToHtml } from '@/lib/tiptap/serialize';
@@ -89,6 +90,8 @@ export default function CriticalThinkingEssay() {
         description={essay?.snippet || 'Critical thinking essay on rigorous analysis methods.'}
         type="article"
         author={essay?.author || 'Dika Gustiana'}
+        // The og:image the prerender wrote into this page's raw HTML.
+        image={essay?.slug ? essayShareImage(essay).url : undefined}
       />
       
       <div className="container py-8">
