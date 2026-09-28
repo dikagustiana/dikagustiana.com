@@ -32,6 +32,7 @@ import { AuthorBox } from './AuthorBox';
 import { EssayNavigation } from './EssayNavigation';
 import { RelatedEssays } from './RelatedEssays';
 import { SEO } from '@/components/SEO';
+import { essayShareImage } from '@/lib/shareImage.mjs';
 import { parseBriefDoc, isEmptyBrief } from '@/lib/brief';
 import { cn } from '@/lib/utils';
 
@@ -44,6 +45,8 @@ export interface ArticleShellProps {
   seoTitle: string;
   seoDescription?: string;
   seoAuthor?: string;
+  /** The essay's slug: names its build-time share card (src/lib/shareImage.mjs). */
+  slug?: string;
 
   /** Back navigation */
   backLink: { label: string; path: string };
@@ -113,6 +116,7 @@ export function ArticleShell({
   seoTitle,
   seoDescription,
   seoAuthor,
+  slug,
   backLink,
   title,
   deck,
@@ -194,7 +198,10 @@ export function ArticleShell({
               description={seoDescription}
               type="article"
               author={seoAuthor || author || 'Dika Gustiana'}
-              image={heroImage || undefined}
+              // The og:image the prerender wrote into this page's raw HTML
+              // (hero, else the essay's card), from the same formula, so
+              // hydration never swaps it for another picture.
+              image={slug ? essayShareImage({ slug, thumbnail_url: heroImage, updated_at: updatedAt }).url : heroImage || undefined}
               publishedTime={publishedAt || createdAt || undefined}
               modifiedTime={updatedAt || undefined}
             />

@@ -185,6 +185,7 @@ export default function NextBigThingEssayPage() {
   return (
     <ArticleShell
       seoTitle={essay.title}
+      slug={essay.slug}
       seoDescription={deck || 'Analysis of emerging economic forces and structural change.'}
       seoAuthor={essay.author || undefined}
       backLink={{ label: 'Back to The Next Big Thing', path: backPath }}

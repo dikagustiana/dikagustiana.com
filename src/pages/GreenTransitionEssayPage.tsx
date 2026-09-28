@@ -214,6 +214,7 @@ export default function GreenTransitionEssayPage() {
   return (
     <ArticleShell
       seoTitle={essay.title}
+      slug={essay.slug}
       seoDescription={deck || 'Economic analysis of Indonesia green transition.'}
       seoAuthor={essay.author || undefined}
       backLink={{

@@ -173,6 +173,7 @@ export default function DevelopmentFinanceEssayPage() {
   return (
     <ArticleShell
       seoTitle={essay.title}
+      slug={essay.slug}
       seoDescription={deck || 'Development finance analysis.'}
       seoAuthor={essay.author || undefined}
       backLink={{
