@@ -69,18 +69,19 @@ change or row was written. **Deployed on Supabase: nothing.** **No identity was 
 hook exists, no secret was stored, and no hook URL appears anywhere. Every Supabase call was a read on
 `asypkbkiebjvvpimewfp`:
 - `execute_sql`, for the published essays and their names, and the 160 unpublished slugs;
-- `execute_sql`, for Part 4's preconditions (next paragraph);
+- `execute_sql`, for Part 4's preconditions (below);
 - `execute_sql`, one `begin; select …; rollback;` probe, which showed results survive inside a
   rolled-back transaction;
 - `get_project_url` and `get_publishable_keys`, for the public key the local builds used, kept in
   the scratchpad and never committed;
+- anonymous REST reads with that key: the builds' and the review script's fetch of the published
+  essays, and the app's own reads while the parity check drove it;
 - one PostgREST request with `Accept-Profile: ops`, answered PGRST106;
 - `search_docs`, twice, for the documented forms of enabling the extensions.
 
-`dikagustiana-prod` was not touched.
-
 The preconditions: extension versions, `essays`' triggers, schemas, the authenticator's settings,
 the server version, the Vault secret count, and the migration role's Vault access.
+`dikagustiana-prod` was not touched.
 
 **What the branch contains:**
 - `b0fa297` (A): `scripts/lib/shareCard.mjs`. It draws a 1200 × 630 card per essay at build time
@@ -122,13 +123,13 @@ today. Measured 2026-09-28 with public GETs:
 - `https://dikagustiana.com/` and every other apex path answer 308 to
   `dika-s-digital-studio.vercel.app`.
 - That host's `/og-image.png` is `text/html`, 1,139 B.
-- `www.dikagustiana.com` is byte-identical to `dikagustiana-com.vercel.app`, and its
-  `/og-image.png` is a 53,103 B PNG.
+- `www.dikagustiana.com` serves the same home page as `dikagustiana-com.vercel.app`, byte for
+  byte, and its `/og-image.png` is a 53,103 B PNG.
 
 **Found — production staleness, observed.** On `www.dikagustiana.com`, the Idea Guy essay serves
 the generic shell, while older essays are pre-rendered. The production build predates its
-publication. This is the R05 staleness that Part 4 exists for, observed live. PR #37's own
-production build will pre-render it.
+publication. This is the R05 staleness that Part 4 exists for, observed live. The production
+build after this merge should pre-render it, which the post-merge check also looks at.
 
 **Not verified:**
 - The renderer on Vercel's build image (GATE_LEDGER B′). A green preview of `f5788f7` implies it,
