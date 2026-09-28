@@ -11,7 +11,7 @@
  */
 import fs from 'node:fs';
 
-const MIN_TESTS = 680; // 684 after WO-R05: the share-card renderer (10: size, determinism, weight, glyph coverage, label, the title held inside the box on the pixels) and one og:image formula for the raw and the hydrated page (8). 666 after the growth-and-link-preview pass (PR #35): the link-preview resolver's SSRF and resolution suite (76), the link card through publish and on the page, the link-card dialog and its client, Growth's nav route, and the markdown attribution; slack of 4, not 40.
+const MIN_TESTS = 687; // 691 after WO-R05: the share-card renderer (10: size, determinism, weight, glyph coverage, label, the title held inside the box on the pixels), one og:image formula for the raw and the hydrated page (8), and the sitemap and feed (7). 666 after the growth-and-link-preview pass (PR #35): the link-preview resolver's SSRF and resolution suite (76), the link card through publish and on the page, the link-card dialog and its client, Growth's nav route, and the markdown attribution; slack of 4, not 40.
 
 const reportPath = process.argv[2] ?? 'vitest-report.json';
 if (!fs.existsSync(reportPath)) {

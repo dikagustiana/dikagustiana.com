@@ -25,6 +25,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fetchPublishedEssays } from './lib/publishedEssays.mjs';
 import { essayShareImage } from '../src/lib/shareImage.mjs';
+import { FEED_SIZE, buildFeed, buildSitemap } from './lib/siteFeeds.mjs';
 
 const ROOT = path.resolve(process.cwd());
 const DIST = path.join(ROOT, 'dist');
@@ -155,6 +156,7 @@ const collisions = [...byPath.entries()].filter(([, slugs]) => slugs.length > 1)
 
 let written = 0;
 const landed = []; // per written page: the tags that must be in it, and its card
+const listed = []; // per written page: what the sitemap and the feed say about it
 const skipped = [];
 for (const essay of essays) {
   const p = canonicalPath(essay);
@@ -255,6 +257,7 @@ for (const essay of essays) {
       `<link rel="canonical" href="${esc(url)}" />`,
     ],
   });
+  listed.push({ url, title: essay.title, deck, published: essay.date || essay.created_at, updated: essay.updated_at });
   console.log(`prerender: ${p}`);
 }
 
@@ -289,5 +292,31 @@ if (missing.length > 0) {
   console.error('prerender: replacements did not land — template drift?');
   process.exit(1);
 }
+
+// ---------------------------------------------------------------------------
+// sitemap.xml and rss.xml (scripts/lib/siteFeeds.mjs): from this same fetch
+// and this same canonicalPath(), so they list exactly the pages written above
+// and there is never a second route table.
+// ---------------------------------------------------------------------------
+
+// index.html's meta description, HTML-unescaped; siteFeeds escapes it for XML.
+const siteDescription = (/<meta name="description" content="([^"]*)" \/>/.exec(template)?.[1] ?? '')
+  .replace(/&quot;/g, '"')
+  .replace(/&lt;/g, '<')
+  .replace(/&gt;/g, '>')
+  .replace(/&amp;/g, '&');
+fs.writeFileSync(path.join(DIST, 'sitemap.xml'), buildSitemap(listed, { origin: SITE_ORIGIN }));
+fs.writeFileSync(path.join(DIST, 'rss.xml'), buildFeed(listed, { origin: SITE_ORIGIN, description: siteDescription }));
+
+// Read both back: one <url> per written page plus the home page, and one
+// <item> per written page up to the feed's size.
+const urlCount = (fs.readFileSync(path.join(DIST, 'sitemap.xml'), 'utf8').match(/<url>/g) ?? []).length;
+const itemCount = (fs.readFileSync(path.join(DIST, 'rss.xml'), 'utf8').match(/<item>/g) ?? []).length;
+if (urlCount !== written + 1 || itemCount !== Math.min(FEED_SIZE, written)) {
+  console.error(`prerender: sitemap has ${urlCount} url(s) and the feed ${itemCount} item(s) for ${written} written page(s)`);
+  process.exit(1);
+}
+
 console.log(`prerender: ${written} route(s) written, ${skipped.length} skipped`);
 console.log(`prerender: ${landed.length} share card(s) in dist/og/`);
+console.log(`prerender: sitemap.xml ${urlCount} url(s), rss.xml ${itemCount} item(s)`);

@@ -63,7 +63,7 @@ describe('the share-image formula', () => {
 
   it('is the formula the prerender itself imports, not a second copy of it', () => {
     const prerender = readFileSync('scripts/prerender.mjs', 'utf-8');
-    expect(prerender).toMatch(/import \{ essayShareImage \} from '\.\.\/src\/lib\/shareImage\.mjs';/);
+    expect(prerender).toMatch(/import \{[^}]*\bessayShareImage\b[^}]*\} from '\.\.\/src\/lib\/shareImage\.mjs';/);
     expect(prerender).toMatch(/const share = essayShareImage\(essay\);/);
   });
 });
