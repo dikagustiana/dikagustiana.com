@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -19,8 +19,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  // The user id whose admin role has already been resolved. `undefined` means
+  // nothing resolved yet; `null` means resolved as signed-out.
+  const resolvedUserId = useRef<string | null | undefined>(undefined);
 
-  const checkAdminRole = async (userId: string) => {
+  // Returns false when the check itself failed (network, RLS), as opposed to
+  // answering "not an admin", so the caller can let the next event retry.
+  const checkAdminRole = async (userId: string): Promise<boolean> => {
     try {
       const { data, error } = await supabase
         .from('user_roles')
@@ -30,8 +35,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .maybeSingle();
 
       setIsAdmin(!error && !!data);
+      return !error;
     } catch {
       setIsAdmin(false);
+      return false;
     }
   };
 
@@ -43,10 +50,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       setSession(activeSession);
       setUser(activeSession?.user ?? null);
+
+      // auth-js fires SIGNED_IN (or TOKEN_REFRESHED) every time the tab
+      // becomes visible again. Same user means same role: keep the app
+      // mounted. Flipping isLoading here made RequireAdmin swap the page for a
+      // spinner, which unmounted the Writer Studio and threw away every
+      // unsaved keystroke on each tab switch.
+      const nextUserId = activeSession?.user?.id ?? null;
+      if (resolvedUserId.current === nextUserId) return;
+      resolvedUserId.current = nextUserId;
+
       setIsLoading(true);
 
       if (activeSession?.user) {
-        await checkAdminRole(activeSession.user.id);
+        const checked = await checkAdminRole(activeSession.user.id);
+        // A failed check is not an answer: forget it, so the next auth event
+        // (e.g. the next tab focus) tries again instead of caching "not admin".
+        if (!checked) resolvedUserId.current = undefined;
       } else {
         setIsAdmin(false);
       }
