@@ -3,43 +3,163 @@
 Append-only. Newest entry first. A fresh session must be able to resume from this file.
 
 ## NEXT ACTION (single)
-**Owner: run the five-step tab-switch check on production.** The 2026-09-28 session merged
-into `main` as **PR #36** on the owner's instruction ("langsung merge"). No preview check was
-recorded before that merge, so its product gate (GATE_LEDGER A′) is still open. The five steps
-are in the 2026-09-28 entry below; run them on dikagustiana.com, since Vercel deploys `main`.
-PR #36 changed nothing on Supabase, so the merge was the whole deployment.
+**Owner: point the apex domain `dikagustiana.com` at this project in Vercel.** Today every path on
+the apex answers **308 → `https://dika-s-digital-studio.vercel.app/<same path>`**, an old,
+pre-rebuild deployment. Only `www.dikagustiana.com` serves this project. Every share image,
+`og:url`, canonical, sitemap `<loc>` and feed link the site emits names the apex. Until the apex
+serves this project, no WhatsApp preview can show a card, the old fallback included. The Vercel
+connector here cannot see the project that holds the apex, so this is a dashboard change in the
+account that owns it: remove `dikagustiana.com` from the old project, then add it to
+`dikagustiana-com`. Evidence: GATE_LEDGER, WO-R05 session, row P5.
 
-Nothing from the 2026-09-27 session is open. It merged into `main` as **PR #35** on the
-owner's instruction, and Vercel deploys `main`. Its two live pieces were already live on
-`asypkbkiebjvvpimewfp` before the merge:
-- the `next-big-thing-growth` category row;
-- the `link-preview` edge function (v1, `verify_jwt = true`).
+**Then, in order:**
+1. **Owner: approve or redirect WO-R05's G1 and G2.** Both were printed on 2026-09-28 and are
+   staged byte for byte in `docs/db/pending/wo-r05-rebuild/`. Nothing is applied: "merge langsung"
+   merged PR #37 and approved no gate. After approval, and on a **new branch from `main`** (PR #37
+   is merged):
+   - G1, then G2, via `apply_migration` on `asypkbkiebjvvpimewfp`, each mirrored into
+     `supabase/migrations/` under the version the database assigns;
+   - the four rolled-back tests, and a re-probe that `ops` is still unexposed;
+   - G3, the owner's action: create a Vercel deploy hook for `main`, then store it personally in
+     the SQL editor with `select vault.create_secret('<url>', 'vercel_deploy_hook_url');`;
+   - G4, the first live fire, asked before any hand stamp; then gate D, and the README's rebuild
+     and rotation section.
+2. **Owner: the phone check (WO-R05 Part 5), once the apex is fixed.** Share a never-shared essay
+   link in WhatsApp to yourself and wait for the preview before sending. It must show that essay's
+   own title on the site's template. Step 3, an edit live in about 5 minutes without a redeploy,
+   also needs Part 4.
+3. **Owner: the five-step tab-switch check from PR #36** (GATE_LEDGER A′), on
+   **`www.dikagustiana.com`**, not the apex, which lands on the old deployment. The steps are in
+   the 2026-09-28 auth tab-focus entry below.
 
-Gates A–D and E/F all PASSED (`docs/GATE_LEDGER.md`, "Growth-and-link-preview session").
-A production spot check, whenever convenient: the header's The Next Big Thing dropdown lists
-six themes, and **Fetch details** fills the link-card dialog.
-
-**After that check, the next action is the staged removal below**, which is still pending.
-The previous NEXT ACTION's merge item is also done (`claude/draft-structure-coming-soon` is in
-`main`, checked 2026-09-27). The staged removal is **still not applied**: all 49 of 49
-`finance_modules` rows still carry `essay_count`, re-read 2026-09-27.
-
-**Staged follow-up migration (do NOT apply until the derived read path is confirmed
-in production — the *_fields precedent; name it e.g. `drop_module_meta_essay_count`):**
+**Still pending from earlier sessions.** PR #35's production spot check, whenever convenient and
+on `www`: the header's The Next Big Thing dropdown lists six themes, and **Fetch details** fills the
+link-card dialog. The staged removal below is **still not applied**: all 49
+of 49 `finance_modules` rows still carry `essay_count`, re-read 2026-09-27. Do NOT apply it until
+the derived read path is confirmed in production, following the *_fields precedent. Name it, for
+example, `drop_module_meta_essay_count`:
 ```sql
 -- module_meta.essay_count is unread since the structure-visibility session
 -- (counts derive from essay_structure; useModuleLessonCounts deleted).
 UPDATE public.finance_modules SET module_meta = module_meta - 'essay_count'
 WHERE module_meta ? 'essay_count';
 ```
-Standing items, not touched by the 2026-09-27 or 2026-09-28 sessions:
+Standing items, not touched by the 2026-09-27 or either 2026-09-28 session:
 - set the two backup secrets and flip the backup workflow's first run green;
 - delete the `council-review` 410 tombstone slug (`supabase functions delete
   council-review`; needs an access token). Still ACTIVE, v3, per `list_edge_functions` on
   2026-09-28.
 
-Owner items still pending: the `/about` biography, the two copy-linter decisions, and the three
-decisions from 2026-09-28 (listed in that entry).
+Owner items still pending:
+- the `/about` biography;
+- the two copy-linter decisions;
+- the three decisions from the auth tab-focus session (listed in that entry);
+- WO-R05's three open decisions (listed in its entry).
+
+## 2026-09-28 (WO-R05 session) — every essay gets its own share card, and a sitemap and a feed; the rebuild is staged, not applied
+
+Branch `claude/wo-r05-share-cards-rebuild`, base `main` @ `85cdf51`. **Merged into `main` as
+PR #37** on the owner's instruction ("merge langsung"), after gates B and C. The brief said "do not
+merge". Part 4's human gates G1 and G2 were printed and are **not approved**, so **Part 4 is not
+applied.** Before merging, `main` @ `babaaf7` (PR #36) was merged into the branch (`f5788f7`). The
+floor was set to the actual count − 4, per the brief, and CI's exact steps were run locally.
+
+**Applied to the database: nothing.** No extension was enabled, and no migration, SQL write, RLS
+change or row was written. **Deployed on Supabase: nothing.** **No identity was created.** No deploy
+hook exists, no secret was stored, and no hook URL appears anywhere. Every Supabase call was a read on
+`asypkbkiebjvvpimewfp`:
+- `execute_sql`, for the published essays and their names, and the 160 unpublished slugs;
+- `execute_sql`, for Part 4's preconditions (next paragraph);
+- `execute_sql`, one `begin; select …; rollback;` probe, which showed results survive inside a
+  rolled-back transaction;
+- `get_project_url` and `get_publishable_keys`, for the public key the local builds used, kept in
+  the scratchpad and never committed;
+- one PostgREST request with `Accept-Profile: ops`, answered PGRST106;
+- `search_docs`, twice, for the documented forms of enabling the extensions.
+
+`dikagustiana-prod` was not touched.
+
+The preconditions: extension versions, `essays`' triggers, schemas, the authenticator's settings,
+the server version, the Vault secret count, and the migration role's Vault access.
+
+**What the branch contains:**
+- `b0fa297` (A): `scripts/lib/shareCard.mjs`. It draws a 1200 × 630 card per essay at build time
+  with satori 0.33.5 and @resvg/resvg-js 2.6.2, both devDependencies pinned exactly. The fonts
+  (`scripts/og-fonts/`, with `OFL.txt` and provenance) and `tests/unit/shareCard.test.ts`
+  (10 tests) come with it.
+- `38ccf70`: the design gate's review set in `docs/review/share-cards/`: 7 published essays, 2
+  stress cases, and `manifest.json`.
+- `87edb2c` (B): each pre-rendered essay advertises its own card in the raw HTML. There is one image
+  formula, `src/lib/shareImage.mjs`, for the prerender and the app, so hydration keeps the image.
+  The branch also adds `scripts/check-share-parity.mjs`, the Playwright check, and 8 tests.
+- `1717877` (C): `dist/sitemap.xml` and `dist/rss.xml` from the same run, the robots.txt
+  `Sitemap:` line, `index.html`'s alternate link, and 7 tests.
+- `f5788f7`: `main` merged in. The only conflict was the floor, which is now **689**, for 693
+  tests.
+- the pre-merge commit: these records, and Part 4's SQL staged in
+  `docs/db/pending/wo-r05-rebuild/`.
+
+**Run locally on the final tree, CI's steps with CI's settings:**
+- `eslint . --max-warnings=35`: 0 errors, 25 warnings;
+- `tsc -b --force`: clean;
+- vitest under `TZ=America/Chicago`: **46 files / 693 tests**;
+- the floor: `693 tests … (floor 689)`, ok;
+- the keyless build: green, with the prerender skipped as on CI.
+
+The keyed build on the same tree gave `7 route(s) written, 0 skipped`, `7 share card(s)`,
+`sitemap.xml 8 url(s), rss.xml 7 item(s)`. `xmllint` passed both files, and the parity check read
+**7/7**.
+
+**The design gate.** The owner approved it with "langsung gas" (13:01 UTC). Two things were
+reported there:
+- **A stop condition:** the brief's font source cannot be rendered. The owner took option (a),
+  the static upstream TTFs (DECISIONS, 2026-09-28 WO-R05).
+- **Seven published essays, not six.** The Idea Guy essay was published after the brief's read.
+
+**Found at the merge — the apex domain is on an old deployment.** It is a hosting setting, outside
+this repo, and it is the NEXT ACTION above. It predates this work and also breaks the fallback card
+today. Measured 2026-09-28 with public GETs:
+- `https://dikagustiana.com/` and every other apex path answer 308 to
+  `dika-s-digital-studio.vercel.app`.
+- That host's `/og-image.png` is `text/html`, 1,139 B.
+- `www.dikagustiana.com` is byte-identical to `dikagustiana-com.vercel.app`, and its
+  `/og-image.png` is a 53,103 B PNG.
+
+**Found — production staleness, observed.** On `www.dikagustiana.com`, the Idea Guy essay serves
+the generic shell, while older essays are pre-rendered. The production build predates its
+publication. This is the R05 staleness that Part 4 exists for, observed live. PR #37's own
+production build will pre-render it.
+
+**Not verified:**
+- The renderer on Vercel's build image (GATE_LEDGER B′). A green preview of `f5788f7` implies it,
+  because every skip on a Vercel build exits 1, but its log could not be read. After this merge,
+  `https://www.dikagustiana.com/og/driver-tree-construction.png` must answer `image/png`.
+- The phone check (P5).
+- All of Part 4.
+
+**Part 4, staged:** `docs/db/pending/wo-r05-rebuild/`. G1 and G2 are byte-identical to what was
+printed, with sha256 values in its README. The folder also holds a local PG 16 rehearsal, run at
+10 of 10. Live preconditions read 2026-09-28:
+- `pg_net` 0.20.4 and `pg_cron` 1.6.4 are available, not installed;
+- Vault 0.3.1 is installed;
+- there is no `ops` schema;
+- the exposed schemas are `public, graphql_public`;
+- `vercel_deploy_hook_url` count is 0.
+
+**Correction to the auth tab-focus entry below:** its production check says "dikagustiana.com". Run
+it on `www.dikagustiana.com`, because the apex lands on the old deployment.
+
+**Owner decisions still open** (from the brief; decision 1, the card's content, was confirmed at the
+design gate):
+1. **Latency:** a 2-minute cron plus a 90-second quiet period plus build time puts a new card
+   live in about 5 minutes. Shorter means more builds.
+2. **Build minutes:** every manual save of a published essay costs one build, coalesced within
+   90 seconds. Check this against the Vercel plan's limits.
+3. **Hero images are not checked** for aspect ratio. Crop them to 1200 × 630 before upload.
+
+**Resume from here:** nothing is half-done in the repo. PR #37 merged the branch, so start from
+`main`. Part 4 starts from its staged folder on a new branch, once G1 and G2 are approved. The CI
+floor is **689**, and the suite is **46 files / 693 tests**.
 
 ## 2026-09-28 (auth tab-focus session) — a tab switch no longer wipes the Writer Studio, and the deployed link-preview is the commit
 

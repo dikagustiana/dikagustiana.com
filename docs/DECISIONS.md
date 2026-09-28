@@ -5,6 +5,137 @@ alternatives. Newest first.
 
 ---
 
+# 2026-09-28 — WO-R05: every essay gets its own share card; the rebuild is decided, not applied
+
+Branch `claude/wo-r05-share-cards-rebuild`, base `main` @ `85cdf51`, merged as PR #37 on the owner's
+instruction ("merge langsung") after gates B and C. Part 4 (the rebuild) is decided below and staged
+at `docs/db/pending/wo-r05-rebuild/`, but **not applied**: its gates G1 and G2 were printed and not
+yet approved. Gates are in `docs/GATE_LEDGER.md` ("WO-R05 session").
+
+## Share-image precedence: the hero, then the essay's own card, then the fallback
+
+On a pre-rendered essay route, `og:image` is:
+1. `thumbnail_url`, the hero image, which is the owner's manual override;
+2. otherwise the generated card, `https://dikagustiana.com/og/<slug>.png?v=<unix seconds of updated_at>`;
+3. `/og-image.png` only on routes that are not pre-rendered.
+
+- **One formula, two callers.** `src/lib/shareImage.mjs` (`essayShareImage`) is imported by
+  `scripts/prerender.mjs` for the raw HTML and by the app for Helmet, through both article shells and
+  `CriticalThinkingEssay`. It is a `.mjs` file with a `.d.mts` beside it, so Vite bundles it and Node
+  runs it unbundled. The brief's fallback, two implementations plus a parity test, was not needed.
+  Without it, `SEO.tsx`'s default image replaced the raw tag after hydration (the gate B mutant, 0/7).
+- **`?v=` is `updated_at` in unix seconds.** A crawler that caches by image URL fetches the new card
+  after an edit, because the URL changes.
+- **Width, height and type only for the generated card.** A hero's dimensions are unknown, and a
+  wrong value is worse than none. `og:image:alt` (the title) and `og:site_name` are always present.
+- **A card is drawn for every written route, hero or not,** so removing a hero later never leaves an
+  essay without one.
+
+## The card: the fallback's template, the site's font, drawn at build time
+
+- **Layout:** measured from `public/og-image.png`: the rule, the lantern and the footer at its
+  positions, and the title's first capital on its line (y 299). The label sits beside the lantern,
+  because below it would push the title down and force three-line titles to 56 px.
+- **Content:** label, title, name and domain; **no deck**, because WhatsApp prints `og:description`
+  under the image. Confirmed by the owner at the design gate.
+- **The label rule:** the section's name (`sections.name`, through the category), then the finance
+  track's title (`finance_sections.title`, through the module), else the category's name. The parts
+  are joined with ` · ` and set uppercase with letter-spacing, since the font has no true small caps.
+  Every name comes from the database; `scripts/` holds none. An unplaced finance essay reads
+  `FINANCE · GENERAL` (the Site Rebuild Note), as rendered at the gate and approved.
+- **Fonts, a deviation the owner approved:** static Plus Jakarta Sans Bold and SemiBold TTFs from
+  `tokotype/PlusJakartaSans` @ `18d1cd2`, the upstream commit `google/fonts` names as its source.
+  `google/fonts` ships only the variable TTF, and satori 0.33.5 cannot parse its `fvar` table.
+  Rejected: (b) deriving static instances from the variable file with fontTools, which yields a
+  converted file reproducible only with the same fontTools version; and converting the site's woff2
+  at build time, which the brief forbids. Provenance and hashes are in `scripts/og-fonts/README.md`,
+  pinned by a test.
+- **The renderer:** satori 0.33.5 (layout, text as paths) and @resvg/resvg-js 2.6.2 (SVG to PNG),
+  both devDependencies pinned exactly. No browser, and no network: the fonts and the logo are
+  files in the repo. `shareCard.mjs` is loaded only by build scripts, never by `src/`, and gate B
+  found no trace of either package in `dist/assets/`. `public/logo.png` holds JPEG bytes, so the card
+  reads the type from the magic bytes.
+
+## An undrawable title stops the build; a long one is cut
+
+- **A character the font lacks fails the build,** naming the essay and the code point
+  (`scripts/prerender.mjs`). A share card with a missing glyph would reach every reader; a failed
+  build leaves the previous deployment serving and says why.
+- **A card over 300 KB also fails the build.** The ceiling is conservative, not WhatsApp's.
+- **A title longer than three lines at 48 px is cut at a word, closed with `…`.** No published
+  title comes near it: all seven fit at 64 px. Truncation keeps the build green for a length problem,
+  which a reader can still understand, while a missing glyph is a correctness problem. `lineClamp`
+  stays as a safety net under the measured fit.
+
+## Sitemap and feed, v1
+
+- **The same run, the same fetch and the same `canonicalPath()`** as the pre-rendered pages. There
+  is no second route table, so the sitemap lists exactly the pages written.
+- **Sitemap:** the home page and every pre-rendered essay, with `lastmod` = `updated_at` as a date.
+  The home page takes the newest essay's. **Section index pages are not listed:** the prerender cannot
+  derive them without a hand-written list, and the home page links them.
+- **Feed:** the 20 newest by `date` (else `created_at`), then by URL. **No `lastBuildDate`**, so
+  the same essays always produce the same bytes. A rebuild that changed nothing then looks unchanged
+  to a feed reader.
+
+## The rebuild rule: any write that touches a published row (decided, not applied)
+
+`AFTER INSERT OR UPDATE OR DELETE ON public.essays FOR EACH ROW`, acting when `OLD.published` **or**
+`NEW.published` is true.
+
+- **Deliberately no column list.** The prerender reads about a dozen columns, `updated_at` among
+  them, and a hand-written list would drift. The rule is quiet anyway: autosave never writes a
+  published row. Unpublishing and deleting a published essay qualify most of all, because they take
+  a page down. Until this is applied, an unpublished essay's pre-rendered page keeps being served
+  until the next deploy.
+- **Nothing network-bound runs inside the owner's save.** The trigger only stamps
+  `ops.site_rebuild.requested_at`, and it never raises: a failure is a warning, never a failed save.
+  pg_cron runs `ops.fire_site_rebuild()` every 2 minutes. It fires once a request has been quiet for
+  90 seconds, so a burst of saves is one build, and it records the previous firing's HTTP answer.
+- **The hook URL lives only in Vault** (`vercel_deploy_hook_url`). It is read by name at firing time
+  and appears in no file, migration or log. Without the secret, a firing records `no_secret` and sends
+  nothing.
+
+## Why the state lives in an unexposed `ops` schema (decided, not applied)
+
+PostgREST exposes `public` and `graphql_public` only (measured 2026-09-28: `Accept-Profile: ops` →
+PGRST106). A table in `public` would be reachable through the Data API with RLS as its only lock, and
+would appear in `types.ts`. `ops` removes that surface:
+- USAGE, table rights and EXECUTE are revoked from `public`, `anon` and `authenticated`;
+- RLS is on anyway;
+- both functions are `SECURITY DEFINER` with `search_path = ''`.
+
+The owner's saves still stamp, because PostgreSQL does not check EXECUTE on a trigger's function when
+the trigger fires. The rehearsal showed this as `authenticated` (check 3). Nothing is created in
+`public`, so `types.ts` does not change.
+
+## What a future session must not undo by accident
+
+- Do not import `scripts/lib/shareCard.mjs`, satori or resvg from `src/`. The renderer is
+  build-time only.
+- Keep one image formula. A second copy in the app lets hydration drift from the raw HTML
+  unseen, because crawlers never run it.
+- Do not give the rebuild trigger a column list, network work, or a path that raises.
+- Do not add `ops` to the exposed schemas, and do not move the state into `public`.
+- Never write the hook URL anywhere but Vault. Rotation: create a new hook, run
+  `vault.update_secret`, then delete the old hook (the README gains the steps with Part 4).
+
+## Known gaps, and found, not acted on
+
+- **The apex domain serves an old deployment.** `https://dikagustiana.com/*` answers 308 to
+  `dika-s-digital-studio.vercel.app`, a pre-rebuild build, while `www.dikagustiana.com` serves this
+  project. Every `og:image`, `og:url`, canonical, sitemap `<loc>` and feed link names the apex, so
+  no share image, the fallback included, reaches a crawler until the owner points the apex at this
+  project. This is a hosting setting, not a code decision, and nothing here changes it (GATE_LEDGER
+  P5).
+- **`finance_modules` changes do not rebuild** (a track slug change, for one). This is rare, and out
+  of scope.
+- **Hero images are not checked** for aspect ratio or size. The owner crops to 1200 × 630.
+- **Accounting rows with a page-level canonical get no card**, exactly as they get no pre-rendered
+  page.
+
+---
+
 # 2026-09-28 — Admin role is resolved once per user id
 
 Branch `claude/auth-tab-focus-unmount`, base `main` @ `85cdf51`, merged as PR #36 on the owner's
