@@ -3,10 +3,11 @@
 Append-only. Newest entry first. A fresh session must be able to resume from this file.
 
 ## NEXT ACTION (single)
-**Owner: check the Vercel preview of `claude/auth-tab-focus-unmount`, then merge it.** The
-branch stops a tab switch from wiping the Writer Studio. The five steps are in the 2026-09-28
-entry below. It is **not merged**. It changes nothing on Supabase, so the merge is the whole
-deployment.
+**Owner: run the five-step tab-switch check on production.** The 2026-09-28 session merged
+into `main` as **PR #36** on the owner's instruction ("langsung merge"). No preview check was
+recorded before that merge, so its product gate (GATE_LEDGER A′) is still open. The five steps
+are in the 2026-09-28 entry below; run them on dikagustiana.com, since Vercel deploys `main`.
+PR #36 changed nothing on Supabase, so the merge was the whole deployment.
 
 Nothing from the 2026-09-27 session is open. It merged into `main` as **PR #35** on the
 owner's instruction, and Vercel deploys `main`. Its two live pieces were already live on
@@ -18,7 +19,7 @@ Gates A–D and E/F all PASSED (`docs/GATE_LEDGER.md`, "Growth-and-link-preview 
 A production spot check, whenever convenient: the header's The Next Big Thing dropdown lists
 six themes, and **Fetch details** fills the link-card dialog.
 
-**After that merge, the next action is the staged removal below**, which is still pending.
+**After that check, the next action is the staged removal below**, which is still pending.
 The previous NEXT ACTION's merge item is also done (`claude/draft-structure-coming-soon` is in
 `main`, checked 2026-09-27). The staged removal is **still not applied**: all 49 of 49
 `finance_modules` rows still carry `essay_count`, re-read 2026-09-27.
@@ -42,8 +43,11 @@ decisions from 2026-09-28 (listed in that entry).
 
 ## 2026-09-28 (auth tab-focus session) — a tab switch no longer wipes the Writer Studio, and the deployed link-preview is the commit
 
-Branch `claude/auth-tab-focus-unmount`, base `main` @ `85cdf51` (the PR #35 merge). **Not
-merged.** The merge gate is the owner's check on this branch's Vercel preview (steps below).
+Branch `claude/auth-tab-focus-unmount`, base `main` @ `85cdf51` (the PR #35 merge). **Merged
+into `main` as PR #36.** The brief said "do not merge"; the owner then instructed the merge
+("langsung merge") after the gates report. The brief's merge gate was the owner's check on the
+Vercel preview. It is not recorded as run, so the five steps below move to production. Before
+merging, CI's exact steps were run again locally with CI's settings, all green.
 
 **Applied to the database: nothing.** No migration, no SQL, no RLS change, no row written.
 **Deployed: nothing.** No edge function was deployed or changed. **No identity was created:** no
@@ -58,14 +62,15 @@ that round-trip, so `WriterEditor` unmounted, remounted and reloaded the row wit
 work. An open link-card dialog went too. That put the Growth curation loop (copy a URL in another
 tab, come back, Fetch details) directly in the bug's path.
 
-**What the branch contains (3 commits):**
+**What the branch contains (4 commits):**
 - `c195c09`: the reviewed Appendix A patch, applied as written. `AuthContext` resolves the admin
   role once per user id. A same-user event never touches `isLoading`, and a failed check is
   forgotten, so the next event retries. With it, `tests/unit/authTabFocus.test.tsx` (2 tests),
   which failed on `main` first (`expected 2 to be 1`) and passes on the branch.
 - `39f3a67`: the CI floor, 662 → 664.
-- the records commit: this entry, GATE_LEDGER gates A–C, and DECISIONS 2026-09-28 ("Admin role is
-  resolved once per user id").
+- `8d9ce28`, the records: this entry, GATE_LEDGER gates A–C, and DECISIONS 2026-09-28 ("Admin
+  role is resolved once per user id").
+- the pre-merge commit: these merge notes.
 
 `WriterEditor.tsx`, `useEssayAutosave.ts`, `revisions.ts` and `types.ts` are untouched. Run locally:
 `tsc -b --force` clean; vitest **43 files / 668 tests** (`main`: 42 / 666); `npm run build` green,
@@ -79,8 +84,8 @@ resets on a same-user auth event. GATE_LEDGER gate A has the per-file reading.
 commit. `index.ts` is sha256 `0fbe64a2…` and `resolve.ts` is `e5e982d0…`, the same on both sides
 (full hashes in gate C). No redeploy was needed, and none was done.
 
-**Merge gate — the owner, on the Vercel preview of this branch:**
-1. Sign in on the preview.
+**The product check — the owner, now on production** (it was the merge gate, on the preview):
+1. Sign in on dikagustiana.com.
 2. Open an existing draft, type a sentence, and do not click Save.
 3. Switch to another browser tab for about 10 seconds, then come back.
 4. The sentence must still be there, with no spinner flash.
@@ -107,9 +112,9 @@ commit. `index.ts` is sha256 `0fbe64a2…` and `resolve.ts` is `e5e982d0…`, th
 answer (a sign-out, or a switch to another account, during the round-trip). This is pre-existing,
 and the patch leaves it as it was. It is UI-only, because RLS enforces every query.
 
-**Resume from here:** nothing is half-done. Once merged, the CI floor is **664** and the suite is
-**43 files / 668 tests**. If a preview step fails, record which one: the unit test proves the
-mechanism, not the product.
+**Resume from here:** nothing is half-done. PR #36 merged the branch, so start from `main`. The
+CI floor is **664**, and the suite is **43 files / 668 tests**. If a production step fails, record
+which one: the unit test proves the mechanism, not the product.
 
 ## 2026-09-27 (growth-and-link-preview session) — Growth, one theme list, link previews resolved server-side
 

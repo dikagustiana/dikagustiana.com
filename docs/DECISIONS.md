@@ -7,8 +7,8 @@ alternatives. Newest first.
 
 # 2026-09-28 — Admin role is resolved once per user id
 
-Branch `claude/auth-tab-focus-unmount`, base `main` @ `85cdf51`. Not merged. Gates are in
-`docs/GATE_LEDGER.md` ("Auth tab-focus session").
+Branch `claude/auth-tab-focus-unmount`, base `main` @ `85cdf51`, merged as PR #36 on the owner's
+instruction. Gates are in `docs/GATE_LEDGER.md` ("Auth tab-focus session").
 
 ## Same-user auth events never blank the route tree
 
