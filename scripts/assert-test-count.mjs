@@ -11,7 +11,7 @@
  */
 import fs from 'node:fs';
 
-const MIN_TESTS = 662; // 666 after the growth-and-link-preview pass (PR #35): the link-preview resolver's SSRF and resolution suite (76), the link card through publish and on the page, the link-card dialog and its client, Growth's nav route, and the markdown attribution; slack of 4, not 40.
+const MIN_TESTS = 664; // 668 after the auth tab-focus fix: the tab-focus regression suite (2), a same-user auth event keeps the admin page mounted and a sign-out still leaves it. 666 after the growth-and-link-preview pass (PR #35): the link-preview resolver's SSRF and resolution suite (76), the link card through publish and on the page, the link-card dialog and its client, Growth's nav route, and the markdown attribution; slack of 4, not 40.
 
 const reportPath = process.argv[2] ?? 'vitest-report.json';
 if (!fs.existsSync(reportPath)) {
