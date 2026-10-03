@@ -14,6 +14,7 @@ import {
   CONDITIONS,
   getLayerLabel,
   CONDITION_ORDER,
+  SHOW_CASE_COMPANIES,
 } from '@/data/capitalConditions';
 
 export default function CapitalConditionDetail() {
@@ -94,7 +95,12 @@ export default function CapitalConditionDetail() {
         </h2>
         <p className="text-lg leading-8 text-slate-800 mb-6">
           This is a <span className="font-medium">{getLayerLabel(condition.layer).toLowerCase()}</span> condition
-          observed in the case of <span className="font-medium">{condition.caseCompany}</span>.
+          {SHOW_CASE_COMPANIES && (
+            <>
+              {' '}observed in the case of <span className="font-medium">{condition.caseCompany}</span>
+            </>
+          )}
+          .
         </p>
 
         {/* The Capital Tension */}
