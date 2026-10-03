@@ -76,6 +76,13 @@ export const LAYER_ORDER: { layer: CapitalCondition['layer']; conditionNumbers: 
   { layer: 'structural-transformation', conditionNumbers: [19, 20, 21] },
 ];
 
+/**
+ * Each case is a causal claim about a named company. Keep false until every
+ * attribution has passed the Verification Register; the `caseCompany` data
+ * below stays in place and is simply not rendered.
+ */
+export const SHOW_CASE_COMPANIES = false;
+
 export const CONDITIONS: CapitalCondition[] = [
   {
     id: 'low-growth-idle', number: 1, layer: 'operational',
