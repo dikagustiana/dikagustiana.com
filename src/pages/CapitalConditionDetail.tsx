@@ -59,7 +59,7 @@ export default function CapitalConditionDetail() {
       breadcrumbs={[
         { label: 'Home', path: '/' },
         { label: 'Finance', path: '/finance' },
-        { label: 'Capital in Motion', path: '/finance/finance-in-motion' },
+        { label: 'Capital in Motion', path: '/finance/capital-allocation' },
         { label: condition.title },
       ]}
     >
@@ -71,7 +71,7 @@ export default function CapitalConditionDetail() {
       <article className="max-w-[860px] mx-auto px-6 lg:px-16 py-16">
         {/* Back link */}
         <Link
-          to="/finance/finance-in-motion"
+          to="/finance/capital-allocation"
           className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-12"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
@@ -197,7 +197,7 @@ export default function CapitalConditionDetail() {
         <div className="mt-16 pt-6 border-t border-slate-200 flex items-center justify-between">
           {prevCondition ? (
             <button
-              onClick={() => navigate(`/finance/capital-in-motion/${prevCondition.id}`)}
+              onClick={() => navigate(`/finance/capital-allocation/${prevCondition.id}`)}
               className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
@@ -208,7 +208,7 @@ export default function CapitalConditionDetail() {
           )}
           {nextCondition ? (
             <button
-              onClick={() => navigate(`/finance/capital-in-motion/${nextCondition.id}`)}
+              onClick={() => navigate(`/finance/capital-allocation/${nextCondition.id}`)}
               className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
               Next

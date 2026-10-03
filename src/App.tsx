@@ -97,6 +97,20 @@ const FourSegmentEssayRedirect = () => {
   return <Navigate to={essaySlug ? `/essays/${essaySlug}` : '/finance'} replace />;
 };
 
+// Capital in Motion moved from /finance/capital-in-motion/:conditionSlug to sit
+// under its section, /finance/capital-allocation/:conditionSlug. A bare
+// <Navigate to="…/:conditionSlug"> would send the literal ":conditionSlug",
+// so the param is carried across here.
+const CapitalConditionLegacyRedirect = () => {
+  const { conditionSlug } = useParams();
+  return (
+    <Navigate
+      to={conditionSlug ? `/finance/capital-allocation/${conditionSlug}` : '/finance/capital-allocation'}
+      replace
+    />
+  );
+};
+
 const RouteFallback = () => (
   <div className="flex items-center justify-center min-h-screen">
     <LoadingState />
@@ -131,8 +145,8 @@ const App = () => (
 
             {/* Finance */}
             <Route path="/finance" element={<FinanceLanding />} />
-            <Route path="/finance/finance-in-motion" element={<FinanceInMotion />} />
-            <Route path="/finance/capital-in-motion/:conditionSlug" element={<CapitalConditionDetail />} />
+            <Route path="/finance/capital-allocation" element={<FinanceInMotion />} />
+            <Route path="/finance/capital-allocation/:conditionSlug" element={<CapitalConditionDetail />} />
             <Route path="/finance/finance-in-action" element={<FinanceInActionIndex />} />
             <Route path="/finance/finance-in-action/:modelSlug" element={<FinanceModelDetail />} />
             <Route path="/finance/:track" element={<FinanceTrackIndex />} />
@@ -146,6 +160,8 @@ const App = () => (
             <Route path="/finance/:track/:moduleSlug/:essaySlug" element={<FourSegmentEssayRedirect />} />
 
             {/* Legacy redirects */}
+            <Route path="/finance/finance-in-motion" element={<Navigate to="/finance/capital-allocation" replace />} />
+            <Route path="/finance/capital-in-motion/:conditionSlug" element={<CapitalConditionLegacyRedirect />} />
             <Route path="/finance-101" element={<Navigate to="/finance" replace />} />
             <Route path="/finance-101/financial-analytics" element={<Navigate to="/finance/analytics" replace />} />
             <Route path="/finance-101/financial-analytics/:topic" element={<Navigate to="/finance/analytics" replace />} />

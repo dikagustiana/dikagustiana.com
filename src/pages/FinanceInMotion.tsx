@@ -77,7 +77,7 @@ export default function FinanceInMotion() {
             <div key={condition.id}>
               <CapitalConditionCard
                 condition={condition}
-                onClick={() => navigate(`/finance/capital-in-motion/${condition.id}`)}
+                onClick={() => navigate(`/finance/capital-allocation/${condition.id}`)}
               />
               {i < orderedConditions.length - 1 && <Separator />}
             </div>
