@@ -17,6 +17,7 @@ import { ConditionPanel } from '@/components/finance-in-action/viewer/model/Cond
 import { ModelGrid } from '@/components/finance-in-action/viewer/model/ModelGrid';
 import { Inspector } from '@/components/finance-in-action/viewer/model/Inspector';
 import { WorkpaperRecord } from '@/components/finance-in-action/viewer/model/WorkpaperRecord';
+import { DownloadButton } from '@/components/finance-in-action/viewer/model/DownloadButton';
 import { PeriodSelect } from '@/components/finance-in-action/viewer/model/PeriodSelect';
 import { UnitEconomics } from '@/components/finance-in-action/viewer/model/UnitEconomics';
 import { UELineDetail } from '@/components/finance-in-action/viewer/model/UELineDetail';
@@ -154,7 +155,7 @@ export function FiaModelPage({ pkg, reg }: { pkg: ModelPackage; reg: Registry })
       <div className="container max-w-7xl px-4 py-8 sm:px-8">
         <div className="xl:grid xl:grid-cols-[minmax(0,1fr)_22rem] xl:items-start xl:gap-8">
           <div className="min-w-0">
-            <ModelHeader pkg={pkg} reg={reg} lens={lens} onLens={setLens} />
+            <ModelHeader pkg={pkg} reg={reg} lens={lens} onLens={setLens} download={<DownloadButton view={view} />} />
             <ProvenanceNote provenance={meta.provenance} />
 
             <Section
