@@ -1,0 +1,4310 @@
+{
+  "meta": {
+    "ticker": "XCOA",
+    "name": "Example Coal Co (SYNTHETIC)",
+    "subIndustry": "SYN-COAL",
+    "chainStage": "stage-extraction",
+    "pair": [
+      "SCOA"
+    ],
+    "version": "XCOA-2025Q4-r1-SYNTHETIC",
+    "contentHash": "1ba63644a6312f82265a87af6cd1a8b3f48eb1d391c193efa2d0de6685ba5422",
+    "asOf": {
+      "latestQuarter": "25Q4",
+      "fullStatementsTo": "25Q4"
+    },
+    "provenance": "synthetic",
+    "status": "published",
+    "depth": "executive",
+    "conditionIds": [
+      3
+    ],
+    "skillVersions": {
+      "fs-intake": "0.0.0-SYNTHETIC",
+      "fs-driver-decomposition": "0.0.0-SYNTHETIC",
+      "financial-modeling": "0.0.0-SYNTHETIC"
+    },
+    "rounding": {
+      "decimals": 0
+    },
+    "conditionNotes": {
+      "3": "This model supplies the per-tonne economics the rule needs: realised price, cost per tonne and margin through the cycle."
+    }
+  },
+  "periods": [
+    {
+      "id": "24Q1",
+      "label": "Q1 24",
+      "kind": "quarter",
+      "forecast": false
+    },
+    {
+      "id": "24Q2",
+      "label": "Q2 24",
+      "kind": "quarter",
+      "forecast": false
+    },
+    {
+      "id": "24Q3",
+      "label": "Q3 24",
+      "kind": "quarter",
+      "forecast": false
+    },
+    {
+      "id": "24Q4",
+      "label": "Q4 24",
+      "kind": "quarter",
+      "forecast": false
+    },
+    {
+      "id": "25Q1",
+      "label": "Q1 25",
+      "kind": "quarter",
+      "forecast": false
+    },
+    {
+      "id": "25Q2",
+      "label": "Q2 25",
+      "kind": "quarter",
+      "forecast": false
+    },
+    {
+      "id": "25Q3",
+      "label": "Q3 25",
+      "kind": "quarter",
+      "forecast": false
+    },
+    {
+      "id": "25Q4",
+      "label": "Q4 25",
+      "kind": "quarter",
+      "forecast": false
+    },
+    {
+      "id": "FY25",
+      "label": "FY 25",
+      "kind": "fy",
+      "forecast": false
+    },
+    {
+      "id": "26Q1E",
+      "label": "Q1 26E",
+      "kind": "quarter",
+      "forecast": true
+    },
+    {
+      "id": "26Q2E",
+      "label": "Q2 26E",
+      "kind": "quarter",
+      "forecast": true
+    }
+  ],
+  "sheets": [
+    {
+      "id": "reported",
+      "rows": [
+        {
+          "id": "revenue",
+          "label": "Revenue",
+          "unit": "Rp bn",
+          "cells": [
+            {
+              "value": 1600,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q1 24",
+                "period": "Q1 24",
+                "page": 12,
+                "note": "24",
+                "xbrlConcept": "syn:Revenue"
+              }
+            },
+            {
+              "value": 1760,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q2 24",
+                "period": "Q2 24",
+                "page": 12,
+                "note": "24",
+                "xbrlConcept": "syn:Revenue"
+              }
+            },
+            {
+              "value": 1800,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q3 24",
+                "period": "Q3 24",
+                "page": 12,
+                "note": "24",
+                "xbrlConcept": "syn:Revenue"
+              }
+            },
+            {
+              "value": 1800,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q4 24",
+                "period": "Q4 24",
+                "page": 12,
+                "note": "24",
+                "xbrlConcept": "syn:Revenue"
+              }
+            },
+            {
+              "value": 1540,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q1 25",
+                "period": "Q1 25",
+                "page": 12,
+                "note": "24",
+                "xbrlConcept": "syn:Revenue"
+              }
+            },
+            {
+              "value": 1680,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q2 25",
+                "period": "Q2 25",
+                "page": 12,
+                "note": "24",
+                "xbrlConcept": "syn:Revenue"
+              }
+            },
+            {
+              "value": 1950,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q3 25",
+                "period": "Q3 25",
+                "page": 12,
+                "note": "24",
+                "xbrlConcept": "syn:Revenue"
+              }
+            },
+            {
+              "value": 2100,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q4 25",
+                "period": "Q4 25",
+                "page": 12,
+                "note": "24",
+                "xbrlConcept": "syn:Revenue"
+              }
+            },
+            {
+              "value": 7270,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC annual report FY 25",
+                "period": "FY 25",
+                "page": 12,
+                "note": "24",
+                "xbrlConcept": "syn:Revenue"
+              },
+              "tieOut": {
+                "externalValue": 7270,
+                "sourceText": "SYNTHETIC IDX XBRL instance FY 25, syn:Revenue",
+                "difference": 0,
+                "status": "agrees"
+              }
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Forecast period: nothing is reported yet (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Forecast period: nothing is reported yet (SYNTHETIC)"
+            }
+          ]
+        },
+        {
+          "id": "vol_sold",
+          "label": "Coal sales volume",
+          "unit": "Mt",
+          "cells": [
+            {
+              "value": 2,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC quarterly operating update Q1 24",
+                "period": "Q1 24",
+                "page": 3
+              }
+            },
+            {
+              "value": 2.2,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC quarterly operating update Q2 24",
+                "period": "Q2 24",
+                "page": 3
+              }
+            },
+            {
+              "value": 2.4,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC quarterly operating update Q3 24",
+                "period": "Q3 24",
+                "page": 3
+              }
+            },
+            {
+              "value": 2.4,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC quarterly operating update Q4 24",
+                "period": "Q4 24",
+                "page": 3
+              }
+            },
+            {
+              "value": 2.2,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC quarterly operating update Q1 25",
+                "period": "Q1 25",
+                "page": 3
+              }
+            },
+            {
+              "value": 2.4,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC quarterly operating update Q2 25",
+                "period": "Q2 25",
+                "page": 3
+              }
+            },
+            {
+              "value": 2.6,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC quarterly operating update Q3 25",
+                "period": "Q3 25",
+                "page": 3
+              }
+            },
+            {
+              "value": 2.8,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC quarterly operating update Q4 25",
+                "period": "Q4 25",
+                "page": 3
+              }
+            },
+            {
+              "value": 10,
+              "kind": "formula",
+              "formula": "=SUM(reported!G3:J3)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Forecast period: nothing is reported yet (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Forecast period: nothing is reported yet (SYNTHETIC)"
+            }
+          ]
+        },
+        {
+          "id": "production",
+          "label": "Coal production",
+          "unit": "Mt",
+          "cells": [
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Production was not disclosed for this quarter (SYNTHETIC)"
+            },
+            {
+              "value": 2.2,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC quarterly operating update Q2 24",
+                "period": "Q2 24",
+                "page": 3
+              }
+            },
+            {
+              "value": 2.5,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC quarterly operating update Q3 24",
+                "period": "Q3 24",
+                "page": 3
+              }
+            },
+            {
+              "value": 2.4,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC quarterly operating update Q4 24",
+                "period": "Q4 24",
+                "page": 3
+              }
+            },
+            {
+              "value": 2.3,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC quarterly operating update Q1 25",
+                "period": "Q1 25",
+                "page": 3
+              }
+            },
+            {
+              "value": 2.4,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC quarterly operating update Q2 25",
+                "period": "Q2 25",
+                "page": 3
+              }
+            },
+            {
+              "value": 2.6,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC quarterly operating update Q3 25",
+                "period": "Q3 25",
+                "page": 3
+              }
+            },
+            {
+              "value": 2.7,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC quarterly operating update Q4 25",
+                "period": "Q4 25",
+                "page": 3
+              }
+            },
+            {
+              "value": 10,
+              "kind": "formula",
+              "formula": "=SUM(reported!G4:J4)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Forecast period: nothing is reported yet (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Forecast period: nothing is reported yet (SYNTHETIC)"
+            }
+          ]
+        },
+        {
+          "id": "ob_removed",
+          "label": "Overburden removed",
+          "unit": "Mbcm",
+          "cells": [
+            {
+              "value": 16,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC quarterly operating update Q1 24",
+                "period": "Q1 24",
+                "page": 3
+              }
+            },
+            {
+              "value": 18,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC quarterly operating update Q2 24",
+                "period": "Q2 24",
+                "page": 3
+              }
+            },
+            {
+              "value": 20,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC quarterly operating update Q3 24",
+                "period": "Q3 24",
+                "page": 3
+              }
+            },
+            {
+              "value": 19,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC quarterly operating update Q4 24",
+                "period": "Q4 24",
+                "page": 3
+              }
+            },
+            {
+              "value": 18,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC quarterly operating update Q1 25",
+                "period": "Q1 25",
+                "page": 3
+              }
+            },
+            {
+              "value": 19,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC quarterly operating update Q2 25",
+                "period": "Q2 25",
+                "page": 3
+              }
+            },
+            {
+              "value": 21,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC quarterly operating update Q3 25",
+                "period": "Q3 25",
+                "page": 3
+              }
+            },
+            {
+              "value": 22,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC quarterly operating update Q4 25",
+                "period": "Q4 25",
+                "page": 3
+              }
+            },
+            {
+              "value": 80,
+              "kind": "formula",
+              "formula": "=SUM(reported!G5:J5)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Forecast period: nothing is reported yet (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Forecast period: nothing is reported yet (SYNTHETIC)"
+            }
+          ]
+        },
+        {
+          "id": "cor_contractor",
+          "label": "Mining contractor services",
+          "unit": "Rp bn",
+          "cells": [
+            {
+              "value": 480,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q1 24",
+                "period": "Q1 24",
+                "page": 41,
+                "note": "25",
+                "xbrlConcept": "syn:CostOfRevenueContractor"
+              }
+            },
+            {
+              "value": 540,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q2 24",
+                "period": "Q2 24",
+                "page": 41,
+                "note": "25",
+                "xbrlConcept": "syn:CostOfRevenueContractor"
+              }
+            },
+            {
+              "value": 600,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q3 24",
+                "period": "Q3 24",
+                "page": 41,
+                "note": "25",
+                "xbrlConcept": "syn:CostOfRevenueContractor"
+              }
+            },
+            {
+              "value": 570,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q4 24",
+                "period": "Q4 24",
+                "page": 41,
+                "note": "25",
+                "xbrlConcept": "syn:CostOfRevenueContractor"
+              }
+            },
+            {
+              "value": 540,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q1 25",
+                "period": "Q1 25",
+                "page": 41,
+                "note": "25",
+                "xbrlConcept": "syn:CostOfRevenueContractor"
+              }
+            },
+            {
+              "value": 570,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q2 25",
+                "period": "Q2 25",
+                "page": 41,
+                "note": "25",
+                "xbrlConcept": "syn:CostOfRevenueContractor"
+              }
+            },
+            {
+              "value": 630,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q3 25",
+                "period": "Q3 25",
+                "page": 41,
+                "note": "25",
+                "xbrlConcept": "syn:CostOfRevenueContractor"
+              }
+            },
+            {
+              "value": 660,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q4 25",
+                "period": "Q4 25",
+                "page": 41,
+                "note": "25",
+                "xbrlConcept": "syn:CostOfRevenueContractor"
+              }
+            },
+            {
+              "value": 2400,
+              "kind": "formula",
+              "formula": "=SUM(reported!G6:J6)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Forecast period: nothing is reported yet (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Forecast period: nothing is reported yet (SYNTHETIC)"
+            }
+          ]
+        },
+        {
+          "id": "cor_fuel",
+          "label": "Fuel",
+          "unit": "Rp bn",
+          "cells": [
+            {
+              "value": 160,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q1 24",
+                "period": "Q1 24",
+                "page": 41,
+                "note": "25",
+                "xbrlConcept": "syn:CostOfRevenueFuel"
+              }
+            },
+            {
+              "value": 180,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q2 24",
+                "period": "Q2 24",
+                "page": 41,
+                "note": "25",
+                "xbrlConcept": "syn:CostOfRevenueFuel"
+              }
+            },
+            {
+              "value": 200,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q3 24",
+                "period": "Q3 24",
+                "page": 41,
+                "note": "25",
+                "xbrlConcept": "syn:CostOfRevenueFuel"
+              }
+            },
+            {
+              "value": 190,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q4 24",
+                "period": "Q4 24",
+                "page": 41,
+                "note": "25",
+                "xbrlConcept": "syn:CostOfRevenueFuel"
+              }
+            },
+            {
+              "value": 180,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q1 25",
+                "period": "Q1 25",
+                "page": 41,
+                "note": "25",
+                "xbrlConcept": "syn:CostOfRevenueFuel"
+              }
+            },
+            {
+              "value": 190,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q2 25",
+                "period": "Q2 25",
+                "page": 41,
+                "note": "25",
+                "xbrlConcept": "syn:CostOfRevenueFuel"
+              }
+            },
+            {
+              "value": 210,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q3 25",
+                "period": "Q3 25",
+                "page": 41,
+                "note": "25",
+                "xbrlConcept": "syn:CostOfRevenueFuel"
+              }
+            },
+            {
+              "value": 220,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q4 25",
+                "period": "Q4 25",
+                "page": 41,
+                "note": "25",
+                "xbrlConcept": "syn:CostOfRevenueFuel"
+              }
+            },
+            {
+              "value": 800,
+              "kind": "formula",
+              "formula": "=SUM(reported!G7:J7)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Forecast period: nothing is reported yet (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Forecast period: nothing is reported yet (SYNTHETIC)"
+            }
+          ]
+        },
+        {
+          "id": "cor_freight",
+          "label": "Coal transport",
+          "unit": "Rp bn",
+          "cells": [
+            {
+              "value": 240,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q1 24",
+                "period": "Q1 24",
+                "page": 41,
+                "note": "25",
+                "xbrlConcept": "syn:CostOfRevenueFreight"
+              }
+            },
+            {
+              "value": 264,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q2 24",
+                "period": "Q2 24",
+                "page": 41,
+                "note": "25",
+                "xbrlConcept": "syn:CostOfRevenueFreight"
+              }
+            },
+            {
+              "value": 288,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q3 24",
+                "period": "Q3 24",
+                "page": 41,
+                "note": "25",
+                "xbrlConcept": "syn:CostOfRevenueFreight"
+              }
+            },
+            {
+              "value": 288,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q4 24",
+                "period": "Q4 24",
+                "page": 41,
+                "note": "25",
+                "xbrlConcept": "syn:CostOfRevenueFreight"
+              }
+            },
+            {
+              "value": 264,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q1 25",
+                "period": "Q1 25",
+                "page": 41,
+                "note": "25",
+                "xbrlConcept": "syn:CostOfRevenueFreight"
+              }
+            },
+            {
+              "value": 288,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q2 25",
+                "period": "Q2 25",
+                "page": 41,
+                "note": "25",
+                "xbrlConcept": "syn:CostOfRevenueFreight"
+              }
+            },
+            {
+              "value": 312,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q3 25",
+                "period": "Q3 25",
+                "page": 41,
+                "note": "25",
+                "xbrlConcept": "syn:CostOfRevenueFreight"
+              }
+            },
+            {
+              "value": 336,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q4 25",
+                "period": "Q4 25",
+                "page": 41,
+                "note": "25",
+                "xbrlConcept": "syn:CostOfRevenueFreight"
+              }
+            },
+            {
+              "value": 1200,
+              "kind": "formula",
+              "formula": "=SUM(reported!G8:J8)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Forecast period: nothing is reported yet (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Forecast period: nothing is reported yet (SYNTHETIC)"
+            }
+          ]
+        },
+        {
+          "id": "cor_royalty",
+          "label": "Royalty",
+          "unit": "Rp bn",
+          "cells": [
+            {
+              "value": 160,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q1 24",
+                "period": "Q1 24",
+                "page": 41,
+                "note": "25",
+                "xbrlConcept": "syn:CostOfRevenueRoyalty"
+              }
+            },
+            {
+              "value": 176,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q2 24",
+                "period": "Q2 24",
+                "page": 41,
+                "note": "25",
+                "xbrlConcept": "syn:CostOfRevenueRoyalty"
+              }
+            },
+            {
+              "value": 180,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q3 24",
+                "period": "Q3 24",
+                "page": 41,
+                "note": "25",
+                "xbrlConcept": "syn:CostOfRevenueRoyalty"
+              }
+            },
+            {
+              "value": 180,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q4 24",
+                "period": "Q4 24",
+                "page": 41,
+                "note": "25",
+                "xbrlConcept": "syn:CostOfRevenueRoyalty"
+              }
+            },
+            {
+              "value": 154,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q1 25",
+                "period": "Q1 25",
+                "page": 41,
+                "note": "25",
+                "xbrlConcept": "syn:CostOfRevenueRoyalty"
+              }
+            },
+            {
+              "value": 168,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q2 25",
+                "period": "Q2 25",
+                "page": 41,
+                "note": "25",
+                "xbrlConcept": "syn:CostOfRevenueRoyalty"
+              }
+            },
+            {
+              "value": 195,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q3 25",
+                "period": "Q3 25",
+                "page": 41,
+                "note": "25",
+                "xbrlConcept": "syn:CostOfRevenueRoyalty"
+              }
+            },
+            {
+              "value": 210,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q4 25",
+                "period": "Q4 25",
+                "page": 41,
+                "note": "25",
+                "xbrlConcept": "syn:CostOfRevenueRoyalty"
+              }
+            },
+            {
+              "value": 727,
+              "kind": "formula",
+              "formula": "=SUM(reported!G9:J9)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Forecast period: nothing is reported yet (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Forecast period: nothing is reported yet (SYNTHETIC)"
+            }
+          ]
+        },
+        {
+          "id": "cor_total",
+          "label": "Cost of revenue",
+          "unit": "Rp bn",
+          "style": "total",
+          "cells": [
+            {
+              "value": 1190,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q1 24",
+                "period": "Q1 24",
+                "page": 12,
+                "note": "25",
+                "xbrlConcept": "syn:CostOfRevenue"
+              }
+            },
+            {
+              "value": 1310,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q2 24",
+                "period": "Q2 24",
+                "page": 12,
+                "note": "25",
+                "xbrlConcept": "syn:CostOfRevenue"
+              }
+            },
+            {
+              "value": 1428,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q3 24",
+                "period": "Q3 24",
+                "page": 12,
+                "note": "25",
+                "xbrlConcept": "syn:CostOfRevenue"
+              }
+            },
+            {
+              "value": 1388,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q4 24",
+                "period": "Q4 24",
+                "page": 12,
+                "note": "25",
+                "xbrlConcept": "syn:CostOfRevenue"
+              }
+            },
+            {
+              "value": 1288,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q1 25",
+                "period": "Q1 25",
+                "page": 12,
+                "note": "25",
+                "xbrlConcept": "syn:CostOfRevenue"
+              }
+            },
+            {
+              "value": 1376,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q2 25",
+                "period": "Q2 25",
+                "page": 12,
+                "note": "25",
+                "xbrlConcept": "syn:CostOfRevenue"
+              }
+            },
+            {
+              "value": 1507,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q3 25",
+                "period": "Q3 25",
+                "page": 12,
+                "note": "25",
+                "xbrlConcept": "syn:CostOfRevenue"
+              }
+            },
+            {
+              "value": 1596,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q4 25",
+                "period": "Q4 25",
+                "page": 12,
+                "note": "25",
+                "xbrlConcept": "syn:CostOfRevenue"
+              }
+            },
+            {
+              "value": 5767,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC annual report FY 25",
+                "period": "FY 25",
+                "page": 12,
+                "note": "25",
+                "xbrlConcept": "syn:CostOfRevenue"
+              },
+              "tieOut": {
+                "externalValue": 5765,
+                "sourceText": "SYNTHETIC IDX XBRL instance FY 25, syn:CostOfRevenue, rounded differently from the annual report",
+                "difference": 2,
+                "status": "differs"
+              }
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Forecast period: nothing is reported yet (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Forecast period: nothing is reported yet (SYNTHETIC)"
+            }
+          ]
+        },
+        {
+          "id": "sga",
+          "label": "Selling, general and administrative expenses",
+          "unit": "Rp bn",
+          "cells": [
+            {
+              "value": 100,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q1 24",
+                "period": "Q1 24",
+                "page": 42,
+                "note": "26",
+                "xbrlConcept": "syn:SellingGeneralAdministrative"
+              }
+            },
+            {
+              "value": 100,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q2 24",
+                "period": "Q2 24",
+                "page": 42,
+                "note": "26",
+                "xbrlConcept": "syn:SellingGeneralAdministrative"
+              }
+            },
+            {
+              "value": 110,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q3 24",
+                "period": "Q3 24",
+                "page": 42,
+                "note": "26",
+                "xbrlConcept": "syn:SellingGeneralAdministrative"
+              }
+            },
+            {
+              "value": 110,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q4 24",
+                "period": "Q4 24",
+                "page": 42,
+                "note": "26",
+                "xbrlConcept": "syn:SellingGeneralAdministrative"
+              }
+            },
+            {
+              "value": 100,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q1 25",
+                "period": "Q1 25",
+                "page": 42,
+                "note": "26",
+                "xbrlConcept": "syn:SellingGeneralAdministrative"
+              }
+            },
+            {
+              "value": 105,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q2 25",
+                "period": "Q2 25",
+                "page": 42,
+                "note": "26",
+                "xbrlConcept": "syn:SellingGeneralAdministrative"
+              }
+            },
+            {
+              "value": 110,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q3 25",
+                "period": "Q3 25",
+                "page": 42,
+                "note": "26",
+                "xbrlConcept": "syn:SellingGeneralAdministrative"
+              }
+            },
+            {
+              "value": 120,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q4 25",
+                "period": "Q4 25",
+                "page": 42,
+                "note": "26",
+                "xbrlConcept": "syn:SellingGeneralAdministrative"
+              }
+            },
+            {
+              "value": 435,
+              "kind": "formula",
+              "formula": "=SUM(reported!G11:J11)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Forecast period: nothing is reported yet (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Forecast period: nothing is reported yet (SYNTHETIC)"
+            }
+          ]
+        },
+        {
+          "id": "other_net",
+          "label": "Finance and other items, net",
+          "unit": "Rp bn",
+          "cells": [
+            {
+              "value": -20,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q1 24",
+                "period": "Q1 24",
+                "page": 43,
+                "note": "27",
+                "xbrlConcept": "syn:OtherItemsNet"
+              }
+            },
+            {
+              "value": -20,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q2 24",
+                "period": "Q2 24",
+                "page": 43,
+                "note": "27",
+                "xbrlConcept": "syn:OtherItemsNet"
+              }
+            },
+            {
+              "value": -15,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q3 24",
+                "period": "Q3 24",
+                "page": 43,
+                "note": "27",
+                "xbrlConcept": "syn:OtherItemsNet"
+              }
+            },
+            {
+              "value": -15,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q4 24",
+                "period": "Q4 24",
+                "page": 43,
+                "note": "27",
+                "xbrlConcept": "syn:OtherItemsNet"
+              }
+            },
+            {
+              "value": -10,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q1 25",
+                "period": "Q1 25",
+                "page": 43,
+                "note": "27",
+                "xbrlConcept": "syn:OtherItemsNet"
+              }
+            },
+            {
+              "value": -10,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q2 25",
+                "period": "Q2 25",
+                "page": 43,
+                "note": "27",
+                "xbrlConcept": "syn:OtherItemsNet"
+              }
+            },
+            {
+              "value": -10,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q3 25",
+                "period": "Q3 25",
+                "page": 43,
+                "note": "27",
+                "xbrlConcept": "syn:OtherItemsNet"
+              }
+            },
+            {
+              "value": -10,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q4 25",
+                "period": "Q4 25",
+                "page": 43,
+                "note": "27",
+                "xbrlConcept": "syn:OtherItemsNet"
+              }
+            },
+            {
+              "value": -40,
+              "kind": "formula",
+              "formula": "=SUM(reported!G12:J12)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Forecast period: nothing is reported yet (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Forecast period: nothing is reported yet (SYNTHETIC)"
+            }
+          ]
+        },
+        {
+          "id": "tax",
+          "label": "Income tax expense",
+          "unit": "Rp bn",
+          "cells": [
+            {
+              "value": 64,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q1 24",
+                "period": "Q1 24",
+                "page": 44,
+                "note": "28",
+                "xbrlConcept": "syn:IncomeTax"
+              }
+            },
+            {
+              "value": 73,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q2 24",
+                "period": "Q2 24",
+                "page": 44,
+                "note": "28",
+                "xbrlConcept": "syn:IncomeTax"
+              }
+            },
+            {
+              "value": 54,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q3 24",
+                "period": "Q3 24",
+                "page": 44,
+                "note": "28",
+                "xbrlConcept": "syn:IncomeTax"
+              }
+            },
+            {
+              "value": 63,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q4 24",
+                "period": "Q4 24",
+                "page": 44,
+                "note": "28",
+                "xbrlConcept": "syn:IncomeTax"
+              }
+            },
+            {
+              "value": 31,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q1 25",
+                "period": "Q1 25",
+                "page": 44,
+                "note": "28",
+                "xbrlConcept": "syn:IncomeTax"
+              }
+            },
+            {
+              "value": 42,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q2 25",
+                "period": "Q2 25",
+                "page": 44,
+                "note": "28",
+                "xbrlConcept": "syn:IncomeTax"
+              }
+            },
+            {
+              "value": 71,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q3 25",
+                "period": "Q3 25",
+                "page": 44,
+                "note": "28",
+                "xbrlConcept": "syn:IncomeTax"
+              }
+            },
+            {
+              "value": 82,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q4 25",
+                "period": "Q4 25",
+                "page": 44,
+                "note": "28",
+                "xbrlConcept": "syn:IncomeTax"
+              }
+            },
+            {
+              "value": 226,
+              "kind": "formula",
+              "formula": "=SUM(reported!G13:J13)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Forecast period: nothing is reported yet (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Forecast period: nothing is reported yet (SYNTHETIC)"
+            }
+          ]
+        },
+        {
+          "id": "nci",
+          "label": "Profit attributable to non-controlling interests",
+          "unit": "Rp bn",
+          "cells": [
+            {
+              "value": 10,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q1 24",
+                "period": "Q1 24",
+                "page": 12,
+                "xbrlConcept": "syn:ProfitNci"
+              }
+            },
+            {
+              "value": 10,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q2 24",
+                "period": "Q2 24",
+                "page": 12,
+                "xbrlConcept": "syn:ProfitNci"
+              }
+            },
+            {
+              "value": 10,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q3 24",
+                "period": "Q3 24",
+                "page": 12,
+                "xbrlConcept": "syn:ProfitNci"
+              }
+            },
+            {
+              "value": 10,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q4 24",
+                "period": "Q4 24",
+                "page": 12,
+                "xbrlConcept": "syn:ProfitNci"
+              }
+            },
+            {
+              "value": 10,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q1 25",
+                "period": "Q1 25",
+                "page": 12,
+                "xbrlConcept": "syn:ProfitNci"
+              }
+            },
+            {
+              "value": 10,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q2 25",
+                "period": "Q2 25",
+                "page": 12,
+                "xbrlConcept": "syn:ProfitNci"
+              }
+            },
+            {
+              "value": 10,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q3 25",
+                "period": "Q3 25",
+                "page": 12,
+                "xbrlConcept": "syn:ProfitNci"
+              }
+            },
+            {
+              "value": 10,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Coal Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q4 25",
+                "period": "Q4 25",
+                "page": 12,
+                "xbrlConcept": "syn:ProfitNci"
+              }
+            },
+            {
+              "value": 40,
+              "kind": "formula",
+              "formula": "=SUM(reported!G14:J14)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Forecast period: nothing is reported yet (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Forecast period: nothing is reported yet (SYNTHETIC)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "model",
+      "rows": [
+        {
+          "id": "vol_sold",
+          "label": "Coal sales volume",
+          "unit": "Mt",
+          "cells": [
+            {
+              "value": 2,
+              "kind": "formula",
+              "formula": "=reported!C3"
+            },
+            {
+              "value": 2.2,
+              "kind": "formula",
+              "formula": "=reported!D3"
+            },
+            {
+              "value": 2.4,
+              "kind": "formula",
+              "formula": "=reported!E3"
+            },
+            {
+              "value": 2.4,
+              "kind": "formula",
+              "formula": "=reported!F3"
+            },
+            {
+              "value": 2.2,
+              "kind": "formula",
+              "formula": "=reported!G3"
+            },
+            {
+              "value": 2.4,
+              "kind": "formula",
+              "formula": "=reported!H3"
+            },
+            {
+              "value": 2.6,
+              "kind": "formula",
+              "formula": "=reported!I3"
+            },
+            {
+              "value": 2.8,
+              "kind": "formula",
+              "formula": "=reported!J3"
+            },
+            {
+              "value": 10,
+              "kind": "formula",
+              "formula": "=SUM(model!G2:J2)"
+            },
+            {
+              "value": 2.6,
+              "kind": "formula",
+              "formula": "=assumptions!L2"
+            },
+            {
+              "value": 2.8,
+              "kind": "formula",
+              "formula": "=assumptions!M2"
+            }
+          ]
+        },
+        {
+          "id": "price",
+          "label": "Realised price per tonne",
+          "unit": "Rp thousand per tonne",
+          "cells": [
+            {
+              "value": 800,
+              "kind": "formula",
+              "formula": "=model!C4/model!C2"
+            },
+            {
+              "value": 799.9999999999999,
+              "kind": "formula",
+              "formula": "=model!D4/model!D2"
+            },
+            {
+              "value": 750,
+              "kind": "formula",
+              "formula": "=model!E4/model!E2"
+            },
+            {
+              "value": 750,
+              "kind": "formula",
+              "formula": "=model!F4/model!F2"
+            },
+            {
+              "value": 700,
+              "kind": "formula",
+              "formula": "=model!G4/model!G2"
+            },
+            {
+              "value": 700,
+              "kind": "formula",
+              "formula": "=model!H4/model!H2"
+            },
+            {
+              "value": 750,
+              "kind": "formula",
+              "formula": "=model!I4/model!I2"
+            },
+            {
+              "value": 750,
+              "kind": "formula",
+              "formula": "=model!J4/model!J2"
+            },
+            {
+              "value": 727,
+              "kind": "formula",
+              "formula": "=model!K4/model!K2"
+            },
+            {
+              "value": 720,
+              "kind": "formula",
+              "formula": "=assumptions!L3"
+            },
+            {
+              "value": 720,
+              "kind": "formula",
+              "formula": "=assumptions!M3"
+            }
+          ]
+        },
+        {
+          "id": "revenue",
+          "label": "Revenue",
+          "unit": "Rp bn",
+          "style": "total",
+          "cells": [
+            {
+              "value": 1600,
+              "kind": "formula",
+              "formula": "=reported!C2"
+            },
+            {
+              "value": 1760,
+              "kind": "formula",
+              "formula": "=reported!D2"
+            },
+            {
+              "value": 1800,
+              "kind": "formula",
+              "formula": "=reported!E2"
+            },
+            {
+              "value": 1800,
+              "kind": "formula",
+              "formula": "=reported!F2"
+            },
+            {
+              "value": 1540,
+              "kind": "formula",
+              "formula": "=reported!G2"
+            },
+            {
+              "value": 1680,
+              "kind": "formula",
+              "formula": "=reported!H2"
+            },
+            {
+              "value": 1950,
+              "kind": "formula",
+              "formula": "=reported!I2"
+            },
+            {
+              "value": 2100,
+              "kind": "formula",
+              "formula": "=reported!J2"
+            },
+            {
+              "value": 7270,
+              "kind": "formula",
+              "formula": "=SUM(model!G4:J4)"
+            },
+            {
+              "value": 1872,
+              "kind": "formula",
+              "formula": "=model!L2*model!L3"
+            },
+            {
+              "value": 2015.9999999999998,
+              "kind": "formula",
+              "formula": "=model!M2*model!M3"
+            }
+          ]
+        },
+        {
+          "id": "strip_ratio",
+          "label": "Strip ratio",
+          "unit": "bcm per tonne",
+          "cells": [
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Production was not disclosed, so the strip ratio cannot be worked (SYNTHETIC)"
+            },
+            {
+              "value": 8.181818181818182,
+              "kind": "formula",
+              "formula": "=model!D6/reported!D4"
+            },
+            {
+              "value": 8,
+              "kind": "formula",
+              "formula": "=model!E6/reported!E4"
+            },
+            {
+              "value": 7.916666666666667,
+              "kind": "formula",
+              "formula": "=model!F6/reported!F4"
+            },
+            {
+              "value": 7.82608695652174,
+              "kind": "formula",
+              "formula": "=model!G6/reported!G4"
+            },
+            {
+              "value": 7.916666666666667,
+              "kind": "formula",
+              "formula": "=model!H6/reported!H4"
+            },
+            {
+              "value": 8.076923076923077,
+              "kind": "formula",
+              "formula": "=model!I6/reported!I4"
+            },
+            {
+              "value": 8.148148148148147,
+              "kind": "formula",
+              "formula": "=model!J6/reported!J4"
+            },
+            {
+              "value": 8,
+              "kind": "formula",
+              "formula": "=model!K6/reported!K4"
+            },
+            {
+              "value": 8,
+              "kind": "formula",
+              "formula": "=assumptions!L4"
+            },
+            {
+              "value": 8,
+              "kind": "formula",
+              "formula": "=assumptions!M4"
+            }
+          ]
+        },
+        {
+          "id": "ob_removed",
+          "label": "Overburden removed",
+          "unit": "Mbcm",
+          "cells": [
+            {
+              "value": 16,
+              "kind": "formula",
+              "formula": "=reported!C5"
+            },
+            {
+              "value": 18,
+              "kind": "formula",
+              "formula": "=reported!D5"
+            },
+            {
+              "value": 20,
+              "kind": "formula",
+              "formula": "=reported!E5"
+            },
+            {
+              "value": 19,
+              "kind": "formula",
+              "formula": "=reported!F5"
+            },
+            {
+              "value": 18,
+              "kind": "formula",
+              "formula": "=reported!G5"
+            },
+            {
+              "value": 19,
+              "kind": "formula",
+              "formula": "=reported!H5"
+            },
+            {
+              "value": 21,
+              "kind": "formula",
+              "formula": "=reported!I5"
+            },
+            {
+              "value": 22,
+              "kind": "formula",
+              "formula": "=reported!J5"
+            },
+            {
+              "value": 80,
+              "kind": "formula",
+              "formula": "=SUM(model!G6:J6)"
+            },
+            {
+              "value": 20.8,
+              "kind": "formula",
+              "formula": "=model!L2*model!L5"
+            },
+            {
+              "value": 22.4,
+              "kind": "formula",
+              "formula": "=model!M2*model!M5"
+            }
+          ]
+        },
+        {
+          "id": "cost_per_bcm",
+          "label": "Contractor cost per bcm",
+          "unit": "Rp thousand per bcm",
+          "cells": [
+            {
+              "value": 30,
+              "kind": "formula",
+              "formula": "=model!C8/model!C6"
+            },
+            {
+              "value": 30,
+              "kind": "formula",
+              "formula": "=model!D8/model!D6"
+            },
+            {
+              "value": 30,
+              "kind": "formula",
+              "formula": "=model!E8/model!E6"
+            },
+            {
+              "value": 30,
+              "kind": "formula",
+              "formula": "=model!F8/model!F6"
+            },
+            {
+              "value": 30,
+              "kind": "formula",
+              "formula": "=model!G8/model!G6"
+            },
+            {
+              "value": 30,
+              "kind": "formula",
+              "formula": "=model!H8/model!H6"
+            },
+            {
+              "value": 30,
+              "kind": "formula",
+              "formula": "=model!I8/model!I6"
+            },
+            {
+              "value": 30,
+              "kind": "formula",
+              "formula": "=model!J8/model!J6"
+            },
+            {
+              "value": 30,
+              "kind": "formula",
+              "formula": "=model!K8/model!K6"
+            },
+            {
+              "value": 31,
+              "kind": "formula",
+              "formula": "=assumptions!L5"
+            },
+            {
+              "value": 31,
+              "kind": "formula",
+              "formula": "=assumptions!M5"
+            }
+          ]
+        },
+        {
+          "id": "cor_contractor",
+          "label": "Mining contractor services",
+          "unit": "Rp bn",
+          "cells": [
+            {
+              "value": 480,
+              "kind": "formula",
+              "formula": "=reported!C6"
+            },
+            {
+              "value": 540,
+              "kind": "formula",
+              "formula": "=reported!D6"
+            },
+            {
+              "value": 600,
+              "kind": "formula",
+              "formula": "=reported!E6"
+            },
+            {
+              "value": 570,
+              "kind": "formula",
+              "formula": "=reported!F6"
+            },
+            {
+              "value": 540,
+              "kind": "formula",
+              "formula": "=reported!G6"
+            },
+            {
+              "value": 570,
+              "kind": "formula",
+              "formula": "=reported!H6"
+            },
+            {
+              "value": 630,
+              "kind": "formula",
+              "formula": "=reported!I6"
+            },
+            {
+              "value": 660,
+              "kind": "formula",
+              "formula": "=reported!J6"
+            },
+            {
+              "value": 2400,
+              "kind": "formula",
+              "formula": "=SUM(model!G8:J8)"
+            },
+            {
+              "value": 644.8000000000001,
+              "kind": "formula",
+              "formula": "=model!L6*model!L7"
+            },
+            {
+              "value": 694.4,
+              "kind": "formula",
+              "formula": "=model!M6*model!M7"
+            }
+          ]
+        },
+        {
+          "id": "fuel_per_bcm",
+          "label": "Fuel cost per bcm",
+          "unit": "Rp thousand per bcm",
+          "cells": [
+            {
+              "value": 10,
+              "kind": "formula",
+              "formula": "=model!C10/model!C6"
+            },
+            {
+              "value": 10,
+              "kind": "formula",
+              "formula": "=model!D10/model!D6"
+            },
+            {
+              "value": 10,
+              "kind": "formula",
+              "formula": "=model!E10/model!E6"
+            },
+            {
+              "value": 10,
+              "kind": "formula",
+              "formula": "=model!F10/model!F6"
+            },
+            {
+              "value": 10,
+              "kind": "formula",
+              "formula": "=model!G10/model!G6"
+            },
+            {
+              "value": 10,
+              "kind": "formula",
+              "formula": "=model!H10/model!H6"
+            },
+            {
+              "value": 10,
+              "kind": "formula",
+              "formula": "=model!I10/model!I6"
+            },
+            {
+              "value": 10,
+              "kind": "formula",
+              "formula": "=model!J10/model!J6"
+            },
+            {
+              "value": 10,
+              "kind": "formula",
+              "formula": "=model!K10/model!K6"
+            },
+            {
+              "value": 10,
+              "kind": "formula",
+              "formula": "=assumptions!L6"
+            },
+            {
+              "value": 10,
+              "kind": "formula",
+              "formula": "=assumptions!M6"
+            }
+          ]
+        },
+        {
+          "id": "cor_fuel",
+          "label": "Fuel",
+          "unit": "Rp bn",
+          "cells": [
+            {
+              "value": 160,
+              "kind": "formula",
+              "formula": "=reported!C7"
+            },
+            {
+              "value": 180,
+              "kind": "formula",
+              "formula": "=reported!D7"
+            },
+            {
+              "value": 200,
+              "kind": "formula",
+              "formula": "=reported!E7"
+            },
+            {
+              "value": 190,
+              "kind": "formula",
+              "formula": "=reported!F7"
+            },
+            {
+              "value": 180,
+              "kind": "formula",
+              "formula": "=reported!G7"
+            },
+            {
+              "value": 190,
+              "kind": "formula",
+              "formula": "=reported!H7"
+            },
+            {
+              "value": 210,
+              "kind": "formula",
+              "formula": "=reported!I7"
+            },
+            {
+              "value": 220,
+              "kind": "formula",
+              "formula": "=reported!J7"
+            },
+            {
+              "value": 800,
+              "kind": "formula",
+              "formula": "=SUM(model!G10:J10)"
+            },
+            {
+              "value": 208,
+              "kind": "formula",
+              "formula": "=model!L6*model!L9"
+            },
+            {
+              "value": 224,
+              "kind": "formula",
+              "formula": "=model!M6*model!M9"
+            }
+          ]
+        },
+        {
+          "id": "freight_rate",
+          "label": "Freight rate per tonne",
+          "unit": "Rp thousand per tonne",
+          "cells": [
+            {
+              "value": 120,
+              "kind": "formula",
+              "formula": "=model!C12/model!C2"
+            },
+            {
+              "value": 119.99999999999999,
+              "kind": "formula",
+              "formula": "=model!D12/model!D2"
+            },
+            {
+              "value": 120,
+              "kind": "formula",
+              "formula": "=model!E12/model!E2"
+            },
+            {
+              "value": 120,
+              "kind": "formula",
+              "formula": "=model!F12/model!F2"
+            },
+            {
+              "value": 119.99999999999999,
+              "kind": "formula",
+              "formula": "=model!G12/model!G2"
+            },
+            {
+              "value": 120,
+              "kind": "formula",
+              "formula": "=model!H12/model!H2"
+            },
+            {
+              "value": 120,
+              "kind": "formula",
+              "formula": "=model!I12/model!I2"
+            },
+            {
+              "value": 120.00000000000001,
+              "kind": "formula",
+              "formula": "=model!J12/model!J2"
+            },
+            {
+              "value": 120,
+              "kind": "formula",
+              "formula": "=model!K12/model!K2"
+            },
+            {
+              "value": 120,
+              "kind": "formula",
+              "formula": "=assumptions!L7"
+            },
+            {
+              "value": 120,
+              "kind": "formula",
+              "formula": "=assumptions!M7"
+            }
+          ]
+        },
+        {
+          "id": "cor_freight",
+          "label": "Coal transport",
+          "unit": "Rp bn",
+          "cells": [
+            {
+              "value": 240,
+              "kind": "formula",
+              "formula": "=reported!C8"
+            },
+            {
+              "value": 264,
+              "kind": "formula",
+              "formula": "=reported!D8"
+            },
+            {
+              "value": 288,
+              "kind": "formula",
+              "formula": "=reported!E8"
+            },
+            {
+              "value": 288,
+              "kind": "formula",
+              "formula": "=reported!F8"
+            },
+            {
+              "value": 264,
+              "kind": "formula",
+              "formula": "=reported!G8"
+            },
+            {
+              "value": 288,
+              "kind": "formula",
+              "formula": "=reported!H8"
+            },
+            {
+              "value": 312,
+              "kind": "formula",
+              "formula": "=reported!I8"
+            },
+            {
+              "value": 336,
+              "kind": "formula",
+              "formula": "=reported!J8"
+            },
+            {
+              "value": 1200,
+              "kind": "formula",
+              "formula": "=SUM(model!G12:J12)"
+            },
+            {
+              "value": 312,
+              "kind": "formula",
+              "formula": "=model!L2*model!L11"
+            },
+            {
+              "value": 336,
+              "kind": "formula",
+              "formula": "=model!M2*model!M11"
+            }
+          ]
+        },
+        {
+          "id": "royalty_rate",
+          "label": "Royalty rate",
+          "unit": "% of revenue",
+          "style": "ratio",
+          "cells": [
+            {
+              "value": 0.1,
+              "kind": "formula",
+              "formula": "=model!C14/model!C4"
+            },
+            {
+              "value": 0.1,
+              "kind": "formula",
+              "formula": "=model!D14/model!D4"
+            },
+            {
+              "value": 0.1,
+              "kind": "formula",
+              "formula": "=model!E14/model!E4"
+            },
+            {
+              "value": 0.1,
+              "kind": "formula",
+              "formula": "=model!F14/model!F4"
+            },
+            {
+              "value": 0.1,
+              "kind": "formula",
+              "formula": "=model!G14/model!G4"
+            },
+            {
+              "value": 0.1,
+              "kind": "formula",
+              "formula": "=model!H14/model!H4"
+            },
+            {
+              "value": 0.1,
+              "kind": "formula",
+              "formula": "=model!I14/model!I4"
+            },
+            {
+              "value": 0.1,
+              "kind": "formula",
+              "formula": "=model!J14/model!J4"
+            },
+            {
+              "value": 0.1,
+              "kind": "formula",
+              "formula": "=model!K14/model!K4"
+            },
+            {
+              "value": 0.1,
+              "kind": "formula",
+              "formula": "=assumptions!L8"
+            },
+            {
+              "value": 0.1,
+              "kind": "formula",
+              "formula": "=assumptions!M8"
+            }
+          ]
+        },
+        {
+          "id": "cor_royalty",
+          "label": "Royalty",
+          "unit": "Rp bn",
+          "cells": [
+            {
+              "value": 160,
+              "kind": "formula",
+              "formula": "=reported!C9"
+            },
+            {
+              "value": 176,
+              "kind": "formula",
+              "formula": "=reported!D9"
+            },
+            {
+              "value": 180,
+              "kind": "formula",
+              "formula": "=reported!E9"
+            },
+            {
+              "value": 180,
+              "kind": "formula",
+              "formula": "=reported!F9"
+            },
+            {
+              "value": 154,
+              "kind": "formula",
+              "formula": "=reported!G9"
+            },
+            {
+              "value": 168,
+              "kind": "formula",
+              "formula": "=reported!H9"
+            },
+            {
+              "value": 195,
+              "kind": "formula",
+              "formula": "=reported!I9"
+            },
+            {
+              "value": 210,
+              "kind": "formula",
+              "formula": "=reported!J9"
+            },
+            {
+              "value": 727,
+              "kind": "formula",
+              "formula": "=SUM(model!G14:J14)"
+            },
+            {
+              "value": 187.20000000000002,
+              "kind": "formula",
+              "formula": "=model!L4*model!L13"
+            },
+            {
+              "value": 201.6,
+              "kind": "formula",
+              "formula": "=model!M4*model!M13"
+            }
+          ]
+        },
+        {
+          "id": "cor_other",
+          "label": "Other cost of revenue, not split in the note",
+          "unit": "Rp bn",
+          "cells": [
+            {
+              "value": 150,
+              "kind": "formula",
+              "formula": "=reported!C10-model!C8-model!C10-model!C12-model!C14"
+            },
+            {
+              "value": 150,
+              "kind": "formula",
+              "formula": "=reported!D10-model!D8-model!D10-model!D12-model!D14"
+            },
+            {
+              "value": 160,
+              "kind": "formula",
+              "formula": "=reported!E10-model!E8-model!E10-model!E12-model!E14"
+            },
+            {
+              "value": 160,
+              "kind": "formula",
+              "formula": "=reported!F10-model!F8-model!F10-model!F12-model!F14"
+            },
+            {
+              "value": 150,
+              "kind": "formula",
+              "formula": "=reported!G10-model!G8-model!G10-model!G12-model!G14"
+            },
+            {
+              "value": 160,
+              "kind": "formula",
+              "formula": "=reported!H10-model!H8-model!H10-model!H12-model!H14"
+            },
+            {
+              "value": 160,
+              "kind": "formula",
+              "formula": "=reported!I10-model!I8-model!I10-model!I12-model!I14"
+            },
+            {
+              "value": 170,
+              "kind": "formula",
+              "formula": "=reported!J10-model!J8-model!J10-model!J12-model!J14"
+            },
+            {
+              "value": 640,
+              "kind": "formula",
+              "formula": "=SUM(model!G15:J15)"
+            },
+            {
+              "value": 165,
+              "kind": "formula",
+              "formula": "=assumptions!L9"
+            },
+            {
+              "value": 165,
+              "kind": "formula",
+              "formula": "=assumptions!M9"
+            }
+          ]
+        },
+        {
+          "id": "cor_total",
+          "label": "Cost of revenue",
+          "unit": "Rp bn",
+          "style": "total",
+          "cells": [
+            {
+              "value": 1190,
+              "kind": "formula",
+              "formula": "=model!C8+model!C10+model!C12+model!C14+model!C15"
+            },
+            {
+              "value": 1310,
+              "kind": "formula",
+              "formula": "=model!D8+model!D10+model!D12+model!D14+model!D15"
+            },
+            {
+              "value": 1428,
+              "kind": "formula",
+              "formula": "=model!E8+model!E10+model!E12+model!E14+model!E15"
+            },
+            {
+              "value": 1388,
+              "kind": "formula",
+              "formula": "=model!F8+model!F10+model!F12+model!F14+model!F15"
+            },
+            {
+              "value": 1288,
+              "kind": "formula",
+              "formula": "=model!G8+model!G10+model!G12+model!G14+model!G15"
+            },
+            {
+              "value": 1376,
+              "kind": "formula",
+              "formula": "=model!H8+model!H10+model!H12+model!H14+model!H15"
+            },
+            {
+              "value": 1507,
+              "kind": "formula",
+              "formula": "=model!I8+model!I10+model!I12+model!I14+model!I15"
+            },
+            {
+              "value": 1596,
+              "kind": "formula",
+              "formula": "=model!J8+model!J10+model!J12+model!J14+model!J15"
+            },
+            {
+              "value": 5767,
+              "kind": "formula",
+              "formula": "=model!K8+model!K10+model!K12+model!K14+model!K15"
+            },
+            {
+              "value": 1517.0000000000002,
+              "kind": "formula",
+              "formula": "=model!L8+model!L10+model!L12+model!L14+model!L15"
+            },
+            {
+              "value": 1621,
+              "kind": "formula",
+              "formula": "=model!M8+model!M10+model!M12+model!M14+model!M15"
+            }
+          ]
+        },
+        {
+          "id": "cor_per_t",
+          "label": "Cost of revenue per tonne",
+          "unit": "Rp thousand per tonne",
+          "cells": [
+            {
+              "value": 595,
+              "kind": "formula",
+              "formula": "=model!C16/model!C2"
+            },
+            {
+              "value": 595.4545454545454,
+              "kind": "formula",
+              "formula": "=model!D16/model!D2"
+            },
+            {
+              "value": 595,
+              "kind": "formula",
+              "formula": "=model!E16/model!E2"
+            },
+            {
+              "value": 578.3333333333334,
+              "kind": "formula",
+              "formula": "=model!F16/model!F2"
+            },
+            {
+              "value": 585.4545454545454,
+              "kind": "formula",
+              "formula": "=model!G16/model!G2"
+            },
+            {
+              "value": 573.3333333333334,
+              "kind": "formula",
+              "formula": "=model!H16/model!H2"
+            },
+            {
+              "value": 579.6153846153846,
+              "kind": "formula",
+              "formula": "=model!I16/model!I2"
+            },
+            {
+              "value": 570,
+              "kind": "formula",
+              "formula": "=model!J16/model!J2"
+            },
+            {
+              "value": 576.7,
+              "kind": "formula",
+              "formula": "=model!K16/model!K2"
+            },
+            {
+              "value": 583.4615384615386,
+              "kind": "formula",
+              "formula": "=model!L16/model!L2"
+            },
+            {
+              "value": 578.9285714285714,
+              "kind": "formula",
+              "formula": "=model!M16/model!M2"
+            }
+          ]
+        },
+        {
+          "id": "gross_profit",
+          "label": "Gross profit",
+          "unit": "Rp bn",
+          "style": "total",
+          "cells": [
+            {
+              "value": 410,
+              "kind": "formula",
+              "formula": "=model!C4-model!C16"
+            },
+            {
+              "value": 450,
+              "kind": "formula",
+              "formula": "=model!D4-model!D16"
+            },
+            {
+              "value": 372,
+              "kind": "formula",
+              "formula": "=model!E4-model!E16"
+            },
+            {
+              "value": 412,
+              "kind": "formula",
+              "formula": "=model!F4-model!F16"
+            },
+            {
+              "value": 252,
+              "kind": "formula",
+              "formula": "=model!G4-model!G16"
+            },
+            {
+              "value": 304,
+              "kind": "formula",
+              "formula": "=model!H4-model!H16"
+            },
+            {
+              "value": 443,
+              "kind": "formula",
+              "formula": "=model!I4-model!I16"
+            },
+            {
+              "value": 504,
+              "kind": "formula",
+              "formula": "=model!J4-model!J16"
+            },
+            {
+              "value": 1503,
+              "kind": "formula",
+              "formula": "=model!K4-model!K16"
+            },
+            {
+              "value": 354.9999999999998,
+              "kind": "formula",
+              "formula": "=model!L4-model!L16"
+            },
+            {
+              "value": 394.9999999999998,
+              "kind": "formula",
+              "formula": "=model!M4-model!M16"
+            }
+          ]
+        },
+        {
+          "id": "gross_margin",
+          "label": "Gross margin",
+          "unit": "%",
+          "style": "ratio",
+          "cells": [
+            {
+              "value": 0.25625,
+              "kind": "formula",
+              "formula": "=model!C18/model!C4"
+            },
+            {
+              "value": 0.2556818181818182,
+              "kind": "formula",
+              "formula": "=model!D18/model!D4"
+            },
+            {
+              "value": 0.20666666666666667,
+              "kind": "formula",
+              "formula": "=model!E18/model!E4"
+            },
+            {
+              "value": 0.2288888888888889,
+              "kind": "formula",
+              "formula": "=model!F18/model!F4"
+            },
+            {
+              "value": 0.16363636363636364,
+              "kind": "formula",
+              "formula": "=model!G18/model!G4"
+            },
+            {
+              "value": 0.18095238095238095,
+              "kind": "formula",
+              "formula": "=model!H18/model!H4"
+            },
+            {
+              "value": 0.2271794871794872,
+              "kind": "formula",
+              "formula": "=model!I18/model!I4"
+            },
+            {
+              "value": 0.24,
+              "kind": "formula",
+              "formula": "=model!J18/model!J4"
+            },
+            {
+              "value": 0.20674002751031637,
+              "kind": "formula",
+              "formula": "=model!K18/model!K4"
+            },
+            {
+              "value": 0.18963675213675202,
+              "kind": "formula",
+              "formula": "=model!L18/model!L4"
+            },
+            {
+              "value": 0.1959325396825396,
+              "kind": "formula",
+              "formula": "=model!M18/model!M4"
+            }
+          ]
+        },
+        {
+          "id": "sga",
+          "label": "Selling, general and administrative expenses",
+          "unit": "Rp bn",
+          "cells": [
+            {
+              "value": 100,
+              "kind": "formula",
+              "formula": "=reported!C11"
+            },
+            {
+              "value": 100,
+              "kind": "formula",
+              "formula": "=reported!D11"
+            },
+            {
+              "value": 110,
+              "kind": "formula",
+              "formula": "=reported!E11"
+            },
+            {
+              "value": 110,
+              "kind": "formula",
+              "formula": "=reported!F11"
+            },
+            {
+              "value": 100,
+              "kind": "formula",
+              "formula": "=reported!G11"
+            },
+            {
+              "value": 105,
+              "kind": "formula",
+              "formula": "=reported!H11"
+            },
+            {
+              "value": 110,
+              "kind": "formula",
+              "formula": "=reported!I11"
+            },
+            {
+              "value": 120,
+              "kind": "formula",
+              "formula": "=reported!J11"
+            },
+            {
+              "value": 435,
+              "kind": "formula",
+              "formula": "=SUM(model!G20:J20)"
+            },
+            {
+              "value": 115,
+              "kind": "formula",
+              "formula": "=assumptions!L10"
+            },
+            {
+              "value": 115,
+              "kind": "formula",
+              "formula": "=assumptions!M10"
+            }
+          ]
+        },
+        {
+          "id": "operating_profit",
+          "label": "Operating profit",
+          "unit": "Rp bn",
+          "style": "total",
+          "cells": [
+            {
+              "value": 310,
+              "kind": "formula",
+              "formula": "=model!C18-model!C20"
+            },
+            {
+              "value": 350,
+              "kind": "formula",
+              "formula": "=model!D18-model!D20"
+            },
+            {
+              "value": 262,
+              "kind": "formula",
+              "formula": "=model!E18-model!E20"
+            },
+            {
+              "value": 302,
+              "kind": "formula",
+              "formula": "=model!F18-model!F20"
+            },
+            {
+              "value": 152,
+              "kind": "formula",
+              "formula": "=model!G18-model!G20"
+            },
+            {
+              "value": 199,
+              "kind": "formula",
+              "formula": "=model!H18-model!H20"
+            },
+            {
+              "value": 333,
+              "kind": "formula",
+              "formula": "=model!I18-model!I20"
+            },
+            {
+              "value": 384,
+              "kind": "formula",
+              "formula": "=model!J18-model!J20"
+            },
+            {
+              "value": 1068,
+              "kind": "formula",
+              "formula": "=model!K18-model!K20"
+            },
+            {
+              "value": 239.99999999999977,
+              "kind": "formula",
+              "formula": "=model!L18-model!L20"
+            },
+            {
+              "value": 279.9999999999998,
+              "kind": "formula",
+              "formula": "=model!M18-model!M20"
+            }
+          ]
+        },
+        {
+          "id": "other_net",
+          "label": "Finance and other items, net",
+          "unit": "Rp bn",
+          "cells": [
+            {
+              "value": -20,
+              "kind": "formula",
+              "formula": "=reported!C12"
+            },
+            {
+              "value": -20,
+              "kind": "formula",
+              "formula": "=reported!D12"
+            },
+            {
+              "value": -15,
+              "kind": "formula",
+              "formula": "=reported!E12"
+            },
+            {
+              "value": -15,
+              "kind": "formula",
+              "formula": "=reported!F12"
+            },
+            {
+              "value": -10,
+              "kind": "formula",
+              "formula": "=reported!G12"
+            },
+            {
+              "value": -10,
+              "kind": "formula",
+              "formula": "=reported!H12"
+            },
+            {
+              "value": -10,
+              "kind": "formula",
+              "formula": "=reported!I12"
+            },
+            {
+              "value": -10,
+              "kind": "formula",
+              "formula": "=reported!J12"
+            },
+            {
+              "value": -40,
+              "kind": "formula",
+              "formula": "=SUM(model!G22:J22)"
+            },
+            {
+              "value": -10,
+              "kind": "formula",
+              "formula": "=assumptions!L11"
+            },
+            {
+              "value": -10,
+              "kind": "formula",
+              "formula": "=assumptions!M11"
+            }
+          ]
+        },
+        {
+          "id": "profit_before_tax",
+          "label": "Profit before tax",
+          "unit": "Rp bn",
+          "style": "total",
+          "cells": [
+            {
+              "value": 290,
+              "kind": "formula",
+              "formula": "=model!C21+model!C22"
+            },
+            {
+              "value": 330,
+              "kind": "formula",
+              "formula": "=model!D21+model!D22"
+            },
+            {
+              "value": 247,
+              "kind": "formula",
+              "formula": "=model!E21+model!E22"
+            },
+            {
+              "value": 287,
+              "kind": "formula",
+              "formula": "=model!F21+model!F22"
+            },
+            {
+              "value": 142,
+              "kind": "formula",
+              "formula": "=model!G21+model!G22"
+            },
+            {
+              "value": 189,
+              "kind": "formula",
+              "formula": "=model!H21+model!H22"
+            },
+            {
+              "value": 323,
+              "kind": "formula",
+              "formula": "=model!I21+model!I22"
+            },
+            {
+              "value": 374,
+              "kind": "formula",
+              "formula": "=model!J21+model!J22"
+            },
+            {
+              "value": 1028,
+              "kind": "formula",
+              "formula": "=model!K21+model!K22"
+            },
+            {
+              "value": 229.99999999999977,
+              "kind": "formula",
+              "formula": "=model!L21+model!L22"
+            },
+            {
+              "value": 269.9999999999998,
+              "kind": "formula",
+              "formula": "=model!M21+model!M22"
+            }
+          ]
+        },
+        {
+          "id": "tax",
+          "label": "Income tax expense",
+          "unit": "Rp bn",
+          "cells": [
+            {
+              "value": 64,
+              "kind": "formula",
+              "formula": "=reported!C13"
+            },
+            {
+              "value": 73,
+              "kind": "formula",
+              "formula": "=reported!D13"
+            },
+            {
+              "value": 54,
+              "kind": "formula",
+              "formula": "=reported!E13"
+            },
+            {
+              "value": 63,
+              "kind": "formula",
+              "formula": "=reported!F13"
+            },
+            {
+              "value": 31,
+              "kind": "formula",
+              "formula": "=reported!G13"
+            },
+            {
+              "value": 42,
+              "kind": "formula",
+              "formula": "=reported!H13"
+            },
+            {
+              "value": 71,
+              "kind": "formula",
+              "formula": "=reported!I13"
+            },
+            {
+              "value": 82,
+              "kind": "formula",
+              "formula": "=reported!J13"
+            },
+            {
+              "value": 226,
+              "kind": "formula",
+              "formula": "=SUM(model!G24:J24)"
+            },
+            {
+              "value": 50.59999999999995,
+              "kind": "formula",
+              "formula": "=model!L23*assumptions!L12"
+            },
+            {
+              "value": 59.39999999999995,
+              "kind": "formula",
+              "formula": "=model!M23*assumptions!M12"
+            }
+          ]
+        },
+        {
+          "id": "net_profit",
+          "label": "Profit for the period",
+          "unit": "Rp bn",
+          "style": "total",
+          "cells": [
+            {
+              "value": 226,
+              "kind": "formula",
+              "formula": "=model!C23-model!C24"
+            },
+            {
+              "value": 257,
+              "kind": "formula",
+              "formula": "=model!D23-model!D24"
+            },
+            {
+              "value": 193,
+              "kind": "formula",
+              "formula": "=model!E23-model!E24"
+            },
+            {
+              "value": 224,
+              "kind": "formula",
+              "formula": "=model!F23-model!F24"
+            },
+            {
+              "value": 111,
+              "kind": "formula",
+              "formula": "=model!G23-model!G24"
+            },
+            {
+              "value": 147,
+              "kind": "formula",
+              "formula": "=model!H23-model!H24"
+            },
+            {
+              "value": 252,
+              "kind": "formula",
+              "formula": "=model!I23-model!I24"
+            },
+            {
+              "value": 292,
+              "kind": "formula",
+              "formula": "=model!J23-model!J24"
+            },
+            {
+              "value": 802,
+              "kind": "formula",
+              "formula": "=model!K23-model!K24"
+            },
+            {
+              "value": 179.3999999999998,
+              "kind": "formula",
+              "formula": "=model!L23-model!L24"
+            },
+            {
+              "value": 210.59999999999982,
+              "kind": "formula",
+              "formula": "=model!M23-model!M24"
+            }
+          ]
+        },
+        {
+          "id": "nci",
+          "label": "Non-controlling interests",
+          "unit": "Rp bn",
+          "cells": [
+            {
+              "value": 10,
+              "kind": "formula",
+              "formula": "=reported!C14"
+            },
+            {
+              "value": 10,
+              "kind": "formula",
+              "formula": "=reported!D14"
+            },
+            {
+              "value": 10,
+              "kind": "formula",
+              "formula": "=reported!E14"
+            },
+            {
+              "value": 10,
+              "kind": "formula",
+              "formula": "=reported!F14"
+            },
+            {
+              "value": 10,
+              "kind": "formula",
+              "formula": "=reported!G14"
+            },
+            {
+              "value": 10,
+              "kind": "formula",
+              "formula": "=reported!H14"
+            },
+            {
+              "value": 10,
+              "kind": "formula",
+              "formula": "=reported!I14"
+            },
+            {
+              "value": 10,
+              "kind": "formula",
+              "formula": "=reported!J14"
+            },
+            {
+              "value": 40,
+              "kind": "formula",
+              "formula": "=SUM(model!G26:J26)"
+            },
+            {
+              "value": 3.587999999999996,
+              "kind": "formula",
+              "formula": "=model!L25*assumptions!L13"
+            },
+            {
+              "value": 4.211999999999996,
+              "kind": "formula",
+              "formula": "=model!M25*assumptions!M13"
+            }
+          ]
+        },
+        {
+          "id": "owners_profit",
+          "label": "Profit attributable to owners",
+          "unit": "Rp bn",
+          "style": "total",
+          "cells": [
+            {
+              "value": 216,
+              "kind": "formula",
+              "formula": "=model!C25-model!C26"
+            },
+            {
+              "value": 247,
+              "kind": "formula",
+              "formula": "=model!D25-model!D26"
+            },
+            {
+              "value": 183,
+              "kind": "formula",
+              "formula": "=model!E25-model!E26"
+            },
+            {
+              "value": 214,
+              "kind": "formula",
+              "formula": "=model!F25-model!F26"
+            },
+            {
+              "value": 101,
+              "kind": "formula",
+              "formula": "=model!G25-model!G26"
+            },
+            {
+              "value": 137,
+              "kind": "formula",
+              "formula": "=model!H25-model!H26"
+            },
+            {
+              "value": 242,
+              "kind": "formula",
+              "formula": "=model!I25-model!I26"
+            },
+            {
+              "value": 282,
+              "kind": "formula",
+              "formula": "=model!J25-model!J26"
+            },
+            {
+              "value": 762,
+              "kind": "formula",
+              "formula": "=model!K25-model!K26"
+            },
+            {
+              "value": 175.8119999999998,
+              "kind": "formula",
+              "formula": "=model!L25-model!L26"
+            },
+            {
+              "value": 206.38799999999983,
+              "kind": "formula",
+              "formula": "=model!M25-model!M26"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "assumptions",
+      "rows": [
+        {
+          "id": "vol_sold",
+          "label": "Coal sales volume",
+          "unit": "Mt",
+          "cells": [
+            {
+              "value": 2,
+              "kind": "formula",
+              "formula": "=model!C2"
+            },
+            {
+              "value": 2.2,
+              "kind": "formula",
+              "formula": "=model!D2"
+            },
+            {
+              "value": 2.4,
+              "kind": "formula",
+              "formula": "=model!E2"
+            },
+            {
+              "value": 2.4,
+              "kind": "formula",
+              "formula": "=model!F2"
+            },
+            {
+              "value": 2.2,
+              "kind": "formula",
+              "formula": "=model!G2"
+            },
+            {
+              "value": 2.4,
+              "kind": "formula",
+              "formula": "=model!H2"
+            },
+            {
+              "value": 2.6,
+              "kind": "formula",
+              "formula": "=model!I2"
+            },
+            {
+              "value": 2.8,
+              "kind": "formula",
+              "formula": "=model!J2"
+            },
+            {
+              "value": 10,
+              "kind": "formula",
+              "formula": "=model!K2"
+            },
+            {
+              "value": 2.6,
+              "kind": "assumption",
+              "note": "SYNTHETIC: a round number a little above the last quarter."
+            },
+            {
+              "value": 2.8,
+              "kind": "assumption",
+              "note": "SYNTHETIC: a round number a little above the last quarter."
+            }
+          ]
+        },
+        {
+          "id": "price",
+          "label": "Realised price per tonne",
+          "unit": "Rp thousand per tonne",
+          "cells": [
+            {
+              "value": 800,
+              "kind": "formula",
+              "formula": "=model!C3"
+            },
+            {
+              "value": 799.9999999999999,
+              "kind": "formula",
+              "formula": "=model!D3"
+            },
+            {
+              "value": 750,
+              "kind": "formula",
+              "formula": "=model!E3"
+            },
+            {
+              "value": 750,
+              "kind": "formula",
+              "formula": "=model!F3"
+            },
+            {
+              "value": 700,
+              "kind": "formula",
+              "formula": "=model!G3"
+            },
+            {
+              "value": 700,
+              "kind": "formula",
+              "formula": "=model!H3"
+            },
+            {
+              "value": 750,
+              "kind": "formula",
+              "formula": "=model!I3"
+            },
+            {
+              "value": 750,
+              "kind": "formula",
+              "formula": "=model!J3"
+            },
+            {
+              "value": 727,
+              "kind": "formula",
+              "formula": "=model!K3"
+            },
+            {
+              "value": 720,
+              "kind": "assumption",
+              "note": "SYNTHETIC: held a little under the FY 25 average."
+            },
+            {
+              "value": 720,
+              "kind": "assumption",
+              "note": "SYNTHETIC: held a little under the FY 25 average."
+            }
+          ]
+        },
+        {
+          "id": "strip_ratio",
+          "label": "Strip ratio",
+          "unit": "bcm per tonne",
+          "cells": [
+            {
+              "value": null,
+              "kind": "formula",
+              "formula": "=model!C5"
+            },
+            {
+              "value": 8.181818181818182,
+              "kind": "formula",
+              "formula": "=model!D5"
+            },
+            {
+              "value": 8,
+              "kind": "formula",
+              "formula": "=model!E5"
+            },
+            {
+              "value": 7.916666666666667,
+              "kind": "formula",
+              "formula": "=model!F5"
+            },
+            {
+              "value": 7.82608695652174,
+              "kind": "formula",
+              "formula": "=model!G5"
+            },
+            {
+              "value": 7.916666666666667,
+              "kind": "formula",
+              "formula": "=model!H5"
+            },
+            {
+              "value": 8.076923076923077,
+              "kind": "formula",
+              "formula": "=model!I5"
+            },
+            {
+              "value": 8.148148148148147,
+              "kind": "formula",
+              "formula": "=model!J5"
+            },
+            {
+              "value": 8,
+              "kind": "formula",
+              "formula": "=model!K5"
+            },
+            {
+              "value": 8,
+              "kind": "assumption",
+              "note": "SYNTHETIC: the mine plan ratio, rounded."
+            },
+            {
+              "value": 8,
+              "kind": "assumption",
+              "note": "SYNTHETIC: the mine plan ratio, rounded."
+            }
+          ]
+        },
+        {
+          "id": "cost_per_bcm",
+          "label": "Contractor cost per bcm",
+          "unit": "Rp thousand per bcm",
+          "cells": [
+            {
+              "value": 30,
+              "kind": "formula",
+              "formula": "=model!C7"
+            },
+            {
+              "value": 30,
+              "kind": "formula",
+              "formula": "=model!D7"
+            },
+            {
+              "value": 30,
+              "kind": "formula",
+              "formula": "=model!E7"
+            },
+            {
+              "value": 30,
+              "kind": "formula",
+              "formula": "=model!F7"
+            },
+            {
+              "value": 30,
+              "kind": "formula",
+              "formula": "=model!G7"
+            },
+            {
+              "value": 30,
+              "kind": "formula",
+              "formula": "=model!H7"
+            },
+            {
+              "value": 30,
+              "kind": "formula",
+              "formula": "=model!I7"
+            },
+            {
+              "value": 30,
+              "kind": "formula",
+              "formula": "=model!J7"
+            },
+            {
+              "value": 30,
+              "kind": "formula",
+              "formula": "=model!K7"
+            },
+            {
+              "value": 31,
+              "kind": "assumption",
+              "note": "SYNTHETIC: the contract rate, rounded."
+            },
+            {
+              "value": 31,
+              "kind": "assumption",
+              "note": "SYNTHETIC: the contract rate, rounded."
+            }
+          ]
+        },
+        {
+          "id": "fuel_per_bcm",
+          "label": "Fuel cost per bcm",
+          "unit": "Rp thousand per bcm",
+          "cells": [
+            {
+              "value": 10,
+              "kind": "formula",
+              "formula": "=model!C9"
+            },
+            {
+              "value": 10,
+              "kind": "formula",
+              "formula": "=model!D9"
+            },
+            {
+              "value": 10,
+              "kind": "formula",
+              "formula": "=model!E9"
+            },
+            {
+              "value": 10,
+              "kind": "formula",
+              "formula": "=model!F9"
+            },
+            {
+              "value": 10,
+              "kind": "formula",
+              "formula": "=model!G9"
+            },
+            {
+              "value": 10,
+              "kind": "formula",
+              "formula": "=model!H9"
+            },
+            {
+              "value": 10,
+              "kind": "formula",
+              "formula": "=model!I9"
+            },
+            {
+              "value": 10,
+              "kind": "formula",
+              "formula": "=model!J9"
+            },
+            {
+              "value": 10,
+              "kind": "formula",
+              "formula": "=model!K9"
+            },
+            {
+              "value": 10,
+              "kind": "assumption",
+              "note": "SYNTHETIC: flat on FY 25."
+            },
+            {
+              "value": 10,
+              "kind": "assumption",
+              "note": "SYNTHETIC: flat on FY 25."
+            }
+          ]
+        },
+        {
+          "id": "freight_rate",
+          "label": "Freight rate per tonne",
+          "unit": "Rp thousand per tonne",
+          "cells": [
+            {
+              "value": 120,
+              "kind": "formula",
+              "formula": "=model!C11"
+            },
+            {
+              "value": 119.99999999999999,
+              "kind": "formula",
+              "formula": "=model!D11"
+            },
+            {
+              "value": 120,
+              "kind": "formula",
+              "formula": "=model!E11"
+            },
+            {
+              "value": 120,
+              "kind": "formula",
+              "formula": "=model!F11"
+            },
+            {
+              "value": 119.99999999999999,
+              "kind": "formula",
+              "formula": "=model!G11"
+            },
+            {
+              "value": 120,
+              "kind": "formula",
+              "formula": "=model!H11"
+            },
+            {
+              "value": 120,
+              "kind": "formula",
+              "formula": "=model!I11"
+            },
+            {
+              "value": 120.00000000000001,
+              "kind": "formula",
+              "formula": "=model!J11"
+            },
+            {
+              "value": 120,
+              "kind": "formula",
+              "formula": "=model!K11"
+            },
+            {
+              "value": 120,
+              "kind": "assumption",
+              "note": "SYNTHETIC: flat on FY 25."
+            },
+            {
+              "value": 120,
+              "kind": "assumption",
+              "note": "SYNTHETIC: flat on FY 25."
+            }
+          ]
+        },
+        {
+          "id": "royalty_rate",
+          "label": "Royalty rate",
+          "unit": "% of revenue",
+          "style": "ratio",
+          "cells": [
+            {
+              "value": 0.1,
+              "kind": "formula",
+              "formula": "=model!C13"
+            },
+            {
+              "value": 0.1,
+              "kind": "formula",
+              "formula": "=model!D13"
+            },
+            {
+              "value": 0.1,
+              "kind": "formula",
+              "formula": "=model!E13"
+            },
+            {
+              "value": 0.1,
+              "kind": "formula",
+              "formula": "=model!F13"
+            },
+            {
+              "value": 0.1,
+              "kind": "formula",
+              "formula": "=model!G13"
+            },
+            {
+              "value": 0.1,
+              "kind": "formula",
+              "formula": "=model!H13"
+            },
+            {
+              "value": 0.1,
+              "kind": "formula",
+              "formula": "=model!I13"
+            },
+            {
+              "value": 0.1,
+              "kind": "formula",
+              "formula": "=model!J13"
+            },
+            {
+              "value": 0.1,
+              "kind": "formula",
+              "formula": "=model!K13"
+            },
+            {
+              "value": 0.1,
+              "kind": "assumption",
+              "note": "SYNTHETIC: the statutory rate in this invented world."
+            },
+            {
+              "value": 0.1,
+              "kind": "assumption",
+              "note": "SYNTHETIC: the statutory rate in this invented world."
+            }
+          ]
+        },
+        {
+          "id": "other_cor",
+          "label": "Other cost of revenue, not split",
+          "unit": "Rp bn per quarter",
+          "cells": [
+            {
+              "value": 150,
+              "kind": "formula",
+              "formula": "=model!C15"
+            },
+            {
+              "value": 150,
+              "kind": "formula",
+              "formula": "=model!D15"
+            },
+            {
+              "value": 160,
+              "kind": "formula",
+              "formula": "=model!E15"
+            },
+            {
+              "value": 160,
+              "kind": "formula",
+              "formula": "=model!F15"
+            },
+            {
+              "value": 150,
+              "kind": "formula",
+              "formula": "=model!G15"
+            },
+            {
+              "value": 160,
+              "kind": "formula",
+              "formula": "=model!H15"
+            },
+            {
+              "value": 160,
+              "kind": "formula",
+              "formula": "=model!I15"
+            },
+            {
+              "value": 170,
+              "kind": "formula",
+              "formula": "=model!J15"
+            },
+            {
+              "value": 640,
+              "kind": "formula",
+              "formula": "=model!K15"
+            },
+            {
+              "value": 165,
+              "kind": "assumption",
+              "note": "SYNTHETIC: a round number per quarter."
+            },
+            {
+              "value": 165,
+              "kind": "assumption",
+              "note": "SYNTHETIC: a round number per quarter."
+            }
+          ]
+        },
+        {
+          "id": "sga",
+          "label": "Selling, general and administrative expenses",
+          "unit": "Rp bn per quarter",
+          "cells": [
+            {
+              "value": 100,
+              "kind": "formula",
+              "formula": "=model!C20"
+            },
+            {
+              "value": 100,
+              "kind": "formula",
+              "formula": "=model!D20"
+            },
+            {
+              "value": 110,
+              "kind": "formula",
+              "formula": "=model!E20"
+            },
+            {
+              "value": 110,
+              "kind": "formula",
+              "formula": "=model!F20"
+            },
+            {
+              "value": 100,
+              "kind": "formula",
+              "formula": "=model!G20"
+            },
+            {
+              "value": 105,
+              "kind": "formula",
+              "formula": "=model!H20"
+            },
+            {
+              "value": 110,
+              "kind": "formula",
+              "formula": "=model!I20"
+            },
+            {
+              "value": 120,
+              "kind": "formula",
+              "formula": "=model!J20"
+            },
+            {
+              "value": 435,
+              "kind": "formula",
+              "formula": "=model!K20"
+            },
+            {
+              "value": 115,
+              "kind": "assumption",
+              "note": "SYNTHETIC: a round number per quarter."
+            },
+            {
+              "value": 115,
+              "kind": "assumption",
+              "note": "SYNTHETIC: a round number per quarter."
+            }
+          ]
+        },
+        {
+          "id": "other_net",
+          "label": "Finance and other items, net",
+          "unit": "Rp bn per quarter",
+          "cells": [
+            {
+              "value": -20,
+              "kind": "formula",
+              "formula": "=model!C22"
+            },
+            {
+              "value": -20,
+              "kind": "formula",
+              "formula": "=model!D22"
+            },
+            {
+              "value": -15,
+              "kind": "formula",
+              "formula": "=model!E22"
+            },
+            {
+              "value": -15,
+              "kind": "formula",
+              "formula": "=model!F22"
+            },
+            {
+              "value": -10,
+              "kind": "formula",
+              "formula": "=model!G22"
+            },
+            {
+              "value": -10,
+              "kind": "formula",
+              "formula": "=model!H22"
+            },
+            {
+              "value": -10,
+              "kind": "formula",
+              "formula": "=model!I22"
+            },
+            {
+              "value": -10,
+              "kind": "formula",
+              "formula": "=model!J22"
+            },
+            {
+              "value": -40,
+              "kind": "formula",
+              "formula": "=model!K22"
+            },
+            {
+              "value": -10,
+              "kind": "assumption",
+              "note": "SYNTHETIC: a round number per quarter."
+            },
+            {
+              "value": -10,
+              "kind": "assumption",
+              "note": "SYNTHETIC: a round number per quarter."
+            }
+          ]
+        },
+        {
+          "id": "tax_rate",
+          "label": "Effective tax rate",
+          "unit": "% of profit before tax",
+          "style": "ratio",
+          "cells": [
+            {
+              "value": 0.2206896551724138,
+              "kind": "formula",
+              "formula": "=model!C24/model!C23"
+            },
+            {
+              "value": 0.22121212121212122,
+              "kind": "formula",
+              "formula": "=model!D24/model!D23"
+            },
+            {
+              "value": 0.21862348178137653,
+              "kind": "formula",
+              "formula": "=model!E24/model!E23"
+            },
+            {
+              "value": 0.21951219512195122,
+              "kind": "formula",
+              "formula": "=model!F24/model!F23"
+            },
+            {
+              "value": 0.21830985915492956,
+              "kind": "formula",
+              "formula": "=model!G24/model!G23"
+            },
+            {
+              "value": 0.2222222222222222,
+              "kind": "formula",
+              "formula": "=model!H24/model!H23"
+            },
+            {
+              "value": 0.21981424148606812,
+              "kind": "formula",
+              "formula": "=model!I24/model!I23"
+            },
+            {
+              "value": 0.2192513368983957,
+              "kind": "formula",
+              "formula": "=model!J24/model!J23"
+            },
+            {
+              "value": 0.2198443579766537,
+              "kind": "formula",
+              "formula": "=model!K24/model!K23"
+            },
+            {
+              "value": 0.22,
+              "kind": "assumption",
+              "note": "SYNTHETIC: the FY 25 rate, rounded."
+            },
+            {
+              "value": 0.22,
+              "kind": "assumption",
+              "note": "SYNTHETIC: the FY 25 rate, rounded."
+            }
+          ]
+        },
+        {
+          "id": "nci_share",
+          "label": "Non-controlling interests",
+          "unit": "% of profit",
+          "style": "ratio",
+          "cells": [
+            {
+              "value": 0.04424778761061947,
+              "kind": "formula",
+              "formula": "=model!C26/model!C25"
+            },
+            {
+              "value": 0.038910505836575876,
+              "kind": "formula",
+              "formula": "=model!D26/model!D25"
+            },
+            {
+              "value": 0.05181347150259067,
+              "kind": "formula",
+              "formula": "=model!E26/model!E25"
+            },
+            {
+              "value": 0.044642857142857144,
+              "kind": "formula",
+              "formula": "=model!F26/model!F25"
+            },
+            {
+              "value": 0.09009009009009009,
+              "kind": "formula",
+              "formula": "=model!G26/model!G25"
+            },
+            {
+              "value": 0.06802721088435375,
+              "kind": "formula",
+              "formula": "=model!H26/model!H25"
+            },
+            {
+              "value": 0.03968253968253968,
+              "kind": "formula",
+              "formula": "=model!I26/model!I25"
+            },
+            {
+              "value": 0.03424657534246575,
+              "kind": "formula",
+              "formula": "=model!J26/model!J25"
+            },
+            {
+              "value": 0.04987531172069826,
+              "kind": "formula",
+              "formula": "=model!K26/model!K25"
+            },
+            {
+              "value": 0.02,
+              "kind": "assumption",
+              "note": "SYNTHETIC: a round share."
+            },
+            {
+              "value": 0.02,
+              "kind": "assumption",
+              "note": "SYNTHETIC: a round share."
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "driverTree": {
+    "nodes": [
+      {
+        "id": "vol_sold",
+        "label": "Tonnes sold",
+        "rowRef": "model!vol_sold"
+      },
+      {
+        "id": "price",
+        "label": "Realised price per tonne",
+        "rowRef": "model!price"
+      },
+      {
+        "id": "revenue",
+        "label": "Revenue",
+        "rowRef": "model!revenue"
+      },
+      {
+        "id": "strip_ratio",
+        "label": "Strip ratio",
+        "rowRef": "model!strip_ratio"
+      },
+      {
+        "id": "ob_removed",
+        "label": "Overburden removed",
+        "rowRef": "model!ob_removed"
+      },
+      {
+        "id": "cost_per_bcm",
+        "label": "Contractor cost per bcm",
+        "rowRef": "model!cost_per_bcm"
+      },
+      {
+        "id": "cor_total",
+        "label": "Cost of revenue",
+        "rowRef": "model!cor_total"
+      },
+      {
+        "id": "cor_per_t",
+        "label": "Cost of revenue per tonne",
+        "rowRef": "model!cor_per_t"
+      },
+      {
+        "id": "gross_profit",
+        "label": "Gross profit",
+        "rowRef": "model!gross_profit"
+      },
+      {
+        "id": "gross_margin",
+        "label": "Gross margin",
+        "rowRef": "model!gross_margin"
+      },
+      {
+        "id": "sga",
+        "label": "Selling, general and administrative",
+        "rowRef": "model!sga"
+      },
+      {
+        "id": "operating_profit",
+        "label": "Operating profit",
+        "rowRef": "model!operating_profit"
+      },
+      {
+        "id": "net_profit",
+        "label": "Profit for the period",
+        "rowRef": "model!net_profit"
+      },
+      {
+        "id": "owners_profit",
+        "label": "Profit to owners",
+        "rowRef": "model!owners_profit"
+      }
+    ],
+    "edges": [
+      {
+        "from": "vol_sold",
+        "to": "revenue"
+      },
+      {
+        "from": "price",
+        "to": "revenue"
+      },
+      {
+        "from": "vol_sold",
+        "to": "ob_removed"
+      },
+      {
+        "from": "strip_ratio",
+        "to": "ob_removed"
+      },
+      {
+        "from": "ob_removed",
+        "to": "cor_total"
+      },
+      {
+        "from": "cost_per_bcm",
+        "to": "cor_total"
+      },
+      {
+        "from": "vol_sold",
+        "to": "cor_total"
+      },
+      {
+        "from": "revenue",
+        "to": "cor_total"
+      },
+      {
+        "from": "cor_total",
+        "to": "cor_per_t"
+      },
+      {
+        "from": "vol_sold",
+        "to": "cor_per_t"
+      },
+      {
+        "from": "revenue",
+        "to": "gross_profit"
+      },
+      {
+        "from": "cor_total",
+        "to": "gross_profit"
+      },
+      {
+        "from": "gross_profit",
+        "to": "gross_margin"
+      },
+      {
+        "from": "revenue",
+        "to": "gross_margin"
+      },
+      {
+        "from": "gross_profit",
+        "to": "operating_profit"
+      },
+      {
+        "from": "sga",
+        "to": "operating_profit"
+      },
+      {
+        "from": "operating_profit",
+        "to": "net_profit"
+      },
+      {
+        "from": "net_profit",
+        "to": "owners_profit"
+      }
+    ]
+  },
+  "unitEconomics": {
+    "unit": "tonne",
+    "basisLabel": "per tonne of coal sold",
+    "denominatorRowRef": "model!vol_sold",
+    "periods": [
+      "25Q1",
+      "25Q2",
+      "25Q3",
+      "25Q4",
+      "FY25",
+      "26Q1E",
+      "26Q2E"
+    ],
+    "lines": [
+      {
+        "id": "revenue",
+        "label": "Revenue",
+        "role": "revenue",
+        "rowRef": "model!revenue",
+        "driver": {
+          "description": "Realised price per tonne × tonnes sold",
+          "physicalUnit": "Rp thousand per tonne",
+          "inputRowRefs": [
+            "model!price",
+            "model!vol_sold"
+          ]
+        }
+      },
+      {
+        "id": "contractor",
+        "label": "Mining contractor services",
+        "role": "cost",
+        "rowRef": "model!cor_contractor",
+        "driver": {
+          "description": "Cost per bcm × overburden removed",
+          "physicalUnit": "Rp thousand per bcm",
+          "inputRowRefs": [
+            "model!cost_per_bcm",
+            "model!ob_removed"
+          ]
+        }
+      },
+      {
+        "id": "fuel",
+        "label": "Fuel",
+        "role": "cost",
+        "rowRef": "model!cor_fuel",
+        "driver": {
+          "description": "Fuel cost per bcm × overburden removed",
+          "physicalUnit": "Rp thousand per bcm",
+          "inputRowRefs": [
+            "model!fuel_per_bcm",
+            "model!ob_removed"
+          ]
+        }
+      },
+      {
+        "id": "freight",
+        "label": "Coal transport",
+        "role": "cost",
+        "rowRef": "model!cor_freight",
+        "driver": {
+          "description": "Freight rate per tonne × tonnes sold",
+          "physicalUnit": "Rp thousand per tonne",
+          "inputRowRefs": [
+            "model!freight_rate",
+            "model!vol_sold"
+          ]
+        }
+      },
+      {
+        "id": "royalty",
+        "label": "Royalty",
+        "role": "cost",
+        "rowRef": "model!cor_royalty",
+        "driver": {
+          "description": "Royalty rate × revenue",
+          "physicalUnit": "% of revenue",
+          "inputRowRefs": [
+            "model!royalty_rate",
+            "model!revenue"
+          ]
+        }
+      },
+      {
+        "id": "other",
+        "label": "Not split in the note",
+        "role": "unsplit",
+        "rowRef": "model!cor_other",
+        "contains": [
+          "Depreciation of mine assets",
+          "Site salaries",
+          "Inventory movement",
+          "Other site costs"
+        ]
+      },
+      {
+        "id": "gross_profit",
+        "label": "Gross profit",
+        "role": "subtotal",
+        "rowRef": "model!gross_profit"
+      },
+      {
+        "id": "sga",
+        "label": "Selling, general and administrative",
+        "role": "cost",
+        "rowRef": "model!sga",
+        "driver": {
+          "description": "Head office and selling costs, mostly fixed per quarter",
+          "physicalUnit": "Rp bn per quarter",
+          "inputRowRefs": []
+        }
+      },
+      {
+        "id": "operating_profit",
+        "label": "Operating profit",
+        "role": "subtotal",
+        "rowRef": "model!operating_profit"
+      }
+    ]
+  },
+  "peerBand": [
+    {
+      "metric": "Realised price per tonne",
+      "unit": "Rp thousand per tonne",
+      "period": "FY25",
+      "rowRef": "model!price",
+      "value": 727
+    },
+    {
+      "metric": "Cost of revenue per tonne",
+      "unit": "Rp thousand per tonne",
+      "period": "FY25",
+      "rowRef": "model!cor_per_t",
+      "value": 576.7
+    },
+    {
+      "metric": "Gross margin",
+      "unit": "%",
+      "period": "FY25",
+      "rowRef": "model!gross_margin",
+      "value": 0.20674002751031637
+    },
+    {
+      "metric": "Strip ratio",
+      "unit": "bcm per tonne",
+      "period": "FY25",
+      "rowRef": "model!strip_ratio",
+      "value": 8
+    }
+  ],
+  "workpaper": {
+    "gates": [
+      {
+        "name": "Intake and tie-out",
+        "status": "passed"
+      },
+      {
+        "name": "Driver model",
+        "status": "passed_with_escalation",
+        "note": "SYNTHETIC: one escalation left open on purpose, to show the status."
+      },
+      {
+        "name": "Calibration",
+        "status": "passed"
+      },
+      {
+        "name": "Partner review",
+        "status": "passed"
+      }
+    ],
+    "preparedBy": "FS reverse-engineering suite (SYNTHETIC run)",
+    "approvedBy": "Owner (SYNTHETIC)",
+    "approvedAt": "2026-01-15"
+  }
+}

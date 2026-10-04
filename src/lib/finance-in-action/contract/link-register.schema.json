@@ -1,0 +1,73 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "urn:dikagustiana:finance-in-action:link-register:proposal-v3.1",
+  "title": "Finance in Action link register",
+  "description": "PROPOSAL v3.1, pending owner approval and FSRE P-2. A link is measured only when costShare and demandShare are both non-null and sourced.",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["id", "from", "to", "whatFlows", "driverFrom", "driverTo", "intensity", "costShare", "demandShare", "passThrough"],
+    "properties": {
+      "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+      "from": { "type": "string", "minLength": 1 },
+      "to": { "type": "string", "minLength": 1 },
+      "whatFlows": { "type": "string", "minLength": 1 },
+      "driverFrom": { "type": "string", "minLength": 1 },
+      "driverTo": { "type": "string", "minLength": 1 },
+      "intensity": {
+        "oneOf": [
+          { "type": "null" },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["value", "unit", "period", "source"],
+            "properties": {
+              "value": { "type": "number", "exclusiveMinimum": 0 },
+              "unit": { "type": "string", "minLength": 1 },
+              "period": { "type": "string", "minLength": 1 },
+              "source": { "type": "string", "minLength": 1 }
+            }
+          }
+        ]
+      },
+      "costShare": { "$ref": "#/definitions/share" },
+      "demandShare": { "$ref": "#/definitions/share" },
+      "passThrough": {
+        "oneOf": [
+          { "type": "null" },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["estimate", "low", "high", "quarters", "source"],
+            "properties": {
+              "estimate": { "type": "number" },
+              "low": { "type": "number" },
+              "high": { "type": "number" },
+              "quarters": { "type": "integer", "minimum": 1 },
+              "source": { "type": "string", "minLength": 1 }
+            }
+          }
+        ]
+      },
+      "caveat": { "type": "string" }
+    }
+  },
+  "definitions": {
+    "share": {
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["value", "period", "source"],
+          "properties": {
+            "value": { "type": "number", "minimum": 0, "maximum": 1 },
+            "period": { "type": "string", "minLength": 1 },
+            "source": { "type": "string", "minLength": 1 }
+          }
+        }
+      ]
+    }
+  }
+}

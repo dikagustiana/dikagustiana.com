@@ -1,9 +1,17 @@
-import { defineConfig } from "vite";
+import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 
 // https://vitejs.dev/config/
-export default defineConfig(() => ({
+export default defineConfig(({ mode }) => ({
+  // Finance in Action preview (docs/company-models/implementation-brief-v3.1.md,
+  // constraint 3). VITE_FIA_PREVIEW=true turns on the v3.1 viewer and its
+  // SYNTHETIC fixtures. It becomes a compile-time constant so that, unset,
+  // the viewer and the fixtures are dead code Rollup drops: no chunk of them
+  // reaches dist/. scripts/assert-no-synthetic.mjs checks that after the build.
+  define: {
+    __FIA_PREVIEW__: JSON.stringify(loadEnv(mode, process.cwd(), "VITE_").VITE_FIA_PREVIEW === "true"),
+  },
   server: {
     host: "::",
     port: 8080,

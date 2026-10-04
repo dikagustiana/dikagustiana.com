@@ -1,0 +1,9 @@
+{
+  "about": "The companies planned for the first models. Names and tickers only: no figures. Depth and condition links follow the owner's mockup (fsre-skills docs/company-models/mockup/Main.dc.html).",
+  "companies": [
+    { "ticker": "PTBA", "name": "Bukit Asam", "subIndustry": "A121", "status": "not_started", "depth": "executive", "conditionIds": [3] },
+    { "ticker": "ITMG", "name": "Indo Tambangraya Megah", "subIndustry": "A121", "status": "not_started", "depth": "executive", "conditionIds": [3] },
+    { "ticker": "INTP", "name": "Indocement Tunggal Prakarsa", "subIndustry": "B121", "status": "not_started", "depth": "executive", "conditionIds": [1] },
+    { "ticker": "SMGR", "name": "Semen Indonesia", "subIndustry": "B121", "status": "not_started", "depth": "institutional", "conditionIds": [1, 6] }
+  ]
+}

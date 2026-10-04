@@ -1,0 +1,248 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "urn:dikagustiana:finance-in-action:model-package:proposal-v3.1",
+  "title": "Finance in Action model package",
+  "description": "PROPOSAL v3.1, pending owner approval and FSRE P-2. One JSON package per model version. Cell addresses: <sheet id>!<column><row>, row 1 the header, rows[n] on row n + 2, column A label, column B unit, column C the first period. Additions to the brief's shape are marked ADDITION.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["meta", "periods", "sheets", "driverTree", "unitEconomics", "peerBand", "workpaper"],
+  "properties": {
+    "meta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ticker", "name", "subIndustry", "chainStage", "pair", "version", "contentHash",
+        "asOf", "provenance", "status", "depth", "conditionIds", "skillVersions"
+      ],
+      "properties": {
+        "ticker": { "type": "string", "pattern": "^[A-Z0-9]{2,8}$" },
+        "name": { "type": "string", "minLength": 1 },
+        "subIndustry": { "type": "string", "minLength": 1 },
+        "chainStage": {
+          "type": "string",
+          "description": "An id from the chain map's STAGES. ADDITION: or band-energy / band-logistics.",
+          "minLength": 1
+        },
+        "pair": { "type": "array", "items": { "type": "string", "pattern": "^[A-Z0-9]{2,8}$" } },
+        "version": { "type": "string", "minLength": 1 },
+        "contentHash": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "asOf": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["latestQuarter", "fullStatementsTo"],
+          "properties": {
+            "latestQuarter": { "type": "string" },
+            "fullStatementsTo": { "type": "string" }
+          }
+        },
+        "provenance": { "enum": ["filings", "fixture", "synthetic"] },
+        "status": { "enum": ["published", "preview", "in_progress", "not_started"] },
+        "depth": { "enum": ["foundation", "executive", "institutional"] },
+        "conditionIds": { "type": "array", "items": { "type": "integer", "minimum": 1 } },
+        "skillVersions": { "type": "object", "additionalProperties": { "type": "string" } },
+        "rounding": {
+          "description": "ADDITION",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["decimals"],
+          "properties": { "decimals": { "type": "integer", "minimum": 0 } }
+        },
+        "conditionNotes": {
+          "description": "ADDITION",
+          "type": "object",
+          "propertyNames": { "pattern": "^[0-9]+$" },
+          "additionalProperties": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "periods": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "label", "kind", "forecast"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "label": { "type": "string", "minLength": 1 },
+          "kind": { "enum": ["quarter", "fy"] },
+          "forecast": { "type": "boolean" }
+        }
+      }
+    },
+    "sheets": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "rows"],
+        "properties": {
+          "id": { "enum": ["reported", "model", "assumptions"] },
+          "rows": { "type": "array", "items": { "$ref": "#/definitions/row" } }
+        }
+      }
+    },
+    "driverTree": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["nodes", "edges"],
+      "properties": {
+        "nodes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "label", "rowRef"],
+            "properties": {
+              "id": { "type": "string", "minLength": 1 },
+              "label": { "type": "string", "minLength": 1 },
+              "rowRef": { "$ref": "#/definitions/rowRef" }
+            }
+          }
+        },
+        "edges": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["from", "to"],
+            "properties": { "from": { "type": "string" }, "to": { "type": "string" } }
+          }
+        }
+      }
+    },
+    "unitEconomics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["unit", "basisLabel", "denominatorRowRef", "periods", "lines"],
+      "properties": {
+        "unit": { "type": "string", "minLength": 1 },
+        "basisLabel": { "type": "string", "minLength": 1 },
+        "denominatorRowRef": { "$ref": "#/definitions/rowRef" },
+        "periods": { "type": "array", "items": { "type": "string" } },
+        "lines": { "type": "array", "minItems": 1, "items": { "$ref": "#/definitions/ueLine" } }
+      }
+    },
+    "peerBand": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["metric", "unit", "period", "value"],
+        "properties": {
+          "metric": { "type": "string", "minLength": 1 },
+          "unit": { "type": "string" },
+          "period": { "type": "string" },
+          "value": { "type": ["number", "null"] },
+          "rowRef": { "description": "ADDITION", "$ref": "#/definitions/rowRef" }
+        }
+      }
+    },
+    "workpaper": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["gates"],
+      "properties": {
+        "gates": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "status"],
+            "properties": {
+              "name": { "type": "string", "minLength": 1 },
+              "status": { "enum": ["passed", "passed_with_escalation", "failed", "not_run"] },
+              "note": { "type": "string" }
+            }
+          }
+        },
+        "preparedBy": { "description": "ADDITION", "type": "string" },
+        "approvedBy": { "type": "string" },
+        "approvedAt": { "type": "string" }
+      }
+    }
+  },
+  "definitions": {
+    "rowRef": { "type": "string", "pattern": "^(reported|model|assumptions)![A-Za-z0-9_]+$" },
+    "row": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "label", "unit", "cells"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[A-Za-z0-9_]+$" },
+        "label": { "type": "string", "minLength": 1 },
+        "unit": { "type": "string" },
+        "style": { "enum": ["total", "ratio"] },
+        "cells": { "type": "array", "items": { "$ref": "#/definitions/cell" } }
+      }
+    },
+    "cell": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value", "kind"],
+      "properties": {
+        "value": { "type": ["number", "null"] },
+        "kind": { "enum": ["sourced", "formula", "assumption", "missing"] },
+        "formula": { "type": "string", "minLength": 1 },
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["issuer", "document", "period"],
+          "properties": {
+            "issuer": { "type": "string", "minLength": 1 },
+            "document": { "type": "string", "minLength": 1 },
+            "period": { "type": "string", "minLength": 1 },
+            "page": { "type": "integer", "minimum": 1 },
+            "note": { "type": "string" },
+            "xbrlConcept": { "type": "string" },
+            "docSha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+          }
+        },
+        "tieOut": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["externalValue", "sourceText", "difference", "status"],
+          "properties": {
+            "externalValue": { "type": "number" },
+            "sourceText": { "type": "string", "minLength": 1 },
+            "difference": { "type": "number" },
+            "status": { "enum": ["agrees", "differs", "not_checked"] }
+          }
+        },
+        "note": { "type": "string" }
+      },
+      "allOf": [
+        { "if": { "properties": { "kind": { "const": "formula" } } }, "then": { "required": ["formula"] } },
+        { "if": { "properties": { "kind": { "const": "sourced" } } }, "then": { "required": ["source"], "properties": { "value": { "type": "number" } } } },
+        { "if": { "properties": { "kind": { "const": "assumption" } } }, "then": { "properties": { "value": { "type": "number" } } } },
+        { "if": { "properties": { "kind": { "const": "missing" } } }, "then": { "properties": { "value": { "type": "null" } } } }
+      ]
+    },
+    "ueLine": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "label", "role", "rowRef"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "label": { "type": "string", "minLength": 1 },
+        "role": { "enum": ["revenue", "cost", "subtotal", "unsplit"] },
+        "rowRef": { "$ref": "#/definitions/rowRef" },
+        "driver": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["description", "physicalUnit", "inputRowRefs"],
+          "properties": {
+            "description": { "type": "string", "minLength": 1 },
+            "physicalUnit": { "type": "string", "minLength": 1 },
+            "inputRowRefs": { "type": "array", "items": { "$ref": "#/definitions/rowRef" } }
+          }
+        },
+        "contains": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } }
+      },
+      "allOf": [
+        { "if": { "properties": { "role": { "const": "unsplit" } } }, "then": { "required": ["contains"] }, "else": { "not": { "required": ["contains"] } } }
+      ]
+    }
+  }
+}

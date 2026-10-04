@@ -9,6 +9,9 @@ import path from 'path';
 export default defineConfig({
   plugins: [react()],
   resolve: { alias: { '@': path.resolve(__dirname, './src') } },
+  // The Finance in Action preview flag (see vite.config.ts). Off in tests, as
+  // in production; suites that need the preview import its modules directly.
+  define: { __FIA_PREVIEW__: 'false' },
   test: {
     globals: true,
     environment: 'jsdom',

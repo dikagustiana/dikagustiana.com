@@ -1,0 +1,15 @@
+[
+  {
+    "id": "syn-coal-to-cement",
+    "from": "SYN-COAL",
+    "to": "SYN-CEM",
+    "whatFlows": "Coal burnt as kiln fuel (SYNTHETIC)",
+    "driverFrom": "Realised price per tonne of coal",
+    "driverTo": "Kiln fuel cost per tonne of cement",
+    "intensity": { "value": 0.1, "unit": "tonnes of coal per tonne of cement", "period": "FY25", "source": "SYNTHETIC: invented to exercise the viewer" },
+    "costShare": { "value": 0.12, "period": "FY25", "source": "SYNTHETIC: invented to exercise the viewer" },
+    "demandShare": { "value": 0.25, "period": "FY25", "source": "SYNTHETIC: invented to exercise the viewer" },
+    "passThrough": { "estimate": 0.6, "low": 0.4, "high": 0.8, "quarters": 8, "source": "SYNTHETIC: invented to exercise the viewer" },
+    "caveat": "SYNTHETIC link. In a real pair the price a cement plant pays can differ from a coal producer's realised price: calorific value, contract terms and domestic market obligation rules all sit between them."
+  }
+]

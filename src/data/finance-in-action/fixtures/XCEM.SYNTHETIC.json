@@ -1,0 +1,4082 @@
+{
+  "meta": {
+    "ticker": "XCEM",
+    "name": "Example Cement Co (SYNTHETIC)",
+    "subIndustry": "SYN-CEM",
+    "chainStage": "stage-processing",
+    "pair": [
+      "SCEM",
+      "YCEM"
+    ],
+    "version": "XCEM-2025Q4-r1-SYNTHETIC",
+    "contentHash": "f4c380145e2ece3176aea14cbda32107c2adc037805853eafd3e730adf278bb1",
+    "asOf": {
+      "latestQuarter": "25Q4",
+      "fullStatementsTo": "25Q4"
+    },
+    "provenance": "synthetic",
+    "status": "preview",
+    "depth": "foundation",
+    "conditionIds": [
+      1,
+      6
+    ],
+    "skillVersions": {
+      "fs-intake": "0.0.0-SYNTHETIC",
+      "fs-driver-decomposition": "0.0.0-SYNTHETIC",
+      "financial-modeling": "0.0.0-SYNTHETIC"
+    },
+    "rounding": {
+      "decimals": 0
+    },
+    "conditionNotes": {
+      "1": "This model supplies tonnes sold against clinker produced, so idle kiln capacity shows up in the cost of a tonne."
+    }
+  },
+  "periods": [
+    {
+      "id": "24Q1",
+      "label": "Q1 24",
+      "kind": "quarter",
+      "forecast": false
+    },
+    {
+      "id": "24Q2",
+      "label": "Q2 24",
+      "kind": "quarter",
+      "forecast": false
+    },
+    {
+      "id": "24Q3",
+      "label": "Q3 24",
+      "kind": "quarter",
+      "forecast": false
+    },
+    {
+      "id": "24Q4",
+      "label": "Q4 24",
+      "kind": "quarter",
+      "forecast": false
+    },
+    {
+      "id": "25Q1",
+      "label": "Q1 25",
+      "kind": "quarter",
+      "forecast": false
+    },
+    {
+      "id": "25Q2",
+      "label": "Q2 25",
+      "kind": "quarter",
+      "forecast": false
+    },
+    {
+      "id": "25Q3",
+      "label": "Q3 25",
+      "kind": "quarter",
+      "forecast": false
+    },
+    {
+      "id": "25Q4",
+      "label": "Q4 25",
+      "kind": "quarter",
+      "forecast": false
+    },
+    {
+      "id": "FY25",
+      "label": "FY 25",
+      "kind": "fy",
+      "forecast": false
+    },
+    {
+      "id": "26Q1E",
+      "label": "Q1 26E",
+      "kind": "quarter",
+      "forecast": true
+    },
+    {
+      "id": "26Q2E",
+      "label": "Q2 26E",
+      "kind": "quarter",
+      "forecast": true
+    }
+  ],
+  "sheets": [
+    {
+      "id": "reported",
+      "rows": [
+        {
+          "id": "revenue",
+          "label": "Revenue",
+          "unit": "Rp bn",
+          "cells": [
+            {
+              "value": 1000,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q1 24",
+                "period": "Q1 24",
+                "page": 10,
+                "note": "22",
+                "xbrlConcept": "syn:Revenue"
+              }
+            },
+            {
+              "value": 1050,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q2 24",
+                "period": "Q2 24",
+                "page": 10,
+                "note": "22",
+                "xbrlConcept": "syn:Revenue"
+              }
+            },
+            {
+              "value": 1100,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q3 24",
+                "period": "Q3 24",
+                "page": 10,
+                "note": "22",
+                "xbrlConcept": "syn:Revenue"
+              }
+            },
+            {
+              "value": 1200,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q4 24",
+                "period": "Q4 24",
+                "page": 10,
+                "note": "22",
+                "xbrlConcept": "syn:Revenue"
+              }
+            },
+            {
+              "value": 1000,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q1 25",
+                "period": "Q1 25",
+                "page": 10,
+                "note": "22",
+                "xbrlConcept": "syn:Revenue"
+              }
+            },
+            {
+              "value": 1050,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q2 25",
+                "period": "Q2 25",
+                "page": 10,
+                "note": "22",
+                "xbrlConcept": "syn:Revenue"
+              }
+            },
+            {
+              "value": 1150,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q3 25",
+                "period": "Q3 25",
+                "page": 10,
+                "note": "22",
+                "xbrlConcept": "syn:Revenue"
+              }
+            },
+            {
+              "value": 1300,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q4 25",
+                "period": "Q4 25",
+                "page": 10,
+                "note": "22",
+                "xbrlConcept": "syn:Revenue"
+              }
+            },
+            {
+              "value": 4500,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC annual report FY 25",
+                "period": "FY 25",
+                "page": 10,
+                "note": "22",
+                "xbrlConcept": "syn:Revenue"
+              },
+              "tieOut": {
+                "externalValue": 4500,
+                "sourceText": "SYNTHETIC IDX XBRL instance FY 25, syn:Revenue",
+                "difference": 0,
+                "status": "agrees"
+              }
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Forecast period: nothing is reported yet (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Forecast period: nothing is reported yet (SYNTHETIC)"
+            }
+          ]
+        },
+        {
+          "id": "vol_sold",
+          "label": "Cement sales volume",
+          "unit": "Mt",
+          "cells": [
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Sales volume is not disclosed in the statements or in an operating update (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Sales volume is not disclosed in the statements or in an operating update (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Sales volume is not disclosed in the statements or in an operating update (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Sales volume is not disclosed in the statements or in an operating update (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Sales volume is not disclosed in the statements or in an operating update (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Sales volume is not disclosed in the statements or in an operating update (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Sales volume is not disclosed in the statements or in an operating update (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Sales volume is not disclosed in the statements or in an operating update (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Sales volume is not disclosed in the statements or in an operating update (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Forecast period: nothing is reported yet (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Forecast period: nothing is reported yet (SYNTHETIC)"
+            }
+          ]
+        },
+        {
+          "id": "clinker",
+          "label": "Clinker produced",
+          "unit": "Mt",
+          "cells": [
+            {
+              "value": 0.8,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC quarterly operating update Q1 24",
+                "period": "Q1 24",
+                "page": 2
+              }
+            },
+            {
+              "value": 0.85,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC quarterly operating update Q2 24",
+                "period": "Q2 24",
+                "page": 2
+              }
+            },
+            {
+              "value": 0.9,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC quarterly operating update Q3 24",
+                "period": "Q3 24",
+                "page": 2
+              }
+            },
+            {
+              "value": 1,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC quarterly operating update Q4 24",
+                "period": "Q4 24",
+                "page": 2
+              }
+            },
+            {
+              "value": 0.8,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC quarterly operating update Q1 25",
+                "period": "Q1 25",
+                "page": 2
+              }
+            },
+            {
+              "value": 0.85,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC quarterly operating update Q2 25",
+                "period": "Q2 25",
+                "page": 2
+              }
+            },
+            {
+              "value": 0.95,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC quarterly operating update Q3 25",
+                "period": "Q3 25",
+                "page": 2
+              }
+            },
+            {
+              "value": 1.05,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC quarterly operating update Q4 25",
+                "period": "Q4 25",
+                "page": 2
+              }
+            },
+            {
+              "value": 3.6499999999999995,
+              "kind": "formula",
+              "formula": "=SUM(reported!G4:J4)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Forecast period: nothing is reported yet (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Forecast period: nothing is reported yet (SYNTHETIC)"
+            }
+          ]
+        },
+        {
+          "id": "cor_fuel",
+          "label": "Kiln fuel",
+          "unit": "Rp bn",
+          "cells": [
+            {
+              "value": 170,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q1 24",
+                "period": "Q1 24",
+                "page": 38,
+                "note": "23",
+                "xbrlConcept": "syn:CostOfRevenueFuel"
+              }
+            },
+            {
+              "value": 180,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q2 24",
+                "period": "Q2 24",
+                "page": 38,
+                "note": "23",
+                "xbrlConcept": "syn:CostOfRevenueFuel"
+              }
+            },
+            {
+              "value": 190,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q3 24",
+                "period": "Q3 24",
+                "page": 38,
+                "note": "23",
+                "xbrlConcept": "syn:CostOfRevenueFuel"
+              }
+            },
+            {
+              "value": 210,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q4 24",
+                "period": "Q4 24",
+                "page": 38,
+                "note": "23",
+                "xbrlConcept": "syn:CostOfRevenueFuel"
+              }
+            },
+            {
+              "value": 170,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q1 25",
+                "period": "Q1 25",
+                "page": 38,
+                "note": "23",
+                "xbrlConcept": "syn:CostOfRevenueFuel"
+              }
+            },
+            {
+              "value": 180,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q2 25",
+                "period": "Q2 25",
+                "page": 38,
+                "note": "23",
+                "xbrlConcept": "syn:CostOfRevenueFuel"
+              }
+            },
+            {
+              "value": 200,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q3 25",
+                "period": "Q3 25",
+                "page": 38,
+                "note": "23",
+                "xbrlConcept": "syn:CostOfRevenueFuel"
+              }
+            },
+            {
+              "value": 220,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q4 25",
+                "period": "Q4 25",
+                "page": 38,
+                "note": "23",
+                "xbrlConcept": "syn:CostOfRevenueFuel"
+              }
+            },
+            {
+              "value": 770,
+              "kind": "formula",
+              "formula": "=SUM(reported!G5:J5)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Forecast period: nothing is reported yet (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Forecast period: nothing is reported yet (SYNTHETIC)"
+            }
+          ]
+        },
+        {
+          "id": "cor_power",
+          "label": "Electricity",
+          "unit": "Rp bn",
+          "cells": [
+            {
+              "value": 110,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q1 24",
+                "period": "Q1 24",
+                "page": 38,
+                "note": "23",
+                "xbrlConcept": "syn:CostOfRevenuePower"
+              }
+            },
+            {
+              "value": 115,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q2 24",
+                "period": "Q2 24",
+                "page": 38,
+                "note": "23",
+                "xbrlConcept": "syn:CostOfRevenuePower"
+              }
+            },
+            {
+              "value": 120,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q3 24",
+                "period": "Q3 24",
+                "page": 38,
+                "note": "23",
+                "xbrlConcept": "syn:CostOfRevenuePower"
+              }
+            },
+            {
+              "value": 130,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q4 24",
+                "period": "Q4 24",
+                "page": 38,
+                "note": "23",
+                "xbrlConcept": "syn:CostOfRevenuePower"
+              }
+            },
+            {
+              "value": 110,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q1 25",
+                "period": "Q1 25",
+                "page": 38,
+                "note": "23",
+                "xbrlConcept": "syn:CostOfRevenuePower"
+              }
+            },
+            {
+              "value": 115,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q2 25",
+                "period": "Q2 25",
+                "page": 38,
+                "note": "23",
+                "xbrlConcept": "syn:CostOfRevenuePower"
+              }
+            },
+            {
+              "value": 125,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q3 25",
+                "period": "Q3 25",
+                "page": 38,
+                "note": "23",
+                "xbrlConcept": "syn:CostOfRevenuePower"
+              }
+            },
+            {
+              "value": 140,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q4 25",
+                "period": "Q4 25",
+                "page": 38,
+                "note": "23",
+                "xbrlConcept": "syn:CostOfRevenuePower"
+              }
+            },
+            {
+              "value": 490,
+              "kind": "formula",
+              "formula": "=SUM(reported!G6:J6)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Forecast period: nothing is reported yet (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Forecast period: nothing is reported yet (SYNTHETIC)"
+            }
+          ]
+        },
+        {
+          "id": "cor_raw",
+          "label": "Raw materials",
+          "unit": "Rp bn",
+          "cells": [
+            {
+              "value": 100,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q1 24",
+                "period": "Q1 24",
+                "page": 38,
+                "note": "23",
+                "xbrlConcept": "syn:CostOfRevenueRawMaterials"
+              }
+            },
+            {
+              "value": 105,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q2 24",
+                "period": "Q2 24",
+                "page": 38,
+                "note": "23",
+                "xbrlConcept": "syn:CostOfRevenueRawMaterials"
+              }
+            },
+            {
+              "value": 110,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q3 24",
+                "period": "Q3 24",
+                "page": 38,
+                "note": "23",
+                "xbrlConcept": "syn:CostOfRevenueRawMaterials"
+              }
+            },
+            {
+              "value": 120,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q4 24",
+                "period": "Q4 24",
+                "page": 38,
+                "note": "23",
+                "xbrlConcept": "syn:CostOfRevenueRawMaterials"
+              }
+            },
+            {
+              "value": 100,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q1 25",
+                "period": "Q1 25",
+                "page": 38,
+                "note": "23",
+                "xbrlConcept": "syn:CostOfRevenueRawMaterials"
+              }
+            },
+            {
+              "value": 105,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q2 25",
+                "period": "Q2 25",
+                "page": 38,
+                "note": "23",
+                "xbrlConcept": "syn:CostOfRevenueRawMaterials"
+              }
+            },
+            {
+              "value": 115,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q3 25",
+                "period": "Q3 25",
+                "page": 38,
+                "note": "23",
+                "xbrlConcept": "syn:CostOfRevenueRawMaterials"
+              }
+            },
+            {
+              "value": 125,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q4 25",
+                "period": "Q4 25",
+                "page": 38,
+                "note": "23",
+                "xbrlConcept": "syn:CostOfRevenueRawMaterials"
+              }
+            },
+            {
+              "value": 445,
+              "kind": "formula",
+              "formula": "=SUM(reported!G7:J7)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Forecast period: nothing is reported yet (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Forecast period: nothing is reported yet (SYNTHETIC)"
+            }
+          ]
+        },
+        {
+          "id": "cor_packaging",
+          "label": "Packaging",
+          "unit": "Rp bn",
+          "cells": [
+            {
+              "value": 45,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q1 24",
+                "period": "Q1 24",
+                "page": 38,
+                "note": "23",
+                "xbrlConcept": "syn:CostOfRevenuePackaging"
+              }
+            },
+            {
+              "value": 47,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q2 24",
+                "period": "Q2 24",
+                "page": 38,
+                "note": "23",
+                "xbrlConcept": "syn:CostOfRevenuePackaging"
+              }
+            },
+            {
+              "value": 50,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q3 24",
+                "period": "Q3 24",
+                "page": 38,
+                "note": "23",
+                "xbrlConcept": "syn:CostOfRevenuePackaging"
+              }
+            },
+            {
+              "value": 54,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q4 24",
+                "period": "Q4 24",
+                "page": 38,
+                "note": "23",
+                "xbrlConcept": "syn:CostOfRevenuePackaging"
+              }
+            },
+            {
+              "value": 45,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q1 25",
+                "period": "Q1 25",
+                "page": 38,
+                "note": "23",
+                "xbrlConcept": "syn:CostOfRevenuePackaging"
+              }
+            },
+            {
+              "value": 47,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q2 25",
+                "period": "Q2 25",
+                "page": 38,
+                "note": "23",
+                "xbrlConcept": "syn:CostOfRevenuePackaging"
+              }
+            },
+            {
+              "value": 52,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q3 25",
+                "period": "Q3 25",
+                "page": 38,
+                "note": "23",
+                "xbrlConcept": "syn:CostOfRevenuePackaging"
+              }
+            },
+            {
+              "value": 58,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q4 25",
+                "period": "Q4 25",
+                "page": 38,
+                "note": "23",
+                "xbrlConcept": "syn:CostOfRevenuePackaging"
+              }
+            },
+            {
+              "value": 202,
+              "kind": "formula",
+              "formula": "=SUM(reported!G8:J8)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Forecast period: nothing is reported yet (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Forecast period: nothing is reported yet (SYNTHETIC)"
+            }
+          ]
+        },
+        {
+          "id": "cor_total",
+          "label": "Cost of revenue",
+          "unit": "Rp bn",
+          "style": "total",
+          "cells": [
+            {
+              "value": 525,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q1 24",
+                "period": "Q1 24",
+                "page": 10,
+                "note": "23",
+                "xbrlConcept": "syn:CostOfRevenue"
+              }
+            },
+            {
+              "value": 547,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q2 24",
+                "period": "Q2 24",
+                "page": 10,
+                "note": "23",
+                "xbrlConcept": "syn:CostOfRevenue"
+              }
+            },
+            {
+              "value": 575,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q3 24",
+                "period": "Q3 24",
+                "page": 10,
+                "note": "23",
+                "xbrlConcept": "syn:CostOfRevenue"
+              }
+            },
+            {
+              "value": 619,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q4 24",
+                "period": "Q4 24",
+                "page": 10,
+                "note": "23",
+                "xbrlConcept": "syn:CostOfRevenue"
+              }
+            },
+            {
+              "value": 525,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q1 25",
+                "period": "Q1 25",
+                "page": 10,
+                "note": "23",
+                "xbrlConcept": "syn:CostOfRevenue"
+              }
+            },
+            {
+              "value": 547,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q2 25",
+                "period": "Q2 25",
+                "page": 10,
+                "note": "23",
+                "xbrlConcept": "syn:CostOfRevenue"
+              }
+            },
+            {
+              "value": 597,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q3 25",
+                "period": "Q3 25",
+                "page": 10,
+                "note": "23",
+                "xbrlConcept": "syn:CostOfRevenue"
+              }
+            },
+            {
+              "value": 653,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q4 25",
+                "period": "Q4 25",
+                "page": 10,
+                "note": "23",
+                "xbrlConcept": "syn:CostOfRevenue"
+              }
+            },
+            {
+              "value": 2322,
+              "kind": "formula",
+              "formula": "=SUM(reported!G9:J9)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Forecast period: nothing is reported yet (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Forecast period: nothing is reported yet (SYNTHETIC)"
+            }
+          ]
+        },
+        {
+          "id": "sga",
+          "label": "Selling, general and administrative expenses",
+          "unit": "Rp bn",
+          "cells": [
+            {
+              "value": 90,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q1 24",
+                "period": "Q1 24",
+                "page": 39,
+                "note": "24",
+                "xbrlConcept": "syn:SellingGeneralAdministrative"
+              }
+            },
+            {
+              "value": 90,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q2 24",
+                "period": "Q2 24",
+                "page": 39,
+                "note": "24",
+                "xbrlConcept": "syn:SellingGeneralAdministrative"
+              }
+            },
+            {
+              "value": 95,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q3 24",
+                "period": "Q3 24",
+                "page": 39,
+                "note": "24",
+                "xbrlConcept": "syn:SellingGeneralAdministrative"
+              }
+            },
+            {
+              "value": 95,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q4 24",
+                "period": "Q4 24",
+                "page": 39,
+                "note": "24",
+                "xbrlConcept": "syn:SellingGeneralAdministrative"
+              }
+            },
+            {
+              "value": 90,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q1 25",
+                "period": "Q1 25",
+                "page": 39,
+                "note": "24",
+                "xbrlConcept": "syn:SellingGeneralAdministrative"
+              }
+            },
+            {
+              "value": 92,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q2 25",
+                "period": "Q2 25",
+                "page": 39,
+                "note": "24",
+                "xbrlConcept": "syn:SellingGeneralAdministrative"
+              }
+            },
+            {
+              "value": 95,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q3 25",
+                "period": "Q3 25",
+                "page": 39,
+                "note": "24",
+                "xbrlConcept": "syn:SellingGeneralAdministrative"
+              }
+            },
+            {
+              "value": 100,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q4 25",
+                "period": "Q4 25",
+                "page": 39,
+                "note": "24",
+                "xbrlConcept": "syn:SellingGeneralAdministrative"
+              }
+            },
+            {
+              "value": 377,
+              "kind": "formula",
+              "formula": "=SUM(reported!G10:J10)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Forecast period: nothing is reported yet (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Forecast period: nothing is reported yet (SYNTHETIC)"
+            }
+          ]
+        },
+        {
+          "id": "other_net",
+          "label": "Finance and other items, net",
+          "unit": "Rp bn",
+          "cells": [
+            {
+              "value": -20,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q1 24",
+                "period": "Q1 24",
+                "page": 40,
+                "note": "25",
+                "xbrlConcept": "syn:OtherItemsNet"
+              }
+            },
+            {
+              "value": -20,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q2 24",
+                "period": "Q2 24",
+                "page": 40,
+                "note": "25",
+                "xbrlConcept": "syn:OtherItemsNet"
+              }
+            },
+            {
+              "value": -20,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q3 24",
+                "period": "Q3 24",
+                "page": 40,
+                "note": "25",
+                "xbrlConcept": "syn:OtherItemsNet"
+              }
+            },
+            {
+              "value": -20,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q4 24",
+                "period": "Q4 24",
+                "page": 40,
+                "note": "25",
+                "xbrlConcept": "syn:OtherItemsNet"
+              }
+            },
+            {
+              "value": -20,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q1 25",
+                "period": "Q1 25",
+                "page": 40,
+                "note": "25",
+                "xbrlConcept": "syn:OtherItemsNet"
+              }
+            },
+            {
+              "value": -20,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q2 25",
+                "period": "Q2 25",
+                "page": 40,
+                "note": "25",
+                "xbrlConcept": "syn:OtherItemsNet"
+              }
+            },
+            {
+              "value": -20,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q3 25",
+                "period": "Q3 25",
+                "page": 40,
+                "note": "25",
+                "xbrlConcept": "syn:OtherItemsNet"
+              }
+            },
+            {
+              "value": -20,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q4 25",
+                "period": "Q4 25",
+                "page": 40,
+                "note": "25",
+                "xbrlConcept": "syn:OtherItemsNet"
+              }
+            },
+            {
+              "value": -80,
+              "kind": "formula",
+              "formula": "=SUM(reported!G11:J11)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Forecast period: nothing is reported yet (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Forecast period: nothing is reported yet (SYNTHETIC)"
+            }
+          ]
+        },
+        {
+          "id": "tax",
+          "label": "Income tax expense",
+          "unit": "Rp bn",
+          "cells": [
+            {
+              "value": 80,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q1 24",
+                "period": "Q1 24",
+                "page": 41,
+                "note": "26",
+                "xbrlConcept": "syn:IncomeTax"
+              }
+            },
+            {
+              "value": 86,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q2 24",
+                "period": "Q2 24",
+                "page": 41,
+                "note": "26",
+                "xbrlConcept": "syn:IncomeTax"
+              }
+            },
+            {
+              "value": 90,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q3 24",
+                "period": "Q3 24",
+                "page": 41,
+                "note": "26",
+                "xbrlConcept": "syn:IncomeTax"
+              }
+            },
+            {
+              "value": 103,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q4 24",
+                "period": "Q4 24",
+                "page": 41,
+                "note": "26",
+                "xbrlConcept": "syn:IncomeTax"
+              }
+            },
+            {
+              "value": 80,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q1 25",
+                "period": "Q1 25",
+                "page": 41,
+                "note": "26",
+                "xbrlConcept": "syn:IncomeTax"
+              }
+            },
+            {
+              "value": 86,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q2 25",
+                "period": "Q2 25",
+                "page": 41,
+                "note": "26",
+                "xbrlConcept": "syn:IncomeTax"
+              }
+            },
+            {
+              "value": 96,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q3 25",
+                "period": "Q3 25",
+                "page": 41,
+                "note": "26",
+                "xbrlConcept": "syn:IncomeTax"
+              }
+            },
+            {
+              "value": 116,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q4 25",
+                "period": "Q4 25",
+                "page": 41,
+                "note": "26",
+                "xbrlConcept": "syn:IncomeTax"
+              }
+            },
+            {
+              "value": 378,
+              "kind": "formula",
+              "formula": "=SUM(reported!G12:J12)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Forecast period: nothing is reported yet (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Forecast period: nothing is reported yet (SYNTHETIC)"
+            }
+          ]
+        },
+        {
+          "id": "nci",
+          "label": "Profit attributable to non-controlling interests",
+          "unit": "Rp bn",
+          "cells": [
+            {
+              "value": 0,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q1 24",
+                "period": "Q1 24",
+                "page": 10,
+                "xbrlConcept": "syn:ProfitNci"
+              }
+            },
+            {
+              "value": 0,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q2 24",
+                "period": "Q2 24",
+                "page": 10,
+                "xbrlConcept": "syn:ProfitNci"
+              }
+            },
+            {
+              "value": 0,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q3 24",
+                "period": "Q3 24",
+                "page": 10,
+                "xbrlConcept": "syn:ProfitNci"
+              }
+            },
+            {
+              "value": 0,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q4 24",
+                "period": "Q4 24",
+                "page": 10,
+                "xbrlConcept": "syn:ProfitNci"
+              }
+            },
+            {
+              "value": 0,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q1 25",
+                "period": "Q1 25",
+                "page": 10,
+                "xbrlConcept": "syn:ProfitNci"
+              }
+            },
+            {
+              "value": 0,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q2 25",
+                "period": "Q2 25",
+                "page": 10,
+                "xbrlConcept": "syn:ProfitNci"
+              }
+            },
+            {
+              "value": 0,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q3 25",
+                "period": "Q3 25",
+                "page": 10,
+                "xbrlConcept": "syn:ProfitNci"
+              }
+            },
+            {
+              "value": 0,
+              "kind": "sourced",
+              "source": {
+                "issuer": "Example Cement Co (SYNTHETIC)",
+                "document": "SYNTHETIC interim financial statements Q4 25",
+                "period": "Q4 25",
+                "page": 10,
+                "xbrlConcept": "syn:ProfitNci"
+              }
+            },
+            {
+              "value": 0,
+              "kind": "formula",
+              "formula": "=SUM(reported!G13:J13)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Forecast period: nothing is reported yet (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Forecast period: nothing is reported yet (SYNTHETIC)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "model",
+      "rows": [
+        {
+          "id": "vol_sold",
+          "label": "Cement sales volume",
+          "unit": "Mt",
+          "cells": [
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Sales volume is not disclosed in the statements or in an operating update (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Sales volume is not disclosed in the statements or in an operating update (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Sales volume is not disclosed in the statements or in an operating update (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Sales volume is not disclosed in the statements or in an operating update (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Sales volume is not disclosed in the statements or in an operating update (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Sales volume is not disclosed in the statements or in an operating update (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Sales volume is not disclosed in the statements or in an operating update (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Sales volume is not disclosed in the statements or in an operating update (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Sales volume is not disclosed in the statements or in an operating update (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            }
+          ]
+        },
+        {
+          "id": "price",
+          "label": "Realised price per tonne",
+          "unit": "Rp thousand per tonne",
+          "cells": [
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Sales volume is not disclosed in the statements or in an operating update (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Sales volume is not disclosed in the statements or in an operating update (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Sales volume is not disclosed in the statements or in an operating update (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Sales volume is not disclosed in the statements or in an operating update (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Sales volume is not disclosed in the statements or in an operating update (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Sales volume is not disclosed in the statements or in an operating update (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Sales volume is not disclosed in the statements or in an operating update (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Sales volume is not disclosed in the statements or in an operating update (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Sales volume is not disclosed in the statements or in an operating update (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            }
+          ]
+        },
+        {
+          "id": "revenue",
+          "label": "Revenue",
+          "unit": "Rp bn",
+          "style": "total",
+          "cells": [
+            {
+              "value": 1000,
+              "kind": "formula",
+              "formula": "=reported!C2"
+            },
+            {
+              "value": 1050,
+              "kind": "formula",
+              "formula": "=reported!D2"
+            },
+            {
+              "value": 1100,
+              "kind": "formula",
+              "formula": "=reported!E2"
+            },
+            {
+              "value": 1200,
+              "kind": "formula",
+              "formula": "=reported!F2"
+            },
+            {
+              "value": 1000,
+              "kind": "formula",
+              "formula": "=reported!G2"
+            },
+            {
+              "value": 1050,
+              "kind": "formula",
+              "formula": "=reported!H2"
+            },
+            {
+              "value": 1150,
+              "kind": "formula",
+              "formula": "=reported!I2"
+            },
+            {
+              "value": 1300,
+              "kind": "formula",
+              "formula": "=reported!J2"
+            },
+            {
+              "value": 4500,
+              "kind": "formula",
+              "formula": "=SUM(model!G4:J4)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            }
+          ]
+        },
+        {
+          "id": "clinker",
+          "label": "Clinker produced",
+          "unit": "Mt",
+          "cells": [
+            {
+              "value": 0.8,
+              "kind": "formula",
+              "formula": "=reported!C4"
+            },
+            {
+              "value": 0.85,
+              "kind": "formula",
+              "formula": "=reported!D4"
+            },
+            {
+              "value": 0.9,
+              "kind": "formula",
+              "formula": "=reported!E4"
+            },
+            {
+              "value": 1,
+              "kind": "formula",
+              "formula": "=reported!F4"
+            },
+            {
+              "value": 0.8,
+              "kind": "formula",
+              "formula": "=reported!G4"
+            },
+            {
+              "value": 0.85,
+              "kind": "formula",
+              "formula": "=reported!H4"
+            },
+            {
+              "value": 0.95,
+              "kind": "formula",
+              "formula": "=reported!I4"
+            },
+            {
+              "value": 1.05,
+              "kind": "formula",
+              "formula": "=reported!J4"
+            },
+            {
+              "value": 3.6499999999999995,
+              "kind": "formula",
+              "formula": "=SUM(model!G5:J5)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            }
+          ]
+        },
+        {
+          "id": "clinker_factor",
+          "label": "Clinker per tonne of cement",
+          "unit": "tonnes of clinker per tonne",
+          "cells": [
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Sales volume is not disclosed in the statements or in an operating update (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Sales volume is not disclosed in the statements or in an operating update (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Sales volume is not disclosed in the statements or in an operating update (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Sales volume is not disclosed in the statements or in an operating update (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Sales volume is not disclosed in the statements or in an operating update (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Sales volume is not disclosed in the statements or in an operating update (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Sales volume is not disclosed in the statements or in an operating update (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Sales volume is not disclosed in the statements or in an operating update (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Sales volume is not disclosed in the statements or in an operating update (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            }
+          ]
+        },
+        {
+          "id": "fuel_per_clinker",
+          "label": "Kiln fuel per tonne of clinker",
+          "unit": "Rp thousand per tonne of clinker",
+          "cells": [
+            {
+              "value": 212.5,
+              "kind": "formula",
+              "formula": "=model!C8/model!C5"
+            },
+            {
+              "value": 211.76470588235296,
+              "kind": "formula",
+              "formula": "=model!D8/model!D5"
+            },
+            {
+              "value": 211.11111111111111,
+              "kind": "formula",
+              "formula": "=model!E8/model!E5"
+            },
+            {
+              "value": 210,
+              "kind": "formula",
+              "formula": "=model!F8/model!F5"
+            },
+            {
+              "value": 212.5,
+              "kind": "formula",
+              "formula": "=model!G8/model!G5"
+            },
+            {
+              "value": 211.76470588235296,
+              "kind": "formula",
+              "formula": "=model!H8/model!H5"
+            },
+            {
+              "value": 210.5263157894737,
+              "kind": "formula",
+              "formula": "=model!I8/model!I5"
+            },
+            {
+              "value": 209.52380952380952,
+              "kind": "formula",
+              "formula": "=model!J8/model!J5"
+            },
+            {
+              "value": 210.95890410958907,
+              "kind": "formula",
+              "formula": "=model!K8/model!K5"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            }
+          ]
+        },
+        {
+          "id": "cor_fuel",
+          "label": "Kiln fuel",
+          "unit": "Rp bn",
+          "cells": [
+            {
+              "value": 170,
+              "kind": "formula",
+              "formula": "=reported!C5"
+            },
+            {
+              "value": 180,
+              "kind": "formula",
+              "formula": "=reported!D5"
+            },
+            {
+              "value": 190,
+              "kind": "formula",
+              "formula": "=reported!E5"
+            },
+            {
+              "value": 210,
+              "kind": "formula",
+              "formula": "=reported!F5"
+            },
+            {
+              "value": 170,
+              "kind": "formula",
+              "formula": "=reported!G5"
+            },
+            {
+              "value": 180,
+              "kind": "formula",
+              "formula": "=reported!H5"
+            },
+            {
+              "value": 200,
+              "kind": "formula",
+              "formula": "=reported!I5"
+            },
+            {
+              "value": 220,
+              "kind": "formula",
+              "formula": "=reported!J5"
+            },
+            {
+              "value": 770,
+              "kind": "formula",
+              "formula": "=SUM(model!G8:J8)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            }
+          ]
+        },
+        {
+          "id": "power_per_t",
+          "label": "Electricity per tonne",
+          "unit": "Rp thousand per tonne",
+          "cells": [
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Sales volume is not disclosed in the statements or in an operating update (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Sales volume is not disclosed in the statements or in an operating update (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Sales volume is not disclosed in the statements or in an operating update (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Sales volume is not disclosed in the statements or in an operating update (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Sales volume is not disclosed in the statements or in an operating update (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Sales volume is not disclosed in the statements or in an operating update (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Sales volume is not disclosed in the statements or in an operating update (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Sales volume is not disclosed in the statements or in an operating update (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Sales volume is not disclosed in the statements or in an operating update (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            }
+          ]
+        },
+        {
+          "id": "cor_power",
+          "label": "Electricity",
+          "unit": "Rp bn",
+          "cells": [
+            {
+              "value": 110,
+              "kind": "formula",
+              "formula": "=reported!C6"
+            },
+            {
+              "value": 115,
+              "kind": "formula",
+              "formula": "=reported!D6"
+            },
+            {
+              "value": 120,
+              "kind": "formula",
+              "formula": "=reported!E6"
+            },
+            {
+              "value": 130,
+              "kind": "formula",
+              "formula": "=reported!F6"
+            },
+            {
+              "value": 110,
+              "kind": "formula",
+              "formula": "=reported!G6"
+            },
+            {
+              "value": 115,
+              "kind": "formula",
+              "formula": "=reported!H6"
+            },
+            {
+              "value": 125,
+              "kind": "formula",
+              "formula": "=reported!I6"
+            },
+            {
+              "value": 140,
+              "kind": "formula",
+              "formula": "=reported!J6"
+            },
+            {
+              "value": 490,
+              "kind": "formula",
+              "formula": "=SUM(model!G10:J10)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            }
+          ]
+        },
+        {
+          "id": "raw_per_clinker",
+          "label": "Raw materials per tonne of clinker",
+          "unit": "Rp thousand per tonne of clinker",
+          "cells": [
+            {
+              "value": 125,
+              "kind": "formula",
+              "formula": "=model!C12/model!C5"
+            },
+            {
+              "value": 123.52941176470588,
+              "kind": "formula",
+              "formula": "=model!D12/model!D5"
+            },
+            {
+              "value": 122.22222222222221,
+              "kind": "formula",
+              "formula": "=model!E12/model!E5"
+            },
+            {
+              "value": 120,
+              "kind": "formula",
+              "formula": "=model!F12/model!F5"
+            },
+            {
+              "value": 125,
+              "kind": "formula",
+              "formula": "=model!G12/model!G5"
+            },
+            {
+              "value": 123.52941176470588,
+              "kind": "formula",
+              "formula": "=model!H12/model!H5"
+            },
+            {
+              "value": 121.05263157894737,
+              "kind": "formula",
+              "formula": "=model!I12/model!I5"
+            },
+            {
+              "value": 119.04761904761904,
+              "kind": "formula",
+              "formula": "=model!J12/model!J5"
+            },
+            {
+              "value": 121.9178082191781,
+              "kind": "formula",
+              "formula": "=model!K12/model!K5"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            }
+          ]
+        },
+        {
+          "id": "cor_raw",
+          "label": "Raw materials",
+          "unit": "Rp bn",
+          "cells": [
+            {
+              "value": 100,
+              "kind": "formula",
+              "formula": "=reported!C7"
+            },
+            {
+              "value": 105,
+              "kind": "formula",
+              "formula": "=reported!D7"
+            },
+            {
+              "value": 110,
+              "kind": "formula",
+              "formula": "=reported!E7"
+            },
+            {
+              "value": 120,
+              "kind": "formula",
+              "formula": "=reported!F7"
+            },
+            {
+              "value": 100,
+              "kind": "formula",
+              "formula": "=reported!G7"
+            },
+            {
+              "value": 105,
+              "kind": "formula",
+              "formula": "=reported!H7"
+            },
+            {
+              "value": 115,
+              "kind": "formula",
+              "formula": "=reported!I7"
+            },
+            {
+              "value": 125,
+              "kind": "formula",
+              "formula": "=reported!J7"
+            },
+            {
+              "value": 445,
+              "kind": "formula",
+              "formula": "=SUM(model!G12:J12)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            }
+          ]
+        },
+        {
+          "id": "packaging_per_t",
+          "label": "Packaging per tonne",
+          "unit": "Rp thousand per tonne",
+          "cells": [
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Sales volume is not disclosed in the statements or in an operating update (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Sales volume is not disclosed in the statements or in an operating update (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Sales volume is not disclosed in the statements or in an operating update (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Sales volume is not disclosed in the statements or in an operating update (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Sales volume is not disclosed in the statements or in an operating update (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Sales volume is not disclosed in the statements or in an operating update (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Sales volume is not disclosed in the statements or in an operating update (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Sales volume is not disclosed in the statements or in an operating update (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Sales volume is not disclosed in the statements or in an operating update (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            }
+          ]
+        },
+        {
+          "id": "cor_packaging",
+          "label": "Packaging",
+          "unit": "Rp bn",
+          "cells": [
+            {
+              "value": 45,
+              "kind": "formula",
+              "formula": "=reported!C8"
+            },
+            {
+              "value": 47,
+              "kind": "formula",
+              "formula": "=reported!D8"
+            },
+            {
+              "value": 50,
+              "kind": "formula",
+              "formula": "=reported!E8"
+            },
+            {
+              "value": 54,
+              "kind": "formula",
+              "formula": "=reported!F8"
+            },
+            {
+              "value": 45,
+              "kind": "formula",
+              "formula": "=reported!G8"
+            },
+            {
+              "value": 47,
+              "kind": "formula",
+              "formula": "=reported!H8"
+            },
+            {
+              "value": 52,
+              "kind": "formula",
+              "formula": "=reported!I8"
+            },
+            {
+              "value": 58,
+              "kind": "formula",
+              "formula": "=reported!J8"
+            },
+            {
+              "value": 202,
+              "kind": "formula",
+              "formula": "=SUM(model!G14:J14)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            }
+          ]
+        },
+        {
+          "id": "cor_other",
+          "label": "Other cost of revenue, not split in the note",
+          "unit": "Rp bn",
+          "cells": [
+            {
+              "value": 100,
+              "kind": "formula",
+              "formula": "=reported!C9-model!C8-model!C10-model!C12-model!C14"
+            },
+            {
+              "value": 100,
+              "kind": "formula",
+              "formula": "=reported!D9-model!D8-model!D10-model!D12-model!D14"
+            },
+            {
+              "value": 105,
+              "kind": "formula",
+              "formula": "=reported!E9-model!E8-model!E10-model!E12-model!E14"
+            },
+            {
+              "value": 105,
+              "kind": "formula",
+              "formula": "=reported!F9-model!F8-model!F10-model!F12-model!F14"
+            },
+            {
+              "value": 100,
+              "kind": "formula",
+              "formula": "=reported!G9-model!G8-model!G10-model!G12-model!G14"
+            },
+            {
+              "value": 100,
+              "kind": "formula",
+              "formula": "=reported!H9-model!H8-model!H10-model!H12-model!H14"
+            },
+            {
+              "value": 105,
+              "kind": "formula",
+              "formula": "=reported!I9-model!I8-model!I10-model!I12-model!I14"
+            },
+            {
+              "value": 110,
+              "kind": "formula",
+              "formula": "=reported!J9-model!J8-model!J10-model!J12-model!J14"
+            },
+            {
+              "value": 415,
+              "kind": "formula",
+              "formula": "=SUM(model!G15:J15)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            }
+          ]
+        },
+        {
+          "id": "cor_total",
+          "label": "Cost of revenue",
+          "unit": "Rp bn",
+          "style": "total",
+          "cells": [
+            {
+              "value": 525,
+              "kind": "formula",
+              "formula": "=model!C8+model!C10+model!C12+model!C14+model!C15"
+            },
+            {
+              "value": 547,
+              "kind": "formula",
+              "formula": "=model!D8+model!D10+model!D12+model!D14+model!D15"
+            },
+            {
+              "value": 575,
+              "kind": "formula",
+              "formula": "=model!E8+model!E10+model!E12+model!E14+model!E15"
+            },
+            {
+              "value": 619,
+              "kind": "formula",
+              "formula": "=model!F8+model!F10+model!F12+model!F14+model!F15"
+            },
+            {
+              "value": 525,
+              "kind": "formula",
+              "formula": "=model!G8+model!G10+model!G12+model!G14+model!G15"
+            },
+            {
+              "value": 547,
+              "kind": "formula",
+              "formula": "=model!H8+model!H10+model!H12+model!H14+model!H15"
+            },
+            {
+              "value": 597,
+              "kind": "formula",
+              "formula": "=model!I8+model!I10+model!I12+model!I14+model!I15"
+            },
+            {
+              "value": 653,
+              "kind": "formula",
+              "formula": "=model!J8+model!J10+model!J12+model!J14+model!J15"
+            },
+            {
+              "value": 2322,
+              "kind": "formula",
+              "formula": "=model!K8+model!K10+model!K12+model!K14+model!K15"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            }
+          ]
+        },
+        {
+          "id": "cor_per_t",
+          "label": "Cost of revenue per tonne",
+          "unit": "Rp thousand per tonne",
+          "cells": [
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Sales volume is not disclosed in the statements or in an operating update (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Sales volume is not disclosed in the statements or in an operating update (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Sales volume is not disclosed in the statements or in an operating update (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Sales volume is not disclosed in the statements or in an operating update (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Sales volume is not disclosed in the statements or in an operating update (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Sales volume is not disclosed in the statements or in an operating update (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Sales volume is not disclosed in the statements or in an operating update (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Sales volume is not disclosed in the statements or in an operating update (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "Sales volume is not disclosed in the statements or in an operating update (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            }
+          ]
+        },
+        {
+          "id": "gross_profit",
+          "label": "Gross profit",
+          "unit": "Rp bn",
+          "style": "total",
+          "cells": [
+            {
+              "value": 475,
+              "kind": "formula",
+              "formula": "=model!C4-model!C16"
+            },
+            {
+              "value": 503,
+              "kind": "formula",
+              "formula": "=model!D4-model!D16"
+            },
+            {
+              "value": 525,
+              "kind": "formula",
+              "formula": "=model!E4-model!E16"
+            },
+            {
+              "value": 581,
+              "kind": "formula",
+              "formula": "=model!F4-model!F16"
+            },
+            {
+              "value": 475,
+              "kind": "formula",
+              "formula": "=model!G4-model!G16"
+            },
+            {
+              "value": 503,
+              "kind": "formula",
+              "formula": "=model!H4-model!H16"
+            },
+            {
+              "value": 553,
+              "kind": "formula",
+              "formula": "=model!I4-model!I16"
+            },
+            {
+              "value": 647,
+              "kind": "formula",
+              "formula": "=model!J4-model!J16"
+            },
+            {
+              "value": 2178,
+              "kind": "formula",
+              "formula": "=model!K4-model!K16"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            }
+          ]
+        },
+        {
+          "id": "gross_margin",
+          "label": "Gross margin",
+          "unit": "%",
+          "style": "ratio",
+          "cells": [
+            {
+              "value": 0.475,
+              "kind": "formula",
+              "formula": "=model!C18/model!C4"
+            },
+            {
+              "value": 0.47904761904761906,
+              "kind": "formula",
+              "formula": "=model!D18/model!D4"
+            },
+            {
+              "value": 0.4772727272727273,
+              "kind": "formula",
+              "formula": "=model!E18/model!E4"
+            },
+            {
+              "value": 0.4841666666666667,
+              "kind": "formula",
+              "formula": "=model!F18/model!F4"
+            },
+            {
+              "value": 0.475,
+              "kind": "formula",
+              "formula": "=model!G18/model!G4"
+            },
+            {
+              "value": 0.47904761904761906,
+              "kind": "formula",
+              "formula": "=model!H18/model!H4"
+            },
+            {
+              "value": 0.4808695652173913,
+              "kind": "formula",
+              "formula": "=model!I18/model!I4"
+            },
+            {
+              "value": 0.4976923076923077,
+              "kind": "formula",
+              "formula": "=model!J18/model!J4"
+            },
+            {
+              "value": 0.484,
+              "kind": "formula",
+              "formula": "=model!K18/model!K4"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            }
+          ]
+        },
+        {
+          "id": "sga",
+          "label": "Selling, general and administrative expenses",
+          "unit": "Rp bn",
+          "cells": [
+            {
+              "value": 90,
+              "kind": "formula",
+              "formula": "=reported!C10"
+            },
+            {
+              "value": 90,
+              "kind": "formula",
+              "formula": "=reported!D10"
+            },
+            {
+              "value": 95,
+              "kind": "formula",
+              "formula": "=reported!E10"
+            },
+            {
+              "value": 95,
+              "kind": "formula",
+              "formula": "=reported!F10"
+            },
+            {
+              "value": 90,
+              "kind": "formula",
+              "formula": "=reported!G10"
+            },
+            {
+              "value": 92,
+              "kind": "formula",
+              "formula": "=reported!H10"
+            },
+            {
+              "value": 95,
+              "kind": "formula",
+              "formula": "=reported!I10"
+            },
+            {
+              "value": 100,
+              "kind": "formula",
+              "formula": "=reported!J10"
+            },
+            {
+              "value": 377,
+              "kind": "formula",
+              "formula": "=SUM(model!G20:J20)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            }
+          ]
+        },
+        {
+          "id": "operating_profit",
+          "label": "Operating profit",
+          "unit": "Rp bn",
+          "style": "total",
+          "cells": [
+            {
+              "value": 385,
+              "kind": "formula",
+              "formula": "=model!C18-model!C20"
+            },
+            {
+              "value": 413,
+              "kind": "formula",
+              "formula": "=model!D18-model!D20"
+            },
+            {
+              "value": 430,
+              "kind": "formula",
+              "formula": "=model!E18-model!E20"
+            },
+            {
+              "value": 486,
+              "kind": "formula",
+              "formula": "=model!F18-model!F20"
+            },
+            {
+              "value": 385,
+              "kind": "formula",
+              "formula": "=model!G18-model!G20"
+            },
+            {
+              "value": 411,
+              "kind": "formula",
+              "formula": "=model!H18-model!H20"
+            },
+            {
+              "value": 458,
+              "kind": "formula",
+              "formula": "=model!I18-model!I20"
+            },
+            {
+              "value": 547,
+              "kind": "formula",
+              "formula": "=model!J18-model!J20"
+            },
+            {
+              "value": 1801,
+              "kind": "formula",
+              "formula": "=model!K18-model!K20"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            }
+          ]
+        },
+        {
+          "id": "other_net",
+          "label": "Finance and other items, net",
+          "unit": "Rp bn",
+          "cells": [
+            {
+              "value": -20,
+              "kind": "formula",
+              "formula": "=reported!C11"
+            },
+            {
+              "value": -20,
+              "kind": "formula",
+              "formula": "=reported!D11"
+            },
+            {
+              "value": -20,
+              "kind": "formula",
+              "formula": "=reported!E11"
+            },
+            {
+              "value": -20,
+              "kind": "formula",
+              "formula": "=reported!F11"
+            },
+            {
+              "value": -20,
+              "kind": "formula",
+              "formula": "=reported!G11"
+            },
+            {
+              "value": -20,
+              "kind": "formula",
+              "formula": "=reported!H11"
+            },
+            {
+              "value": -20,
+              "kind": "formula",
+              "formula": "=reported!I11"
+            },
+            {
+              "value": -20,
+              "kind": "formula",
+              "formula": "=reported!J11"
+            },
+            {
+              "value": -80,
+              "kind": "formula",
+              "formula": "=SUM(model!G22:J22)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            }
+          ]
+        },
+        {
+          "id": "profit_before_tax",
+          "label": "Profit before tax",
+          "unit": "Rp bn",
+          "style": "total",
+          "cells": [
+            {
+              "value": 365,
+              "kind": "formula",
+              "formula": "=model!C21+model!C22"
+            },
+            {
+              "value": 393,
+              "kind": "formula",
+              "formula": "=model!D21+model!D22"
+            },
+            {
+              "value": 410,
+              "kind": "formula",
+              "formula": "=model!E21+model!E22"
+            },
+            {
+              "value": 466,
+              "kind": "formula",
+              "formula": "=model!F21+model!F22"
+            },
+            {
+              "value": 365,
+              "kind": "formula",
+              "formula": "=model!G21+model!G22"
+            },
+            {
+              "value": 391,
+              "kind": "formula",
+              "formula": "=model!H21+model!H22"
+            },
+            {
+              "value": 438,
+              "kind": "formula",
+              "formula": "=model!I21+model!I22"
+            },
+            {
+              "value": 527,
+              "kind": "formula",
+              "formula": "=model!J21+model!J22"
+            },
+            {
+              "value": 1721,
+              "kind": "formula",
+              "formula": "=model!K21+model!K22"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            }
+          ]
+        },
+        {
+          "id": "tax",
+          "label": "Income tax expense",
+          "unit": "Rp bn",
+          "cells": [
+            {
+              "value": 80,
+              "kind": "formula",
+              "formula": "=reported!C12"
+            },
+            {
+              "value": 86,
+              "kind": "formula",
+              "formula": "=reported!D12"
+            },
+            {
+              "value": 90,
+              "kind": "formula",
+              "formula": "=reported!E12"
+            },
+            {
+              "value": 103,
+              "kind": "formula",
+              "formula": "=reported!F12"
+            },
+            {
+              "value": 80,
+              "kind": "formula",
+              "formula": "=reported!G12"
+            },
+            {
+              "value": 86,
+              "kind": "formula",
+              "formula": "=reported!H12"
+            },
+            {
+              "value": 96,
+              "kind": "formula",
+              "formula": "=reported!I12"
+            },
+            {
+              "value": 116,
+              "kind": "formula",
+              "formula": "=reported!J12"
+            },
+            {
+              "value": 378,
+              "kind": "formula",
+              "formula": "=SUM(model!G24:J24)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            }
+          ]
+        },
+        {
+          "id": "net_profit",
+          "label": "Profit for the period",
+          "unit": "Rp bn",
+          "style": "total",
+          "cells": [
+            {
+              "value": 285,
+              "kind": "formula",
+              "formula": "=model!C23-model!C24"
+            },
+            {
+              "value": 307,
+              "kind": "formula",
+              "formula": "=model!D23-model!D24"
+            },
+            {
+              "value": 320,
+              "kind": "formula",
+              "formula": "=model!E23-model!E24"
+            },
+            {
+              "value": 363,
+              "kind": "formula",
+              "formula": "=model!F23-model!F24"
+            },
+            {
+              "value": 285,
+              "kind": "formula",
+              "formula": "=model!G23-model!G24"
+            },
+            {
+              "value": 305,
+              "kind": "formula",
+              "formula": "=model!H23-model!H24"
+            },
+            {
+              "value": 342,
+              "kind": "formula",
+              "formula": "=model!I23-model!I24"
+            },
+            {
+              "value": 411,
+              "kind": "formula",
+              "formula": "=model!J23-model!J24"
+            },
+            {
+              "value": 1343,
+              "kind": "formula",
+              "formula": "=model!K23-model!K24"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            }
+          ]
+        },
+        {
+          "id": "nci",
+          "label": "Non-controlling interests",
+          "unit": "Rp bn",
+          "cells": [
+            {
+              "value": 0,
+              "kind": "formula",
+              "formula": "=reported!C13"
+            },
+            {
+              "value": 0,
+              "kind": "formula",
+              "formula": "=reported!D13"
+            },
+            {
+              "value": 0,
+              "kind": "formula",
+              "formula": "=reported!E13"
+            },
+            {
+              "value": 0,
+              "kind": "formula",
+              "formula": "=reported!F13"
+            },
+            {
+              "value": 0,
+              "kind": "formula",
+              "formula": "=reported!G13"
+            },
+            {
+              "value": 0,
+              "kind": "formula",
+              "formula": "=reported!H13"
+            },
+            {
+              "value": 0,
+              "kind": "formula",
+              "formula": "=reported!I13"
+            },
+            {
+              "value": 0,
+              "kind": "formula",
+              "formula": "=reported!J13"
+            },
+            {
+              "value": 0,
+              "kind": "formula",
+              "formula": "=SUM(model!G26:J26)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            }
+          ]
+        },
+        {
+          "id": "owners_profit",
+          "label": "Profit attributable to owners",
+          "unit": "Rp bn",
+          "style": "total",
+          "cells": [
+            {
+              "value": 285,
+              "kind": "formula",
+              "formula": "=model!C25-model!C26"
+            },
+            {
+              "value": 307,
+              "kind": "formula",
+              "formula": "=model!D25-model!D26"
+            },
+            {
+              "value": 320,
+              "kind": "formula",
+              "formula": "=model!E25-model!E26"
+            },
+            {
+              "value": 363,
+              "kind": "formula",
+              "formula": "=model!F25-model!F26"
+            },
+            {
+              "value": 285,
+              "kind": "formula",
+              "formula": "=model!G25-model!G26"
+            },
+            {
+              "value": 305,
+              "kind": "formula",
+              "formula": "=model!H25-model!H26"
+            },
+            {
+              "value": 342,
+              "kind": "formula",
+              "formula": "=model!I25-model!I26"
+            },
+            {
+              "value": 411,
+              "kind": "formula",
+              "formula": "=model!J25-model!J26"
+            },
+            {
+              "value": 1343,
+              "kind": "formula",
+              "formula": "=model!K25-model!K26"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "assumptions",
+      "rows": [
+        {
+          "id": "vol_sold",
+          "label": "Cement sales volume",
+          "unit": "Mt",
+          "cells": [
+            {
+              "value": null,
+              "kind": "formula",
+              "formula": "=model!C2"
+            },
+            {
+              "value": null,
+              "kind": "formula",
+              "formula": "=model!D2"
+            },
+            {
+              "value": null,
+              "kind": "formula",
+              "formula": "=model!E2"
+            },
+            {
+              "value": null,
+              "kind": "formula",
+              "formula": "=model!F2"
+            },
+            {
+              "value": null,
+              "kind": "formula",
+              "formula": "=model!G2"
+            },
+            {
+              "value": null,
+              "kind": "formula",
+              "formula": "=model!H2"
+            },
+            {
+              "value": null,
+              "kind": "formula",
+              "formula": "=model!I2"
+            },
+            {
+              "value": null,
+              "kind": "formula",
+              "formula": "=model!J2"
+            },
+            {
+              "value": null,
+              "kind": "formula",
+              "formula": "=model!K2"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            }
+          ]
+        },
+        {
+          "id": "price",
+          "label": "Realised price per tonne",
+          "unit": "Rp thousand per tonne",
+          "cells": [
+            {
+              "value": null,
+              "kind": "formula",
+              "formula": "=model!C3"
+            },
+            {
+              "value": null,
+              "kind": "formula",
+              "formula": "=model!D3"
+            },
+            {
+              "value": null,
+              "kind": "formula",
+              "formula": "=model!E3"
+            },
+            {
+              "value": null,
+              "kind": "formula",
+              "formula": "=model!F3"
+            },
+            {
+              "value": null,
+              "kind": "formula",
+              "formula": "=model!G3"
+            },
+            {
+              "value": null,
+              "kind": "formula",
+              "formula": "=model!H3"
+            },
+            {
+              "value": null,
+              "kind": "formula",
+              "formula": "=model!I3"
+            },
+            {
+              "value": null,
+              "kind": "formula",
+              "formula": "=model!J3"
+            },
+            {
+              "value": null,
+              "kind": "formula",
+              "formula": "=model!K3"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            }
+          ]
+        },
+        {
+          "id": "clinker_factor",
+          "label": "Clinker per tonne of cement",
+          "unit": "tonnes of clinker per tonne",
+          "cells": [
+            {
+              "value": null,
+              "kind": "formula",
+              "formula": "=model!C6"
+            },
+            {
+              "value": null,
+              "kind": "formula",
+              "formula": "=model!D6"
+            },
+            {
+              "value": null,
+              "kind": "formula",
+              "formula": "=model!E6"
+            },
+            {
+              "value": null,
+              "kind": "formula",
+              "formula": "=model!F6"
+            },
+            {
+              "value": null,
+              "kind": "formula",
+              "formula": "=model!G6"
+            },
+            {
+              "value": null,
+              "kind": "formula",
+              "formula": "=model!H6"
+            },
+            {
+              "value": null,
+              "kind": "formula",
+              "formula": "=model!I6"
+            },
+            {
+              "value": null,
+              "kind": "formula",
+              "formula": "=model!J6"
+            },
+            {
+              "value": null,
+              "kind": "formula",
+              "formula": "=model!K6"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            }
+          ]
+        },
+        {
+          "id": "fuel_per_clinker",
+          "label": "Kiln fuel per tonne of clinker",
+          "unit": "Rp thousand per tonne of clinker",
+          "cells": [
+            {
+              "value": 212.5,
+              "kind": "formula",
+              "formula": "=model!C7"
+            },
+            {
+              "value": 211.76470588235296,
+              "kind": "formula",
+              "formula": "=model!D7"
+            },
+            {
+              "value": 211.11111111111111,
+              "kind": "formula",
+              "formula": "=model!E7"
+            },
+            {
+              "value": 210,
+              "kind": "formula",
+              "formula": "=model!F7"
+            },
+            {
+              "value": 212.5,
+              "kind": "formula",
+              "formula": "=model!G7"
+            },
+            {
+              "value": 211.76470588235296,
+              "kind": "formula",
+              "formula": "=model!H7"
+            },
+            {
+              "value": 210.5263157894737,
+              "kind": "formula",
+              "formula": "=model!I7"
+            },
+            {
+              "value": 209.52380952380952,
+              "kind": "formula",
+              "formula": "=model!J7"
+            },
+            {
+              "value": 210.95890410958907,
+              "kind": "formula",
+              "formula": "=model!K7"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            }
+          ]
+        },
+        {
+          "id": "power_per_t",
+          "label": "Electricity per tonne",
+          "unit": "Rp thousand per tonne",
+          "cells": [
+            {
+              "value": null,
+              "kind": "formula",
+              "formula": "=model!C9"
+            },
+            {
+              "value": null,
+              "kind": "formula",
+              "formula": "=model!D9"
+            },
+            {
+              "value": null,
+              "kind": "formula",
+              "formula": "=model!E9"
+            },
+            {
+              "value": null,
+              "kind": "formula",
+              "formula": "=model!F9"
+            },
+            {
+              "value": null,
+              "kind": "formula",
+              "formula": "=model!G9"
+            },
+            {
+              "value": null,
+              "kind": "formula",
+              "formula": "=model!H9"
+            },
+            {
+              "value": null,
+              "kind": "formula",
+              "formula": "=model!I9"
+            },
+            {
+              "value": null,
+              "kind": "formula",
+              "formula": "=model!J9"
+            },
+            {
+              "value": null,
+              "kind": "formula",
+              "formula": "=model!K9"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            }
+          ]
+        },
+        {
+          "id": "raw_per_clinker",
+          "label": "Raw materials per tonne of clinker",
+          "unit": "Rp thousand per tonne of clinker",
+          "cells": [
+            {
+              "value": 125,
+              "kind": "formula",
+              "formula": "=model!C11"
+            },
+            {
+              "value": 123.52941176470588,
+              "kind": "formula",
+              "formula": "=model!D11"
+            },
+            {
+              "value": 122.22222222222221,
+              "kind": "formula",
+              "formula": "=model!E11"
+            },
+            {
+              "value": 120,
+              "kind": "formula",
+              "formula": "=model!F11"
+            },
+            {
+              "value": 125,
+              "kind": "formula",
+              "formula": "=model!G11"
+            },
+            {
+              "value": 123.52941176470588,
+              "kind": "formula",
+              "formula": "=model!H11"
+            },
+            {
+              "value": 121.05263157894737,
+              "kind": "formula",
+              "formula": "=model!I11"
+            },
+            {
+              "value": 119.04761904761904,
+              "kind": "formula",
+              "formula": "=model!J11"
+            },
+            {
+              "value": 121.9178082191781,
+              "kind": "formula",
+              "formula": "=model!K11"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            }
+          ]
+        },
+        {
+          "id": "packaging_per_t",
+          "label": "Packaging per tonne",
+          "unit": "Rp thousand per tonne",
+          "cells": [
+            {
+              "value": null,
+              "kind": "formula",
+              "formula": "=model!C13"
+            },
+            {
+              "value": null,
+              "kind": "formula",
+              "formula": "=model!D13"
+            },
+            {
+              "value": null,
+              "kind": "formula",
+              "formula": "=model!E13"
+            },
+            {
+              "value": null,
+              "kind": "formula",
+              "formula": "=model!F13"
+            },
+            {
+              "value": null,
+              "kind": "formula",
+              "formula": "=model!G13"
+            },
+            {
+              "value": null,
+              "kind": "formula",
+              "formula": "=model!H13"
+            },
+            {
+              "value": null,
+              "kind": "formula",
+              "formula": "=model!I13"
+            },
+            {
+              "value": null,
+              "kind": "formula",
+              "formula": "=model!J13"
+            },
+            {
+              "value": null,
+              "kind": "formula",
+              "formula": "=model!K13"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            }
+          ]
+        },
+        {
+          "id": "other_cor",
+          "label": "Other cost of revenue, not split",
+          "unit": "Rp bn per quarter",
+          "cells": [
+            {
+              "value": 100,
+              "kind": "formula",
+              "formula": "=model!C15"
+            },
+            {
+              "value": 100,
+              "kind": "formula",
+              "formula": "=model!D15"
+            },
+            {
+              "value": 105,
+              "kind": "formula",
+              "formula": "=model!E15"
+            },
+            {
+              "value": 105,
+              "kind": "formula",
+              "formula": "=model!F15"
+            },
+            {
+              "value": 100,
+              "kind": "formula",
+              "formula": "=model!G15"
+            },
+            {
+              "value": 100,
+              "kind": "formula",
+              "formula": "=model!H15"
+            },
+            {
+              "value": 105,
+              "kind": "formula",
+              "formula": "=model!I15"
+            },
+            {
+              "value": 110,
+              "kind": "formula",
+              "formula": "=model!J15"
+            },
+            {
+              "value": 415,
+              "kind": "formula",
+              "formula": "=model!K15"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            }
+          ]
+        },
+        {
+          "id": "sga",
+          "label": "Selling, general and administrative expenses",
+          "unit": "Rp bn per quarter",
+          "cells": [
+            {
+              "value": 90,
+              "kind": "formula",
+              "formula": "=model!C20"
+            },
+            {
+              "value": 90,
+              "kind": "formula",
+              "formula": "=model!D20"
+            },
+            {
+              "value": 95,
+              "kind": "formula",
+              "formula": "=model!E20"
+            },
+            {
+              "value": 95,
+              "kind": "formula",
+              "formula": "=model!F20"
+            },
+            {
+              "value": 90,
+              "kind": "formula",
+              "formula": "=model!G20"
+            },
+            {
+              "value": 92,
+              "kind": "formula",
+              "formula": "=model!H20"
+            },
+            {
+              "value": 95,
+              "kind": "formula",
+              "formula": "=model!I20"
+            },
+            {
+              "value": 100,
+              "kind": "formula",
+              "formula": "=model!J20"
+            },
+            {
+              "value": 377,
+              "kind": "formula",
+              "formula": "=model!K20"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            }
+          ]
+        },
+        {
+          "id": "other_net",
+          "label": "Finance and other items, net",
+          "unit": "Rp bn per quarter",
+          "cells": [
+            {
+              "value": -20,
+              "kind": "formula",
+              "formula": "=model!C22"
+            },
+            {
+              "value": -20,
+              "kind": "formula",
+              "formula": "=model!D22"
+            },
+            {
+              "value": -20,
+              "kind": "formula",
+              "formula": "=model!E22"
+            },
+            {
+              "value": -20,
+              "kind": "formula",
+              "formula": "=model!F22"
+            },
+            {
+              "value": -20,
+              "kind": "formula",
+              "formula": "=model!G22"
+            },
+            {
+              "value": -20,
+              "kind": "formula",
+              "formula": "=model!H22"
+            },
+            {
+              "value": -20,
+              "kind": "formula",
+              "formula": "=model!I22"
+            },
+            {
+              "value": -20,
+              "kind": "formula",
+              "formula": "=model!J22"
+            },
+            {
+              "value": -80,
+              "kind": "formula",
+              "formula": "=model!K22"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            }
+          ]
+        },
+        {
+          "id": "tax_rate",
+          "label": "Effective tax rate",
+          "unit": "% of profit before tax",
+          "style": "ratio",
+          "cells": [
+            {
+              "value": 0.2191780821917808,
+              "kind": "formula",
+              "formula": "=model!C24/model!C23"
+            },
+            {
+              "value": 0.21882951653944022,
+              "kind": "formula",
+              "formula": "=model!D24/model!D23"
+            },
+            {
+              "value": 0.21951219512195122,
+              "kind": "formula",
+              "formula": "=model!E24/model!E23"
+            },
+            {
+              "value": 0.22103004291845493,
+              "kind": "formula",
+              "formula": "=model!F24/model!F23"
+            },
+            {
+              "value": 0.2191780821917808,
+              "kind": "formula",
+              "formula": "=model!G24/model!G23"
+            },
+            {
+              "value": 0.21994884910485935,
+              "kind": "formula",
+              "formula": "=model!H24/model!H23"
+            },
+            {
+              "value": 0.2191780821917808,
+              "kind": "formula",
+              "formula": "=model!I24/model!I23"
+            },
+            {
+              "value": 0.22011385199240988,
+              "kind": "formula",
+              "formula": "=model!J24/model!J23"
+            },
+            {
+              "value": 0.21963974433468914,
+              "kind": "formula",
+              "formula": "=model!K24/model!K23"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            }
+          ]
+        },
+        {
+          "id": "nci_share",
+          "label": "Non-controlling interests",
+          "unit": "% of profit",
+          "style": "ratio",
+          "cells": [
+            {
+              "value": 0,
+              "kind": "formula",
+              "formula": "=model!C26/model!C25"
+            },
+            {
+              "value": 0,
+              "kind": "formula",
+              "formula": "=model!D26/model!D25"
+            },
+            {
+              "value": 0,
+              "kind": "formula",
+              "formula": "=model!E26/model!E25"
+            },
+            {
+              "value": 0,
+              "kind": "formula",
+              "formula": "=model!F26/model!F25"
+            },
+            {
+              "value": 0,
+              "kind": "formula",
+              "formula": "=model!G26/model!G25"
+            },
+            {
+              "value": 0,
+              "kind": "formula",
+              "formula": "=model!H26/model!H25"
+            },
+            {
+              "value": 0,
+              "kind": "formula",
+              "formula": "=model!I26/model!I25"
+            },
+            {
+              "value": 0,
+              "kind": "formula",
+              "formula": "=model!J26/model!J25"
+            },
+            {
+              "value": 0,
+              "kind": "formula",
+              "formula": "=model!K26/model!K25"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            },
+            {
+              "value": null,
+              "kind": "missing",
+              "note": "No forecast: without volumes the model cannot be run forward (SYNTHETIC)"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "driverTree": {
+    "nodes": [
+      {
+        "id": "revenue",
+        "label": "Revenue",
+        "rowRef": "model!revenue"
+      },
+      {
+        "id": "cor_total",
+        "label": "Cost of revenue",
+        "rowRef": "model!cor_total"
+      },
+      {
+        "id": "gross_profit",
+        "label": "Gross profit",
+        "rowRef": "model!gross_profit"
+      },
+      {
+        "id": "gross_margin",
+        "label": "Gross margin",
+        "rowRef": "model!gross_margin"
+      },
+      {
+        "id": "sga",
+        "label": "Selling, general and administrative",
+        "rowRef": "model!sga"
+      },
+      {
+        "id": "operating_profit",
+        "label": "Operating profit",
+        "rowRef": "model!operating_profit"
+      },
+      {
+        "id": "net_profit",
+        "label": "Profit for the period",
+        "rowRef": "model!net_profit"
+      },
+      {
+        "id": "owners_profit",
+        "label": "Profit to owners",
+        "rowRef": "model!owners_profit"
+      }
+    ],
+    "edges": [
+      {
+        "from": "revenue",
+        "to": "gross_profit"
+      },
+      {
+        "from": "cor_total",
+        "to": "gross_profit"
+      },
+      {
+        "from": "gross_profit",
+        "to": "gross_margin"
+      },
+      {
+        "from": "revenue",
+        "to": "gross_margin"
+      },
+      {
+        "from": "gross_profit",
+        "to": "operating_profit"
+      },
+      {
+        "from": "sga",
+        "to": "operating_profit"
+      },
+      {
+        "from": "operating_profit",
+        "to": "net_profit"
+      },
+      {
+        "from": "net_profit",
+        "to": "owners_profit"
+      }
+    ]
+  },
+  "unitEconomics": {
+    "unit": "tonne",
+    "basisLabel": "per tonne of cement sold",
+    "denominatorRowRef": "model!vol_sold",
+    "periods": [
+      "FY25"
+    ],
+    "lines": [
+      {
+        "id": "revenue",
+        "label": "Revenue",
+        "role": "revenue",
+        "rowRef": "model!revenue",
+        "driver": {
+          "description": "Realised price per tonne × tonnes sold",
+          "physicalUnit": "Rp thousand per tonne",
+          "inputRowRefs": [
+            "model!price",
+            "model!vol_sold"
+          ]
+        }
+      },
+      {
+        "id": "fuel",
+        "label": "Kiln fuel",
+        "role": "cost",
+        "rowRef": "model!cor_fuel",
+        "driver": {
+          "description": "Fuel per tonne of clinker × clinker produced",
+          "physicalUnit": "Rp thousand per tonne of clinker",
+          "inputRowRefs": [
+            "model!fuel_per_clinker",
+            "model!clinker"
+          ]
+        }
+      },
+      {
+        "id": "power",
+        "label": "Electricity",
+        "role": "cost",
+        "rowRef": "model!cor_power",
+        "driver": {
+          "description": "Power cost per tonne × tonnes sold",
+          "physicalUnit": "Rp thousand per tonne",
+          "inputRowRefs": [
+            "model!power_per_t",
+            "model!vol_sold"
+          ]
+        }
+      },
+      {
+        "id": "raw",
+        "label": "Raw materials",
+        "role": "cost",
+        "rowRef": "model!cor_raw",
+        "driver": {
+          "description": "Raw material cost per tonne of clinker × clinker produced",
+          "physicalUnit": "Rp thousand per tonne of clinker",
+          "inputRowRefs": [
+            "model!raw_per_clinker",
+            "model!clinker"
+          ]
+        }
+      },
+      {
+        "id": "packaging",
+        "label": "Packaging",
+        "role": "cost",
+        "rowRef": "model!cor_packaging",
+        "driver": {
+          "description": "Packaging per tonne × tonnes sold",
+          "physicalUnit": "Rp thousand per tonne",
+          "inputRowRefs": [
+            "model!packaging_per_t",
+            "model!vol_sold"
+          ]
+        }
+      },
+      {
+        "id": "other",
+        "label": "Not split in the note",
+        "role": "unsplit",
+        "rowRef": "model!cor_other",
+        "contains": [
+          "Depreciation of plant",
+          "Maintenance",
+          "Plant labour",
+          "Inventory movement"
+        ]
+      },
+      {
+        "id": "gross_profit",
+        "label": "Gross profit",
+        "role": "subtotal",
+        "rowRef": "model!gross_profit"
+      },
+      {
+        "id": "sga",
+        "label": "Selling, general and administrative",
+        "role": "cost",
+        "rowRef": "model!sga",
+        "driver": {
+          "description": "Head office, selling and distribution costs, mostly fixed per quarter",
+          "physicalUnit": "Rp bn per quarter",
+          "inputRowRefs": []
+        }
+      },
+      {
+        "id": "operating_profit",
+        "label": "Operating profit",
+        "role": "subtotal",
+        "rowRef": "model!operating_profit"
+      }
+    ]
+  },
+  "peerBand": [
+    {
+      "metric": "Realised price per tonne",
+      "unit": "Rp thousand per tonne",
+      "period": "FY25",
+      "rowRef": "model!price",
+      "value": null
+    },
+    {
+      "metric": "Cost of revenue per tonne",
+      "unit": "Rp thousand per tonne",
+      "period": "FY25",
+      "rowRef": "model!cor_per_t",
+      "value": null
+    },
+    {
+      "metric": "Gross margin",
+      "unit": "%",
+      "period": "FY25",
+      "rowRef": "model!gross_margin",
+      "value": 0.484
+    },
+    {
+      "metric": "Clinker per tonne of cement",
+      "unit": "tonnes of clinker per tonne",
+      "period": "FY25",
+      "rowRef": "model!clinker_factor",
+      "value": null
+    }
+  ],
+  "workpaper": {
+    "gates": [
+      {
+        "name": "Intake and tie-out",
+        "status": "passed"
+      },
+      {
+        "name": "Volumes",
+        "status": "failed",
+        "note": "SYNTHETIC: sales volume is not disclosed, so nothing can be worked per tonne."
+      },
+      {
+        "name": "Driver model",
+        "status": "not_run"
+      },
+      {
+        "name": "Partner review",
+        "status": "not_run"
+      }
+    ],
+    "preparedBy": "FS reverse-engineering suite (SYNTHETIC run)"
+  }
+}
