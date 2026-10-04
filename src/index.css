@@ -163,6 +163,23 @@
     --button-dark: 215 30% 13%;
     --button-dark-foreground: 0 0% 100%;
 
+    /* ── Finance in Action (brief v3.1 §6). New tokens for the roles the
+       site had none for; everything else in the section uses the tokens
+       above. Contrast measured with the WCAG 2.x formula and recorded in
+       docs/company-models/commit-0-report.md §4. Pairs that must be told
+       apart also differ in lightness: precedent L95 vs dependent L86, cost
+       bar L38 vs revenue bar (--primary) L17. */
+    --fia-sourced: 212 85% 33%;          /* sourced cell text, 8,00:1 on white */
+    --fia-assumption-bg: 142 55% 92%;    /* assumption cell fill */
+    --fia-assumption-fg: 145 70% 20%;    /* assumption text, 7,66:1 on its fill */
+    --fia-missing: 215 10% 36%;          /* missing cell text, 6,94:1 on white */
+    --fia-cost: 24 75% 38%;              /* named cost bar; white label 5,34:1 */
+    --fia-unsplit: 215 10% 55%;          /* hatch stroke of the unsplit bar */
+    --fia-precedent: 210 90% 95%;        /* feeds the selection, ▲ */
+    --fia-dependent: 28 95% 86%;         /* fed by the selection, ▼ */
+    --fia-changed: 48 100% 88%;          /* changed by an edit */
+    --fia-edited: 145 70% 24%;           /* edited cell outline, 2px */
+
     /* Sidebar */
     --sidebar-background: 215 28% 17%;
     --sidebar-foreground: 0 0% 95%;
@@ -204,6 +221,17 @@
     --border: 215 20% 22%;
     --input: 215 20% 22%;
     --ring: 142 71% 45%;
+
+    --fia-sourced: 212 90% 72%;
+    --fia-assumption-bg: 145 40% 18%;
+    --fia-assumption-fg: 142 60% 78%;
+    --fia-missing: 215 10% 66%;
+    --fia-cost: 24 80% 55%;
+    --fia-unsplit: 215 10% 55%;
+    --fia-precedent: 210 45% 22%;
+    --fia-dependent: 28 55% 32%;
+    --fia-changed: 48 60% 26%;
+    --fia-edited: 142 60% 55%;
   }
 }
 
@@ -565,4 +593,30 @@
   .longform-body table td {
     @apply border border-border px-3 py-2;
   }
+}
+
+/* ── Finance in Action (brief v3.1) ─────────────────────────────────────
+   The unsplit remainder is hatched as well as coloured (constraint 13), with
+   a dashed edge, so it never reads as one more named cost line. */
+.fia-hatch {
+  background-color: hsl(var(--background));
+  background-image: repeating-linear-gradient(
+    135deg,
+    hsl(var(--fia-unsplit)) 0 2px,
+    transparent 2px 7px
+  );
+  border: 2px dashed hsl(var(--fia-unsplit));
+}
+
+/* The only animation in the section (§5.6): a changed item flashes once. It
+   does not run at all under prefers-reduced-motion: reduce, because the
+   rule only exists inside no-preference. */
+@media (prefers-reduced-motion: no-preference) {
+  .fia-flash {
+    animation: fia-flash 900ms ease-out 1;
+  }
+}
+@keyframes fia-flash {
+  from { box-shadow: inset 0 0 0 999px hsl(var(--fia-changed)); }
+  to { box-shadow: inset 0 0 0 999px transparent; }
 }
