@@ -74,7 +74,9 @@ const FinanceTrackIndex = lazy(() => import("./pages/FinanceTrackIndex"));
 const FinanceInActionIndex = lazy(() =>
   __FIA_PREVIEW__ ? import("./pages/finance-in-action/FiaIndexPage") : import("./pages/FinanceInActionIndex"),
 );
-const FinanceModelDetail = lazy(() => import("./pages/FinanceModelDetail"));
+const FinanceModelDetail = lazy(() =>
+  __FIA_PREVIEW__ ? import("./pages/finance-in-action/FiaModelRoute") : import("./pages/FinanceModelDetail"),
+);
 const AdminEditorRedirect = lazy(() => import("./pages/AdminEditorRedirect"));
 const WriterEditorPage = lazy(() => import("./pages/WriterEditorPage"));
 const WriterListPage = lazy(() => import("./pages/WriterListPage"));

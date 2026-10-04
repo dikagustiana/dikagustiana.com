@@ -55,5 +55,8 @@ export const WATERFALL = {
   barWidthPct: 64,
 } as const;
 
+/** Room either side of a peer band, as a share of its width. */
+export const PEER_PAD = 0.25;
+
 export const PERCENT = 100;
 export const HALF = 0.5;
