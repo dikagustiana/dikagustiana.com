@@ -4,6 +4,7 @@
     "name": "Synthetic coal mining (SYNTHETIC)",
     "chainStage": "stage-extraction",
     "unitNoun": "coal",
+    "unit": "tonne",
     "note": "SYNTHETIC: two invented miners in round numbers, published inside the fixture set so the pair and the peer band can be exercised."
   },
   {
@@ -11,6 +12,7 @@
     "name": "Synthetic cement (SYNTHETIC)",
     "chainStage": "stage-processing",
     "unitNoun": "cement",
+    "unit": "tonne",
     "note": "SYNTHETIC: one invented cement maker with volumes, and one whose volumes are not disclosed."
   }
 ]

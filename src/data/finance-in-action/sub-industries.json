@@ -4,6 +4,7 @@
     "name": "Coal production",
     "chainStage": "stage-extraction",
     "unitNoun": "coal",
+    "unit": "tonne",
     "note": "Open-pit miners: the volume moved, the overburden stripped per tonne and the haul to port set the cost of a tonne."
   },
   {
@@ -11,6 +12,7 @@
     "name": "Construction materials",
     "chainStage": "stage-processing",
     "unitNoun": "cement",
+    "unit": "tonne",
     "note": "Cement makers: kiln fuel, power and limestone, run through capacity that is costly to leave idle."
   }
 ]

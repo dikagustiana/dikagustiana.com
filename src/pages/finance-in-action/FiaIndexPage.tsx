@@ -15,6 +15,11 @@ import { ALL, IndexFilters } from '@/components/finance-in-action/viewer/IndexFi
 import { StageStrip } from '@/components/finance-in-action/viewer/StageStrip';
 import { SyntheticBanner } from '@/components/finance-in-action/viewer/SyntheticBanner';
 import { RejectedPackages } from '@/components/finance-in-action/viewer/RejectedPackages';
+import { LinkLayer, LinkLegend } from '@/components/finance-in-action/viewer/links/LinkLayer';
+import { LinkCard } from '@/components/finance-in-action/viewer/links/LinkCard';
+import { linksFrom, linksTo, placeLinks } from '@/lib/finance-in-action/links';
+import type { IndustryLink } from '@/lib/finance-in-action/contract/links';
+import type { Registry } from '@/lib/finance-in-action/registry';
 import { COPY } from '@/lib/finance-in-action/copy';
 import { chainMapHref, positionAnchor, subIndustryAnchor } from '@/lib/finance-in-action/chain';
 import { conditionsUsed } from '@/lib/finance-in-action/conditions';
@@ -37,6 +42,8 @@ export default function FiaIndexPage() {
   const query = params.get(PARAM.query) ?? '';
   const condition = params.get(PARAM.condition) ?? ALL;
   const lens = params.get(PARAM.lens) === 'on';
+  const linkId = lens ? params.get(PARAM.link) : null;
+  const link = linkId ? reg.links.find((l) => l.id === linkId) ?? null : null;
 
   const update = (patch: Partial<Record<(typeof PARAM)[keyof typeof PARAM], string | null>>) => {
     const next = new URLSearchParams(params);
@@ -54,6 +61,8 @@ export default function FiaIndexPage() {
   );
   const conditions = useMemo(() => conditionsUsed(reg.companies.map((c) => c.conditionIds)), [reg]);
   const stages = all.filter((g) => g.position.kind === 'stage');
+  const drawn = useMemo(() => placeLinks(reg, stages.map((g) => g.position.id)), [reg, stages]);
+  const openLink = (id: string) => update({ [PARAM.lens]: 'on', [PARAM.link]: id });
   const layers = all.filter((g) => g.position.kind === 'layer');
   const sections = filtered.filter((g) => g.position.kind === 'stage' || g.subIndustries.length > 0);
   const anySynthetic = reg.companies.some((c) => c.synthetic);
@@ -101,7 +110,13 @@ export default function FiaIndexPage() {
               <ConnectionsToggle on={lens} onChange={(on) => update({ [PARAM.lens]: on ? 'on' : null, [PARAM.link]: null })} />
             </div>
           </div>
-          <StageStrip stages={stages} layers={layers} />
+          <StageStrip
+            stages={stages}
+            layers={layers}
+            linkLayer={lens ? <LinkLayer reg={reg} drawn={drawn} columns={stages.length} selected={linkId} onSelect={openLink} /> : undefined}
+          />
+          {lens && <LinkLegend />}
+          {link && <LinkCard key={link.id} reg={reg} link={link} onClose={() => update({ [PARAM.link]: null })} />}
         </section>
 
         <section aria-label="Filters" className="mb-8">
@@ -116,7 +131,7 @@ export default function FiaIndexPage() {
 
         <div className="space-y-10">
           {sections.map((g) => (
-            <PositionSection key={g.position.id} group={g} filtering={filtering} />
+            <PositionSection key={g.position.id} group={g} filtering={filtering} lens={lens} reg={reg} onLink={openLink} />
           ))}
         </div>
       </div>
@@ -124,7 +139,42 @@ export default function FiaIndexPage() {
   );
 }
 
-function PositionSection({ group, filtering }: { group: PositionGroup; filtering: boolean }) {
+function LinkMentions({ reg, code, onLink }: { reg: Registry; code: string; onLink: (id: string) => void }) {
+  const out = linksFrom(reg, code);
+  const into = linksTo(reg, code);
+  if (!out.length && !into.length) return null;
+  const item = (l: IndustryLink, word: string, other: string) => (
+    <li key={`${word}-${l.id}`}>
+      <button
+        type="button"
+        onClick={() => onLink(l.id)}
+        className="inline-flex min-h-11 items-center text-sm font-medium text-accent underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      >
+        {word} {reg.subIndustry(other)?.name ?? other}
+      </button>
+    </li>
+  );
+  return (
+    <ul className="flex flex-wrap gap-x-4">
+      {out.map((l) => item(l, COPY.feeds, l.to))}
+      {into.map((l) => item(l, COPY.fedBy, l.from))}
+    </ul>
+  );
+}
+
+function PositionSection({
+  group,
+  filtering,
+  lens,
+  reg,
+  onLink,
+}: {
+  group: PositionGroup;
+  filtering: boolean;
+  lens: boolean;
+  reg: Registry;
+  onLink: (id: string) => void;
+}) {
   const headingId = `${positionAnchor(group.position.id)}-heading`;
   return (
     <section id={positionAnchor(group.position.id)} aria-labelledby={headingId} className="scroll-mt-24">
@@ -142,6 +192,7 @@ function PositionSection({ group, filtering }: { group: PositionGroup; filtering
                   {subIndustry.name} <span className="font-mono text-xs font-normal text-muted-foreground">{subIndustry.code}</span>
                 </h3>
                 <p className="text-sm text-muted-foreground">{subIndustry.note}</p>
+                {lens && <LinkMentions reg={reg} code={subIndustry.code} onLink={onLink} />}
               </div>
               {companies.length ? (
                 <CompanyList companies={companies} />

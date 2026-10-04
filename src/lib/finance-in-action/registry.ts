@@ -21,6 +21,8 @@ export interface SubIndustry {
   chainStage: string;
   /** The product, as a noun: "coal", "cement". */
   unitNoun: string;
+  /** The unit it is counted in: "tonne". */
+  unit: string;
   note: string;
 }
 

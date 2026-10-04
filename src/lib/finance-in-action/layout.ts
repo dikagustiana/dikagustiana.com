@@ -17,12 +17,17 @@ export const STRIP_MIN_COLUMN = '7.5rem';
 export const STRIP = {
   /** viewBox units per stage column. */
   column: 100,
-  /** Height of the link layer, in px. */
-  layerHeight: 96,
   /** Vertical step between links that join the same two stages, in px. */
-  laneStep: 22,
+  laneStep: 28,
   /** First lane's depth below the cards, in px. */
-  laneStart: 26,
+  laneStart: 40,
+  /** Room under the deepest lane, in px. */
+  laneFoot: 12,
+  /** The row of link buttons under the drawing, in px. */
+  labelRow: 52,
+  /** A line sample beside a link's name, in px. */
+  sample: 24,
+  sampleHeight: 10,
   /** Stroke widths, in px: a base, and what a share of 1 adds to it. */
   costBase: 3,
   costScale: 14,
