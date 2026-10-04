@@ -10,7 +10,7 @@ import { isMeasured } from '@/lib/finance-in-action/contract/links';
 import { SYNTHETIC_MARK } from '@/lib/finance-in-action/contract/validate';
 import { COPY } from '@/lib/finance-in-action/copy';
 import { formatPercent } from '@/lib/finance-in-action/format';
-import { HALF, STRIP } from '@/lib/finance-in-action/layout';
+import { EMPHASIS, HALF, STRIP } from '@/lib/finance-in-action/layout';
 import type { Registry } from '@/lib/finance-in-action/registry';
 import { linkName, type DrawnLink } from '@/lib/finance-in-action/links';
 import { cn } from '@/lib/utils';
@@ -49,7 +49,7 @@ export function LinkLayer({
                 d={path(0)}
                 fill="none"
                 strokeDasharray={STRIP.dash}
-                strokeWidth={active ? STRIP.dashedWidth * 2 : STRIP.dashedWidth}
+                strokeWidth={active ? STRIP.dashedWidth * EMPHASIS : STRIP.dashedWidth}
                 vectorEffect="non-scaling-stroke"
                 className="stroke-muted-foreground"
               />

@@ -49,7 +49,7 @@ export function StageStrip({
                   <a
                     href={`#${positionAnchor(g.position.id)}`}
                     className={cn(
-                      'flex h-full min-h-[5.5rem] flex-col justify-between rounded-md border p-3 text-left hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                      'flex h-full min-h-[5.5rem] flex-col justify-between rounded-md border p-3 text-left hover:border-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                       empty ? 'border-dashed border-border bg-background' : 'border-foreground/30 bg-card',
                     )}
                   >
@@ -69,7 +69,7 @@ export function StageStrip({
           <li key={g.position.id}>
             <a
               href={`#${positionAnchor(g.position.id)}`}
-              className="flex min-h-11 flex-wrap items-baseline gap-x-3 gap-y-1 rounded-md border border-dashed border-border bg-background px-3 py-2 hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="flex min-h-11 flex-wrap items-baseline gap-x-3 gap-y-1 rounded-md border border-dashed border-border bg-background px-3 py-2 hover:border-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <span className="text-sm font-semibold text-foreground">{g.position.label}</span>
               <span className="text-xs text-muted-foreground">{g.position.span}</span>

@@ -69,7 +69,7 @@ export function LinkCard({ reg, link, onClose }: { reg: Registry; link: Industry
     list.length > 1 ? (
       <label className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
         {label}
-        <select value={value} onChange={(e) => onChange(e.target.value)} className="h-11 rounded-md border border-input bg-background px-2 text-sm text-foreground">
+        <select value={value} onChange={(e) => onChange(e.target.value)} className="h-11 rounded-md border border-input bg-background px-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
           {list.map((p) => (
             <option key={p.meta.ticker} value={p.meta.ticker}>
               {p.meta.ticker}

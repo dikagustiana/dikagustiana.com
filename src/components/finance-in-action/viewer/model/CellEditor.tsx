@@ -60,7 +60,7 @@ export function CellEditor({ view, cellKey, close }: { view: ModelView; cellKey:
       />
       {error && (
         <span id={errorId} role="alert" className="absolute right-0 top-full z-20 whitespace-nowrap rounded bg-popover px-2 py-1 text-xs text-destructive shadow">
-          Type a number: 1.234,5 or 15,5%
+          Type a number: a point for thousands, a comma for decimals
         </span>
       )}
     </div>

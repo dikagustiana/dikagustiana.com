@@ -11,9 +11,10 @@ import { formatDeltaForRow, formatForRow, formatPointsDelta, isRatioRow } from '
 import { chainThrough } from '@/lib/finance-in-action/model/chainPath';
 import { PER_UNIT_DECIMALS, perUnitDelta } from '@/lib/finance-in-action/unitEconomics';
 import { formatDelta } from '@/lib/finance-in-action/format';
+import { LIMITS } from '@/lib/finance-in-action/layout';
 import type { ModelView } from './useModelView';
 
-const CHANGES_SHOWN = 24;
+const CHANGES_SHOWN = LIMITS.changes;
 
 export function ChainBreadcrumb({ view }: { view: ModelView }) {
   const { wb, pkg } = view;
@@ -108,7 +109,11 @@ export function WhatChanged({ view }: { view: ModelView }) {
               return (
                 <tr key={c.key} className="border-t border-border/60">
                   <th scope="row" className="py-1 text-left font-normal">
-                    <button type="button" onClick={() => view.select(c.key)} className="text-left underline-offset-2 hover:underline">
+                    <button
+                      type="button"
+                      onClick={() => view.select(c.key)}
+                      className="min-h-11 text-left underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
                       {row.label}, {pkg.periods[a.periodIndex].label}
                     </button>
                   </th>

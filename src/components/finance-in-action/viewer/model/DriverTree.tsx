@@ -7,7 +7,7 @@
  */
 import { useMemo } from 'react';
 import { formatForRow, isRatioRow } from '@/lib/finance-in-action/format';
-import { TREE } from '@/lib/finance-in-action/layout';
+import { EMPHASIS, HALF, TREE } from '@/lib/finance-in-action/layout';
 import { treeLayout } from '@/lib/finance-in-action/model/treeLayout';
 import type { Decoration } from '@/lib/finance-in-action/view/decorate';
 import { cn } from '@/lib/utils';
@@ -27,8 +27,8 @@ export function DriverTree({
 }) {
   const { pkg, wb } = view;
   const layout = useMemo(() => treeLayout(pkg.driverTree), [pkg.driverTree]);
-  const width = layout.columns * stepX - TREE.columnGap + TREE.padding * 2;
-  const height = layout.rows * stepY - TREE.rowGap + TREE.padding * 2;
+  const width = layout.columns * stepX - TREE.columnGap + TREE.padding * EMPHASIS;
+  const height = layout.rows * stepY - TREE.rowGap + TREE.padding * EMPHASIS;
   const x = (id: string) => TREE.padding + (layout.at.get(id)?.col ?? 0) * stepX;
   const y = (id: string) => TREE.padding + (layout.at.get(id)?.row ?? 0) * stepY;
   const selectedRow = view.selected ? wb.rowRefOf(view.selected) : null;
@@ -39,23 +39,23 @@ export function DriverTree({
       <div className="relative" style={{ width, height }}>
         <svg width={width} height={height} className="absolute inset-0" aria-hidden="true">
           <defs>
-            <marker id="fia-arrow" markerUnits="userSpaceOnUse" viewBox={`0 0 ${TREE.arrow} ${TREE.arrow}`} refX={TREE.arrow} refY={TREE.arrow / 2} markerWidth={TREE.arrow} markerHeight={TREE.arrow} orient="auto">
-              <path d={`M0 0 L${TREE.arrow} ${TREE.arrow / 2} L0 ${TREE.arrow} Z`} className="fill-muted-foreground" />
+            <marker id="fia-arrow" markerUnits="userSpaceOnUse" viewBox={`0 0 ${TREE.arrow} ${TREE.arrow}`} refX={TREE.arrow} refY={TREE.arrow * HALF} markerWidth={TREE.arrow} markerHeight={TREE.arrow} orient="auto">
+              <path d={`M0 0 L${TREE.arrow} ${TREE.arrow * HALF} L0 ${TREE.arrow} Z`} className="fill-muted-foreground" />
             </marker>
           </defs>
           {pkg.driverTree.edges.map((e) => {
             const x1 = x(e.from) + TREE.nodeWidth;
-            const y1 = y(e.from) + TREE.nodeHeight / 2;
+            const y1 = y(e.from) + TREE.nodeHeight * HALF;
             const x2 = x(e.to);
-            const y2 = y(e.to) + TREE.nodeHeight / 2;
-            const mid = (x1 + x2) / 2;
+            const y2 = y(e.to) + TREE.nodeHeight * HALF;
+            const mid = (x1 + x2) * HALF;
             const touches = selectedRow !== null && (nodeRow.get(e.from) === selectedRow || nodeRow.get(e.to) === selectedRow);
             return (
               <path
                 key={`${e.from}-${e.to}`}
                 d={`M${x1} ${y1} C${mid} ${y1}, ${mid} ${y2}, ${x2} ${y2}`}
                 fill="none"
-                strokeWidth={touches ? TREE.edgeWidth * 2 : TREE.edgeWidth}
+                strokeWidth={touches ? TREE.edgeWidth * EMPHASIS : TREE.edgeWidth}
                 className={touches ? 'stroke-foreground' : 'stroke-muted-foreground/60'}
                 markerEnd="url(#fia-arrow)"
               />

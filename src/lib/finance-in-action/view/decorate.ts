@@ -29,6 +29,9 @@ export interface DecorationInput {
 
 const role = (id: LensRole) => byId(LENS_ROLES, id)!;
 
+/** Inside a tinted item, secondary text becomes ink: muted grey on the dependent tint is 3,80:1. */
+export const TINTED_TEXT = '[&_.text-muted-foreground]:text-foreground';
+
 export function decoration(i: DecorationInput): Decoration | null {
   const classes: string[] = [];
   const labels: string[] = [];
@@ -49,6 +52,9 @@ export function decoration(i: DecorationInput): Decoration | null {
     labels.push(role('edited').label.toLowerCase());
   }
   if (i.flashing) classes.push(`fia-flash-${i.flashToken % 2}`);
+  // Muted text does not hold 4.5:1 on the tints, so inside a tinted item it
+  // takes the ink colour.
+  if (glyph || i.change) classes.push(TINTED_TEXT);
   if (!classes.length && !glyph && !note) return null;
   return { className: classes.join(' '), glyph, note, label: labels.join(', ') || undefined, flash: false };
 }

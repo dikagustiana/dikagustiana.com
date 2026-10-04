@@ -12,10 +12,11 @@ import { X } from 'lucide-react';
 import { CELL_KINDS, SHEETS, TIE_OUT_STATUSES, byId } from '@/lib/finance-in-action/constants';
 import { formatForRow, formatNumber, decimalsFor, isRatioRow } from '@/lib/finance-in-action/format';
 import { explainFormula, sourceLine, sourcedInputs } from '@/lib/finance-in-action/model/explain';
+import { LIMITS } from '@/lib/finance-in-action/layout';
 import { cn } from '@/lib/utils';
 import type { ModelView } from './useModelView';
 
-const SOURCES_SHOWN = 4;
+const SOURCES_SHOWN = LIMITS.inspectorSources;
 export const INSPECTOR_EMPTY = 'Select a cell, a node or a bar to see how it is built and where it comes from.';
 
 export function Inspector({ view, children }: { view: ModelView; children?: ReactNode }) {

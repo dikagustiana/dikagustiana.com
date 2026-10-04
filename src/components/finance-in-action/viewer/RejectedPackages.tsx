@@ -1,7 +1,8 @@
 /** A package that fails validation is not drawn; this says which, and why. */
 import type { ValidationIssue } from '@/lib/finance-in-action/contract/validate';
+import { LIMITS } from '@/lib/finance-in-action/layout';
 
-const SHOWN = 5;
+const SHOWN = LIMITS.rejectedIssues;
 
 export function RejectedPackages({ rejected }: { rejected: { ticker: string; issues: ValidationIssue[] }[] }) {
   if (!rejected.length) return null;

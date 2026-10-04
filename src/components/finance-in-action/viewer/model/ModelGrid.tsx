@@ -164,7 +164,7 @@ export function ModelGrid({
                 >
                   <span className="block">{p.label}</span>
                   {p.forecast && <span className="block text-[10px] font-normal not-italic uppercase tracking-wider text-muted-foreground">forecast</span>}
-                  {p.kind === 'fy' && <span className="block text-[10px] font-normal uppercase tracking-wider text-muted-foreground">year</span>}
+                  {p.kind === 'fy' && <span className="block text-[10px] font-normal uppercase tracking-wider text-foreground">year</span>}
                 </th>
               ))}
             </tr>

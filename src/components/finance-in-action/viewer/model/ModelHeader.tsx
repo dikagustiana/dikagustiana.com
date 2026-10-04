@@ -59,7 +59,7 @@ export function ModelHeader({
       </div>
       <dl className="grid gap-x-6 gap-y-3 sm:grid-cols-2 lg:grid-cols-4">
         <Fact term="Sub-industry">
-          <Link to={subIndustryPath(meta.subIndustry)} className="text-accent underline-offset-4 hover:underline">
+          <Link to={subIndustryPath(meta.subIndustry)} className="inline-flex min-h-11 items-center text-accent underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
             {sub?.name ?? meta.subIndustry}
           </Link>
         </Fact>
@@ -73,7 +73,7 @@ export function ModelHeader({
                 return (
                   <li key={t}>
                     {c?.pkg ? (
-                      <Link to={modelPath(t)} className="text-accent underline-offset-4 hover:underline">
+                      <Link to={modelPath(t)} className="inline-flex min-h-11 items-center text-accent underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                         {c.name} ({t})
                       </Link>
                     ) : (

@@ -21,7 +21,7 @@ export function ConditionPanel({ pkg, subIndustry }: { pkg: ModelPackage; subInd
         return (
           <article key={n} className="space-y-2">
             <h3 className="text-base font-semibold text-foreground">
-              <Link to={conditionHref(n)} className="underline-offset-4 hover:text-accent hover:underline">
+              <Link to={conditionHref(n)} className="inline-flex min-h-11 items-center underline-offset-4 hover:text-accent hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                 {conditionShort(n)}: {c.title}
               </Link>
             </h3>
@@ -32,7 +32,7 @@ export function ConditionPanel({ pkg, subIndustry }: { pkg: ModelPackage; subInd
       })}
       <Link
         to={chainMapHref(pkg.meta.chainStage)}
-        className="inline-flex min-h-11 items-center text-sm text-accent underline underline-offset-4"
+        className="inline-flex min-h-11 items-center text-sm text-accent underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         Show {subIndustry?.unitNoun ?? subIndustry?.name ?? pkg.meta.subIndustry} on the chain map
         {position ? ` (${position.label})` : ''}

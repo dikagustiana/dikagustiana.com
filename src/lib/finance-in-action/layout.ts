@@ -63,5 +63,15 @@ export const WATERFALL = {
 /** Room either side of a peer band, as a share of its width. */
 export const PEER_PAD = 0.25;
 
+/** How many items a list shows before it says "and N more". */
+export const LIMITS = {
+  rejectedIssues: 5,
+  inspectorSources: 4,
+  changes: 24,
+} as const;
+
+/** A selected line is drawn this many times thicker. */
+export const EMPHASIS = 2;
+
 export const PERCENT = 100;
 export const HALF = 0.5;
