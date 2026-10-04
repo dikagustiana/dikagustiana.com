@@ -49,7 +49,7 @@ export function StageStrip({
                   <a
                     href={`#${positionAnchor(g.position.id)}`}
                     className={cn(
-                      'flex h-full min-h-[5.5rem] flex-col justify-between rounded-md border p-3 text-left transition-colors hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                      'flex h-full min-h-[5.5rem] flex-col justify-between rounded-md border p-3 text-left hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                       empty ? 'border-dashed border-border bg-background' : 'border-foreground/30 bg-card',
                     )}
                   >

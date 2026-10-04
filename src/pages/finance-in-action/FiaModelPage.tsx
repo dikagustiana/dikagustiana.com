@@ -5,7 +5,7 @@
  * The lens state lives in the address (?connections=on); edits never leave
  * the page (constraint 12).
  */
-import { useMemo, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { PageLayout } from '@/components/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
@@ -20,8 +20,16 @@ import { WorkpaperRecord } from '@/components/finance-in-action/viewer/model/Wor
 import { PeriodSelect } from '@/components/finance-in-action/viewer/model/PeriodSelect';
 import { UnitEconomics } from '@/components/finance-in-action/viewer/model/UnitEconomics';
 import { UELineDetail } from '@/components/finance-in-action/viewer/model/UELineDetail';
+import { DriverTree } from '@/components/finance-in-action/viewer/model/DriverTree';
+import { CellEditor } from '@/components/finance-in-action/viewer/model/CellEditor';
+import { ChainBreadcrumb, WhatChanged } from '@/components/finance-in-action/viewer/model/LensPanels';
+import { isEditable } from '@/lib/finance-in-action/model/scenario';
+import { decoration } from '@/lib/finance-in-action/view/decorate';
+import { formatDelta } from '@/lib/finance-in-action/format';
+import { PER_UNIT_DECIMALS, type UEBar } from '@/lib/finance-in-action/unitEconomics';
 import { useModelView } from '@/components/finance-in-action/viewer/model/useModelView';
-import type { SheetId } from '@/lib/finance-in-action/constants';
+import { LENS_ROLES, type SheetId } from '@/lib/finance-in-action/constants';
+import { cn } from '@/lib/utils';
 import type { ModelPackage } from '@/lib/finance-in-action/contract/types';
 import type { IndustryLink } from '@/lib/finance-in-action/contract/links';
 import { COPY } from '@/lib/finance-in-action/copy';
@@ -32,6 +40,21 @@ import { latestReported, quarterPeriods, periodById } from '@/lib/finance-in-act
 import { noVolumeAnywhere, unitEconomicsAt } from '@/lib/finance-in-action/unitEconomics';
 import type { Registry } from '@/lib/finance-in-action/registry';
 import { INDEX_PATH, MODEL_PARAM, positionPath, subIndustryPath } from '@/lib/finance-in-action/routes';
+
+function LensLegend() {
+  return (
+    <ul className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-foreground" aria-label="Connections legend">
+      {LENS_ROLES.map((r) => (
+        <li key={r.id} className="inline-flex items-center gap-1.5">
+          <span aria-hidden="true" className={cn('inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-sm border border-border px-1', r.className)}>
+            {r.glyph}
+          </span>
+          {r.label}
+        </li>
+      ))}
+    </ul>
+  );
+}
 
 export function Section({ id, title, aside, children }: { id: string; title: string; aside?: ReactNode; children: ReactNode }) {
   return (
@@ -48,9 +71,9 @@ export function Section({ id, title, aside, children }: { id: string; title: str
 }
 
 export function FiaModelPage({ pkg, reg }: { pkg: ModelPackage; reg: Registry }) {
-  const view = useModelView(pkg);
   const [params, setParams] = useSearchParams();
   const lens = params.get(MODEL_PARAM.lens) === 'on';
+  const view = useModelView(pkg, lens);
   const setLens = (on: boolean) => {
     const next = new URLSearchParams(params);
     if (on) next.set(MODEL_PARAM.lens, 'on');
@@ -79,6 +102,40 @@ export function FiaModelPage({ pkg, reg }: { pkg: ModelPackage; reg: Registry })
   }, [reg, pkg, meta.subIndustry]);
 
   const peers = useMemo(() => peerBand(reg, pkg), [reg, pkg]);
+
+  // With the lens on, a selection brings the tree and the waterfall to its
+  // period, so its precedents and dependents can be marked in all three.
+  useEffect(() => {
+    if (!lens || !view.selected) return;
+    const a = view.wb.address(view.selected);
+    const period = a ? pkg.periods[a.periodIndex] : undefined;
+    if (!period) return;
+    if (period.kind === 'quarter') setTreePeriod(period.id);
+    if (pkg.unitEconomics.periods.includes(period.id)) setUePeriod(period.id);
+  }, [lens, view.selected, view.wb, pkg]);
+
+  const editedKeys = useMemo(() => new Set(view.edits.map((e) => e.key)), [view.edits]);
+  const decorate = useCallback(
+    (key: string) =>
+      decoration({
+        mark: view.markOf(key),
+        change: view.changed.get(key),
+        edited: editedKeys.has(key),
+        flashing: view.flash.keys.has(key),
+        flashToken: view.flash.token,
+        row: view.rowOf(key),
+      }),
+    [view, editedKeys],
+  );
+  const barNote = (bar: UEBar) => {
+    if (!view.changed.has(bar.key) || bar.perUnit === null) return null;
+    const before = unitEconomicsAt(view.wb, view.base, uePeriod).bars.find((b) => b.key === bar.key)?.perUnit ?? null;
+    if (before === null) return null;
+    const reduces = bar.line.role === 'cost' || bar.line.role === 'unsplit';
+    const delta = reduces ? -(bar.perUnit - before) : bar.perUnit - before;
+    return <span className="mt-1 px-1 text-center text-[11px] font-semibold tabular-nums text-foreground">{formatDelta(delta, PER_UNIT_DECIMALS)}</span>;
+  };
+  const treeIsForecast = periodById(pkg, treePeriod)?.forecast ?? false;
   const treeLabel = periodById(pkg, treePeriod)?.label ?? treePeriod;
 
   return (
@@ -109,11 +166,40 @@ export function FiaModelPage({ pkg, reg }: { pkg: ModelPackage; reg: Registry })
                 {treePeriod === meta.asOf.fullStatementsTo ? `${treeLabel}, the latest quarter with full statements.` : `${treeLabel}.`} Each figure has
                 the same quarter a year earlier beneath it.
               </p>
-              <DriverRow view={view} periodId={treePeriod} feeds={feeds} reg={reg} />
+              {lens ? (
+                <div className="space-y-3">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <p className="text-sm font-medium text-foreground">
+                      {treeIsForecast ? COPY.directionForecast : COPY.directionReported(pkg.unitEconomics.unit)}
+                    </p>
+                    <button
+                      type="button"
+                      aria-pressed={view.depth === 'full'}
+                      onClick={() => view.setDepth(view.depth === 'full' ? 'one' : 'full')}
+                      className="inline-flex min-h-11 items-center rounded-md border border-input px-3 text-sm hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      {view.depth === 'full' ? COPY.showOneLevel : COPY.showFullChain}
+                    </button>
+                  </div>
+                  <LensLegend />
+                  <DriverTree view={view} periodId={treePeriod} decorate={decorate} />
+                </div>
+              ) : (
+                <DriverRow view={view} periodId={treePeriod} feeds={feeds} reg={reg} decorate={decorate} />
+              )}
             </Section>
 
             <Section id="fia-unit-economics" title={`Unit economics, per ${pkg.unitEconomics.unit} sold`}>
-              <UnitEconomics view={view} reg={reg} ue={ue} periodId={uePeriod} onPeriod={setUePeriod} onlyMessage={noVolume} />
+              <UnitEconomics
+                view={view}
+                reg={reg}
+                ue={ue}
+                periodId={uePeriod}
+                onPeriod={setUePeriod}
+                onlyMessage={noVolume}
+                decorate={decorate}
+                barNote={barNote}
+              />
             </Section>
 
             <Section id="fia-peers" title={`Where ${meta.ticker} sits in ${subName}`}>
@@ -124,8 +210,27 @@ export function FiaModelPage({ pkg, reg }: { pkg: ModelPackage; reg: Registry })
               <ConditionPanel pkg={pkg} subIndustry={sub} />
             </Section>
 
-            <Section id="fia-model" title={COPY.theModel}>
-              <ModelGrid view={view} sheetId={sheet} onSheet={setSheet} />
+            <Section
+              id="fia-model"
+              title={COPY.theModel}
+              aside={
+                view.edits.length ? (
+                  <button type="button" onClick={view.reset} className="min-h-11 text-sm text-accent underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                    {COPY.reset}
+                  </button>
+                ) : undefined
+              }
+            >
+              <ModelGrid
+                view={view}
+                sheetId={sheet}
+                onSheet={setSheet}
+                decorate={decorate}
+                editing={{
+                  canEdit: (key) => isEditable(view.wb, key),
+                  editor: (key, close) => <CellEditor view={view} cellKey={key} close={close} />,
+                }}
+              />
             </Section>
 
             <Section id="fia-workpaper" title={COPY.workpaper}>
@@ -134,6 +239,8 @@ export function FiaModelPage({ pkg, reg }: { pkg: ModelPackage; reg: Registry })
           </div>
           <Inspector view={view}>
             <UELineDetail view={view} ue={ue} />
+            <ChainBreadcrumb view={view} />
+            <WhatChanged view={view} />
           </Inspector>
         </div>
       </div>

@@ -180,3 +180,25 @@ export function barValue(bar: UEBar): string {
   const reduces = bar.line.role === 'cost' || bar.line.role === 'unsplit';
   return formatNumber(reduces ? -bar.perUnit : bar.perUnit, PER_UNIT_DECIMALS);
 }
+
+/**
+ * How much a money cell moved per unit after an edit: its value over the
+ * period's volume after, less the same before. Null for a row that is not
+ * money, or a period without a volume.
+ */
+export function perUnitDelta(wb: Workbook, base: Map<string, Value>, now: Map<string, Value>, key: string): number | null {
+  const a = wb.address(key);
+  const rowRef = wb.rowRefOf(key);
+  const row = rowRef ? wb.row(rowRef) : undefined;
+  const denomRow = wb.row(wb.pkg.unitEconomics.denominatorRowRef);
+  if (!a || !row || !denomRow) return null;
+  const scale = unitScale(row.unit, denomRow.unit);
+  if (!scale.known) return null;
+  const period = wb.pkg.periods[a.periodIndex].id;
+  const before = denominatorState(wb, base, period);
+  const after = denominatorState(wb, now, period);
+  const v0 = num(base.get(key));
+  const v1 = num(now.get(key));
+  if (!before.ok || !after.ok || v0 === null || v1 === null || !before.value || !after.value) return null;
+  return (v1 / after.value - v0 / before.value) * scale.multiplier;
+}

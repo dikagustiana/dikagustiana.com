@@ -15,7 +15,7 @@ import { explainFormula, sourceLine, sourcedInputs } from '@/lib/finance-in-acti
 import { cn } from '@/lib/utils';
 import type { ModelView } from './useModelView';
 
-const SOURCES_SHOWN = 8;
+const SOURCES_SHOWN = 4;
 export const INSPECTOR_EMPTY = 'Select a cell, a node or a bar to see how it is built and where it comes from.';
 
 export function Inspector({ view, children }: { view: ModelView; children?: ReactNode }) {
@@ -45,8 +45,18 @@ export function Inspector({ view, children }: { view: ModelView; children?: Reac
           </button>
         )}
       </div>
-      {key ? <CellDetail view={view} cellKey={key} /> : <p className="text-sm text-muted-foreground">{INSPECTOR_EMPTY}</p>}
-      {children}
+      {key ? (
+        <>
+          <CellDetail view={view} cellKey={key} />
+          {children}
+          <CellSources view={view} cellKey={key} />
+        </>
+      ) : (
+        <>
+          <p className="text-sm text-muted-foreground">{INSPECTOR_EMPTY}</p>
+          {children}
+        </>
+      )}
     </aside>
   );
 }
@@ -62,7 +72,6 @@ function CellDetail({ view, cellKey }: { view: ModelView; cellKey: string }) {
   const v = values.get(cellKey);
   const value = typeof v === 'number' ? v : null;
   const explanation = cell.kind === 'formula' ? explainFormula(wb, cellKey, values) : null;
-  const inputs = sourcedInputs(wb, cellKey);
   const tie = cell.tieOut;
 
   return (
@@ -107,25 +116,30 @@ function CellDetail({ view, cellKey }: { view: ModelView; cellKey: string }) {
           </p>
         </div>
       )}
+    </div>
+  );
+}
 
-      <div>
-        <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Inputs and their sources</h3>
-        {inputs.length ? (
-          <ul className="mt-1 space-y-1.5">
-            {inputs.slice(0, SOURCES_SHOWN).map((i) => (
-              <li key={i.key}>
-                <span className="font-medium text-fia-sourced">
-                  {i.label}, {i.period}
-                </span>
-                <span className="block text-muted-foreground">{sourceLine(i.source)}</span>
-              </li>
-            ))}
-            {inputs.length > SOURCES_SHOWN && <li className="text-muted-foreground">and {inputs.length - SOURCES_SHOWN} more sourced inputs.</li>}
-          </ul>
-        ) : (
-          <p className="mt-1 text-muted-foreground">No sourced input: this value is set or worked within the model.</p>
-        )}
-      </div>
+function CellSources({ view, cellKey }: { view: ModelView; cellKey: string }) {
+  const inputs = sourcedInputs(view.wb, cellKey);
+  return (
+    <div className="mt-4 border-t border-border pt-4 text-sm">
+      <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Inputs and their sources</h3>
+      {inputs.length ? (
+        <ul className="mt-1 space-y-1.5">
+          {inputs.slice(0, SOURCES_SHOWN).map((i) => (
+            <li key={i.key}>
+              <span className="font-medium text-fia-sourced">
+                {i.label}, {i.period}
+              </span>
+              <span className="block text-muted-foreground">{sourceLine(i.source)}</span>
+            </li>
+          ))}
+          {inputs.length > SOURCES_SHOWN && <li className="text-muted-foreground">and {inputs.length - SOURCES_SHOWN} more sourced inputs.</li>}
+        </ul>
+      ) : (
+        <p className="mt-1 text-muted-foreground">No sourced input: this value is set or worked within the model.</p>
+      )}
     </div>
   );
 }

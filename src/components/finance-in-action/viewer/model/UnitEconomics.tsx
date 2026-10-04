@@ -119,7 +119,7 @@ export function UnitEconomics({
                 const deco = decorate?.(bar.key) ?? null;
                 const selected = view.selected === bar.key;
                 return (
-                  <li key={bar.line.id} className={cn('flex flex-col rounded-sm', deco?.className, deco?.flash && 'fia-flash')} style={{ width: `${WATERFALL.columnRem}rem` }}>
+                  <li key={bar.line.id} className={cn('flex flex-col rounded-sm', deco?.className)} style={{ width: `${WATERFALL.columnRem}rem` }}>
                     <button
                       type="button"
                       onClick={() => view.select(bar.key)}

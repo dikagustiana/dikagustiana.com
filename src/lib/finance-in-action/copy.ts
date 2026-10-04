@@ -47,8 +47,9 @@ export const COPY = {
   ueRounding: 'Per-unit figures are rounded; subtotals are worked before rounding.',
   ueNotAvailable: 'Not available: volumes not disclosed',
   // Connections
-  directionReported:
-    'The left-hand column is read out of the statements, so revenue per tonne is revenue divided by volume.',
+  /** The direction caption is chosen by the period's kind, and names the package's own unit. */
+  directionReported: (unit: string) =>
+    `The left-hand column is read out of the statements, so revenue per ${unit} is revenue divided by volume.`,
   directionForecast: 'The same arrows run forward, from operation to money.',
   showFullChain: 'Show full chain',
   showOneLevel: 'Show one level',

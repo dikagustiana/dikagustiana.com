@@ -218,7 +218,6 @@ export function ModelGrid({
                             'flex min-h-11 w-full flex-col items-end justify-center px-3 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring',
                             kind?.className,
                             deco?.className,
-                            deco?.flash && 'fia-flash',
                             selected && 'ring-2 ring-inset ring-ring',
                           )}
                         >

@@ -610,13 +610,22 @@
 
 /* The only animation in the section (§5.6): a changed item flashes once. It
    does not run at all under prefers-reduced-motion: reduce, because the
-   rule only exists inside no-preference. */
+   rules only exist inside no-preference. Two classes with two identically
+   drawn keyframes alternate from one edit to the next, so a cell that
+   changes again flashes again, once. */
 @media (prefers-reduced-motion: no-preference) {
-  .fia-flash {
-    animation: fia-flash 900ms ease-out 1;
+  .fia-flash-0 {
+    animation: fia-flash-a 900ms ease-out 1;
+  }
+  .fia-flash-1 {
+    animation: fia-flash-b 900ms ease-out 1;
   }
 }
-@keyframes fia-flash {
+@keyframes fia-flash-a {
+  from { box-shadow: inset 0 0 0 999px hsl(var(--fia-changed)); }
+  to { box-shadow: inset 0 0 0 999px transparent; }
+}
+@keyframes fia-flash-b {
   from { box-shadow: inset 0 0 0 999px hsl(var(--fia-changed)); }
   to { box-shadow: inset 0 0 0 999px transparent; }
 }
