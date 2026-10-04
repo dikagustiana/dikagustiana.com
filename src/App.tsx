@@ -67,8 +67,16 @@ const FinanceLanding = lazy(() => import("./pages/FinanceLanding"));
 const FinanceInMotion = lazy(() => import("./pages/FinanceInMotion"));
 const CapitalConditionDetail = lazy(() => import("./pages/CapitalConditionDetail"));
 const FinanceTrackIndex = lazy(() => import("./pages/FinanceTrackIndex"));
-const FinanceInActionIndex = lazy(() => import("./pages/FinanceInActionIndex"));
-const FinanceModelDetail = lazy(() => import("./pages/FinanceModelDetail"));
+// Finance in Action v3.1 preview (docs/company-models/implementation-brief-v3.1.md).
+// __FIA_PREVIEW__ is a compile-time constant (vite.config.ts): unset, the
+// preview branch is dead code and its chunk, fixtures included, is never
+// emitted, so the route renders exactly what it rendered before.
+const FinanceInActionIndex = lazy(() =>
+  __FIA_PREVIEW__ ? import("./pages/finance-in-action/FiaIndexPage") : import("./pages/FinanceInActionIndex"),
+);
+const FinanceModelDetail = lazy(() =>
+  __FIA_PREVIEW__ ? import("./pages/finance-in-action/FiaModelRoute") : import("./pages/FinanceModelDetail"),
+);
 const AdminEditorRedirect = lazy(() => import("./pages/AdminEditorRedirect"));
 const WriterEditorPage = lazy(() => import("./pages/WriterEditorPage"));
 const WriterListPage = lazy(() => import("./pages/WriterListPage"));

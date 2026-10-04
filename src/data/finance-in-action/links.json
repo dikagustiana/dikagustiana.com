@@ -1,0 +1,15 @@
+[
+  {
+    "id": "coal-to-cement",
+    "from": "A121",
+    "to": "B121",
+    "whatFlows": "Coal burnt as kiln fuel",
+    "driverFrom": "Realised price per tonne of coal",
+    "driverTo": "Kiln fuel cost per tonne of cement",
+    "intensity": null,
+    "costShare": null,
+    "demandShare": null,
+    "passThrough": null,
+    "caveat": "The price a cement plant pays can differ from a coal producer's realised price: calorific value, contract terms and domestic market obligation rules all sit between them."
+  }
+]

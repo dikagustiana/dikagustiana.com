@@ -95,6 +95,19 @@ export default {
         nav: {
           active: "hsl(var(--nav-active))",
         },
+        // Finance in Action roles (brief v3.1 §6); values in src/index.css.
+        fia: {
+          sourced: "hsl(var(--fia-sourced))",
+          "assumption-bg": "hsl(var(--fia-assumption-bg))",
+          "assumption-fg": "hsl(var(--fia-assumption-fg))",
+          missing: "hsl(var(--fia-missing))",
+          cost: "hsl(var(--fia-cost))",
+          unsplit: "hsl(var(--fia-unsplit))",
+          precedent: "hsl(var(--fia-precedent))",
+          dependent: "hsl(var(--fia-dependent))",
+          changed: "hsl(var(--fia-changed))",
+          edited: "hsl(var(--fia-edited))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
