@@ -1,0 +1,182 @@
+/**
+ * Unit economics (brief §5.4), worked in the viewer from package rows divided
+ * by the package's denominator row (constraint 7). The package stores no
+ * per-unit figure; every one here is a row value over the volume, in full
+ * precision, and only rounded for display. Subtotals are their own rows over
+ * the volume, never a sum of rounded bars.
+ *
+ * No volume, no unit economics (constraint 9): a missing denominator row, or
+ * a missing cell in it, makes the period unavailable, and nothing is drawn.
+ */
+import type { ModelPackage, UELine } from './contract/types';
+import { splitRowRef } from './contract/types';
+import { isNum, type Value } from './engine/engine';
+import { formatNumber } from './format';
+import type { Workbook } from './model/workbook';
+
+const MONEY: Record<string, number> = {
+  Rp: 1,
+  'Rp thousand': 1e3,
+  'Rp mn': 1e6,
+  'Rp million': 1e6,
+  'Rp bn': 1e9,
+  'Rp billion': 1e9,
+  'Rp tn': 1e12,
+  'Rp trillion': 1e12,
+};
+const VOLUME: Record<string, number> = { t: 1, tonne: 1, tonnes: 1, kt: 1e3, Mt: 1e6 };
+const SCALE_LABEL: [number, string][] = [
+  [1e12, 'Rp trillion'],
+  [1e9, 'Rp billion'],
+  [1e6, 'Rp million'],
+  [1e3, 'Rp thousand'],
+  [1, 'Rp'],
+];
+
+export interface UnitScale {
+  /** Multiply row ÷ volume by this to land in `label` per unit. */
+  multiplier: number;
+  /** "Rp thousand" */
+  label: string;
+  /** False when the units were not recognised; the label then names both. */
+  known: boolean;
+}
+
+/**
+ * The money scale of a per-unit figure: Rp bn ÷ Mt is Rp thousand per tonne.
+ * Unknown units keep their own names and a multiplier of one.
+ */
+export function unitScale(moneyUnit: string, volumeUnit: string): UnitScale {
+  const m = MONEY[moneyUnit.trim()];
+  const v = VOLUME[volumeUnit.trim()];
+  if (!m || !v) return { multiplier: 1, label: `${moneyUnit} per ${volumeUnit}`, known: false };
+  const ratio = m / v;
+  const [base, label] = SCALE_LABEL.find(([b]) => ratio >= b) ?? SCALE_LABEL[SCALE_LABEL.length - 1];
+  return { multiplier: ratio / base, label, known: true };
+}
+
+export const plural = (unit: string): string => (unit.endsWith('s') ? unit : `${unit}s`);
+
+export interface UEBar {
+  line: UELine;
+  key: string;
+  /** The row's value in the period, in its own unit. */
+  total: number | null;
+  /** Worked per unit, full precision. */
+  perUnit: number | null;
+  /** Where the bar starts and ends on the per-unit scale. */
+  from: number | null;
+  to: number | null;
+}
+
+export type UEUnavailable = 'no-denominator-row' | 'volume-missing';
+
+export interface UEView {
+  periodId: string;
+  available: boolean;
+  reason?: UEUnavailable;
+  scale: UnitScale;
+  denominator: { rowRef: string; key: string | null; value: number | null; label: string; unit: string };
+  bars: UEBar[];
+}
+
+const num = (v: Value | undefined): number | null => (isNum(v) ? v : null);
+
+/** Whether a package can show unit economics in a period. */
+export function denominatorState(wb: Workbook, values: Map<string, Value>, periodId: string): { ok: boolean; reason?: UEUnavailable; value: number | null; key: string | null } {
+  const ref = wb.pkg.unitEconomics.denominatorRowRef;
+  const row = wb.row(ref);
+  if (!row) return { ok: false, reason: 'no-denominator-row', value: null, key: null };
+  const key = wb.keyOf(ref, periodId) ?? null;
+  const cell = key ? wb.cell(key) : undefined;
+  const value = key ? num(values.get(key)) : null;
+  if (!cell || cell.kind === 'missing' || value === null || value === 0) return { ok: false, reason: 'volume-missing', value: null, key };
+  return { ok: true, value, key };
+}
+
+/** True when no period of the package has a volume: the section then shows only the not-available line. */
+export function noVolumeAnywhere(wb: Workbook, values: Map<string, Value>): boolean {
+  return wb.pkg.unitEconomics.periods.every((p) => !denominatorState(wb, values, p).ok);
+}
+
+export function unitEconomicsAt(wb: Workbook, values: Map<string, Value>, periodId: string): UEView {
+  const ue = wb.pkg.unitEconomics;
+  const denomRow = wb.row(ue.denominatorRowRef);
+  const state = denominatorState(wb, values, periodId);
+  const revenueRow = wb.row(ue.lines.find((l) => l.role === 'revenue')?.rowRef ?? '');
+  const scale = unitScale(revenueRow?.unit ?? '', denomRow?.unit ?? '');
+  const denominator = {
+    rowRef: ue.denominatorRowRef,
+    key: state.key,
+    value: state.value,
+    label: denomRow?.label ?? ue.denominatorRowRef,
+    unit: denomRow?.unit ?? '',
+  };
+  if (!state.ok || state.value === null) return { periodId, available: false, reason: state.reason, scale, denominator, bars: [] };
+
+  const vol = state.value;
+  let running: number | null = null;
+  const bars: UEBar[] = ue.lines.map((line) => {
+    const key = wb.keyOf(line.rowRef, periodId) ?? '';
+    const total = num(values.get(key));
+    const perUnit = total === null ? null : (total / vol) * scale.multiplier;
+    let from: number | null = null;
+    let to: number | null = null;
+    if (perUnit !== null) {
+      if (line.role === 'revenue' || line.role === 'subtotal') {
+        from = 0;
+        to = perUnit;
+        running = perUnit;
+      } else if (running !== null) {
+        from = running;
+        to = running - perUnit;
+        running = to;
+      }
+    }
+    return { line, key, total, perUnit, from, to };
+  });
+  return { periodId, available: true, scale, denominator, bars };
+}
+
+/** The bars' extent, for the chart's scale: zero always included. */
+export function extent(bars: UEBar[]): { lo: number; hi: number } {
+  const ends = bars.flatMap((b) => [b.from, b.to]).filter((x): x is number => x !== null);
+  return { lo: Math.min(0, ...ends), hi: Math.max(0, ...ends) };
+}
+
+/** A line's per-unit value in another package, read from its stored rows, or null. */
+export function perUnitInPackage(pkg: ModelPackage, lineId: string, periodId: string): number | null {
+  const ue = pkg.unitEconomics;
+  const line = ue.lines.find((l) => l.id === lineId);
+  const pi = pkg.periods.findIndex((p) => p.id === periodId);
+  if (!line || pi < 0) return null;
+  const read = (rowRef: string) => {
+    const r = splitRowRef(rowRef);
+    const row = r ? pkg.sheets.find((s) => s.id === r.sheet)?.rows.find((x) => x.id === r.rowId) : undefined;
+    const cell = row?.cells[pi];
+    return { row, value: cell && cell.kind !== 'missing' ? cell.value : null };
+  };
+  const vol = read(ue.denominatorRowRef);
+  const v = read(line.rowRef);
+  if (vol.value === null || vol.value === 0 || v.value === null || !v.row || !vol.row) return null;
+  return (v.value / vol.value) * unitScale(v.row.unit, vol.row.unit).multiplier;
+}
+
+/** Two packages are on the same basis when they divide by the same unit and share the line. */
+export function sameBasis(a: ModelPackage, b: ModelPackage, lineId: string): boolean {
+  return (
+    a.unitEconomics.unit === b.unitEconomics.unit &&
+    a.unitEconomics.basisLabel === b.unitEconomics.basisLabel &&
+    b.unitEconomics.lines.some((l) => l.id === lineId)
+  );
+}
+
+/** Per-unit figures are shown to one decimal; they are worked in full precision. */
+export const PER_UNIT_DECIMALS = 1;
+
+/** Costs are reductions, so they read in brackets on the bar. */
+export function barValue(bar: UEBar): string {
+  if (bar.perUnit === null) return '—';
+  const reduces = bar.line.role === 'cost' || bar.line.role === 'unsplit';
+  return formatNumber(reduces ? -bar.perUnit : bar.perUnit, PER_UNIT_DECIMALS);
+}

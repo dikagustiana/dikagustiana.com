@@ -18,6 +18,8 @@ import { ModelGrid } from '@/components/finance-in-action/viewer/model/ModelGrid
 import { Inspector } from '@/components/finance-in-action/viewer/model/Inspector';
 import { WorkpaperRecord } from '@/components/finance-in-action/viewer/model/WorkpaperRecord';
 import { PeriodSelect } from '@/components/finance-in-action/viewer/model/PeriodSelect';
+import { UnitEconomics } from '@/components/finance-in-action/viewer/model/UnitEconomics';
+import { UELineDetail } from '@/components/finance-in-action/viewer/model/UELineDetail';
 import { useModelView } from '@/components/finance-in-action/viewer/model/useModelView';
 import type { SheetId } from '@/lib/finance-in-action/constants';
 import type { ModelPackage } from '@/lib/finance-in-action/contract/types';
@@ -26,7 +28,8 @@ import { COPY } from '@/lib/finance-in-action/copy';
 import { positionOf } from '@/lib/finance-in-action/chain';
 import { linksFrom } from '@/lib/finance-in-action/links';
 import { peerBand, publishedPeers } from '@/lib/finance-in-action/peers';
-import { quarterPeriods, periodById } from '@/lib/finance-in-action/model/periods';
+import { latestReported, quarterPeriods, periodById } from '@/lib/finance-in-action/model/periods';
+import { noVolumeAnywhere, unitEconomicsAt } from '@/lib/finance-in-action/unitEconomics';
 import type { Registry } from '@/lib/finance-in-action/registry';
 import { INDEX_PATH, MODEL_PARAM, positionPath, subIndustryPath } from '@/lib/finance-in-action/routes';
 
@@ -56,6 +59,9 @@ export function FiaModelPage({ pkg, reg }: { pkg: ModelPackage; reg: Registry })
   };
   const [sheet, setSheet] = useState<SheetId>('model');
   const [treePeriod, setTreePeriod] = useState(pkg.meta.asOf.fullStatementsTo);
+  const [uePeriod, setUePeriod] = useState(() => latestReported(pkg, pkg.unitEconomics.periods) ?? pkg.meta.asOf.fullStatementsTo);
+  const ue = useMemo(() => unitEconomicsAt(view.wb, view.values, uePeriod), [view.wb, view.values, uePeriod]);
+  const noVolume = useMemo(() => noVolumeAnywhere(view.wb, view.values), [view.wb, view.values]);
 
   const { meta } = pkg;
   const sub = reg.subIndustry(meta.subIndustry);
@@ -106,6 +112,10 @@ export function FiaModelPage({ pkg, reg }: { pkg: ModelPackage; reg: Registry })
               <DriverRow view={view} periodId={treePeriod} feeds={feeds} reg={reg} />
             </Section>
 
+            <Section id="fia-unit-economics" title={`Unit economics, per ${pkg.unitEconomics.unit} sold`}>
+              <UnitEconomics view={view} reg={reg} ue={ue} periodId={uePeriod} onPeriod={setUePeriod} onlyMessage={noVolume} />
+            </Section>
+
             <Section id="fia-peers" title={`Where ${meta.ticker} sits in ${subName}`}>
               <PeerBand metrics={peers} ticker={meta.ticker} subIndustryName={subName} publishedCount={publishedPeers(reg, pkg).length} />
             </Section>
@@ -122,7 +132,9 @@ export function FiaModelPage({ pkg, reg }: { pkg: ModelPackage; reg: Registry })
               <WorkpaperRecord pkg={pkg} />
             </Section>
           </div>
-          <Inspector view={view} />
+          <Inspector view={view}>
+            <UELineDetail view={view} ue={ue} />
+          </Inspector>
         </div>
       </div>
     </PageLayout>

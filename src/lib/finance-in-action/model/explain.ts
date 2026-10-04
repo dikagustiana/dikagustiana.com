@@ -134,3 +134,23 @@ export function sourceLine(s: CellSource): string {
     .filter(Boolean)
     .join(', ');
 }
+
+/**
+ * Sources in short: one entry per document series and note, with the periods
+ * as a range. "SYNTHETIC interim financial statements, Q1 25 to Q4 25, note 25".
+ */
+export function summariseSources(inputs: SourcedInput[]): string[] {
+  const groups = new Map<string, { title: string; note?: string; periods: string[] }>();
+  for (const i of inputs) {
+    const s = i.source;
+    const title = s.document.endsWith(s.period) ? s.document.slice(0, -s.period.length).trim() : s.document;
+    const id = `${s.issuer}|${title}|${s.note ?? ''}`;
+    const g = groups.get(id) ?? { title, note: s.note, periods: [] };
+    if (!g.periods.includes(s.period)) g.periods.push(s.period);
+    groups.set(id, g);
+  }
+  return Array.from(groups.values()).map((g) => {
+    const range = g.periods.length > 2 ? `${g.periods[0]} to ${g.periods[g.periods.length - 1]}` : g.periods.join(' and ');
+    return [g.title, range, g.note ? `note ${g.note}` : null].filter(Boolean).join(', ');
+  });
+}
