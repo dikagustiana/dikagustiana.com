@@ -292,10 +292,9 @@ describe('useEssayAutosave', () => {
     expect(inserts()).toHaveLength(1);
   });
 
-  // PINNED CURRENT BEHAVIOUR — a small gap the test exposed: Supabase errors
-  // are plain PostgrestError objects, not Error instances, so the chip shows
-  // the opaque "Unknown error" instead of the actual cause. Phase 11 widens
-  // the message extraction; this then asserts the real message.
+  // WO-03 (docs/review/09-plan.md): the chip now shows the real cause —
+  // Supabase errors are plain objects, and the old extraction collapsed them
+  // to "Unknown error".
   it('surfaces a row-write error instead of silently claiming Saved', async () => {
     state.current.essayRow = { data: null, error: { message: 'network down' } };
     const { result } = renderHook(props =>
@@ -307,7 +306,7 @@ describe('useEssayAutosave', () => {
     });
 
     await until(() => result.current.autosaveStatus === 'error');
-    expect(result.current.autosaveError).toBe('Unknown error');
+    expect(result.current.autosaveError).toBe('network down');
     expect(inserts()).toHaveLength(1);
   });
 

@@ -41,6 +41,19 @@ import {
 const UNIQUE_VIOLATION = '23505';
 const MAX_INSERT_ATTEMPTS = 3;
 
+/**
+ * The chip's message for a failed write. Supabase errors are plain
+ * PostgrestError objects, not Error instances — without this, every failure
+ * reads as the opaque "Unknown error" and the author cannot tell a network
+ * drop from a guard rejection.
+ */
+function errorMessage(error: unknown): string {
+  if (error instanceof Error && error.message) return error.message;
+  const message = (error as { message?: unknown } | null)?.message;
+  if (typeof message === 'string' && message.trim()) return message;
+  return 'Unknown error';
+}
+
 const REVISION_COLUMNS = 'id, revision_no, change_type, created_at, content_json, title';
 
 export type AutosaveStatus = 'idle' | 'unsaved' | 'saving' | 'saved' | 'error';
@@ -340,7 +353,7 @@ export function useEssayAutosave({
       setAutosaveStatus('saved');
     } catch (error: unknown) {
       // Loud on purpose: the author must know the net is not catching them.
-      setAutosaveError(error instanceof Error ? error.message : 'Unknown error');
+      setAutosaveError(errorMessage(error));
       setAutosaveStatus('error');
     } finally {
       inFlight.current = false;
@@ -404,7 +417,7 @@ export function useEssayAutosave({
         setAutosaveError(null);
         setAutosaveStatus('saved');
       } catch (error: unknown) {
-        setAutosaveError(error instanceof Error ? error.message : 'Unknown error');
+        setAutosaveError(errorMessage(error));
         setAutosaveStatus('error');
       }
     },
