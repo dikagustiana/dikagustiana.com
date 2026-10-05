@@ -5,7 +5,7 @@ redo a finished phase. Deliverables live in this folder (`docs/review/`).
 
 ## Current position
 
-- **Phase:** 3 of 13 (Phases 1–2 committed)
+- **Phase:** 4 of 13 (Phases 1–3 committed)
 - **Next:** Phase 3 function audit (`02-functions.md`): every function/hook/store/edge
   function/SQL function with verdicts (works/broken/dead/risky/unclear) + tests for
   untested functions that matter (mock Supabase).
