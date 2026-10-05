@@ -40,6 +40,8 @@ interface Harness {
   insertQueue: Array<{ data?: { id: string } | null; error?: { code: string; message: string } | null }>;
   rollupError: { code: string; message: string } | null;
   essayRow: { data: Array<{ updated_at: string }> | null; error: { message: string } | null };
+  /** When set, every essays write parks until it resolves (race tests). */
+  essayRowGate: Promise<void> | null;
 }
 
 function makeHarness(): Harness {
@@ -50,6 +52,7 @@ function makeHarness(): Harness {
     insertQueue: [],
     rollupError: null,
     essayRow: { data: [{ updated_at: '2026-01-03T00:00:00Z' }], error: null },
+    essayRowGate: null,
   };
 }
 
@@ -81,7 +84,10 @@ vi.mock('@/integrations/supabase/client', () => ({
         } else {
           result = { data: null, error: { code: 'XX000', message: `unexpected await on ${table}` } };
         }
-        return Promise.resolve(result).then(res, rej);
+        const settled = table === 'essays' && h.essayRowGate
+          ? h.essayRowGate.then(() => result)
+          : Promise.resolve(result);
+        return settled.then(res, rej);
       };
       return b;
     },
@@ -328,8 +334,7 @@ describe('useEssayAutosave', () => {
       initialProps: { ...baseArgs, doc: doc('v1'), persistToEssay: false },
     });
 
-    act(() => result.current.flush());
-    await until(() => result.current.autosaveStatus === 'saved');
+    await act(async () => { await result.current.flush(); });
     expect(inserts()).toHaveLength(1);
   });
 
@@ -365,6 +370,42 @@ describe('useEssayAutosave', () => {
     expect(inserts()[0].payload).toMatchObject({ change_type: 'publish', status: 'published' });
     expect(revisionUpdates()).toHaveLength(0);
     expect(result.current.lastSavedTo).toBe('essay');
+    expect(result.current.autosaveStatus).toBe('saved');
+  });
+
+  // WO-04 (docs/review/09-plan.md): a second flush while a guarded row write
+  // is mid-flight must WAIT for it — a manual save that raced its own tab's
+  // autosave guarded on a stale updated_at and blamed "another tab".
+  it('flush() settles an in-flight save before returning', async () => {
+    let release!: () => void;
+    state.current.essayRowGate = new Promise<void>(r => { release = r; });
+    const serverUpdatedAt = { current: '2026-01-02T00:00:00Z' };
+    const { result } = renderHook(props =>
+      useEssayAutosave({ ...baseArgs, ...props }), {
+      initialProps: {
+        ...baseArgs, doc: doc('v1'), persistToEssay: true, serverUpdatedAtRef: serverUpdatedAt,
+      },
+    });
+
+    let firstSettled = false;
+    await act(async () => { void result.current.flush().then(() => { firstSettled = true; }); });
+    await vi.advanceTimersByTimeAsync(20);
+    expect(inserts()).toHaveLength(1); // backup landed; row write is parked
+
+    let secondSettled = false;
+    await act(async () => { void result.current.flush().then(() => { secondSettled = true; }); });
+    await vi.advanceTimersByTimeAsync(20);
+    expect(secondSettled).toBe(false); // the second flush waits out the first
+
+    await act(async () => {
+      release();
+      await vi.advanceTimersByTimeAsync(20);
+    });
+    expect(firstSettled).toBe(true);
+    expect(secondSettled).toBe(true);
+    expect(inserts()).toHaveLength(1); // the settled follow-up finds no diff — no duplicate
+    expect(essayUpdates()).toHaveLength(1);
+    expect(serverUpdatedAt.current).toBe('2026-01-03T00:00:00Z');
     expect(result.current.autosaveStatus).toBe('saved');
   });
 });
