@@ -12,9 +12,12 @@ const PORT = 4173;
 // Supabase env is set HERE, in Node, where it is cross-platform — a POSIX
 // `VAR=x cmd` prefix cannot start the server on Windows
 // ('VITE_SUPABASE_URL' is not recognized as an internal or external command).
-process.env.VITE_SUPABASE_URL ??= 'http://127.0.0.1:54321';
-process.env.VITE_SUPABASE_PUBLISHABLE_KEY ??= 'test-anon-key';
-process.env.VITE_SUPABASE_PROJECT_ID ??= 'test';
+// Assigned unconditionally, as the old prefix was: a shell that already
+// exports the real values must not point this build at production, and
+// variables already in the environment outrank .env files in Vite.
+process.env.VITE_SUPABASE_URL = 'http://127.0.0.1:54321';
+process.env.VITE_SUPABASE_PUBLISHABLE_KEY = 'test-anon-key';
+process.env.VITE_SUPABASE_PROJECT_ID = 'test';
 
 export default defineConfig({
   testDir: './tests/e2e',
