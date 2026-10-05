@@ -181,22 +181,35 @@ export interface RecoveryCandidate {
  * Decide whether to OFFER recovery when opening an essay.
  *
  * Offered only when an autosaved backup exists whose body differs from what
- * the essays row holds. That is exactly the "the tab died before Save" case.
- * A matching backup means the last save captured everything and there is
- * nothing to recover. Recovery is never applied automatically.
+ * the essays row holds AND that was written after the row's last save. That
+ * is exactly the "the tab died before Save" case. A matching backup means the
+ * last save captured everything and there is nothing to recover; an older
+ * backup that merely differs is the survivor of a burst the author already
+ * saved over, and offering it made the banner fire after every routine
+ * save-and-reload. Recovery is never applied automatically.
  *
  * `latest` must already be the newest revision OF THIS BODY (the caller
  * queries with the body filter); `autosaveType` is the second fence — a row
- * of the other body's kind can never become a candidate here.
+ * of the other body's kind can never become a candidate here. `rowUpdatedAt`
+ * is the essays row's `updated_at` as the editor loaded it; null keeps the
+ * content-only rule (used when the caller cannot know the row's timestamp).
  */
 export function findRecoveryCandidate(
   latest: RevisionSummary | null,
   essayDoc: unknown,
   autosaveType: RevisionChangeType = 'autosave',
+  rowUpdatedAt?: string | null,
 ): RecoveryCandidate | null {
   if (!latest) return null;
   if (latest.change_type !== autosaveType) return null;
   if (!latest.content_json) return null;
   if (!docsDiffer(latest.content_json, essayDoc)) return null;
+  if (rowUpdatedAt) {
+    const savedAtMs = new Date(rowUpdatedAt).getTime();
+    const backupMs = new Date(latest.created_at).getTime();
+    if (Number.isFinite(savedAtMs) && Number.isFinite(backupMs) && backupMs <= savedAtMs) {
+      return null;
+    }
+  }
   return { revision: latest, savedAt: latest.created_at };
 }

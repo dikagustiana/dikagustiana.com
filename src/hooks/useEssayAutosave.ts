@@ -449,6 +449,7 @@ export function useDraftRecovery(
   essayDoc: unknown,
   ready: boolean,
   body: RevisionBody = 'long',
+  rowUpdatedAt?: string | null,
 ): UseDraftRecoveryResult {
   const [candidate, setCandidate] = useState<RecoveryCandidate | null>(null);
   const checkedFor = useRef<string | null>(null);
@@ -462,7 +463,9 @@ export function useDraftRecovery(
       try {
         const latest = await fetchLatestRevisionOfBody(essayId, body);
         if (cancelled) return;
-        setCandidate(findRecoveryCandidate(latest, essayDoc, autosaveTypeForBody(body)));
+        setCandidate(
+          findRecoveryCandidate(latest, essayDoc, autosaveTypeForBody(body), rowUpdatedAt),
+        );
       } catch {
         // A failed recovery probe must not block opening the editor; the
         // backup itself is unaffected and still in the table.
@@ -473,7 +476,7 @@ export function useDraftRecovery(
     return () => {
       cancelled = true;
     };
-  }, [essayId, essayDoc, ready, body]);
+  }, [essayId, essayDoc, ready, body, rowUpdatedAt]);
 
   const dismiss = useCallback(() => setCandidate(null), []);
 

@@ -247,6 +247,7 @@ function BriefCanvas({
     parseBriefDoc(essay.brief_json),
     true,
     'brief',
+    serverUpdatedAtRef.current,
   );
 
   const handleRestoreRecovery = useCallback(() => {

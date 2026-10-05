@@ -416,21 +416,35 @@ describe('useDraftRecovery', () => {
     expect(result.current.candidate).toBeNull();
   });
 
-  // PINNED CURRENT BEHAVIOUR — documents a known gap, not a desired rule.
-  // findRecoveryCandidate compares content only; an autosave OLDER than the
-  // last manual save still differs from the row, so the banner fires after a
-  // routine save-and-reload. Phase 11 tightens this rule (recency vs the
-  // row's updated_at); when that lands, this test must flip to the negative.
-  it('[pinned] offers the differing autosave even when it predates the last save', async () => {
+  // WO-02 (docs/review/09-plan.md): the recovery offer now respects recency —
+  // a backup is "unsaved work" only if it was written AFTER the row's last
+  // save. The previously pinned false positive (a stale autosave offered
+  // after a routine save+reload) is asserted as the negative here.
+  it('stays quiet when the differing autosave predates the last save', async () => {
     state.current.latestOfBody = rev({
       change_type: 'autosave',
       content_json: doc('stale burst, saved over'),
       created_at: new Date(before - 3_600_000).toISOString(),
     });
 
-    const { result } = renderHook(() => useDraftRecovery('essay-1', rowDoc, true));
+    const { result } = renderHook(() =>
+      useDraftRecovery('essay-1', rowDoc, true, 'long', new Date(before).toISOString()));
+
+    await vi.advanceTimersByTimeAsync(50);
+    expect(result.current.candidate).toBeNull();
+  });
+
+  it('offers the differing autosave when it is newer than the last save', async () => {
+    state.current.latestOfBody = rev({
+      change_type: 'autosave',
+      content_json: doc('crashed tab text, newer than the row'),
+      created_at: new Date(before + 60_000).toISOString(),
+    });
+
+    const { result } = renderHook(() =>
+      useDraftRecovery('essay-1', rowDoc, true, 'long', new Date(before).toISOString()));
 
     await until(() => result.current.candidate !== null);
-    expect(result.current.candidate?.savedAt).toBe(state.current.latestOfBody!.created_at);
+    expect(result.current.candidate?.revision.id).toBe('rev-1');
   });
 });

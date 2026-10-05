@@ -389,6 +389,8 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
     essayDbId,
     contentJson,
     !isLoading,
+    'long',
+    serverUpdatedAtRef.current,
   );
 
   const handleRestoreRecovery = useCallback(() => {
