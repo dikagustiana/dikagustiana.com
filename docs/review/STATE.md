@@ -5,5 +5,5 @@ redo a finished phase. Deliverables live in this folder (`docs/review/`).
 
 ## Current position
 
-- **Phase:** 13 of 13 — final report (`11-report.md`). Phases 1–12 are complete and committed.
-- **Next:** write the final report with the Indonesian summary, commit, push the branch (second and last push), stop. Do not open a PR.
+- **Phase:** COMPLETE. All 13 phases committed; branch pushed twice (after Phase 10 and after Phase 13). Do not redo anything.
+- **Next (owner, not a review session):** R1 repair Vercel deploy + redeploy, R2 fix apex domain, R3 set backup secrets, R6 deploy hook on publish. Then re-run the blocked-live list in `10-reverification.md` §6.
