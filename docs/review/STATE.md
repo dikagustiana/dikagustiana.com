@@ -5,8 +5,8 @@ redo a finished phase. Deliverables live in this folder (`docs/review/`).
 
 ## Current position
 
-- **Phase:** 6 of 13 (Phases 1–5 committed)
-- **Next:** Phase 6 goal-fit review (`05-goal-fit.md`): page-by-page against the Phase 1 checks (live content checks blocked by the blank-page P0; local build + e2e stand in).
+- **Phase:** 8 of 13 (Phases 1–7 committed)
+- **Next:** Phase 8 content map (`07-content-map.md`): sections/modules coverage from the seed migrations + share-card manifest; then reconciliation.
 
 ## Baseline snapshot (recorded 2026-10-05, main @ cf22d64, Windows checkout)
 
