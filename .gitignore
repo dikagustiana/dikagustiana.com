@@ -47,3 +47,6 @@ backups/
 # The JSON report CI writes for scripts/assert-test-count.mjs. A contributor who
 # reproduces the CI step locally should not commit its output.
 vitest-report.json
+
+# Incremental-build state (docs/REVIEW-2026-08.md R12): machine-local, never source.
+*.tsbuildinfo
