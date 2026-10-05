@@ -23,9 +23,10 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      # --max-warnings holds the line at the current count (35). New warnings
-      # fail; paying warnings down lowers the ceiling deliberately, not silently.
-      - run: npx eslint . --max-warnings=35
+      # --max-warnings holds the line at the current count (22, after the
+      # 2026-10 review's dead-code removal). New warnings fail; paying
+      # warnings down lowers the ceiling deliberately, not silently.
+      - run: npx eslint . --max-warnings=22
       # tsc -b --force: the root tsconfig is solution-style ("files": []), so a
       # bare `tsc --noEmit` compiles NOTHING and exits 0. Do not "simplify" this.
       - run: npm run typecheck
