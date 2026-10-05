@@ -7,10 +7,14 @@ import { defineConfig, devices } from '@playwright/test';
  * contacted.
  */
 const PORT = 4173;
-const TEST_SUPABASE_ENV =
-  'VITE_SUPABASE_URL=http://127.0.0.1:54321 ' +
-  'VITE_SUPABASE_PUBLISHABLE_KEY=test-anon-key ' +
-  'VITE_SUPABASE_PROJECT_ID=test';
+
+// The webServer command runs through the platform shell, so the fake
+// Supabase env is set HERE, in Node, where it is cross-platform — a POSIX
+// `VAR=x cmd` prefix cannot start the server on Windows
+// ('VITE_SUPABASE_URL' is not recognized as an internal or external command).
+process.env.VITE_SUPABASE_URL ??= 'http://127.0.0.1:54321';
+process.env.VITE_SUPABASE_PUBLISHABLE_KEY ??= 'test-anon-key';
+process.env.VITE_SUPABASE_PROJECT_ID ??= 'test';
 
 export default defineConfig({
   testDir: './tests/e2e',
@@ -35,7 +39,8 @@ export default defineConfig({
     // whole premise is that no production backend is ever contacted; the
     // SPA bundle is what it tests, and preview falls back to index.html for
     // every route, so the per-essay static files are not needed here.
-    command: `${TEST_SUPABASE_ENV} npx vite build && npm run preview -- --host 127.0.0.1 --port ${PORT} --strictPort`,
+    // Plain `&&` — understood by both cmd.exe and POSIX sh.
+    command: `npx vite build && npm run preview -- --host 127.0.0.1 --port ${PORT} --strictPort`,
     url: `http://127.0.0.1:${PORT}`,
     timeout: 180_000,
     reuseExistingServer: !process.env.CI,
