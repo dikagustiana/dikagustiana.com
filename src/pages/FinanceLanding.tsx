@@ -13,6 +13,7 @@ import { PageLayout } from '@/components/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
 import { CURRICULUM_CONTRACT } from '@/data/curriculumContract';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ErrorState } from '@/components/states';
 import { ArrowRight } from 'lucide-react';
 import { useFeaturedFinanceEssay, useFinanceSections } from '@/hooks/queries/useFinance';
 import { essayUrl, essayUrlInputFromRow, universalEssayUrl } from '@/lib/essayUrl';
@@ -26,7 +27,7 @@ function sectionHref(slug: string): string {
 
 export default function FinanceLanding() {
   const { data: featured, isLoading: featuredLoading } = useFeaturedFinanceEssay();
-  const { data: sections, isLoading: sectionsLoading } = useFinanceSections();
+  const { data: sections, isLoading: sectionsLoading, isError: sectionsError, refetch: refetchSections } = useFinanceSections();
 
   return (
     <PageLayout
@@ -94,7 +95,13 @@ export default function FinanceLanding() {
         ) : null}
 
         {/* Domain Entry Points — DB-driven */}
-        {sectionsLoading ? (
+        {sectionsError ? (
+          <ErrorState
+            title="Couldn't load the tracks"
+            message="The finance tracks could not be fetched just now. This is a temporary failure, not an empty syllabus."
+            onRetry={() => refetchSections()}
+          />
+        ) : sectionsLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {Array.from({ length: 4 }).map((_, i) => (
               <Skeleton key={i} className="h-24 rounded-xl" />
