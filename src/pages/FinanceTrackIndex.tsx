@@ -229,14 +229,26 @@ function TrackContent({ track }: { track: string }) {
   const [openModules, setOpenModules] = useState<Set<string>>(new Set());
 
   // A failed query is a failure, not a missing track: redirecting it to the
-  // landing page made an outage look like the syllabus had vanished.
+  // landing page made an outage look like the syllabus had vanished. Rendered
+  // inside the layout so the header and footer stay reachable.
   if (!sectionLoading && sectionError) {
     return (
-      <ErrorState
-        title="Couldn't load this track"
-        message="The track's pages could not be fetched just now. This is a temporary failure, not an empty track."
-        onRetry={() => refetchSection()}
-      />
+      <PageLayout
+        role="manager"
+        breadcrumbs={[
+          { label: 'Home', path: '/' },
+          { label: 'Finance', path: '/finance' },
+          { label: track },
+        ]}
+      >
+        <div className="flex-1 container py-16">
+          <ErrorState
+            title="Couldn't load this track"
+            message="The track's pages could not be fetched just now. This is a temporary failure, not an empty track."
+            onRetry={() => refetchSection()}
+          />
+        </div>
+      </PageLayout>
     );
   }
 
