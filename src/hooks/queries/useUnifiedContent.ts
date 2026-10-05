@@ -147,13 +147,17 @@ export function useContentStats() {
   return useQuery({
     queryKey: ['content-stats'],
     queryFn: async () => {
-      const { data: essays } = await supabase
+      // A failed read must not read as "0 drafts, 0 published" — throw so the
+      // page can distinguish an outage from an empty workspace.
+      const { data: essays, error: essaysError } = await supabase
         .from('essays')
         .select('id, published, section, status');
+      if (essaysError) throw essaysError;
 
-      const { count: fsliCount } = await supabase
+      const { count: fsliCount, error: fsliError } = await supabase
         .from('fsli_pages')
         .select('*', { count: 'exact', head: true });
+      if (fsliError) throw fsliError;
 
       const essayList = essays || [];
 
