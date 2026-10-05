@@ -5,8 +5,8 @@ redo a finished phase. Deliverables live in this folder (`docs/review/`).
 
 ## Current position
 
-- **Phase:** 8 of 13 (Phases 1–7 committed)
-- **Next:** Phase 8 content map (`07-content-map.md`): sections/modules coverage from the seed migrations + share-card manifest; then reconciliation.
+- **Phase:** 11 of 13 (Phases 1–10 committed; branch pushed after the Phase 10 commit)
+- **Next:** Phase 11 — execute WO-01…WO-15 from `09-plan.md`, one commit each, re-running build/typecheck/lint/tests after each.
 
 ## Baseline snapshot (recorded 2026-10-05, main @ cf22d64, Windows checkout)
 
