@@ -38,3 +38,11 @@ jobs:
           TZ: America/Chicago
       - run: node scripts/assert-test-count.mjs vitest-report.json
       - run: npm run build
+      # The e2e suite (72 specs: every public route, the reader journeys, the
+      # chain map) used to run only when someone remembered. It builds and
+      # serves the production bundle locally with a dead Supabase URL and
+      # intercepts every backend call, so it touches no production system.
+      - run: npx playwright install --with-deps chromium
+      - run: npx playwright test
+        env:
+          TZ: America/Chicago
