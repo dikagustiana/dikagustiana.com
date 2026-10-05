@@ -28,43 +28,37 @@ export function useAuditLog(filter: AuditLogFilter = {}) {
   return useQuery({
     queryKey: ['admin-audit-log', filter],
     queryFn: async (): Promise<AuditLogEntry[]> => {
-      const client = supabase as unknown as {
-        from: (table: string) => {
-          select: (cols: string) => {
-            order: (col: string, opts: { ascending: boolean }) => {
-              limit: (n: number) => Promise<{ data: AuditLogEntry[] | null; error: unknown }>;
-            };
-          };
-        };
-      };
-
-      const { data, error } = await client
+      // Filters run SERVER-SIDE: the client-side pass filtered only the
+      // fetched page (limit 500), so a search silently missed every matching
+      // row beyond it.
+      let query = supabase
         .from('admin_audit_log')
         .select('*')
-        .order('created_at', { ascending: false })
-        .limit(filter.limit ?? 500);
-
-      if (error) throw error;
-      let rows = data ?? [];
+        .order('created_at', { ascending: false });
 
       if (filter.action && filter.action !== 'all') {
-        rows = rows.filter((r) => r.action === filter.action);
+        query = query.eq('action', filter.action);
       }
       if (filter.table && filter.table !== 'all') {
-        rows = rows.filter((r) => r.table_name === filter.table);
+        query = query.eq('table_name', filter.table);
       }
       if (filter.userEmail && filter.userEmail !== 'all') {
-        rows = rows.filter((r) => r.user_email === filter.userEmail);
+        query = query.eq('user_email', filter.userEmail);
       }
       if (filter.search) {
-        const q = filter.search.toLowerCase();
-        rows = rows.filter((r) =>
-          [r.record_title, r.record_slug, r.user_email, r.table_name]
-            .filter(Boolean)
-            .some((v) => String(v).toLowerCase().includes(q))
-        );
+        const q = filter.search.replace(/[%,]/g, '');
+        if (q) {
+          query = query.or(
+            `record_title.ilike.%${q}%,record_slug.ilike.%${q}%,user_email.ilike.%${q}%`
+          );
+        }
       }
-      return rows;
+
+      const { data, error } = await query.limit(filter.limit ?? 500);
+      if (error) throw error;
+      // changes/metadata are jsonb (Database types them Json); the entry
+      // type models them as records.
+      return (data ?? []) as unknown as AuditLogEntry[];
     },
   });
 }
