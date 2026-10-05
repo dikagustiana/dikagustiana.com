@@ -26,7 +26,6 @@
 
 import { writeFileSync, mkdirSync, existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { TABLES, assessTable, assessTableError, buildIntegrity } from './lib/dumpAssess.mjs';
 
 // ---------------------------------------------------------------------------
 // Config
@@ -71,6 +70,20 @@ const OUT_DIR = argOut > -1 ? process.argv[argOut + 1] : join('backups', stamp);
 // Tables. `min` is a floor below which the dump is considered untrustworthy.
 // ---------------------------------------------------------------------------
 
+const TABLES = [
+  { name: 'essays', min: 100 },
+  { name: 'essay_revisions', min: 0 },
+  { name: 'sections', min: 1 },
+  { name: 'categories', min: 1 },
+  { name: 'finance_sections', min: 1 },
+  { name: 'finance_modules', min: 10 },
+  { name: 'fsli_pages', min: 1 },
+  { name: 'fsli_sections', min: 0 },
+  { name: 'finance_models', min: 0 },
+  { name: 'books_uploads', min: 0 },
+  { name: 'finance_settings', min: 0 },
+];
+
 async function fetchAll(table) {
   const rows = [];
   const PAGE = 500;
@@ -102,15 +115,12 @@ for (const { name, min } of TABLES) {
     const rows = await fetchAll(name);
     const path = join(OUT_DIR, `${name}.json`);
     writeFileSync(path, JSON.stringify(rows, null, 2));
-    const json = JSON.stringify(rows, null, 2);
-    writeFileSync(path, json);
-    const assessed = assessTable(name, min, rows.length, json.length);
-    manifest.tables[name] = assessed.entry;
-    if (assessed.belowFloor) suspicious = true;
-    const flag = assessed.belowFloor ? '  << BELOW EXPECTED FLOOR' : '';
+    manifest.tables[name] = { rows: rows.length, bytes: JSON.stringify(rows).length };
+    const flag = rows.length < min ? '  << BELOW EXPECTED FLOOR' : '';
+    if (rows.length < min) suspicious = true;
     console.log(`${name.padEnd(20)} ${String(rows.length).padStart(5)} rows${flag}`);
   } catch (e) {
-    manifest.tables[name] = assessTableError(e.message).entry;
+    manifest.tables[name] = { error: e.message };
     suspicious = true;
     console.error(`${name.padEnd(20)} FAILED: ${e.message}`);
   }
@@ -118,10 +128,14 @@ for (const { name, min } of TABLES) {
 
 // The thing the backup exists for: verify the authored bodies are actually in it.
 const essays = JSON.parse(readFileSync(join(OUT_DIR, 'essays.json'), 'utf-8'));
-const integrity = buildIntegrity(essays);
-manifest.integrity = integrity;
-const withBody = integrity.essays_with_body;
-const withPresentation = integrity.essays_with_presentation;
+const withBody = essays.filter(e => (e.content && e.content.length > 0) || e.content_json);
+const withPresentation = essays.filter(e => e.presentation);
+manifest.integrity = {
+  essays_total: essays.length,
+  essays_with_body: withBody.length,
+  essays_with_presentation: withPresentation.length,
+  published: essays.filter(e => e.published).length,
+};
 
 writeFileSync(join(OUT_DIR, 'manifest.json'), JSON.stringify(manifest, null, 2));
 
