@@ -438,6 +438,11 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
     setIsSaving(true);
 
     try {
+      // Settle this tab's own in-flight autosave first: its guarded row write
+      // advances serverUpdatedAtRef, and a manual save that raced it would
+      // fail on a stale updated_at and blame "another tab" for its own write.
+      await flushAutosave();
+
       // Ensure slug uniqueness
       const finalSlug = await generateUniqueSlug(slug, essayDbId || undefined);
 
