@@ -18,6 +18,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { LoadingState, ErrorState } from '@/components/states';
 import { ArticleShell } from '@/components/editorial';
+import { chainLinkForModule } from '@/lib/chainLink';
 import { contentToHtml } from '@/lib/tiptap/serialize';
 import { resolvePresentation, type EssayPresentation } from '@/lib/presentation';
 import { essayUrl, universalEssayUrl } from '@/lib/essayUrl';
@@ -134,6 +135,7 @@ export default function EssayBySlug() {
       seoDescription={deck || undefined}
       seoAuthor={essay.author || undefined}
       backLink={{ label: 'Back to home', path: '/' }}
+      chainLink={chainLinkForModule(essay.finance_modules?.slug)}
       title={essay.title}
       deck={deck}
       author={essay.author}

@@ -7,7 +7,7 @@
 
 import { ReactNode, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, User, Calendar, Clock } from 'lucide-react';
+import { ArrowLeft, User, Calendar, Clock, Waypoints } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { ReadingProgress } from './ReadingProgress';
@@ -31,6 +31,8 @@ export interface LongformArticleShellProps {
   /** The essay's slug: names its build-time share card (src/lib/shareImage.mjs). */
   slug?: string;
   backLink: { label: string; path: string };
+  /** Optional essay→chain link — only for modules pinned in chainCurriculumMap. */
+  chainLink?: { label: string; path: string } | null;
   title: string;
   deck?: string | null;
   author?: string | null;
@@ -73,6 +75,7 @@ export function LongformArticleShell({
   seoAuthor,
   slug,
   backLink,
+  chainLink,
   title,
   deck,
   author,
@@ -147,6 +150,15 @@ export function LongformArticleShell({
             <ArrowLeft className="h-4 w-4" />
             {backLink.label}
           </Link>
+          {chainLink && (
+            <Link
+              to={chainLink.path}
+              className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <Waypoints className="h-4 w-4" />
+              {chainLink.label}
+            </Link>
+          )}
 
           {/* ── Title section ── */}
           <header className="space-y-4">

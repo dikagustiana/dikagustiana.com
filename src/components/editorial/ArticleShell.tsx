@@ -14,7 +14,7 @@
 
 import { ReactNode, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Waypoints } from 'lucide-react';
 import { genreOf } from '@/data/genres';
 import { fullDate } from '@/lib/formatDate';
 import { Header } from '@/components/Header';
@@ -50,6 +50,8 @@ export interface ArticleShellProps {
 
   /** Back navigation */
   backLink: { label: string; path: string };
+  /** Optional essay→chain link — only for modules pinned in chainCurriculumMap. */
+  chainLink?: { label: string; path: string } | null;
 
   /** Article header */
   title: string;
@@ -118,6 +120,7 @@ export function ArticleShell({
   seoAuthor,
   slug,
   backLink,
+  chainLink,
   title,
   deck,
   author,
@@ -214,6 +217,15 @@ export function ArticleShell({
               <ArrowLeft className="h-4 w-4" />
               {backLink.label}
             </Link>
+            {chainLink && (
+              <Link
+                to={chainLink.path}
+                className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-8"
+              >
+                <Waypoints className="h-4 w-4" />
+                {chainLink.label}
+              </Link>
+            )}
 
             {/* Header block */}
             <ArticleHeader

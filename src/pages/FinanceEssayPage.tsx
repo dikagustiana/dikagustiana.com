@@ -21,6 +21,7 @@ import { LoadingState, ErrorState } from '@/components/states';
 import { ArticleShell, ArticleLayout } from '@/components/editorial';
 import { LongformArticleShell } from '@/components/editorial/LongformArticleShell';
 import { contentToHtml } from '@/lib/tiptap/serialize';
+import { chainLinkForModule } from '@/lib/chainLink';
 import { isPublished } from '@/lib/publication';
 
 interface Essay {
@@ -216,6 +217,7 @@ export default function FinanceEssayPage() {
     backLink: actualModule
       ? { label: 'Back to lessons', path: `/finance/${track}/${actualModule.slug}` }
       : { label: 'Back to track', path: `/finance/${track}` },
+    chainLink: chainLinkForModule(actualModule?.slug ?? null),
     title: essay.title,
     deck,
     author: essay.author,
