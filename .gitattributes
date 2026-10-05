@@ -1,0 +1,4 @@
+# Keep checkout bytes identical across platforms: a test pins the sha256 of
+# the share-card font licence, and a CRLF checkout breaks it.
+scripts/og-fonts/*.txt text eol=lf
+scripts/og-fonts/*.ttf binary
