@@ -5,10 +5,10 @@ redo a finished phase. Deliverables live in this folder (`docs/review/`).
 
 ## Current position
 
-- **Phase:** 2 of 13 (Phase 1 committed)
-- **Next:** Phase 2 inventory (`01-inventory.md`): routes/pages and reachability, feature
-  areas, Supabase schema/policies, edge function, cron, external services, env var names,
-  build/CI/deploy config, what a non-main-branch push triggers, and the baseline.
+- **Phase:** 3 of 13 (Phases 1–2 committed)
+- **Next:** Phase 3 function audit (`02-functions.md`): every function/hook/store/edge
+  function/SQL function with verdicts (works/broken/dead/risky/unclear) + tests for
+  untested functions that matter (mock Supabase).
 
 ## Baseline snapshot (recorded 2026-10-05, main @ cf22d64, Windows checkout)
 
@@ -32,6 +32,13 @@ redo a finished phase. Deliverables live in this folder (`docs/review/`).
 - [x] Branch `review/goals-2026-10` cut from main @ cf22d64.
 - [x] `npm install` clean.
 - [x] Phase 1 — `00-goals.md` (checks G1.1–G6.5, guardrails FD1–FD4, claims K1–K6).
+- [x] Phase 2 — `01-inventory.md`. Headline live-site facts: (a) production deployment is
+  ~2 months stale (pre-Aug-2 index.html, no capital-allocation/FIA v3 in bundle; CI green
+  ⇒ break is GitHub→Vercel; owner-only); (b) apex domain 308-redirects to the raw
+  vercel.app URL while www serves 200 (owner-only); (c) K1 CONFIRMED — backup secrets
+  empty in Actions, daily failures logged; (d) K2 CONFIRMED (dead file); (e) non-main
+  branch push triggers no CI/migrations/function deploys (Vercel previews undeterminable
+  from repo) ⇒ Phase 10/13 pushes may go ahead.
 
 ## Decisions / notes for the next session
 
@@ -39,5 +46,8 @@ redo a finished phase. Deliverables live in this folder (`docs/review/`).
   paraphrases. Do not write personal/applicant info into files.
 - Phase 11 fix candidates already queued: `.gitattributes` for line-ending-stable
   checkout (from baseline test failure).
-- Share-card PNGs already in repo at `docs/review/share-cards/` + `manifest.json` — use
-  as evidence for claim K4 (share-card parity), do not overwrite.
+- gh CLI is authenticated as the owner; used READ-ONLY (run logs/list). Never create
+  PRs/issues/releases/tags. The GitHub repo is private (anonymous API 404s).
+- Do NOT touch Supabase/Vercel/DNS. The two P0s (stale deploy, apex redirect) are
+  owner-only dashboard/DNS decisions — document, never "fix".
+- `gh` evidence for K1: run 37242617434 log shows both secrets resolve empty + FATAL line.
