@@ -416,12 +416,16 @@ describe('useDraftRecovery', () => {
     expect(result.current.candidate).toBeNull();
   });
 
-  // PINNED CURRENT BEHAVIOUR — documents a known gap, not a desired rule.
-  // findRecoveryCandidate compares content only; an autosave OLDER than the
-  // last manual save still differs from the row, so the banner fires after a
-  // routine save-and-reload. Phase 11 tightens this rule (recency vs the
-  // row's updated_at); when that lands, this test must flip to the negative.
-  it('[pinned] offers the differing autosave even when it predates the last save', async () => {
+  // The offer is content-only ON PURPOSE. A manual save writes a
+  // `manual_save` revision, so after a normal save-and-reload the newest
+  // revision of the body is not an autosave and nothing is offered; an older
+  // differing autosave only surfaces when that marker failed to land. A
+  // recency rule against essays.updated_at was tried and rejected
+  // (docs/review/claude-audit.md, WO-02): the Brief and the long body share
+  // that column, and a rolled-up autosave stamps created_at from the client
+  // clock, so the rule could hide a real unsaved draft. An extra banner the
+  // author can dismiss is the cheaper failure.
+  it('offers the differing autosave even when it predates the last save', async () => {
     state.current.latestOfBody = rev({
       change_type: 'autosave',
       content_json: doc('stale burst, saved over'),
