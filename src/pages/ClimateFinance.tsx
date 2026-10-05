@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ErrorState } from '@/components/states';
 import { useEssays } from '@/hooks/queries/useEssays';
 import { GREEN_TRANSITION_TABS } from '@/data/greenTransitionTabs';
 import { Banknote, BarChart3, HandCoins, Flame, Building2, Factory, Search, Clock, User, Calendar } from 'lucide-react';
@@ -20,7 +21,7 @@ const concepts = [
 ];
 
 export default function ClimateFinance() {
-  const { data: essays, isLoading } = useEssays({
+  const { data: essays, isLoading, isError, refetch } = useEssays({
     section: 'green-transition',
     phase: 'climate-finance',
   });
@@ -146,7 +147,13 @@ export default function ClimateFinance() {
             {filteredEssays.length} {filteredEssays.length === 1 ? 'essay' : 'essays'}
           </p>
 
-          {isLoading ? (
+          {isError ? (
+            <ErrorState
+              title="Couldn't load the essays"
+              message="The essays could not be fetched just now. This is a temporary failure, not an empty section."
+              onRetry={() => refetch()}
+            />
+          ) : isLoading ? (
             <div className="space-y-8">
               {[1, 2, 3].map((i) => (
                 <div key={i} className="flex gap-6">

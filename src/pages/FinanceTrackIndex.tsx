@@ -8,6 +8,7 @@
 
 import React, { useState } from 'react';
 import { Link, useParams, Navigate } from 'react-router-dom';
+import { ErrorState } from '@/components/states';
 import { ChevronDown } from 'lucide-react';
 import { PageLayout } from '@/components/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
@@ -218,6 +219,7 @@ function TrackContent({ track }: { track: string }) {
     data: section,
     isLoading: sectionLoading,
     isError: sectionError,
+    refetch: refetchSection,
   } = useFinanceSectionBySlug(track);
 
   const { data: modules, isLoading: modulesLoading } = useFinanceModulesByTrack(track);
@@ -226,8 +228,16 @@ function TrackContent({ track }: { track: string }) {
 
   const [openModules, setOpenModules] = useState<Set<string>>(new Set());
 
+  // A failed query is a failure, not a missing track: redirecting it to the
+  // landing page made an outage look like the syllabus had vanished.
   if (!sectionLoading && sectionError) {
-    return <Navigate to="/finance" replace />;
+    return (
+      <ErrorState
+        title="Couldn't load this track"
+        message="The track's pages could not be fetched just now. This is a temporary failure, not an empty track."
+        onRetry={() => refetchSection()}
+      />
+    );
   }
 
   const isLoading = sectionLoading || modulesLoading || countsLoading || essaysLoading;
