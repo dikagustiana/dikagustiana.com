@@ -182,23 +182,3 @@ export const useEssaysByTopic = (section: string, topic: string) => {
     enabled: !!section && !!topic,
   });
 };
-
-export const useRelatedEssays = (currentId: string, section: string, limit = 3) => {
-  return useQuery({
-    queryKey: ['essays', 'related', currentId, section],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('essays')
-        .select('id, slug, title, snippet, section, phase, author, read_time')
-        .eq('section', section)
-        .eq('published', true)
-        .neq('id', currentId)
-        .order('created_at', { ascending: false })
-        .limit(limit);
-
-      if (error) throw error;
-      return data as unknown as Essay[];
-    },
-    enabled: !!currentId && !!section,
-  });
-};
