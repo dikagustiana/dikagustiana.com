@@ -101,7 +101,7 @@ export default function AdminContent() {
     status: statusFilter === 'all' ? undefined : statusFilter,
     search: searchQuery,
   });
-  const { data: stats, refetch: refetchStats } = useContentStats();
+  const { data: stats, refetch: refetchStats, isError: statsError } = useContentStats();
   const togglePublish = useTogglePublishContent();
   const toggleSelect = useToggleSelectContent();
   const deleteContent = useDeleteContent();
@@ -237,7 +237,16 @@ export default function AdminContent() {
           </div>
         </div>
 
-        {/* Status cards — quick triage */}
+        {/* Status cards — quick triage. A failed read says so: zeros that
+            read as "nothing drafted" are worse than no numbers. */}
+        {statsError && (
+          <div className="mb-4 rounded-lg border border-destructive/40 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+            Content stats could not be loaded — the numbers below are missing, not zero.{' '}
+            <button onClick={() => refetchStats()} className="underline font-medium">
+              Retry
+            </button>
+          </div>
+        )}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-8">
           <button
             onClick={() => { setStatusFilter('all'); setNeedsWorkFilter(false); }}

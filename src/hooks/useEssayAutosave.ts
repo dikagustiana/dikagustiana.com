@@ -41,6 +41,19 @@ import {
 const UNIQUE_VIOLATION = '23505';
 const MAX_INSERT_ATTEMPTS = 3;
 
+/**
+ * The chip's message for a failed write. Supabase errors are plain
+ * PostgrestError objects, not Error instances — without this, every failure
+ * reads as the opaque "Unknown error" and the author cannot tell a network
+ * drop from a guard rejection.
+ */
+function errorMessage(error: unknown): string {
+  if (error instanceof Error && error.message) return error.message;
+  const message = (error as { message?: unknown } | null)?.message;
+  if (typeof message === 'string' && message.trim()) return message;
+  return 'Unknown error';
+}
+
 const REVISION_COLUMNS = 'id, revision_no, change_type, created_at, content_json, title';
 
 export type AutosaveStatus = 'idle' | 'unsaved' | 'saving' | 'saved' | 'error';
@@ -234,8 +247,8 @@ export interface UseEssayAutosaveResult {
       Pick<EssayRevisionInput, 'title' | 'snippet' | 'status' | 'doc' | 'essayId'>
     >,
   ) => Promise<void>;
-  /** Force a pending autosave to run now. */
-  flush: () => void;
+  /** Settle any in-flight save, then force a pending autosave to run now. */
+  flush: () => Promise<void>;
 }
 
 export function useEssayAutosave({
@@ -262,6 +275,9 @@ export function useEssayAutosave({
   // The doc as last backed up, so an unchanged doc never re-writes a revision.
   const backedUpDoc = useRef<unknown>(null);
   const inFlight = useRef(false);
+  // The promise of the write currently in flight, so flush() can settle it
+  // before a manual save guards on the row's updated_at.
+  const inFlightPromise = useRef<Promise<void> | null>(null);
   // A Brief autosave never writes the essays row, whatever the caller says.
   const persistRow = body === 'brief' ? false : persistToEssay;
 
@@ -275,14 +291,12 @@ export function useEssayAutosave({
     persistToEssay: persistRow, body, serverUpdatedAtRef,
   };
 
-  const runAutosave = useCallback(async () => {
+  const performAutosave = useCallback(async () => {
     const args = latestArgs.current;
-    if (inFlight.current) return;
     if (!canAutosave(args)) return;
     if (isEmptyDoc(args.doc)) return;
     if (!docsDiffer(args.doc, backedUpDoc.current)) return;
 
-    inFlight.current = true;
     setAutosaveStatus('saving');
     try {
       const id = await writeRevision(
@@ -340,12 +354,24 @@ export function useEssayAutosave({
       setAutosaveStatus('saved');
     } catch (error: unknown) {
       // Loud on purpose: the author must know the net is not catching them.
-      setAutosaveError(error instanceof Error ? error.message : 'Unknown error');
+      setAutosaveError(errorMessage(error));
       setAutosaveStatus('error');
-    } finally {
-      inFlight.current = false;
     }
   }, []);
+
+  // Single entry point for an autosave write. Overlapping callers (debounce,
+  // visibilitychange, flush) share the one in-flight write instead of racing
+  // the guarded row update against itself.
+  const runAutosave = useCallback((): Promise<void> => {
+    if (inFlight.current) return inFlightPromise.current ?? Promise.resolve();
+    const write = performAutosave().finally(() => {
+      inFlight.current = false;
+      inFlightPromise.current = null;
+    });
+    inFlight.current = true;
+    inFlightPromise.current = write;
+    return write;
+  }, [performAutosave]);
 
   // Debounced autosave on document change.
   useEffect(() => {
@@ -373,9 +399,16 @@ export function useEssayAutosave({
     return () => document.removeEventListener('visibilitychange', onHide);
   }, [runAutosave]);
 
-  const flush = useCallback(() => {
+  /** Settle any in-flight save, then force a pending autosave to run now. */
+  const flush = useCallback(async (): Promise<void> => {
     if (timer.current) clearTimeout(timer.current);
-    void runAutosave();
+    // A manual save that starts while this tab's own row write is mid-flight
+    // would guard on a stale updated_at and report "changed in another tab"
+    // about its own tab — so the caller can wait the write out first.
+    if (inFlight.current && inFlightPromise.current) {
+      await inFlightPromise.current;
+    }
+    await runAutosave();
   }, [runAutosave]);
 
   const recordRevision = useCallback<UseEssayAutosaveResult['recordRevision']>(
@@ -404,7 +437,7 @@ export function useEssayAutosave({
         setAutosaveError(null);
         setAutosaveStatus('saved');
       } catch (error: unknown) {
-        setAutosaveError(error instanceof Error ? error.message : 'Unknown error');
+        setAutosaveError(errorMessage(error));
         setAutosaveStatus('error');
       }
     },

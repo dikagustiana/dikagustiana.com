@@ -12,6 +12,7 @@ import { PageLayout } from '@/components/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
 import { CURRICULUM_CONTRACT } from '@/data/curriculumContract';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ErrorState } from '@/components/states';
 import { Separator } from '@/components/ui/separator';
 import { ModuleHeaderFactory } from '@/components/finance/ModuleHeaderFactory';
 import { FinanceCycleMap } from '@/components/finance/FinanceCycleMap';
@@ -40,7 +41,17 @@ function EssayListing({
   const { isAdmin } = useAuth();
   // essay_structure: every identity receives every lesson row — drafts
   // included, bodies never. Only the rendering differs by identity.
-  const { data: essays, isLoading } = useEssaysByModuleId(moduleId);
+  const { data: essays, isLoading, isError, refetch } = useEssaysByModuleId(moduleId);
+
+  if (isError) {
+    return (
+      <ErrorState
+        title="Couldn't load the lessons"
+        message="This module's lessons could not be fetched just now. This is a temporary failure, not an empty module."
+        onRetry={() => refetch()}
+      />
+    );
+  }
 
   if (isLoading) {
     return (

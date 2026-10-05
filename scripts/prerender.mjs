@@ -70,48 +70,10 @@ if (!KEY) {
   process.exit(0);
 }
 
-/**
- * Mirror of essayUrl's canonical mapping (route-table-tested in the app),
- * plus a distinction essayUrl does not need to make: whether the canonical
- * URL belongs to THIS ESSAY ALONE.
- *
- * Accounting essays canonicalise to PAGE-level surfaces —
- * /accounting/fsli/:slug, /accounting/consolidation/:topic,
- * /accounting/statutory-reporting — which inline several essays. Writing one
- * essay's og:title there would make an arbitrary essay speak for the whole
- * page (last writer wins), and writing it at /essays/:slug instead would
- * advertise a doorway that redirects. Both are wrong, so those rows are
- * SKIPPED and named in the log rather than silently mishandled. Giving those
- * pages their own page-level cards is separate work on a separate object.
- */
-function canonicalPath(row) {
-  const mod = row.finance_modules ?? null;
-  const track = mod?.track_slug ?? row.finance_section ?? null;
-  switch (row.section) {
-    case 'finance':
-      return track ? `/finance/${track}/${row.slug}` : `/essays/${row.slug}`;
-    case 'green-transition': {
-      const short = { 'where-we-are-now': 'now', 'challenges-ahead': 'gaps', 'pathways-forward': 'future' };
-      return row.phase ? `/green-transition/${short[row.phase] ?? row.phase}/${row.slug}` : `/essays/${row.slug}`;
-    }
-    case 'development-finance':
-      return row.phase ? `/development-finance/${row.phase}/${row.slug}` : `/essays/${row.slug}`;
-    case 'next-big-thing':
-      // Theme (the category, cached as phase) is the third segment; a
-      // theme-less essay keeps the two-segment resolver shape, which renders
-      // it directly. Mirrors essayUrl's next-big-thing branch.
-      return row.phase ? `/the-next-big-thing/${row.phase}/${row.slug}` : `/the-next-big-thing/${row.slug}`;
-    case 'critical-thinking':
-    case 'critical-thinking-research':
-      return `/critical-thinking-research/${row.phase || 'clarify'}/${row.slug}`;
-    case 'accounting':
-      // Page-level canonical: not this essay's URL to claim. See above.
-      if (row.fsli_slug || row.topic || row.phase === 'statutory-reporting') return null;
-      return `/essays/${row.slug}`;
-    default:
-      return `/essays/${row.slug}`;
-  }
-}
+// canonicalPath moved to scripts/lib/canonicalPath.mjs so the parity test
+// (tests/unit/canonicalPathParity.test.ts) can import it without executing
+// this script's build flow. The mapping's rationale lives with the function.
+import { canonicalPath } from './lib/canonicalPath.mjs';
 
 const esc = s =>
   String(s ?? '')

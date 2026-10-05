@@ -6,11 +6,11 @@ import { SEO } from '@/components/SEO';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useFsliPages, FsliPage } from '@/hooks/queries/useFsliPages';
-import { LoadingState } from '@/components/states';
+import { ErrorState, LoadingState } from '@/components/states';
 
 export default function FsliList() {
   const [searchTerm, setSearchTerm] = useState('');
-  const { data: fsliPages = [], isLoading } = useFsliPages();
+  const { data: fsliPages = [], isLoading, isError, refetch } = useFsliPages();
 
   const filteredItems = fsliPages.filter(item =>
     item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -77,6 +77,20 @@ export default function FsliList() {
       <PageLayout variant="content" role="manager" breadcrumbs={[{label:'Home',path:'/'},{label:'Accounting',path:'/accounting'},{label:'FSLI Detail'}]}>
         <div className="flex-1 container py-8">
           <LoadingState />
+        </div>
+      </PageLayout>
+    );
+  }
+
+  if (isError) {
+    return (
+      <PageLayout variant="content" role="manager" breadcrumbs={[{label:'Home',path:'/'},{label:'Accounting',path:'/accounting'},{label:'FSLI Detail'}]}>
+        <div className="flex-1 container py-8">
+          <ErrorState
+            title="Couldn't load the line items"
+            message="The FSLI pages could not be fetched just now. This is a temporary failure, not an empty section."
+            onRetry={() => refetch()}
+          />
         </div>
       </PageLayout>
     );
