@@ -57,4 +57,6 @@ export const COPY = {
   whatChanged: 'What changed',
   viewerOnly: 'Worked in the viewer only. Published models do not change.',
   expectedNotMeasured: 'expected, not measured',
+  publishedFailed: 'Published models could not be read, so only the preview companies are shown. The reason:',
+  publishedLoading: 'Reading the published models…',
 } as const;

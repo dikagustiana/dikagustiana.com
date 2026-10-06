@@ -23,12 +23,18 @@ const isPackage = (x: unknown): x is ModelPackage => !!x && typeof x === 'object
 
 let registry: Registry | null = null;
 
-export function previewRegistry(): Registry {
-  registry ??= buildRegistry({
-    packages: Object.values(packageModules).filter(isPackage),
+/** The preview's registry: the SYNTHETIC fixtures, plus any package the owner has published. */
+export function buildPreviewRegistry(published: ModelPackage[] = []): Registry {
+  return buildRegistry({
+    packages: [...Object.values(packageModules).filter(isPackage), ...published],
     slate: slate.companies as SlateEntry[],
     subIndustries: [...subIndustries, ...syntheticSubIndustries] as SubIndustry[],
     links: [...links, ...syntheticLinks] as IndustryLink[],
   });
+}
+
+/** The fixtures alone, built once. */
+export function previewRegistry(): Registry {
+  registry ??= buildPreviewRegistry();
   return registry;
 }

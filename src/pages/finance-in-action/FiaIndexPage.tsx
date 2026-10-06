@@ -24,7 +24,8 @@ import { COPY } from '@/lib/finance-in-action/copy';
 import { chainMapHref, positionAnchor, subIndustryAnchor } from '@/lib/finance-in-action/chain';
 import { conditionsUsed } from '@/lib/finance-in-action/conditions';
 import { groupAlongChain, type CompanyEntry, type PositionGroup } from '@/lib/finance-in-action/registry';
-import { previewRegistry } from '@/lib/finance-in-action/preview';
+import { usePreviewRegistry } from '@/lib/finance-in-action/usePreviewRegistry';
+import { PublishedNote } from '@/components/finance-in-action/viewer/PublishedNote';
 
 export const PARAM = { query: 'q', condition: 'condition', lens: 'connections', link: 'link' } as const;
 
@@ -36,7 +37,7 @@ function matches(c: CompanyEntry, query: string, condition: string): boolean {
 }
 
 export default function FiaIndexPage() {
-  const reg = previewRegistry();
+  const { reg, published, error } = usePreviewRegistry();
   const [params, setParams] = useSearchParams();
   const location = useLocation();
   const query = params.get(PARAM.query) ?? '';
@@ -86,6 +87,7 @@ export default function FiaIndexPage() {
       <SEO title={COPY.seoTitle} description={COPY.seoDescription} noindex />
       <div className="container max-w-5xl px-4 py-8 sm:px-8">
         {anySynthetic && <SyntheticBanner />}
+        <PublishedNote state={published} error={error} />
         <RejectedPackages rejected={reg.rejected} />
 
         <header className="mb-8 max-w-3xl">
