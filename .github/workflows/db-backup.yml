@@ -25,10 +25,6 @@ on:
   schedule:
     - cron: '43 20 * * *' # 03:43 WIB, after the content backup
   workflow_dispatch:
-  # Lets the branch prove the workflow before it reaches main (scheduled and
-  # dispatched runs only exist on the default branch). Remove after the merge.
-  push:
-    branches: ['m1/site-safe']
 
 permissions:
   contents: read
