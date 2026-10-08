@@ -13,7 +13,7 @@ import * as THREE from 'three';
 import { createRng, DEFAULT_SEED } from './kernel/math';
 import { createTheme } from './theme';
 import { createContext, type EngineContext } from './context';
-import { createClock, STEP } from './sim/clock';
+import { createClock, STEP, WARMUP_SECONDS } from './sim/clock';
 import { buildSlab } from './world/ground';
 import { createView, type View } from './view';
 import type { Entity, FrameReading, LayerName, OverlayName, RendererLike, WorldHandle, WorldOptions } from './types';
@@ -21,15 +21,7 @@ import type { FlowWeight, ModelStatus, StationBinding } from '@/world/data/types
 import { buildWorldScene, type WorldScene } from '@/world/world/build';
 import { createTraffic, type Traffic } from '@/world/sim/traffic';
 
-/**
- * Simulated seconds run before the first frame, so the far view's roads are
- * not empty when the world fades in. Factory Yard ran 80 s (4,800 steps)
- * because its vehicles started at their depots. Here every vehicle is placed
- * spaced along its lane at build time (src/world/sim/traffic.ts), so the far
- * view is populated at the first frame: measured, zero steps are needed, and
- * one second is run so the spacing has settled.
- */
-export const WARMUP_SECONDS = 1;
+export { WARMUP_SECONDS };
 
 export class WorldError extends Error {
   constructor(readonly code: 'webgl-unavailable' | 'no-container', message: string) { super(message); this.name = 'WorldError'; }

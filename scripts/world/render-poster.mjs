@@ -40,13 +40,14 @@ const fmt = (n) => (Math.round(n * 10) / 10).toString();
 const poly = (pts, fill, stroke, extra = '') => `<polygon points="${pts.map(([x, y]) => `${fmt(x)},${fmt(y)}`).join(' ')}" fill="${fill}" stroke="${stroke}" stroke-width="1" vector-effect="non-scaling-stroke"${extra}/>`;
 const line = (pts, stroke, width = 1, extra = '') => `<polyline points="${pts.map(([x, y]) => `${fmt(x)},${fmt(y)}`).join(' ')}" fill="none" stroke="${stroke}" stroke-width="${fmt(width)}" vector-effect="non-scaling-stroke" stroke-linejoin="round"${extra}/>`;
 
-/** An isometric prism for a box of height h: the top, the south face and the east face, each outlined. */
-function prism(b, h, fill, top, stroke) {
+/** An isometric prism for a box standing on z0 with height h: the top, the south face and the east face, each outlined. */
+function prism(b, h, fill, top, stroke, z0 = 0) {
   const { x0, x1, y0, y1 } = b;
+  const z1 = z0 + h;
   return [
-    poly([P(x0, y1, 0), P(x1, y1, 0), P(x1, y1, h), P(x0, y1, h)], fill, stroke),
-    poly([P(x1, y0, 0), P(x1, y1, 0), P(x1, y1, h), P(x1, y0, h)], fill, stroke),
-    poly([P(x0, y0, h), P(x1, y0, h), P(x1, y1, h), P(x0, y1, h)], top, stroke),
+    poly([P(x0, y1, z0), P(x1, y1, z0), P(x1, y1, z1), P(x0, y1, z1)], fill, stroke),
+    poly([P(x1, y0, z0), P(x1, y1, z0), P(x1, y1, z1), P(x1, y0, z1)], fill, stroke),
+    poly([P(x0, y0, z1), P(x1, y0, z1), P(x1, y1, z1), P(x0, y1, z1)], top, stroke),
   ].join('');
 }
 
@@ -57,7 +58,7 @@ export function renderPoster(layout, c = POSTER_COLOURS) {
   const out = [];
   const w = layout.world;
   // the slab: its top, its south and east faces
-  out.push(prism(w, 4, c.muted, c.background, c.border).replace(/translate/g, ''));
+  out.push(prism(w, 4, c.muted, c.background, c.border));
   // regions
   for (const r of layout.regions) {
     const fill = r.id === 'estate' ? c.border : r.id === 'gateway' ? c.card : r.id === 'town' || r.id === 'recovery' ? c.card : r.id === 'hill' ? 'none' : c.muted;
@@ -70,7 +71,7 @@ export function renderPoster(layout, c = POSTER_COLOURS) {
   // blocks, back to front so nearer prisms cover farther ones (nearer = larger x + y)
   const blocks = [...layout.blocks].sort((a, b) => (a.box.x0 + a.box.y0) - (b.box.x0 + b.box.y0));
   for (const b of blocks) out.push(prism(b.box, HEIGHT[b.family] ?? 6, c.card, c.background, c.mutedForeground));
-  for (const f of layout.fixtures) { const h = f.kind === 'think-tank' && layout.hill ? HEIGHT['think-tank'] : (HEIGHT[f.kind] ?? 6); const z0 = f.kind === 'think-tank' && layout.hill ? layout.hill.height : 0; const bb = f.box; out.push(prism(bb, h, c.card, c.background, c.mutedForeground).replace(/,(-?[\d.]+)"/g, (m, y) => `,${fmt(Number(y) - z0)}"`)); }
+  for (const f of layout.fixtures) { const h = HEIGHT[f.kind] ?? 6; const z0 = f.kind === 'think-tank' && layout.hill ? layout.hill.height : 0; out.push(prism(f.box, h, c.card, c.background, c.mutedForeground, z0)); }
   // region labels
   for (const l of layout.labels.filter((x) => x.level === 'far')) { const [x, y] = P(l.at[0], l.at[1], 0); out.push(`<text x="${fmt(x)}" y="${fmt(y)}" text-anchor="middle" font-family="'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif" font-size="22" letter-spacing="2" fill="${c.mutedForeground}">${l.text.toUpperCase()}</text>`); }
   // the frame

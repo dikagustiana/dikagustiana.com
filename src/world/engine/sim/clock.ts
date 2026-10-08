@@ -4,6 +4,16 @@
 export const STEP = 1 / 60;
 // One day passes in six minutes of simulation; the visible run starts at 10:00. The skip button adds six hours.
 export const DAY = 360;
+/**
+ * Warm-up before the first frame, in simulated seconds. Factory Yard ran 80
+ * (its vehicles had to spread out from a depot); here every vehicle is spaced
+ * along its lane at build time (src/world/sim/traffic.ts), so the far view is
+ * populated at the first frame: measured, zero steps are needed, and one
+ * second is run so the spacing has settled. 60 steps of 1/60 s.
+ */
+export const WARMUP_SECONDS = 1;
+/** The hour at t = 0, so that the first visible frame, after the warm-up, reads 10:00. */
+const START_HOUR = 10 - (WARMUP_SECONDS * 24) / DAY;
 const ease = (t: number) => t * t * (3 - 2 * t);
 
 export interface Clock {
@@ -25,7 +35,7 @@ export function createClock(): Clock {
   const c: Clock = {
     t: 0,
     shift: { h: 0, goal: 0 },
-    hourAt: (t) => (((4 + 2 / 3 + (t * 24) / DAY + c.shift.h) % 24) + 24) % 24,
+    hourAt: (t) => (((START_HOUR + (t * 24) / DAY + c.shift.h) % 24) + 24) % 24,
     clock: (t) => hhmm(c.hourAt(t)),
     night: () => nightOf(c.hourAt(c.t)),
   };

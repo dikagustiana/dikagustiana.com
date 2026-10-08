@@ -17,6 +17,7 @@ import { UnitEconomics } from '@/components/finance-in-action/viewer/model/UnitE
 import { UELineDetail } from '@/components/finance-in-action/viewer/model/UELineDetail';
 import { ConditionPanel } from '@/components/finance-in-action/viewer/model/ConditionPanel';
 import { WorkpaperRecord } from '@/components/finance-in-action/viewer/model/WorkpaperRecord';
+import { SyntheticBanner } from '@/components/finance-in-action/viewer/SyntheticBanner';
 import { useModelView } from '@/components/finance-in-action/viewer/model/useModelView';
 import { decoration } from '@/lib/finance-in-action/view/decorate';
 import { latestReported } from '@/lib/finance-in-action/model/periods';
@@ -49,7 +50,7 @@ export default function Board({ ticker, data, pieces, onClose, bindings }: { tic
       <div className="world-board__head">
         <div>
           <p className="text-xs uppercase tracking-[0.12em] text-muted-foreground">Board</p>
-          <h3 tabIndex={-1} className="text-2xl">{company?.name ?? pkg?.meta.name ?? t}</h3>
+          <h3 tabIndex={-1} className="text-2xl">{pkg?.meta.name ?? company?.name ?? t}</h3>
           <p className="text-sm text-muted-foreground">{t}{sub ? ` · ${sub.nameEn} (${sub.code})` : ''}{pkg ? ` · latest quarter ${pkg.periods.find((p) => p.id === pkg.meta.asOf.latestQuarter)?.label ?? pkg.meta.asOf.latestQuarter}` : ''}</p>
           <p className="text-sm"><span aria-hidden="true">{status.glyph}</span> {status.word}</p>
         </div>
@@ -58,6 +59,7 @@ export default function Board({ ticker, data, pieces, onClose, bindings }: { tic
           <button type="button" className="world-card__close" aria-label="Close the board" onClick={onClose}>×</button>
         </div>
       </div>
+      {pkg?.meta.provenance === 'synthetic' && <SyntheticBanner text="SYNTHETIC package: a mock, never ships. No company and no filing stands behind these figures; a production build carries no synthetic package (scripts/assert-no-synthetic.mjs)." />}
       {pkg ? <Published pkg={pkg} data={data} related={related} bindings={bindings} /> : (
         <section aria-label="No model">
           <h4>{SECTION_ORDER[5]}</h4>

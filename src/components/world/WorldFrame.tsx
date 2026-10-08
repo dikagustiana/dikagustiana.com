@@ -13,6 +13,7 @@ import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { prefersReducedMotion } from '@/lib/motion';
 import { CANVAS_DESCRIPTION, LAYERS, OVERLAYS, PLACES, TITLE, TOTAL_PLACED, WORLD_PATH, boardPath } from '@/lib/world/constants';
 import { marksFor, type PlacedMark } from '@/lib/world/presentation';
+import { REGISTRY } from '@/lib/world/registry/subindustries.generated';
 import { STATUS, type LensId, type ShiftId } from '@/data/industryChain';
 import type { FrameReading, LayerName, OverlayName, Selection, ViewName, WorldHandle, WorldAction } from '@/world/engine/types';
 import { Card } from './Card';
@@ -75,7 +76,7 @@ export default function WorldFrame({ variant, heading, boardTicker = null, onBoa
     if (wanted.current || reduced || skema || !host.current) return;
     wanted.current = true;
     try {
-      const [{ createWorld }, { LAYOUT }, { REGISTRY }] = await Promise.all([import('@/world/engine'), import('@/world/placement/layout.generated'), import('@/lib/world/registry/subindustries.generated')]);
+      const [{ createWorld }, { LAYOUT }] = await Promise.all([import('@/world/engine'), import('@/world/placement/layout.generated')]);
       if (!host.current) return;
       const font = getComputedStyle(document.documentElement).getPropertyValue('--font-sans').trim() || 'sans-serif';
       const h = createWorld(host.current, {
@@ -93,10 +94,33 @@ export default function WorldFrame({ variant, heading, boardTicker = null, onBoa
     } catch (e) { setFailed(e instanceof Error ? e.message : String(e)); }
   }, [act, layers, phone, reduced, skema]);
 
+  // The engine mounts after first paint (PRD §7.1): once the poster has
+  // loaded (so the two never compete for the connection), the stage is in
+  // view, and the main thread is idle; or on the first pointer or keyboard
+  // interaction with the stage, whichever comes first.
   useEffect(() => {
-    if (reduced || skema) return;
-    const t = typeof requestIdleCallback === 'function' ? requestIdleCallback(() => void mount()) : setTimeout(() => void mount(), 0);
-    return () => { if (typeof cancelIdleCallback === 'function' && typeof t === 'number') cancelIdleCallback(t); else clearTimeout(t as ReturnType<typeof setTimeout>); };
+    if (reduced || skema || !host.current) return;
+    const stage = host.current.parentElement!;
+    const poster = stage.querySelector('img');
+    let idle: number | ReturnType<typeof setTimeout> | null = null;
+    let cancelled = false;
+    const whenIdle = () => { idle = typeof requestIdleCallback === 'function' ? requestIdleCallback(() => { if (!cancelled) void mount(); }, { timeout: 2000 }) : setTimeout(() => { if (!cancelled) void mount(); }, 0); };
+    // The poster is the page's largest paint: the engine's build, one long
+    // task, waits until the browser has reported that paint (the first
+    // largest-contentful-paint entry, or 3 s if the browser reports none),
+    // then two frames more, so the build can never delay it.
+    let po: PerformanceObserver | null = null, fallback: ReturnType<typeof setTimeout> | null = null;
+    const twoFrames = () => requestAnimationFrame(() => requestAnimationFrame(() => { if (!cancelled) whenIdle(); }));
+    const afterPaint = () => {
+      const go = () => { if (cancelled) return; po?.disconnect(); po = null; if (fallback) { clearTimeout(fallback); fallback = null; } twoFrames(); };
+      try { po = new PerformanceObserver(() => go()); po.observe({ type: 'largest-contentful-paint', buffered: true }); fallback = setTimeout(go, 3000); }
+      catch { twoFrames(); }
+    };
+    const whenLoaded = () => { if (!poster || poster.complete) afterPaint(); else poster.addEventListener('load', afterPaint, { once: true }); };
+    let io: IntersectionObserver | null = null;
+    if (typeof IntersectionObserver === 'function') { io = new IntersectionObserver((entries) => { if (entries.some((e) => e.isIntersecting)) { io?.disconnect(); io = null; whenLoaded(); } }, { rootMargin: '200px' }); io.observe(stage); }
+    else whenLoaded();
+    return () => { cancelled = true; io?.disconnect(); po?.disconnect(); if (fallback) clearTimeout(fallback); poster?.removeEventListener('load', afterPaint); if (idle !== null) { if (typeof cancelIdleCallback === 'function' && typeof idle === 'number') cancelIdleCallback(idle); else clearTimeout(idle as ReturnType<typeof setTimeout>); } };
   }, [mount, reduced, skema]);
   useEffect(() => () => { handle.current?.dispose(); handle.current = null; wanted.current = false; }, []);
   useEffect(() => { if (skema) { handle.current?.dispose(); handle.current = null; wanted.current = false; setReady(false); } }, [skema]);
@@ -114,6 +138,8 @@ export default function WorldFrame({ variant, heading, boardTicker = null, onBoa
   const night = reading?.night ?? 0;
 
   const headerTitle = <H className="text-2xl font-display font-semibold tracking-tight">{TITLE}</H>;
+  const Sub = heading === 'h1' ? 'h2' : 'h3';
+  const Stage = heading === 'h1' ? 'h3' : 'h4';
 
   if (reduced) {
     return (
@@ -143,6 +169,7 @@ export default function WorldFrame({ variant, heading, boardTicker = null, onBoa
             {data.state === 'loading' ? 'Reading the published models…' : data.state === 'outage' ? 'Model status unavailable' : `${data.covered} of ${TOTAL_PLACED} sub-industries have a published model`}
           </p>
         </div>
+        <Sub className="sr-only">Controls</Sub>
         <div className="world-frame__controls">
           {phone ? <details className="world-frame__group"><summary className="world-btn">Places</summary><div className="world-frame__group">{places}</div></details> : <div className="world-frame__group" aria-label="Places"><span>Places</span>{places}</div>}
           <div className="world-frame__group" aria-label="Zoom"><button type="button" className="world-btn" aria-label="Zoom in" onClick={() => { onDistance(Math.min(1, distance + 0.15)); }}>+</button><button type="button" className="world-btn" aria-label="Zoom out" onClick={() => { onDistance(Math.max(0, distance - 0.15)); }}>−</button></div>
@@ -156,6 +183,7 @@ export default function WorldFrame({ variant, heading, boardTicker = null, onBoa
       </header>
       <div className="world-frame__stage" onPointerDown={() => void mount()} onKeyDown={() => void mount()}>
         <img className="world-frame__poster" src="/world/poster-far.svg" alt="" data-hidden={ready} width={1600} height={952} decoding="async" fetchPriority="high" />
+        <Stage className="sr-only">The map</Stage>
         <div className="world-frame__canvas-host" ref={host} data-ready={ready} />
         <div className="world-frame__night" style={{ opacity: night * 0.55 }} aria-hidden="true" />
         {reading && <div className="world-frame__clock" aria-hidden="true">{reading.clock}{night > 0.5 ? ' · night' : ''}{reading.paused ? ' · paused' : ''}</div>}

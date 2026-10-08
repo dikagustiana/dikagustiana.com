@@ -23,6 +23,16 @@ export default defineConfig(({ mode }) => ({
   },
   plugins: [
     react(),
+    // With the world on, its poster is the landing page's largest paint and
+    // would otherwise be discovered only after three lazy chunks; the preload
+    // makes it discoverable in the initial document (Lighthouse, gate 2).
+    {
+      name: "world-poster-preload",
+      transformIndexHtml(html) {
+        if (loadEnv(mode, process.cwd(), "VITE_").VITE_WORLD_KAWASAN !== "true") return html;
+        return html.replace("</head>", '    <link rel="preload" as="image" href="/world/poster-far.svg" fetchpriority="high" />\n  </head>');
+      },
+    },
   ],
   resolve: {
     alias: {
