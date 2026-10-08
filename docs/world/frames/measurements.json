@@ -20,7 +20,10 @@
     "overlay-reindustrialisation",
     "skema-toggle",
     "phone-390",
-    "outage-unavailable"
+    "outage-unavailable",
+    "exposed-company-whiteboard-mock",
+    "think-tank-section",
+    "overlay-reindustrialisation-marks"
   ],
   "drawCalls": {
     "light-day": {
@@ -102,26 +105,10 @@
   },
   "consoleErrors": [
     "/finance/kawasan: 404 /_vercel/insights/script.js",
-    "/finance/kawasan: Failed to load resource: the server responded with a status of 404 (Not Found)",
-    "/finance/kawasan: 404 /_vercel/insights/script.js",
-    "/finance/kawasan: Failed to load resource: the server responded with a status of 404 (Not Found)",
-    "/finance/kawasan: 404 /_vercel/insights/script.js",
-    "/finance/kawasan: Failed to load resource: the server responded with a status of 404 (Not Found)",
-    "/finance/kawasan: 404 /_vercel/insights/script.js",
-    "/finance/kawasan: Failed to load resource: the server responded with a status of 404 (Not Found)",
-    "/finance/kawasan: 404 /_vercel/insights/script.js",
-    "/finance/kawasan: Failed to load resource: the server responded with a status of 404 (Not Found)",
-    "/finance/kawasan: 404 /_vercel/insights/script.js",
-    "/finance/kawasan: Failed to load resource: the server responded with a status of 404 (Not Found)",
-    "/finance/kawasan: 404 /_vercel/insights/script.js",
-    "/finance/kawasan: Failed to load resource: the server responded with a status of 404 (Not Found)",
-    "/finance/kawasan: 404 /_vercel/insights/script.js",
-    "/finance/kawasan: Failed to load resource: the server responded with a status of 404 (Not Found)",
-    "/finance/kawasan: 404 /_vercel/insights/script.js",
-    "/finance/kawasan: Failed to load resource: the server responded with a status of 404 (Not Found)",
-    "/finance/kawasan: 503 /rest/v1/model_packages",
-    "/finance/kawasan: Failed to load resource: the server responded with a status of 503 (Service Unavailable)",
-    "/finance/kawasan: 503 /rest/v1/model_packages",
-    "/finance/kawasan: Failed to load resource: the server responded with a status of 503 (Service Unavailable)"
+    "/finance/kawasan: Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ],
+  "reshotAt": "2026-10-08T19:08:02.001Z",
+  "reshot": [
+    "overlay"
   ]
 }

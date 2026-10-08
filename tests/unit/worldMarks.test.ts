@@ -69,6 +69,9 @@ describe('condition marks', () => {
     handle.setMarks(marks);
     expect(sprites().length).toBe(marks.length);
     for (const d of sprites()) { expect(d.scale.x).toBeGreaterThan(0); expect(d.scale.x).toBe(d.scale.y); }
+    // two marks on one carrier stand side by side, never one under the other
+    const positions = sprites().map((d) => `${d.position.x.toFixed(2)},${d.position.y.toFixed(2)},${d.position.z.toFixed(2)}`);
+    expect(new Set(positions).size).toBe(positions.length);
     const ids = window.world!.all().filter((e) => e.kind === 'mark').map((e) => e.id);
     expect(ids).toEqual(marks.map((m) => `mark:${m.targetId}`));
     handle.select(ids[0]);

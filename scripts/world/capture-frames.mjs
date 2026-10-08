@@ -25,6 +25,9 @@ const ON = args.on ?? 'http://127.0.0.1:4174';
 const OFF = args.off ?? 'http://127.0.0.1:4173';
 const MAIN = args.main ?? 'http://127.0.0.1:4175';
 const OUT = path.resolve(args.out ?? 'docs/world/frames');
+// --only views,exposed,thinktank,overlay,skema,phone,outage,flagoff re-shoots a subset and keeps the rest of measurements.json
+const ONLY = args.only ? args.only.split(',') : null;
+const want = (name) => !ONLY || ONLY.includes(name);
 fs.mkdirSync(OUT, { recursive: true });
 
 const MOCK_LABEL = 'mock, never ships';
@@ -51,7 +54,8 @@ async function intercept(page, { published = true } = {}) {
 }
 
 const browser = await chromium.launch({ args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
-const measurements = { capturedAt: new Date().toISOString(), renderer: null, frames: [], drawCalls: {}, warmup: null, mount: {}, frameTimes: {}, flagOff: {}, consoleErrors: [] };
+const prior = ONLY && fs.existsSync(path.join(OUT, 'measurements.json')) ? JSON.parse(fs.readFileSync(path.join(OUT, 'measurements.json'), 'utf8')) : null;
+const measurements = prior ? { ...prior, reshotAt: new Date().toISOString(), reshot: ONLY, consoleErrors: [] } : { capturedAt: new Date().toISOString(), renderer: null, frames: [], drawCalls: {}, warmup: null, mount: {}, frameTimes: {}, flagOff: {}, consoleErrors: [] };
 
 async function worldPage({ dark = false, width = 1440, height = 900, debug = true, url = '/finance/kawasan', published = true } = {}) {
   const context = await browser.newContext({ viewport: { width, height }, deviceScaleFactor: 1, reducedMotion: 'no-preference', colorScheme: dark ? 'dark' : 'light' });
@@ -72,7 +76,7 @@ async function worldPage({ dark = false, width = 1440, height = 900, debug = tru
   return { context, page, mountMs, firstClock };
 }
 
-const shot = async (page, name, locator) => { const file = path.join(OUT, `${name}.png`); await (locator ? page.locator(locator) : page).screenshot({ path: file }); measurements.frames.push(name); console.log('frame', name); return file; };
+const shot = async (page, name, locator) => { const file = path.join(OUT, `${name}.png`); await (locator ? page.locator(locator) : page).screenshot({ path: file }); if (!measurements.frames.includes(name)) measurements.frames.push(name); console.log('frame', name); return file; };
 const setDistance = (page, t) => page.evaluate((v) => { const input = document.querySelector('input[aria-label^="Distance"]'); const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set; setter.call(input, String(v)); input.dispatchEvent(new Event('input', { bubbles: true })); }, t);
 const settle = async (page, seconds = 2) => {
   await page.evaluate((s) => window.world.step(s), seconds);
@@ -83,7 +87,7 @@ const settle = async (page, seconds = 2) => {
 const hideNav = (page) => page.evaluate(() => { for (const el of document.querySelectorAll('header, nav')) if (!el.closest('.world-frame')) el.style.visibility = 'hidden'; document.querySelector('.world-frame')?.scrollIntoView(); });
 
 // ---- far / middle / near × light / dark × day / night ----
-for (const dark of [false, true]) {
+for (const dark of want('views') ? [false, true] : []) {
   const { context, page, mountMs, firstClock } = await worldPage({ dark });
   measurements.mount[dark ? 'dark' : 'light'] = mountMs;
   if (!measurements.warmup) measurements.warmup = { seconds: 1, steps: 60, firstClock };
@@ -112,11 +116,14 @@ for (const dark of [false, true]) {
   await context.close();
 }
 
-// ---- exposed company (INTP, mock), card at the near distance ----
-{
+// ---- exposed company (INTP, mock): its section, the whiteboard and the station markers; then the board ----
+if (want('exposed')) {
   const { context, page } = await worldPage();
   await page.evaluate(() => window.world.select('INTP')); await setDistance(page, 1); await settle(page, 2);
   await shot(page, 'exposed-company-mock', '.world-frame__stage');
+  await page.click('button:has-text("Look inside")'); await settle(page, 3);
+  console.log('exposed', JSON.stringify(await page.evaluate(() => window.world.exposed())));
+  await shot(page, 'exposed-company-whiteboard-mock', '.world-frame__stage');
   // the board on its route
   await page.goto(`${ON}/finance/kawasan/intp`, { waitUntil: 'networkidle' });
   await page.waitForSelector('.world-board h3');
@@ -125,9 +132,13 @@ for (const dark of [false, true]) {
   await context.close();
 }
 
-// ---- the think tank with two rooms, a piece open ----
-{
+// ---- the think tank: its section drawing with two rooms, then the panel with a piece open ----
+if (want('thinktank')) {
   const { context, page } = await worldPage();
+  await page.evaluate(() => window.world.view('thinktank')); await settle(page, 2);
+  await page.evaluate(() => window.world.select('think-tank')); await settle(page, 3);
+  await shot(page, 'think-tank-section', '.world-frame__stage');
+  await page.evaluate(() => window.world.select(null));
   await page.fill('.world-search input', 'mock');
   await page.click('.world-search li button >> nth=0');
   await page.waitForSelector('[role="dialog"][aria-label="The think tank"]');
@@ -136,11 +147,14 @@ for (const dark of [false, true]) {
   await context.close();
 }
 
-// ---- the reindustrialisation overlay with the reading strip and a condition card ----
-{
+// ---- the reindustrialisation overlay: the discs in the world, the reading strip and a condition card ----
+if (want('overlay')) {
   const { context, page } = await worldPage();
   await page.click('[role="radio"]:has-text("Reindustrialisation")');
   await page.waitForSelector('.world-frame__strip');
+  await settle(page, 2);
+  console.log('marks', (await page.evaluate(() => window.world.all().filter((e) => e.kind === 'mark').length)));
+  await shot(page, 'overlay-reindustrialisation-marks', '.world-frame__stage');
   await page.click('.world-frame__strip li >> nth=0 >> button');
   await settle(page, 2);
   await hideNav(page);
@@ -149,7 +163,7 @@ for (const dark of [false, true]) {
 }
 
 // ---- the Skema toggle ----
-{
+if (want('skema')) {
   const { context, page } = await worldPage();
   await page.click('button.world-btn:has-text("Skema")');
   await page.waitForSelector('.world-frame[data-world="skema"]');
@@ -160,7 +174,7 @@ for (const dark of [false, true]) {
 }
 
 // ---- a 390 px phone ----
-{
+if (want('phone')) {
   const { context, page } = await worldPage({ width: 390, height: 844 });
   await page.evaluate(() => window.world.select('C111')); await settle(page, 2);
   await hideNav(page);
@@ -169,7 +183,7 @@ for (const dark of [false, true]) {
 }
 
 // ---- outage: every company 'Status unavailable', no figure ----
-{
+if (want('outage')) {
   const { context, page } = await worldPage({ published: false });
   await page.evaluate(() => window.world.select('INTP')); await setDistance(page, 1); await settle(page, 2);
   await shot(page, 'outage-unavailable', '.world-frame__stage');
@@ -200,7 +214,7 @@ async function pixelDiff(a, b) {
   await page.close();
   return r;
 }
-for (const [route, name] of [['/', 'landing'], ['/about', 'about']]) {
+for (const [route, name] of want('flagoff') ? [['/', 'landing'], ['/about', 'about']] : []) {
   const results = {};
   for (const [base, tag] of [[OFF, 'branch'], [MAIN, 'main']]) {
     const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 });

@@ -55,11 +55,17 @@ export function createMarks(ctx: EngineContext, onAction: (a: WorldAction) => vo
   }
   function set(marks: readonly WorldMark[]) {
     clear();
+    // marks that would land on one spot (a stage and a node at one region's anchor, a gate beside it) sit side by side, not one under the other
+    const clusters: { x: number; z: number; n: number }[] = [];
     for (const m of marks) {
       const at = anchorOf(m); if (!at) continue;
+      // within 14 m of an earlier mark (a gate beside its region's anchor) counts as the same spot
+      let c = clusters.find((k) => Math.abs(k.x - at.x) < 14 && Math.abs(k.z - at.z) < 14);
+      if (!c) { c = { x: at.x, z: at.z, n: 0 }; clusters.push(c); }
+      const slot = c.n++;
       const map = discTexture(ctx, m);
       const mat = new THREE.SpriteMaterial(map ? { map, transparent: true, depthTest: false } : { color: ctx.theme.textColor('ink'), depthTest: false });
-      const s = new THREE.Sprite(mat); s.position.copy(at); s.renderOrder = 10;
+      const s = new THREE.Sprite(mat); s.position.copy(at); s.renderOrder = 10; s.userData.base = at.clone(); s.userData.slot = slot;
       const ent: Entity = { kind: 'mark', id: `mark:${m.targetId}`, groups: [s], pick: [at.x, at.z, at.y],
         info: () => ({ kind: 'Condition mark', title: m.label, status: '', rows: [['Mark', String(m.n)], ['Target', m.targetId]], actions: [['Open the condition', () => onAction({ type: 'open-condition', targetId: m.targetId })]] }),
         readout: () => `mark ${m.n} · ${m.label}` };
@@ -68,6 +74,6 @@ export function createMarks(ctx: EngineContext, onAction: (a: WorldAction) => vo
     }
     update(zoom);
   }
-  function update(z: number) { zoom = z; const k = PX / Math.max(z, 1e-6); for (const s of sprites) s.scale.set(k, k, 1); }
+  function update(z: number) { zoom = z; const k = PX / Math.max(z, 1e-6); for (const s of sprites) { s.scale.set(k, k, 1); const slot = s.userData.slot as number; if (slot) s.position.copy(s.userData.base as THREE.Vector3).x += slot * k * 1.15; } }
   return { set, update, count: () => sprites.length, dispose: () => { clear(); ctx.sky.remove(group); } };
 }

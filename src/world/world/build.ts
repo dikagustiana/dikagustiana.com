@@ -13,7 +13,7 @@
  */
 import * as THREE from 'three';
 import { JOINT_BY_ID, type JointId } from '@/data/industryChain';
-import { subIndustryByCode } from '@/lib/world/registry/subindustries.generated';
+import { REGISTRY, subIndustryByCode } from '@/lib/world/registry/subindustries.generated';
 import type { SubIndustry } from '@/lib/world/registry/types';
 import type { Box, Block, GeneratedLayout, Pt, Road } from '@/world/placement/types';
 import type { ModelStatus } from '@/world/data/types';
@@ -26,6 +26,7 @@ import { dashes, pine, tree } from '../engine/world/ground';
 import { buildCut } from '../interiors/base';
 import { INTERIORS, archetypeForZone } from '../interiors';
 import { drawWhiteboard } from '../engine/whiteboard';
+import { buildRooms } from '../interiors/thinktank';
 import type { WhiteboardContent } from '@/world/data/types';
 import type { Archetype } from '@/lib/world/registry/types';
 import { drawFamily, drawPlot, type WindowRect } from './families';
@@ -259,10 +260,17 @@ export function buildWorldScene(ctx: EngineContext, layout: GeneratedLayout, onA
     const bx = { ...f.box };
     if (f.kind === 'quay') { p.extrude([[bx.x0, bx.y0, -0.6], [bx.x1, bx.y0, -0.6], [bx.x1, bx.y1, -0.6], [bx.x0, bx.y1, -0.6]], [0, 0, 0.6]); for (let x = bx.x0 + 6; x < bx.x1; x += 12) p.box(x, bx.y1 - 1.2, 0, 0.6, 0.6, 0.9, 'k'); }
     else { const d = drawFamily(p, fam, bx, rng, label); void d; }
-    const g = p.build(`fixture-${f.id}`); if (z0) g.position.y = z0; scene.add(g);
-    const ent: Entity = { kind: f.kind === 'think-tank' ? 'thinktank' : 'fixture', id: f.id, groups: [g], pick: [(bx.x0 + bx.x1) / 2, bx.y1, 3],
-      info: () => ({ kind: label, title: label, status: f.kind === 'think-tank' ? 'rooms inside' : 'estate fixture', rows: [['Region', f.region]], actions: f.kind === 'think-tank' ? [['Open the think tank', () => onAction({ type: 'open-thinktank' })]] : undefined }), readout: () => label };
+    const shell = p.build(`fixture-${f.id}`); const g = new THREE.Group(); g.name = `fixture-${f.id}`; g.add(shell); if (z0) g.position.y = z0; scene.add(g);
+    // the think tank's card lists its rooms, the registry's research programmes that are on (PRD §7.10)
+    const rooms = f.kind === 'think-tank' ? REGISTRY.rooms.filter((r) => r.on).map((r) => ({ id: r.id, label: r.label })) : [];
+    const ent: Entity = { kind: f.kind === 'think-tank' ? 'thinktank' : 'fixture', id: f.id, groups: [g], pick: [(bx.x0 + bx.x1) / 2, bx.y1, 3 + z0],
+      info: () => ({ kind: label, title: label, status: f.kind === 'think-tank' ? 'rooms inside' : 'estate fixture', rows: [['Region', f.region], ...rooms.map((r): [string, string] => ['Room', r.label])], actions: f.kind === 'think-tank' ? [['Open the think tank', () => onAction({ type: 'open-thinktank' })]] : undefined }), readout: () => label };
     g.userData.entity = ent; ctx.entities.push(ent);
+    if (f.kind === 'think-tank') {
+      // the section drawing: one room per programme, drawn the first time the building opens (selected, or the camera close over it)
+      const peek: Peek = { shell, box: [bx.x0, bx.x1, bx.y0, bx.y1], z: [z0, z0 + 8], near: true, section: () => { const c = buildCut(ctx, bx, 's', 7, (inside, b) => { buildRooms(inside, b, rooms); }); return { cut: c.cut, inside: c.inside }; } };
+      g.userData.peek = peek; ctx.peeks.push([g, ent]);
+    }
   }
 
   // block labels at the middle view: one text each, drawn flat beside the status mark
