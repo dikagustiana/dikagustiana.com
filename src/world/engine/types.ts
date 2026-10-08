@@ -5,7 +5,7 @@
 import type * as THREE from 'three';
 import type { Registry } from '@/lib/world/registry/types';
 import type { GeneratedLayout } from '@/world/placement/types';
-import type { ModelStatus, StationBinding } from '@/world/data/types';
+import type { FlowWeight, ModelStatus, StationBinding } from '@/world/data/types';
 
 /** What a card shows. Rows are [label, value] pairs; actions render as buttons in the card's footer. */
 export interface EntityInfo {
@@ -110,6 +110,13 @@ export interface RendererLike {
   capabilities: { getMaxAnisotropy(): number };
 }
 
+/** What a card's action asks the shell to do. */
+export type WorldAction =
+  | { type: 'open-board'; ticker: string }
+  | { type: 'open-index'; code: string }
+  | { type: 'open-thinktank' }
+  | { type: 'open-condition'; targetId: string };
+
 export interface WorldOptions {
   registry: Registry;
   layout: GeneratedLayout;
@@ -123,6 +130,7 @@ export interface WorldOptions {
   /** Simulated seconds run before the first frame; measured in Phase D, see WARMUP_SECONDS. */
   warmupSeconds?: number;
   onSelect?: (sel: Selection | null) => void;
+  onAction?: (action: WorldAction) => void;
   onReady?: () => void;
   /** Tests pass a fake renderer; the default creates a WebGLRenderer on the engine's canvas. */
   createRenderer?: (canvas: HTMLCanvasElement) => RendererLike;
@@ -137,6 +145,8 @@ export interface WorldHandle {
   setOverlay(name: OverlayName): void;
   setLayer(name: LayerName, on: boolean): void;
   setModelStatus(statuses: Map<string, ModelStatus>): void;
+  /** Flow classes from the boundary: measured links carry more vehicles than expected ones. */
+  setFlowWeights(flows: FlowWeight[]): void;
   highlightChain(id: string, depth: 1 | 'all'): void;
   exposeCompany(ticker: string, stations: StationBinding[]): void;
   pause(on: boolean): void;

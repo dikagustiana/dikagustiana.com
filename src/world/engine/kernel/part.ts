@@ -25,6 +25,7 @@ export interface PartContext {
   gfx: { aniso: number };
   texts: TextRegistry;
   font: string;
+  text2d: boolean;
 }
 
 interface TextSpec { M: THREE.Matrix4; str: string; x: number; y: number; size: number; k: TextKey; anchor: 'start' | 'middle' | 'end'; lift: number }
@@ -134,7 +135,7 @@ export const setTextFar = (texts: TextRegistry, far: boolean): void => { texts.f
 // Text drawn flat on a plane: a canvas glyph texture (white) tinted by its token colour. Where no 2D canvas exists
 // (a headless test), the text is left out rather than drawn wrong.
 function textMesh(ctx: PartContext, { M, str, x, y, size, k, anchor, lift }: TextSpec): THREE.Mesh | null {
-  if (typeof document === 'undefined') return null;
+  if (!ctx.text2d || typeof document === 'undefined') return null;
   const font = `500 ${TEX_PX}px ${ctx.font}`;
   const c = document.createElement('canvas'), g = c.getContext('2d');
   if (!g) return null;

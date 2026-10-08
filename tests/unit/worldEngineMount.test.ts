@@ -43,6 +43,8 @@ beforeEach(() => {
   vi.stubGlobal('requestAnimationFrame', (fn: FrameRequestCallback) => { const id = rafSeq++; frames.add(id); void fn; return id; });
   vi.stubGlobal('cancelAnimationFrame', (id: number) => { frames.delete(id); });
   vi.stubGlobal('ResizeObserver', class { observe() {} disconnect() {} unobserve() {} });
+  // jsdom has no 2D canvas and logs an error for every getContext call; the engine probes once and draws no text here
+  HTMLCanvasElement.prototype.getContext = (() => null) as unknown as HTMLCanvasElement['getContext'];
 });
 afterEach(() => {
   EventTarget.prototype.addEventListener = origAdd; EventTarget.prototype.removeEventListener = origRemove;

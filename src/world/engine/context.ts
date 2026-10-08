@@ -44,6 +44,8 @@ export interface EngineContext {
   texts: TextRegistry;
   /** The CSS font family the text textures are drawn in, read from the shell's variable. */
   font: string;
+  /** Whether a 2D canvas exists to draw text textures with (a headless test has none; text is then left out). */
+  text2d: boolean;
   reduced: boolean;
   debug: boolean;
   /** Every entity that can be clicked, in creation order; the view cycles through them. */
@@ -55,7 +57,7 @@ export interface EngineContext {
 const noop = () => {};
 
 export function createContext(o: {
-  rng: Rng; theme: Theme; layout: GeneratedLayout; font: string; reduced: boolean; debug: boolean;
+  rng: Rng; theme: Theme; layout: GeneratedLayout; font: string; reduced: boolean; debug: boolean; text2d: boolean;
 }): EngineContext {
   return {
     scene: new THREE.Scene(),
@@ -67,6 +69,7 @@ export function createContext(o: {
     layout: o.layout,
     texts: { meshes: [], far: false },
     font: o.font,
+    text2d: o.text2d,
     reduced: o.reduced,
     debug: o.debug,
     entities: [],

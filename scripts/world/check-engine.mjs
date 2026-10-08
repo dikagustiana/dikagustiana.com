@@ -24,8 +24,9 @@ import { parse } from '@babel/parser';
 import traverseMod from '@babel/traverse';
 
 const traverse = traverseMod.default;
-const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../src/world/engine');
-const ENTRY = path.join(ROOT, 'index.ts');
+const SRC = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../src');
+const ROOT = path.join(SRC, 'world');
+const ENTRY = path.join(ROOT, 'engine/index.ts');
 const STRICT = process.argv.includes('--strict');
 const rel = (f) => path.relative(ROOT, f);
 
@@ -65,15 +66,15 @@ for (const f of files) {
   mods.set(f, { ast, names });
 }
 
-// './view' is view.ts or view/index.ts, as the bundler resolves it
+// './view' is view.ts or view/index.ts, as the bundler resolves it; '@/x' is src/x
 const resolve = (from, spec) => {
-  const base = path.resolve(path.dirname(from), spec);
+  const base = spec.startsWith('@/') ? path.join(SRC, spec.slice(2)) : path.resolve(path.dirname(from), spec);
   if (spec.endsWith('.ts')) return base;
   return fs.existsSync(base + '.ts') ? base + '.ts' : path.join(base, 'index.ts');
 };
 // the relative modules a file loads: its imports and its re-exports
 const edges = (ast) => ast.program.body
-  .filter((st) => (st.type === 'ImportDeclaration' || st.type === 'ExportNamedDeclaration' || st.type === 'ExportAllDeclaration') && st.source?.value.startsWith('.'))
+  .filter((st) => (st.type === 'ImportDeclaration' || st.type === 'ExportNamedDeclaration' || st.type === 'ExportAllDeclaration') && st.source && (st.source.value.startsWith('.') || st.source.value.startsWith('@/')))
   .map((st) => st.source.value);
 
 // ---- reachability from the entry ----
@@ -96,9 +97,10 @@ for (const f of files) {
   const { ast } = mods.get(f);
   for (const st of ast.program.body) {
     const isImport = st.type === 'ImportDeclaration', isReexport = (st.type === 'ExportNamedDeclaration' || st.type === 'ExportAllDeclaration') && !!st.source;
-    if (!(isImport || isReexport) || !st.source.value.startsWith('.')) continue;
+    if (!(isImport || isReexport) || !(st.source.value.startsWith('.') || st.source.value.startsWith('@/'))) continue;
     const target = resolve(f, st.source.value), ex = mods.get(target);
-    if (!ex) { report(f, `no module ${st.source.value}`); continue; }
+    // a module outside src/world (the registry, the chain data) is not checked here
+    if (!ex) { if (target.startsWith(ROOT)) report(f, `no module ${st.source.value}`); continue; }
     for (const sp of st.specifiers ?? []) {
       const name = sp.type === 'ImportSpecifier' ? (sp.imported.name ?? sp.imported.value) : sp.type === 'ExportSpecifier' ? (sp.local.name ?? sp.local.value) : null;
       if (name && !ex.names.has(name)) report(f, `${name} is not exported by ${st.source.value}`);
@@ -126,7 +128,8 @@ if (fs.existsSync(ENTRY)) {
       ReferencedIdentifier(p) {
         if (p.getFunctionParent()) return;
         const b = p.scope.getBinding(p.node.name);
-        if (b?.kind === 'module' && b.path.parent.source?.value.startsWith('.')) deps.add(`${resolve(f, b.path.parent.source.value)}|${p.node.name}`);
+        const spec = b?.kind === 'module' ? b.path.parent.source?.value : null;
+        if (spec && (spec.startsWith('.') || spec.startsWith('@/'))) { const m = resolve(f, spec); if (mods.has(m)) deps.add(`${m}|${p.node.name}`); }
       },
     });
     importsOf.set(f, imps); evalDeps.set(f, deps);

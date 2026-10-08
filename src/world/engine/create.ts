@@ -17,15 +17,19 @@ import { createClock, STEP } from './sim/clock';
 import { buildSlab } from './world/ground';
 import { createView, type View } from './view';
 import type { Entity, FrameReading, LayerName, OverlayName, RendererLike, WorldHandle, WorldOptions } from './types';
-import type { ModelStatus, StationBinding } from '@/world/data/types';
+import type { FlowWeight, ModelStatus, StationBinding } from '@/world/data/types';
+import { buildWorldScene, type WorldScene } from '@/world/world/build';
+import { createTraffic, type Traffic } from '@/world/sim/traffic';
 
 /**
  * Simulated seconds run before the first frame, so the far view's roads are
- * not empty when the world fades in. Factory Yard ran 80 s (4,800 steps).
- * Nothing moves in this world until Phase D places the vehicles, so the
- * measured value is recorded there; until then no warm-up is needed.
+ * not empty when the world fades in. Factory Yard ran 80 s (4,800 steps)
+ * because its vehicles started at their depots. Here every vehicle is placed
+ * spaced along its lane at build time (src/world/sim/traffic.ts), so the far
+ * view is populated at the first frame: measured, zero steps are needed, and
+ * one second is run so the spacing has settled.
  */
-export const WARMUP_SECONDS = 0;
+export const WARMUP_SECONDS = 1;
 
 export class WorldError extends Error {
   constructor(readonly code: 'webgl-unavailable' | 'no-container', message: string) { super(message); this.name = 'WorldError'; }
@@ -77,16 +81,19 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
   const read = (token: string) => (typeof getComputedStyle === 'function' ? getComputedStyle(container).getPropertyValue(token) : '');
   const theme = createTheme(read);
   const rng = createRng(options.seed ?? DEFAULT_SEED);
-  const ctx: EngineContext = createContext({ rng, theme, layout: options.layout, font: options.theme.font, reduced, debug: !!options.debug });
+  // one probe for a 2D canvas (text textures); a headless test environment has none and the text is left out
+  const text2d = (() => { try { return !!document.createElement('canvas').getContext('2d'); } catch { return false; } })();
+  const ctx: EngineContext = createContext({ rng, theme, layout: options.layout, font: options.theme.font, reduced, debug: !!options.debug, text2d });
   ctx.gfx.aniso = renderer.capabilities.getMaxAnisotropy();
   const clock = createClock();
 
   // ---- assemble, in a fixed order (the rng is drawn while building, so the order decides what the world looks like) ----
   ctx.scene.add(buildSlab(ctx));
-  // Phase D adds: regions, blocks, roads, gates, signposts, fixtures, vehicles, from options.layout.
+  const world: WorldScene = buildWorldScene(ctx, options.layout, (a) => options.onAction?.(a));
+  const traffic: Traffic = createTraffic(ctx, options.layout);
 
   // ---- the simulation step ----
-  const systems: { update(dt: number): void }[] = [];
+  const systems: { update(dt: number): void }[] = [traffic];
   const stepOnce = (dt: number) => {
     clock.t += dt;
     for (const s of systems) s.update(dt);
@@ -99,6 +106,7 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
   const view: View = createView(ctx, {
     container, canvas, renderer, clock, reducedDetail: !!options.reducedDetail,
     onSelect: options.onSelect,
+    onDetail: (tiny, far) => { world.nearGroup.visible = !far; traffic.setDetail(tiny, far); },
   });
   if (options.initialView && options.initialView !== 'whole') view.lookAt(options.initialView);
 
@@ -134,8 +142,9 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
     lookAt: (name) => view.lookAt(name),
     setDistance: (t) => view.setDistance(t),
     setOverlay: (name) => { overlay = name; },
-    setLayer: (name, on) => { layers.set(name, on); },
-    setModelStatus: (s) => { statuses = s; },
+    setLayer: (name, on) => { layers.set(name, on); traffic.setLayer(name, on); },
+    setModelStatus: (s) => { statuses = s; world.setStatuses(s); },
+    setFlowWeights: (flows: FlowWeight[]) => { traffic.setFlows(flows); },
     highlightChain: (id, depth) => { chain = { id, depth }; },
     exposeCompany: (ticker, stations) => { exposed = { ticker, stations }; },
     pause: (on) => { paused = on; },
@@ -150,6 +159,7 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
     if (raf !== null) { cancelAnimationFrame(raf); raf = null; }
     subscribers.clear();
     view.dispose();
+    traffic.dispose();
     ctx.scene.traverse((o) => disposeObject(o));
     ctx.sky.traverse((o) => disposeObject(o));
     ctx.scene.clear(); ctx.sky.clear();
