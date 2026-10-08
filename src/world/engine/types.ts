@@ -162,7 +162,8 @@ export interface WorldHandle {
   setModelStatus(statuses: Map<string, ModelStatus>): void;
   /** Flow classes from the boundary: measured links carry more vehicles than expected ones. */
   setFlowWeights(flows: FlowWeight[]): void;
-  highlightChain(id: string, depth: 1 | 'all'): void;
+  /** Light the chain of a building or company (PRD §7.9): one level, or the whole connected chain; null clears. */
+  highlightChain(id: string | null, depth: 1 | 'all'): void;
   /** Light the entities whose id, code or chain id is named (a think-tank piece's tags); an empty list clears. */
   setHighlight(ids: readonly string[]): void;
   exposeCompany(ticker: string, stations: StationBinding[]): void;

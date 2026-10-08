@@ -55,6 +55,8 @@ export default function WorldFrame({ variant, heading, boardTicker = null, onBoa
   const [view, setView] = useState<ViewName | null>(null);
   const [thinkTank, setThinkTank] = useState(false);
   const [piece, setPiece] = useState<string | null>(null);
+  const [fullChain, setFullChain] = useState(false);
+  const fullChainRef = useRef(fullChain); fullChainRef.current = fullChain;
   const host = useRef<HTMLDivElement>(null);
   const handle = useRef<WorldHandle | null>(null);
   const wanted = useRef(false);
@@ -71,13 +73,14 @@ export default function WorldFrame({ variant, heading, boardTicker = null, onBoa
   }), [marks]);
   const dragging = useRef(false);
 
-  const act = useCallback((a: WorldAction | { type: 'select'; id: string } | { type: 'open-piece'; slug: string }) => {
+  const act = useCallback((a: WorldAction | { type: 'select'; id: string } | { type: 'open-piece'; slug: string } | { type: 'chain-depth'; full: boolean }) => {
     if (a.type === 'open-board') { if (onBoard) onBoard(a.ticker); else navigate(boardPath(a.ticker)); }
     else if (a.type === 'open-index') navigate(`/finance/finance-in-action#sub-${a.code}`);
     else if (a.type === 'open-thinktank') setThinkTank(true);
     else if (a.type === 'select') { handle.current?.select(a.id); handle.current?.setDistance(0.75); setDistance(0.75); }
     else if (a.type === 'open-piece') { setPiece(a.slug); setThinkTank(true); }
     else if (a.type === 'open-condition') setMark(shift ? { shift, targetId: a.targetId } : null);
+    else if (a.type === 'chain-depth') setFullChain(a.full);
   }, [navigate, onBoard, shift]);
 
   // mount the engine lazily: after first paint, or on the first pointer or keyboard interaction, whichever first
@@ -91,7 +94,7 @@ export default function WorldFrame({ variant, heading, boardTicker = null, onBoa
       const h = createWorld(host.current, {
         registry: REGISTRY, layout: LAYOUT, theme: { font }, initialView: phone ? 'estate' : 'whole', reducedDetail: phone,
         debug: typeof location !== 'undefined' && new URLSearchParams(location.search).has('debug'),
-        onSelect: (sel) => { if (sel?.kind === 'mark') { const id = sel.info.rows.find(([k]) => k === 'Target')?.[1]; setSelection(null); setMark(id && shiftRef.current ? { shift: shiftRef.current, targetId: id } : null); return; } setSelection(sel); if (sel) setMark(null); },
+        onSelect: (sel) => { if (sel?.kind === 'mark') { const id = sel.info.rows.find(([k]) => k === 'Target')?.[1]; setSelection(null); setMark(id && shiftRef.current ? { shift: shiftRef.current, targetId: id } : null); return; } setSelection(sel); if (sel) setMark(null); handle.current?.highlightChain(sel && (sel.kind === 'building' || sel.kind === 'company') ? sel.id : null, fullChainRef.current ? 'all' : 1); },
         onAction: act,
         onReady: () => setReady(true),
       });
@@ -137,6 +140,7 @@ export default function WorldFrame({ variant, heading, boardTicker = null, onBoa
   // data into the engine
   useEffect(() => { if (ready && handle.current) { handle.current.setModelStatus(data.statuses); handle.current.setFlowWeights(data.flows); } }, [ready, data.statuses, data.flows]);
   useEffect(() => { handle.current?.setOverlay(overlay); if (ready) handle.current?.setMarks(worldMarks); }, [overlay, ready, worldMarks]);
+  useEffect(() => { if (ready && selection && (selection.kind === 'building' || selection.kind === 'company')) handle.current?.highlightChain(selection.id, fullChain ? 'all' : 1); }, [fullChain, ready, selection]);
   useEffect(() => { if (ready && handle.current) for (const l of LAYERS) handle.current.setLayer(l.layer, layers[l.layer]); }, [layers, ready]);
   // the board's company is selected and exposed when the route names it
   useEffect(() => { if (ready && boardTicker && handle.current) { handle.current.select(boardTicker.toUpperCase()); handle.current.setDistance(1); setDistance(1); } }, [ready, boardTicker]);
@@ -197,7 +201,7 @@ export default function WorldFrame({ variant, heading, boardTicker = null, onBoa
         <div className="world-frame__night" style={{ opacity: night * 0.55 }} aria-hidden="true" />
         {reading && <div className="world-frame__clock" aria-hidden="true">{reading.clock}{night > 0.5 ? ' · night' : ''}{reading.paused ? ' · paused' : ''}</div>}
         {failed && <p className="world-note" role="status">The world needs WebGL, which this browser has turned off. The poster stays; press Skema for the schematic.</p>}
-        <Card selection={selection} mark={mark} lens={lens} flows={data.flows} pieces={pieces} onClose={closeCard} onAction={act} />
+        <Card selection={selection} mark={mark} lens={lens} flows={data.flows} weights={data.weights} fullChain={fullChain} pieces={pieces} onClose={closeCard} onAction={act} />
         {boardTicker && (
           <Suspense fallback={<div className="world-board" role="status">Opening the board…</div>}>
             <Board ticker={boardTicker} data={data} pieces={pieces} onClose={() => { if (onBoard) onBoard(null); else navigate(WORLD_PATH); host.current?.querySelector('canvas')?.focus(); }} />

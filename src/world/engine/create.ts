@@ -21,6 +21,7 @@ import type { FlowWeight, ModelStatus, StationBinding } from '@/world/data/types
 import { buildWorldScene, type WorldScene } from '@/world/world/build';
 import { createTraffic, type Traffic } from '@/world/sim/traffic';
 import { createMarks, type Marks } from './marks';
+import { createChain, type Chain } from './chain';
 
 export { WARMUP_SECONDS };
 
@@ -41,7 +42,9 @@ interface DebugApi {
   /** The distance control's reading of the camera, 0 at home and 1 at the near view. */
   distance(): number;
   statuses(): Record<string, ModelStatus>;
-  chain(id: string): string[];
+  /** Codes in the lit chain, the selected one first. */
+  chain(): string[];
+  chainDrawn(): { measured: number; expected: number; dimmed: number };
   expose(ticker: string): void;
   dispose(): void;
 }
@@ -105,12 +108,12 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
   });
   if (options.initialView && options.initialView !== 'whole') view.lookAt(options.initialView);
   const marks: Marks = createMarks(ctx, (a) => options.onAction?.(a));
+  const chain: Chain = createChain(ctx, options.registry.links);
 
   // ---- state the shell sets through the handle; Phase E–G give them their effects ----
   let overlay: OverlayName = 'none';
   const layers = new Map<LayerName, boolean>();
   let statuses = new Map<string, ModelStatus>();
-  let chain: { id: string; depth: 1 | 'all' } | null = null;
   let exposed: { ticker: string; stations: StationBinding[] } | null = null;
 
   // ---- the loop ----
@@ -129,6 +132,7 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
     if (clock.shift.h < clock.shift.goal) clock.shift.h = Math.min(clock.shift.goal, clock.shift.h + dt * (reduced ? 60 : 5));
     view.tick(dt, paused);
     marks.update(view.camera.zoom);
+    chain.update(view.camera.zoom);
     if (subscribers.size) { const r = reading(); for (const fn of subscribers) fn(r); }
   }
   const find = (id: string | null) => (id ? ctx.entities.find((e) => e.id === id) ?? null : null);
@@ -142,8 +146,8 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
     setMarks: (list) => marks.set(list),
     setLayer: (name, on) => { layers.set(name, on); traffic.setLayer(name, on); },
     setModelStatus: (s) => { statuses = s; world.setStatuses(s); },
-    setFlowWeights: (flows: FlowWeight[]) => { traffic.setFlows(flows); },
-    highlightChain: (id, depth) => { chain = { id, depth }; },
+    setFlowWeights: (flows: FlowWeight[]) => { traffic.setFlows(flows); chain.setFlows(flows); },
+    highlightChain: (id, depth) => chain.set(id, depth),
     setHighlight: (ids) => view.setHighlight(ids),
     exposeCompany: (ticker, stations) => { exposed = { ticker, stations }; },
     pause: (on) => { paused = on; },
@@ -158,6 +162,7 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
     if (raf !== null) { cancelAnimationFrame(raf); raf = null; }
     subscribers.clear();
     marks.dispose();
+    chain.dispose();
     view.dispose();
     traffic.dispose();
     ctx.scene.traverse((o) => disposeObject(o));
@@ -168,7 +173,7 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
     try { renderer.forceContextLoss(); } catch { /* a fake renderer, or a context already lost */ }
     canvas.remove();
     ctx.entities.length = 0; ctx.peeks.length = 0; ctx.texts.meshes.length = 0; systems.length = 0;
-    statuses = new Map(); chain = null; exposed = null; layers.clear();
+    statuses = new Map(); exposed = null; layers.clear();
     if (options.debug && typeof window !== 'undefined' && window.world?.dispose === dispose) delete window.world;
   }
 
@@ -184,7 +189,8 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
       drawCalls: () => view.drawCalls(),
       distance: () => view.distanceOf(),
       statuses: () => Object.fromEntries(statuses),
-      chain: () => (chain ? [chain.id] : []),
+      chain: () => chain.codes(),
+      chainDrawn: () => ({ ...chain.drawn(), dimmed: chain.dimmed() }),
       expose: (ticker) => handle.exposeCompany(ticker, []),
       dispose,
     };

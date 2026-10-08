@@ -10,12 +10,16 @@ import { flowsFrom, loadPublished, packageFor, PUBLISHED_QUERY_KEY, statusesFrom
 import type { Registry as FiaRegistry } from '@/lib/finance-in-action/registry';
 import type { ModelPackage } from '@/lib/finance-in-action/contract/types';
 import type { FlowWeight, ModelStatus } from '@/world/data/types';
+import { isMeasured } from '@/lib/finance-in-action/contract/links';
+import { formatPercent } from '@/lib/finance-in-action/format';
 
 export interface WorldData {
   state: 'loading' | 'ok' | 'outage';
   reg: FiaRegistry | null;
   statuses: Map<string, ModelStatus>;
   flows: FlowWeight[];
+  /** A measured link's weight for the card, `from>to` → 'cost share 23,0%'; the house formatter, the data layer's measure. */
+  weights: Map<string, string>;
   packageFor: (ticker: string) => ModelPackage | null;
   /** How many of the placed sub-industries have a published model: computed, never typed. */
   covered: number;
@@ -28,7 +32,9 @@ export function useWorldData(): WorldData {
   return useMemo(() => {
     const statuses = statusesFrom(state === 'loading' ? null : reg, state === 'outage');
     const published = new Set([...statuses.values()].filter((s) => s.state === 'published').map((s) => s.ticker));
-    return { state, reg, statuses, flows: flowsFrom(reg), packageFor: (t) => packageFor(reg, t),
+    const weights = new Map<string, string>();
+    for (const l of reg?.links ?? []) if (isMeasured(l) && l.costShare) weights.set(`${l.from}>${l.to}`, `cost share ${formatPercent(l.costShare.value)}`);
+    return { state, reg, statuses, flows: flowsFrom(reg), weights, packageFor: (t) => packageFor(reg, t),
       covered: 0 + (published.size ? countCovered(published) : 0) };
   }, [state, reg]);
 }

@@ -24,9 +24,13 @@ export interface CardProps {
   mark?: { shift: ShiftId; targetId: string } | null;
   lens: LensId;
   flows: readonly FlowWeight[];
+  /** Measured link weights by `from>to`, from the data layer through the shell; the engine never sees them. */
+  weights?: ReadonlyMap<string, string>;
+  /** Whether the chain highlight shows the whole chain or one level (PRD §7.9). */
+  fullChain?: boolean;
   pieces: readonly Piece[];
   onClose: () => void;
-  onAction: (a: { type: 'open-board'; ticker: string } | { type: 'open-index'; code: string } | { type: 'open-thinktank' } | { type: 'select'; id: string } | { type: 'open-piece'; slug: string }) => void;
+  onAction: (a: { type: 'open-board'; ticker: string } | { type: 'open-index'; code: string } | { type: 'open-thinktank' } | { type: 'select'; id: string } | { type: 'open-piece'; slug: string } | { type: 'chain-depth'; full: boolean }) => void;
 }
 
 /** The energy drill-down, v0 (discovery item D): the band's three lines and the two PLN conditions, by number. */
@@ -44,7 +48,7 @@ function EnergyDrillDown() {
 
 const stateOf = (status: string): keyof typeof STATUS_VOCAB | undefined => (Object.keys(STATUS_VOCAB) as (keyof typeof STATUS_VOCAB)[]).find((k) => STATUS_VOCAB[k].word === status);
 
-export function Card({ selection, mark, lens, flows, pieces, onClose, onAction }: CardProps) {
+export function Card({ selection, mark, lens, flows, weights, fullChain = false, pieces, onClose, onAction }: CardProps) {
   const ref = useRef<HTMLElement>(null);
   useEffect(() => { ref.current?.querySelector<HTMLElement>('h3')?.focus(); }, [selection?.id, mark?.targetId]);
   if (!selection && !mark) return null;
@@ -83,9 +87,10 @@ export function Card({ selection, mark, lens, flows, pieces, onClose, onAction }
     if (s) {
       const flowOf = (from: string, to: string) => flows.find((f) => f.from === from && f.to === to)?.cls ?? 'expected';
       const up = linksTo(s.code), down = linksFrom(s.code);
-      const line = (code: string, cls: string) => { const o = subIndustryByCode(code); const v = cls === 'expected' ? STATUS_VOCAB.expected : STATUS_VOCAB.measured; return <li key={code}><button type="button" className="underline" onClick={() => onAction({ type: 'select', id: code })}>{o?.nameEn ?? code}</button> <span className="text-muted-foreground">{v.glyph} {v.word}</span></li>; };
-      sections.push(<div className="world-card__section" key="up"><h4>Upstream</h4>{up.length ? <ul>{up.map((l) => line(l.from, flowOf(l.from, l.to)))}</ul> : <p>No link recorded.</p>}</div>);
-      sections.push(<div className="world-card__section" key="down"><h4>Downstream</h4>{down.length ? <ul>{down.map((l) => line(l.to, flowOf(l.from, l.to)))}</ul> : <p>No link recorded.</p>}</div>);
+      const line = (code: string, from: string, to: string) => { const cls = flowOf(from, to); const o = subIndustryByCode(code); const v = cls === 'expected' ? STATUS_VOCAB.expected : STATUS_VOCAB.measured; const w = cls === 'expected' ? null : weights?.get(`${from}>${to}`) ?? null; return <li key={code}><button type="button" className="underline" onClick={() => onAction({ type: 'select', id: code })}>{o?.nameEn ?? code}</button> <span className="text-muted-foreground">{v.glyph} {v.word}{w ? ` · ${w}` : ''}</span></li>; };
+      sections.push(<div className="world-card__section" key="up"><h4>Upstream</h4>{up.length ? <ul>{up.map((l) => line(l.from, l.from, l.to))}</ul> : <p>No link recorded.</p>}</div>);
+      sections.push(<div className="world-card__section" key="down"><h4>Downstream</h4>{down.length ? <ul>{down.map((l) => line(l.to, l.from, l.to))}</ul> : <p>No link recorded.</p>}</div>);
+      if (up.length || down.length) sections.push(<p className="world-card__section" key="chain"><button type="button" className="world-btn" aria-pressed={fullChain} onClick={() => onAction({ type: 'chain-depth', full: !fullChain })}>{fullChain ? 'Show one level' : 'Show full chain'}</button> <span className="text-muted-foreground">{fullChain ? 'The whole chain is lit; the rest is dimmed.' : 'One level is lit; the rest is dimmed.'}</span></p>);
       const related = pieces.filter((p) => p.tags.includes(s.code) || p.tags.includes(s.chainNodeId) || s.companies.some((c) => p.tags.includes(c.ticker)));
       sections.push(<div className="world-card__section" key="analyses"><h4>Related analyses</h4>{related.length ? <ul>{related.map((p) => <li key={p.slug}><button type="button" className="underline" onClick={() => onAction({ type: 'open-piece', slug: p.slug })}>{p.title}</button> <span className="text-muted-foreground">{STATUS_VOCAB[p.kind].glyph} {STATUS_VOCAB[p.kind].word}</span></li>)}</ul> : <p>Nothing published about this sub-industry yet.</p>}</div>);
       if (state === 'none') sections.push(<p className="world-card__section" key="empty">A model here would show the unit economics of a listed company in this sub-industry, its main cost drivers and where it sits against its peer. None is published yet.</p>);
@@ -96,6 +101,7 @@ export function Card({ selection, mark, lens, flows, pieces, onClose, onAction }
     const ticker = rows.find(([k]) => k === 'Ticker')?.[1];
     if (ticker) foot.push(<Link key="board" className="world-btn" to={boardPath(ticker)} onClick={(e) => { e.preventDefault(); onAction({ type: 'open-board', ticker }); }}>Open board</Link>);
     for (const [label, fn] of info.actions ?? []) if (label !== 'Open board') foot.push(<button key={label} type="button" className="world-btn" onClick={fn}>{label}</button>);
+    foot.push(<button key="chain" type="button" className="world-btn" aria-pressed={fullChain} onClick={() => onAction({ type: 'chain-depth', full: !fullChain })}>{fullChain ? 'Show one level' : 'Show full chain'}</button>);
   } else if (sel.kind === 'gate' || sel.kind === 'signpost') {
     const jointId = rows.find(([k]) => k === 'Joint')?.[1] as JointId | undefined;
     const j = jointId ? JOINT_BY_ID[jointId] : undefined;

@@ -23,6 +23,7 @@ import { searchIndex } from '@/lib/world/search';
 import { piecesFor, TAG_FILE, type PublishedEssay } from '@/lib/world/thinkTank';
 import { REGISTRY } from '@/lib/world/registry/subindustries.generated';
 import { ROOMS } from '@/lib/world/registry/generate';
+import { linksFrom } from '@/lib/world/registry/links.generated';
 import { ENERGY_DRILLDOWN, LAYERS, OVERLAYS, PLACES, SECTION_ORDER, STATUS_VOCAB, TOTAL_PLACED, boardPath } from '@/lib/world/constants';
 import { conditionHref, conditionOf, conditionShort } from '@/lib/finance-in-action/conditions';
 import { Card } from '@/components/world/Card';
@@ -110,6 +111,24 @@ describe('card', () => {
     expect(card.textContent!.replace(/\d{4}-\d{2}-\d{2}/g, '')).not.toMatch(/\d/);
     expect(screen.getByRole('link', { name: 'Open board' })).toHaveAttribute('href', boardPath('ABCD'));
     expect(screen.getByRole('heading', { level: 3 })).toHaveFocus();
+  });
+});
+
+describe('chain highlight controls (PRD §7.9)', () => {
+  it('a sub-industry card offers the full chain, shows a measured link’s weight from the shell and words an expected one', () => {
+    const actions: unknown[] = [];
+    const sub = REGISTRY.subIndustries.find((s) => s.zone !== 'unplaced' && linksFrom(s.code).length > 0)!;
+    const l = linksFrom(sub.code)[0];
+    const info = { kind: 'Sub-industry', title: sub.nameEn, status: STATUS_VOCAB.none.word, rows: [['Code', sub.code]] as const };
+    mount(<Card selection={{ id: sub.code, kind: 'building', info }} lens="economy" flows={[{ from: l.from, to: l.to, cls: 'measured-light' }]} weights={new Map([[`${l.from}>${l.to}`, 'cost share 23,0%']])} fullChain={false} pieces={[]} onClose={() => {}} onAction={(a) => actions.push(a)} />);
+    const down = screen.getByRole('heading', { name: 'Downstream' }).parentElement!;
+    expect(down.textContent).toContain(`${STATUS_VOCAB.measured.word} · cost share 23,0%`);
+    const others = linksFrom(sub.code).slice(1);
+    if (others.length) expect(down.textContent).toContain(STATUS_VOCAB.expected.word);
+    const toggle = screen.getByRole('button', { name: 'Show full chain' });
+    expect(toggle).toHaveAttribute('aria-pressed', 'false');
+    toggle.click();
+    expect(actions).toEqual([{ type: 'chain-depth', full: true }]);
   });
 });
 
