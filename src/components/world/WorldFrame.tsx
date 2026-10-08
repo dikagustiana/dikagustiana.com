@@ -14,6 +14,9 @@ import { prefersReducedMotion } from '@/lib/motion';
 import { CANVAS_DESCRIPTION, LAYERS, OVERLAYS, PLACES, REGION_VIEW, TITLE, TOTAL_PLACED, WORLD_PATH, boardPath } from '@/lib/world/constants';
 import { marksFor, type PlacedMark } from '@/lib/world/presentation';
 import { REGISTRY } from '@/lib/world/registry/subindustries.generated';
+import { bindingsFrom } from '@/world/data/boundary';
+import { archetypeForZone, stationFor } from '@/world/interiors';
+import type { StationBinding } from '@/world/data/types';
 import { STATUS, type LensId, type ShiftId } from '@/data/industryChain';
 import type { FrameReading, LayerName, OverlayName, Selection, ViewName, WorldHandle, WorldAction, WorldMark } from '@/world/engine/types';
 import { Card } from './Card';
@@ -142,8 +145,17 @@ export default function WorldFrame({ variant, heading, boardTicker = null, onBoa
   useEffect(() => { handle.current?.setOverlay(overlay); if (ready) handle.current?.setMarks(worldMarks); }, [overlay, ready, worldMarks]);
   useEffect(() => { if (ready && selection && (selection.kind === 'building' || selection.kind === 'company')) handle.current?.highlightChain(selection.id, fullChain ? 'all' : 1); }, [fullChain, ready, selection]);
   useEffect(() => { if (ready && handle.current) for (const l of LAYERS) handle.current.setLayer(l.layer, layers[l.layer]); }, [layers, ready]);
-  // the board's company is selected and exposed when the route names it
-  useEffect(() => { if (ready && boardTicker && handle.current) { handle.current.select(boardTicker.toUpperCase()); handle.current.setDistance(1); setDistance(1); } }, [ready, boardTicker]);
+  // the exposed company (PRD §7.8): the board's company, or a selected company with a published model. Its cost
+  // lines bind to the stations of its archetype (the package's, else its zone's fallback); the engine gets labels only.
+  const exposedTicker = boardTicker?.toUpperCase() ?? (selection?.kind === 'company' && /^[A-Z]{4}$/.test(selection.id) ? selection.id : null);
+  const bindings: StationBinding[] = useMemo(() => {
+    if (!exposedTicker) return [];
+    const pkg = data.packageFor(exposedTicker); if (!pkg) return [];
+    const sub = REGISTRY.subIndustries.find((x) => x.companies.some((c) => c.ticker === exposedTicker));
+    const archetype = data.statuses.get(exposedTicker)?.archetype ?? archetypeForZone(sub?.zone ?? 'unplaced');
+    return bindingsFrom(pkg, (unit, desc) => stationFor(archetype, unit, desc));
+  }, [exposedTicker, data]);
+  useEffect(() => { if (ready && exposedTicker && handle.current) { handle.current.exposeCompany(exposedTicker, bindings); if (boardTicker) { handle.current.setDistance(1); setDistance(1); } } }, [ready, exposedTicker, bindings, boardTicker]);
 
   const closeCard = () => { setSelection(null); setMark(null); handle.current?.select(null); host.current?.querySelector('canvas')?.focus(); };
   const toggleLayer = (name: LayerName) => setLayers((s) => ({ ...s, [name]: !s[name] }));
@@ -204,7 +216,7 @@ export default function WorldFrame({ variant, heading, boardTicker = null, onBoa
         <Card selection={selection} mark={mark} lens={lens} flows={data.flows} weights={data.weights} fullChain={fullChain} pieces={pieces} onClose={closeCard} onAction={act} />
         {boardTicker && (
           <Suspense fallback={<div className="world-board" role="status">Opening the board…</div>}>
-            <Board ticker={boardTicker} data={data} pieces={pieces} onClose={() => { if (onBoard) onBoard(null); else navigate(WORLD_PATH); host.current?.querySelector('canvas')?.focus(); }} />
+            <Board ticker={boardTicker} data={data} pieces={pieces} bindings={bindings} onStation={(lineId) => handle.current?.lightStation(lineId)} onClose={() => { if (onBoard) onBoard(null); else navigate(WORLD_PATH); host.current?.querySelector('canvas')?.focus(); }} />
           </Suspense>
         )}
         {thinkTank && (

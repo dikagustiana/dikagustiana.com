@@ -34,7 +34,7 @@ import type { ModelPackage } from '@/lib/finance-in-action/contract/types';
 import type { WorldData } from './useWorldData';
 
 
-export default function Board({ ticker, data, pieces, onClose, bindings }: { ticker: string; data: WorldData; pieces: readonly Piece[]; onClose: () => void; bindings?: readonly { lineId: string; label: string; stationId: string | null }[] }) {
+export default function Board({ ticker, data, pieces, onClose, bindings, onStation }: { ticker: string; data: WorldData; pieces: readonly Piece[]; onClose: () => void; bindings?: readonly { lineId: string; label: string; stationId: string | null }[]; onStation?: (lineId: string | null) => void }) {
   const ref = useRef<HTMLDivElement>(null);
   const t = ticker.toUpperCase();
   const sub = REGISTRY.subIndustries.find((s) => s.companies.some((c) => c.ticker === t)) ?? null;
@@ -60,7 +60,7 @@ export default function Board({ ticker, data, pieces, onClose, bindings }: { tic
         </div>
       </div>
       {pkg?.meta.provenance === 'synthetic' && <SyntheticBanner text="SYNTHETIC package: a mock, never ships. No company and no filing stands behind these figures; a production build carries no synthetic package (scripts/assert-no-synthetic.mjs)." />}
-      {pkg ? <Published pkg={pkg} data={data} related={related} bindings={bindings} /> : (
+      {pkg ? <Published pkg={pkg} data={data} related={related} bindings={bindings} onStation={onStation} /> : (
         <section aria-label="No model">
           <h4>{SECTION_ORDER[5]}</h4>
           <p>{data.state === 'outage' ? 'The published models could not be read just now, so nothing can be shown; try again later.' : `${NO_MODEL}. When a model of ${t} is published, this board will show its drivers, unit economics and peer position, each figure with its source.`}</p>
@@ -72,7 +72,7 @@ export default function Board({ ticker, data, pieces, onClose, bindings }: { tic
   );
 }
 
-function Published({ pkg, data, related, bindings }: { pkg: ModelPackage; data: WorldData; related: Piece[]; bindings?: readonly { lineId: string; label: string; stationId: string | null }[] }) {
+function Published({ pkg, data, related, bindings, onStation }: { pkg: ModelPackage; data: WorldData; related: Piece[]; bindings?: readonly { lineId: string; label: string; stationId: string | null }[]; onStation?: (lineId: string | null) => void }) {
   const reg = data.reg!;
   const view = useModelView(pkg, false);
   const [uePeriod, setUePeriod] = useState(() => latestReported(pkg, pkg.unitEconomics.periods) ?? pkg.meta.asOf.fullStatementsTo);
@@ -95,6 +95,11 @@ function Published({ pkg, data, related, bindings }: { pkg: ModelPackage; data: 
       <section aria-label={SECTION_ORDER[1]}>{sectionTitle(1)}
         <DriverRow view={view} periodId={treePeriod} feeds={new Map()} reg={reg} decorate={decorate} />
         {pkg.driverTree.nodes.length ? <DriverTree view={view} periodId={treePeriod} decorate={decorate} /> : <p className="text-sm text-muted-foreground">{TREE_UNAVAILABLE}</p>}
+        {bindings?.some((b) => b.stationId) && (
+          <ul className="flex flex-wrap gap-2 text-sm" aria-label="Drivers in the drawing">
+            {bindings.filter((b) => b.stationId).map((b) => <li key={b.lineId}><button type="button" className="world-btn" onMouseEnter={() => onStation?.(b.lineId)} onMouseLeave={() => onStation?.(null)} onFocus={() => onStation?.(b.lineId)} onBlur={() => onStation?.(null)} onClick={() => view.select(b.lineId)} aria-label={`${b.label}: lights its station in the drawing`}>{b.label} · {b.stationId}</button></li>)}
+          </ul>
+        )}
       </section>
       <section aria-label={SECTION_ORDER[2]}>{sectionTitle(2)}
         <UnitEconomics view={view} reg={reg} ue={ue} periodId={uePeriod} onPeriod={setUePeriod} onlyMessage={noVolume} decorate={decorate} barNote={() => null} />

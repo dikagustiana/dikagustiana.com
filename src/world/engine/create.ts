@@ -22,6 +22,7 @@ import { buildWorldScene, type WorldScene } from '@/world/world/build';
 import { createTraffic, type Traffic } from '@/world/sim/traffic';
 import { createMarks, type Marks } from './marks';
 import { createChain, type Chain } from './chain';
+import { createStations, type Stations } from './stations';
 
 export { WARMUP_SECONDS };
 
@@ -45,7 +46,8 @@ interface DebugApi {
   /** Codes in the lit chain, the selected one first. */
   chain(): string[];
   chainDrawn(): { measured: number; expected: number; dimmed: number };
-  expose(ticker: string): void;
+  expose(ticker: string, bindings?: StationBinding[]): void;
+  exposed(): { ticker: string; placed: Record<string, string>; lit: string | null } | null;
   dispose(): void;
 }
 declare global { interface Window { world?: DebugApi } }
@@ -109,12 +111,13 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
   if (options.initialView && options.initialView !== 'whole') view.lookAt(options.initialView);
   const marks: Marks = createMarks(ctx, (a) => options.onAction?.(a));
   const chain: Chain = createChain(ctx, options.registry.links);
+  const stations: Stations = createStations(ctx);
 
   // ---- state the shell sets through the handle; Phase E–G give them their effects ----
   let overlay: OverlayName = 'none';
   const layers = new Map<LayerName, boolean>();
   let statuses = new Map<string, ModelStatus>();
-  let exposed: { ticker: string; stations: StationBinding[] } | null = null;
+  let exposed: { ticker: string; stations: readonly StationBinding[] } | null = null;
 
   // ---- the loop ----
   const subscribers = new Set<(r: FrameReading) => void>();
@@ -133,6 +136,8 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
     view.tick(dt, paused);
     marks.update(view.camera.zoom);
     chain.update(view.camera.zoom);
+    stations.update(view.camera.zoom);
+    if (exposed && view.selected()?.id !== exposed.ticker) { exposed = null; stations.clear(); }
     if (subscribers.size) { const r = reading(); for (const fn of subscribers) fn(r); }
   }
   const find = (id: string | null) => (id ? ctx.entities.find((e) => e.id === id) ?? null : null);
@@ -149,7 +154,15 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
     setFlowWeights: (flows: FlowWeight[]) => { traffic.setFlows(flows); chain.setFlows(flows); },
     highlightChain: (id, depth) => chain.set(id, depth),
     setHighlight: (ids) => view.setHighlight(ids),
-    exposeCompany: (ticker, stations) => { exposed = { ticker, stations }; },
+    exposeCompany: (ticker, bindings) => {
+      const plot = world.plots.get(ticker.toUpperCase()), arch = world.archetypeOf(ticker);
+      if (!plot || !arch) { exposed = null; stations.clear(); return; }
+      exposed = { ticker: ticker.toUpperCase(), stations: bindings };
+      // the plot opens as a section while selected (the view's peek), and its stations are marked
+      view.select(plot);
+      stations.expose(arch, plot.box, bindings);
+    },
+    lightStation: (lineId) => stations.light(lineId),
     pause: (on) => { paused = on; },
     subscribe: (fn) => { subscribers.add(fn); return () => { subscribers.delete(fn); }; },
     step: (seconds) => { for (let t = 0; t < seconds; t += STEP) stepOnce(STEP); },
@@ -173,7 +186,7 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
     try { renderer.forceContextLoss(); } catch { /* a fake renderer, or a context already lost */ }
     canvas.remove();
     ctx.entities.length = 0; ctx.peeks.length = 0; ctx.texts.meshes.length = 0; systems.length = 0;
-    statuses = new Map(); exposed = null; layers.clear();
+    statuses = new Map(); exposed = null; layers.clear(); stations.dispose();
     if (options.debug && typeof window !== 'undefined' && window.world?.dispose === dispose) delete window.world;
   }
 
@@ -191,12 +204,13 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
       statuses: () => Object.fromEntries(statuses),
       chain: () => chain.codes(),
       chainDrawn: () => ({ ...chain.drawn(), dimmed: chain.dimmed() }),
-      expose: (ticker) => handle.exposeCompany(ticker, []),
+      expose: (ticker, bindings = []) => handle.exposeCompany(ticker, bindings),
+      exposed: () => (exposed ? { ticker: exposed.ticker, placed: Object.fromEntries(stations.placed()), lit: stations.lit() } : null),
       dispose,
     };
   }
-  // the overlay, layers and exposed company are read by the Phase E–G systems; until then they are state only
-  void overlay; void exposed;
+  // the overlay is read by the shell's marks (setMarks); the layers by the traffic
+  void overlay;
 
   options.onReady?.();
   raf = requestAnimationFrame(frame);

@@ -166,7 +166,10 @@ export interface WorldHandle {
   highlightChain(id: string | null, depth: 1 | 'all'): void;
   /** Light the entities whose id, code or chain id is named (a think-tank piece's tags); an empty list clears. */
   setHighlight(ids: readonly string[]): void;
-  exposeCompany(ticker: string, stations: StationBinding[]): void;
+  /** Open a company's plot as a section and mark its bound stations with the cost lines' labels (PRD §7.8). */
+  exposeCompany(ticker: string, stations: readonly StationBinding[]): void;
+  /** Light the marker of one cost line while the board hovers or focuses it; null lights none. */
+  lightStation(lineId: string | null): void;
   pause(on: boolean): void;
   /** Per-frame readings for the shell's clock and readout; returns the unsubscribe. */
   subscribe(fn: (r: FrameReading) => void): () => void;

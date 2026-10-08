@@ -15,7 +15,7 @@ import * as THREE from 'three';
 import { JOINT_BY_ID, type JointId } from '@/data/industryChain';
 import { subIndustryByCode } from '@/lib/world/registry/subindustries.generated';
 import type { SubIndustry } from '@/lib/world/registry/types';
-import type { Block, GeneratedLayout, Pt, Road } from '@/world/placement/types';
+import type { Box, Block, GeneratedLayout, Pt, Road } from '@/world/placement/types';
 import type { ModelStatus } from '@/world/data/types';
 import type { EngineContext } from '../engine/context';
 import { FRONT, TOP, W } from '../engine/kernel/iso';
@@ -24,6 +24,8 @@ import { Path } from '../engine/kernel/path';
 import type { Entity, EntityInfo, Peek, WorldAction } from '../engine/types';
 import { dashes, pine, tree } from '../engine/world/ground';
 import { buildCut } from '../interiors/base';
+import { INTERIORS, archetypeForZone } from '../interiors';
+import type { Archetype } from '@/lib/world/registry/types';
 import { drawFamily, drawPlot, type WindowRect } from './families';
 
 export const STATUS_WORD = { published: 'Published', none: 'No model yet', unavailable: 'Status unavailable', 'no-issuer': 'No listed issuer' } as const;
@@ -42,11 +44,15 @@ export interface PlotEntity extends Entity {
   code: string;
   ticker: string | null;
   slot: number;
+  /** The plot's footprint, where its section and station markers go. */
+  box: Box;
 }
 
 export interface WorldScene {
   buildings: Map<string, BuildingEntity>;
   plots: Map<string, PlotEntity>;
+  /** The archetype a company's plot is drawn with: the published model's, else its zone's fallback. */
+  archetypeOf(ticker: string): Archetype | null;
   /** The group the far view hides: plots and their signs. */
   nearGroup: THREE.Group;
   /** Statuses by ticker; an outage arrives as every ticker 'unavailable' (the boundary never says 'none' for an outage). */
@@ -110,6 +116,7 @@ export function buildWorldScene(ctx: EngineContext, layout: GeneratedLayout, onA
   const buildings = new Map<string, BuildingEntity>(), plots = new Map<string, PlotEntity>();
   const nearGroup = new THREE.Group(); nearGroup.name = 'near'; scene.add(nearGroup);
   let statuses = new Map<string, ModelStatus>();
+  const archetypeFor = (ticker: string | null, zone: SubIndustry['zone']): Archetype => (ticker ? statuses.get(ticker)?.archetype : undefined) ?? archetypeForZone(zone);
   const outageFor = (tickers: string[]) => tickers.some((t) => statuses.get(t)?.state === 'unavailable');
 
   // ---- blocks: one static part per zone for the buildings, a small lit-windows mesh per block, the status marks
@@ -181,7 +188,7 @@ export function buildWorldScene(ctx: EngineContext, layout: GeneratedLayout, onA
       const p = new Part(ctx); drawPlot(p, pl.box, b.front, ticker);
       const shell = p.build(`plot-${pl.id}`); const g = new THREE.Group(); g.name = pl.id; g.add(shell); nearGroup.add(g);
       const ent: PlotEntity = {
-        kind: 'company', id: ticker ?? pl.id, code: b.code, ticker, slot: i, groups: [g], pick: [(pl.box.x0 + pl.box.x1) / 2, pl.box.y1, 2],
+        kind: 'company', id: ticker ?? pl.id, code: b.code, ticker, slot: i, box: pl.box, groups: [g], pick: [(pl.box.x0 + pl.box.x1) / 2, pl.box.y1, 2],
         info(): EntityInfo {
           const st = ticker ? statuses.get(ticker) : undefined;
           const status = st?.state === 'unavailable' ? STATUS_WORD.unavailable : st?.state === 'published' ? STATUS_WORD.published : STATUS_WORD.none;
@@ -193,7 +200,8 @@ export function buildWorldScene(ctx: EngineContext, layout: GeneratedLayout, onA
         },
         readout: () => `${ticker ?? pl.id} · ${s.nameEn}`,
       };
-      const peek: Peek = { shell, box: [pl.box.x0, pl.box.x1, pl.box.y0, pl.box.y1], z: [0, 5], section: () => { const c = buildCut(ctx, pl.box, b.front, 4.2); return { cut: c.cut, inside: c.inside }; } };
+      // the section is drawn the first time it opens, with the interior of the archetype the published model names, else the zone's fallback (PRD §7.8)
+      const peek: Peek = { shell, box: [pl.box.x0, pl.box.x1, pl.box.y0, pl.box.y1], z: [0, 5], section: () => { const c = buildCut(ctx, pl.box, b.front, 4.2, (inside, bb) => INTERIORS[archetypeFor(ticker, s.zone)].build(inside, bb)); return { cut: c.cut, inside: c.inside }; } };
       g.userData.peek = peek; g.userData.entity = ent;
       ctx.peeks.push([g, ent]); plots.set(ent.id, ent); ctx.entities.push(ent);
     });
@@ -249,6 +257,7 @@ export function buildWorldScene(ctx: EngineContext, layout: GeneratedLayout, onA
   rebuildMarks();
   return {
     buildings, plots, nearGroup,
+    archetypeOf(ticker) { const pl = plots.get(ticker.toUpperCase()); return pl ? archetypeFor(pl.ticker, subIndustryByCode(pl.code)?.zone ?? 'unplaced') : null; },
     setStatuses(next) {
       statuses = next;
       for (const ent of buildings.values()) ent.setLit(ent.statusKey() === 'published');
