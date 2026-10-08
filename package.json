@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && node scripts/assert-no-synthetic.mjs && node scripts/prerender.mjs",
+    "build": "node --experimental-strip-types scripts/world/render-poster.mjs && vite build && node scripts/assert-no-synthetic.mjs && node scripts/prerender.mjs",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "typecheck": "tsc -b --force",
@@ -20,7 +20,8 @@
     "build:fia-fixtures": "vite-node scripts/fia/build-synthetic-fixtures.ts",
     "check:world": "node scripts/world/check-engine.mjs",
     "build:registry": "node --experimental-strip-types scripts/world/build-registry.ts",
-    "build:layout": "node --experimental-strip-types scripts/world/build-layout.ts"
+    "build:layout": "node --experimental-strip-types scripts/world/build-layout.ts",
+    "build:poster": "node --experimental-strip-types scripts/world/render-poster.mjs"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.11",
