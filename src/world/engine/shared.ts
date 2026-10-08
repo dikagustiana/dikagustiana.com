@@ -1,0 +1,19 @@
+// @ts-nocheck
+// Adapted from Factory Yard (github.com/Khalidabdi1/factory, commit 148758a), after ai-iso-skill (MIT, © 2026 Tolga Cohce).
+import * as THREE from 'three';
+
+// Page elements, flags and the scene every module shares.
+export const $ = id => document.getElementById(id);
+export const stage = $('stage'), canvas = $('view');
+export const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+export const DEBUG = new URLSearchParams(location.search).has('debug');
+export const noop = () => {};
+export const scene = new THREE.Scene();
+// what is up in the sky past the plate's edges (a rocket in flight, its smoke): drawn after the scene, never cut off
+export const sky = new THREE.Scene();
+// set once the renderer exists: texture anisotropy for text drawn on faces
+export const gfx = { aniso:1 };
+// late-bound calls into the view, so the simulation never imports it
+// and a few things the simulation reaches without importing them (they import it): the courier and its orders
+export const hooks: Record<string, any> = { forget:noop, handOff:noop, metroVisit:noop, brtVisit:noop, lookInside:noop, track:noop, select:noop, closedAt:() => false, orderFor:() => null, courier:null, orders:{ list:[], delivered:0 },
+  bankOpen:() => false, bankVisit:noop, shopShut:() => false, crimeAt:() => null, fairOpen:() => false, fairVisit:noop, raining:() => false, inBuilding:() => false, onRain:noop, weather:null, fireFor:() => null, isSelected:() => false };

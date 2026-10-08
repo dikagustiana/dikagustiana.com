@@ -39,6 +39,10 @@ export default defineConfig(({ mode }) => ({
           // Rollup emit STATIC imports of that chunk from every page that
           // might lazily need it, defeating the lazy load. Left alone,
           // Rollup gives the dynamic import its own async chunk.
+          // The Kawasan Industri world's renderer. Its only importer is the
+          // world's lazily imported engine, so this chunk is never part of
+          // the initial bundle (docs/world/PRD-kawasan-industri.md §10).
+          if (id.includes("/node_modules/three/")) return "world-engine";
           if (id.includes("@supabase")) return "supabase";
           if (id.includes("@tanstack")) return "query";
           if (
