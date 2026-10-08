@@ -59,4 +59,8 @@ export const COPY = {
   expectedNotMeasured: 'expected, not measured',
   publishedFailed: 'Published models could not be read, so only the preview companies are shown. The reason:',
   publishedLoading: 'Reading the published models…',
+  // Production (VITE_FIA_LIVE): no fixture stands in, so each failure is a sentence of its own.
+  liveNotAvailable: 'The published models are not available yet, so the companies below are listed as planned.',
+  liveRefused: 'The published models could not be read: access was refused.',
+  liveFailed: 'The published models could not be loaded. The companies below are listed as planned.',
 } as const;

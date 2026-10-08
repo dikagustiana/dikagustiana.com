@@ -67,15 +67,26 @@ const FinanceLanding = lazy(() => import("./pages/FinanceLanding"));
 const FinanceInMotion = lazy(() => import("./pages/FinanceInMotion"));
 const CapitalConditionDetail = lazy(() => import("./pages/CapitalConditionDetail"));
 const FinanceTrackIndex = lazy(() => import("./pages/FinanceTrackIndex"));
-// Finance in Action v3.1 preview (docs/company-models/implementation-brief-v3.1.md).
-// __FIA_PREVIEW__ is a compile-time constant (vite.config.ts): unset, the
-// preview branch is dead code and its chunk, fixtures included, is never
-// emitted, so the route renders exactly what it rendered before.
+// Finance in Action v3.1 (docs/company-models/implementation-brief-v3.1.md).
+// __FIA_PREVIEW__ and __FIA_LIVE__ are compile-time constants (vite.config.ts).
+// Preview: the viewer with its SYNTHETIC fixtures. Live: the same viewer over
+// the published packages only, through page modules that import no fixture
+// (src/lib/finance-in-action/live.ts), so the fixture chunk is never emitted.
+// Neither set: the route renders exactly what it rendered before. The preview
+// wins when both are set, and assert-no-synthetic fails that build.
 const FinanceInActionIndex = lazy(() =>
-  __FIA_PREVIEW__ ? import("./pages/finance-in-action/FiaIndexPage") : import("./pages/FinanceInActionIndex"),
+  __FIA_PREVIEW__
+    ? import("./pages/finance-in-action/FiaIndexPage")
+    : __FIA_LIVE__
+      ? import("./pages/finance-in-action/FiaLiveIndexPage")
+      : import("./pages/FinanceInActionIndex"),
 );
 const FinanceModelDetail = lazy(() =>
-  __FIA_PREVIEW__ ? import("./pages/finance-in-action/FiaModelRoute") : import("./pages/FinanceModelDetail"),
+  __FIA_PREVIEW__
+    ? import("./pages/finance-in-action/FiaModelRoute")
+    : __FIA_LIVE__
+      ? import("./pages/finance-in-action/FiaLiveModelRoute")
+      : import("./pages/FinanceModelDetail"),
 );
 const AdminEditorRedirect = lazy(() => import("./pages/AdminEditorRedirect"));
 const WriterEditorPage = lazy(() => import("./pages/WriterEditorPage"));
