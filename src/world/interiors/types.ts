@@ -7,16 +7,10 @@
 import type { Part } from '../engine/kernel/part';
 import type { Box } from '@/world/placement/types';
 import type { Archetype } from '@/lib/world/registry/types';
+import type { Station } from './stations';
 
-export interface Station {
-  id: string;
-  /** The label drawn beside the station; never a figure. */
-  label: string;
-  /** Tags a cost line's physical unit and description are matched against (lower case, whole tokens). */
-  tags: readonly string[];
-  /** Where the station stands in the plot, as fractions of the box: x from the west wall, y from the north (back) wall. */
-  anchor: readonly [number, number];
-}
+export type { Station } from './stations';
+export { stationAt } from './stations';
 
 export interface Interior {
   archetype: Archetype;
@@ -25,8 +19,6 @@ export interface Interior {
   build(part: Part, box: Box): void;
 }
 
-/** A station's floor position in a plot box. */
-export const stationAt = (b: Box, s: Station): [number, number] => [b.x0 + (b.x1 - b.x0) * s.anchor[0], b.y0 + (b.y1 - b.y0) * s.anchor[1]];
 
 /** A station's label on the floor beside it, small and in paint. */
 export function label(part: Part, TOP: (x: number, y: number, z: number) => import('three').Matrix4, x: number, y: number, text: string): void {

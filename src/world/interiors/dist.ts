@@ -3,14 +3,9 @@ import { TOP } from '../engine/kernel/iso';
 import type { Part } from '../engine/kernel/part';
 import type { Box } from '@/world/placement/types';
 import { label, stationAt, type Interior, type Station } from './types';
+import { STATIONS_BY_ARCHETYPE } from './stations';
 
-export const STATIONS: readonly Station[] = [
-  { id: 'inbound', label: 'Inbound docks', tags: ['inbound', 'receiving', 'pallets', 'pallet', 'dock', 'docks', 'arrival', 'purchases', 'purchased', 'goods', 'cogs', 'merchandise', 'supplier', 'suppliers'], anchor: [0.12, 0.3] },
-  { id: 'racks', label: 'Racks', tags: ['racks', 'rack', 'storage', 'pallet-days', 'inventory', 'warehouse', 'stock', 'holding', 'days', 'shelf', 'shelves', 'sqm', 'space'], anchor: [0.4, 0.3] },
-  { id: 'picking', label: 'Picking', tags: ['picking', 'pick', 'cartons', 'carton', 'orders', 'order', 'handling', 'labour', 'labor', 'staff', 'headcount', 'wages', 'salaries'], anchor: [0.55, 0.68] },
-  { id: 'loading', label: 'Loading docks', tags: ['loading', 'trips', 'trip', 'dos', 'delivery', 'deliveries', 'outbound', 'freight', 'fleet', 'fuel', 'trucks', 'km', 'drops', 'routes', 'transport', 'logistics', 'sold'], anchor: [0.8, 0.68] },
-  { id: 'office', label: 'Office', tags: ['office', 'invoices', 'invoice', 'capital', 'clock', 'admin', 'overhead', 'overheads', 'sga', 'selling', 'general', 'administrative', 'rent', 'receivables', 'payables', 'marketing'], anchor: [0.85, 0.2] },
-];
+export const STATIONS: readonly Station[] = STATIONS_BY_ARCHETYPE.DIST;
 
 export function build(p: Part, b: Box): void {
   const at = (id: string) => stationAt(b, STATIONS.find((s) => s.id === id)!);

@@ -3,13 +3,9 @@ import { TOP } from '../engine/kernel/iso';
 import type { Part } from '../engine/kernel/part';
 import type { Box } from '@/world/placement/types';
 import { label, stationAt, type Interior, type Station } from './types';
+import { STATIONS_BY_ARCHETYPE } from './stations';
 
-export const STATIONS: readonly Station[] = [
-  { id: 'asset', label: 'The asset', tags: ['asset', 'assets', 'towers', 'tower', 'plaza', 'toll', 'plant', 'unit', 'units', 'vessel', 'vessels', 'capacity', 'utilisation', 'utilization', 'mw', 'mwh', 'kwh', 'gwh', 'km', 'sites', 'site', 'tenancy', 'tenancies', 'rooms', 'floor', 'sqm', 'depreciation', 'fleet', 'aircraft', 'berth', 'berths', 'lanes', 'generation'], anchor: [0.45, 0.42] },
-  { id: 'maintenance', label: 'Maintenance yard', tags: ['maintenance', 'repair', 'repairs', 'spares', 'yard', 'upkeep', 'overhaul', 'servicing'], anchor: [0.15, 0.78] },
-  { id: 'operations', label: 'Operations centre', tags: ['operations', 'control', 'centre', 'center', 'staff', 'network', 'monitoring', 'fuel', 'power', 'energy', 'electricity', 'crew', 'headcount', 'wages', 'salaries', 'coal', 'gas'], anchor: [0.8, 0.2] },
-  { id: 'entry', label: 'Entry', tags: ['customer', 'customers', 'entry', 'gate', 'traffic', 'passengers', 'users', 'tenants', 'subscribers', 'vehicles', 'revenue', 'ticket', 'tickets', 'connections', 'volume', 'throughput', 'teu', 'calls'], anchor: [0.86, 0.8] },
-];
+export const STATIONS: readonly Station[] = STATIONS_BY_ARCHETYPE.ASSET;
 
 export function build(p: Part, b: Box): void {
   const at = (id: string) => stationAt(b, STATIONS.find((s) => s.id === id)!);

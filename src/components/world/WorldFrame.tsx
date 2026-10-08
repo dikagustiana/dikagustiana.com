@@ -15,7 +15,7 @@ import { CANVAS_DESCRIPTION, LAYERS, OVERLAYS, PLACES, REGION_VIEW, TITLE, TOTAL
 import { marksFor, type PlacedMark } from '@/lib/world/presentation';
 import { REGISTRY } from '@/lib/world/registry/subindustries.generated';
 import { bindingsFrom } from '@/world/data/boundary';
-import { archetypeForZone, stationFor } from '@/world/interiors';
+import { archetypeForZone, stationFor } from '@/world/interiors/stations';
 import { whiteboardFor } from '@/lib/world/whiteboard';
 import type { StationBinding, WhiteboardContent } from '@/world/data/types';
 import { STATUS, type LensId, type ShiftId } from '@/data/industryChain';

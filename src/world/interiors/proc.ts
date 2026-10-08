@@ -3,15 +3,9 @@ import { TOP } from '../engine/kernel/iso';
 import type { Part } from '../engine/kernel/part';
 import type { Box } from '@/world/placement/types';
 import { label, stationAt, type Interior, type Station } from './types';
+import { STATIONS_BY_ARCHETYPE } from './stations';
 
-export const STATIONS: readonly Station[] = [
-  { id: 'receiving', label: 'Receiving', tags: ['raw', 'material', 'materials', 'receiving', 'limestone', 'ore', 'feed', 'feedstock', 'input', 'inputs', 'inbound', 'purchases'], anchor: [0.12, 0.25] },
-  { id: 'preparation', label: 'Preparation', tags: ['crushing', 'crusher', 'preparation', 'grinding', 'mill', 'milling', 'mixing', 'blending'], anchor: [0.3, 0.6] },
-  { id: 'line', label: 'Main line', tags: ['kiln', 'smelter', 'reactor', 'furnace', 'process', 'line', 'fuel', 'power', 'electricity', 'gas', 'coal', 'energy', 'clinker', 'heat', 'steam', 'produced', 'production', 'conversion', 'yield'], anchor: [0.5, 0.3] },
-  { id: 'packing', label: 'Packing', tags: ['packing', 'packaging', 'bags', 'bagging', 'filling', 'bottling', 'cans'], anchor: [0.7, 0.65] },
-  { id: 'store', label: 'Store', tags: ['store', 'finished', 'goods', 'inventory', 'stock', 'warehouse'], anchor: [0.85, 0.3] },
-  { id: 'despatch', label: 'Despatch', tags: ['despatch', 'dispatch', 'loading', 'trucks', 'freight', 'delivery', 'distribution', 'sold', 'sales', 'shipping', 'logistics'], anchor: [0.88, 0.82] },
-];
+export const STATIONS: readonly Station[] = STATIONS_BY_ARCHETYPE.PROC;
 
 export function build(p: Part, b: Box): void {
   const at = (id: string) => stationAt(b, STATIONS.find((s) => s.id === id)!);

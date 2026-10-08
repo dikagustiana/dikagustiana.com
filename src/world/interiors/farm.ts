@@ -3,13 +3,9 @@ import { TOP } from '../engine/kernel/iso';
 import type { Part } from '../engine/kernel/part';
 import type { Box } from '@/world/placement/types';
 import { label, stationAt, type Interior, type Station } from './types';
+import { STATIONS_BY_ARCHETYPE } from './stations';
 
-export const STATIONS: readonly Station[] = [
-  { id: 'blocks', label: 'Blocks', tags: ['field', 'fields', 'pond', 'ponds', 'block', 'blocks', 'hectares', 'ha', 'planting', 'seed', 'seeds', 'feed', 'fertiliser', 'fertilizer', 'stocking', 'fry', 'chicks', 'doc', 'cattle', 'trees', 'palms'], anchor: [0.2, 0.42] },
-  { id: 'harvest', label: 'Harvest', tags: ['harvest', 'harvesting', 'collection', 'ffb', 'picking', 'labour', 'labor', 'workers', 'wages', 'yield'], anchor: [0.48, 0.65] },
-  { id: 'handling', label: 'Primary handling', tags: ['mill', 'milling', 'hatchery', 'cold', 'room', 'processing', 'drying', 'extraction', 'oer', 'power', 'fuel', 'energy', 'slaughter', 'packing', 'grading'], anchor: [0.72, 0.3] },
-  { id: 'despatch', label: 'Despatch', tags: ['despatch', 'dispatch', 'transport', 'delivery', 'freight', 'sold', 'sales', 'shipping', 'logistics'], anchor: [0.88, 0.78] },
-];
+export const STATIONS: readonly Station[] = STATIONS_BY_ARCHETYPE.FARM;
 
 export function build(p: Part, b: Box): void {
   const at = (id: string) => stationAt(b, STATIONS.find((s) => s.id === id)!);

@@ -3,14 +3,9 @@ import { TOP } from '../engine/kernel/iso';
 import type { Part } from '../engine/kernel/part';
 import type { Box } from '@/world/placement/types';
 import { label, stationAt, type Interior, type Station } from './types';
+import { STATIONS_BY_ARCHETYPE } from './stations';
 
-export const STATIONS: readonly Station[] = [
-  { id: 'pit', label: 'Pit', tags: ['pit', 'well', 'pad', 'drilling', 'overburden', 'stripping', 'blasting', 'mined', 'mining', 'bcm', 'contractor', 'contractors', 'extraction', 'lifting', 'barrels', 'boe', 'wells'], anchor: [0.15, 0.3] },
-  { id: 'haul', label: 'Haul road', tags: ['haul', 'hauling', 'haulage', 'trucks', 'distance', 'km', 'fuel', 'diesel', 'tyres', 'tires'], anchor: [0.4, 0.55] },
-  { id: 'plant', label: 'Crusher', tags: ['crusher', 'crushing', 'wash', 'washing', 'plant', 'processing', 'power', 'electricity', 'reagents', 'smelting'], anchor: [0.62, 0.3] },
-  { id: 'stockpile', label: 'Stockpile', tags: ['stockpile', 'stock', 'inventory', 'rom', 'blending', 'storage', 'tanks'], anchor: [0.76, 0.7] },
-  { id: 'loadout', label: 'Load-out', tags: ['load-out', 'loadout', 'rail', 'barge', 'barging', 'port', 'jetty', 'shipping', 'freight', 'sold', 'sales', 'royalty', 'royalties', 'pipeline', 'offtake'], anchor: [0.9, 0.4] },
-];
+export const STATIONS: readonly Station[] = STATIONS_BY_ARCHETYPE.MINE;
 
 export function build(p: Part, b: Box): void {
   const at = (id: string) => stationAt(b, STATIONS.find((s) => s.id === id)!);

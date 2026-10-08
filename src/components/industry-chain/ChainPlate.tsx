@@ -55,6 +55,7 @@
  * the document.
  */
 
+import { WorldPoster } from '@/components/world/Poster';
 import { lazy, Suspense, useCallback, useEffect, useId, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent, type ReactNode } from 'react';
 import {
   CHAIN_COPY,
@@ -796,7 +797,8 @@ const WorldSection = __WORLD_KAWASAN__ ? lazy(() => import('@/components/world/W
 
 /** The plate as an About section: under that page's heading, so the map's title is an h2. */
 export function IndustryChainSection() {
-  if (WorldSection) return <Suspense fallback={null}><WorldSection variant="full" heading="h2" /></Suspense>;
+  // the poster paints while the world's chunk loads (gate 2, D12/D15): the same stage, the same image, nothing moves
+  if (WorldSection) return <Suspense fallback={<WorldPoster heading="h2" />}><WorldSection variant="full" heading="h2" /></Suspense>;
   return (
     <section id="industry-chain" className="border-b border-border py-12">
       <div className="container">
@@ -813,7 +815,7 @@ export function IndustryChainSection() {
  * more — so its title carries the page's main heading.
  */
 export function IndustryChainPreview() {
-  if (WorldSection) return <Suspense fallback={null}><WorldSection variant="preview" heading="h1" /></Suspense>;
+  if (WorldSection) return <Suspense fallback={<WorldPoster heading="h1" />}><WorldSection variant="preview" heading="h1" /></Suspense>;
   return (
     <section id="industry-chain" className="border-b border-border py-12">
       <div className="container">

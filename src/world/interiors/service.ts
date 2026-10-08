@@ -3,12 +3,9 @@ import { TOP } from '../engine/kernel/iso';
 import type { Part } from '../engine/kernel/part';
 import type { Box } from '@/world/placement/types';
 import { label, stationAt, type Interior, type Station } from './types';
+import { STATIONS_BY_ARCHETYPE } from './stations';
 
-export const STATIONS: readonly Station[] = [
-  { id: 'reception', label: 'Reception', tags: ['reception', 'customers', 'customer', 'clients', 'client', 'patients', 'patient', 'visitors', 'front', 'sales', 'marketing', 'revenue', 'booking', 'bookings', 'guests', 'students', 'members', 'subscribers', 'accounts'], anchor: [0.2, 0.72] },
-  { id: 'floor', label: 'Work floor', tags: ['work', 'floor', 'staff', 'labour', 'labor', 'doctors', 'nurses', 'teachers', 'engineers', 'consultants', 'hours', 'beds', 'bed', 'seats', 'tables', 'kitchen', 'food', 'materials', 'supplies', 'drugs', 'medicines', 'headcount', 'wages', 'salaries', 'crew', 'fuel'], anchor: [0.55, 0.4] },
-  { id: 'office', label: 'Back office', tags: ['office', 'back', 'admin', 'overhead', 'overheads', 'rent', 'it', 'systems', 'sga', 'general', 'administrative', 'finance', 'interest', 'funding', 'provisions', 'claims'], anchor: [0.85, 0.2] },
-];
+export const STATIONS: readonly Station[] = STATIONS_BY_ARCHETYPE.SERVICE;
 
 export function build(p: Part, b: Box): void {
   const at = (id: string) => stationAt(b, STATIONS.find((s) => s.id === id)!);

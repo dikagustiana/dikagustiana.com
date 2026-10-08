@@ -1,15 +1,15 @@
 {
-  "ranAt": "2026-10-08T18:19:31.802Z",
+  "ranAt": "2026-10-08T19:33:13.745Z",
   "lighthouse": "13.5.0",
   "runs": {
     "off-mobile": {
-      "performance": 81,
+      "performance": 80,
       "accessibility": 98,
       "bestPractices": 96,
-      "lcpMs": 4262,
+      "lcpMs": 4295,
       "cls": 0.011,
-      "tbtMs": 55,
-      "fcpMs": 2847,
+      "tbtMs": 43,
+      "fcpMs": 2888,
       "transferKb": 436,
       "lcpElement": null
     },
@@ -17,33 +17,33 @@
       "performance": 99,
       "accessibility": 98,
       "bestPractices": 96,
-      "lcpMs": 880,
+      "lcpMs": 891,
       "cls": 0.001,
       "tbtMs": 0,
-      "fcpMs": 628,
+      "fcpMs": 630,
       "transferKb": 436,
       "lcpElement": null
     },
     "on-mobile": {
-      "performance": 50,
+      "performance": 74,
       "accessibility": 98,
       "bestPractices": 96,
-      "lcpMs": 5228,
+      "lcpMs": 5271,
       "cls": 0.001,
-      "tbtMs": 1083,
-      "fcpMs": 3152,
-      "transferKb": 662,
+      "tbtMs": 34,
+      "fcpMs": 3236,
+      "transferKb": 494,
       "lcpElement": null
     },
     "on-desktop": {
       "performance": 95,
       "accessibility": 98,
       "bestPractices": 96,
-      "lcpMs": 1170,
+      "lcpMs": 1123,
       "cls": 0.001,
-      "tbtMs": 102,
-      "fcpMs": 696,
-      "transferKb": 662,
+      "tbtMs": 120,
+      "fcpMs": 702,
+      "transferKb": 676,
       "lcpElement": null
     }
   }

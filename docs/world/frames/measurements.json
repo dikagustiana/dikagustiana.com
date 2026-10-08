@@ -105,10 +105,13 @@
   },
   "consoleErrors": [
     "/finance/kawasan: 404 /_vercel/insights/script.js",
+    "/finance/kawasan: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "/finance/kawasan: 404 /_vercel/insights/script.js",
     "/finance/kawasan: Failed to load resource: the server responded with a status of 404 (Not Found)"
   ],
-  "reshotAt": "2026-10-08T19:08:02.001Z",
+  "reshotAt": "2026-10-08T19:27:48.184Z",
   "reshot": [
+    "phone",
     "overlay"
   ]
 }
