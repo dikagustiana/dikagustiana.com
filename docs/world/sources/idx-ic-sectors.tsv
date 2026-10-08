@@ -1,0 +1,13 @@
+code	nameId	nameEn
+A	Energi	Energy
+B	Barang Baku	Basic Materials
+C	Perindustrian	Industrials
+D	Barang Konsumen Primer	Consumer Non-Cyclicals
+E	Barang Konsumen Non-Primer	Consumer Cyclicals
+F	Kesehatan	Healthcare
+G	Keuangan	Financials
+H	Properti & Real Estat	Properties & Real Estate
+I	Teknologi	Technology
+J	Infrastruktur	Infrastructures
+K	Transportasi & Logistik	Transportation & Logistic
+Z	Produk Investasi Tercatat	Listed Investment Product

@@ -1,0 +1,131 @@
+code	industryNameId	nameId	nameEn
+A111	Minyak & Gas	Produksi & Penyulingan Minyak & Gas	Oil & Gas Production & Refinery
+A112	Minyak & Gas	Penyimpanan & Distribusi Minyak & Gas	Oil & Gas Storage & Distribution
+A121	Batu Bara	Produksi Batu Bara	Coal Production
+A122	Batu Bara	Distribusi Batu Bara	Coal Distribution
+A131	Pendukung Minyak, Gas & Batu Bara	Jasa Pengeboran Minyak & Gas	Oil & Gas Drilling Service
+A132	Pendukung Minyak, Gas & Batu Bara	Jasa & Perlengkapan Minyak, Gas & Batu Bara	Oil, Gas & Coal Equipment & Services
+A211	Peralatan Energi Alternatif	Peralatan Energi Alternatif	Alternative Energy Equipment
+A221	Bahan Bakar Alternatif	Bahan Bakar Alternatif	Alternative Fuels
+B111	Barang Kimia	Barang Kimia Dasar	Basic Chemicals
+B112	Barang Kimia	Barang Kimia Pertanian	Agricultural Chemicals
+B113	Barang Kimia	Barang Kimia Khusus	Specialty Chemicals
+B121	Material Konstruksi	Material Konstruksi	Construction Materials
+B131	Wadah & Kemasan	Wadah & Kemasan	Containers & Packaging
+B141	Logam & Mineral	Aluminium	Aluminium
+B142	Logam & Mineral	Tembaga	Copper
+B143	Logam & Mineral	Emas	Gold
+B144	Logam & Mineral	Baja & Besi	Iron & Steel
+B145	Logam & Mineral	Logam & Mineral Mulia	Precious Metals & Minerals
+B146	Logam & Mineral	Logam & Mineral Lainnya	Diversified Metals & Minerals
+B147	Logam & Mineral	Jasa & Perlengkapan Pertambangan	Mining Equipment & Services
+B151	Perhutanan & Kertas	Kayu	Timber
+B152	Perhutanan & Kertas	Kertas	Paper
+B153	Perhutanan & Kertas	Produk Hutan Lainnya	Diversified Forest Products
+C111	Kedirgantaraan & Pertahanan	Kedirgantaraan & Pertahanan	Aerospace & Defense
+C121	Produk & Perlengkapan Bangunan	Produk & Perlengkapan Bangunan	Building Products & Fixtures
+C131	Kelistrikan	Komponen & Peralatan Kelistrikan	Electrical Components & Equipment
+C132	Kelistrikan	Alat Kelistrikan Berat	Heavy Electrical Equipment
+C141	Mesin	Mesin Konstruksi & Kendaraan Berat	Construction Machinery & Heavy Vehicles
+C142	Mesin	Mesin Pertanian	Agricultural & Farm Machinery
+C143	Mesin	Mesin & Komponen Perindustrian	Industrial Machinery & Components
+C211	Perdagangan Aneka Barang Perindustrian	Perdagangan Aneka Barang Perindustrian	Diversified Industrial Trading
+C221	Jasa Komersial	Percetakan Komersial	Commercial Printing
+C222	Jasa Komersial	Jasa Pengelolaan Lingkungan & Sarana	Environmental & Facilities Services
+C223	Jasa Komersial	Peralatan Kantor	Office Supplies
+C224	Jasa Komersial	Jasa Pendukung Bisnis	Business Support Services
+C231	Jasa Profesional	Jasa Personalia	Human Resource & Employment Services
+C232	Jasa Profesional	Jasa Penelitian & Konsultasi	Research & Consulting Services
+C311	Perusahaan Holding Multi-sektor	Perusahaan Holding Multi-sektor	Multi-sector Holdings
+D111	Perdagangan Ritel Barang Primer	Ritel & Distributor Obat-obatan	Drug Retail & Distributors
+D112	Perdagangan Ritel Barang Primer	Ritel & Distributor Makanan	Food Retail & Distributors
+D113	Perdagangan Ritel Barang Primer	Supermarket	Supermarkets & Convenience Stores
+D211	Minuman	Minuman Keras	Liquors
+D212	Minuman	Minuman Ringan	Soft Drinks
+D221	Makanan Olahan	Produk Susu Olahan	Dairy Products
+D222	Makanan Olahan	Makanan Olahan	Processed Foods
+D231	Produk Makanan Pertanian	Ikan, Daging & Produk Unggas	Fish, Meat & Poultry
+D232	Produk Makanan Pertanian	Perkebunan & Tanaman Pangan	Plantations & Crops
+D311	Rokok	Rokok	Tobacco
+D411	Produk Keperluan Rumah Tangga	Produk Keperluan Rumah Tangga	Household Products
+D421	Produk Perawatan Tubuh	Produk Perawatan Tubuh	Personal Care Products
+E111	Komponen Otomotif	Suku Cadang Otomotif	Auto Parts & Equipment
+E112	Komponen Otomotif	Ban	Tires
+E121	Otomotif	Produsen Mobil	Car Manufacturers
+E122	Otomotif	Produsen Motor	Motorcycle Manufacturers
+E211	Barang Rumah Tangga	Produsen Furnitur Rumah	Home Furnishings
+E212	Barang Rumah Tangga	Peralatan Rumah Tangga	Household Appliances
+E213	Barang Rumah Tangga	Perlengkapan Rumah Tangga	Housewares & Specialties
+E311	Barang Elektronik Konsumen	Barang Elektronik Konsumen	Consumer Electronics
+E321	Peralatan Olah Raga & Barang Hobi	Peralatan Olah Raga & Barang Hobi	Sport Equipment & Hobbies Goods
+E411	Pakaian & Barang Mewah	Pakaian, Aksesoris & Tas	Clothing, Accessories & Bags
+E412	Pakaian & Barang Mewah	Alas Kaki	Footwear
+E413	Pakaian & Barang Mewah	Tekstil	Textiles
+E511	Pariwisata & Rekreasi	Fasilitas Permainan	Gaming Venues
+E512	Pariwisata & Rekreasi	Hotel, Resor & Kapal Pesiar	Hotels, Resorts & Cruise Lines
+E513	Pariwisata & Rekreasi	Agen Perjalanan	Travel Agencies
+E514	Pariwisata & Rekreasi	Fasilitas Rekreasi & Olah Raga	Recreational & Sports Facilities
+E515	Pariwisata & Rekreasi	Rumah Makan	Restaurants
+E521	Pendidikan & Jasa Penunjang	Jasa Pendidikan	Education Services
+E522	Pendidikan & Jasa Penunjang	Jasa Penunjang Konsumen	Consumer Support Services
+E611	Media	Periklanan	Advertising
+E612	Media	Penyiaran	Broadcasting
+E613	Media	Penyiaran Berbayar	Cable & Satellite
+E614	Media	Penerbitan	Consumer Publishing
+E621	Hiburan & Film	Hiburan & Film	Entertainment & Movie Production
+E711	Distributor Barang Konsumen	Distributor Barang Konsumen	Consumer Distributors
+E721	Ritel Internet & Homeshop	Ritel Internet & Homeshop	Internet & Homeshop Retail
+E731	Department Store	Department Store	Department Stores
+E741	Ritel Khusus	Ritel Pakaian & Tekstil	Apparel & Textile Retail
+E742	Ritel Khusus	Ritel Elektronik	Electronics Retail
+E743	Ritel Khusus	Ritel Barang Rumah Tangga	Home Improvement Retail
+E744	Ritel Khusus	Toko Khusus	Specialty Stores
+E745	Ritel Khusus	Ritel Otomotif	Automotive Retail
+F111	Peralatan & Perlengkapan Kesehatan	Peralatan Kesehatan	Healthcare Equipment
+F112	Peralatan & Perlengkapan Kesehatan	Penyedia & Distribusi Perlengkapan Kesehatan	Healthcare Supplies & Distributions
+F121	Penyedia Jasa Kesehatan	Penyedia Jasa Kesehatan	Healthcare Providers
+F211	Farmasi	Farmasi	Pharmaceuticals
+F221	Riset Kesehatan	Riset Kesehatan	Healthcare Research
+G111	Bank	Bank	Banks
+G211	Pembiayaan Konsumen	Pembiayaan Konsumen	Consumer Financing
+G221	Pembiayaan Usaha	Modal Ventura	Venture Capital
+G222	Pembiayaan Usaha	Pembiayaan Usaha Khusus	Specialized Business Financing
+G311	Jasa Investasi	Manajemen Investasi	Investment Management
+G312	Jasa Investasi	Bank Investasi & Perantara Perdagangan	Investment Banking & Brokerage Services
+G313	Jasa Investasi	Penyelenggara Pasar	Market Operators
+G314	Jasa Investasi	Pendukung Jasa Investasi	Investment Service Support
+G411	Asuransi	Pialang Asuransi	Insurance Brokers
+G412	Asuransi	Asuransi Umum	General Insurance
+G413	Asuransi	Asuransi Jiwa	Life Insurance
+G414	Asuransi	Reasuransi	Reinsurance
+G511	Perusahaan Holding & Investasi	Perusahaan Holding Keuangan	Financial Holdings
+G512	Perusahaan Holding & Investasi	Perusahaan Investasi	Investment Companies
+H111	Pengelola & Pengembang Real Estat	Pengembang & Operator Real Estat	Real Estate Development & Management
+H112	Pengelola & Pengembang Real Estat	Jasa Real Estat	Real Estate Services
+I111	Aplikasi & Jasa Internet	Aplikasi & Jasa Internet	Online Applications & Services
+I121	Jasa & Konsultan TI	Jasa & Konsultan TI	IT Services & Consulting
+I131	Perangkat Lunak	Perangkat Lunak	Software
+I211	Peralatan Jaringan	Peralatan Jaringan	Networking Equipment
+I221	Perangkat Komputer	Perangkat Komputer	Computer Hardware
+I231	Perangkat, Instrumen & Komponen Elektronik	Perangkat & Instrumen Elektronik	Electronic Equipment & Instruments
+I232	Perangkat, Instrumen & Komponen Elektronik	Komponen Elektronik & Semi Konduktor	Electronic Components & Semiconductors
+J111	Operator Infrastruktur Transportasi	Operator Bandar Udara	Airport Operators
+J112	Operator Infrastruktur Transportasi	Operator Jalan Tol & Rel	Highways & Railtracks
+J113	Operator Infrastruktur Transportasi	Operator Pelabuhan	Marine Ports & Services
+J211	Konstruksi Bangunan	Konstruksi Bangunan	Heavy Constructions & Civil Engineering
+J311	Jasa Telekomunikasi	Jasa Telekomunikasi Kabel	Wired Telecommunication Service
+J312	Jasa Telekomunikasi	Jasa Telekomunikasi Terintegrasi	Integrated Telecommunication Service
+J321	Jasa Telekomunikasi Nirkabel	Jasa Telekomunikasi Nirkabel	Wireless Telecommunication Services
+J411	Utilitas Listrik	Utilitas Listrik	Electric Utilities
+J421	Utilitas Gas	Utilitas Gas	Gas Utilities
+J431	Utilitas Air	Utilitas Air	Water Utilities
+K111	Maskapai Penerbangan	Maskapai Penerbangan	Airlines
+K121	Pengangkutan Laut Penumpang	Pengangkutan Laut Penumpang	Passenger Marine Transportation
+K131	Pengangkutan Darat Penumpang	Kereta Api	Rail
+K132	Pengangkutan Darat Penumpang	Transportasi Jalanan	Road Transportation
+K211	Logistik & Pengantaran	Logistik & Pengantaran	Logistics & Deliveries
+Z111	Kontrak Investasi Kolektif	Reksadana / ETF	Mutual Funds / ETFs
+Z112	Kontrak Investasi Kolektif	Dana Investasi Real Estate	Real Estate Investment Trusts
+Z113	Kontrak Investasi Kolektif	Dana Investasi Infrastruktur	Infrastructure Investment Trusts
+Z211	Obligasi	Obligasi Pemerintah	Government Bonds
+Z212	Obligasi	Obligasi Korporasi	Corporate Bonds

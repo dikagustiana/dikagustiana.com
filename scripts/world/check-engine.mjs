@@ -65,7 +65,16 @@ for (const f of files) {
   mods.set(f, { ast, names });
 }
 
-const resolve = (from, spec) => path.resolve(path.dirname(from), spec) + (spec.endsWith('.ts') ? '' : '.ts');
+// './view' is view.ts or view/index.ts, as the bundler resolves it
+const resolve = (from, spec) => {
+  const base = path.resolve(path.dirname(from), spec);
+  if (spec.endsWith('.ts')) return base;
+  return fs.existsSync(base + '.ts') ? base + '.ts' : path.join(base, 'index.ts');
+};
+// the relative modules a file loads: its imports and its re-exports
+const edges = (ast) => ast.program.body
+  .filter((st) => (st.type === 'ImportDeclaration' || st.type === 'ExportNamedDeclaration' || st.type === 'ExportAllDeclaration') && st.source?.value.startsWith('.'))
+  .map((st) => st.source.value);
 
 // ---- reachability from the entry ----
 const reachable = new Set();
@@ -73,7 +82,7 @@ if (fs.existsSync(ENTRY)) {
   (function visit(f) {
     if (reachable.has(f) || !mods.has(f)) return;
     reachable.add(f);
-    for (const st of mods.get(f).ast.program.body) if (st.type === 'ImportDeclaration' && st.source.value.startsWith('.')) visit(resolve(f, st.source.value));
+    for (const spec of edges(mods.get(f).ast)) visit(resolve(f, spec));
   })(ENTRY);
 } else {
   console.log('no entry (index.ts) yet: every file is pending');
@@ -86,10 +95,14 @@ const report = (f, msg) => { if (reachable.has(f) || STRICT) { console.log(`${re
 for (const f of files) {
   const { ast } = mods.get(f);
   for (const st of ast.program.body) {
-    if (st.type !== 'ImportDeclaration' || !st.source.value.startsWith('.')) continue;
+    const isImport = st.type === 'ImportDeclaration', isReexport = (st.type === 'ExportNamedDeclaration' || st.type === 'ExportAllDeclaration') && !!st.source;
+    if (!(isImport || isReexport) || !st.source.value.startsWith('.')) continue;
     const target = resolve(f, st.source.value), ex = mods.get(target);
     if (!ex) { report(f, `no module ${st.source.value}`); continue; }
-    for (const sp of st.specifiers) if (sp.type === 'ImportSpecifier' && !ex.names.has(sp.imported.name ?? sp.imported.value)) report(f, `${sp.imported.name} is not exported by ${st.source.value}`);
+    for (const sp of st.specifiers ?? []) {
+      const name = sp.type === 'ImportSpecifier' ? (sp.imported.name ?? sp.imported.value) : sp.type === 'ExportSpecifier' ? (sp.local.name ?? sp.local.value) : null;
+      if (name && !ex.names.has(name)) report(f, `${name} is not exported by ${st.source.value}`);
+    }
   }
   const free = new Set();
   const inType = (p) => !!p.findParent((q) => q.node.type.startsWith('TS') && !['TSAsExpression', 'TSNonNullExpression', 'TSSatisfiesExpression'].includes(q.node.type));
@@ -108,7 +121,7 @@ if (fs.existsSync(ENTRY)) {
   const importsOf = new Map(), evalDeps = new Map();
   for (const f of reachable) {
     const { ast } = mods.get(f), imps = [], deps = new Set();
-    for (const st of ast.program.body) if (st.type === 'ImportDeclaration' && st.source.value.startsWith('.')) imps.push(resolve(f, st.source.value));
+    for (const spec of edges(ast)) imps.push(resolve(f, spec));
     traverse(ast, {
       ReferencedIdentifier(p) {
         if (p.getFunctionParent()) return;
