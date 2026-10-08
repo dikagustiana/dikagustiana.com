@@ -38,7 +38,7 @@ export const P = (x, y, z = 0) => [(x - y) * C30, (x + y) * S30 - z];
 
 const fmt = (n) => (Math.round(n * 10) / 10).toString();
 const poly = (pts, fill, stroke, extra = '') => `<polygon points="${pts.map(([x, y]) => `${fmt(x)},${fmt(y)}`).join(' ')}" fill="${fill}" stroke="${stroke}" stroke-width="1" vector-effect="non-scaling-stroke"${extra}/>`;
-const line = (pts, stroke, extra = '') => `<polyline points="${pts.map(([x, y]) => `${fmt(x)},${fmt(y)}`).join(' ')}" fill="none" stroke="${stroke}" stroke-width="1" vector-effect="non-scaling-stroke" stroke-linejoin="round"${extra}/>`;
+const line = (pts, stroke, width = 1, extra = '') => `<polyline points="${pts.map(([x, y]) => `${fmt(x)},${fmt(y)}`).join(' ')}" fill="none" stroke="${stroke}" stroke-width="${fmt(width)}" vector-effect="non-scaling-stroke" stroke-linejoin="round"${extra}/>`;
 
 /** An isometric prism for a box of height h: the top, the south face and the east face, each outlined. */
 function prism(b, h, fill, top, stroke) {
@@ -66,7 +66,7 @@ export function renderPoster(layout, c = POSTER_COLOURS) {
   if (layout.port) { const wb = layout.port.water; out.push(poly([P(wb.x0, wb.y0, -0.6), P(wb.x1, wb.y0, -0.6), P(wb.x1, wb.y1, -0.6), P(wb.x0, wb.y1, -0.6)], c.secondary, c.border)); }
   if (layout.hill) { const { centre: [cx, cy], radius, height } = layout.hill; for (let k = 0; k < 3; k++) { const r = radius * (1 - k * 0.28), z = (height / 3) * (k + 1), ring = []; for (let i = 0; i < 20; i++) { const a = i / 20 * Math.PI * 2; ring.push(P(cx + r * Math.cos(a), cy + r * 0.8 * Math.sin(a), z)); } out.push(poly(ring, c.muted, c.border)); } }
   // roads
-  for (const r of layout.roads) { const pts = r.points.map(([x, y]) => P(x, y, 0.2)); if (r.closed) pts.push(pts[0]); out.push(line(pts, c.mutedForeground, r.dashed ? ' stroke-dasharray="6 4"' : ` stroke-width="${Math.max(1, r.width / 5)}"`)); }
+  for (const r of layout.roads) { const pts = r.points.map(([x, y]) => P(x, y, 0.2)); if (r.closed) pts.push(pts[0]); out.push(line(pts, c.mutedForeground, r.dashed ? 1 : Math.max(1, r.width / 5), r.dashed ? ' stroke-dasharray="6 4"' : '')); }
   // blocks, back to front so nearer prisms cover farther ones (nearer = larger x + y)
   const blocks = [...layout.blocks].sort((a, b) => (a.box.x0 + a.box.y0) - (b.box.x0 + b.box.y0));
   for (const b of blocks) out.push(prism(b.box, HEIGHT[b.family] ?? 6, c.card, c.background, c.mutedForeground));
