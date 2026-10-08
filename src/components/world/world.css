@@ -49,6 +49,7 @@
 .world-coverage { font-size: 0.875rem; color: hsl(var(--muted-foreground)); }
 .world-distance { display: inline-flex; align-items: center; gap: 0.5rem; }
 .world-distance input { width: 8rem; accent-color: hsl(var(--accent)); }
+.world-frame__start { position: absolute; left: 50%; bottom: 1rem; transform: translateX(-50%); z-index: 2; }
 .world-note { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; padding: 1.5rem; color: hsl(var(--muted-foreground)); font-size: 0.875rem; }
 .world-board { position: absolute; inset: 0; z-index: 30; overflow: auto; background: hsl(var(--background)); color: hsl(var(--foreground)); padding: 1rem 1.25rem 2rem; font-variant-numeric: tabular-nums; }
 .world-board h3 { font-family: var(--font-display); margin: 0; }

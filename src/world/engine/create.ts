@@ -42,6 +42,8 @@ interface DebugApi {
   drawCalls(): number;
   /** The distance control's reading of the camera, 0 at home and 1 at the near view. */
   distance(): number;
+  /** One frame of the view by hand (the camera easing, the LOD switch, the peeks), dt in seconds; tests drive it where no animation frame runs. */
+  tick(dt: number): void;
   statuses(): Record<string, ModelStatus>;
   /** Codes in the lit chain, the selected one first. */
   chain(): string[];
@@ -202,6 +204,7 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
       all: () => ctx.entities.map((e: Entity) => ({ id: e.id, kind: e.kind, status: e.info().status })),
       drawCalls: () => view.drawCalls(),
       distance: () => view.distanceOf(),
+      tick: (dt) => tick(last + dt * 1000),
       statuses: () => Object.fromEntries(statuses),
       chain: () => chain.codes(),
       chainDrawn: () => ({ ...chain.drawn(), dimmed: chain.dimmed() }),

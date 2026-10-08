@@ -50,3 +50,6 @@ vitest-report.json
 
 # Incremental-build state (docs/REVIEW-2026-08.md R12): machine-local, never source.
 *.tsbuildinfo
+
+# the world's Playwright build (playwright.world.config.ts)
+dist-world

@@ -50,7 +50,9 @@ const stateOf = (status: string): keyof typeof STATUS_VOCAB | undefined => (Obje
 
 export function Card({ selection, mark, lens, flows, weights, fullChain = false, pieces, onClose, onAction }: CardProps) {
   const ref = useRef<HTMLElement>(null);
-  useEffect(() => { ref.current?.querySelector<HTMLElement>('h3')?.focus(); }, [selection?.id, mark?.targetId]);
+  // The card's title takes focus when it opens, so a screen reader announces it; unless the canvas has focus (the
+  // keyboard is cycling with [ and ]), in which case the region's live announcement carries the title and focus stays.
+  useEffect(() => { if (document.activeElement?.classList.contains('world-canvas')) return; ref.current?.querySelector<HTMLElement>('h3')?.focus(); }, [selection?.id, mark?.targetId]);
   if (!selection && !mark) return null;
 
   if (mark) {
@@ -60,7 +62,7 @@ export function Card({ selection, mark, lens, flows, weights, fullChain = false,
     const s = STATUS[c.status], basis = BASIS[c.basis];
     const essays = essaysFor(mark.targetId, mark.shift);
     return (
-      <aside className="world-card" role="region" aria-label="Condition" ref={ref}>
+      <aside className="world-card" role="region" aria-label="Condition" aria-live="polite" ref={ref}>
         <div className="world-card__kind"><span>Condition mark {placed.n}</span><button type="button" className="world-card__close" aria-label="Close the card" onClick={onClose}>×</button></div>
         <h3 className="world-card__title" tabIndex={-1}>{placed.label}</h3>
         <span className="world-card__status" data-state={c.status}><span aria-hidden="true">{s.form === 'filled' ? '●' : s.form === 'open' ? '○' : '◌'}</span>{s.label}</span>
@@ -123,7 +125,7 @@ export function Card({ selection, mark, lens, flows, weights, fullChain = false,
   void INDEX_PATH; void labelOf;
 
   return (
-    <aside className="world-card" role="region" aria-label="Selection details" ref={ref}>
+    <aside className="world-card" role="region" aria-label="Selection details" aria-live="polite" ref={ref}>
       <div className="world-card__kind"><span>{info.kind}</span><button type="button" className="world-card__close" aria-label="Close the card" onClick={onClose}>×</button></div>
       <h3 className="world-card__title" tabIndex={-1}>{info.title}</h3>
       {info.status && <span className="world-card__status" data-state={state ?? ''}>{state ? <span aria-hidden="true">{STATUS_VOCAB[state].glyph}</span> : null}{info.status}</span>}

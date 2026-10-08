@@ -21,7 +21,8 @@
     "check:world": "node scripts/world/check-engine.mjs",
     "build:registry": "node --experimental-strip-types scripts/world/build-registry.ts",
     "build:layout": "node --experimental-strip-types scripts/world/build-layout.ts",
-    "build:poster": "node --experimental-strip-types scripts/world/render-poster.mjs"
+    "build:poster": "node --experimental-strip-types scripts/world/render-poster.mjs",
+    "test:e2e:world": "playwright test -c playwright.world.config.ts"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.11",

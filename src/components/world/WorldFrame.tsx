@@ -116,6 +116,9 @@ export default function WorldFrame({ variant, heading, boardTicker = null, onBoa
   // interaction with the stage, whichever comes first.
   useEffect(() => {
     if (reduced || skema || !host.current) return;
+    // On a phone the world starts on the first touch or key (the poster stays until then): a phone's main thread
+    // cannot absorb the engine's build behind the page's largest paint (gate 2, D15); a wide screen starts after it.
+    if (phone) return;
     const stage = host.current.parentElement!;
     const poster = stage.querySelector('img');
     let idle: number | ReturnType<typeof setTimeout> | null = null;
@@ -137,7 +140,7 @@ export default function WorldFrame({ variant, heading, boardTicker = null, onBoa
     if (typeof IntersectionObserver === 'function') { io = new IntersectionObserver((entries) => { if (entries.some((e) => e.isIntersecting)) { io?.disconnect(); io = null; whenLoaded(); } }, { rootMargin: '200px' }); io.observe(stage); }
     else whenLoaded();
     return () => { cancelled = true; io?.disconnect(); po?.disconnect(); if (fallback) clearTimeout(fallback); poster?.removeEventListener('load', afterPaint); if (idle !== null) { if (typeof cancelIdleCallback === 'function' && typeof idle === 'number') cancelIdleCallback(idle); else clearTimeout(idle as ReturnType<typeof setTimeout>); } };
-  }, [mount, reduced, skema]);
+  }, [mount, reduced, skema, phone]);
   useEffect(() => () => { handle.current?.dispose(); handle.current = null; wanted.current = false; }, []);
   useEffect(() => { if (skema) { handle.current?.dispose(); handle.current = null; wanted.current = false; setReady(false); } }, [skema]);
 
@@ -215,6 +218,7 @@ export default function WorldFrame({ variant, heading, boardTicker = null, onBoa
         <div className="world-frame__night" style={{ opacity: night * 0.55 }} aria-hidden="true" />
         {reading && <div className="world-frame__clock" aria-hidden="true">{reading.clock}{night > 0.5 ? ' · night' : ''}{reading.paused ? ' · paused' : ''}</div>}
         {failed && <p className="world-note" role="status">The world needs WebGL, which this browser has turned off. The poster stays; press Skema for the schematic.</p>}
+        {phone && !ready && !failed && !wanted.current && <button type="button" className="world-btn world-frame__start" onClick={() => void mount()}>Start the world</button>}
         <Card selection={selection} mark={mark} lens={lens} flows={data.flows} weights={data.weights} fullChain={fullChain} pieces={pieces} onClose={closeCard} onAction={act} />
         {boardTicker && (
           <Suspense fallback={<div className="world-board" role="status">Opening the board…</div>}>

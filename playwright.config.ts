@@ -21,6 +21,8 @@ process.env.VITE_SUPABASE_PROJECT_ID = 'test';
 
 export default defineConfig({
   testDir: './tests/e2e',
+  // the world's spec needs a build with VITE_WORLD_KAWASAN=true: playwright.world.config.ts (npm run test:e2e:world)
+  testIgnore: /world\.spec\.ts/,
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: 0,

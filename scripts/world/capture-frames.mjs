@@ -68,6 +68,8 @@ async function worldPage({ dark = false, width = 1440, height = 900, debug = tru
   const t0 = Date.now();
   await page.goto(`${ON}${url}${debug ? (url.includes('?') ? '&' : '?') + 'debug=1' : ''}`, { waitUntil: 'networkidle' });
   await page.waitForSelector('.world-frame[data-world="on"]');
+  // on a phone the world starts by hand (gate 2, D15): the poster stays until the first touch
+  if (width <= 640) await page.click('button:has-text("Start the world")');
   await page.waitForSelector('.world-frame__canvas-host[data-ready="true"]', { timeout: 60_000 });
   const mountMs = Date.now() - t0;
   const firstClock = await page.evaluate(() => document.querySelector('.world-frame__clock')?.textContent ?? null);
