@@ -37,4 +37,8 @@ jobs:
         env:
           TZ: America/Chicago
       - run: node scripts/assert-test-count.mjs vitest-report.json
+      # The world engine's own check (scripts/world/check-engine.mjs): imports,
+      # free names and load order from its entry. Files not yet wired are
+      # listed as pending and do not fail; wired files must be clean.
+      - run: npm run check:world
       - run: npm run build

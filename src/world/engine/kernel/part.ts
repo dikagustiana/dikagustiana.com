@@ -140,7 +140,8 @@ function textMesh(ctx: PartContext, { M, str, x, y, size, k, anchor, lift }: Tex
   if (!g) return null;
   g.font = font;
   c.width = Math.ceil(g.measureText(str).width) + 8; c.height = Math.round(TEX_PX * 1.25);
-  g.font = font; g.fillStyle = '#fff'; g.fillText(str, 4, TEX_PX * 0.95);
+  // the glyphs are a white mask; the token colour tints them through the material, so no colour is chosen here
+  g.font = font; g.fillStyle = 'white'; g.fillText(str, 4, TEX_PX * 0.95);
   const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = ctx.gfx.aniso;
   const s = size / TEX_PX, w = c.width * s, h = c.height * s;
   const x0 = anchor === 'middle' ? x - w / 2 : anchor === 'end' ? x - w : x - 4 * s, top = y - TEX_PX * 0.95 * s;
