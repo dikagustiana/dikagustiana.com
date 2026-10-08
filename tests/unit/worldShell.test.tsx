@@ -11,7 +11,7 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactElement } from 'react';
-import { CHAIN_COPY } from '@/data/industryChain';
+import { BAND_BY_ID, CHAIN_COPY } from '@/data/industryChain';
 import { makeQueryResult } from './helpers/renderWithProviders';
 
 const { fromMock } = vi.hoisted(() => ({ fromMock: vi.fn() }));
@@ -23,7 +23,8 @@ import { searchIndex } from '@/lib/world/search';
 import { piecesFor, TAG_FILE, type PublishedEssay } from '@/lib/world/thinkTank';
 import { REGISTRY } from '@/lib/world/registry/subindustries.generated';
 import { ROOMS } from '@/lib/world/registry/generate';
-import { LAYERS, OVERLAYS, PLACES, SECTION_ORDER, STATUS_VOCAB, TOTAL_PLACED, boardPath } from '@/lib/world/constants';
+import { ENERGY_DRILLDOWN, LAYERS, OVERLAYS, PLACES, SECTION_ORDER, STATUS_VOCAB, TOTAL_PLACED, boardPath } from '@/lib/world/constants';
+import { conditionHref, conditionOf, conditionShort } from '@/lib/finance-in-action/conditions';
 import { Card } from '@/components/world/Card';
 
 function mount(ui: ReactElement) {
@@ -109,6 +110,22 @@ describe('card', () => {
     expect(card.textContent!.replace(/\d{4}-\d{2}-\d{2}/g, '')).not.toMatch(/\d/);
     expect(screen.getByRole('link', { name: 'Open board' })).toHaveAttribute('href', boardPath('ABCD'));
     expect(screen.getByRole('heading', { level: 3 })).toHaveFocus();
+  });
+});
+
+describe('energy drill-down (discovery item D)', () => {
+  it('the energy mark lists the band’s three lines and links to the two Capital in Motion conditions on PLN', () => {
+    const noop = () => {};
+    mount(<Card selection={null} mark={{ shift: 'green', targetId: ENERGY_DRILLDOWN.bandId }} lens="economy" flows={[]} pieces={[]} onClose={noop} onAction={noop} />);
+    const drill = document.querySelector('[data-drilldown="energy"]')!;
+    expect(drill).not.toBeNull();
+    expect(drill.querySelectorAll('li').length).toBe(BAND_BY_ID['band-energy'].lines.length + ENERGY_DRILLDOWN.conditions.length);
+    for (const n of ENERGY_DRILLDOWN.conditions) {
+      const link = screen.getByRole('link', { name: new RegExp(conditionShort(n)) });
+      expect(link).toHaveAttribute('href', conditionHref(n));
+      expect(conditionOf(n)?.caseCompany).toMatch(/PLN/);
+    }
+    expect(drill.textContent!.replace(/Capital in Motion \d+/g, '')).not.toMatch(/\d{3}/);
   });
 });
 

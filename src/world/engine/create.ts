@@ -20,6 +20,7 @@ import type { Entity, FrameReading, LayerName, OverlayName, RendererLike, WorldH
 import type { FlowWeight, ModelStatus, StationBinding } from '@/world/data/types';
 import { buildWorldScene, type WorldScene } from '@/world/world/build';
 import { createTraffic, type Traffic } from '@/world/sim/traffic';
+import { createMarks, type Marks } from './marks';
 
 export { WARMUP_SECONDS };
 
@@ -37,6 +38,8 @@ interface DebugApi {
   view(name: string): void;
   all(): { id: string; kind: string; status: string }[];
   drawCalls(): number;
+  /** The distance control's reading of the camera, 0 at home and 1 at the near view. */
+  distance(): number;
   statuses(): Record<string, ModelStatus>;
   chain(id: string): string[];
   expose(ticker: string): void;
@@ -101,6 +104,7 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
     onDetail: (tiny, far) => { world.nearGroup.visible = !far; traffic.setDetail(tiny, far); },
   });
   if (options.initialView && options.initialView !== 'whole') view.lookAt(options.initialView);
+  const marks: Marks = createMarks(ctx, (a) => options.onAction?.(a));
 
   // ---- state the shell sets through the handle; Phase E–G give them their effects ----
   let overlay: OverlayName = 'none';
@@ -113,7 +117,7 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
   const subscribers = new Set<(r: FrameReading) => void>();
   let paused = false, last = typeof performance !== 'undefined' ? performance.now() : 0, acc = 0, raf: number | null = null, disposed = false;
   const reported = new Set<string>();
-  const reading = (): FrameReading => ({ clock: clock.clock(clock.t), night: clock.night(), readout: view.selected()?.readout() ?? 'nothing selected', paused, view: view.currentView(), zoom: view.camera.zoom });
+  const reading = (): FrameReading => ({ clock: clock.clock(clock.t), night: clock.night(), readout: view.selected()?.readout() ?? 'nothing selected', paused, view: view.currentView(), zoom: view.camera.zoom, distance: view.distanceOf() });
   function frame(now: number) {
     if (disposed) return;
     raf = requestAnimationFrame(frame);
@@ -124,6 +128,7 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
     if (!paused) { acc += dt; while (acc >= STEP) { stepOnce(STEP); acc -= STEP; } }
     if (clock.shift.h < clock.shift.goal) clock.shift.h = Math.min(clock.shift.goal, clock.shift.h + dt * (reduced ? 60 : 5));
     view.tick(dt, paused);
+    marks.update(view.camera.zoom);
     if (subscribers.size) { const r = reading(); for (const fn of subscribers) fn(r); }
   }
   const find = (id: string | null) => (id ? ctx.entities.find((e) => e.id === id) ?? null : null);
@@ -133,7 +138,8 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
     selected: () => view.selected()?.id ?? null,
     lookAt: (name) => view.lookAt(name),
     setDistance: (t) => view.setDistance(t),
-    setOverlay: (name) => { overlay = name; },
+    setOverlay: (name) => { overlay = name; if (name === 'none') marks.set([]); },
+    setMarks: (list) => marks.set(list),
     setLayer: (name, on) => { layers.set(name, on); traffic.setLayer(name, on); },
     setModelStatus: (s) => { statuses = s; world.setStatuses(s); },
     setFlowWeights: (flows: FlowWeight[]) => { traffic.setFlows(flows); },
@@ -151,6 +157,7 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
     disposed = true;
     if (raf !== null) { cancelAnimationFrame(raf); raf = null; }
     subscribers.clear();
+    marks.dispose();
     view.dispose();
     traffic.dispose();
     ctx.scene.traverse((o) => disposeObject(o));
@@ -175,6 +182,7 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
       view: (name) => { if ((['whole', 'ring', 'estate', 'gateway', 'town', 'thinktank'] as string[]).includes(name)) view.lookAt(name as FrameReading['view'] & string); },
       all: () => ctx.entities.map((e: Entity) => ({ id: e.id, kind: e.kind, status: e.info().status })),
       drawCalls: () => view.drawCalls(),
+      distance: () => view.distanceOf(),
       statuses: () => Object.fromEntries(statuses),
       chain: () => (chain ? [chain.id] : []),
       expose: (ticker) => handle.exposeCompany(ticker, []),

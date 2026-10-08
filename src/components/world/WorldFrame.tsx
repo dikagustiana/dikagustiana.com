@@ -11,11 +11,11 @@ import { useNavigate } from 'react-router-dom';
 import { ChainPlate } from '@/components/industry-chain/ChainPlate';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { prefersReducedMotion } from '@/lib/motion';
-import { CANVAS_DESCRIPTION, LAYERS, OVERLAYS, PLACES, TITLE, TOTAL_PLACED, WORLD_PATH, boardPath } from '@/lib/world/constants';
+import { CANVAS_DESCRIPTION, LAYERS, OVERLAYS, PLACES, REGION_VIEW, TITLE, TOTAL_PLACED, WORLD_PATH, boardPath } from '@/lib/world/constants';
 import { marksFor, type PlacedMark } from '@/lib/world/presentation';
 import { REGISTRY } from '@/lib/world/registry/subindustries.generated';
 import { STATUS, type LensId, type ShiftId } from '@/data/industryChain';
-import type { FrameReading, LayerName, OverlayName, Selection, ViewName, WorldHandle, WorldAction } from '@/world/engine/types';
+import type { FrameReading, LayerName, OverlayName, Selection, ViewName, WorldHandle, WorldAction, WorldMark } from '@/world/engine/types';
 import { Card } from './Card';
 import { Search } from './Search';
 import { useWorldData } from './useWorldData';
@@ -60,7 +60,16 @@ export default function WorldFrame({ variant, heading, boardTicker = null, onBoa
   const wanted = useRef(false);
   const lens: LensId = distance >= 0.5 ? 'finance' : 'economy';
   const shift = OVERLAYS.find((o) => o.overlay === overlay)?.shift ?? null;
+  const shiftRef = useRef<ShiftId | null>(shift); shiftRef.current = shift;
   const marks: PlacedMark[] = useMemo(() => (shift ? marksFor(shift) : []), [shift]);
+  /** The marks with a place in the world: a gate, a signpost or a region's label; layers and return vehicles are read from the strip. */
+  const worldMarks: WorldMark[] = useMemo(() => marks.flatMap((m): WorldMark[] => {
+    const form = STATUS[m.target.condition!.status].form;
+    if (m.carrier.kind === 'gate' || m.carrier.kind === 'signpost') return [{ targetId: m.targetId, n: m.n, label: m.label, form, at: { kind: 'entity' as const, id: m.carrier.id } }];
+    if (m.carrier.kind === 'region') return [{ targetId: m.targetId, n: m.n, label: m.label, form, at: { kind: 'region' as const, id: m.carrier.id } }];
+    return [];
+  }), [marks]);
+  const dragging = useRef(false);
 
   const act = useCallback((a: WorldAction | { type: 'select'; id: string } | { type: 'open-piece'; slug: string }) => {
     if (a.type === 'open-board') { if (onBoard) onBoard(a.ticker); else navigate(boardPath(a.ticker)); }
@@ -82,14 +91,14 @@ export default function WorldFrame({ variant, heading, boardTicker = null, onBoa
       const h = createWorld(host.current, {
         registry: REGISTRY, layout: LAYOUT, theme: { font }, initialView: phone ? 'estate' : 'whole', reducedDetail: phone,
         debug: typeof location !== 'undefined' && new URLSearchParams(location.search).has('debug'),
-        onSelect: (sel) => { setSelection(sel); if (sel) setMark(null); },
+        onSelect: (sel) => { if (sel?.kind === 'mark') { const id = sel.info.rows.find(([k]) => k === 'Target')?.[1]; setSelection(null); setMark(id && shiftRef.current ? { shift: shiftRef.current, targetId: id } : null); return; } setSelection(sel); if (sel) setMark(null); },
         onAction: act,
         onReady: () => setReady(true),
       });
       handle.current = h;
       const canvas = host.current.querySelector('canvas');
       if (canvas) { canvas.setAttribute('role', 'img'); canvas.setAttribute('aria-label', CANVAS_DESCRIPTION); }
-      h.subscribe((r) => { setReading((prev) => (prev && prev.clock === r.clock && prev.readout === r.readout && prev.view === r.view && Math.abs(prev.night - r.night) < 0.05 ? prev : r)); setView(r.view); });
+      h.subscribe((r) => { setReading((prev) => (prev && prev.clock === r.clock && prev.readout === r.readout && prev.view === r.view && Math.abs(prev.night - r.night) < 0.05 ? prev : r)); setView(r.view); if (!dragging.current) setDistance((d) => (Math.abs(d - r.distance) > 0.02 ? r.distance : d)); });
       for (const l of LAYERS) h.setLayer(l.layer, layers[l.layer]);
     } catch (e) { setFailed(e instanceof Error ? e.message : String(e)); }
   }, [act, layers, phone, reduced, skema]);
@@ -127,7 +136,7 @@ export default function WorldFrame({ variant, heading, boardTicker = null, onBoa
 
   // data into the engine
   useEffect(() => { if (ready && handle.current) { handle.current.setModelStatus(data.statuses); handle.current.setFlowWeights(data.flows); } }, [ready, data.statuses, data.flows]);
-  useEffect(() => { handle.current?.setOverlay(overlay); }, [overlay, ready]);
+  useEffect(() => { handle.current?.setOverlay(overlay); if (ready) handle.current?.setMarks(worldMarks); }, [overlay, ready, worldMarks]);
   useEffect(() => { if (ready && handle.current) for (const l of LAYERS) handle.current.setLayer(l.layer, layers[l.layer]); }, [layers, ready]);
   // the board's company is selected and exposed when the route names it
   useEffect(() => { if (ready && boardTicker && handle.current) { handle.current.select(boardTicker.toUpperCase()); handle.current.setDistance(1); setDistance(1); } }, [ready, boardTicker]);
@@ -173,7 +182,7 @@ export default function WorldFrame({ variant, heading, boardTicker = null, onBoa
         <div className="world-frame__controls">
           {phone ? <details className="world-frame__group"><summary className="world-btn">Places</summary><div className="world-frame__group">{places}</div></details> : <div className="world-frame__group" aria-label="Places"><span>Places</span>{places}</div>}
           <div className="world-frame__group" aria-label="Zoom"><button type="button" className="world-btn" aria-label="Zoom in" onClick={() => { onDistance(Math.min(1, distance + 0.15)); }}>+</button><button type="button" className="world-btn" aria-label="Zoom out" onClick={() => { onDistance(Math.max(0, distance - 0.15)); }}>−</button></div>
-          <label className="world-distance"><span className="text-muted-foreground">Economy</span><input type="range" min={0} max={1} step={0.01} value={distance} aria-label="Distance: economy to finance" onChange={(e) => onDistance(Number(e.target.value))} /><span className="text-muted-foreground">Finance</span></label>
+          <label className="world-distance"><span className="text-muted-foreground">Economy</span><input type="range" min={0} max={1} step={0.01} value={distance} aria-label="Distance: economy to finance" onChange={(e) => onDistance(Number(e.target.value))} onPointerDown={() => { dragging.current = true; }} onPointerUp={() => { dragging.current = false; }} onPointerCancel={() => { dragging.current = false; }} /><span className="text-muted-foreground">Finance</span></label>
           <div className="world-frame__group" role="radiogroup" aria-label="Shift overlay"><span>Shift</span>{OVERLAYS.map((o) => <button key={o.overlay} type="button" role="radio" className="world-btn" aria-checked={overlay === o.overlay} onClick={() => { setOverlay(o.overlay); setMark(null); }}>{o.label}</button>)}</div>
           <div className="world-frame__group" aria-label="Layers"><span>Layers</span>{LAYERS.map((l) => <button key={l.layer} type="button" className="world-btn" aria-pressed={layers[l.layer]} onClick={() => toggleLayer(l.layer)}>{l.label}</button>)}</div>
           <Search pieces={pieces} onPick={(hit) => { if (hit.kind === 'piece') act({ type: 'open-piece', slug: hit.id }); else act({ type: 'select', id: hit.id }); }} />
@@ -202,7 +211,7 @@ export default function WorldFrame({ variant, heading, boardTicker = null, onBoa
       </div>
       {shift && (
         <ol className="world-frame__strip" aria-label="Reading strip: the marks of this shift in argument order">
-          {marks.map((m) => { const st = STATUS[m.target.condition!.status]; return <li key={m.targetId}><button type="button" aria-pressed={mark?.targetId === m.targetId} onClick={() => { setMark({ shift, targetId: m.targetId }); setSelection(null); if (m.carrier.kind === 'gate' || m.carrier.kind === 'signpost') handle.current?.select(m.carrier.id); }}><span aria-hidden="true">{m.n}</span><span aria-hidden="true">{st.form === 'filled' ? '●' : st.form === 'open' ? '○' : '◌'}</span>{m.label} · {st.label}</button></li>; })}
+          {marks.map((m) => { const st = STATUS[m.target.condition!.status]; return <li key={m.targetId}><button type="button" aria-pressed={mark?.targetId === m.targetId} onClick={() => { setMark({ shift, targetId: m.targetId }); setSelection(null); const h = handle.current; if (!h) return; if (m.carrier.kind === 'gate' || m.carrier.kind === 'signpost') { h.select(m.carrier.id); h.setDistance(0.6); } else if (m.carrier.kind === 'region') { h.select(null); h.lookAt(REGION_VIEW[m.carrier.id] ?? 'whole'); } }}><span aria-hidden="true">{m.n}</span><span aria-hidden="true">{st.form === 'filled' ? '●' : st.form === 'open' ? '○' : '◌'}</span>{m.label} · {st.label}</button></li>; })}
         </ol>
       )}
       <p className="sr-only">{CANVAS_DESCRIPTION}</p>

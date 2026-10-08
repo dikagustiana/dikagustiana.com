@@ -42,6 +42,7 @@ export interface View {
   /** Frame a box of the world, with an optional height range. */
   frameBox(box: Box, z?: readonly [number, number]): void;
   setDistance(t: number): void;
+  distanceOf(): number;
   zoomBy(k: number): void;
   reset(): void;
   cycle(d: 1 | -1): void;
@@ -139,9 +140,12 @@ export function createView(ctx: EngineContext, o: ViewOptions): View {
     return best;
   }
   // the distance control: 0 is the far home view, 1 the near view on the selected or last building
+  const NEAR = 14;
+  /** The distance control's reading of the camera, the inverse of setDistance's zoom curve. */
+  function distanceOf(): number { const nearZoom = fitZoom * NEAR; return clamp(Math.sqrt(Math.max(0, (camera.zoom - fitZoom) / (nearZoom - fitZoom))), 0, 1); }
   function setDistance(t: number) {
     const k = clamp(t, 0, 1), near = selected ?? lastBuilding;
-    const nearZoom = fitZoom * 14, zoom = fitZoom + (nearZoom - fitZoom) * k * k;
+    const nearZoom = fitZoom * NEAR, zoom = fitZoom + (nearZoom - fitZoom) * k * k;
     let target = HOME.clone();
     if (near) { const b = bounds(near), c = b.getCenter(v3()); target = HOME.clone().lerp(c.addScaledVector(ISO, -c.y / ISO.y), k); }
     setFollow(false); goal = { zoom: clamp(zoom, controls.minZoom, controls.maxZoom), target };
@@ -303,7 +307,7 @@ export function createView(ctx: EngineContext, o: ViewOptions): View {
   }
 
   return {
-    camera, controls, select, selected: () => selected, hovered: () => hovered, lookAt, frameBox, setDistance, zoomBy, reset, cycle, setFollow, setHighlight, currentView, tick,
+    camera, controls, select, selected: () => selected, hovered: () => hovered, lookAt, frameBox, setDistance, distanceOf, zoomBy, reset, cycle, setFollow, setHighlight, currentView, tick,
     drawCalls: () => { tick(0, true); return renderer.info.render.calls; },
     screenOf: (e) => { scene.updateMatrixWorld(); camera.updateMatrixWorld(); const pk = e.pick ?? [0, 0, 1];
       const p = (e.groups[0] ? e.groups[0].localToWorld(W(...pk)) : W(...pk)).project(camera), r = canvas.getBoundingClientRect();

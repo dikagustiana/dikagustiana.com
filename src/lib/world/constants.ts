@@ -55,3 +55,13 @@ export const CANVAS_DESCRIPTION = 'An isometric industrial estate, live. Primary
 export const SECTION_ORDER = ['Header', 'Main drivers', 'Unit economics', 'Performance vs peer', 'What the model contains', 'Limits of the filing', 'Chain', 'Related analyses'] as const;
 export const NO_MODEL = 'No model yet';
 export const TREE_UNAVAILABLE = 'Driver tree not available for this model';
+
+/** Where a region's mark takes the camera (the strip's click on a stage or node mark). */
+export const REGION_VIEW: Record<string, ViewName> = { 'ring-geological': 'ring', 'ring-biological': 'ring', estate: 'estate', gateway: 'gateway', town: 'town', recovery: 'town', hill: 'thinktank' };
+
+/**
+ * The energy mark's drill-down, v0 (discovery item D): the schematic has no
+ * electricity chain to open, so the card lists the energy band's own three
+ * lines and links to the two Capital in Motion conditions on PLN, by number.
+ */
+export const ENERGY_DRILLDOWN = { bandId: 'band-energy', layer: 'energy' as LayerName, conditions: [12, 17] as const, label: 'Drill-down v0: opens in Capital in Motion' };

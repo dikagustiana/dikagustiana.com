@@ -95,6 +95,17 @@ export interface FrameReading {
   paused: boolean;
   view: ViewName | null;
   zoom: number;
+  /** The distance control's reading of the camera: 0 at the far home view, 1 at the near view. */
+  distance: number;
+}
+
+/** A condition mark the shell has placed: on an entity (a gate or signpost) or at a region's label anchor. */
+export interface WorldMark {
+  targetId: string;
+  n: number;
+  label: string;
+  form: 'filled' | 'open' | 'dashed';
+  at: { kind: 'entity'; id: string } | { kind: 'region'; id: string };
 }
 
 /** The renderer surface the engine needs; a test can pass a fake. */
@@ -145,6 +156,8 @@ export interface WorldHandle {
   /** 0 economy (the far home view) … 1 finance (near view on the selected or last building). */
   setDistance(t: number): void;
   setOverlay(name: OverlayName): void;
+  /** The marks of the active shift, placed by the shell; an empty list clears them. */
+  setMarks(marks: readonly WorldMark[]): void;
   setLayer(name: LayerName, on: boolean): void;
   setModelStatus(statuses: Map<string, ModelStatus>): void;
   /** Flow classes from the boundary: measured links carry more vehicles than expected ones. */

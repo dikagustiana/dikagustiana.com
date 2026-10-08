@@ -11,7 +11,8 @@ import { BAND_BY_ID, JOINT_BY_ID, STATUS, BASIS, type JointId, type LensId, type
 import { subIndustryByCode } from '@/lib/world/registry/subindustries.generated';
 import { linksFrom, linksTo } from '@/lib/world/registry/links.generated';
 import { INDEX_PATH, subIndustryPath } from '@/lib/finance-in-action/routes';
-import { STATUS_VOCAB, boardPath } from '@/lib/world/constants';
+import { ENERGY_DRILLDOWN, STATUS_VOCAB, boardPath } from '@/lib/world/constants';
+import { conditionHref, conditionOf, conditionShort } from '@/lib/finance-in-action/conditions';
 import { labelOf, marksFor } from '@/lib/world/presentation';
 import type { Selection } from '@/world/engine/types';
 import type { FlowWeight } from '@/world/data/types';
@@ -26,6 +27,19 @@ export interface CardProps {
   pieces: readonly Piece[];
   onClose: () => void;
   onAction: (a: { type: 'open-board'; ticker: string } | { type: 'open-index'; code: string } | { type: 'open-thinktank' } | { type: 'select'; id: string } | { type: 'open-piece'; slug: string }) => void;
+}
+
+/** The energy drill-down, v0 (discovery item D): the band's three lines and the two PLN conditions, by number. */
+function EnergyDrillDown() {
+  const band = BAND_BY_ID[ENERGY_DRILLDOWN.bandId];
+  if (!band) return null;
+  return (
+    <div className="world-card__section" data-drilldown="energy">
+      <h4>{ENERGY_DRILLDOWN.label}</h4>
+      <ul>{band.lines.map((l) => <li key={l}>{l}</li>)}</ul>
+      <ul>{ENERGY_DRILLDOWN.conditions.map((n) => { const c = conditionOf(n); return <li key={n}><Link to={conditionHref(n)}>{conditionShort(n)}{c ? ` · ${c.title}` : ''}</Link>{c?.caseCompany ? ` (${c.caseCompany})` : ''}</li>; })}</ul>
+    </div>
+  );
 }
 
 const stateOf = (status: string): keyof typeof STATUS_VOCAB | undefined => (Object.keys(STATUS_VOCAB) as (keyof typeof STATUS_VOCAB)[]).find((k) => STATUS_VOCAB[k].word === status);
@@ -52,6 +66,7 @@ export function Card({ selection, mark, lens, flows, pieces, onClose, onAction }
         <div className="world-card__section"><h4>Evidence</h4>
           {essays.length ? <ul>{essays.map((e) => <li key={e.slug}><Link to={`/essays/${e.slug}`}>{e.title}</Link>{e.evidence ? ' (the evidence behind this reading)' : ''} — {e.reads}</li>)}</ul> : <p>No essay carries this reading yet.</p>}
         </div>
+        {mark.targetId === ENERGY_DRILLDOWN.bandId && <EnergyDrillDown />}
       </aside>
     );
   }
@@ -92,6 +107,7 @@ export function Card({ selection, mark, lens, flows, pieces, onClose, onAction }
   } else if (sel.kind === 'layer') {
     const band = BAND_BY_ID[sel.id];
     if (band) sections.push(<div className="world-card__section" key="band"><p>{band.means}</p><p>{band.read[lens]}</p><ul>{band.lines.map((l) => <li key={l}>{l}</li>)}</ul></div>);
+    if (sel.id === ENERGY_DRILLDOWN.bandId) sections.push(<EnergyDrillDown key="drill" />);
   } else if (sel.kind === 'thinktank') {
     foot.push(<button key="tt" type="button" className="world-btn" onClick={() => onAction({ type: 'open-thinktank' })}>Open the think tank</button>);
   } else {
