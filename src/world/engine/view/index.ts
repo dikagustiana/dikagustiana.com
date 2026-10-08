@@ -46,6 +46,8 @@ export interface View {
   reset(): void;
   cycle(d: 1 | -1): void;
   setFollow(on: boolean): void;
+  /** Light the entities named (by id, or by a tag the entity carries); an empty list clears. */
+  setHighlight(ids: readonly string[]): void;
   /** Which place the view is centred on, when it is in close. */
   currentView(): ViewName | null;
   /** One frame: ease the camera, update the peeks and the detail, draw. */
@@ -171,6 +173,12 @@ export function createView(ctx: EngineContext, o: ViewOptions): View {
   function setLive(ent: Entity | null, on: boolean) { if (ent) eachOwn(ent, (o) => { if (o instanceof LineSegments2 && o.userData.line === 'line') o.material = on ? theme.line.live : theme.line.line; }); }
   function bounds(ent: Entity) { box.makeEmpty(); if (ent.bbox) return box.copy(ent.bbox); for (const g of ent.groups) box.expandByObject(g); return box; }
   const isBuilding = (e: Entity) => !e.isPerson && !VEHICLE_KINDS.has(e.kind);
+  let lit: Entity[] = [];
+  function setHighlight(ids: readonly string[]) {
+    for (const e of lit) if (e !== selected) setLive(e, false);
+    lit = ids.length ? ctx.entities.filter((e) => ids.includes(e.id) || (e.tags?.some((t) => ids.includes(t)) ?? false)) : [];
+    for (const e of lit) setLive(e, true);
+  }
   function select(ent: Entity | null) {
     if (ent === selected) return;
     setLive(selected, false); selected = ent; setLive(selected, true); liveG = ent?.groups?.[0] ?? null;
@@ -295,7 +303,7 @@ export function createView(ctx: EngineContext, o: ViewOptions): View {
   }
 
   return {
-    camera, controls, select, selected: () => selected, hovered: () => hovered, lookAt, frameBox, setDistance, zoomBy, reset, cycle, setFollow, currentView, tick,
+    camera, controls, select, selected: () => selected, hovered: () => hovered, lookAt, frameBox, setDistance, zoomBy, reset, cycle, setFollow, setHighlight, currentView, tick,
     drawCalls: () => { tick(0, true); return renderer.info.render.calls; },
     screenOf: (e) => { scene.updateMatrixWorld(); camera.updateMatrixWorld(); const pk = e.pick ?? [0, 0, 1];
       const p = (e.groups[0] ? e.groups[0].localToWorld(W(...pk)) : W(...pk)).project(camera), r = canvas.getBoundingClientRect();
@@ -307,7 +315,7 @@ export function createView(ctx: EngineContext, o: ViewOptions): View {
       ro?.disconnect(); ro = null;
       controls.dispose();
       for (const l of [retLine, routeLine]) { scene.remove(l); l.geometry.dispose(); }
-      selected = null; hovered = null; liveG = null; lastBuilding = null; goal = null;
+      selected = null; hovered = null; liveG = null; lastBuilding = null; goal = null; lit = [];
     },
   };
 }

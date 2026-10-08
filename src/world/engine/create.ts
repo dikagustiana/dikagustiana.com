@@ -146,6 +146,7 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
     setModelStatus: (s) => { statuses = s; world.setStatuses(s); },
     setFlowWeights: (flows: FlowWeight[]) => { traffic.setFlows(flows); },
     highlightChain: (id, depth) => { chain = { id, depth }; },
+    setHighlight: (ids) => view.setHighlight(ids),
     exposeCompany: (ticker, stations) => { exposed = { ticker, stations }; },
     pause: (on) => { paused = on; },
     subscribe: (fn) => { subscribers.add(fn); return () => { subscribers.delete(fn); }; },

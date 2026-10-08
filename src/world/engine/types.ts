@@ -49,6 +49,8 @@ export interface Entity {
   aloft?(): boolean;
   /** Called by the simulation every fixed step. */
   update?(dt: number): void;
+  /** What a highlight by tag can find this entity by: its code, its chain id, its tickers. */
+  tags?: readonly string[];
 }
 
 /** A closed building's shell and its section drawing, on the group's userData.peek. */
@@ -148,6 +150,8 @@ export interface WorldHandle {
   /** Flow classes from the boundary: measured links carry more vehicles than expected ones. */
   setFlowWeights(flows: FlowWeight[]): void;
   highlightChain(id: string, depth: 1 | 'all'): void;
+  /** Light the entities whose id, code or chain id is named (a think-tank piece's tags); an empty list clears. */
+  setHighlight(ids: readonly string[]): void;
   exposeCompany(ticker: string, stations: StationBinding[]): void;
   pause(on: boolean): void;
   /** Per-frame readings for the shell's clock and readout; returns the unsubscribe. */

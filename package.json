@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "node --experimental-strip-types scripts/world/render-poster.mjs && vite build && node scripts/assert-no-synthetic.mjs && node scripts/prerender.mjs",
+    "build": "node --experimental-strip-types scripts/world/render-poster.mjs && vite build && node scripts/assert-no-synthetic.mjs && node scripts/world/assert-world-flag.mjs && node scripts/prerender.mjs",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "typecheck": "tsc -b --force",

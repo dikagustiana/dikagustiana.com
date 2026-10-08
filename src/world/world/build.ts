@@ -142,6 +142,7 @@ export function buildWorldScene(ctx: EngineContext, layout: GeneratedLayout, onA
       const win = windowsPart(ctx, d.windows); if (win) scene.add(win);
       const ent: BuildingEntity = {
         kind: 'building', id: b.code, sub: s, block: b, groups: [g], pick: [(b.box.x0 + b.box.x1) / 2, b.box.y1, d.top / 2],
+        tags: [b.code, s.chainNodeId, ...s.companies.map((c) => c.ticker)],
         bbox: new THREE.Box3(W(b.box.x0, b.box.y0, 0), W(b.box.x1, b.box.y1, d.top)),
         resolve: () => ent,
         statusKey() {

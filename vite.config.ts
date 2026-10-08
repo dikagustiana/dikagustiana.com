@@ -11,6 +11,11 @@ export default defineConfig(({ mode }) => ({
   // reaches dist/. scripts/assert-no-synthetic.mjs checks that after the build.
   define: {
     __FIA_PREVIEW__: JSON.stringify(loadEnv(mode, process.cwd(), "VITE_").VITE_FIA_PREVIEW === "true"),
+    // The Kawasan Industri world (docs/world/PRD-kawasan-industri.md §7.1):
+    // VITE_WORLD_KAWASAN=true builds the world behind the chain map's slot.
+    // Unset, the schematic renders exactly as before and the world's
+    // modules are dead code Rollup drops (scripts/world/assert-world-flag.mjs).
+    __WORLD_KAWASAN__: JSON.stringify(loadEnv(mode, process.cwd(), "VITE_").VITE_WORLD_KAWASAN === "true"),
   },
   server: {
     host: "::",
