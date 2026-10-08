@@ -5,7 +5,7 @@
  * (docs/world/PRD-kawasan-industri.md §9.4). Coordinates are the engine's:
  * +x east, +y south, +z up, one unit is a metre.
  */
-import type { BuildingFamily, Zone } from '@/lib/world/registry/types';
+import type { BuildingFamily, Zone } from '../../lib/world/registry/types.ts';
 
 export type Pt = readonly [x: number, y: number];
 export type Box = { readonly x0: number; readonly x1: number; readonly y0: number; readonly y1: number };

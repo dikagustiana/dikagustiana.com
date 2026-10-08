@@ -240,7 +240,7 @@ function renderSubIndustriesTs(rows: SubIndustry[], citation: Citation, clsHash:
  * changes \`review.placedBy\`, the owner does, in docs/world/sources/placement.tsv.
  */
 import type { Registry, SubIndustry } from './types.ts';
-import { LINKS } from './links.generated';
+import { LINKS } from './links.generated.ts';
 
 export const SUB_INDUSTRIES: readonly SubIndustry[] = ${JSON.stringify(rows, null, 2)};
 

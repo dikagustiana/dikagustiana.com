@@ -19,7 +19,8 @@
     "build:chain": "node --experimental-strip-types scripts/build-chain-plate.mjs",
     "build:fia-fixtures": "vite-node scripts/fia/build-synthetic-fixtures.ts",
     "check:world": "node scripts/world/check-engine.mjs",
-    "build:registry": "node --experimental-strip-types scripts/world/build-registry.ts"
+    "build:registry": "node --experimental-strip-types scripts/world/build-registry.ts",
+    "build:layout": "node --experimental-strip-types scripts/world/build-layout.ts"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.11",
