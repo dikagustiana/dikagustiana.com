@@ -26,6 +26,14 @@ export interface PartContext {
   texts: TextRegistry;
   font: string;
   text2d: boolean;
+  /** Development only: throws if a figure with a currency or a unit is about to be drawn (mega prompt §8.1). */
+  guard?: (text: string) => void;
+}
+
+/** A figure a scene builder must never draw: a rupiah amount, a percentage, a thousands-grouped number, a number with a unit. */
+export const FIGURE = /(^|[\s(])(Rp|USD|IDR)\s?\d|\d\s?%|\d{1,3}([.,]\d{3})+|\b\d+([.,]\d+)?\s?(bn|mn|jt|tn|rb|USD|IDR)\b/i;
+export function assertNoFigure(text: string): void {
+  if (FIGURE.test(text)) throw new Error(`world: a figure reached a scene builder: "${text}" (PRD §9.3.4; figures live on cards and the board)`);
 }
 
 interface TextSpec { M: THREE.Matrix4; str: string; x: number; y: number; size: number; k: TextKey; anchor: 'start' | 'middle' | 'end'; lift: number }
@@ -87,6 +95,7 @@ export class Part {
     return this;
   }
   text(M: THREE.Matrix4, str: string, x: number, y: number, size: number, k: TextKey = 'ink', anchor: Anchor = 'start', lift = 0.035): this {
+    this.ctx.guard?.(str);
     this.texts.push({ M, str, x, y, size, k, anchor, lift }); return this;
   }
   // any three.js geometry, flat-filled by facet direction, every facet edge a hairline

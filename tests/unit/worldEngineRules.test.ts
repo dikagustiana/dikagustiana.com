@@ -16,7 +16,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 
-const ROOTS = ['src/world/engine', 'src/world/interiors', 'src/world/world'].map((d) => path.resolve(__dirname, '../..', d));
+const ROOTS = ['src/world/engine', 'src/world/interiors', 'src/world/world', 'src/world/sim'].map((d) => path.resolve(__dirname, '../..', d));
 const MAPPING_FILE = path.resolve(__dirname, '../../src/world/engine/theme.ts');
 
 function* walk(dir: string): Generator<string> {
@@ -45,5 +45,13 @@ describe('engine code rules', () => {
 
   it('never finds DOM elements by id (the shell passes the container)', () => {
     expect(hits(/getElementById|querySelector\s*\(\s*['"]#/)).toEqual([]);
+  });
+
+  // mega prompt §8.1: scene code sees only the boundary's shapes
+  it('never imports the Finance in Action data layer, the link register, or the boundary itself (types aside)', () => {
+    const imports = hits(/^import\s(?!type\s)[^;]*from\s+['"](@\/lib\/finance-in-action|@\/lib\/world\/registry\/links\.generated|@\/world\/data\/boundary|@\/integrations)/);
+    expect(imports).toEqual([]);
+    const dynamic = hits(/import\(\s*['"](@\/lib\/finance-in-action|@\/world\/data\/boundary|@\/integrations)/);
+    expect(dynamic).toEqual([]);
   });
 });

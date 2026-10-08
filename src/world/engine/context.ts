@@ -46,6 +46,8 @@ export interface EngineContext {
   font: string;
   /** Whether a 2D canvas exists to draw text textures with (a headless test has none; text is then left out). */
   text2d: boolean;
+  /** Development only: throws if a figure with a currency or a unit is about to be drawn (mega prompt §8.1). */
+  guard?: (text: string) => void;
   reduced: boolean;
   debug: boolean;
   /** Every entity that can be clicked, in creation order; the view cycles through them. */
@@ -53,6 +55,8 @@ export interface EngineContext {
   /** Closed buildings that open as a section drawing while selected: [the group carrying userData.peek, its entity]. */
   peeks: [THREE.Group, Entity][];
 }
+
+import { assertNoFigure } from './kernel/part';
 
 const noop = () => {};
 
@@ -70,6 +74,8 @@ export function createContext(o: {
     texts: { meshes: [], far: false },
     font: o.font,
     text2d: o.text2d,
+    // the guard is on in development and under the debug flag; a production build pays nothing for it
+    guard: o.debug || import.meta.env.DEV ? assertNoFigure : undefined,
     reduced: o.reduced,
     debug: o.debug,
     entities: [],

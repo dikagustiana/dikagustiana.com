@@ -67,3 +67,25 @@ export function packageFor(reg: FiaRegistry | null, ticker: string): ModelPackag
 export function bindingsFrom(pkg: ModelPackage, match: (physicalUnit: string, description: string) => string | null): StationBinding[] {
   return pkg.unitEconomics.lines.filter((l) => l.role === 'cost' && l.driver).map((l) => ({ lineId: l.id, label: l.label, stationId: match(l.driver!.physicalUnit, l.driver!.description) }));
 }
+
+// ---- the boundary as mega prompt §8.1 names it: one request for the index, cached for the session ----
+let indexPromise: Promise<FiaRegistry> | null = null;
+/** The published index, requested once per session; a failed request is not cached, so the next call retries. */
+export function publishedIndex(): Promise<FiaRegistry> {
+  if (!indexPromise) indexPromise = loadPublished().catch((e) => { indexPromise = null; throw e; });
+  return indexPromise;
+}
+/** Every ticker the registry names with its status; an outage reads 'unavailable' everywhere, never 'none'. */
+export async function getModelStatuses(): Promise<Map<string, ModelStatus>> {
+  try { return statusesFrom(await publishedIndex(), false); } catch { return statusesFrom(null, true); }
+}
+export async function getFlowWeights(): Promise<FlowWeight[]> {
+  try { return flowsFrom(await publishedIndex()); } catch { return []; }
+}
+/** The stations a company's cost lines bind to; the matcher is Phase G's (physical-units.ts). An unknown or unpublished company binds nothing. */
+export async function bindStations(ticker: string, match: (physicalUnit: string, description: string) => string | null): Promise<StationBinding[]> {
+  const pkg = packageFor(await publishedIndex().catch(() => null), ticker);
+  return pkg ? bindingsFrom(pkg, match) : [];
+}
+/** Tests only: forget the cached index. */
+export function resetPublishedIndex(): void { indexPromise = null; }
