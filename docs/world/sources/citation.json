@@ -1,0 +1,18 @@
+{
+  "classification": {
+    "title": "IDX Industrial Classification (IDX-IC): the 130 sub-industries with codes and Indonesian and English names",
+    "publisher": "PT Bursa Efek Indonesia (transcribed from two secondary pages that cite BEI; see SOURCES.md)",
+    "url": "https://gopublic.idx.co.id/media/1404/daftar-sektor_web-go-public_en.pdf",
+    "accessed": "2026-10-08",
+    "sha256": "930eb4e59d9c55af8a17a7cdfa81d40ffbb34f6243ed56e241071f4c1cb0a77a",
+    "note": "The official bytes were unreachable from the build environment (HTTP 403); this hash is the committed transcription's. Replace it with the official file's hash when the owner supplies the document."
+  },
+  "issuers": {
+    "title": "Listed issuers per IDX-IC sub-industry (ticker, name, founding and IPO dates)",
+    "publisher": "lembarsaham.com (secondary; mirrors the exchange's classification of each issuer)",
+    "url": "https://lembarsaham.com/daftar-emiten/industrial/<code>/",
+    "fetched": "2026-10-08",
+    "sha256": "fbb961ec9bd99de5f3aafe4936b372ea7a72c72aa012ec25e80f9e0245e5beb6",
+    "note": "Fetched by scripts/world/fetch-issuers.py; only the four fields named are kept."
+  }
+}
