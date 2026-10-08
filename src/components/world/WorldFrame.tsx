@@ -16,7 +16,8 @@ import { marksFor, type PlacedMark } from '@/lib/world/presentation';
 import { REGISTRY } from '@/lib/world/registry/subindustries.generated';
 import { bindingsFrom } from '@/world/data/boundary';
 import { archetypeForZone, stationFor } from '@/world/interiors';
-import type { StationBinding } from '@/world/data/types';
+import { whiteboardFor } from '@/lib/world/whiteboard';
+import type { StationBinding, WhiteboardContent } from '@/world/data/types';
 import { STATUS, type LensId, type ShiftId } from '@/data/industryChain';
 import type { FrameReading, LayerName, OverlayName, Selection, ViewName, WorldHandle, WorldAction, WorldMark } from '@/world/engine/types';
 import { Card } from './Card';
@@ -97,7 +98,7 @@ export default function WorldFrame({ variant, heading, boardTicker = null, onBoa
       const h = createWorld(host.current, {
         registry: REGISTRY, layout: LAYOUT, theme: { font }, initialView: phone ? 'estate' : 'whole', reducedDetail: phone,
         debug: typeof location !== 'undefined' && new URLSearchParams(location.search).has('debug'),
-        onSelect: (sel) => { if (sel?.kind === 'mark') { const id = sel.info.rows.find(([k]) => k === 'Target')?.[1]; setSelection(null); setMark(id && shiftRef.current ? { shift: shiftRef.current, targetId: id } : null); return; } setSelection(sel); if (sel) setMark(null); handle.current?.highlightChain(sel && (sel.kind === 'building' || sel.kind === 'company') ? sel.id : null, fullChainRef.current ? 'all' : 1); },
+        onSelect: (sel) => { if (sel?.kind === 'whiteboard') { const t = sel.info.rows.find(([k]) => k === 'Ticker')?.[1]; if (t) act({ type: 'open-board', ticker: t }); return; } if (sel?.kind === 'mark') { const id = sel.info.rows.find(([k]) => k === 'Target')?.[1]; setSelection(null); setMark(id && shiftRef.current ? { shift: shiftRef.current, targetId: id } : null); return; } setSelection(sel); if (sel) setMark(null); handle.current?.highlightChain(sel && (sel.kind === 'building' || sel.kind === 'company') ? sel.id : null, fullChainRef.current ? 'all' : 1); },
         onAction: act,
         onReady: () => setReady(true),
       });
@@ -155,7 +156,8 @@ export default function WorldFrame({ variant, heading, boardTicker = null, onBoa
     const archetype = data.statuses.get(exposedTicker)?.archetype ?? archetypeForZone(sub?.zone ?? 'unplaced');
     return bindingsFrom(pkg, (unit, desc) => stationFor(archetype, unit, desc));
   }, [exposedTicker, data]);
-  useEffect(() => { if (ready && exposedTicker && handle.current) { handle.current.exposeCompany(exposedTicker, bindings); if (boardTicker) { handle.current.setDistance(1); setDistance(1); } } }, [ready, exposedTicker, bindings, boardTicker]);
+  const whiteboard: WhiteboardContent | null = useMemo(() => { const pkg = exposedTicker ? data.packageFor(exposedTicker) : null; return pkg && data.reg ? whiteboardFor(pkg, data.reg.packages) : null; }, [exposedTicker, data]);
+  useEffect(() => { if (ready && exposedTicker && handle.current) { handle.current.exposeCompany(exposedTicker, bindings, whiteboard); if (boardTicker) { handle.current.setDistance(1); setDistance(1); } } }, [ready, exposedTicker, bindings, whiteboard, boardTicker]);
 
   const closeCard = () => { setSelection(null); setMark(null); handle.current?.select(null); host.current?.querySelector('canvas')?.focus(); };
   const toggleLayer = (name: LayerName) => setLayers((s) => ({ ...s, [name]: !s[name] }));

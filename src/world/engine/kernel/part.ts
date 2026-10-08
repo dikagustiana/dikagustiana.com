@@ -98,6 +98,10 @@ export class Part {
     this.ctx.guard?.(str);
     this.texts.push({ M, str, x, y, size, k, anchor, lift }); return this;
   }
+  /** Text the guard does not check: the whiteboard's figures, formatted by the shell (src/world/engine/whiteboard.ts only; a rule test holds that). */
+  note(M: THREE.Matrix4, str: string, x: number, y: number, size: number, k: TextKey = 'ink', anchor: Anchor = 'start', lift = 0.035): this {
+    this.texts.push({ M, str, x, y, size, k, anchor, lift }); return this;
+  }
   // any three.js geometry, flat-filled by facet direction, every facet edge a hairline
   geo(g: THREE.BufferGeometry, m: THREE.Matrix4, tone: Tone = 'n'): this {
     const [bodyK, deckK, lineK] = TONE[tone];

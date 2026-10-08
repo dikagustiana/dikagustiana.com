@@ -17,7 +17,7 @@ import { createClock, STEP, WARMUP_SECONDS } from './sim/clock';
 import { buildSlab } from './world/ground';
 import { createView, type View } from './view';
 import type { Entity, FrameReading, LayerName, OverlayName, RendererLike, WorldHandle, WorldOptions } from './types';
-import type { FlowWeight, ModelStatus, StationBinding } from '@/world/data/types';
+import type { FlowWeight, ModelStatus, StationBinding, WhiteboardContent } from '@/world/data/types';
 import { buildWorldScene, type WorldScene } from '@/world/world/build';
 import { createTraffic, type Traffic } from '@/world/sim/traffic';
 import { createMarks, type Marks } from './marks';
@@ -46,7 +46,7 @@ interface DebugApi {
   /** Codes in the lit chain, the selected one first. */
   chain(): string[];
   chainDrawn(): { measured: number; expected: number; dimmed: number };
-  expose(ticker: string, bindings?: StationBinding[]): void;
+  expose(ticker: string, bindings?: StationBinding[], whiteboard?: WhiteboardContent | null): void;
   exposed(): { ticker: string; placed: Record<string, string>; lit: string | null } | null;
   dispose(): void;
 }
@@ -154,10 +154,11 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
     setFlowWeights: (flows: FlowWeight[]) => { traffic.setFlows(flows); chain.setFlows(flows); },
     highlightChain: (id, depth) => chain.set(id, depth),
     setHighlight: (ids) => view.setHighlight(ids),
-    exposeCompany: (ticker, bindings) => {
+    exposeCompany: (ticker, bindings, whiteboard = null) => {
       const plot = world.plots.get(ticker.toUpperCase()), arch = world.archetypeOf(ticker);
       if (!plot || !arch) { exposed = null; stations.clear(); return; }
       exposed = { ticker: ticker.toUpperCase(), stations: bindings };
+      plot.setWhiteboard(whiteboard);
       // the plot opens as a section while selected (the view's peek), and its stations are marked
       view.select(plot);
       stations.expose(arch, plot.box, bindings);
@@ -204,7 +205,7 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
       statuses: () => Object.fromEntries(statuses),
       chain: () => chain.codes(),
       chainDrawn: () => ({ ...chain.drawn(), dimmed: chain.dimmed() }),
-      expose: (ticker, bindings = []) => handle.exposeCompany(ticker, bindings),
+      expose: (ticker, bindings = [], whiteboard = null) => handle.exposeCompany(ticker, bindings, whiteboard),
       exposed: () => (exposed ? { ticker: exposed.ticker, placed: Object.fromEntries(stations.placed()), lit: stations.lit() } : null),
       dispose,
     };

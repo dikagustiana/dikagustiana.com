@@ -47,6 +47,10 @@ describe('engine code rules', () => {
     expect(hits(/getElementById|querySelector\s*\(\s*['"]#/)).toEqual([]);
   });
 
+  it('draws unguarded text (Part.note) only on the whiteboard', () => {
+    expect(hits(/\.note\(/, (f) => f.endsWith('whiteboard.ts') || f.endsWith('kernel/part.ts'))).toEqual([]);
+  });
+
   // mega prompt §8.1: scene code sees only the boundary's shapes
   it('never imports the Finance in Action data layer, the link register, or the boundary itself (types aside)', () => {
     const imports = hits(/^import\s(?!type\s)[^;]*from\s+['"](@\/lib\/finance-in-action|@\/lib\/world\/registry\/links\.generated|@\/world\/data\/boundary|@\/integrations)/);

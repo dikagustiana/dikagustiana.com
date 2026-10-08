@@ -5,7 +5,7 @@
 import type * as THREE from 'three';
 import type { Registry } from '@/lib/world/registry/types';
 import type { GeneratedLayout } from '@/world/placement/types';
-import type { FlowWeight, ModelStatus, StationBinding } from '@/world/data/types';
+import type { FlowWeight, ModelStatus, StationBinding, WhiteboardContent } from '@/world/data/types';
 
 /** What a card shows. Rows are [label, value] pairs; actions render as buttons in the card's footer. */
 export interface EntityInfo {
@@ -167,7 +167,7 @@ export interface WorldHandle {
   /** Light the entities whose id, code or chain id is named (a think-tank piece's tags); an empty list clears. */
   setHighlight(ids: readonly string[]): void;
   /** Open a company's plot as a section and mark its bound stations with the cost lines' labels (PRD §7.8). */
-  exposeCompany(ticker: string, stations: readonly StationBinding[]): void;
+  exposeCompany(ticker: string, stations: readonly StationBinding[], whiteboard?: WhiteboardContent | null): void;
   /** Light the marker of one cost line while the board hovers or focuses it; null lights none. */
   lightStation(lineId: string | null): void;
   pause(on: boolean): void;

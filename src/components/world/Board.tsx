@@ -92,6 +92,7 @@ function Published({ pkg, data, related, bindings, onStation }: { pkg: ModelPack
 
   return (
     <>
+      <p className="flex gap-2 py-2"><DownloadButton view={view} /></p>
       <section aria-label={SECTION_ORDER[1]}>{sectionTitle(1)}
         <DriverRow view={view} periodId={treePeriod} feeds={new Map()} reg={reg} decorate={decorate} />
         {pkg.driverTree.nodes.length ? <DriverTree view={view} periodId={treePeriod} decorate={decorate} /> : <p className="text-sm text-muted-foreground">{TREE_UNAVAILABLE}</p>}

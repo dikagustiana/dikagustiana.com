@@ -33,3 +33,21 @@ export interface StationBinding {
   label: string;
   stationId: string | null;
 }
+
+/**
+ * The in-world whiteboard (PRD §7.7; mega prompt §9.3), the one place the
+ * scene shows figures: pre-formatted strings the shell wrote with the house
+ * formatter, labels of at most twelve characters, bar lengths as fractions.
+ * The engine draws them with Part.note, which the development guard does
+ * not check; everything else in scene code goes through Part.text.
+ */
+export interface WhiteboardContent {
+  ticker: string;
+  period: string;
+  /** The top three cost drivers by share of cost of revenue: label (≤ 12 chars) and figure. */
+  drivers: { label: string; figure: string }[];
+  /** The miniature waterfall: label (≤ 12 chars), figure, and the bar's extent as fractions of the scale. */
+  waterfall: { label: string; figure: string; from: number; to: number; role: 'revenue' | 'cost' | 'unsplit' | 'subtotal' }[];
+  /** The peer position: two marks on one scale, or a band with the median, as fractions; null when there is no peer. */
+  peer: { heading: string; metric: string; self: number; other?: number; min?: number; max?: number; median?: number } | null;
+}

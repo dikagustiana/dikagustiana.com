@@ -25,6 +25,8 @@ import type { Entity, EntityInfo, Peek, WorldAction } from '../engine/types';
 import { dashes, pine, tree } from '../engine/world/ground';
 import { buildCut } from '../interiors/base';
 import { INTERIORS, archetypeForZone } from '../interiors';
+import { drawWhiteboard } from '../engine/whiteboard';
+import type { WhiteboardContent } from '@/world/data/types';
 import type { Archetype } from '@/lib/world/registry/types';
 import { drawFamily, drawPlot, type WindowRect } from './families';
 
@@ -46,6 +48,8 @@ export interface PlotEntity extends Entity {
   slot: number;
   /** The plot's footprint, where its section and station markers go. */
   box: Box;
+  /** The whiteboard's content from the shell; null draws "No model yet". Redrawn at once if the section is open. */
+  setWhiteboard(content: WhiteboardContent | null): void;
 }
 
 export interface WorldScene {
@@ -188,7 +192,13 @@ export function buildWorldScene(ctx: EngineContext, layout: GeneratedLayout, onA
       const p = new Part(ctx); drawPlot(p, pl.box, b.front, ticker);
       const shell = p.build(`plot-${pl.id}`); const g = new THREE.Group(); g.name = pl.id; g.add(shell); nearGroup.add(g);
       const ent: PlotEntity = {
-        kind: 'company', id: ticker ?? pl.id, code: b.code, ticker, slot: i, box: pl.box, groups: [g], pick: [(pl.box.x0 + pl.box.x1) / 2, pl.box.y1, 2],
+        kind: 'company', id: ticker ?? pl.id, code: b.code, ticker, slot: i, box: pl.box, groups: [g],
+        setWhiteboard(content) {
+          whiteboard = content;
+          // an exposed company's section exists at once (the view only toggles it), so the whiteboard is there before the next frame
+          if (!peek.cut && peek.section) { const sec = peek.section(); sec.cut.visible = sec.inside.visible = false; g.add(sec.cut, sec.inside); peek.cut = sec.cut; peek.inside = sec.inside; }
+          else redraw();
+        }, pick: [(pl.box.x0 + pl.box.x1) / 2, pl.box.y1, 2],
         info(): EntityInfo {
           const st = ticker ? statuses.get(ticker) : undefined;
           const status = st?.state === 'unavailable' ? STATUS_WORD.unavailable : st?.state === 'published' ? STATUS_WORD.published : STATUS_WORD.none;
@@ -201,7 +211,15 @@ export function buildWorldScene(ctx: EngineContext, layout: GeneratedLayout, onA
         readout: () => `${ticker ?? pl.id} · ${s.nameEn}`,
       };
       // the section is drawn the first time it opens, with the interior of the archetype the published model names, else the zone's fallback (PRD §7.8)
-      const peek: Peek = { shell, box: [pl.box.x0, pl.box.x1, pl.box.y0, pl.box.y1], z: [0, 5], section: () => { const c = buildCut(ctx, pl.box, b.front, 4.2, (inside, bb) => INTERIORS[archetypeFor(ticker, s.zone)].build(inside, bb)); return { cut: c.cut, inside: c.inside }; } };
+      let whiteboard: WhiteboardContent | null = null, board: THREE.Group | null = null, insideG: THREE.Group | null = null, wall: { x0: number; x1: number; y: number; z: number } | null = null;
+      // the whiteboard is redrawn whenever its content changes; its group is an entity (clicking it opens the board), listed while it exists
+      const redraw = () => {
+        if (!insideG || !wall) return;
+        if (board) { const old = board.userData.entity as Entity | undefined; if (old) { ctx.hooks.forget(old); const i = ctx.entities.indexOf(old); if (i >= 0) ctx.entities.splice(i, 1); } insideG.remove(board); board = null; }
+        board = drawWhiteboard(ctx, wall, b.front, whiteboard, ticker, onAction); insideG.add(board);
+        if (board.userData.entity) ctx.entities.push(board.userData.entity as Entity);
+      };
+      const peek: Peek = { shell, box: [pl.box.x0, pl.box.x1, pl.box.y0, pl.box.y1], z: [0, 5], section: () => { const c = buildCut(ctx, pl.box, b.front, 4.2, (inside, bb) => INTERIORS[archetypeFor(ticker, s.zone)].build(inside, bb)); insideG = c.inside as THREE.Group; wall = c.backWall; redraw(); return { cut: c.cut, inside: c.inside }; } };
       g.userData.peek = peek; g.userData.entity = ent;
       ctx.peeks.push([g, ent]); plots.set(ent.id, ent); ctx.entities.push(ent);
     });
