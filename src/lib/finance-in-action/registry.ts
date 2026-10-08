@@ -3,8 +3,14 @@
  * companies, the sub-industries and the link register, joined and checked.
  *
  * A package is listed only if it passes both the contract rules
- * (validatePackage) and the engine checks (checkFormulas); one that fails is
- * kept aside with its issues so the page can say so instead of drawing it.
+ * (validatePackage) and the engine checks (checkFormulas), and names a
+ * sub-industry the section lists; one that fails is kept aside with its
+ * issues so the page can say so instead of drawing it. The sub-industry rule
+ * is here and not in validatePackage because the list is the registry's
+ * input, not the contract's: the index draws companies under their
+ * sub-industry, so a package the section cannot place would otherwise be
+ * neither drawn nor reported (found on the first end-to-end run, PRD "FSRE
+ * publish path" M5).
  */
 import type { Depth, ModelStatus } from './constants';
 import { STATUSES } from './constants';
@@ -72,8 +78,12 @@ export function buildRegistry(src: RegistrySources): Registry {
   const workbooks = new Map<string, Workbook>();
   const packages: ModelPackage[] = [];
   const rejected: Registry['rejected'] = [];
+  const listed = new Set(src.subIndustries.map((s) => s.code));
   for (const pkg of src.packages) {
     const issues = validatePackage(pkg);
+    if (!listed.has(pkg.meta.subIndustry)) {
+      issues.push({ path: 'meta.subIndustry', message: `${pkg.meta.subIndustry} is not a sub-industry the section lists, so the package has no place on the chain` });
+    }
     let wb: Workbook | undefined;
     if (!issues.length) {
       wb = new Workbook(pkg);

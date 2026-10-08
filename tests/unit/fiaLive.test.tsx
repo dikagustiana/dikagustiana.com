@@ -104,6 +104,13 @@ describe('the live registry', () => {
     expect(reg.packages).toEqual([]);
   });
 
+  it('refuses a filings package whose sub-industry the section does not list, with the reason (found on the M5 run: SYNPROC)', () => {
+    const unplaced = { ...FILINGS_PKG, meta: { ...FILINGS_PKG.meta, subIndustry: 'SYNPROC' } };
+    const reg = buildLiveRegistry([unplaced]);
+    expect(reg.company('SYNP')).toBeUndefined();
+    expect(reg.rejected).toEqual([{ ticker: 'SYNP', issues: [{ path: 'meta.subIndustry', message: expect.stringContaining('SYNPROC is not a sub-industry the section lists') }] }]);
+  });
+
   it('still runs the contract and formula checks on a filings package', () => {
     const broken = { ...FILINGS_PKG, meta: { ...FILINGS_PKG.meta, chainStage: 'nowhere' } };
     const reg = buildLiveRegistry([broken]);
