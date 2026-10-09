@@ -26,11 +26,16 @@ export default defineConfig(({ mode }) => ({
     // With the world on, its poster is the landing page's largest paint and
     // would otherwise be discovered only after three lazy chunks; the preload
     // makes it discoverable in the initial document (Lighthouse, gate 2).
+    // The frame's title face (Spectral 700) is preloaded with it (gate 4, O8):
+    // on a wide screen Chrome passes over the compact poster as a placeholder
+    // (under 0.05 bits per pixel), the title is the largest paint, and a title
+    // first painted in the fallback face is outgrown by the frame's own title,
+    // drawn in Spectral when the frame takes over, a later and larger paint.
     {
       name: "world-poster-preload",
       transformIndexHtml(html) {
         if (loadEnv(mode, process.cwd(), "VITE_").VITE_WORLD_KAWASAN !== "true") return html;
-        return html.replace("</head>", '    <link rel="preload" as="image" href="/world/poster-far.svg" fetchpriority="high" />\n  </head>');
+        return html.replace("</head>", '    <link rel="preload" as="image" href="/world/poster-far.svg" fetchpriority="high" />\n    <link rel="preload" as="font" type="font/woff2" href="/fonts/spectral-normal-700-latin.woff2" crossorigin />\n  </head>');
       },
     },
   ],
@@ -45,6 +50,10 @@ export default defineConfig(({ mode }) => ({
     // only download when a route that needs them is visited.
     rollupOptions: {
       output: {
+        // The world engine's own code (src/world/engine and the scene it
+        // builds) is the chunk whose entry is engine/index.ts; named so the
+        // build output says what it is instead of "index".
+        chunkFileNames: (chunk) => (chunk.facadeModuleId?.endsWith("/src/world/engine/index.ts") ? "assets/world-scene-[hash].js" : "assets/[name]-[hash].js"),
         manualChunks(id) {
           if (!id.includes("node_modules")) return undefined;
           // No "charts" chunk: recharts/d3/victory-vendor are removed — their
@@ -55,9 +64,18 @@ export default defineConfig(({ mode }) => ({
           // might lazily need it, defeating the lazy load. Left alone,
           // Rollup gives the dynamic import its own async chunk.
           // The Kawasan Industri world's renderer. Its only importer is the
-          // world's lazily imported engine, so this chunk is never part of
-          // the initial bundle (docs/world/PRD-kawasan-industri.md §10).
-          if (id.includes("/node_modules/three/")) return "world-engine";
+          // world's lazily imported engine, so none of these chunks is ever
+          // part of the initial bundle (docs/world/PRD-kawasan-industri.md §10);
+          // a phone fetches them on its first touch, a wide screen after the
+          // poster's paint. Three chunks instead of one (gate 4, O8): all are
+          // needed for the engine's first frame and are requested together,
+          // so they download and compile in parallel and a change to one
+          // leaves the others cached. three.core is the scene graph, maths and
+          // geometry; three.module the WebGL renderer and its shader library;
+          // the addons the orbit controls and the fat lines.
+          if (id.includes("/node_modules/three/build/three.core")) return "three-core";
+          if (id.includes("/node_modules/three/build/")) return "three-renderer";
+          if (id.includes("/node_modules/three/")) return "three-addons";
           if (id.includes("@supabase")) return "supabase";
           if (id.includes("@tanstack")) return "query";
           if (

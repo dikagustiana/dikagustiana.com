@@ -26,6 +26,8 @@ export const LAYERS: readonly { layer: LayerName; bandId: string; label: string 
 ];
 /** The asset-finance band rides with the credit layer as its second strand (gate 0, item Q). */
 export const CAPITAL_BAND_LAYER: LayerName = 'credit';
+/** The layers a visitor finds on: logistics, the rest off. */
+export const DEFAULT_LAYERS: Readonly<Record<LayerName, boolean>> = { logistics: true, 'cold-chain': false, credit: false, energy: false, governance: false, regulation: false };
 
 export const OVERLAYS: readonly { overlay: OverlayName; shift: ShiftId | null; label: string }[] = [
   { overlay: 'none', shift: null, label: 'No shift' },
@@ -49,6 +51,11 @@ export const WORLD_PATH = '/finance/kawasan';
 export const boardPath = (ticker: string): string => `${WORLD_PATH}/${ticker.toLowerCase()}`;
 export const TOTAL_PLACED = 125;
 export const TITLE = 'The industry chain';
+/** The coverage line beside the frame's title: what the published index says, or that it is being read. */
+export const coverageLine = (state: 'loading' | 'ok' | 'outage', covered: number): string =>
+  state === 'loading' ? 'Reading the published models…' : state === 'outage' ? 'Model status unavailable' : `${covered} of ${TOTAL_PLACED} sub-industries have a published model`;
+/** The one line above the schematic when the reader's system asks for reduced motion. */
+export const REDUCED_NOTE = 'A living version of this map exists; it is not shown while your system asks for reduced motion.';
 export const CANVAS_DESCRIPTION = 'An isometric industrial estate, live. Primary resources ring it, processing and manufacturing stand in the estate at the centre, a gateway with a port leads east to a town of distributors, shops, services and banks, and a think tank stands on the hill. Trucks run the ring road; coloured marks on buildings say which sub-industries have a published model. Drag to pan, scroll or pinch to zoom, click anything for its card. Keys: 1 to 5 jump to the ring, estate, gateway, town and think tank, 0 shows the whole map, [ and ] cycle through buildings, Enter opens the card, Escape closes it, + and − zoom, F follows a selected vehicle.';
 
 /** The full board's eight sections, in the PRD's order (PRD Appendix B). */

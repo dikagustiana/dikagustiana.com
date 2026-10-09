@@ -1,0 +1,25 @@
+/* The Kawasan Industri frame's first paint (src/components/world): the header, its controls and the stage with the
+   poster. WorldFrame imports it as a stylesheet; the poster fallback (Poster.tsx) inlines the same rules, so the first
+   paint is laid out exactly as the frame that replaces it, before the frame's chunk arrives. Token-only. */
+.world-frame { position: relative; display: grid; gap: 0.75rem; }
+.world-frame__controls { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 1rem; font-size: 0.8125rem; }
+.world-frame__group { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 0.25rem; }
+.world-frame__group[aria-label] > span:first-child { color: hsl(var(--muted-foreground)); margin-right: 0.25rem; text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.6875rem; }
+.world-btn { min-height: 2.75rem; min-width: 2.75rem; padding: 0.25rem 0.75rem; border: 1px solid hsl(var(--border)); border-radius: calc(var(--radius) - 2px); background: hsl(var(--card)); color: hsl(var(--foreground)); font: inherit; cursor: pointer; }
+.world-btn:hover { border-color: hsl(var(--muted-foreground)); }
+.world-btn:focus-visible { outline: 2px solid hsl(var(--ring)); outline-offset: 2px; }
+.world-btn[aria-pressed="true"], .world-btn[aria-current="true"] { background: hsl(var(--accent)); color: hsl(var(--accent-foreground)); border-color: hsl(var(--accent)); }
+.world-frame__stage { position: relative; aspect-ratio: 16 / 9; min-height: 420px; max-height: 78vh; overflow: hidden; border: 1px solid hsl(var(--border)); border-radius: var(--radius); background: hsl(var(--background)); }
+.world-frame__poster { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; pointer-events: none; transition: opacity 600ms ease; }
+.world-frame__poster[data-hidden="true"] { opacity: 0; }
+.world-search { position: relative; }
+.world-search input { min-height: 2.75rem; padding: 0.25rem 0.75rem; border: 1px solid hsl(var(--border)); border-radius: calc(var(--radius) - 2px); background: hsl(var(--background)); color: hsl(var(--foreground)); font: inherit; width: 14rem; max-width: 100%; }
+.world-search input:focus-visible { outline: 2px solid hsl(var(--ring)); outline-offset: 2px; }
+.world-coverage { font-size: 0.875rem; color: hsl(var(--muted-foreground)); }
+.world-distance { display: inline-flex; align-items: center; gap: 0.5rem; }
+.world-distance input { width: 8rem; accent-color: hsl(var(--accent)); }
+@media (max-width: 640px) {
+  .world-frame__stage { aspect-ratio: 4 / 5; min-height: 360px; margin-inline: -16px; border-radius: 0; border-inline: 0; }
+  .world-search input { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) { .world-frame__poster { transition: none; } }
