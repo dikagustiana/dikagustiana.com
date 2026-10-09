@@ -17,6 +17,7 @@ import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { CHAIN_IDS, EXPECTED, RegistryError, generate, type Sources } from '@/lib/world/registry/generate';
 import { REGISTRY, SUB_INDUSTRIES } from '@/lib/world/registry/subindustries.generated';
+import { GOODS } from '@/lib/world/registry/types';
 import { LINKS } from '@/lib/world/registry/links.generated';
 import { isMeasured } from '@/lib/finance-in-action/contract/links';
 import { assertNoFigure } from '@/world/engine/kernel/part';
@@ -92,6 +93,20 @@ describe('the registry', () => {
     const review = fs.readFileSync(path.join(ROOT, 'docs/world/v2/review-does.md'), 'utf8');
     for (const c of companies) expect(review, c.ticker).toContain(`| ${c.ticker} |`);
     expect(generate(sources()).files.reviewDoesMd).toBe(review);
+  });
+
+  it('leaves no placed sub-industry without a link, and gives every link a note and a goods class (PRD v2 §4.1, B4)', () => {
+    const placed = SUB_INDUSTRIES.filter((s) => s.zone !== 'unplaced').map((s) => s.code);
+    const linked = new Set(LINKS.flatMap((l) => [l.from, l.to]));
+    expect(placed.filter((c) => !linked.has(c))).toEqual([]);
+    for (const l of LINKS) {
+      expect(GOODS, `${l.from}>${l.to}`).toContain(l.goods);
+      expect(l.note?.length ?? 0, `${l.from}>${l.to}`).toBeGreaterThan(8);
+      expect(l.state).toBe('expected');
+    }
+    const s = sources();
+    s.links = s.links.replace('\tbulk\n', '\tgravel\n');
+    expect(() => generate(s)).toThrow(/goods/);
   });
 
   it('exposes the two default rooms on and the two switchable rooms off', () => {

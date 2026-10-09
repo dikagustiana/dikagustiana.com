@@ -92,11 +92,21 @@ export interface Measured {
   period: string;
 }
 
+/**
+ * What a link carries (PRD v2 §4.1, Appendix A), which decides the vehicle that runs it: bulk by dump truck or hopper,
+ * liquid by tanker, cold by reefer, boxed by box truck or container trailer, parcel by van, people by bus; none draws
+ * no vehicle (money and information move as coins and pulses).
+ */
+export const GOODS = ['bulk', 'liquid', 'cold', 'boxed', 'parcel', 'people', 'none'] as const;
+export type Goods = (typeof GOODS)[number];
+
 export interface Link {
   /** Sub-industry code of the supplier. */
   from: string;
   /** Sub-industry code of the customer. */
   to: string;
+  /** What moves along the link (PRD v2 Appendix A). */
+  goods: Goods;
   costShare?: Measured;
   demandShare?: Measured;
   intensity?: Measured;

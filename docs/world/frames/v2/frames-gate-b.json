@@ -1,0 +1,39 @@
+{
+  "ranAt": "2026-10-09T20:57:54.706Z",
+  "base": "http://127.0.0.1:4410",
+  "gate": "b",
+  "frames": [
+    {
+      "frame": "gate-b-home-flows.png",
+      "note": "the hero with the flows: goods vehicles on their routes from supplier lots to customer lots, drawn at 1.25 × their size",
+      "zoom": 1.25,
+      "band": "district",
+      "drawCalls": 188,
+      "selected": null
+    },
+    {
+      "frame": "gate-b-gate-stop.png",
+      "note": "a laden truck standing on the east gate’s weighbridge, the queue behind it, at the street band",
+      "zoom": 7,
+      "band": "street",
+      "drawCalls": 116,
+      "selected": null
+    },
+    {
+      "frame": "gate-b-port.png",
+      "note": "the port: the bulk ship loading at its quay (its hold filling), the container ship, the crane, the raw-export trucks",
+      "zoom": 2.2,
+      "band": "district",
+      "drawCalls": 146,
+      "selected": null
+    },
+    {
+      "frame": "gate-b-vehicle-card.png",
+      "note": "a click on a truck at the inside band: its card with the load, the supplier and the customer, the link’s state and the illustrative line",
+      "zoom": 10,
+      "band": "street",
+      "drawCalls": 99,
+      "selected": "V-0009"
+    }
+  ]
+}

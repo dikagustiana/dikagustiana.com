@@ -26,7 +26,7 @@
 import { createHash } from 'node:crypto';
 import { BANDS, BORDERS, BYPRODUCT, NODES, NON_PHYSICAL, RETAIL, RETAIL_GROUP, RETURNS, STAGES } from '../../../data/industryChain.ts';
 import {
-  ARCHETYPES, BUILDING_FAMILIES, CHAIN_STAGES, ZONES,
+  ARCHETYPES, BUILDING_FAMILIES, CHAIN_STAGES, GOODS, ZONES,
   type Archetype, type BuildingFamily, type ChainStage, type CompanyRef, type Link, type ListedCount, type Room, type SubIndustry, type Zone,
 } from './types.ts';
 
@@ -224,7 +224,9 @@ export function generate(src: Sources): Generated {
     const key = `${l.from}>${l.to}`;
     if (pairs.has(key)) throw new RegistryError(`link ${l.from} → ${l.to} is listed twice`);
     pairs.add(key);
-    links.push({ from: l.from, to: l.to, state: 'expected', ...(l.note ? { note: l.note } : {}) });
+    if (!is(GOODS, l.goods)) throw new RegistryError(`link ${l.from} → ${l.to}: goods must be one of ${GOODS.join(', ')}, not "${l.goods}"`);
+    if (!l.note) throw new RegistryError(`link ${l.from} → ${l.to} has no note`);
+    links.push({ from: l.from, to: l.to, goods: l.goods, state: 'expected', note: l.note });
   }
 
   const all = { subSectors: counts.subSectors, industries: counts.industries, subIndustries: counts.subIndustries, placed: counts.placed, links: links.length, proposedPlacements, proposedCompanies, emptySlots };
@@ -308,8 +310,8 @@ function renderReview(rows: SubIndustry[], links: Link[], counts: Generated['cou
   }
   lines.push('', '## Proposed pairs: the reason for each', '', '| Code | Ticker | Name | Status | Reason | Source |', '|---|---|---|---|---|---|');
   for (const s of rows) for (const c of s.companies) lines.push(`| ${s.code} | ${c.ticker} | ${esc(c.name)} | ${c.status} | ${esc(c.reason ?? '')} | ${esc(c.source ?? '')} |`);
-  lines.push('', '## Expected links', '', '| From | To | State | Rationale |', '|---|---|---|---|');
-  for (const l of links) lines.push(`| ${l.from} | ${l.to} | ${l.state} | ${esc(l.note ?? '')} |`);
+  lines.push('', '## Expected links', '', '| From | To | Goods | State | Rationale |', '|---|---|---|---|---|');
+  for (const l of links) lines.push(`| ${l.from} | ${l.to} | ${l.goods} | ${l.state} | ${esc(l.note ?? '')} |`);
   lines.push('');
   return lines.join('\n');
 }

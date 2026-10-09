@@ -57,6 +57,8 @@ export interface EngineContext {
   debug: boolean;
   entities: Entity[];
   peeks: [THREE.Group, Entity][];
+  /** Which flows cross a gate, in words, for its card (PRD v2 §3.11); set by the flows once they exist. */
+  flowsAt?: (gateId: string) => string;
 }
 
 export function idleHooks(): Hooks {

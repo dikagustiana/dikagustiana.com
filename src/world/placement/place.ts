@@ -17,7 +17,7 @@
  */
 import type { BuildingFamily, Registry, SubIndustry, Zone } from '../../lib/world/registry/types.ts';
 import { createRng } from '../engine/kernel/math.ts';
-import type { Block, Box, Fixture, Gate, GeneratedLayout, Label, Lot, Pt, Region, RegionId, Road, Signpost } from './types.ts';
+import type { Block, Box, Fixture, Gate, GeneratedLayout, GraphEdge, GraphNode, GraphNodeKind, Label, Lot, Pt, Region, RegionId, Road, Signpost } from './types.ts';
 
 /** Footprints by family: width along x, depth along y, in metres. */
 export const FAMILY_SIZE: Record<BuildingFamily, readonly [number, number]> = {
@@ -116,11 +116,11 @@ export function blockSize(family: BuildingFamily, front: 's' | 'e' = 's'): reado
  * The two lots along a block's front (PRD v2 §3.5): side by side for a block facing south, one above the other for one
  * facing east, the signboard's gap between them; for a large family, an office unit at each end of the front strip.
  */
-export function lotBoxes(b: Box, family: BuildingFamily, front: 's' | 'e'): { box: Box; office: boolean }[] {
+export function lotBoxes(b: Box, family: BuildingFamily, front: 's' | 'e', entry: 's' | 'e' | 'n' = front): { box: Box; office: boolean }[] {
   const m = LOT_MARGIN, W = b.x1 - b.x0, D = b.y1 - b.y0;
   const { front: of, depth: od } = OFFICE_UNIT;
   if (LARGE_FAMILIES.includes(family)) {
-    return [0, 1].map((i) => ({ office: true, box: front === 's' ? box(i === 0 ? b.x0 + m : b.x1 - m - of, b.y1 - m - od, of, od) : box(b.x1 - m - od, i === 0 ? b.y0 + m : b.y1 - m - of, od, of) }));
+    return [0, 1].map((i) => ({ office: true, box: entry === 's' ? box(i === 0 ? b.x0 + m : b.x1 - m - of, b.y1 - m - od, of, od) : entry === 'n' ? box(i === 0 ? b.x0 + m : b.x1 - m - of, b.y0 + m, of, od) : box(b.x1 - m - od, i === 0 ? b.y0 + m : b.y1 - m - of, od, of) }));
   }
   if (front === 's') { const w = (W - 2 * m - SIGN_GAP) / 2; return [0, 1].map((i) => ({ office: false, box: box(b.x0 + m + i * (w + SIGN_GAP), b.y0 + m, w, D - 2 * m) })); }
   const d = (D - 2 * m - SIGN_GAP) / 2;
@@ -150,11 +150,11 @@ const round = (p: Pt): Pt => [Math.round(p[0] * 100) / 100, Math.round(p[1] * 10
  * can reach without passing through another block or lot; the despatch bay at the lot's front, the receiving bay a
  * few metres out on the same driveway.
  */
-function driveway(lot: Box, front: 's' | 'e', own: Box, roads: readonly Road[], others: readonly Box[]): { driveway: Pt[]; bays: Lot['bays'] } {
-  const f: Pt = front === 's' ? [(lot.x0 + lot.x1) / 2, lot.y1] : [lot.x1, (lot.y0 + lot.y1) / 2];
+function driveway(lot: Box, entry: 's' | 'e' | 'n', own: Box, roads: readonly Road[], others: readonly Box[]): { driveway: Pt[]; bays: Lot['bays'] } {
+  const f: Pt = entry === 's' ? [(lot.x0 + lot.x1) / 2, lot.y1] : entry === 'n' ? [(lot.x0 + lot.x1) / 2, lot.y0] : [lot.x1, (lot.y0 + lot.y1) / 2];
   const candidates: { at: Pt; d: number; score: number }[] = [];
   // a road in front of the lot wins over a nearer one behind it, so goods leave by the front
-  const n: Pt = front === 's' ? [0, 1] : [1, 0];
+  const n: Pt = entry === 's' ? [0, 1] : entry === 'n' ? [0, -1] : [1, 0];
   for (const r of roads) {
     const pts = r.closed ? [...r.points, r.points[0]] : r.points;
     for (let i = 0; i + 1 < pts.length; i++) {
@@ -170,6 +170,98 @@ function driveway(lot: Box, front: 's' | 'e', own: Box, roads: readonly Road[], 
   return { driveway: [round(f), round(clear.at)], bays: { despatch: round(f), receiving: round(receiving) } };
 }
 
+/** How close two graph points must be to be one node (a road's end on another road, a gate on its road). */
+const NODE_MERGE = 1.6;
+const ROUND = 100;
+// (+ 0 turns a rounded -0 into 0, as the committed JSON writes it)
+const rp = (p: Pt): Pt => [Math.round(p[0] * ROUND) / ROUND + 0, Math.round(p[1] * ROUND) / ROUND + 0];
+
+/**
+ * The road graph (PRD v2 §3.6): every road cut at its ends, at every point where it crosses or meets another road, at
+ * its gates and where a driveway joins it; an edge between each pair of cuts along it; and each lot's driveway as two
+ * edges, from the road to its receiving bay and on to its despatch bay at its front. Nodes closer than NODE_MERGE are
+ * one; bays are never merged.
+ */
+export function roadGraph(roads: readonly Road[], gates: readonly Gate[], blocks: readonly Block[]): { nodes: GraphNode[]; edges: GraphEdge[] } {
+  const nodes: GraphNode[] = [], edges: GraphEdge[] = [];
+  const RANK: Record<GraphNodeKind, number> = { gate: 5, junction: 4, attach: 3, end: 2, despatch: 1, receiving: 1 };
+  function node(at: Pt, kind: GraphNodeKind, ref?: string, merge = true): GraphNode {
+    if (merge) {
+      const near = nodes.find((n) => n.kind !== 'despatch' && n.kind !== 'receiving' && Math.hypot(n.at[0] - at[0], n.at[1] - at[1]) < NODE_MERGE);
+      if (near) { if (RANK[kind] > RANK[near.kind]) { near.kind = kind; if (ref) near.ref = ref; } return near; }
+    }
+    const n: GraphNode = { id: nodes.length, at: rp(at), kind, ...(ref ? { ref } : {}) };
+    nodes.push(n); return n;
+  }
+  // every road as a polyline with its arc length at each vertex
+  const lines = roads.map((r) => {
+    const pts = r.closed ? [...r.points, r.points[0]] : [...r.points];
+    const s = [0]; for (let i = 1; i < pts.length; i++) s.push(s[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]));
+    return { road: r, pts, s, cuts: [] as { at: number; node: GraphNode }[] };
+  });
+  const project = (line: (typeof lines)[number], p: Pt): { d: number; at: number; pt: Pt } => {
+    let best = { d: Infinity, at: 0, pt: p as Pt };
+    for (let i = 0; i + 1 < line.pts.length; i++) {
+      const a = line.pts[i], b = line.pts[i + 1], q = nearestOn(p, a, b), d = Math.hypot(q[0] - p[0], q[1] - p[1]);
+      if (d < best.d) best = { d, at: line.s[i] + Math.hypot(q[0] - a[0], q[1] - a[1]), pt: q };
+    }
+    return best;
+  };
+  const cut = (line: (typeof lines)[number], at: number, n: GraphNode) => { line.cuts.push({ at, node: n }); };
+  // gates first, so a junction beside a gate merges into the gate
+  for (const g of gates) { const line = lines.find((l) => l.road.id === g.road); if (!line) continue; const p = project(line, g.at); cut(line, p.at, node(p.pt, 'gate', g.id)); }
+  // crossings between roads
+  for (let i = 0; i < lines.length; i++) for (let j = i + 1; j < lines.length; j++) {
+    const A = lines[i], B = lines[j];
+    for (let a = 0; a + 1 < A.pts.length; a++) for (let b = 0; b + 1 < B.pts.length; b++) {
+      const p = A.pts[a], p2 = A.pts[a + 1], q = B.pts[b], q2 = B.pts[b + 1];
+      const rx = p2[0] - p[0], ry = p2[1] - p[1], sx = q2[0] - q[0], sy = q2[1] - q[1], den = rx * sy - ry * sx;
+      if (Math.abs(den) < 1e-9) continue;
+      const t = ((q[0] - p[0]) * sy - (q[1] - p[1]) * sx) / den, u = ((q[0] - p[0]) * ry - (q[1] - p[1]) * rx) / den;
+      if (t < -1e-9 || t > 1 + 1e-9 || u < -1e-9 || u > 1 + 1e-9) continue;
+      const at: Pt = [p[0] + rx * t, p[1] + ry * t], n = node(at, 'junction');
+      cut(A, A.s[a] + Math.hypot(rx, ry) * t, n); cut(B, B.s[b] + Math.hypot(sx, sy) * u, n);
+    }
+  }
+  // an open road's ends: on another road (a T), else a dead end
+  for (const line of lines) {
+    if (line.road.closed) continue;
+    for (const [at, p] of [[0, line.pts[0]], [line.s[line.s.length - 1], line.pts[line.pts.length - 1]]] as [number, Pt][]) {
+      const host = lines.filter((l) => l !== line).map((l) => ({ l, ...project(l, p) })).filter((h) => h.d < NODE_MERGE).sort((x, y) => x.d - y.d)[0];
+      const n = node(host ? host.pt : p, host ? 'junction' : 'end');
+      cut(line, at, n); if (host) cut(host.l, host.at, n);
+    }
+  }
+  // where every driveway joins its road
+  const lotNodes: { lot: Lot; attach: GraphNode }[] = [];
+  for (const b of blocks) for (const l of b.lots) {
+    const end = l.driveway[l.driveway.length - 1];
+    const host = lines.map((line) => ({ line, ...project(line, end) })).sort((x, y) => x.d - y.d)[0];
+    const n = node(host.pt, 'attach'); cut(host.line, host.at, n); lotNodes.push({ lot: l, attach: n });
+  }
+  // the edges along each road, between consecutive cuts
+  const edge = (a: GraphNode, b: GraphNode, road: string, pts: Pt[], width: number) => {
+    if (a === b) return;
+    const points = pts.map(rp); let length = 0; for (let i = 1; i < points.length; i++) length += Math.hypot(points[i][0] - points[i - 1][0], points[i][1] - points[i - 1][1]);
+    if (length < 0.05) return;
+    edges.push({ id: edges.length, a: a.id, b: b.id, road, points, length: Math.round(length * 100) / 100, width });
+  };
+  const pointAt = (line: (typeof lines)[number], at: number): Pt => { for (let i = 0; i + 1 < line.pts.length; i++) if (at <= line.s[i + 1] + 1e-9) { const k = (at - line.s[i]) / Math.max(1e-9, line.s[i + 1] - line.s[i]); return [line.pts[i][0] + (line.pts[i + 1][0] - line.pts[i][0]) * k, line.pts[i][1] + (line.pts[i + 1][1] - line.pts[i][1]) * k]; } return line.pts[line.pts.length - 1]; };
+  const between = (line: (typeof lines)[number], s0: number, s1: number): Pt[] => [pointAt(line, s0), ...line.pts.filter((_, i) => line.s[i] > s0 + 1e-6 && line.s[i] < s1 - 1e-6), pointAt(line, s1)];
+  for (const line of lines) {
+    const cuts = [...line.cuts].sort((x, y) => x.at - y.at).filter((c, i, all) => i === 0 || c.node !== all[i - 1].node);
+    for (let i = 0; i + 1 < cuts.length; i++) edge(cuts[i].node, cuts[i + 1].node, line.road.id, between(line, cuts[i].at, cuts[i + 1].at), line.road.width);
+    // a closed road also runs from its last cut round to its first
+    if (line.road.closed && cuts.length > 1) { const L = line.s[line.s.length - 1], first = cuts[0], last = cuts[cuts.length - 1]; edge(last.node, first.node, line.road.id, [...between(line, last.at, L), ...between(line, 0, first.at).slice(1)], line.road.width); }
+  }
+  // the driveways: road to receiving bay to despatch bay
+  for (const { lot, attach } of lotNodes) {
+    const r = node(lot.bays.receiving, 'receiving', lot.id, false), d = node(lot.bays.despatch, 'despatch', lot.id, false);
+    edge(attach, r, `driveway:${lot.id}`, [attach.at, r.at], 6); edge(r, d, `driveway:${lot.id}`, [r.at, d.at], 6);
+  }
+  return { nodes, edges };
+}
+
 export function placeWorld(registry: Registry, seed = 20261004, registrySha256 = ''): GeneratedLayout {
   const rng = createRng(seed);
   const placed = registry.subIndustries.filter((s) => s.zone !== 'unplaced');
@@ -179,8 +271,9 @@ export function placeWorld(registry: Registry, seed = 20261004, registrySha256 =
   const size = (s: SubIndustry, front: 's' | 'e' = 's') => blockSize(s.buildingFamily, front);
   // the block's label and status mark stand at its front centre, on the kerb (PRD v2 §3.5)
   const anchorOf = (b: Box, front: 's' | 'e'): Pt => (front === 's' ? [centre(b)[0], b.y1 + 4] : [b.x1 + 4, centre(b)[1]]);
+  // a quay's lots open onto its landward side, away from the water; every other block's onto its front
   const mk = (s: SubIndustry, b: Box, region: RegionId, front: 's' | 'e' = 's'): Block => ({
-    id: s.code, code: s.code, zone: s.zone, region, family: s.buildingFamily, box: b, front, lots: [], anchor: anchorOf(b, front),
+    id: s.code, code: s.code, zone: s.zone, region, family: s.buildingFamily, box: b, front, entry: s.buildingFamily === 'quay' ? 'n' : front, lots: [], anchor: anchorOf(b, front),
   });
   const roads: Road[] = [];
   const road = (id: string, kind: Road['kind'], points: Pt[], width: number, dashed = false, closed = false) => { roads.push({ id, kind, points, closed, width, dashed }); };
@@ -214,7 +307,8 @@ export function placeWorld(registry: Registry, seed = 20261004, registrySha256 =
   });
   for (const s of manuf) blocks.push(mk(s, mB.get(s.code)!, 'estate'));
   const manufRows = [...new Set([...mB.values()].map((b) => b.y1))].sort((a, b) => a - b);
-  for (const s of oper) { const [w, d] = size(s, 'e'); blocks.push(mk(s, box(inner.x1 - w, -d / 2, w, d), 'estate', 'e')); }
+  // the operator's office by the east gate, south of the main road where it enters the estate
+  for (const s of oper) { const [w, d] = size(s, 'e'); blocks.push(mk(s, box(inner.x1 - w, 12, w, d), 'estate', 'e')); }
   const fixtures: Fixture[] = [
     { id: 'estate-warehouse', kind: 'warehouse', box: box(mw.x0, inner.y1 - 40, 80, 40), region: 'estate' },
     { id: 'estate-cold-store', kind: 'cold-store', box: box(mw.x0 + 94, inner.y1 - 40, 44, 40), region: 'estate' },
@@ -289,26 +383,31 @@ export function placeWorld(registry: Registry, seed = 20261004, registrySha256 =
 
   // ---- roads: the ring, the radials and the main road; the raw-export road from the geological arc to the port;
   // the recovery road back to the ring; the lanes every block's front faces ----
-  const northGate: Pt = [0, ESTATE.y0], southGate: Pt = [0, ESTATE.y1], westGate: Pt = [ESTATE.x0, 0], eastGate: Pt = [ESTATE.x1, 0];
+  const crossY = primaryBottom - 7;
+  const northGate: Pt = [0, ESTATE.y0], southGate: Pt = [0, ESTATE.y1], westGate: Pt = [ESTATE.x0, crossY], eastGate: Pt = [ESTATE.x1, 0];
   const TOWN_X1 = TOWN.x1 + 5;
   road('ring', 'ring', ringRoad(), 12, false, true);
   road('radial-north', 'radial', [[0, RING.y0], northGate], 9);
   road('radial-south', 'radial', [[0, RING.y1], southGate], 9);
-  road('radial-west', 'radial', [[RING.x0, 0], westGate], 9);
-  road('main', 'main', [eastGate, [RING.x1, 0], [GATEWAY.x0, 0], [gx, 0], [TOWN_X0 - 5, 0], [TOWN_X1, 0]], 12);
+  // the west gate's road meets the estate's cross road, and the main road enters the estate to its east lane, so both
+  // gates lead into the estate's lanes (every bay reaches every other bay)
+  road('radial-west', 'radial', [[RING.x0, crossY], westGate], 9);
+  road('main', 'main', [[me.x1 + 7, 0], eastGate, [RING.x1, 0], [GATEWAY.x0, 0], [gx, 0], [TOWN_X0 - 5, 0], [TOWN_X1, 0]], 12);
   // the raw-export road leaves the ring through a gap in the geological arc's row and runs north of it to the port
   const north = [...northBoxes.values()].sort((a, b) => a.x0 - b.x0), mid = Math.floor(north.length / 2);
   const rawX = (north[mid - 1].x1 + north[mid].x0) / 2, rawY = Math.min(...north.map((b) => b.y0)) - 16, rawE = GATEWAY.x1 + 22;
-  road('raw-export', 'raw-export', [[rawX, RING.y0], [rawX, rawY], [rawE, rawY], [rawE, WATER.y0 - 60], [GATEWAY.x0 + 80, WATER.y0 - 60]], 8, true);
+  // it meets the port lane at the lane's east end; the bulk quay is along the lane
+  road('raw-export', 'raw-export', [[rawX, RING.y0], [rawX, rawY], [rawE, rawY], [rawE, WATER.y0 - 60], [GATEWAY.x1, WATER.y0 - 60]], 8, true);
   road('recovery', 'recovery', [[RECOVERY.x0 - 8, TOWN.y1 + 10], [RECOVERY.x0 - 8, WATER.y1 + 16], [RING.x1 - 90, WATER.y1 + 16], [RING.x1 - 90, RING.y1]], 8);
   road('haul-geo', 'haul', [[colX1 - 76, northY1 + 14], [RING.x0 + RING.r, northY1 + 14], [RING.x0 + RING.r + 20, RING.y0]], 8);
   road('estate-spine', 'estate', [[0, ESTATE.y0], [0, ESTATE.y1]], 10);
-  road('estate-cross', 'estate', [[ESTATE.x0, primaryBottom - 7], [ESTATE.x1, primaryBottom - 7]], 10);
+  road('estate-cross', 'estate', [[ESTATE.x0, crossY], [ESTATE.x1, crossY]], 10);
   road('gateway-spine', 'town', [[gx, GATEWAY.y0], [gx, WATER.y0 - 60]], 9);
   // the lanes: in front of every row of the estate, the gateway and the town, and down the estate's utilities
   for (const [i, y] of primaryRows.slice(0, -1).entries()) road(`estate-street-${i + 1}`, 'estate', [[inner.x0, y + 6], [inner.x1, y + 6]], 8);
   for (const [i, y] of manufRows.entries()) road(`estate-row-${i + 1}`, 'estate', [[utilEast + 8, y + 7], [me.x1 + 7, y + 7]], 8);
-  road('estate-utilities', 'estate', [[utilEast + 8, primaryBottom - 7], [utilEast + 8, manufRows[manufRows.length - 1] + 7]], 8);
+  road('estate-utilities', 'estate', [[utilEast + 8, crossY], [utilEast + 8, manufRows[manufRows.length - 1] + 7]], 8);
+  road('estate-east', 'estate', [[me.x1 + 7, crossY], [me.x1 + 7, manufRows[manufRows.length - 1] + 7]], 8);
   const gwRows = (side: SubIndustry[], x0: number, x1: number, tag: string) => {
     const ys = [...new Set(side.map((s) => gwB.get(s.code)!.y1))].sort((a, b) => a - b);
     ys.forEach((y, i) => road(`gateway-lane-${tag}${i + 1}`, 'town', [[x0, y + 7], [x1, y + 7]], 7));
@@ -324,15 +423,15 @@ export function placeWorld(registry: Registry, seed = 20261004, registrySha256 =
   road('hill-road', 'town', [[HILL.centre[0], TOWN.y0 - 10], [HILL.centre[0], HILL.centre[1] + 30]], 6);
 
   // ---- the lots, now the roads are known: two per block, each with its sign, bays and driveway ----
-  const lotList = blocks.flatMap((b) => lotBoxes(b.box, b.family, b.front).map((l) => ({ block: b, ...l })));
+  const lotList = blocks.flatMap((b) => lotBoxes(b.box, b.family, b.front, b.entry).map((l) => ({ block: b, ...l })));
   const obstacles = [...blocks.map((b) => b.box), ...fixtures.map((f) => f.box)];
   for (const b of blocks) {
     const own = lotList.filter((l) => l.block === b);
     // a lot's driveway may cross its own block (a quay's office faces the water) but no other block, fixture or lot
     const others = [...obstacles.filter((o) => o !== b.box), ...own.slice(1).map((l) => l.box)];
     b.lots = own.map((l, i): Lot => {
-      const sign: Pt = b.front === 's' ? [l.box.x0 + 1.5, b.box.y1 + 1] : [b.box.x1 + 1, l.box.y0 + 1.5];
-      const route = driveway(l.box, b.front, b.box, roads, i === 0 ? others : [...obstacles.filter((o) => o !== b.box), own[0].box]);
+      const sign: Pt = b.entry === 'n' ? [l.box.x0 + 1.5, b.box.y0 - 1] : b.front === 's' ? [l.box.x0 + 1.5, b.box.y1 + 1] : [b.box.x1 + 1, l.box.y0 + 1.5];
+      const route = driveway(l.box, b.entry, b.box, roads, i === 0 ? others : [...obstacles.filter((o) => o !== b.box), own[0].box]);
       return { id: `${b.code}-lot-${i + 1}`, slot: i, box: l.box, office: l.office, sign, ...route };
     });
   }
@@ -341,7 +440,7 @@ export function placeWorld(registry: Registry, seed = 20261004, registrySha256 =
   const gates: Gate[] = [
     { id: 'gate-north', road: 'radial-north', at: [0, ESTATE.y0 - 10], heading: Math.PI / 2, weighbridge: true, jointId: 'j-extraction-processing' },
     { id: 'gate-south', road: 'radial-south', at: [0, ESTATE.y1 + 10], heading: -Math.PI / 2, weighbridge: true, jointId: 'j-aggregation-processing' },
-    { id: 'gate-west', road: 'radial-west', at: [ESTATE.x0 - 10, 0], heading: 0, weighbridge: true, jointId: 'j-packaging-manufacturing' },
+    { id: 'gate-west', road: 'radial-west', at: [ESTATE.x0 - 10, crossY], heading: 0, weighbridge: true, jointId: 'j-packaging-manufacturing' },
     { id: 'gate-east', road: 'main', at: [ESTATE.x1 + 10, 0], heading: Math.PI, weighbridge: true, jointId: 'j-manufacturing-distribution' },
     { id: 'gate-port', road: 'gateway-spine', at: [gx, WATER.y0 - 70], heading: -Math.PI / 2, weighbridge: true, jointId: 'j-processing-trader' },
   ];
@@ -378,7 +477,9 @@ export function placeWorld(registry: Registry, seed = 20261004, registrySha256 =
   rng.next();
 
   // ---- the slab: the content's extent and a margin all round (PRD v2 §3.2) ----
-  const rail = { points: [[GATEWAY.x0 + 20, GATEWAY.y0 - 40], [GATEWAY.x1 - 20, GATEWAY.y0 - 40]] as Pt[], yard: box(GATEWAY.x0 + 20, GATEWAY.y0 - 60, GATEWAY.x1 - GATEWAY.x0 - 40, 44) };
+  // the rail line runs from the yard north of the gateway round its east side to the port (PRD v2 §3.6: the shuttle)
+  const RAIL_X = GATEWAY.x1 + 10;
+  const rail = { points: [[GATEWAY.x0 + 20, GATEWAY.y0 - 40], [GATEWAY.x1 - 20, GATEWAY.y0 - 40], [RAIL_X, GATEWAY.y0 - 10], [RAIL_X, WATER.y0 - 100]] as Pt[], yard: box(GATEWAY.x0 + 20, GATEWAY.y0 - 60, GATEWAY.x1 - GATEWAY.x0 - 40, 44) };
   const hillBox: Box = { x0: HILL.centre[0] - HILL.radius, x1: HILL.centre[0] + HILL.radius, y0: HILL.centre[1] - HILL.radius * 0.8, y1: HILL.centre[1] + HILL.radius * 0.8 };
   const content = bounds([
     ...regions.flatMap((r) => r.polygon), ...blocks.flatMap((b) => rect(b.box)), ...fixtures.flatMap((f) => rect(f.box)),
@@ -390,9 +491,12 @@ export function placeWorld(registry: Registry, seed = 20261004, registrySha256 =
   // ---- the hero (PRD v2 §3.1): the estate, the ring's near arc above it, the gateway's first blocks to its right ----
   const hero: Box = { x0: ESTATE.x0 - 20, x1: Math.max(ESTATE.x1, GATEWAY.x0 + 90), y0: ESTATE.y0 - 110, y1: ESTATE.y1 + 20 };
 
+  // ---- the road graph flows route on (PRD v2 §3.6) ----
+  const graph = roadGraph(roads, gates, blocks);
+
   return {
     world, seed, registrySha256, regions, blocks, roads, gates, signposts, labels, fixtures, hero,
-    rail,
+    rail, graph,
     port: { quay: box(GATEWAY.x0, WATER.y0 - 10, GATEWAY.x1 - GATEWAY.x0, 10), apron: box(GATEWAY.x0, WATER.y0 - 60, GATEWAY.x1 - GATEWAY.x0, 50), water: WATER },
     hill: HILL,
   };

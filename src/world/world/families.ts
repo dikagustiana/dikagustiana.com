@@ -186,7 +186,7 @@ export function statusBar(p: Part, lot: Box, front: 's' | 'e', tone: Tone): void
   else p.box(lot.x1 - 1.6, lot.y0 + 0.5, 0, 1.4, Math.max(1, d(lot) - 1), 0.9, tone, { lines: false });
 }
 
-/** The shared form of a large family: the block less its front strip, where the office units stand. */
-export function sharedBox(b: Box, front: 's' | 'e', strip: number): Box {
-  return front === 's' ? { ...b, y1: b.y1 - strip } : { ...b, x1: b.x1 - strip };
+/** The shared form of a large family: the block less the strip its lots open onto, where the office units stand. */
+export function sharedBox(b: Box, entry: 's' | 'e' | 'n', strip: number): Box {
+  return entry === 's' ? { ...b, y1: b.y1 - strip } : entry === 'n' ? { ...b, y0: b.y0 + strip } : { ...b, x1: b.x1 - strip };
 }

@@ -52,6 +52,11 @@ export interface Block {
   box: Box;
   /** Which way the block's front faces: 's' south or 'e' east (the two faces the camera sees). */
   front: 's' | 'e';
+  /**
+   * The side its lots open onto and their driveways leave by: the front, except a quay's, whose office units stand
+   * on its landward side ('n'), away from the water.
+   */
+  entry: 's' | 'e' | 'n';
   /** Two company lots along the front, side by side (PRD v2 §3.5). */
   lots: readonly Lot[];
   /** Where the block's signboard, label and status mark stand: its front centre, on the kerb. */
@@ -105,6 +110,31 @@ export interface Fixture {
   region: RegionId;
 }
 
+/**
+ * The road graph (PRD v2 §3.6, D-V2-5): nodes at junctions, road ends, gates, the points where driveways meet a
+ * road, and every lot's two bays; edges along road centrelines between them, and along every driveway. Every edge is
+ * two-way: a vehicle keeps to the lane on its right, offset from the centreline by a quarter of the road's width.
+ */
+export type GraphNodeKind = 'junction' | 'end' | 'gate' | 'attach' | 'despatch' | 'receiving';
+export interface GraphNode {
+  id: number;
+  at: Pt;
+  kind: GraphNodeKind;
+  /** A gate's id, or a bay's lot id. */
+  ref?: string;
+}
+export interface GraphEdge {
+  id: number;
+  a: number;
+  b: number;
+  /** The road it runs along, or `driveway:<lot id>`. */
+  road: string;
+  /** Its centreline from a to b. */
+  points: readonly Pt[];
+  length: number;
+  width: number;
+}
+
 export interface GeneratedLayout {
   /** The world's slab. */
   world: Box;
@@ -124,6 +154,8 @@ export interface GeneratedLayout {
    */
   hero?: Box;
   rail: { points: readonly Pt[]; yard: Box } | null;
+  /** The road graph flows route on (PRD v2 §3.6); absent in a layout with no roads. */
+  graph?: { nodes: readonly GraphNode[]; edges: readonly GraphEdge[] };
   port: { quay: Box; apron: Box; water: Box } | null;
   hill: { centre: Pt; radius: number; height: number } | null;
 }

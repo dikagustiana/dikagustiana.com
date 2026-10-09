@@ -210,7 +210,7 @@ export function createView(ctx: EngineContext, o: ViewOptions): View {
 
   // ---- selection ----
   let chosen: Entity | null = null, focus: Entity | null = null, routeAge = Infinity;
-  const moving = (e: Entity) => typeof e.update === 'function' && e.groups.length > 0;
+  const moving = (e: Entity) => (e.moves === true || typeof e.update === 'function') && e.groups.length > 0;
   /** An entity's anchor in three.js space: its pick point (local to a moving thing's group). */
   function anchorOf(e: Entity): THREE.Vector3 {
     const p = e.pick ?? [0, 0, 0];
@@ -221,6 +221,7 @@ export function createView(ctx: EngineContext, o: ViewOptions): View {
   /** An entity's bounds in three.js space, for the selection frame. */
   function boundsOf(e: Entity): THREE.Box3 {
     if (e.bbox) return e.bbox.clone();
+    if (e.extent) return e.extent();
     const plot = (e as Entity & { box?: Box }).box;
     if (plot && typeof plot.x0 === 'number') return new THREE.Box3(W(plot.x0, plot.y0, 0), W(plot.x1, plot.y1, 4.6));
     if (moving(e)) { const b = new THREE.Box3().setFromObject(e.groups[0]); if (!b.isEmpty()) return b.expandByScalar(0.4); }
@@ -385,6 +386,8 @@ export function createView(ctx: EngineContext, o: ViewOptions): View {
   }
 
   // ---- picking ----
+  /** What a fleet's instanced mesh carries on its userData: the entity of an instance. */
+  type InstanceOf = (instance: number) => Entity | null;
   const raycaster = new THREE.Raycaster(), ndc = new THREE.Vector2();
   const shown = (obj: THREE.Object3D | null) => { for (let x = obj; x; x = x.parent) if (!x.visible) return false; return true; };
   const owner = (obj: THREE.Object3D | null): Entity | null => { for (let x = obj; x; x = x.parent) if (x.userData.entity) return x.userData.entity as Entity; return null; };
@@ -394,7 +397,9 @@ export function createView(ctx: EngineContext, o: ViewOptions): View {
     for (const root of [ctx.sky, ctx.scene]) {
       for (const hit of raycaster.intersectObject(root, true)) {
         if (!shown(hit.object)) continue;
-        const ent = owner(hit.object);
+        // an instance of a fleet's mesh names its own entity (PRD v2 §3.4: picking resolves instance ids)
+        const of = hit.object.userData.instanceOf as InstanceOf | undefined;
+        const ent = of && hit.instanceId !== undefined ? of(hit.instanceId) : owner(hit.object);
         if (!ent) continue;
         const resolved = ent.resolve ? ent.resolve(hit.point) : ent;
         if (resolved.kind === 'zone') continue;

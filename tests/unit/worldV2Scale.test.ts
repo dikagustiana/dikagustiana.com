@@ -108,7 +108,7 @@ describe('companies are buildings (PRD v2 §3.5, A3, A4)', () => {
 describe('pointing (PRD v2 §3.4, A2)', () => {
   it('hovering a lot labels it TICKER · name with a pointer and an outline; a block, its sub-industry; a gate, its joint; empty ground, nothing', async () => {
     const seen: (string | null)[] = [];
-    const { container } = await mountWorld({ onHover: (h) => seen.push(h?.label ?? null) });
+    const { container, handle } = await mountWorld({ onHover: (h) => seen.push(h?.label ?? null) });
     frames(2);
     const at = (id: string) => window.world!.screenOf(id)!;
     const [x, y] = at('INTP');
@@ -117,6 +117,8 @@ describe('pointing (PRD v2 §3.4, A2)', () => {
     expect(seen.at(-1)).toBe('INTP · Indocement Tunggal Prakarsa Tbk');
     const [bx, by] = at('B121');
     expect(window.world!.hoverAt(bx, by)).toMatchObject({ id: 'B121', kind: 'building', label: 'Construction Materials' });
+    // a vehicle weighing on the plate is what the pointer finds there (PRD v2 §3.4, §3.6), so the gate is pointed at with the goods off
+    handle.setLayer('logistics', false);
     window.world!.look(310, 0, 8); frames(2);
     const [gx, gy] = at('gate-east');
     expect(window.world!.hoverAt(gx, gy)).toMatchObject({ id: 'gate-east', kind: 'gate' });

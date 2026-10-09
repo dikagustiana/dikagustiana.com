@@ -3,15 +3,15 @@
  * every placed sub-industry is an entity with two lots, the gates,
  * signposts and fixtures are entities, model statuses light the right
  * buildings with the right glyph word (and an outage never reads as
- * absence), the layers switch their vehicles, flow classes add trucks
- * and only trucks, two seeded worlds replay identically, and the draw
+ * absence), the layers switch their vehicles, flow classes send vehicles
+ * more often on measured links, two seeded worlds replay identically, and the draw
  * calls the far, middle and near views would issue stay under the PRD's
  * budgets (1,200 / 1,600 / 1,900), counted here as the renderable objects
  * the view leaves visible, since jsdom has no renderer.
  */
 import * as THREE from 'three';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { RendererLike, WorldHandle } from '@/world/engine/types';
+import type { RendererLike, Selection, WorldHandle } from '@/world/engine/types';
 import { LAYOUT } from '@/world/placement/layout.generated';
 import { REGISTRY } from '@/lib/world/registry/subindustries.generated';
 import { TRAFFIC_LINE } from '@/world/world/build';
@@ -34,13 +34,13 @@ afterEach(() => { for (const m of mounted) { m.handle.dispose(); m.container.rem
 
 const renderer = (canvas: HTMLCanvasElement): RendererLike => ({ domElement: canvas, setSize() {}, setPixelRatio() {}, setClearColor() {}, render() {}, dispose() {}, forceContextLoss() {}, clippingPlanes: [], autoClear: true, info: { autoReset: true, reset() {}, render: { calls: 0 } }, capabilities: { getMaxAnisotropy: () => 1 } });
 
-async function mount(seed = 3, debug = true) {
+async function mount(seed = 3, debug = true, onSelect?: (s: Selection | null) => void) {
   const { createWorld } = await import('@/world/engine');
   const container = document.createElement('div');
   Object.defineProperty(container, 'clientWidth', { value: 1280 }); Object.defineProperty(container, 'clientHeight', { value: 720 });
   document.body.append(container);
   const before = scenes.length;
-  const handle = createWorld(container, { registry: REGISTRY, layout: LAYOUT, theme: { font: 'sans-serif' }, seed, debug, createRenderer: renderer });
+  const handle = createWorld(container, { registry: REGISTRY, layout: LAYOUT, theme: { font: 'sans-serif' }, seed, debug, createRenderer: renderer, onSelect });
   const m: Mounted = { handle, container, scene: () => scenes[before] };
   mounted.push(m); return m;
 }
@@ -54,7 +54,7 @@ function drawables(scene: THREE.Scene): number {
 }
 
 describe('the world scene', () => {
-  it('has an entity for every placed sub-industry, two lots each, every gate, signpost and fixture, and traffic', async () => {
+  it('has an entity for every placed sub-industry, two lots each, every gate, signpost and fixture, and the flows', async () => {
     const { handle } = await mount();
     const all = window.world!.all();
     const kinds = new Map<string, number>(); for (const e of all) kinds.set(e.kind, (kinds.get(e.kind) ?? 0) + 1);
@@ -63,7 +63,11 @@ describe('the world scene', () => {
     expect(kinds.get('gate')).toBe(5);
     expect(kinds.get('signpost')).toBe(7);
     expect((kinds.get('fixture') ?? 0) + (kinds.get('thinktank') ?? 0)).toBe(4);
-    expect(kinds.get('truck')! + kinds.get('reefer')! + kinds.get('loop')! + kinds.get('raw')! + kinds.get('coin')!).toBeGreaterThan(30);
+    // the flows (PRD v2 §3.6): goods vehicles on the registry's links, the two ships at the quays, the rail shuttle, walkers
+    expect(kinds.get('vehicle')).toBeGreaterThan(200);
+    expect(kinds.get('ship')).toBe(2);
+    expect(kinds.get('train')).toBe(1);
+    expect(kinds.get('walker')).toBeGreaterThan(20);
     expect(new Set(all.map((e) => e.id)).size, 'ids are unique').toBe(all.length);
     expect(handle.selected()).toBeNull();
   });
@@ -84,29 +88,36 @@ describe('the world scene', () => {
   });
 
   it('says on every vehicle card that the traffic is illustrative', async () => {
-    await mount();
-    const { createWorld: _ } = await import('@/world/engine'); void _;
-    const vehicles = window.world!.all().filter((e) => ['truck', 'reefer', 'loop', 'raw', 'coin', 'forklift', 'train', 'walker', 'van'].includes(e.kind));
-    expect(vehicles.length).toBeGreaterThan(0);
-    // the status is 'moving' or 'waiting'; the card's rows carry the line
-    window.world!.select(vehicles[0].id);
-    expect(window.world!.selected()).toBe(vehicles[0].id);
+    let sel: Selection | null = null;
+    await mount(3, true, (s) => { sel = s; });
+    // every mover's card (PRD v2 §3.11): goods vehicles, ships, the train, walkers; the card's rows carry the line
+    const movers = window.world!.all().filter((e) => ['vehicle', 'ship', 'train', 'walker'].includes(e.kind));
+    expect(new Set(movers.map((e) => e.kind)).size).toBe(4);
+    for (const m of movers) {
+      window.world!.select(m.id);
+      expect(window.world!.selected()).toBe(m.id);
+      expect(sel!.info.rows.find(([k]) => k === 'Traffic')?.[1], m.id).toBe(TRAFFIC_LINE);
+    }
     expect(TRAFFIC_LINE).toBe('Illustrative traffic; see the model for figures');
   });
 
-  it('switches the cold-chain reefers and the money layer with their layers, and adds trucks for measured flows', async () => {
+  // rewritten for the flows (PRD v2 §3.6): a measured link sends its vehicles more often, instead of v1's extra trucks on the main road
+  it('switches the cold-chain reefers, the goods and the money layer with their layers, and sends vehicles more often on measured flows', async () => {
     const { handle, scene } = await mount();
     const s = scene();
-    const group = (name: string) => { let g: THREE.Object3D | undefined; s.traverse((o) => { if (o.name === name) g = o; }); return g; };
-    const traffic = group('traffic')!, reefers = traffic.children[1], coins = traffic.children[2];
-    expect(reefers.visible).toBe(false); expect(coins.visible).toBe(false);
+    const group = (name: string) => { let g: THREE.Object3D | undefined; s.traverse((o) => { if (o.name === name) g = o; }); return g!; };
+    const reefers = group('cold'), coins = group('coins'), goods = group('goods'), loops = group('loops');
+    expect(reefers.visible).toBe(false); expect(coins.visible).toBe(false); expect(goods.visible).toBe(true);
     handle.setLayer('cold-chain', true); expect(reefers.visible).toBe(true);
     handle.setLayer('credit', true); expect(coins.visible).toBe(true);
-    const before = window.world!.all().filter((e) => e.kind === 'truck').length;
-    handle.setFlowWeights([{ from: 'A121', to: 'B121', cls: 'measured-heavy' }, { from: 'B121', to: 'J211', cls: 'measured-light' }]);
-    expect(window.world!.all().filter((e) => e.kind === 'truck').length).toBe(before + 3);
+    handle.setLayer('logistics', false); expect(goods.visible).toBe(false); expect(loops.visible).toBe(false);
+    handle.setLayer('logistics', true); expect(goods.visible).toBe(true);
+    const onLink = (key: string) => window.world!.all().filter((e) => e.facts?.link === key).map((e) => e.id);
+    const sent = (key: string, seconds: number) => { const seen = new Set(onLink(key)); for (let t = 0; t < seconds; t += 5) { handle.step(5); for (const id of onLink(key)) seen.add(id); } return seen.size; };
+    const before = sent('B121>J211', 150);
+    handle.setFlowWeights([{ from: 'A121', to: 'B121', cls: 'measured-heavy' }, { from: 'B121', to: 'J211', cls: 'measured-heavy' }]);
+    expect(sent('B121>J211', 150)).toBeGreaterThan(before);
     handle.setFlowWeights([]);
-    expect(window.world!.all().filter((e) => e.kind === 'truck').length).toBe(before);
   });
 
   it('replays deterministically: two worlds with one seed agree after 120 simulated seconds', async () => {

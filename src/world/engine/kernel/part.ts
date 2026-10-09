@@ -109,6 +109,8 @@ export class Part {
   private readonly texts: TextSpec[] = [];
   /** A brightness step for the solids drawn next (PRD v2 §3.2: neighbouring buildings differ by a few per cent). */
   tint = 1;
+  /** False keeps the faces that look away from the camera: a model that turns (a vehicle) shows them as it does. */
+  cull = true;
 
   constructor(ctx: PartContext) { this.ctx = ctx; }
 
@@ -169,7 +171,7 @@ export class Part {
 
   /** A face of a solid, in world terms, with its outward normal; dropped when it looks away from the camera. */
   private face(pts: readonly V3[], n: V3, tone: Tone): boolean {
-    if (!facing(n[0], n[1], n[2])) return false;
+    if (this.cull && !facing(n[0], n[1], n[2])) return false;
     const c = this.ctx.theme.tone(tone, shadeOf(n[0], n[1], n[2]) * this.tint);
     for (const [a, b, d] of triangulate(pts, n)) {
       for (const i of [a, b, d]) { const p = pts[i]; this.solidPos.push(p[0], p[2], p[1]); this.solidCol.push(c.r, c.g, c.b); }
@@ -274,6 +276,15 @@ export class Part {
   }
 
   // ---- build ----
+
+  /** The solids drawn so far as one geometry (position and per-vertex colour), for a model drawn many times at once. */
+  solidGeometry(): THREE.BufferGeometry {
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(this.solidPos, 3));
+    geo.setAttribute('color', new THREE.Float32BufferAttribute(this.solidCol, 3));
+    geo.computeBoundingSphere(); geo.computeBoundingBox();
+    return geo;
+  }
 
   /** Everything drawn so far, merged into one group of meshes. */
   build(name = 'part'): THREE.Group {
