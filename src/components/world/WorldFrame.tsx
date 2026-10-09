@@ -19,7 +19,7 @@ import { archetypeForZone, stationFor } from '@/world/interiors/stations';
 import { whiteboardFor } from '@/lib/world/whiteboard';
 import type { StationBinding, WhiteboardContent } from '@/world/data/types';
 import { STATUS, type LensId, type ShiftId } from '@/data/industryChain';
-import type { FrameReading, OverlayName, Selection, ViewName, WorldHandle, WorldAction, WorldMark } from '@/world/engine/types';
+import type { FrameReading, Hover, OverlayName, Selection, ViewName, WorldHandle, WorldAction, WorldMark } from '@/world/engine/types';
 import { Card } from './Card';
 import { FrameHeader, PHONE_QUERY, PosterImage, type FrameControls } from './FrameShell';
 import { Search } from './Search';
@@ -50,6 +50,7 @@ export default function WorldFrame({ variant, heading, boardTicker = null, onBoa
   const [ready, setReady] = useState(false);
   const [failed, setFailed] = useState<string | null>(null);
   const [selection, setSelection] = useState<Selection | null>(null);
+  const [hovered, setHovered] = useState<Hover | null>(null);
   const [mark, setMark] = useState<{ shift: ShiftId; targetId: string } | null>(null);
   const [overlay, setOverlay] = useState<OverlayName>('none');
   const [layers, setLayers] = useState(DEFAULT_LAYERS);
@@ -98,6 +99,7 @@ export default function WorldFrame({ variant, heading, boardTicker = null, onBoa
         registry: REGISTRY, layout: LAYOUT, theme: { font }, initialView: 'hero', reducedDetail: phone,
         debug: typeof location !== 'undefined' && new URLSearchParams(location.search).has('debug'),
         onSelect: (sel) => { if (sel?.kind === 'whiteboard') { const t = sel.info.rows.find(([k]) => k === 'Ticker')?.[1]; if (t) act({ type: 'open-board', ticker: t }); return; } if (sel?.kind === 'mark') { const id = sel.info.rows.find(([k]) => k === 'Target')?.[1]; setSelection(null); setMark(id && shiftRef.current ? { shift: shiftRef.current, targetId: id } : null); return; } setSelection(sel); if (sel) setMark(null); handle.current?.highlightChain(sel && (sel.kind === 'building' || sel.kind === 'company') ? sel.id : null, fullChainRef.current ? 'all' : 1); },
+        onHover: setHovered,
         onAction: act,
         onReady: () => setReady(true),
       });
@@ -221,6 +223,8 @@ export default function WorldFrame({ variant, heading, boardTicker = null, onBoa
         </ol>
       )}
       <p className="sr-only">{CANVAS_DESCRIPTION}</p>
+      {/* the hover label, else the selection's readout, read out as it changes (PRD v2 §3.4, §3.15) */}
+      <p className="sr-only" aria-live="polite" data-world-readout="">{hovered?.label ?? (selection ? reading?.readout ?? selection.info.title : '')}</p>
     </div>
   );
 }

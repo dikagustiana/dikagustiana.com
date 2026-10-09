@@ -321,14 +321,18 @@ export function buildWorldScene(ctx: EngineContext, layout: GeneratedLayout, onA
     // a booth, a boom, the weighbridge plate across the road, a sign
     gatesPart.box(x - sn * 7 - 1.5, y + c * 7 - 1.5, 0, 3, 3, 3.2); gatesPart.box(x - sn * 7 - 1.7, y + c * 7 - 1.7, 3.2, 3.4, 3.4, 0.2);
     gatesPart.box(x - sn * 5 - 0.2, y + c * 5 - 0.2, 0, 0.4, 0.4, 1.1); gatesPart.seg('line', W(x - sn * 5, y + c * 5, 1.1), W(x + sn * 5, y - c * 5, 1.1));
-    if (gt.weighbridge) { const L = 8, Wd = 3.4; gatesPart.poly('kob', [W(x - c * L - sn * Wd, y - sn * L + c * Wd, 0.06), W(x + c * L - sn * Wd, y + sn * L + c * Wd, 0.06), W(x + c * L + sn * Wd, y + sn * L - c * Wd, 0.06), W(x - c * L + sn * Wd, y - sn * L - c * Wd, 0.06)]); gatesPart.rect2(TOP(0, 0, 0.08), x - L, y - Wd, 2 * L, 2 * Wd, 'line', 0.02); }
+    // the weighbridge's plate is drawn with the gate's own small part below, so pointing at it finds the gate
+    const L = 8, Wd = 3.4;
+    if (gt.weighbridge) gatesPart.rect2(TOP(0, 0, 0.08), x - L, y - Wd, 2 * L, 2 * Wd, 'line', 0.02);
     const joint = JOINT_BY_ID[gt.jointId as JointId];
-    const ent: Entity = { kind: 'gate', id: gt.id, groups: [], pick: [x, y, 2], bbox: new THREE.Box3(W(x - 9, y - 9, 0), W(x + 9, y + 9, 3.4)),
-      info: () => ({ kind: 'Gate · weighbridge', title: joint?.label ?? gt.id, status: 'transfer of title', rows: [['Joint', gt.jointId], ['Weighbridge', gt.weighbridge ? 'yes' : 'no'], ['Road', gt.road]] }), readout: () => `${gt.id} · ${joint?.label ?? ''}` };
+    const ent: Entity = { kind: 'gate', id: gt.id, groups: [], pick: [x, y, 0.5], bbox: new THREE.Box3(W(x - 9, y - 9, 0), W(x + 9, y + 9, 3.4)),
+      info: () => ({ kind: 'Gate · weighbridge', title: joint?.label ?? gt.id, status: 'transfer of title', rows: [['Joint', gt.jointId], ['Weighbridge', gt.weighbridge ? 'yes' : 'no'], ['Road', gt.road]] }), label: () => joint?.label ?? gt.id, readout: () => `${gt.id} · ${joint?.label ?? ''}` };
     ctx.entities.push(ent); (ent as { gateId?: string }).gateId = gt.id;
     gatesPart.text(TOP(x - 6, y + 10, 0.1), joint?.label ?? gt.id, 0, 0, 1.8, 'paint');
     // a small group per gate so it can be hit
-    const hitPart = new Part(ctx); hitPart.box(x - 1.5 - sn * 7, y - 1.5 + c * 7, 0, 3, 3, 3.2); const hg = hitPart.build(`gate-${gt.id}`); hg.userData.entity = ent; ent.groups.push(hg); scene.add(hg);
+    const hitPart = new Part(ctx); hitPart.box(x - 1.5 - sn * 7, y - 1.5 + c * 7, 0, 3, 3, 3.2);
+    if (gt.weighbridge) hitPart.poly('kob', [W(x - c * L - sn * Wd, y - sn * L + c * Wd, 0.06), W(x + c * L - sn * Wd, y + sn * L + c * Wd, 0.06), W(x + c * L + sn * Wd, y + sn * L - c * Wd, 0.06), W(x - c * L + sn * Wd, y - sn * L - c * Wd, 0.06)]);
+    const hg = hitPart.build(`gate-${gt.id}`); hg.userData.entity = ent; ent.groups.push(hg); scene.add(hg);
   }
   const gatesG = gatesPart.build('gates'); gatesG.traverse((o) => { o.raycast = () => {}; }); scene.add(gatesG);
 

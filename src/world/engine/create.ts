@@ -41,6 +41,10 @@ interface DebugApi {
   drawCalls(): number;
   /** The distance control's reading of the camera, 0 at home and 1 at the near view. */
   distance(): number;
+  /** What the pointer is over, as the hover label shows it. */
+  hovered(): { id: string; kind: string; label: string } | null;
+  /** Hover the thing at a canvas point now, as the pointer would. */
+  hoverAt(px: number, py: number): { id: string; kind: string; label: string } | null;
   /** The camera's zoom, in screen pixels per metre (scripts/world/probe.mjs reads it). */
   zoom(): number;
   /** The band of detail the zoom is in (PRD v2 §3.3). */
@@ -113,6 +117,7 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
   const view: View = createView(ctx, {
     container, canvas, renderer, clock, reducedDetail: !!options.reducedDetail,
     onSelect: options.onSelect,
+    onHover: options.onHover,
     onDetail: (tiny, far) => { world.nearGroup.visible = !far; traffic.setDetail(tiny, far); },
   });
   if (options.initialView && options.initialView !== 'hero') view.lookAt(options.initialView);
@@ -207,6 +212,8 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
       look: (x, y, k) => view.look(x, y, k),
       view: (name) => { if ((VIEW_NAMES as readonly string[]).includes(name)) view.lookAt(name as ViewName); },
       band: () => view.band(),
+      hovered: () => view.hovered(),
+      hoverAt: (px, py) => view.hoverAt(px, py),
       all: () => ctx.entities.map((e: Entity) => ({ id: e.id, kind: e.kind, status: e.info().status })),
       drawCalls: () => view.drawCalls(),
       distance: () => view.distanceOf(),

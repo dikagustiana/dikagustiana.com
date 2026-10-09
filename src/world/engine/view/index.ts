@@ -33,7 +33,7 @@ import { setTextFar } from '../kernel/part';
 import { approach, clamp } from '../kernel/math';
 import { idleHooks, type EngineContext } from '../context';
 import type { Clock } from '../sim/clock';
-import type { Band, Entity, Peek, RendererLike, Selection, ViewName } from '../types';
+import type { Band, Entity, Hover, Peek, RendererLike, Selection, ViewName } from '../types';
 import type { Box, GeneratedLayout, Pt } from '@/world/placement/types';
 
 export interface ViewOptions {
@@ -44,6 +44,8 @@ export interface ViewOptions {
   /** Phones: the walkers wait for a closer view, and the hero's floor is lower. */
   reducedDetail: boolean;
   onSelect?: (sel: Selection | null) => void;
+  /** The thing under the pointer changed (PRD v2 §3.4): its id, kind and label, or null. */
+  onHover?: (h: Hover | null) => void;
   /** The band of detail changed (PRD v2 §3.3): tiny hides the smallest movers, far hides the small text and street details. */
   onDetail?: (tiny: boolean, far: boolean, band: Band) => void;
 }
@@ -61,6 +63,10 @@ export interface View {
   zoomBy(k: number): void;
   /** Select the next or previous building, in the order they were built. */
   cycle(d: 1 | -1): void;
+  /** What the pointer is over, as the hover label shows it. */
+  hovered(): Hover | null;
+  /** Hover the thing at a canvas point now, as the pointer would (tests, the debug API). */
+  hoverAt(px: number, py: number): Hover | null;
   setHighlight(ids: readonly string[]): void;
   currentView(): ViewName | null;
   tick(dt: number, paused: boolean): void;
@@ -117,6 +123,12 @@ const HERO_ZOOM = 1.25, HERO_ZOOM_PHONE = 1.0, PHONE_WIDTH = 640;
 const STREET = 4, INSIDE = 10, HYSTERESIS = 0.1;
 /** Easing rate of the camera, per second. */
 const EASE = 6;
+/** How often the pointer is checked for what is under it, in milliseconds: the label shows within 150 ms (PRD v2 §3.4). */
+const HOVER_EVERY = 60;
+/** How long a touch must rest for the hover label (a long press), in milliseconds. */
+const LONG_PRESS = 500;
+/** The hover label's text height on screen, in CSS pixels. */
+const LABEL_PX = 15;
 const KEY_VIEWS: Record<string, ViewName> = { '0': 'whole', '1': 'ring', '2': 'estate', '3': 'gateway', '4': 'town', '5': 'thinktank', h: 'hero', H: 'hero' };
 const noRaycast = () => {};
 
@@ -170,7 +182,7 @@ export function createView(ctx: EngineContext, o: ViewOptions): View {
     camera.left = -w / 2; camera.right = w / 2; camera.top = h / 2; camera.bottom = -h / 2;
     renderer.setSize(w, h, false);
     ctx.theme.setResolution(w, h);
-    markerMat.resolution.set(w, h);
+    markerMat.resolution.set(w, h); hoverMat.resolution.set(w, h);
   }
   const zoomRange = () => [mapLog + Math.log(0.85), nearLog + Math.log(1.25)] as const;
   const distOf = (logZ: number) => clamp((logZ - homeLog) / (nearLog - homeLog), 0, 1);
@@ -321,6 +333,54 @@ export function createView(ctx: EngineContext, o: ViewOptions): View {
     }
   }
 
+  // ---- hover (PRD v2 §3.4): one label in the sky over the thing under the pointer, a hairline round it, the pointer ----
+  const hoverMat = ctx.theme.line.line.clone() as LineMaterial;
+  hoverMat.depthTest = false; hoverMat.depthWrite = false;
+  const hoverLine = new LineSegments2(new LineSegmentsGeometry().setPositions(CUBE_EDGES), hoverMat);
+  hoverLine.visible = false; hoverLine.renderOrder = 11; hoverLine.frustumCulled = false; hoverLine.raycast = noRaycast; sky.add(hoverLine);
+  let hoverEnt: Entity | null = null, hoverInfo: Hover | null = null, hoverLabel: THREE.Sprite | null = null;
+  const labelOf = (e: Entity) => { try { return e.label?.() ?? e.info().title; } catch { return e.id; } };
+  function labelSprite(text: string): THREE.Sprite | null {
+    if (!ctx.text2d) return null;
+    // the label is drawn at twice its size for crisp text, and kept at its size on screen whatever the zoom
+    const k = 2, pad = 8 * k, fontPx = LABEL_PX * k, c = document.createElement('canvas'), g = c.getContext('2d');
+    if (!g) return null;
+    g.font = `600 ${fontPx}px ${ctx.font}`;
+    const tw = Math.ceil(g.measureText(text).width), cw = tw + pad * 2, ch = Math.ceil(fontPx * 1.6);
+    c.width = cw; c.height = ch;
+    g.fillStyle = `#${ctx.theme.fill.lamp.color.getHexString()}`; g.fillRect(0, 0, cw, ch);
+    g.strokeStyle = `#${ctx.theme.textColor('ink').getHexString()}`; g.lineWidth = k; g.strokeRect(k / 2, k / 2, cw - k, ch - k);
+    g.fillStyle = `#${ctx.theme.textColor('ink').getHexString()}`; g.font = `600 ${fontPx}px ${ctx.font}`; g.textBaseline = 'middle'; g.fillText(text, pad, ch / 2 + k / 2);
+    const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = ctx.gfx.aniso;
+    const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: t, transparent: true, depthTest: false }));
+    sp.renderOrder = 13; sp.center.set(0.5, 0); sp.userData.px = [cw / k, ch / k]; sp.raycast = noRaycast;
+    return sp;
+  }
+  function dropLabel() { if (hoverLabel) { sky.remove(hoverLabel); hoverLabel.material.map?.dispose(); hoverLabel.material.dispose(); hoverLabel = null; } }
+  function placeHover() {
+    if (!hoverEnt) { hoverLine.visible = false; return; }
+    const b = boundsOf(hoverEnt);
+    hoverLine.position.copy(b.min);
+    hoverLine.scale.set(Math.max(1e-3, b.max.x - b.min.x), Math.max(1e-3, b.max.y - b.min.y), Math.max(1e-3, b.max.z - b.min.z));
+    hoverLine.visible = true;
+    if (hoverLabel) {
+      // above the thing's top, at its middle; a constant size on screen
+      const z = Math.exp(cur.logZ), [pw, ph] = hoverLabel.userData.px as [number, number];
+      hoverLabel.position.set((b.min.x + b.max.x) / 2, b.max.y, (b.min.z + b.max.z) / 2);
+      hoverLabel.scale.set(pw / z, ph / z, 1);
+    }
+  }
+  function hover(ent: Entity | null) {
+    if (ent === hoverEnt) return;
+    hoverEnt = ent;
+    dropLabel();
+    hoverInfo = ent ? { id: ent.id, kind: ent.kind, label: labelOf(ent) } : null;
+    if (ent && hoverInfo) { hoverLabel = labelSprite(hoverInfo.label); if (hoverLabel) sky.add(hoverLabel); }
+    placeHover();
+    if (!pointers.size) canvas.style.cursor = ent ? 'pointer' : 'grab';
+    o.onHover?.(hoverInfo);
+  }
+
   // ---- picking ----
   const raycaster = new THREE.Raycaster(), ndc = new THREE.Vector2();
   const shown = (obj: THREE.Object3D | null) => { for (let x = obj; x; x = x.parent) if (!x.visible) return false; return true; };
@@ -350,17 +410,26 @@ export function createView(ctx: EngineContext, o: ViewOptions): View {
     try { canvas.setPointerCapture(e.pointerId); } catch { /* not every environment captures */ }
     const p = local(e); pointers.set(e.pointerId, p);
     if (pointers.size === 1) press = { id: e.pointerId, x: p[0], y: p[1], moved: false };
+    // a touch that rests shows the hover label (a long press)
+    if (e.pointerType === 'touch' && pointers.size === 1) { if (pressTimer) clearTimeout(pressTimer); pressTimer = setTimeout(() => { pressTimer = null; if (press && !press.moved) hover(pickAt(press.x, press.y)); }, LONG_PRESS); }
     else { press = null; const [a, b] = [...pointers.values()]; spread = Math.hypot(a[0] - b[0], a[1] - b[1]); }
     canvas.style.cursor = 'grabbing';
   };
+  let hoverTimer: ReturnType<typeof setTimeout> | null = null, pressTimer: ReturnType<typeof setTimeout> | null = null, hoverAtPt: [number, number] | null = null;
+  const clearTimers = () => { if (hoverTimer) { clearTimeout(hoverTimer); hoverTimer = null; } if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; } };
   const onMove = (e: PointerEvent) => {
     const p = local(e), prev = pointers.get(e.pointerId);
     if (!prev) {
-      // hover: a pointer over something clickable, checked a few times a second
+      // hover: what is under a mouse, checked at most every HOVER_EVERY ms, and once more where the pointer comes to rest
+      if (e.pointerType !== 'mouse' && e.pointerType !== 'pen') return;
       const now = typeof performance !== 'undefined' ? performance.now() : 0;
-      if (e.pointerType === 'mouse' && now - lastHover > 120) { lastHover = now; canvas.style.cursor = pickAt(p[0], p[1]) ? 'pointer' : 'grab'; }
+      hoverAtPt = p;
+      if (now - lastHover >= HOVER_EVERY) { lastHover = now; hover(pickAt(p[0], p[1])); }
+      if (hoverTimer) clearTimeout(hoverTimer);
+      hoverTimer = setTimeout(() => { hoverTimer = null; if (hoverAtPt && !pointers.size) { lastHover = typeof performance !== 'undefined' ? performance.now() : 0; hover(pickAt(hoverAtPt[0], hoverAtPt[1])); } }, HOVER_EVERY);
       return;
     }
+    if (pressTimer && press && Math.hypot(p[0] - press.x, p[1] - press.y) > 5) { clearTimeout(pressTimer); pressTimer = null; }
     pointers.set(e.pointerId, p);
     if (pointers.size === 2) {
       const [a, b] = [...pointers.values()], d = Math.hypot(a[0] - b[0], a[1] - b[1]);
@@ -371,8 +440,10 @@ export function createView(ctx: EngineContext, o: ViewOptions): View {
     if (press && !press.moved && Math.hypot(p[0] - press.x, p[1] - press.y) > 5) press.moved = true;
     if (!press || press.moved) panBy(p[0] - prev[0], p[1] - prev[1]);
   };
+  const onLeave = () => { hoverAtPt = null; clearTimers(); if (!pointers.size) hover(null); };
   const onUp = (e: PointerEvent) => {
     const p = local(e);
+    if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
     pointers.delete(e.pointerId);
     try { canvas.releasePointerCapture(e.pointerId); } catch { /* already released */ }
     if (press && press.id === e.pointerId && !press.moved && e.type === 'pointerup') select(pickAt(p[0], p[1]));
@@ -404,7 +475,7 @@ export function createView(ctx: EngineContext, o: ViewOptions): View {
   };
   const listeners: [string, EventListener, AddEventListenerOptions?][] = [
     ['pointerdown', onDown as EventListener], ['pointermove', onMove as EventListener], ['pointerup', onUp as EventListener],
-    ['pointercancel', onUp as EventListener], ['wheel', onWheel as EventListener, { passive: false }], ['keydown', onKey as EventListener],
+    ['pointercancel', onUp as EventListener], ['pointerleave', onLeave as EventListener], ['wheel', onWheel as EventListener, { passive: false }], ['keydown', onKey as EventListener],
   ];
   for (const [type, fn, opts] of listeners) canvas.addEventListener(type, fn, opts);
   canvas.style.cursor = 'grab';
@@ -413,7 +484,7 @@ export function createView(ctx: EngineContext, o: ViewOptions): View {
 
   // ---- the hooks scene code calls ----
   ctx.hooks = {
-    forget(e) { if (chosen === e) select(null); if (focus === e) focus = null; if (highlighted.includes(e)) highlighted = highlighted.filter((x) => x !== e); },
+    forget(e) { if (hoverEnt === e) hover(null); if (chosen === e) select(null); if (focus === e) focus = null; if (highlighted.includes(e)) highlighted = highlighted.filter((x) => x !== e); },
     select: (e) => select(e),
     isSelected: (e) => chosen === e,
     track(e) { select(e); const [x, y] = centreOn(e); goal.x = x; goal.y = y; named = null; },
@@ -475,6 +546,7 @@ export function createView(ctx: EngineContext, o: ViewOptions): View {
     detail();
     sections();
     if (chosen && moving(chosen)) placeFrame();
+    if (hoverEnt) placeHover();
     routeAge += dt;
     if (chosen?.route && !paused && routeAge > 0.2) { routeAge = 0; drawRoute(); }
     ctx.theme.shade(o.clock.night());
@@ -518,6 +590,8 @@ export function createView(ctx: EngineContext, o: ViewOptions): View {
     band: () => band ?? 'district',
     zoomBy,
     cycle,
+    hovered: () => hoverInfo,
+    hoverAt(px, py) { hover(pickAt(px, py)); return hoverInfo; },
     setHighlight,
     currentView: () => named,
     tick,
@@ -528,11 +602,12 @@ export function createView(ctx: EngineContext, o: ViewOptions): View {
     dispose() {
       for (const [type, fn, opts] of listeners) canvas.removeEventListener(type, fn, opts);
       observer?.disconnect(); observer = null;
+      clearTimers(); dropLabel(); hoverEnt = null; hoverInfo = null;
       pointers.clear(); open.clear(); highlighted = []; chosen = null; focus = null;
       ctx.hooks = idleHooks();
       sky.removeFromParent();
-      for (const l of [frameLine, routeLine, highlightLine]) l.geometry.dispose();
-      markerMat.dispose();
+      for (const l of [frameLine, routeLine, highlightLine, hoverLine]) l.geometry.dispose();
+      markerMat.dispose(); hoverMat.dispose();
     },
   };
 }

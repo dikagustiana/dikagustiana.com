@@ -87,6 +87,13 @@ export interface ThemeTokens {
   font: string;
 }
 
+/** What the pointer is over (PRD v2 §3.4): the shell shows the label and reads it out. */
+export interface Hover {
+  id: string;
+  kind: string;
+  label: string;
+}
+
 export interface Selection {
   id: string;
   kind: string;
@@ -151,6 +158,8 @@ export interface WorldOptions {
   /** Simulated seconds run before the first frame; measured in Phase D, see WARMUP_SECONDS. */
   warmupSeconds?: number;
   onSelect?: (sel: Selection | null) => void;
+  /** The thing under the pointer changed: its label for the shell's readout (PRD v2 §3.4). */
+  onHover?: (h: Hover | null) => void;
   onAction?: (action: WorldAction) => void;
   onReady?: () => void;
   /** Tests pass a fake renderer; the default creates a WebGLRenderer on the engine's canvas. */
