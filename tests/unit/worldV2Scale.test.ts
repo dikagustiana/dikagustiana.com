@@ -159,6 +159,8 @@ describe('the pointer on the canvas (PRD v2 §3.4, A3)', () => {
     expect(window.world!.hovered()?.id).toBe('INTP');
     pointer('pointerdown', x, y); pointer('pointerup', x, y);
     expect(window.world!.selected()).toBe('INTP');
+    // still over the company after the click: still the pointer
+    expect(canvas.style.cursor).toBe('pointer');
     // a second finger and a drag do not select
     pointer('pointerdown', x, y, 'touch'); pointer('pointermove', x + 40, y + 40, 'touch'); pointer('pointerup', x + 40, y + 40, 'touch');
     expect(window.world!.selected()).toBe('INTP');

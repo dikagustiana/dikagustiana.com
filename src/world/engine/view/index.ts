@@ -450,7 +450,7 @@ export function createView(ctx: EngineContext, o: ViewOptions): View {
     pointers.delete(e.pointerId);
     try { canvas.releasePointerCapture(e.pointerId); } catch { /* already released */ }
     if (press && press.id === e.pointerId && !press.moved && e.type === 'pointerup') select(pickAt(p[0], p[1]));
-    if (!pointers.size) { press = null; canvas.style.cursor = 'grab'; }
+    if (!pointers.size) { press = null; canvas.style.cursor = hoverEnt ? 'pointer' : 'grab'; }
   };
   const onWheel = (e: WheelEvent) => {
     // the page scrolls past the world until the visitor has put a hand on it (focus), or pinches (ctrl + wheel)
