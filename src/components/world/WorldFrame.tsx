@@ -95,7 +95,7 @@ export default function WorldFrame({ variant, heading, boardTicker = null, onBoa
       if (!host.current) return;
       const font = getComputedStyle(document.documentElement).getPropertyValue('--font-sans').trim() || 'sans-serif';
       const h = createWorld(host.current, {
-        registry: REGISTRY, layout: LAYOUT, theme: { font }, initialView: phone ? 'estate' : 'whole', reducedDetail: phone,
+        registry: REGISTRY, layout: LAYOUT, theme: { font }, initialView: 'hero', reducedDetail: phone,
         debug: typeof location !== 'undefined' && new URLSearchParams(location.search).has('debug'),
         onSelect: (sel) => { if (sel?.kind === 'whiteboard') { const t = sel.info.rows.find(([k]) => k === 'Ticker')?.[1]; if (t) act({ type: 'open-board', ticker: t }); return; } if (sel?.kind === 'mark') { const id = sel.info.rows.find(([k]) => k === 'Target')?.[1]; setSelection(null); setMark(id && shiftRef.current ? { shift: shiftRef.current, targetId: id } : null); return; } setSelection(sel); if (sel) setMark(null); handle.current?.highlightChain(sel && (sel.kind === 'building' || sel.kind === 'company') ? sel.id : null, fullChainRef.current ? 'all' : 1); },
         onAction: act,
@@ -217,7 +217,7 @@ export default function WorldFrame({ variant, heading, boardTicker = null, onBoa
       </div>
       {shift && (
         <ol className="world-frame__strip" aria-label="Reading strip: the marks of this shift in argument order">
-          {marks.map((m) => { const st = STATUS[m.target.condition!.status]; return <li key={m.targetId}><button type="button" aria-pressed={mark?.targetId === m.targetId} onClick={() => { setMark({ shift, targetId: m.targetId }); setSelection(null); const h = handle.current; if (!h) return; if (m.carrier.kind === 'gate' || m.carrier.kind === 'signpost') { h.select(m.carrier.id); h.setDistance(0.6); } else if (m.carrier.kind === 'region') { h.select(null); h.lookAt(REGION_VIEW[m.carrier.id] ?? 'whole'); } }}><span aria-hidden="true">{m.n}</span><span aria-hidden="true">{st.form === 'filled' ? '●' : st.form === 'open' ? '○' : '◌'}</span>{m.label} · {st.label}</button></li>; })}
+          {marks.map((m) => { const st = STATUS[m.target.condition!.status]; return <li key={m.targetId}><button type="button" aria-pressed={mark?.targetId === m.targetId} onClick={() => { setMark({ shift, targetId: m.targetId }); setSelection(null); const h = handle.current; if (!h) return; if (m.carrier.kind === 'gate' || m.carrier.kind === 'signpost') { h.select(m.carrier.id); h.setDistance(0.6); } else if (m.carrier.kind === 'region') { h.select(null); h.lookAt(REGION_VIEW[m.carrier.id] ?? 'hero'); } }}><span aria-hidden="true">{m.n}</span><span aria-hidden="true">{st.form === 'filled' ? '●' : st.form === 'open' ? '○' : '◌'}</span>{m.label} · {st.label}</button></li>; })}
         </ol>
       )}
       <p className="sr-only">{CANVAS_DESCRIPTION}</p>

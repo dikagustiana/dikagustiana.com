@@ -9,12 +9,16 @@
  * pixels tall whatever the distance, which is how the sky's markers keep
  * their size.
  *
- * Distance is the slider's reading of the zoom: 0 at the home view (the
- * whole world in the frame) and 1 at the near view, on a log scale between
- * the two, so every step of the slider feels the same. Moving between views
- * eases; dragging and the wheel act at once. The far view hides the plots
- * and the small text (the level of detail is reported to the caller through
- * onDetail); coming close opens a selected building as its section drawing.
+ * Distance is the slider's reading of the zoom: 0 at the hero, the home view
+ * (PRD v2 §3.1: the estate with the ring's near arc and the gateway's first
+ * blocks, at no less than 1.25 px/m on a wide stage and 1 px/m on a phone),
+ * and 1 at the near view, on a log scale between the two, so every step of the
+ * slider feels the same. The map view (Whole) zooms out past the hero to frame
+ * everything drawn. Moving between views eases; dragging and the wheel act at
+ * once. The zoom decides the level of detail (PRD v2 §3.3), in three bands with
+ * hysteresis: district below 4 px/m (small text and walkers hidden), street from
+ * 4 px/m, inside from 10 px/m (a selected lot opens as its section drawing);
+ * the band is reported to the caller through onDetail.
  *
  * The view owns no DOM beyond the canvas it is given: every listener it
  * adds is on that canvas, plus one ResizeObserver on the container, and
@@ -29,19 +33,19 @@ import { setTextFar } from '../kernel/part';
 import { approach, clamp } from '../kernel/math';
 import { idleHooks, type EngineContext } from '../context';
 import type { Clock } from '../sim/clock';
-import type { Entity, Peek, RendererLike, Selection, ViewName } from '../types';
-import type { Box, GeneratedLayout } from '@/world/placement/types';
+import type { Band, Entity, Peek, RendererLike, Selection, ViewName } from '../types';
+import type { Box, GeneratedLayout, Pt } from '@/world/placement/types';
 
 export interface ViewOptions {
   container: HTMLElement;
   canvas: HTMLCanvasElement;
   renderer: RendererLike;
   clock: Clock;
-  /** Phones: the plots and the walkers wait for a closer view. */
+  /** Phones: the walkers wait for a closer view, and the hero's floor is lower. */
   reducedDetail: boolean;
   onSelect?: (sel: Selection | null) => void;
-  /** The level of detail changed: tiny hides the smallest movers, far hides the plots. */
-  onDetail?: (tiny: boolean, far: boolean) => void;
+  /** The band of detail changed (PRD v2 §3.3): tiny hides the smallest movers, far hides the small text and street details. */
+  onDetail?: (tiny: boolean, far: boolean, band: Band) => void;
 }
 
 export interface View {
@@ -52,6 +56,8 @@ export interface View {
   /** 0 the home view … 1 the near view on the selected (or last selected) building. */
   setDistance(t: number): void;
   distanceOf(): number;
+  /** The band of detail the camera's zoom is in (PRD v2 §3.3). */
+  band(): Band;
   zoomBy(k: number): void;
   /** Select the next or previous building, in the order they were built. */
   cycle(d: 1 | -1): void;
@@ -66,16 +72,21 @@ export interface View {
   dispose(): void;
 }
 
-/** A region of the world to frame: its footprint and the heights it spans. */
-export interface Frame { box: Box; z: readonly [number, number] }
+/** A region of the world to frame: its footprint and the heights it spans; pts, when given, are the ground points to fit instead of the box's corners. */
+export interface Frame { box: Box; z: readonly [number, number]; pts?: readonly Pt[] }
+
+const boundsOfPts = (pts: readonly Pt[]): Box => ({ x0: Math.min(...pts.map((p) => p[0])), x1: Math.max(...pts.map((p) => p[0])), y0: Math.min(...pts.map((p) => p[1])), y1: Math.max(...pts.map((p) => p[1])) });
+const corners = (b: Box): Pt[] => [[b.x0, b.y0], [b.x1, b.y0], [b.x1, b.y1], [b.x0, b.y1]];
 
 /** The places the shell's buttons name, as boxes to frame. */
 export function viewBoxes(layout: GeneratedLayout): Record<ViewName, Frame> {
-  const whole: Frame = { box: layout.world, z: [-4, 30] };
+  // the map frames everything drawn, point by point, so an empty corner of the slab costs it no zoom
+  const drawn: Pt[] = [...layout.regions.flatMap((r) => r.polygon), ...layout.blocks.flatMap((b) => corners(b.box)), ...layout.fixtures.flatMap((f) => corners(f.box))];
+  if (layout.port) drawn.push(...corners(layout.port.water));
+  const whole: Frame = drawn.length ? { box: boundsOfPts(drawn), z: [-4, 30], pts: drawn } : { box: layout.world, z: [-4, 30] };
   const boundsOf = (ids: readonly string[]): Box | null => {
     const pts = layout.regions.filter((r) => ids.includes(r.id)).flatMap((r) => r.polygon);
-    if (!pts.length) return null;
-    return { x0: Math.min(...pts.map((p) => p[0])), x1: Math.max(...pts.map((p) => p[0])), y0: Math.min(...pts.map((p) => p[1])), y1: Math.max(...pts.map((p) => p[1])) };
+    return pts.length ? boundsOfPts(pts) : null;
   };
   const region = (ids: readonly string[]): Frame => { const b = boundsOf(ids); return b ? { box: b, z: [0, 20] } : whole; };
   const tank = layout.fixtures.find((f) => f.kind === 'think-tank');
@@ -83,7 +94,10 @@ export function viewBoxes(layout: GeneratedLayout): Record<ViewName, Frame> {
   const thinktank: Frame = tank
     ? { box: { x0: tank.box.x0 - 30, x1: tank.box.x1 + 30, y0: tank.box.y0 - 30, y1: tank.box.y1 + 30 }, z: [hillZ, hillZ + 10] }
     : layout.hill ? { box: { x0: layout.hill.centre[0] - layout.hill.radius, x1: layout.hill.centre[0] + layout.hill.radius, y0: layout.hill.centre[1] - layout.hill.radius, y1: layout.hill.centre[1] + layout.hill.radius }, z: [0, hillZ + 10] } : region(['hill']);
-  return { whole, ring: region(['ring-geological', 'ring-biological']), estate: region(['estate']), gateway: region(['gateway']), town: region(['town']), thinktank };
+  // the hero (PRD v2 §3.1): the estate, the ring's near arc above it and the gateway's first blocks to the right
+  const est = boundsOf(['estate']), gw = boundsOf(['gateway']);
+  const hero: Frame = est ? { box: { x0: est.x0 - 20, x1: gw ? Math.max(est.x1, gw.x0 + 90) : est.x1 + 20, y0: est.y0 - 110, y1: est.y1 + 20 }, z: [0, 20] } : whole;
+  return { hero, whole, ring: region(['ring-geological', 'ring-biological']), estate: region(['estate']), gateway: region(['gateway']), town: region(['town']), thinktank };
 }
 
 // ---- the projection ----
@@ -97,13 +111,13 @@ const groundAt = (r: number, u: number): [number, number] => [(r * S2 - u * S6) 
 /** A world point's screen offset (right, up, in metres) from the ground origin. */
 const screenOfPoint = (x: number, y: number, z: number): [number, number] => [(x - y) / S2, (2 * z - x - y) / S6];
 
-/** Distance below which the view is far (plots and small text hidden), and below which it is tiny (walkers hidden). */
-const FAR = 0.22, TINY = 0.45, FAR_PHONE = 0.32, TINY_PHONE = 0.58;
-/** Distance from which a building marked "near" opens as the camera comes over it. */
-const NEAR_OPEN = 0.72;
+/** The hero's floor in pixels per metre (PRD v2 §2.3, §3.14): a wide stage, and a phone's. */
+const HERO_ZOOM = 1.25, HERO_ZOOM_PHONE = 1.0, PHONE_WIDTH = 640;
+/** The bands of detail (PRD v2 §3.3), in pixels per metre, each switching with a hysteresis of a tenth either side. */
+const STREET = 4, INSIDE = 10, HYSTERESIS = 0.1;
 /** Easing rate of the camera, per second. */
 const EASE = 6;
-const KEY_VIEWS: Record<string, ViewName> = { '0': 'whole', '1': 'ring', '2': 'estate', '3': 'gateway', '4': 'town', '5': 'thinktank' };
+const KEY_VIEWS: Record<string, ViewName> = { '0': 'whole', '1': 'ring', '2': 'estate', '3': 'gateway', '4': 'town', '5': 'thinktank', h: 'hero', H: 'hero' };
 const noRaycast = () => {};
 
 /** The twelve edges of a unit cube, for the selection frame (scaled to an entity's bounds). */
@@ -125,13 +139,15 @@ export function createView(ctx: EngineContext, o: ViewOptions): View {
 
   // ---- camera state: the ground point at the centre of the frame, and the zoom (kept as its log) ----
   const cur = { x: 0, y: 0, logZ: 0 }, goal = { x: 0, y: 0, logZ: 0 };
-  let homeLog = 0, nearLog = 1, home = { x: 0, y: 0 };
-  let named: ViewName | null = 'whole';
+  // homeLog is the hero's zoom (the slider's 0), mapLog the map's (the furthest out), nearLog the slider's 1
+  let homeLog = 0, mapLog = 0, nearLog = 1, home = { x: 0, y: 0 }, map = { x: 0, y: 0 };
+  let named: ViewName | null = 'hero';
 
-  /** The centre and zoom that frame a box with a margin. */
+  /** The centre and zoom that frame a box (or the frame's points) with a margin. */
   function fit(f: Frame, margin: number): { x: number; y: number; logZ: number } {
     let r0 = Infinity, r1 = -Infinity, u0 = Infinity, u1 = -Infinity;
-    for (const x of [f.box.x0, f.box.x1]) for (const y of [f.box.y0, f.box.y1]) for (const z of f.z) {
+    const pts = f.pts ?? [[f.box.x0, f.box.y0], [f.box.x1, f.box.y0], [f.box.x1, f.box.y1], [f.box.x0, f.box.y1]];
+    for (const [x, y] of pts) for (const z of f.z) {
       const [r, u] = screenOfPoint(x, y, z);
       r0 = Math.min(r0, r); r1 = Math.max(r1, r); u0 = Math.min(u0, u); u1 = Math.max(u1, u);
     }
@@ -145,15 +161,18 @@ export function createView(ctx: EngineContext, o: ViewOptions): View {
   function measure() {
     w = Math.max(1, container.clientWidth || canvas.clientWidth || 0);
     h = Math.max(1, container.clientHeight || canvas.clientHeight || 0);
-    const homeFit = fit(frames.whole, 1.04);
-    homeLog = homeFit.logZ; home = { x: homeFit.x, y: homeFit.y };
+    // the hero frames its box, never below its floor; on a narrow stage the floor wins and the hero shows part of it
+    const heroFit = fit(frames.hero, 1.04), floor = Math.log(w < PHONE_WIDTH ? HERO_ZOOM_PHONE : HERO_ZOOM);
+    homeLog = Math.max(heroFit.logZ, floor); home = { x: heroFit.x, y: heroFit.y };
+    const mapFit = fit(frames.whole, 1.03);
+    mapLog = Math.min(mapFit.logZ, homeLog); map = { x: mapFit.x, y: mapFit.y };
     nearLog = Math.max(homeLog + Math.log(8), Math.log(Math.min(w, h) / 40));
     camera.left = -w / 2; camera.right = w / 2; camera.top = h / 2; camera.bottom = -h / 2;
     renderer.setSize(w, h, false);
     ctx.theme.setResolution(w, h);
     markerMat.resolution.set(w, h);
   }
-  const zoomRange = () => [homeLog + Math.log(0.85), nearLog + Math.log(1.25)] as const;
+  const zoomRange = () => [mapLog + Math.log(0.85), nearLog + Math.log(1.25)] as const;
   const distOf = (logZ: number) => clamp((logZ - homeLog) / (nearLog - homeLog), 0, 1);
   const logOf = (t: number) => homeLog + clamp(t, 0, 1) * (nearLog - homeLog);
 
@@ -233,7 +252,7 @@ export function createView(ctx: EngineContext, o: ViewOptions): View {
     t = clamp(t, 0, 1);
     goal.logZ = logOf(t);
     const target = chosen ?? focus;
-    if (t === 0) { goal.x = home.x; goal.y = home.y; named = 'whole'; return; }
+    if (t === 0) { goal.x = home.x; goal.y = home.y; named = 'hero'; return; }
     named = null;
     if (target) {
       // the frame slides from the home view toward the building over the first part of the slider
@@ -243,8 +262,9 @@ export function createView(ctx: EngineContext, o: ViewOptions): View {
   }
   function lookAt(name: ViewName) {
     const f = frames[name] ?? frames.whole;
-    if (name === 'whole') { goal.x = home.x; goal.y = home.y; goal.logZ = homeLog; }
-    else { const g = fit(f, 1.08); goal.x = g.x; goal.y = g.y; goal.logZ = clamp(g.logZ, homeLog, nearLog); }
+    if (name === 'hero') { goal.x = home.x; goal.y = home.y; goal.logZ = homeLog; }
+    else if (name === 'whole') { goal.x = map.x; goal.y = map.y; goal.logZ = mapLog; }
+    else { const g = fit(f, 1.08); goal.x = g.x; goal.y = g.y; goal.logZ = clamp(g.logZ, mapLog, nearLog); }
     named = name;
   }
   function zoomBy(k: number) {
@@ -402,26 +422,32 @@ export function createView(ctx: EngineContext, o: ViewOptions): View {
   };
 
   // ---- the level of detail, the sections, the frame ----
-  let far: boolean | null = null, tiny: boolean | null = null, calls = 0;
+  let band: Band | null = null, calls = 0;
   const open = new Set<THREE.Group>();
+  /** The band the zoom z is in, switching only past the hysteresis so a zoom resting on a threshold never flickers. */
+  function bandOf(z: number, was: Band | null): Band {
+    const up = (t: number) => t * (1 + HYSTERESIS), down = (t: number) => t * (1 - HYSTERESIS);
+    if (was === 'inside') return z < down(INSIDE) ? (z < down(STREET) ? 'district' : 'street') : 'inside';
+    if (was === 'street') return z >= up(INSIDE) ? 'inside' : z < down(STREET) ? 'district' : 'street';
+    if (was === 'district') return z >= up(INSIDE) ? 'inside' : z >= up(STREET) ? 'street' : 'district';
+    return z >= INSIDE ? 'inside' : z >= STREET ? 'street' : 'district';
+  }
   function detail() {
-    const t = distOf(cur.logZ);
-    const nextFar = t < (o.reducedDetail ? FAR_PHONE : FAR), nextTiny = t < (o.reducedDetail ? TINY_PHONE : TINY);
-    if (nextFar !== far || nextTiny !== tiny) {
-      if (nextFar !== far) setTextFar(ctx.texts, nextFar);
-      far = nextFar; tiny = nextTiny;
-      o.onDetail?.(tiny, far);
-    }
+    const next = bandOf(Math.exp(cur.logZ), band);
+    if (next === band) return;
+    const far = next === 'district';
+    if (band === null || (band === 'district') !== far) setTextFar(ctx.texts, far);
+    band = next;
+    o.onDetail?.(far || o.reducedDetail, far, next);
   }
   const within = (g: THREE.Object3D, inner: THREE.Object3D | undefined) => { for (let x = inner ?? null; x; x = x.parent) if (x === g) return true; return false; };
   function sections() {
-    const t = distOf(cur.logZ);
     for (const [g, ent] of ctx.peeks) {
       const peek = g.userData.peek as Peek | undefined;
       if (!peek) continue;
       // the point at the building's floor height under the middle of the frame (a raised floor sits up-screen of its ground)
       const z0 = peek.z?.[0] ?? 0, mx = cur.x + z0, my = cur.y + z0;
-      const over = !!peek.near && t >= NEAR_OPEN && mx >= peek.box[0] - 20 && mx <= peek.box[1] + 20 && my >= peek.box[2] - 20 && my <= peek.box[3] + 20;
+      const over = !!peek.near && band === 'inside' && mx >= peek.box[0] - 20 && mx <= peek.box[1] + 20 && my >= peek.box[2] - 20 && my <= peek.box[3] + 20;
       const want = chosen === ent || (!!chosen && within(g, chosen.groups[0])) || over;
       const isOpen = open.has(g);
       if (want && !isOpen) {
@@ -460,7 +486,7 @@ export function createView(ctx: EngineContext, o: ViewOptions): View {
   }
 
   function resize() {
-    const t = distOf(cur.logZ), atHome = named === 'whole' && cur.logZ === homeLog;
+    const t = distOf(cur.logZ), atHome = named === 'hero' && cur.logZ === homeLog;
     measure();
     if (atHome) { cur.x = goal.x = home.x; cur.y = goal.y = home.y; cur.logZ = goal.logZ = homeLog; }
     else if (named) lookAt(named);
@@ -488,6 +514,7 @@ export function createView(ctx: EngineContext, o: ViewOptions): View {
     lookAt,
     setDistance,
     distanceOf: () => distOf(cur.logZ),
+    band: () => band ?? 'district',
     zoomBy,
     cycle,
     setHighlight,

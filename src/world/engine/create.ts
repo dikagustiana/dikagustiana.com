@@ -15,7 +15,7 @@ import { createContext, type EngineContext } from './context';
 import { createClock, STEP, WARMUP_SECONDS } from './sim/clock';
 import { buildSlab } from './world/ground';
 import { createView, type View } from './view';
-import type { Entity, FrameReading, LayerName, OverlayName, RendererLike, WorldHandle, WorldOptions } from './types';
+import { VIEW_NAMES, type Entity, type FrameReading, type LayerName, type OverlayName, type RendererLike, type ViewName, type WorldHandle, type WorldOptions } from './types';
 import type { FlowWeight, ModelStatus, StationBinding, WhiteboardContent } from '@/world/data/types';
 import { buildWorldScene, type WorldScene } from '@/world/world/build';
 import { createTraffic, type Traffic } from '@/world/sim/traffic';
@@ -43,6 +43,8 @@ interface DebugApi {
   distance(): number;
   /** The camera's zoom, in screen pixels per metre (scripts/world/probe.mjs reads it). */
   zoom(): number;
+  /** The band of detail the zoom is in (PRD v2 §3.3). */
+  band(): string;
   /** Whether an entity's first group is rendered: it and every ancestor visible (the LOD and the layers hide whole groups). */
   visible(id: string): boolean;
   /** One frame of the view by hand (the camera easing, the LOD switch, the peeks), dt in seconds; tests drive it where no animation frame runs. */
@@ -113,7 +115,7 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
     onSelect: options.onSelect,
     onDetail: (tiny, far) => { world.nearGroup.visible = !far; traffic.setDetail(tiny, far); },
   });
-  if (options.initialView && options.initialView !== 'whole') view.lookAt(options.initialView);
+  if (options.initialView && options.initialView !== 'hero') view.lookAt(options.initialView);
   const marks: Marks = createMarks(ctx, (a) => options.onAction?.(a));
   const chain: Chain = createChain(ctx, options.registry.links);
   const stations: Stations = createStations(ctx);
@@ -128,7 +130,7 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
   const subscribers = new Set<(r: FrameReading) => void>();
   let paused = false, last = typeof performance !== 'undefined' ? performance.now() : 0, acc = 0, raf: number | null = null, disposed = false;
   const reported = new Set<string>();
-  const reading = (): FrameReading => ({ clock: clock.clock(clock.t), night: clock.night(), readout: view.selected()?.readout() ?? 'nothing selected', paused, view: view.currentView(), zoom: view.camera.zoom, distance: view.distanceOf() });
+  const reading = (): FrameReading => ({ clock: clock.clock(clock.t), night: clock.night(), readout: view.selected()?.readout() ?? 'nothing selected', paused, view: view.currentView(), zoom: view.camera.zoom, distance: view.distanceOf(), band: view.band() });
   function frame(now: number) {
     if (disposed) return;
     raf = requestAnimationFrame(frame);
@@ -203,7 +205,8 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
       select: (id) => handle.select(id), selected: handle.selected,
       screenOf: (id) => { const e = find(id); return e ? view.screenOf(e) : null; },
       look: (x, y, k) => view.look(x, y, k),
-      view: (name) => { if ((['whole', 'ring', 'estate', 'gateway', 'town', 'thinktank'] as string[]).includes(name)) view.lookAt(name as FrameReading['view'] & string); },
+      view: (name) => { if ((VIEW_NAMES as readonly string[]).includes(name)) view.lookAt(name as ViewName); },
+      band: () => view.band(),
       all: () => ctx.entities.map((e: Entity) => ({ id: e.id, kind: e.kind, status: e.info().status })),
       drawCalls: () => view.drawCalls(),
       distance: () => view.distanceOf(),

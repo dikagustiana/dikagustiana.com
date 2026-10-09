@@ -6,14 +6,17 @@
 import type { LayerName, OverlayName, ViewName } from '@/world/engine/types';
 import type { ShiftId } from '@/data/industryChain';
 
+/** The place buttons (PRD v2 §3.1): Whole is the map; the hero, the home view, is H and the distance control's 0. */
 export const PLACES: readonly { view: ViewName; label: string; key: string }[] = [
   { view: 'ring', label: 'Ring', key: '1' },
   { view: 'estate', label: 'Estate', key: '2' },
   { view: 'gateway', label: 'Gateway', key: '3' },
   { view: 'town', label: 'Town', key: '4' },
-  { view: 'thinktank', label: 'Think tank', key: '5' },
+  { view: 'thinktank', label: 'Hill', key: '5' },
   { view: 'whole', label: 'Whole', key: '0' },
 ];
+/** The home view's key (PRD v2 §3.1). */
+export const HERO_KEY = 'H';
 
 /** The enabling layers as layer toggles, each the band it comes from in src/data/industryChain.ts. */
 export const LAYERS: readonly { layer: LayerName; bandId: string; label: string }[] = [

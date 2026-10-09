@@ -66,8 +66,12 @@ export interface Peek {
   near?: boolean;
 }
 
-export const VIEW_NAMES = ['whole', 'ring', 'estate', 'gateway', 'town', 'thinktank'] as const;
+/** The views the camera frames: the hero is the home (PRD v2 §3.1), whole is the map. */
+export const VIEW_NAMES = ['hero', 'whole', 'ring', 'estate', 'gateway', 'town', 'thinktank'] as const;
 export type ViewName = (typeof VIEW_NAMES)[number];
+
+/** The three bands of detail (PRD v2 §3.3), by the camera's zoom in pixels per metre. */
+export type Band = 'district' | 'street' | 'inside';
 
 export const LAYER_NAMES = ['logistics', 'cold-chain', 'credit', 'energy', 'governance', 'regulation'] as const;
 export type LayerName = (typeof LAYER_NAMES)[number];
@@ -95,8 +99,10 @@ export interface FrameReading {
   paused: boolean;
   view: ViewName | null;
   zoom: number;
-  /** The distance control's reading of the camera: 0 at the far home view, 1 at the near view. */
+  /** The distance control's reading of the camera: 0 at the hero (home) view, 1 at the near view. */
   distance: number;
+  /** The level of detail the zoom gives (PRD v2 §3.3): district, street or inside. */
+  band: Band;
 }
 
 /** A condition mark the shell has placed: on an entity (a gate or signpost) or at a region's label anchor. */
@@ -153,7 +159,7 @@ export interface WorldHandle {
   select(id: string | null): void;
   selected(): string | null;
   lookAt(view: ViewName): void;
-  /** 0 economy (the far home view) … 1 finance (near view on the selected or last building). */
+  /** 0 economy (the hero, home view) … 1 finance (near view on the selected or last building). */
   setDistance(t: number): void;
   setOverlay(name: OverlayName): void;
   /** The marks of the active shift, placed by the shell; an empty list clears them. */
