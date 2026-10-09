@@ -166,3 +166,40 @@ describe('the pointer on the canvas (PRD v2 §3.4, A3)', () => {
     expect(window.world!.selected()).toBe('INTP');
   });
 });
+
+describe('a lot opened as its section (PRD v2 §3.3, §3.5)', () => {
+  const solidVertices = (scene: import('three').Scene, zone: string) => { let n = 0; scene.traverse((o) => { if (o.name === `zone-part-${zone}`) o.traverse((m) => { const g = (m as import('three').Mesh).geometry; if (g && (m as import('three').Mesh).isMesh && g.getAttribute('color')) n += g.getAttribute('position').count; }); }); return n; };
+  const open = (handle: import('@/world/engine/types').WorldHandle, ticker: string) => { handle.select(ticker); window.world!.centre(ticker, 12); frames(3); };
+
+  it('draws its zone without it, and switching to another lot of the same zone keeps the new one out and the old one back', async () => {
+    const { handle, scene } = await mountWorld();
+    const zone = 'estate-primary';
+    frames(2);
+    const all = solidVertices(scene, zone);
+    open(handle, 'SMGR');
+    const withoutSmgr = solidVertices(scene, zone);
+    expect(withoutSmgr).toBeLessThan(all);
+    open(handle, 'INTP');
+    const withoutIntp = solidVertices(scene, zone);
+    expect(withoutIntp).toBeLessThan(all);
+    open(handle, 'SMGR');
+    expect(solidVertices(scene, zone)).toBe(withoutSmgr);
+    handle.select(null); frames(3);
+    expect(solidVertices(scene, zone)).toBe(all);
+  });
+
+  it('leaves no discarded text in the registry the view hides small text through, however often a zone is redrawn', async () => {
+    // a minimal 2D canvas, so the parts draw their text pages here
+    const ctx2d = { font: '', fillStyle: '', strokeStyle: '', lineWidth: 1, textBaseline: '', textAlign: '', measureText: (s: string) => ({ width: s.length * 10 }), fillText() {}, fillRect() {}, strokeRect() {}, clearRect() {}, beginPath() {}, arc() {}, fill() {}, stroke() {}, setLineDash() {} };
+    HTMLCanvasElement.prototype.getContext = (() => ctx2d) as unknown as HTMLCanvasElement['getContext'];
+    const { handle } = await mountWorld();
+    frames(2);
+    expect(window.world!.textMeshes()).toBeGreaterThan(0);
+    // the first opening draws the lot's section (its whiteboard has text) once; it is kept for the next time
+    open(handle, 'INTP'); handle.select(null); frames(3);
+    const before = window.world!.textMeshes();
+    for (let i = 0; i < 4; i++) { open(handle, 'INTP'); handle.select(null); frames(3); handle.setModelStatus(new Map([['INTP', { ticker: 'INTP', state: i % 2 ? 'published' : 'none' }]])); }
+    handle.setModelStatus(new Map());
+    expect(window.world!.textMeshes()).toBe(before);
+  });
+});

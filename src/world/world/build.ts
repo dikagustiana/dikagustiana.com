@@ -152,7 +152,7 @@ export function buildWorldScene(ctx: EngineContext, layout: GeneratedLayout, onA
   // family's shared form once, an office unit per company), the block's signboard between them, every building's cast
   // shadow; redrawn without a lot while that lot is open as its section (PRD v2 §3.5, D-V2-4) ----
   const zones = [...new Set(layout.blocks.map((b) => b.zone))];
-  interface Zone { id: string; blocks: Block[]; container: THREE.Group; part: THREE.Group | null; windows: THREE.Group | null; rects: Map<string, WindowRect[]>; tops: Map<string, number>; skip: string | null }
+  interface Zone { id: string; blocks: Block[]; container: THREE.Group; part: THREE.Group | null; windows: THREE.Group | null; rects: Map<string, WindowRect[]>; tops: Map<string, number>; skip: Set<string> }
   const zoneOf = new Map<string, Zone>();
   const OFFICE_STRIP = OFFICE_UNIT.depth + 2 * LOT_MARGIN;
   function drawBlock(p: Part, z: Zone, b: Block) {
@@ -163,11 +163,11 @@ export function buildWorldScene(ctx: EngineContext, layout: GeneratedLayout, onA
     if (LARGE_FAMILIES.includes(b.family)) {
       const shared = sharedBox(b.box, b.front, OFFICE_STRIP), d = FAMILY_BUILDERS[b.family](p, shared, r);
       shadow(p, shared, d.top); z.rects.set(b.code, d.windows); z.tops.set(b.code, d.top);
-      for (const l of b.lots) { if (l.id === z.skip) continue; const o = officeUnit(p, l.box); shadow(p, l.box, o.top); z.rects.set(l.id, o.windows); z.tops.set(l.id, o.top); }
+      for (const l of b.lots) { if (z.skip.has(l.id)) continue; const o = officeUnit(p, l.box); shadow(p, l.box, o.top); z.rects.set(l.id, o.windows); z.tops.set(l.id, o.top); }
     } else {
       let top = 0;
       for (const l of b.lots) {
-        if (l.id === z.skip) continue;
+        if (z.skip.has(l.id)) continue;
         p.tint = 1 + r.rand(-TONE_STEP, TONE_STEP);
         const d = FAMILY_BUILDERS[b.family](p, l.box, r); shadow(p, l.box, d.top);
         z.rects.set(l.id, d.windows); z.tops.set(l.id, d.top); top = Math.max(top, d.top);
@@ -177,8 +177,13 @@ export function buildWorldScene(ctx: EngineContext, layout: GeneratedLayout, onA
     p.tint = 1;
     signboard(p, b.box, b.front);
   }
+  /** A part going away: its text meshes leave the registry the view hides small text through, then it is disposed. */
+  function discard(g: THREE.Object3D) {
+    const meshes = ctx.texts.meshes;
+    g.traverse((o) => { const i = meshes.indexOf(o as THREE.Mesh); if (i >= 0) meshes.splice(i, 1); disposeMesh(o); });
+  }
   function drawZone(z: Zone) {
-    if (z.part) { z.container.remove(z.part); z.part.traverse(disposeMesh); }
+    if (z.part) { z.container.remove(z.part); discard(z.part); }
     z.rects.clear();
     const p = new Part(ctx);
     for (const b of z.blocks) drawBlock(p, z, b);
@@ -186,7 +191,7 @@ export function buildWorldScene(ctx: EngineContext, layout: GeneratedLayout, onA
     drawWindows(z);
   }
   function drawWindows(z: Zone) {
-    if (z.windows) { scene.remove(z.windows); z.windows.traverse(disposeMesh); }
+    if (z.windows) { scene.remove(z.windows); discard(z.windows); }
     const unlit: WindowRect[] = [], lit: WindowRect[] = [];
     for (const b of z.blocks) {
       const s = subIndustryByCode(b.code)!;
@@ -198,7 +203,7 @@ export function buildWorldScene(ctx: EngineContext, layout: GeneratedLayout, onA
   }
   for (const id of zones) {
     const container = new THREE.Group(); container.name = `zone-${id}`; scene.add(container);
-    const z: Zone = { id, blocks: layout.blocks.filter((b) => b.zone === id), container, part: null, windows: null, rects: new Map(), tops: new Map(), skip: null };
+    const z: Zone = { id, blocks: layout.blocks.filter((b) => b.zone === id), container, part: null, windows: null, rects: new Map(), tops: new Map(), skip: new Set() };
     zoneOf.set(id, z); drawZone(z);
   }
 
@@ -208,7 +213,7 @@ export function buildWorldScene(ctx: EngineContext, layout: GeneratedLayout, onA
   const BAR_TONE: Record<StatusKey, Tone> = { published: 'a', none: 'k', unavailable: 'g', 'no-issuer': 'g' };
   const rebuildMarks = () => {
     for (const id of zones) {
-      const old = marksByZone.get(id); if (old) { scene.remove(old); old.traverse(disposeMesh); }
+      const old = marksByZone.get(id); if (old) { scene.remove(old); discard(old); }
       const p = new Part(ctx);
       for (const b of zoneOf.get(id)!.blocks) {
         const ent = buildings.get(b.code)!, key = ent.statusKey(), [ax, ay] = b.anchor, M = TOP(ax - MARK / 2, ay - MARK / 2, 0.08);
@@ -282,7 +287,8 @@ export function buildWorldScene(ctx: EngineContext, layout: GeneratedLayout, onA
         label: () => (company ? `${company.ticker} · ${company.name}` : `Vacant lot · ${s.nameEn}`),
         readout: () => `${ticker ?? l.id} · ${s.nameEn}`,
         // while the lot is open as its section, its zone is drawn without it
-        peeked(on) { z.skip = on ? l.id : null; drawZone(z); },
+        // (another lot of the zone may open or close in the same frame: each lot adds or removes only itself)
+        peeked(on) { const had = z.skip.has(l.id); if (on) z.skip.add(l.id); else z.skip.delete(l.id); if (had !== on) drawZone(z); },
       };
       // the section is drawn the first time it opens, with the interior of the archetype the published model names, else the zone's fallback (PRD §7.8)
       let whiteboard: WhiteboardContent | null = null, board: THREE.Group | null = null, insideG: THREE.Group | null = null, wall: { x0: number; x1: number; y: number; z: number } | null = null;

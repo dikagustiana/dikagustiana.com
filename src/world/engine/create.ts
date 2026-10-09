@@ -51,6 +51,8 @@ interface DebugApi {
   zoom(): number;
   /** The band of detail the zoom is in (PRD v2 §3.3). */
   band(): string;
+  /** How many text meshes the registry holds (the view hides small text through it): a redraw must not grow it. */
+  textMeshes(): number;
   /** Whether an entity's first group is rendered: it and every ancestor visible (the LOD and the layers hide whole groups). */
   visible(id: string): boolean;
   /** One frame of the view by hand (the camera easing, the LOD switch, the peeks), dt in seconds; tests drive it where no animation frame runs. */
@@ -215,6 +217,7 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
       centre: (id, k) => { const e = find(id); if (e) view.lookAtEntity(e, k); },
       view: (name) => { if ((VIEW_NAMES as readonly string[]).includes(name)) view.lookAt(name as ViewName); },
       band: () => view.band(),
+      textMeshes: () => ctx.texts.meshes.length,
       hovered: () => view.hovered(),
       hoverAt: (px, py) => view.hoverAt(px, py),
       all: () => ctx.entities.map((e: Entity) => ({ id: e.id, kind: e.kind, status: e.info().status })),
