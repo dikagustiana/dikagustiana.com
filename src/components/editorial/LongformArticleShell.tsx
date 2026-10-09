@@ -7,7 +7,7 @@
 
 import { ReactNode, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, User, Calendar, Clock } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { ReadingProgress } from './ReadingProgress';
@@ -150,7 +150,10 @@ export function LongformArticleShell({
 
           {/* ── Title section ── */}
           <header className="space-y-4">
-            <h1 className="text-5xl font-black leading-tight text-foreground">
+            {/* .editorial-title, the class ArticleShell and the writer's title
+                input share; this shell used text-5xl font-black, a third
+                title spec for the same kind of page. */}
+            <h1 className="editorial-title">
               {title}
             </h1>
 
@@ -161,23 +164,12 @@ export function LongformArticleShell({
             )}
 
             {/* Metadata line */}
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
-              {author && (
-                <span className="flex items-center gap-1.5">
-                  <User className="h-3.5 w-3.5" />
-                  {author}
-                </span>
-              )}
-              {publishedAt && (
-                <span className="flex items-center gap-1.5">
-                  <Calendar className="h-3.5 w-3.5" />
-                  {formatDate(publishedAt)}
-                </span>
-              )}
-              {readTime && (
-                <span className="flex items-center gap-1.5">
-                  <Clock className="h-3.5 w-3.5" />
-                  {readTime}
+            <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1 text-sm text-muted-foreground">
+              {(author || publishedAt || readTime) && (
+                <span>
+                  {author && <span className="font-medium text-foreground">{author}</span>}
+                  {author && (publishedAt || readTime) && ' · '}
+                  {[publishedAt && formatDate(publishedAt), readTime].filter(Boolean).join(' · ')}
                 </span>
               )}
               {showUpdated && updatedAt && (

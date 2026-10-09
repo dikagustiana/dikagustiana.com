@@ -1,6 +1,4 @@
 import { useMemo } from 'react';
-import { User, Calendar, Clock, Tag } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 interface ArticleHeaderProps {
@@ -78,30 +76,17 @@ export function ArticleHeader({
       )}
 
       {/* Meta row: author, then date · read time, then the divider — the
-          order the specification asks for. */}
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground border-b border-border pb-6 mb-8">
+          order the specification asks for. Plain text: the user, calendar,
+          clock and tag icons only labelled what the words already say. */}
+      <div className="flex flex-wrap items-baseline gap-x-4 gap-y-2 text-sm text-muted-foreground border-b border-border pb-6 mb-8">
         {topic && (
-          <Badge variant="secondary" className="text-xs uppercase tracking-wide">
-            <Tag className="h-3 w-3 mr-1" />
-            {topic}
-          </Badge>
+          <span className="text-xs font-mono uppercase tracking-wide">{topic}</span>
         )}
-        {author && (
-          <span className="flex items-center gap-1.5">
-            <User className="h-4 w-4" />
-            <span className="font-medium text-foreground">{author}</span>
-          </span>
-        )}
-        {publishedAt && (
-          <span className="flex items-center gap-1.5">
-            <Calendar className="h-4 w-4" />
-            {formatDate(publishedAt)}
-          </span>
-        )}
-        {readTime && (
-          <span className="flex items-center gap-1.5">
-            <Clock className="h-4 w-4" />
-            {readTime}
+        {(author || publishedAt || readTime) && (
+          <span>
+            {author && <span className="font-medium text-foreground">{author}</span>}
+            {author && (publishedAt || readTime) && ' · '}
+            {[publishedAt && formatDate(publishedAt), readTime].filter(Boolean).join(' · ')}
           </span>
         )}
         {showUpdated && updatedAt && (

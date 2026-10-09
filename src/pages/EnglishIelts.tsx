@@ -1,7 +1,6 @@
 import { PageLayout } from '@/components/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Headphones, BookOpen, Pencil, MessageCircle, Clock, Target } from 'lucide-react';
 
 const skills = [
   {
@@ -10,7 +9,6 @@ const skills = [
     timeRequired: '40 minutes per session',
     task: 'Complete 4 sections, 40 questions. Answer while listening.',
     method: 'Predict answers before audio. Write during audio. Transfer at end.',
-    icon: Headphones,
   },
   {
     title: 'Reading',
@@ -18,7 +16,6 @@ const skills = [
     timeRequired: '60 minutes total',
     task: '3 passages, 40 questions. No extra transfer time.',
     method: 'Skim first. Locate keywords. Answer in passage order.',
-    icon: BookOpen,
   },
   {
     title: 'Writing',
@@ -30,7 +27,6 @@ const skills = [
     // of complex structures", so that is what this says now.
     task: 'Task 1: 150+ words. Task 2: 250+ words. Band 7 grammar: a variety of complex structures.',
     method: '5 min planning. 4 paragraphs Task 2. Proofread last 3 min.',
-    icon: Pencil,
   },
   {
     title: 'Speaking',
@@ -38,7 +34,6 @@ const skills = [
     timeRequired: '11-14 minutes exam',
     task: 'Part 1: Personal. Part 2: 2-min monologue. Part 3: Abstract discussion.',
     method: 'Extend answers naturally. Use discourse markers. Self-correct visibly.',
-    icon: MessageCircle,
   },
 ];
 
@@ -59,36 +54,24 @@ export default function EnglishIelts() {
       <div className="container py-8">
         <div className="text-center mb-12">
           <h1 className="text-3xl md:text-4xl font-display font-bold mb-4">
-            IELTS Preparation: Band 7+ Methodology
+            IELTS Preparation
           </h1>
-          <div className="flex items-center justify-center gap-6 text-sm text-muted-foreground">
-            <span className="flex items-center gap-2">
-              <Target className="h-4 w-4" />
-              Target: Band 7.0+
-            </span>
-            <span className="flex items-center gap-2">
-              <Clock className="h-4 w-4" />
-              Exam Duration: 2h 45min
-            </span>
-          </div>
+          <p className="text-sm text-muted-foreground">
+            Target: Band 7.0+ · Exam duration: 2h 45min
+          </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
           {skills.map((skill) => (
             <Card key={skill.title} className="h-full">
               <CardHeader className="pb-2">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-primary/10">
-                    <skill.icon className="h-5 w-5 text-primary" />
-                  </div>
-                  <CardTitle className="text-lg">{skill.title}</CardTitle>
-                </div>
+                <CardTitle className="text-lg">{skill.title}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
                     <p className="text-xs font-medium text-muted-foreground uppercase mb-1">Target</p>
-                    <p className="font-semibold text-green-600 dark:text-green-400">{skill.targetScore}</p>
+                    <p className="font-semibold text-foreground">{skill.targetScore}</p>
                   </div>
                   <div>
                     <p className="text-xs font-medium text-muted-foreground uppercase mb-1">Time</p>
