@@ -30,10 +30,11 @@ src/world/
   world/                         families.ts (44 builders), build.ts (the scene from the layout: regions, blocks, plots, roads, gates, signposts, fixtures)
   interiors/                     base.ts (the cut), stations.ts (data + matcher, no three.js), proc/dist/asset/mine/farm/service.ts (drawings), thinktank.ts
   sim/traffic.ts                 lanes and movers: trucks, reefers, forklifts, the train, the crane, walkers, coins; flow classes add trucks
-src/components/world/            WorldFrame (header, stage, strip, card dock, board host), Card, Board, ThinkTank, Search, Poster, WorldSection,
-                                 useWorldData (one request, react-query), usePieces, world.css (token-only)
+src/components/world/            WorldFrame (header, stage, strip, card dock, board host), Card, Board, ThinkTank, Search, Poster (the slot: the
+                                 poster in the frame's layout first, the frame after its paint), FrameShell + frame.css (what the first paint draws,
+                                 shared by both), WorldSection, useWorldData (one request, react-query), usePieces, world.css (token-only)
 src/pages/world/KawasanPage.tsx  /finance/kawasan and /finance/kawasan/:ticker
-src/components/industry-chain/ChainPlate.tsx   the two wrappers: flag off → the schematic exactly as before; flag on → WorldSection, poster first
+src/components/industry-chain/ChainPlate.tsx   the two wrappers: flag off → the schematic exactly as before; flag on → WorldSlot, poster first
 supabase/migrations/20261008120000_essay_world_tags.sql   committed, applied nowhere
 tests/unit/world*.test.ts(x)     16 suites, 72 tests; tests/e2e/world.spec.ts (7, playwright.world.config.ts)
 ```
@@ -126,6 +127,29 @@ on both profiles; TBT is at parity; desktop LCP is within 0.25 s; **mobile LCP i
 the flag-off page** on this uncompressed preview, the poster's transfer and its render behind the
 lazy route chunk. Open for the owner (gate 4, O8).
 
+### After gate 4: O8, the mobile LCP
+
+`o8-mobile-lcp.md` has the trace, the change and the measurements. One correction to the paragraph
+above: `vite preview` does compress (gzip); the poster travelled as 7.4 kB. The cause was render: on a
+phone the frame's own poster, in a different layout from the fallback's, was the largest paint, behind
+the frame's chunk. Now the first paint is the frame's own layout (shared components, the same stage),
+the frame's chunk is fetched after the poster's paint, the poster is written compactly (66.7 kB →
+17.8 kB) and three.js is three chunks. Five interleaved rounds, medians, before (`main` at `8b549d1`)
+and after:
+
+| run (Lighthouse 13.5.0, this container) | LCP before → after | FCP before → after | TBT before → after | CLS before → after |
+|---|---|---|---|---|
+| flag on, mobile, `vite preview` (gzip) | 5,204 → 4,291 ms | 3,230 → 2,755 ms | 58 → 43 ms | 0.001 → 0 |
+| flag off, mobile, `vite preview` (gzip) | 4,339 → 4,311 ms | 2,919 → 2,897 ms | 69 → 52 ms | 0.011 → 0.011 |
+| flag on, mobile, brotli | 4,881 → 4,018 ms | 3,058 → 2,598 ms | 38 → 50 ms | 0.001 → 0 |
+| flag off, mobile, brotli | 3,992 → 4,001 ms | 2,737 → 2,747 ms | 72 → 61 ms | 0.011 → 0.011 |
+| flag on, desktop, `vite preview` (gzip) | 1,150 → 891 ms | 703 → 611 ms | 126 → 118 ms | 0.001 → 0.001 |
+| flag on, desktop, brotli | 1,089 → 848 ms | 663 → 553 ms | 111 → 129 ms | 0.001 → 0.001 |
+
+Flag-on mobile LCP is level with the flag-off page under both kinds of compression; mobile
+performance 74 → 81 (gzip) and 76 → 83 (brotli). `frames/lighthouse.json` and the four reports are
+re-run on this branch with `--runs 3`.
+
 Engine (`measurements.json`): draw calls far 522 · middle 263–457 · near 440–552 (budgets 1,200 /
 1,600 / 1,900); warm-up 1 s = 60 steps, the first frame reads 10:00; mount 0.8–1.2 s on SwiftShader;
 frame times are SwiftShader's and are not a measure of the engine.
@@ -155,8 +179,9 @@ viewer only with `VITE_FIA_PREVIEW=true` as well (discovery item K).
 5. **The registry's review.** Placements (D1–D4, 130 rows), pairs (S1, 64 empty slots), the ten spelling
    corrections (S3), the official IDX-IC PDF or its hash (item N).
 6. **The think tank's tags** (`think-tank-tags.json`, O4) and the whiteboard's share rule (O6).
-7. **Mobile LCP** (O8): accept the first-touch start as the phone's behaviour, or ask for the sliced
-   build (D15's first plan) and a smaller poster.
+7. **Mobile LCP** (O8): done on `claude/world-mobile-lcp` (`o8-mobile-lcp.md`): a smaller poster, the
+   first paint in the frame's own layout, the frame fetched after it, three.js in three chunks; flag-on
+   mobile LCP is level with the flag-off page. D15's sliced scene build is not done (§5 there).
 8. **The preview URL** (item P): this session cannot read Vercel's deployments.
 
 ## 7. Decision log

@@ -1,50 +1,71 @@
 {
-  "ranAt": "2026-10-08T19:33:13.745Z",
+  "ranAt": "2026-10-09T04:57:41.290Z",
   "lighthouse": "13.5.0",
+  "rounds": 3,
   "runs": {
     "off-mobile": {
       "performance": 80,
       "accessibility": 98,
       "bestPractices": 96,
-      "lcpMs": 4295,
+      "lcpMs": 4296,
       "cls": 0.011,
-      "tbtMs": 43,
-      "fcpMs": 2888,
+      "tbtMs": 78,
+      "fcpMs": 2930,
       "transferKb": 436,
-      "lcpElement": null
+      "lcpElement": "<p class=\"mt-2 text-sm leading-relaxed text-muted-foreground md:text-base\" data-chain-shift-lead=\"true\">",
+      "lcpMsRuns": [
+        4338,
+        4288,
+        4296
+      ]
     },
     "off-desktop": {
-      "performance": 99,
+      "performance": 98,
       "accessibility": 98,
       "bestPractices": 96,
-      "lcpMs": 891,
+      "lcpMs": 898,
       "cls": 0.001,
       "tbtMs": 0,
-      "fcpMs": 630,
+      "fcpMs": 638,
       "transferKb": 436,
-      "lcpElement": null
+      "lcpElement": "<p class=\"mt-3 text-sm leading-relaxed text-muted-foreground\" data-chain-doors=\"true\">",
+      "lcpMsRuns": [
+        898,
+        909,
+        894
+      ]
     },
     "on-mobile": {
-      "performance": 74,
+      "performance": 81,
       "accessibility": 98,
       "bestPractices": 96,
-      "lcpMs": 5271,
-      "cls": 0.001,
-      "tbtMs": 34,
-      "fcpMs": 3236,
-      "transferKb": 494,
-      "lcpElement": null
+      "lcpMs": 4272,
+      "cls": 0,
+      "tbtMs": 55,
+      "fcpMs": 2763,
+      "transferKb": 493,
+      "lcpElement": "<img class=\"world-frame__poster\" src=\"/world/poster-far.svg\" alt=\"\" width=\"1600\" height=\"952\" decoding=\"async\" fetchprio",
+      "lcpMsRuns": [
+        4255,
+        4339,
+        4272
+      ]
     },
     "on-desktop": {
-      "performance": 95,
+      "performance": 94,
       "accessibility": 98,
       "bestPractices": 96,
-      "lcpMs": 1123,
+      "lcpMs": 883,
       "cls": 0.001,
-      "tbtMs": 120,
-      "fcpMs": 702,
-      "transferKb": 676,
-      "lcpElement": null
+      "tbtMs": 165,
+      "fcpMs": 609,
+      "transferKb": 678,
+      "lcpElement": null,
+      "lcpMsRuns": [
+        883,
+        891,
+        876
+      ]
     }
   }
 }
