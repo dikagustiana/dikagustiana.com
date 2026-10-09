@@ -254,8 +254,8 @@ Trailer lines as the repository's convention requires (see the session's attribu
 ## 11. Definition of done
 
 - PRD §7 A1–E5 all met, each with its evidence in a gate note.
-- `scripts/world/probe.mjs` at the home view: ≥ 1.2 px/m, block ≥ 60 px, ≥ 40 vehicles moving,
-  `clickResolves: company` at the three bands, hover pointer.
+- `scripts/world/probe.mjs` at the home view: ≥ 1.2 px/m, block ≥ 60 px, ≥ 40 vehicles rendered
+  and moving at ≥ 3 px/s, `clickResolves: company` at the three bands, hover pointer.
 - Unit suite green with ≥ 40 new tests; the world browser suite ≥ 12 cases green; `check:world`
   clean; flag-off build identical to `main`; Lighthouse no worse.
 - Six stories light; Follow completes one; every family moves; every block lights at night.

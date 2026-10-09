@@ -43,6 +43,8 @@ interface DebugApi {
   distance(): number;
   /** The camera's zoom, in screen pixels per metre (scripts/world/probe.mjs reads it). */
   zoom(): number;
+  /** Whether an entity's first group is rendered: it and every ancestor visible (the LOD and the layers hide whole groups). */
+  visible(id: string): boolean;
   /** One frame of the view by hand (the camera easing, the LOD switch, the peeks), dt in seconds; tests drive it where no animation frame runs. */
   tick(dt: number): void;
   statuses(): Record<string, ModelStatus>;
@@ -206,6 +208,7 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
       drawCalls: () => view.drawCalls(),
       distance: () => view.distanceOf(),
       zoom: () => view.camera.zoom,
+      visible: (id) => { const e = find(id); const g = e?.groups[0]; if (!g) return false; for (let o: THREE.Object3D | null = g; o; o = o.parent) if (!o.visible) return false; return true; },
       tick: (dt) => tick(last + dt * 1000),
       statuses: () => Object.fromEntries(statuses),
       chain: () => chain.codes(),

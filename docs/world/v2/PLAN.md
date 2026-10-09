@@ -37,14 +37,17 @@ Measured on 9 October 2026 with `scripts/world/probe.mjs` (added by this plan) a
 build of `main` at `edc944a`, Chromium 1440 × 900, the stage 1,246 × 700 px, SwiftShader. Frames
 and the JSON are in `docs/world/frames/v1-probe/`.
 
-| view | px per metre | a 40 m block on screen | movers moving / visible | truck speed on screen | draw calls | click at INTP's anchor selects |
+| view | px per metre | a 40 m block on screen | vehicles rendered, on screen and moving | truck speed on screen | draw calls | click at INTP's anchor selects |
 |---|---|---|---|---|---|---|
-| home (`whole`) | 0.42 | 24 px | 68 / 122 | 2.3 px/s | 317 | the building B121 |
-| middle (`estate`) | 1.41 | 79 px | 32 / 32 | 25.3 px/s | 658 | the building B121 |
-| near (distance 1) | 15.98 | 904 px | 0 / 0 | 0 | 95 | the building B121 |
+| home (`whole`) | 0.42 | 24 px | 47 of 47 | 2.1 px/s | 317 | the building B121 |
+| middle (`estate`) | 1.39 | 78 px | 23 of 23 | 34 px/s | 648 | the building B121 |
+| near (distance 1) | 16.25 | 919 px | 0 of 0 | 0 | 95 | the building B121 |
 
-(SwiftShader renders at a few frames per second, so px/s understates a real GPU by roughly 3×;
-the ratio between views holds.)
+(Only rendered movers count: the LOD hides the walkers at the home view and the layers hide the
+reefers and coins. SwiftShader renders at a few frames per second, so px/s understates a real GPU
+by roughly 3×; the ratio between views holds. At the home view 47 vehicles are on screen, so the
+failure is not their number but their size and speed: a truck is 5 px long and moves two pixels a
+second.)
 
 ### 1.1 Root causes
 
@@ -106,7 +109,7 @@ v2 is alive when all of these hold on a laptop at the home view:
 | # | property | measure |
 |---|---|---|
 | L1 | Buildings read as buildings | a 40 m block is ≥ 60 px wide; silhouettes differ by family |
-| L2 | Motion is visible | ≥ 40 vehicles on screen moving at ≥ 8 px/s on a real GPU (≥ 3 px/s on the probe's SwiftShader) |
+| L2 | Motion is visible | ≥ 40 goods vehicles on screen, each ≥ 18 px long, moving at ≥ 8 px/s on a real GPU (≥ 3 px/s on the probe's SwiftShader) |
 | L3 | Motion has meaning | every goods vehicle has an origin building, a destination building and a load named after the link; it stops at the gate's weighbridge and at the destination's bay |
 | L4 | The chain can be seen | selecting any building animates its supplier and customer flows; dashes travel in the direction of the goods |
 | L5 | Everything points | hovering any company, building, vehicle, gate or fixture shows a pointer and a label; clicking it opens its card, at every distance |
@@ -180,7 +183,7 @@ for "lanjut").
 | gate | deliverable | exit criteria (measured) |
 |---|---|---|
 | **A. Scale, pointing, companies** | compacted layout; hero home view; ground and shading; hover label and pointer; company lots with signs; cards v2 for buildings and companies; poster re-rendered | probe home: ≥ 1.2 px/m, block ≥ 60 px; click at a company anchor selects the company at home, district and street; hover shows pointer + label within 150 ms; `Whole` ≥ 0.75 px/m; draw calls within budget; flag-off build identical |
-| **B. Flows** | road graph and routing; bays and driveways; the flows system (goods, returns, raw export by ship, rail shuttle, coins); goods classes and vehicle kinds; link register complete; vehicle cards | probe home: ≥ 40 vehicles on screen moving; every vehicle has origin, destination and load; no isolated building; a truck stops at a weighbridge; routes never cross lots; 300 live vehicles ≤ 1,300 draw calls at the district view |
+| **B. Flows** | road graph and routing; bays and driveways; the flows system (goods, returns, raw export by ship, rail shuttle, coins); goods classes and vehicle kinds; link register complete; vehicle cards | probe home: ≥ 40 vehicles on screen moving at ≥ 3 px/s, each ≥ 18 px; every vehicle has origin, destination and load; no isolated building; a truck stops at a weighbridge; routes never cross lots; 300 live vehicles ≤ 1,300 draw calls at the district view |
 | **C. Activity and night** | per-family activity; day cycle for all; lamps; published emphasis | every family shows motion at the district view (listed in the gate note with a frame each); night frame at 20:00 with every block lit; draw calls within budget |
 | **D. Chain, stories, follow** | flow-based chain highlight; story table and buttons; Follow mode; search over stories; phone layout for the strip | selecting any building animates its links; six stories light end to end; Follow completes a story in ≤ 90 s with a card at each stop; `F` follows a vehicle; Esc exits |
 | **E. Quality** | tests (unit, engine, browser), Lighthouse before/after, a11y pass, docs (report v2, decision log), NOTICE check | 1,062 unit tests + new ≥ 40; world browser suite ≥ 12 cases green; Lighthouse mobile LCP no worse than `main`; zero console errors after 600 simulated seconds; keyboard path covers companies, vehicles and stories |

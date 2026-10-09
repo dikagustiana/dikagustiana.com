@@ -46,7 +46,7 @@ them, and nowhere else.
 |---|---|---|
 | px per metre at the home view | 0.42 | ≥ 1.2 |
 | a 40 m block at the home view | 24 px | ≥ 60 px |
-| vehicles on screen and moving at the home view | 68 (sub-pixel) | ≥ 40 at ≥ 8 px/s (real GPU) |
+| vehicles on screen and moving at the home view | 47, at 2 px/s and 5 px long | ≥ 40, each ≥ 18 px long, at ≥ 8 px/s (real GPU) |
 | click on a company's building selects | the sub-industry | the company, at every distance |
 | hover feedback | cursor only | pointer + label ≤ 150 ms |
 | vehicles with an origin and a destination | 0 of 122 | all goods vehicles |
@@ -54,7 +54,7 @@ them, and nowhere else.
 | families with visible activity at the district view | 2 (crane, forklifts) | all 44 |
 | buildings lit at night | published only (0) | all, published brighter |
 | stories a visitor can follow | 0 | 6 |
-| draw calls home / district / street | 317 / 658 / 95 | ≤ 900 / ≤ 1,300 / ≤ 1,600 |
+| draw calls home / district / street | 317 / 648 / 95 | ≤ 900 / ≤ 1,300 / ≤ 1,600 |
 | Lighthouse mobile LCP, flag on | ≈ 4.3 s (lab) | no worse |
 
 ## 3. The experience
@@ -352,7 +352,7 @@ All measured on a flag-on build; the probe's table is part of the gate note.
 
 **Flows (phase B)**
 - B1. Every goods vehicle has an origin lot, a destination lot and a load named after a link; `window.world.all()` reports them.
-- B2. At the home view ≥ 40 vehicles are on screen and moving.
+- B2. At the home view ≥ 40 goods vehicles are on screen and moving at ≥ 3 px/s on the probe (≥ 8 px/s on a real GPU), each ≥ 18 px long.
 - B3. A vehicle crossing a gate stops at the weighbridge; one arriving at a bay unloads.
 - B4. No placed sub-industry is isolated; every bay reaches every other bay (unit test on the graph).
 - B5. Ships call at the quays; the rail shuttle runs; the six returns run; coins run with the credit layer.

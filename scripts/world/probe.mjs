@@ -8,8 +8,10 @@
  * It reports, at the home view and at the middle (estate) view:
  *   pxPerMetre     the camera's zoom: how many screen pixels one metre is
  *   buildingPx     the on-screen width of a 40 m block at that zoom
- *   truckPxPerSec  how far a truck travels on screen in one wall-clock second
- *   movingVisible  how many movers are on screen and moving
+ *   vehiclesMoving road and rail vehicles (trucks, reefers, loop and raw trucks, vans,
+ *                  forklifts, the train) that are rendered, on screen and moving, of those rendered and on screen
+ *   walkersMoving  the same for walkers; coinsMoving for the money layer's coins
+ *   truckPxPerSec  the median on-screen speed of the rendered, moving trucks (TRUCK-* only)
  *   drawCalls      the renderer's draw calls for the frame
  *   click          what a click at a company's anchor selects (company, building, nothing)
  *   hover          whether the cursor turns to a pointer over a company
@@ -42,20 +44,29 @@ async function measure(name) {
   const m = await page.evaluate(async ({ ticker, code }) => {
     const w = window.world;
     const zoom = w.zoom?.() ?? null;
-    const movers = w.all().filter((e) => /^(TRUCK|REEFER|LOOP|RAW|VAN|COIN|FORKLIFT|TRAIN|WALKER)-/.test(e.id)).map((e) => e.id);
+    // only rendered movers count: the LOD and the layers hide whole groups, and a hidden mover's anchor still projects
+    const kindOf = (id) => (/^WALKER-/.test(id) ? 'walkers' : /^COIN-/.test(id) ? 'coins' : /^(TRUCK|REEFER|LOOP|RAW|VAN|FORKLIFT|TRAIN)-/.test(id) ? 'vehicles' : null);
+    const movers = w.all().map((e) => e.id).filter((id) => kindOf(id) && w.visible(id));
     const at = (id) => w.screenOf(id);
     const before = Object.fromEntries(movers.map((id) => [id, at(id)]));
     await new Promise((r) => setTimeout(r, 1000));
     const after = Object.fromEntries(movers.map((id) => [id, at(id)]));
     const cw = document.querySelector('canvas').clientWidth, ch = document.querySelector('canvas').clientHeight;
-    let visible = 0, moving = 0, speeds = [];
-    for (const id of movers) { const a = before[id], b = after[id]; if (!a || !b) continue; const on = a[0] >= 0 && a[0] <= cw && a[1] >= 0 && a[1] <= ch; if (!on) continue; visible++; const d = Math.hypot(a[0] - b[0], a[1] - b[1]); if (d > 0.5) { moving++; speeds.push(d); } }
-    speeds.sort((x, y) => x - y);
-    const truck = speeds.length ? speeds[Math.floor(speeds.length / 2)] : 0;
-    return { zoom, visible, moving, truckPxPerSec: Math.round(truck * 10) / 10, drawCalls: w.drawCalls(), distance: Math.round(w.distance() * 100) / 100, company: at(ticker), building: at(code) };
+    const count = { vehicles: [0, 0], walkers: [0, 0], coins: [0, 0] }, truckSpeeds = [];
+    for (const id of movers) {
+      const a = before[id], b = after[id]; if (!a || !b) continue;
+      const on = a[0] >= 0 && a[0] <= cw && a[1] >= 0 && a[1] <= ch; if (!on) continue;
+      const k = kindOf(id); count[k][1]++;
+      const d = Math.hypot(a[0] - b[0], a[1] - b[1]);
+      if (d > 0.5) { count[k][0]++; if (/^TRUCK-/.test(id)) truckSpeeds.push(d); }
+    }
+    truckSpeeds.sort((x, y) => x - y);
+    const truck = truckSpeeds.length ? truckSpeeds[Math.floor(truckSpeeds.length / 2)] : 0;
+    const of = ([m, v]) => `${m} of ${v}`;
+    return { zoom, vehiclesMoving: of(count.vehicles), walkersMoving: of(count.walkers), coinsMoving: of(count.coins), truckPxPerSec: Math.round(truck * 10) / 10, drawCalls: w.drawCalls(), distance: Math.round(w.distance() * 100) / 100, company: at(ticker), building: at(code) };
   }, { ticker: TICKER, code: CODE });
   const pxPerMetre = m.zoom;
-  const r = { view: name, pxPerMetre: pxPerMetre ? Math.round(pxPerMetre * 100) / 100 : null, buildingPx: pxPerMetre ? Math.round(40 * Math.SQRT2 * pxPerMetre) : null, movingVisible: `${m.moving} of ${m.visible}`, truckPxPerSec: m.truckPxPerSec, drawCalls: m.drawCalls, distance: m.distance };
+  const r = { view: name, pxPerMetre: pxPerMetre ? Math.round(pxPerMetre * 100) / 100 : null, buildingPx: pxPerMetre ? Math.round(40 * Math.SQRT2 * pxPerMetre) : null, vehiclesMoving: m.vehiclesMoving, walkersMoving: m.walkersMoving, coinsMoving: m.coinsMoving, truckPxPerSec: m.truckPxPerSec, drawCalls: m.drawCalls, distance: m.distance };
   // hover and click at the company's anchor
   if (m.company) {
     const [x, y] = m.company;
@@ -79,6 +90,6 @@ results.push(await measure('near'));
 
 const report = { ranAt: new Date().toISOString(), base, route, canvas: { w: canvas.w, h: canvas.h }, results, pageErrors: errors };
 fs.writeFileSync(path.join(out, 'probe.json'), JSON.stringify(report, null, 2));
-console.table(results.map(({ view, pxPerMetre, buildingPx, movingVisible, truckPxPerSec, drawCalls, hoverCursor, clickResolves }) => ({ view, pxPerMetre, buildingPx, movingVisible, truckPxPerSec, drawCalls, hoverCursor, clickResolves })));
+console.table(results.map(({ view, pxPerMetre, buildingPx, vehiclesMoving, walkersMoving, truckPxPerSec, drawCalls, hoverCursor, clickResolves }) => ({ view, pxPerMetre, buildingPx, vehiclesMoving, walkersMoving, truckPxPerSec, drawCalls, hoverCursor, clickResolves })));
 if (errors.length) console.log('page errors:', errors);
 await browser.close();
