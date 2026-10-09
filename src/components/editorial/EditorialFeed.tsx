@@ -6,9 +6,11 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Search, Clock, User, Calendar } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
+import { ErrorState } from '@/components/states';
+import { canSearchFeed, canSortFeed } from '@/lib/feedControls';
 
 interface Essay {
   id: string;
@@ -53,7 +55,7 @@ export function EditorialFeed({ section, topics = [], getEssayUrl }: EditorialFe
   };
   const [sortBy, setSortBy] = useState('newest');
 
-  const { data: essays, isLoading } = useQuery({
+  const { data: essays, isLoading, isError, refetch } = useQuery({
     queryKey: ['editorial-feed', section],
     queryFn: async () => {
       let query = supabase
@@ -131,11 +133,32 @@ export function EditorialFeed({ section, topics = [], getEssayUrl }: EditorialFe
     );
   }
 
+  // A failed query is not an empty section: without this the feed read
+  // "0 essays / No essays found" during an outage, which tells the reader
+  // something false about the writing. Same fix as the phase feeds.
+  if (isError) {
+    return (
+      <ErrorState
+        title="Couldn't load the essays"
+        message="The essays could not be fetched just now. This is a temporary failure, not an empty section."
+        onRetry={() => refetch()}
+      />
+    );
+  }
+
+  const essayCount = essays?.length ?? 0;
+  const showSearch = canSearchFeed(essayCount);
+  const showSort = canSortFeed(essayCount);
+  const showFilters = showSearch || showSort || topics.length > 0;
+
   return (
     <div className="space-y-8">
-      {/* Filters */}
+      {/* Filters: search and sort appear once the list is long enough to need
+          them; the topic filter is the section's own navigation and stays. */}
+      {showFilters && (
       <div className="flex flex-col sm:flex-row gap-4">
         {/* Search */}
+        {showSearch && (
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
@@ -145,6 +168,7 @@ export function EditorialFeed({ section, topics = [], getEssayUrl }: EditorialFe
             className="pl-9"
           />
         </div>
+        )}
 
         <div className="flex gap-2">
           {/* Topic filter */}
@@ -165,17 +189,20 @@ export function EditorialFeed({ section, topics = [], getEssayUrl }: EditorialFe
           )}
 
           {/* Sort */}
-          <Select value={sortBy} onValueChange={setSortBy}>
-            <SelectTrigger className="w-[120px]">
-              <SelectValue placeholder="Sort" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="newest">Newest</SelectItem>
-              <SelectItem value="oldest">Oldest</SelectItem>
-            </SelectContent>
-          </Select>
+          {showSort && (
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="w-[120px]">
+                <SelectValue placeholder="Sort" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="newest">Newest</SelectItem>
+                <SelectItem value="oldest">Oldest</SelectItem>
+              </SelectContent>
+            </Select>
+          )}
         </div>
       </div>
+      )}
 
       {/* Essay count */}
       <p className="text-sm text-muted-foreground">
@@ -236,26 +263,11 @@ export function EditorialFeed({ section, topics = [], getEssayUrl }: EditorialFe
                   )}
 
                   {/* Meta */}
-                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
-                    {essay.author && (
-                      <span className="flex items-center gap-1">
-                        <User className="h-3.5 w-3.5" />
-                        {essay.author}
-                      </span>
-                    )}
-                    {essay.date && (
-                      <span className="flex items-center gap-1">
-                        <Calendar className="h-3.5 w-3.5" />
-                        {formatDate(essay.date)}
-                      </span>
-                    )}
-                    {essay.read_time && (
-                      <span className="flex items-center gap-1">
-                        <Clock className="h-3.5 w-3.5" />
-                        {essay.read_time}
-                      </span>
-                    )}
-                  </div>
+                  {(essay.author || essay.read_time || essay.date) && (
+                    <p className="text-sm text-muted-foreground">
+                      {[essay.author, essay.date ? formatDate(essay.date) : null, essay.read_time].filter(Boolean).join(' · ')}
+                    </p>
+                  )}
                 </div>
               </Link>
             </article>

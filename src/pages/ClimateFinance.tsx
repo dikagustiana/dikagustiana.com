@@ -2,23 +2,14 @@ import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { PageLayout } from '@/components/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
-import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ErrorState } from '@/components/states';
 import { useEssays } from '@/hooks/queries/useEssays';
 import { GREEN_TRANSITION_TABS } from '@/data/greenTransitionTabs';
-import { Banknote, BarChart3, HandCoins, Flame, Building2, Factory, Search, Clock, User, Calendar } from 'lucide-react';
-
-const concepts = [
-  { title: 'Green Bonds', description: 'Fixed-income instruments where proceeds are earmarked for climate and environmental projects.', icon: Banknote },
-  { title: 'Carbon Markets', description: 'Compliance and voluntary systems that put a price on greenhouse gas emissions.', icon: BarChart3 },
-  { title: 'Blended Finance for Climate', description: 'Combining concessional and commercial capital to de-risk green investments.', icon: HandCoins },
-  { title: 'JETP (Just Energy Transition Partnerships)', description: 'Country-level financing packages to accelerate coal phase-out in emerging markets.', icon: Flame },
-  { title: 'Climate-Aligned Lending', description: 'How banks and DFIs embed climate criteria into credit and investment decisions.', icon: Building2 },
-  { title: 'Transition Finance', description: 'Financing high-emitting sectors to move toward low-carbon operations.', icon: Factory },
-];
+import { Search } from 'lucide-react';
+import { canSearchFeed, canSortFeed } from '@/lib/feedControls';
 
 export default function ClimateFinance() {
   const { data: essays, isLoading, isError, refetch } = useEssays({
@@ -29,9 +20,10 @@ export default function ClimateFinance() {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('newest');
 
+  const publishedEssays = useMemo(() => (essays ?? []).filter(e => e.published), [essays]);
+
   const filteredEssays = useMemo(() => {
-    if (!essays) return [];
-    let result = essays.filter(e => e.published);
+    let result = publishedEssays;
 
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
@@ -48,7 +40,7 @@ export default function ClimateFinance() {
     });
 
     return result;
-  }, [essays, searchQuery, sortBy]);
+  }, [publishedEssays, searchQuery, sortBy]);
 
   const formatDate = (dateStr: string) => {
     try {
@@ -87,61 +79,35 @@ export default function ClimateFinance() {
           </p>
         </div>
 
-        {/* Climate Finance Overview — Concepts Grid */}
-        <section className="mb-12">
-          <h2 className="text-xl font-display font-semibold text-foreground mb-6">
-            Key Instruments & Concepts
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {concepts.map((concept) => {
-              const Icon = concept.icon;
-              return (
-                <Card key={concept.title} className="h-full">
-                  <CardContent className="p-6">
-                    {/* Green here is the Green Transition section's own
-                        identity — one of the two jobs green keeps. It is not
-                        the site accent (navy); see src/index.css. */}
-                    <Icon className="h-6 w-6 text-section-green mb-3" />
-                    <h3 className="font-semibold text-foreground mb-2">{concept.title}</h3>
-                    <p className="text-sm text-muted-foreground">{concept.description}</p>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        </section>
-
-        {/* Callout */}
-        <div className="bg-section-green/5 border border-section-green/20 rounded-lg py-6 px-6 mb-12">
-          <p className="text-muted-foreground italic text-center">
-            Indonesia's green transition requires ~$25B/year in climate investment through 2030.
-            This track examines who provides it, on what terms, and what it achieves.
-          </p>
-        </div>
-
         {/* Essay Feed — same layout as other phase pages */}
         <div className="space-y-8">
-          {/* Filters */}
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search essays..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9"
-              />
+          {/* Filters: only once the list is long enough to need them. */}
+          {(canSearchFeed(publishedEssays.length) || canSortFeed(publishedEssays.length)) && (
+            <div className="flex flex-col sm:flex-row gap-4">
+              {canSearchFeed(publishedEssays.length) && (
+                <div className="relative flex-1 max-w-md">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search essays..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-9"
+                  />
+                </div>
+              )}
+              {canSortFeed(publishedEssays.length) && (
+                <Select value={sortBy} onValueChange={setSortBy}>
+                  <SelectTrigger className="w-[120px]">
+                    <SelectValue placeholder="Sort" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="newest">Newest</SelectItem>
+                    <SelectItem value="oldest">Oldest</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
             </div>
-            <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="w-[120px]">
-                <SelectValue placeholder="Sort" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="newest">Newest</SelectItem>
-                <SelectItem value="oldest">Oldest</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          )}
 
           <p className="text-sm text-muted-foreground">
             {filteredEssays.length} {filteredEssays.length === 1 ? 'essay' : 'essays'}
@@ -195,26 +161,11 @@ export default function ClimateFinance() {
                       {essay.snippet && (
                         <p className="text-muted-foreground mb-4 line-clamp-2">{essay.snippet}</p>
                       )}
-                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
-                        {essay.author && (
-                          <span className="flex items-center gap-1">
-                            <User className="h-3.5 w-3.5" />
-                            {essay.author}
-                          </span>
-                        )}
-                        {essay.date && (
-                          <span className="flex items-center gap-1">
-                            <Calendar className="h-3.5 w-3.5" />
-                            {formatDate(essay.date)}
-                          </span>
-                        )}
-                        {essay.read_time && (
-                          <span className="flex items-center gap-1">
-                            <Clock className="h-3.5 w-3.5" />
-                            {essay.read_time}
-                          </span>
-                        )}
-                      </div>
+                      {(essay.author || essay.read_time || essay.date) && (
+                        <p className="text-sm text-muted-foreground">
+                          {[essay.author, essay.date ? formatDate(essay.date) : null, essay.read_time].filter(Boolean).join(' · ')}
+                        </p>
+                      )}
                     </div>
                   </Link>
                 </article>

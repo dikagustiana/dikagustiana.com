@@ -9,8 +9,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Plus, Search, Clock, User, Calendar } from 'lucide-react';
+import { Plus, Search } from 'lucide-react';
 import { ErrorState } from '@/components/states';
+import { canSearchFeed, canSortFeed } from '@/lib/feedControls';
 
 const phaseDetails: Record<string, { title: string; description: string }> = {
   'sovereign-wealth-funds': {
@@ -118,27 +119,33 @@ export default function DevelopmentFinancePhase() {
           )}
         </div>
 
-        {/* Filters */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-6">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search essays..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9"
-            />
+        {/* Filters: only once the list is long enough to need them. */}
+        {(canSearchFeed(essays?.length ?? 0) || canSortFeed(essays?.length ?? 0)) && (
+          <div className="flex flex-col sm:flex-row gap-4 mb-6">
+            {canSearchFeed(essays?.length ?? 0) && (
+              <div className="relative flex-1 max-w-md">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search essays..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
+            )}
+            {canSortFeed(essays?.length ?? 0) && (
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger className="w-[120px]">
+                  <SelectValue placeholder="Sort" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="newest">Newest</SelectItem>
+                  <SelectItem value="oldest">Oldest</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
           </div>
-          <Select value={sortBy} onValueChange={setSortBy}>
-            <SelectTrigger className="w-[120px]">
-              <SelectValue placeholder="Sort" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="newest">Newest</SelectItem>
-              <SelectItem value="oldest">Oldest</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+        )}
 
         {isLoading ? (
           <div className="space-y-8">
@@ -188,26 +195,17 @@ export default function DevelopmentFinancePhase() {
                         </div>
                       )}
                       <div className="flex-1 min-w-0">
-                        <h2 className="text-xl font-semibold text-foreground group-hover:text-sky-500 transition-colors mb-2 line-clamp-2">
+                        <h2 className="text-xl font-semibold text-foreground group-hover:text-primary transition-colors mb-2 line-clamp-2">
                           {essay.title}
                         </h2>
                         {essay.snippet && (
                           <p className="text-muted-foreground mb-4 line-clamp-2">{essay.snippet}</p>
                         )}
-                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
-                          {essay.author && (
-                            <span className="flex items-center gap-1">
-                              <User className="h-3.5 w-3.5" />
-                              {essay.author}
-                            </span>
-                          )}
-                          {essay.read_time && (
-                            <span className="flex items-center gap-1">
-                              <Clock className="h-3.5 w-3.5" />
-                              {essay.read_time}
-                            </span>
-                          )}
-                        </div>
+                        {(essay.author || essay.read_time) && (
+                          <p className="text-sm text-muted-foreground">
+                            {[essay.author, essay.read_time].filter(Boolean).join(' · ')}
+                          </p>
+                        )}
                       </div>
                     </Link>
                   </article>
