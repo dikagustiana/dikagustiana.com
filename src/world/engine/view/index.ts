@@ -448,7 +448,8 @@ export function createView(ctx: EngineContext, o: ViewOptions): View {
       // the point at the building's floor height under the middle of the frame (a raised floor sits up-screen of its ground)
       const z0 = peek.z?.[0] ?? 0, mx = cur.x + z0, my = cur.y + z0;
       const over = !!peek.near && band === 'inside' && mx >= peek.box[0] - 20 && mx <= peek.box[1] + 20 && my >= peek.box[2] - 20 && my <= peek.box[3] + 20;
-      const want = chosen === ent || (!!chosen && within(g, chosen.groups[0])) || over;
+      // a selected lot opens as its section at the inside band (PRD v2 §3.3); its whiteboard keeps it open while chosen
+      const want = (chosen === ent && band === 'inside') || (!!chosen && chosen !== ent && within(g, chosen.groups[0])) || over;
       const isOpen = open.has(g);
       if (want && !isOpen) {
         if (!peek.cut && peek.section) { const s = peek.section(); g.add(s.cut, s.inside); peek.cut = s.cut; peek.inside = s.inside; }

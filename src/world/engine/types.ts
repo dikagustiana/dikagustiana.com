@@ -36,6 +36,8 @@ export interface Entity {
   pick?: readonly [number, number, number];
   info(): EntityInfo;
   readout(): string;
+  /** The hover label (PRD v2 §3.4): a lot's ticker and name, a block's sub-industry, a vehicle's load and ends; the card's title when absent. */
+  label?(): string;
   route?(): EntityRoute | null;
   /** A part drawn for many things says which one was hit. */
   resolve?(point: THREE.Vector3): Entity;

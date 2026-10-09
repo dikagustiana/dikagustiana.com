@@ -162,7 +162,7 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
     highlightChain: (id, depth) => chain.set(id, depth),
     setHighlight: (ids) => view.setHighlight(ids),
     exposeCompany: (ticker, bindings, whiteboard = null) => {
-      const plot = world.plots.get(ticker.toUpperCase()), arch = world.archetypeOf(ticker);
+      const plot = world.lots.get(ticker.toUpperCase()), arch = world.archetypeOf(ticker);
       if (!plot || !arch) { exposed = null; stations.clear(); return; }
       exposed = { ticker: ticker.toUpperCase(), stations: bindings };
       plot.setWhiteboard(whiteboard);

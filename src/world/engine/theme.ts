@@ -32,9 +32,10 @@ export type TextKey = 'ink' | 'paint';
 /**
  * Solid tones, for boxes, prisms and cylinders: n the plain body, w white,
  * k dark, g pale glass-grey, gr rock, gs grass slope, s sand, l a lamp,
- * nb and kb a walker's light and dark parts.
+ * nb and kb a walker's light and dark parts, a the accent (a published
+ * company's status bar, PRD v2 §3.5).
  */
-export type Tone = 'n' | 'w' | 'k' | 'g' | 'gr' | 'gs' | 's' | 'l' | 'nb' | 'kb';
+export type Tone = 'n' | 'w' | 'k' | 'g' | 'gr' | 'gs' | 's' | 'l' | 'nb' | 'kb' | 'a';
 
 /** A key's colour: a token, or a mix of two tokens (t of the way from the first to the second). */
 type Source = string | readonly [from: string, to: string, t: number];
@@ -48,7 +49,7 @@ export const SITE_TOKENS: { fill: Record<FillKey, string>; line: Record<LineKey,
   },
   line: { line: '--foreground', detail: '--muted-foreground', grid: '--border', live: '--accent' },
   text: { ink: '--foreground', paint: '--muted-foreground' },
-  tone: { n: '--card', w: '--background', k: '--muted-foreground', g: '--secondary', gr: '--muted', gs: '--muted', s: '--muted', l: '--background', nb: '--card', kb: '--primary' },
+  tone: { n: '--card', w: '--background', k: '--muted-foreground', g: '--secondary', gr: '--muted', gs: '--muted', s: '--muted', l: '--background', nb: '--card', kb: '--primary', a: '--accent' },
 };
 
 /** Keys that are a mix of their token and a second one. */

@@ -69,3 +69,38 @@ describe('the bands of detail (PRD v2 §3.3)', () => {
     void handle;
   });
 });
+
+describe('companies are buildings (PRD v2 §3.5, A3, A4)', () => {
+  it('makes every lot an entity with its box and bays, never hidden, two per block with a sign each', async () => {
+    const { scene } = await mountWorld();
+    const { LAYOUT } = await import('@/world/placement/layout.generated');
+    const all = window.world!.all();
+    expect(all.filter((e) => e.kind === 'company')).toHaveLength(LAYOUT.blocks.length * 2);
+    for (const b of LAYOUT.blocks) for (const l of b.lots) expect(l.sign.length).toBe(2);
+    // the lots are drawn in their zone's part, which the view never hides; only the kerb signs wait for the street band
+    frames(2);
+    let zones = 0; scene.traverse((o) => { if (o.name.startsWith('zone-part-')) { zones++; expect(o.visible).toBe(true); } });
+    expect(zones).toBeGreaterThan(10);
+  });
+
+  it('resolves a hit in a zone to the lot whose footprint holds it, else to the block (its signboard and yard)', async () => {
+    const THREE = await import('three');
+    const { scene } = await mountWorld();
+    const { LAYOUT } = await import('@/world/placement/layout.generated');
+    const zoneEntity = (zone: string) => { let e: { resolve(p: InstanceType<typeof THREE.Vector3>): { id: string; kind: string } } | undefined; scene.traverse((o) => { if (o.name === `zone-${zone}`) e = o.userData.entity; }); return e!; };
+    for (const code of ['B121', 'C141', 'A121', 'G111', 'J113']) {
+      const b = LAYOUT.blocks.find((x) => x.code === code)!;
+      const z = zoneEntity(b.zone);
+      const { REGISTRY } = await import('@/lib/world/registry/subindustries.generated');
+      const s = REGISTRY.subIndustries.find((x) => x.code === code)!;
+      b.lots.forEach((l, i) => {
+        const hit = z.resolve(new THREE.Vector3((l.box.x0 + l.box.x1) / 2, 1, (l.box.y0 + l.box.y1) / 2));
+        expect(hit.kind, l.id).toBe('company');
+        expect(hit.id, l.id).toBe(s.companies[i]?.ticker ?? l.id);
+      });
+      // the signboard stands in the middle of the block's front, between the lots
+      const [sx, sy] = b.front === 's' ? [(b.box.x0 + b.box.x1) / 2, b.box.y1 - 1.2] : [b.box.x1 - 1.2, (b.box.y0 + b.box.y1) / 2];
+      expect(z.resolve(new THREE.Vector3(sx, 4, sy))).toMatchObject({ kind: 'building', id: code });
+    }
+  });
+});
