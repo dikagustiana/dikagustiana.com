@@ -18,12 +18,15 @@ import { createView, type View } from './view';
 import { VIEW_NAMES, type Entity, type FrameReading, type LayerName, type OverlayName, type RendererLike, type ViewName, type WorldHandle, type WorldOptions } from './types';
 import type { FlowWeight, ModelStatus, StationBinding, WhiteboardContent } from '@/world/data/types';
 import { buildWorldScene, type WorldScene } from '@/world/world/build';
-import { createTraffic, type Traffic } from '@/world/sim/traffic';
+import { countInWords, createFlows, type FlowSystem } from '@/world/sim/flows';
 import { createMarks, type Marks } from './marks';
 import { createChain, type Chain } from './chain';
 import { createStations, type Stations } from './stations';
 
 export { WARMUP_SECONDS };
+
+/** The most simulated time one frame runs, in seconds. */
+const FRAME_MAX = 0.25;
 
 export class WorldError extends Error {
   constructor(readonly code: 'webgl-unavailable' | 'no-container', message: string) { super(message); this.name = 'WorldError'; }
@@ -31,6 +34,8 @@ export class WorldError extends Error {
 
 interface DebugApi {
   step(seconds: number): void;
+  /** Hold the simulation (the view still draws), so a test can point at a vehicle where it stands. */
+  pause(on: boolean): void;
   skip(hours: number): void;
   select(id: string): void;
   selected(): string | null;
@@ -39,7 +44,10 @@ interface DebugApi {
   /** Centre the camera on an entity at a zoom in pixels per metre, at once (the probe sets each band with it). */
   centre(id: string, zoom: number): void;
   view(name: string): void;
-  all(): { id: string; kind: string; status: string }[];
+  /** Every entity: its id, kind and card status, and a vehicle's facts (origin, destination, load, state). */
+  all(): { id: string; kind: string; status: string; facts?: Record<string, string | number> }[];
+  /** The flows' state: live vehicles and the cap, how many flows and cached routes, the fleet's draw calls. */
+  flows(): { live: number; cap: number; flows: number; routes: number; instanced: number };
   drawCalls(): number;
   /** The distance control's reading of the camera, 0 at home and 1 at the near view. */
   distance(): number;
@@ -105,10 +113,12 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
   // ---- assemble, in a fixed order (the rng is drawn while building, so the order decides what the world looks like) ----
   ctx.scene.add(buildSlab(ctx));
   const world: WorldScene = buildWorldScene(ctx, options.layout, (a) => options.onAction?.(a));
-  const traffic: Traffic = createTraffic(ctx, options.layout);
+  const flows: FlowSystem = createFlows(ctx, options.layout, options.registry.links, { phone: !!options.reducedDetail });
+  // a gate's card counts the flows that cross it, in words (PRD v2 §3.11)
+  ctx.flowsAt = (gateId) => { const n = flows.flowsThrough(gateId); const w = countInWords(n); return n ? `${w[0].toUpperCase()}${w.slice(1)} ${n === 1 ? 'flow crosses' : 'flows cross'} it` : 'No flow crosses it'; };
 
   // ---- the simulation step ----
-  const systems: { update(dt: number): void }[] = [traffic];
+  const systems: { update(dt: number): void }[] = [flows];
   const stepOnce = (dt: number) => {
     clock.t += dt;
     for (const s of systems) s.update(dt);
@@ -122,7 +132,7 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
     container, canvas, renderer, clock, reducedDetail: !!options.reducedDetail,
     onSelect: options.onSelect,
     onHover: options.onHover,
-    onDetail: (tiny, far) => { world.nearGroup.visible = !far; traffic.setDetail(tiny, far); },
+    onDetail: (tiny, far) => { world.nearGroup.visible = !far; flows.setDetail(tiny, far); },
   });
   if (options.initialView && options.initialView !== 'hero') view.lookAt(options.initialView);
   const marks: Marks = createMarks(ctx, (a) => options.onAction?.(a));
@@ -146,7 +156,8 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
     try { tick(now); } catch (err) { const k = String(err instanceof Error ? err.stack : err); if (!reported.has(k)) { reported.add(k); console.error('world frame error', err); } }
   }
   function tick(now: number) {
-    const dt = Math.max(0, Math.min(0.1, (now - last) / 1000)); last = Math.max(last, now);
+    // a slow frame runs up to a quarter of a second of the world, so a slow device keeps near real time (a hidden tab does not burst)
+    const dt = Math.max(0, Math.min(FRAME_MAX, (now - last) / 1000)); last = Math.max(last, now);
     if (!paused) { acc += dt; while (acc >= STEP) { stepOnce(STEP); acc -= STEP; } }
     if (clock.shift.h < clock.shift.goal) clock.shift.h = Math.min(clock.shift.goal, clock.shift.h + dt * (reduced ? 60 : 5));
     view.tick(dt, paused);
@@ -165,9 +176,9 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
     setDistance: (t) => view.setDistance(t),
     setOverlay: (name) => { overlay = name; if (name === 'none') marks.set([]); },
     setMarks: (list) => marks.set(list),
-    setLayer: (name, on) => { layers.set(name, on); traffic.setLayer(name, on); },
+    setLayer: (name, on) => { layers.set(name, on); flows.setLayer(name, on); },
     setModelStatus: (s) => { statuses = s; world.setStatuses(s); },
-    setFlowWeights: (flows: FlowWeight[]) => { traffic.setFlows(flows); chain.setFlows(flows); },
+    setFlowWeights: (weights: FlowWeight[]) => { flows.setFlows(weights); chain.setFlows(weights); },
     highlightChain: (id, depth) => chain.set(id, depth),
     setHighlight: (ids) => view.setHighlight(ids),
     exposeCompany: (ticker, bindings, whiteboard = null) => {
@@ -194,7 +205,7 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
     marks.dispose();
     chain.dispose();
     view.dispose();
-    traffic.dispose();
+    flows.dispose(); ctx.flowsAt = undefined;
     ctx.scene.traverse((o) => disposeObject(o));
     ctx.sky.traverse((o) => disposeObject(o));
     ctx.scene.clear(); ctx.sky.clear();
@@ -210,6 +221,7 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
   if (options.debug && typeof window !== 'undefined') {
     window.world = {
       step: handle.step,
+      pause: handle.pause,
       skip: (hours) => { clock.shift.goal += hours; clock.shift.h = clock.shift.goal; },
       select: (id) => handle.select(id), selected: handle.selected,
       screenOf: (id) => { const e = find(id); return e ? view.screenOf(e) : null; },
@@ -220,7 +232,8 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
       textMeshes: () => ctx.texts.meshes.length,
       hovered: () => view.hovered(),
       hoverAt: (px, py) => view.hoverAt(px, py),
-      all: () => ctx.entities.map((e: Entity) => ({ id: e.id, kind: e.kind, status: e.info().status })),
+      all: () => ctx.entities.map((e: Entity) => { const facts = e.facts?.(); return facts ? { id: e.id, kind: e.kind, status: e.info().status, facts } : { id: e.id, kind: e.kind, status: e.info().status }; }),
+      flows: () => ({ live: flows.live(), cap: flows.cap(), flows: flows.flows().length, routes: flows.roads.cached(), instanced: ctx.scene.getObjectByName('flows') ? flows.vehicles().length : 0 }),
       drawCalls: () => view.drawCalls(),
       distance: () => view.distanceOf(),
       zoom: () => view.camera.zoom,
@@ -234,7 +247,7 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
       dispose,
     };
   }
-  // the overlay is read by the shell's marks (setMarks); the layers by the traffic
+  // the overlay is read by the shell's marks (setMarks); the layers by the flows
   void overlay;
 
   options.onReady?.();

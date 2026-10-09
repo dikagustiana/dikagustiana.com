@@ -333,7 +333,7 @@ export function buildWorldScene(ctx: EngineContext, layout: GeneratedLayout, onA
     if (gt.weighbridge) gatesPart.rect2(TOP(0, 0, 0.08), x - L, y - Wd, 2 * L, 2 * Wd, 'line', 0.02);
     const joint = JOINT_BY_ID[gt.jointId as JointId];
     const ent: Entity = { kind: 'gate', id: gt.id, groups: [], pick: [x, y, 0.5], bbox: new THREE.Box3(W(x - 9, y - 9, 0), W(x + 9, y + 9, 3.4)),
-      info: () => ({ kind: 'Gate · weighbridge', title: joint?.label ?? gt.id, status: 'transfer of title', rows: [['Joint', gt.jointId], ['Weighbridge', gt.weighbridge ? 'yes' : 'no'], ['Road', gt.road]] }), label: () => joint?.label ?? gt.id, readout: () => `${gt.id} · ${joint?.label ?? ''}` };
+      info: () => ({ kind: 'Gate · weighbridge', title: joint?.label ?? gt.id, status: 'transfer of title', rows: [['Joint', gt.jointId], ['Weighbridge', gt.weighbridge ? 'yes: every vehicle crossing stops on it' : 'no'], ['Road', gt.road], ...(ctx.flowsAt ? [['Flows', ctx.flowsAt(gt.id)] as const] : [])] }), label: () => joint?.label ?? gt.id, readout: () => `${gt.id} · ${joint?.label ?? ''}` };
     ctx.entities.push(ent); (ent as { gateId?: string }).gateId = gt.id;
     gatesPart.text(TOP(x - 6, y + 10, 0.1), joint?.label ?? gt.id, 0, 0, 1.8, 'paint');
     // a small group per gate so it can be hit
