@@ -1,0 +1,117 @@
+{
+  "capturedAt": "2026-10-08T18:03:53.466Z",
+  "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+  "frames": [
+    "far-light-day",
+    "middle-light-day",
+    "near-light-day",
+    "far-light-night",
+    "middle-light-night",
+    "near-light-night",
+    "far-dark-day",
+    "middle-dark-day",
+    "near-dark-day",
+    "far-dark-night",
+    "middle-dark-night",
+    "near-dark-night",
+    "exposed-company-mock",
+    "board-mock",
+    "think-tank-mock",
+    "overlay-reindustrialisation",
+    "skema-toggle",
+    "phone-390",
+    "outage-unavailable",
+    "exposed-company-whiteboard-mock",
+    "think-tank-section",
+    "overlay-reindustrialisation-marks"
+  ],
+  "drawCalls": {
+    "light-day": {
+      "far": 522,
+      "middle": 263,
+      "near": 440
+    },
+    "light-night": {
+      "far": 522,
+      "middle": 357,
+      "near": 552
+    },
+    "dark-day": {
+      "far": 522,
+      "middle": 457,
+      "near": 492
+    },
+    "dark-night": {
+      "far": 517,
+      "middle": 404,
+      "near": 451
+    }
+  },
+  "warmup": {
+    "seconds": 1,
+    "steps": 60,
+    "firstClock": "10:00"
+  },
+  "mount": {
+    "light": 1248,
+    "dark": 791
+  },
+  "frameTimes": {
+    "middle": {
+      "p50": 416.6,
+      "p95": 833.3,
+      "samples": 180
+    }
+  },
+  "flagOff": {
+    "landing": {
+      "same": true,
+      "differingPixels": 0,
+      "pixels": 4207680,
+      "box": null,
+      "mainAgainstItself": {
+        "same": true,
+        "differingPixels": 0,
+        "pixels": 4207680,
+        "box": null
+      },
+      "branchWorldMarkup": 0,
+      "mainWorldMarkup": 0
+    },
+    "about": {
+      "same": false,
+      "differingPixels": 35,
+      "pixels": 8951040,
+      "box": [
+        201,
+        4051,
+        1241,
+        4527
+      ],
+      "mainAgainstItself": {
+        "same": false,
+        "differingPixels": 35,
+        "pixels": 8951040,
+        "box": [
+          201,
+          4051,
+          1241,
+          4527
+        ]
+      },
+      "branchWorldMarkup": 0,
+      "mainWorldMarkup": 0
+    }
+  },
+  "consoleErrors": [
+    "/finance/kawasan: 404 /_vercel/insights/script.js",
+    "/finance/kawasan: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "/finance/kawasan: 404 /_vercel/insights/script.js",
+    "/finance/kawasan: Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ],
+  "reshotAt": "2026-10-08T19:27:48.184Z",
+  "reshot": [
+    "phone",
+    "overlay"
+  ]
+}

@@ -1,0 +1,5 @@
+code	ticker	name	status	reason	source
+A121	PTBA	Bukit Asam Tbk	proposed	FSRE first slate (mining archetype, after INTP and SMGR)	src/data/finance-in-action/fixtures/slate.json; PRD §2.2
+A121	ITMG	Indo Tambangraya Megah Tbk	proposed	FSRE first slate (mining archetype, after INTP and SMGR)	src/data/finance-in-action/fixtures/slate.json; PRD §2.2
+B121	INTP	Indocement Tunggal Prakarsa Tbk	proposed	FSRE first slate: the reference build	src/data/finance-in-action/fixtures/slate.json; PRD §2.2
+B121	SMGR	Semen Indonesia (Persero) Tbk	proposed	FSRE first slate, second cement model	src/data/finance-in-action/fixtures/slate.json; PRD §2.2

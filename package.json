@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && node scripts/assert-no-synthetic.mjs && node scripts/prerender.mjs",
+    "build": "node --experimental-strip-types scripts/world/render-poster.mjs && vite build && node scripts/assert-no-synthetic.mjs && node scripts/world/assert-world-flag.mjs && node scripts/prerender.mjs",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "typecheck": "tsc -b --force",
@@ -17,7 +17,12 @@
     "dump:content": "node scripts/dump-content.mjs",
     "prerender": "node scripts/prerender.mjs",
     "build:chain": "node --experimental-strip-types scripts/build-chain-plate.mjs",
-    "build:fia-fixtures": "vite-node scripts/fia/build-synthetic-fixtures.ts"
+    "build:fia-fixtures": "vite-node scripts/fia/build-synthetic-fixtures.ts",
+    "check:world": "node scripts/world/check-engine.mjs",
+    "build:registry": "node --experimental-strip-types scripts/world/build-registry.ts",
+    "build:layout": "node --experimental-strip-types scripts/world/build-layout.ts",
+    "build:poster": "node --experimental-strip-types scripts/world/render-poster.mjs",
+    "test:e2e:world": "playwright test -c playwright.world.config.ts"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.11",
@@ -65,9 +70,12 @@
     "sonner": "^1.7.4",
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
+    "three": "0.186.1",
     "zod": "^3.25.76"
   },
   "devDependencies": {
+    "@babel/parser": "7.29.9",
+    "@babel/traverse": "7.29.8",
     "@eslint/js": "^9.32.0",
     "@playwright/test": "^1.56.1",
     "@resvg/resvg-js": "2.6.2",
@@ -78,6 +86,7 @@
     "@types/node": "^22.16.5",
     "@types/react": "^18.3.23",
     "@types/react-dom": "^18.3.7",
+    "@types/three": "0.186.0",
     "@vitejs/plugin-react-swc": "^3.11.0",
     "@vitest/coverage-v8": "^2.1.9",
     "ajv": "^8.20.0",

@@ -1,0 +1,71 @@
+/* The Kawasan Industri frame (src/components/world). Token-only: every colour is a site token. */
+.world-frame { position: relative; display: grid; gap: 0.75rem; }
+.world-frame__controls { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 1rem; font-size: 0.8125rem; }
+.world-frame__group { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 0.25rem; }
+.world-frame__group[aria-label] > span:first-child { color: hsl(var(--muted-foreground)); margin-right: 0.25rem; text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.6875rem; }
+.world-btn { min-height: 2.75rem; min-width: 2.75rem; padding: 0.25rem 0.75rem; border: 1px solid hsl(var(--border)); border-radius: calc(var(--radius) - 2px); background: hsl(var(--card)); color: hsl(var(--foreground)); font: inherit; cursor: pointer; }
+.world-btn:hover { border-color: hsl(var(--muted-foreground)); }
+.world-btn:focus-visible { outline: 2px solid hsl(var(--ring)); outline-offset: 2px; }
+.world-btn[aria-pressed="true"], .world-btn[aria-current="true"] { background: hsl(var(--accent)); color: hsl(var(--accent-foreground)); border-color: hsl(var(--accent)); }
+.world-frame__stage { position: relative; aspect-ratio: 16 / 9; min-height: 420px; max-height: 78vh; overflow: hidden; border: 1px solid hsl(var(--border)); border-radius: var(--radius); background: hsl(var(--background)); }
+.world-frame__poster { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; pointer-events: none; transition: opacity 600ms ease; }
+.world-frame__poster[data-hidden="true"] { opacity: 0; }
+.world-frame__canvas-host { position: absolute; inset: 0; opacity: 0; transition: opacity 600ms ease; }
+.world-frame__canvas-host[data-ready="true"] { opacity: 1; }
+.world-frame__canvas-host .world-canvas:focus-visible { outline: 2px solid hsl(var(--ring)); outline-offset: -2px; }
+.world-frame__canvas-host .world-canvas { cursor: grab; }
+.world-frame__canvas-host .world-canvas.over { cursor: pointer; }
+.world-frame__clock { position: absolute; left: 0.75rem; top: 0.75rem; font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; color: hsl(var(--muted-foreground)); background: hsl(var(--background) / 0.85); padding: 0.125rem 0.5rem; border-radius: 4px; pointer-events: none; }
+.world-frame__night { position: absolute; inset: 0; pointer-events: none; background: hsl(var(--primary)); opacity: 0; transition: opacity 1200ms ease; }
+/* In the dark theme --primary is the accent green; the night veil takes the page's own dark ground instead. */
+.dark .world-frame__night { background: hsl(var(--background)); }
+.world-frame__strip { display: flex; flex-wrap: wrap; gap: 0.375rem; padding: 0.5rem 0.75rem; border-top: 1px solid hsl(var(--border)); font-size: 0.8125rem; background: hsl(var(--card)); }
+.world-frame__strip button { display: inline-flex; align-items: center; gap: 0.375rem; min-height: 2.25rem; padding: 0.125rem 0.625rem; border: 1px solid hsl(var(--border)); border-radius: 999px; background: hsl(var(--background)); color: hsl(var(--foreground)); font: inherit; cursor: pointer; }
+.world-frame__strip button[aria-pressed="true"] { border-color: hsl(var(--accent)); }
+.world-frame__strip button:focus-visible { outline: 2px solid hsl(var(--ring)); outline-offset: 2px; }
+.world-card { position: absolute; top: 0.75rem; right: 0.75rem; width: min(22rem, calc(100% - 1.5rem)); max-height: calc(100% - 1.5rem); overflow: auto; background: hsl(var(--popover)); color: hsl(var(--popover-foreground)); border: 1px solid hsl(var(--border)); border-radius: var(--radius); padding: 0.75rem 1rem 1rem; display: grid; gap: 0.5rem; font-size: 0.875rem; }
+.world-card__kind { display: flex; justify-content: space-between; align-items: center; font-size: 0.6875rem; letter-spacing: 0.12em; text-transform: uppercase; color: hsl(var(--muted-foreground)); }
+.world-card__title { font-family: var(--font-display); font-size: 1.25rem; line-height: 1.15; font-weight: 600; }
+/* The title takes focus when a card opens so a screen reader announces it; it is not a control, so no ring. */
+.world-card__title:focus, .world-board h3:focus { outline: none; }
+.world-card__status { justify-self: start; display: inline-flex; align-items: center; gap: 0.375rem; border: 1px solid hsl(var(--border)); border-radius: 999px; padding: 0.125rem 0.625rem; font-size: 0.75rem; }
+.world-card__status[data-state="published"], .world-card__status[data-state="measured"] { border-color: hsl(var(--accent)); color: hsl(var(--accent)); }
+.world-card dl { display: grid; grid-template-columns: auto 1fr; gap: 0.25rem 0.75rem; margin: 0; }
+.world-card dt { color: hsl(var(--muted-foreground)); }
+.world-card dd { margin: 0; }
+.world-card__foot { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.world-card__close { min-width: 2.75rem; min-height: 2.75rem; border: 1px solid hsl(var(--border)); border-radius: calc(var(--radius) - 2px); background: transparent; font: inherit; cursor: pointer; }
+.world-card__close:focus-visible, .world-card a:focus-visible, .world-card button:focus-visible { outline: 2px solid hsl(var(--ring)); outline-offset: 2px; }
+.world-card__section { border-top: 1px solid hsl(var(--border)); padding-top: 0.5rem; }
+.world-card__section h4 { margin: 0 0 0.25rem; font-size: 0.6875rem; letter-spacing: 0.1em; text-transform: uppercase; color: hsl(var(--muted-foreground)); }
+.world-card ul { margin: 0; padding-left: 1rem; }
+.world-search { position: relative; }
+.world-search input { min-height: 2.75rem; padding: 0.25rem 0.75rem; border: 1px solid hsl(var(--border)); border-radius: calc(var(--radius) - 2px); background: hsl(var(--background)); color: hsl(var(--foreground)); font: inherit; width: 14rem; max-width: 100%; }
+.world-search input:focus-visible { outline: 2px solid hsl(var(--ring)); outline-offset: 2px; }
+.world-search ul { position: absolute; z-index: 20; top: 100%; left: 0; margin: 0.25rem 0 0; padding: 0.25rem; list-style: none; width: 20rem; max-width: 80vw; max-height: 16rem; overflow: auto; background: hsl(var(--popover)); border: 1px solid hsl(var(--border)); border-radius: var(--radius); }
+.world-search li button { width: 100%; text-align: left; min-height: 2.5rem; padding: 0.25rem 0.5rem; border: 0; background: transparent; font: inherit; cursor: pointer; border-radius: 4px; }
+.world-search li button:hover, .world-search li button:focus-visible { background: hsl(var(--secondary)); outline: none; }
+.world-search li small { display: block; color: hsl(var(--muted-foreground)); }
+.world-coverage { font-size: 0.875rem; color: hsl(var(--muted-foreground)); }
+.world-distance { display: inline-flex; align-items: center; gap: 0.5rem; }
+.world-distance input { width: 8rem; accent-color: hsl(var(--accent)); }
+.world-frame__start { position: absolute; left: 50%; bottom: 1rem; transform: translateX(-50%); z-index: 2; }
+.world-note { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; padding: 1.5rem; color: hsl(var(--muted-foreground)); font-size: 0.875rem; }
+.world-board { position: absolute; inset: 0; z-index: 30; overflow: auto; background: hsl(var(--background)); color: hsl(var(--foreground)); padding: 1rem 1.25rem 2rem; font-variant-numeric: tabular-nums; }
+.world-board h3 { font-family: var(--font-display); margin: 0; }
+.world-board section { border-top: 1px solid hsl(var(--border)); padding: 0.75rem 0; }
+.world-board section > h4 { margin: 0 0 0.5rem; font-size: 0.6875rem; letter-spacing: 0.12em; text-transform: uppercase; color: hsl(var(--muted-foreground)); }
+.world-board__head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: start; gap: 0.75rem; padding-bottom: 0.75rem; }
+.world-board__figure { font: inherit; font-variant-numeric: tabular-nums; border: 0; border-bottom: 1px dotted hsl(var(--muted-foreground)); background: transparent; color: inherit; cursor: pointer; padding: 0; }
+.world-board__figure:focus-visible { outline: 2px solid hsl(var(--ring)); outline-offset: 2px; }
+.world-board table { border-collapse: collapse; font-size: 0.875rem; }
+.world-board td, .world-board th { padding: 0.25rem 0.75rem 0.25rem 0; text-align: left; vertical-align: top; }
+.world-board td.num { text-align: right; }
+.world-board .hatched { background: repeating-linear-gradient(45deg, transparent 0 3px, hsl(var(--fia-unsplit)) 3px 4px); }
+@media (max-width: 640px) {
+  .world-frame__stage { aspect-ratio: 4 / 5; min-height: 360px; margin-inline: -16px; border-radius: 0; border-inline: 0; }
+  .world-card { top: auto; bottom: 0; left: 0; right: 0; width: auto; max-height: 55%; border-radius: var(--radius) var(--radius) 0 0; }
+  .world-board { padding: 0.75rem 1rem 2rem; }
+  .world-search input { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) { .world-frame__poster, .world-frame__canvas-host, .world-frame__night { transition: none; } }
