@@ -3,26 +3,65 @@
 Third-party code and the terms it enters this repository under. Rule 10 of
 `docs/world/MEGA-PROMPT-kawasan-industri.md`: the Factory Yard engine code may
 be merged only once this file records either its licence or the author's
-written permission for use on a public site.
+written permission for use on a public site. On this branch there is no
+Factory Yard code left to merge (below).
 
 ## Factory Yard
 
 - Source: https://github.com/Khalidabdi1/factory at commit
   `148758ae19a9b2201245485bf3619ab5e742f8f4` (7 October 2026).
-- What was taken: the files under `src/world/engine/` whose first comment
-  line reads "Adapted from Factory Yard (github.com/Khalidabdi1/factory,
-  commit 148758a), after ai-iso-skill (MIT, © 2026 Tolga Cohce)".
 - Licence: **none on record.** The repository carries no `LICENSE` file at
-  that commit, and `package.json` declares no `license`.
-- Permission for use on a public site: **pending.** Until the author's
-  written permission (or a licence file) is recorded here with its date and
-  channel, the pull request that carries this code stays a draft.
+  that commit, and `package.json` declares no `license`. Permission for use
+  on a public site: **pending.**
+- **On the branch `claude/world-engine-fallback`, no Factory Yard code
+  remains.** The nine files that were adapted from it (their first comment
+  line read "Adapted from Factory Yard (github.com/Khalidabdi1/factory,
+  commit 148758a), after ai-iso-skill (MIT, © 2026 Tolga Cohce)") are
+  replaced by implementations original to this repository:
+  - `src/world/engine/theme.ts`
+  - `src/world/engine/context.ts`
+  - `src/world/engine/world/ground.ts`
+  - `src/world/engine/kernel/path.ts`
+  - `src/world/engine/kernel/iso.ts`
+  - `src/world/engine/kernel/math.ts`
+  - `src/world/engine/kernel/part.ts`
+  - `src/world/engine/sim/clock.ts`
+  - `src/world/engine/view/index.ts`
+- How the replacements were written: the required API was taken from the
+  callers only (every import of these modules across `src/`, `tests/` and
+  `scripts/`, and the declared signatures), and the bodies were written
+  fresh from that contract, the three.js documentation, general isometric
+  geometry and ai-iso-skill (below). No body, comment, constant table or
+  structure of the Factory Yard files was copied or paraphrased. The
+  random generator is mulberry32 (Tommy Ettinger, public domain), the
+  algorithm the placement already relied on, so the committed layout is
+  unchanged.
+- `scripts/world/check-engine.mjs`, which had been written after Factory
+  Yard's `scripts/check-yard.mjs`, is rewritten as well, with the same
+  checks and one more: it fails if any file under `src/` carries Factory
+  Yard's adaptation header or a link to its repository. A unit test
+  (`tests/unit/worldEngineRules.test.ts`) holds the same rule.
+- Comments in `src/world/interiors/base.ts`, `src/world/sim/traffic.ts`
+  and `src/world/engine/types.ts` still name Factory Yard as the source of
+  an idea ("after …", "… kept"); those files were not among the files taken
+  and are unchanged here.
+- With this branch merged, rule 10 of
+  `docs/world/MEGA-PROMPT-kawasan-industri.md` no longer depends on the
+  author's answer: the world ships without Factory Yard code. If a licence
+  or the author's written permission arrives, record it here with its date
+  and channel.
 
 ## ai-iso-skill
 
 - Source: https://github.com/MrBongoC/ai-iso-skill (commit
-  `44b4da7714148eef547cc1b102e433472dfe3531`, 4 October 2026). Factory Yard's
-  isometric kernel and visual language are adapted from it.
+  `44b4da7714148eef547cc1b102e433472dfe3531`, 4 October 2026).
+- What is used: the face-plane kernel (a face as an origin and two in-plane
+  axes, with TOP, FRONT and SIDE taking the face's top-left corner, +x
+  down-right, +y down-left, +z up), "a box is its three visible faces", and
+  the monochrome vocabulary (body and deck fills, structure and detail
+  lines, one live colour). The files that use it say so in their first
+  line: `src/world/engine/kernel/iso.ts`, `src/world/engine/kernel/part.ts`
+  and `src/world/engine/theme.ts`.
 - Licence: MIT, reproduced in full:
 
 ```

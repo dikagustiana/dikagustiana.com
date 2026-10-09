@@ -1,325 +1,510 @@
-// Adapted from Factory Yard (github.com/Khalidabdi1/factory, commit 148758a), after ai-iso-skill (MIT, © 2026 Tolga Cohce).
+// Original to this repository (Kawasan Industri world engine, fallback kernel).
+/**
+ * The view: the camera, the visitor's hands on it, and the frame.
+ *
+ * The camera is orthographic and never turns. It looks down the isometric
+ * diagonal (from the south-east, above), so world +x runs down-right on
+ * screen and +y down-left, the projection the poster is drawn with. Its zoom
+ * is in screen pixels per metre: at zoom z a sprite scaled 22 / z is 22
+ * pixels tall whatever the distance, which is how the sky's markers keep
+ * their size.
+ *
+ * Distance is the slider's reading of the zoom: 0 at the home view (the
+ * whole world in the frame) and 1 at the near view, on a log scale between
+ * the two, so every step of the slider feels the same. Moving between views
+ * eases; dragging and the wheel act at once. The far view hides the plots
+ * and the small text (the level of detail is reported to the caller through
+ * onDetail); coming close opens a selected building as its section drawing.
+ *
+ * The view owns no DOM beyond the canvas it is given: every listener it
+ * adds is on that canvas, plus one ResizeObserver on the container, and
+ * dispose() removes them all.
+ */
 import * as THREE from 'three';
 import { LineSegments2 } from 'three/addons/lines/LineSegments2.js';
 import { LineSegmentsGeometry } from 'three/addons/lines/LineSegmentsGeometry.js';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import type { LineMaterial } from 'three/addons/lines/LineMaterial.js';
 import { W } from '../kernel/iso';
-import { setTextFar, v3 } from '../kernel/part';
-import { clamp } from '../kernel/math';
-import { Path } from '../kernel/path';
-import { ring } from '../world/ground';
-import type { EngineContext } from '../context';
+import { setTextFar } from '../kernel/part';
+import { approach, clamp } from '../kernel/math';
+import { idleHooks, type EngineContext } from '../context';
 import type { Clock } from '../sim/clock';
-import type { Entity, EntityRoute, Peek, RendererLike, Selection, ViewName } from '../types';
-import { VIEW_NAMES } from '../types';
+import type { Entity, Peek, RendererLike, Selection, ViewName } from '../types';
 import type { Box, GeneratedLayout } from '@/world/placement/types';
-
-// ---- the view: camera and controls, hit-testing, selection, the reticle and the route, looking inside, levels of
-// detail, the keys, and one frame ----
-//
-// Factory Yard's initView found the plate's elements by id and wrote into them. Here the view owns nothing in the
-// DOM but its canvas: the shell passes the container, reads per-frame state through the handle, and gets a callback
-// on every selection change (mega prompt §4.2).
 
 export interface ViewOptions {
   container: HTMLElement;
   canvas: HTMLCanvasElement;
   renderer: RendererLike;
   clock: Clock;
+  /** Phones: the plots and the walkers wait for a closer view. */
   reducedDetail: boolean;
   onSelect?: (sel: Selection | null) => void;
-  /** Called when the level of detail changes, so the simulation can swap its models. */
+  /** The level of detail changed: tiny hides the smallest movers, far hides the plots. */
   onDetail?: (tiny: boolean, far: boolean) => void;
 }
 
 export interface View {
   camera: THREE.OrthographicCamera;
-  controls: OrbitControls;
   select(ent: Entity | null): void;
   selected(): Entity | null;
-  hovered(): Entity | null;
   lookAt(view: ViewName): void;
-  /** Frame a box of the world, with an optional height range. */
-  frameBox(box: Box, z?: readonly [number, number]): void;
+  /** 0 the home view … 1 the near view on the selected (or last selected) building. */
   setDistance(t: number): void;
   distanceOf(): number;
   zoomBy(k: number): void;
-  reset(): void;
+  /** Select the next or previous building, in the order they were built. */
   cycle(d: 1 | -1): void;
-  setFollow(on: boolean): void;
-  /** Light the entities named (by id, or by a tag the entity carries); an empty list clears. */
   setHighlight(ids: readonly string[]): void;
-  /** Which place the view is centred on, when it is in close. */
   currentView(): ViewName | null;
-  /** One frame: ease the camera, update the peeks and the detail, draw. */
   tick(dt: number, paused: boolean): void;
   drawCalls(): number;
   screenOf(ent: Entity): [number, number];
-  look(x: number, y: number, zoomK: number): void;
+  /** Put the camera over world (x, y) at a zoom in pixels per metre, at once. */
+  look(x: number, y: number, zoom: number): void;
   resize(): void;
   dispose(): void;
 }
 
-type Goal = { zoom: number; target?: THREE.Vector3 } | null;
+/** A region of the world to frame: its footprint and the heights it spans. */
+export interface Frame { box: Box; z: readonly [number, number] }
 
-/** The place boxes come from the generated layout's regions (the whole world for 'whole'). */
-export function viewBoxes(layout: GeneratedLayout): Record<ViewName, Box> {
-  const of = (ids: string[]): Box | null => {
-    const rs = layout.regions.filter((r) => ids.includes(r.id));
-    if (!rs.length) return null;
-    const xs = rs.flatMap((r) => r.polygon.map((p) => p[0])), ys = rs.flatMap((r) => r.polygon.map((p) => p[1]));
-    return { x0: Math.min(...xs), x1: Math.max(...xs), y0: Math.min(...ys), y1: Math.max(...ys) };
+/** The places the shell's buttons name, as boxes to frame. */
+export function viewBoxes(layout: GeneratedLayout): Record<ViewName, Frame> {
+  const whole: Frame = { box: layout.world, z: [-4, 30] };
+  const boundsOf = (ids: readonly string[]): Box | null => {
+    const pts = layout.regions.filter((r) => ids.includes(r.id)).flatMap((r) => r.polygon);
+    if (!pts.length) return null;
+    return { x0: Math.min(...pts.map((p) => p[0])), x1: Math.max(...pts.map((p) => p[0])), y0: Math.min(...pts.map((p) => p[1])), y1: Math.max(...pts.map((p) => p[1])) };
   };
-  const whole = layout.world;
-  return {
-    whole,
-    ring: of(['ring-geological', 'ring-biological', 'estate']) ?? whole,
-    estate: of(['estate']) ?? whole,
-    gateway: of(['gateway']) ?? whole,
-    town: of(['town', 'recovery']) ?? whole,
-    thinktank: of(['hill']) ?? whole,
-  };
+  const region = (ids: readonly string[]): Frame => { const b = boundsOf(ids); return b ? { box: b, z: [0, 20] } : whole; };
+  const tank = layout.fixtures.find((f) => f.kind === 'think-tank');
+  const hillZ = layout.hill?.height ?? 0;
+  const thinktank: Frame = tank
+    ? { box: { x0: tank.box.x0 - 30, x1: tank.box.x1 + 30, y0: tank.box.y0 - 30, y1: tank.box.y1 + 30 }, z: [hillZ, hillZ + 10] }
+    : layout.hill ? { box: { x0: layout.hill.centre[0] - layout.hill.radius, x1: layout.hill.centre[0] + layout.hill.radius, y0: layout.hill.centre[1] - layout.hill.radius, y1: layout.hill.centre[1] + layout.hill.radius }, z: [0, hillZ + 10] } : region(['hill']);
+  return { whole, ring: region(['ring-geological', 'ring-biological']), estate: region(['estate']), gateway: region(['gateway']), town: region(['town']), thinktank };
 }
 
+// ---- the projection ----
+/** How far the camera stands back along the diagonal; far enough that the whole world lies in front of it. */
+const BACK = 4000;
+const S2 = Math.SQRT2, S6 = Math.sqrt(6);
+/** Screen right and screen up, in three.js axes. */
+const RIGHT = new THREE.Vector3(1, 0, -1).normalize(), UP = new THREE.Vector3(-1, 2, -1).normalize();
+/** The ground point (world x, y at z = 0) that sits at a given screen offset (right, up, in metres) from the ground origin. */
+const groundAt = (r: number, u: number): [number, number] => [(r * S2 - u * S6) / 2, (-u * S6 - r * S2) / 2];
+/** A world point's screen offset (right, up, in metres) from the ground origin. */
+const screenOfPoint = (x: number, y: number, z: number): [number, number] => [(x - y) / S2, (2 * z - x - y) / S6];
+
+/** Distance below which the view is far (plots and small text hidden), and below which it is tiny (walkers hidden). */
+const FAR = 0.22, TINY = 0.45, FAR_PHONE = 0.32, TINY_PHONE = 0.58;
+/** Distance from which a building marked "near" opens as the camera comes over it. */
+const NEAR_OPEN = 0.72;
+/** Easing rate of the camera, per second. */
+const EASE = 6;
+const KEY_VIEWS: Record<string, ViewName> = { '0': 'whole', '1': 'ring', '2': 'estate', '3': 'gateway', '4': 'town', '5': 'thinktank' };
+const noRaycast = () => {};
+
+/** The twelve edges of a unit cube, for the selection frame (scaled to an entity's bounds). */
+const CUBE_EDGES = [
+  0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0,
+  0, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 0,
+  0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 1, 0, 1, 0, 1, 1, 1, 1, 0, 0, 1, 0, 1, 1,
+];
+
 export function createView(ctx: EngineContext, o: ViewOptions): View {
-  const { container, canvas, renderer, clock } = o;
-  const { scene, sky, theme, layout } = ctx;
-  const WORLD = layout.world, BOXES = viewBoxes(layout);
-  let selected: Entity | null = null, hovered: Entity | null = null;
-  const disposers: (() => void)[] = [];
-  const listen = <K extends keyof HTMLElementEventMap>(el: HTMLElement | Window, type: K | string, fn: (e: never) => void, opts?: AddEventListenerOptions) => {
-    el.addEventListener(type, fn as EventListener, opts); disposers.push(() => el.removeEventListener(type, fn as EventListener, opts));
-  };
+  const { canvas, renderer, container } = o;
+  const frames = viewBoxes(ctx.layout);
+  let w = 1, h = 1;
 
-  // ---- camera & controls ----
-  const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 1, 9000);
-  const ISO = v3(1, 1, 1).normalize(), CENTER = W((WORLD.x0 + WORLD.x1) / 2, (WORLD.y0 + WORLD.y1) / 2, 0);
-  camera.position.copy(CENTER).addScaledVector(ISO, 5000); camera.lookAt(CENTER);
-  const controls = new OrbitControls(camera, canvas);
-  Object.assign(controls, { enableRotate: false, screenSpacePanning: true, zoomToCursor: true, enableDamping: !ctx.reduced, dampingFactor: 0.12 });
-  controls.mouseButtons = { LEFT: THREE.MOUSE.PAN, MIDDLE: THREE.MOUSE.DOLLY, RIGHT: THREE.MOUSE.PAN };
-  controls.touches = { ONE: THREE.TOUCH.PAN, TWO: THREE.TOUCH.DOLLY_PAN };
-  controls.target.copy(CENTER);
-  // arrow keys pan; listened for on the canvas, which the shell gives a tabindex, never on the window
-  controls.listenToKeyEvents(canvas);
-  let fitZoom = 1, HOME = CENTER.clone(), goal: Goal = null, follow = false, sized = false, lastBuilding: Entity | null = null;
-  // the zoom and ground target that frame a box of the world (z0..z1 high) in a w × h view
-  function frame(w: number, h: number, b: Box, [z0, z1]: readonly [number, number] = [0, 12]) {
-    camera.updateMatrixWorld();
-    const inv = camera.matrixWorldInverse, bb = new THREE.Box3();
-    for (const x of [b.x0, b.x1]) for (const y of [b.y0, b.y1]) for (const z of [z0, z1]) bb.expandByPoint(W(x, y, z).applyMatrix4(inv));
-    const c = bb.getCenter(v3()).applyMatrix4(camera.matrixWorld);
-    return { zoom: Math.min(w / (bb.max.x - bb.min.x), h / (bb.max.y - bb.min.y)) * 0.94, target: c.addScaledVector(ISO, -c.y / ISO.y) };
+  const camera = new THREE.OrthographicCamera(-0.5, 0.5, 0.5, -0.5, 1, BACK * 5);
+  camera.up.set(0, 1, 0);
+  camera.position.set(BACK, BACK, BACK);
+  camera.lookAt(0, 0, 0);
+
+  // ---- camera state: the ground point at the centre of the frame, and the zoom (kept as its log) ----
+  const cur = { x: 0, y: 0, logZ: 0 }, goal = { x: 0, y: 0, logZ: 0 };
+  let homeLog = 0, nearLog = 1, home = { x: 0, y: 0 };
+  let named: ViewName | null = 'whole';
+
+  /** The centre and zoom that frame a box with a margin. */
+  function fit(f: Frame, margin: number): { x: number; y: number; logZ: number } {
+    let r0 = Infinity, r1 = -Infinity, u0 = Infinity, u1 = -Infinity;
+    for (const x of [f.box.x0, f.box.x1]) for (const y of [f.box.y0, f.box.y1]) for (const z of f.z) {
+      const [r, u] = screenOfPoint(x, y, z);
+      r0 = Math.min(r0, r); r1 = Math.max(r1, r); u0 = Math.min(u0, u); u1 = Math.max(u1, u);
+    }
+    const zoom = Math.min(w / Math.max(1e-6, (r1 - r0) * margin), h / Math.max(1e-6, (u1 - u0) * margin));
+    const [x, y] = groundAt((r0 + r1) / 2, (u0 + u1) / 2);
+    return { x, y, logZ: Math.log(zoom) };
   }
-  function moveTarget(to: THREE.Vector3) { const d = to.clone().sub(controls.target); controls.target.add(d); camera.position.add(d); }
-  function resize() {
-    const w = container.clientWidth, h = container.clientHeight; if (!w || !h) return;
+  /** The ground point under a world point, as the camera sees it: centring it puts the point in the middle of the frame. */
+  const groundUnder = (x: number, y: number, z: number): [number, number] => { const [r, u] = screenOfPoint(x, y, z); return groundAt(r, u); };
+
+  function measure() {
+    w = Math.max(1, container.clientWidth || canvas.clientWidth || 0);
+    h = Math.max(1, container.clientHeight || canvas.clientHeight || 0);
+    const homeFit = fit(frames.whole, 1.04);
+    homeLog = homeFit.logZ; home = { x: homeFit.x, y: homeFit.y };
+    nearLog = Math.max(homeLog + Math.log(8), Math.log(Math.min(w, h) / 40));
+    camera.left = -w / 2; camera.right = w / 2; camera.top = h / 2; camera.bottom = -h / 2;
     renderer.setSize(w, h, false);
-    Object.assign(camera, { left: -w / 2, right: w / 2, top: h / 2, bottom: -h / 2 });
-    const f = frame(w, h, WORLD, [-4, 50]); fitZoom = f.zoom; HOME = f.target;
-    controls.minZoom = fitZoom * 0.6; controls.maxZoom = fitZoom * 60;
-    if (!sized) { sized = true; const v = w < 600 ? frame(w, h, BOXES.estate) : f; camera.zoom = v.zoom; moveTarget(v.target); }
-    camera.zoom = clamp(camera.zoom, controls.minZoom, controls.maxZoom); camera.updateProjectionMatrix();
-    theme.setResolution(w, h);
+    ctx.theme.setResolution(w, h);
+    markerMat.resolution.set(w, h);
   }
-  const overlay = () => { const l = new LineSegments2(new LineSegmentsGeometry(), theme.line.live); l.raycast = () => {}; l.frustumCulled = false; l.visible = false; scene.add(l); return l; };
-  const retLine = overlay(), routeLine = overlay();
-  let ro: ResizeObserver | null = null;
-  if (typeof ResizeObserver !== 'undefined') { ro = new ResizeObserver(resize); ro.observe(container); }
-  resize();
-  listen(canvas, 'wheel', () => { goal = null; }, { passive: true });
-  function zoomBy(k: number) { goal = { zoom: clamp((goal?.zoom ?? camera.zoom) * k, controls.minZoom, controls.maxZoom), target: goal?.target }; }
-  function reset() { setFollow(false); goal = { zoom: fitZoom, target: HOME.clone() }; }
-  function frameBox(b: Box, z?: readonly [number, number]) { setFollow(false); goal = frame(container.clientWidth, container.clientHeight, b, z); }
-  function lookAt(name: ViewName) { if (name === 'whole') reset(); else frameBox(BOXES[name]); }
-  function currentView(): ViewName | null {
-    const t = controls.target; if (camera.zoom <= fitZoom * 1.3) return null;
-    let best: ViewName | null = null, bd = Infinity;
-    for (const name of VIEW_NAMES) { if (name === 'whole') continue; const b = BOXES[name];
-      if (t.x >= b.x0 && t.x <= b.x1 && t.z >= b.y0 && t.z <= b.y1) { const d = Math.hypot((b.x0 + b.x1) / 2 - t.x, (b.y0 + b.y1) / 2 - t.z); if (d < bd) { bd = d; best = name; } } }
-    return best;
-  }
-  // the distance control: 0 is the far home view, 1 the near view on the selected or last building
-  const NEAR = 14;
-  /** The distance control's reading of the camera, the inverse of setDistance's zoom curve. */
-  function distanceOf(): number { const nearZoom = fitZoom * NEAR; return clamp(Math.sqrt(Math.max(0, (camera.zoom - fitZoom) / (nearZoom - fitZoom))), 0, 1); }
-  function setDistance(t: number) {
-    const k = clamp(t, 0, 1), near = selected ?? lastBuilding;
-    const nearZoom = fitZoom * NEAR, zoom = fitZoom + (nearZoom - fitZoom) * k * k;
-    let target = HOME.clone();
-    if (near) { const b = bounds(near), c = b.getCenter(v3()); target = HOME.clone().lerp(c.addScaledVector(ISO, -c.y / ISO.y), k); }
-    setFollow(false); goal = { zoom: clamp(zoom, controls.minZoom, controls.maxZoom), target };
+  const zoomRange = () => [homeLog + Math.log(0.85), nearLog + Math.log(1.25)] as const;
+  const distOf = (logZ: number) => clamp((logZ - homeLog) / (nearLog - homeLog), 0, 1);
+  const logOf = (t: number) => homeLog + clamp(t, 0, 1) * (nearLog - homeLog);
+
+  function applyCamera() {
+    camera.zoom = Math.exp(cur.logZ);
+    camera.position.set(cur.x + BACK, BACK, cur.y + BACK);
+    camera.updateProjectionMatrix();
+    camera.updateMatrixWorld();
   }
 
-  // ---- selection, tags, card ----
-  const ray = new THREE.Raycaster(), ndc = new THREE.Vector2(), tmp = new THREE.Vector3(), box = new THREE.Box3();
-  const shown = (o: THREE.Object3D | null) => { for (; o; o = o.parent) if (!o.visible) return false; return true; };
-  const inSky = (o: THREE.Object3D | null) => { for (; o; o = o.parent) if (o === sky) return true; return false; };
-  function hit(cx: number, cy: number): Entity | null {
-    const r = canvas.getBoundingClientRect();
-    ndc.set((cx - r.left) / r.width * 2 - 1, -(cy - r.top) / r.height * 2 + 1);
-    ray.setFromCamera(ndc, camera);
-    for (const h of ray.intersectObjects([...scene.children, ...sky.children], true).sort((a, b) => a.distance - b.distance)) {
-      if (!(h.object instanceof THREE.Mesh) || !shown(h.object) || (h.point.x < WORLD.x0 || h.point.x > WORLD.x1 || h.point.z < WORLD.y0 || h.point.z > WORLD.y1) && !inSky(h.object)) continue;
-      let o: THREE.Object3D | null = h.object; while (o && !o.userData.entity) o = o.parent;
-      // the nearest visible surface decides; a part drawn for many things says which one was hit
-      const ent = o?.userData.entity as Entity | undefined;
-      return ent ? ent.resolve?.(h.point) ?? ent : null;
+  // ---- markers in the sky: the selection's frame, a moving thing's route, the highlighted entities ----
+  const sky = new THREE.Group(); sky.name = 'view-markers'; ctx.sky.add(sky);
+  const markerMat = ctx.theme.line.live.clone() as LineMaterial;
+  markerMat.depthTest = false; markerMat.depthWrite = false;
+  const frameLine = new LineSegments2(new LineSegmentsGeometry().setPositions(CUBE_EDGES), markerMat);
+  frameLine.visible = false; frameLine.renderOrder = 12; frameLine.frustumCulled = false; frameLine.raycast = noRaycast; sky.add(frameLine);
+  const routeLine = new LineSegments2(new LineSegmentsGeometry(), markerMat);
+  routeLine.visible = false; routeLine.renderOrder = 12; routeLine.frustumCulled = false; routeLine.raycast = noRaycast; sky.add(routeLine);
+  const highlightLine = new LineSegments2(new LineSegmentsGeometry(), markerMat);
+  highlightLine.visible = false; highlightLine.renderOrder = 12; highlightLine.frustumCulled = false; highlightLine.raycast = noRaycast; sky.add(highlightLine);
+
+  // ---- selection ----
+  let chosen: Entity | null = null, focus: Entity | null = null, routeAge = Infinity;
+  const moving = (e: Entity) => typeof e.update === 'function' && e.groups.length > 0;
+  /** An entity's anchor in three.js space: its pick point (local to a moving thing's group). */
+  function anchorOf(e: Entity): THREE.Vector3 {
+    const p = e.pick ?? [0, 0, 0];
+    const v = W(p[0], p[1], p[2]);
+    if (moving(e)) { e.groups[0].updateMatrixWorld(); v.applyMatrix4(e.groups[0].matrixWorld); }
+    return v;
+  }
+  /** An entity's bounds in three.js space, for the selection frame. */
+  function boundsOf(e: Entity): THREE.Box3 {
+    if (e.bbox) return e.bbox.clone();
+    const plot = (e as Entity & { box?: Box }).box;
+    if (plot && typeof plot.x0 === 'number') return new THREE.Box3(W(plot.x0, plot.y0, 0), W(plot.x1, plot.y1, 4.6));
+    if (moving(e)) { const b = new THREE.Box3().setFromObject(e.groups[0]); if (!b.isEmpty()) return b.expandByScalar(0.4); }
+    const a = anchorOf(e);
+    return new THREE.Box3(a.clone().add(new THREE.Vector3(-2, -1.5, -2)), a.clone().add(new THREE.Vector3(2, 1, 2)));
+  }
+  function placeFrame() {
+    if (!chosen) { frameLine.visible = false; routeLine.visible = false; return; }
+    const b = boundsOf(chosen);
+    frameLine.position.copy(b.min);
+    frameLine.scale.set(Math.max(1e-3, b.max.x - b.min.x), Math.max(1e-3, b.max.y - b.min.y), Math.max(1e-3, b.max.z - b.min.z));
+    frameLine.visible = true;
+  }
+  function drawRoute() {
+    const r = chosen?.route?.();
+    if (!r?.path) { routeLine.visible = false; return; }
+    const path = r.path, start = r.s ?? 0, pts: number[] = [];
+    // dashes ahead of the vehicle, a hundred and twenty metres of its lane
+    for (let d = 2; d < 120; d += 6) {
+      const s0 = start + d, s1 = start + d + 3;
+      if (!(r.closed ?? path.closed) && s1 > path.length) break;
+      const a = path.at(s0), b = path.at(s1);
+      pts.push(a.x, 0.4, a.y, b.x, 0.4, b.y);
+    }
+    const old = routeLine.geometry;
+    routeLine.geometry = new LineSegmentsGeometry().setPositions(pts.length ? pts : [0, 0, 0, 0, 0, 0]);
+    old.dispose();
+    routeLine.visible = pts.length > 0;
+  }
+
+  function select(ent: Entity | null) {
+    chosen = ent;
+    if (ent && (ent.kind === 'building' || ent.kind === 'company')) focus = ent;
+    routeAge = Infinity;
+    placeFrame();
+    if (!ent?.route) routeLine.visible = false;
+    o.onSelect?.(ent ? { id: ent.id, kind: ent.kind, info: ent.info() } : null);
+  }
+
+  // ---- where the camera goes ----
+  function centreOn(e: Entity): [number, number] { const a = anchorOf(e); return groundUnder(a.x, a.z, a.y); }
+  function setDistance(t: number) {
+    t = clamp(t, 0, 1);
+    goal.logZ = logOf(t);
+    const target = chosen ?? focus;
+    if (t === 0) { goal.x = home.x; goal.y = home.y; named = 'whole'; return; }
+    named = null;
+    if (target) {
+      // the frame slides from the home view toward the building over the first part of the slider
+      const s = clamp(t / 0.35, 0, 1), k = s * s * (3 - 2 * s), [fx, fy] = centreOn(target);
+      goal.x = home.x + (fx - home.x) * k; goal.y = home.y + (fy - home.y) * k;
+    }
+  }
+  function lookAt(name: ViewName) {
+    const f = frames[name] ?? frames.whole;
+    if (name === 'whole') { goal.x = home.x; goal.y = home.y; goal.logZ = homeLog; }
+    else { const g = fit(f, 1.08); goal.x = g.x; goal.y = g.y; goal.logZ = clamp(g.logZ, homeLog, nearLog); }
+    named = name;
+  }
+  function zoomBy(k: number) {
+    const [lo, hi] = zoomRange();
+    goal.logZ = clamp(goal.logZ + Math.log(k), lo, hi);
+    named = null;
+  }
+  /** Zoom by k at once, keeping the ground point under (px, py) where it is. */
+  function zoomAt(px: number, py: number, k: number) {
+    const [lo, hi] = zoomRange();
+    const before = Math.exp(cur.logZ), after = Math.exp(clamp(cur.logZ + Math.log(k), lo, hi));
+    const ox = px - w / 2, oy = h / 2 - py;
+    const [gx, gy] = groundAt(ox / before, oy / before), [nx, ny] = groundAt(ox / after, oy / after);
+    cur.x += gx - nx; cur.y += gy - ny; cur.logZ = Math.log(after);
+    goal.x = cur.x; goal.y = cur.y; goal.logZ = cur.logZ;
+    named = null;
+  }
+  /** Move the frame by a drag of (dx, dy) screen pixels, at once: the ground follows the pointer. */
+  function panBy(dx: number, dy: number) {
+    const z = Math.exp(cur.logZ), [gx, gy] = groundAt(-dx / z, dy / z);
+    const { x0, x1, y0, y1 } = ctx.layout.world;
+    cur.x = clamp(cur.x + gx, x0 - 200, x1 + 200); cur.y = clamp(cur.y + gy, y0 - 200, y1 + 200);
+    goal.x = cur.x; goal.y = cur.y;
+    named = null;
+  }
+  function cycle(d: 1 | -1) {
+    const list = ctx.entities.filter((e) => e.kind === 'building');
+    if (!list.length) return;
+    const i = chosen ? list.indexOf(chosen) : -1;
+    const next = list[i < 0 ? (d > 0 ? 0 : list.length - 1) : (i + d + list.length) % list.length];
+    select(next);
+    setDistance(Math.max(distOf(goal.logZ), 0.5));
+  }
+
+  // ---- highlight by tag ----
+  let highlighted: Entity[] = [];
+  function setHighlight(ids: readonly string[]) {
+    const want = new Set(ids);
+    highlighted = want.size ? ctx.entities.filter((e) => want.has(e.id) || (e.tags ?? []).some((t) => want.has(t)) || want.has((e as Entity & { code?: string }).code ?? '\u0000')) : [];
+    const pts: number[] = [];
+    const union = new THREE.Box3();
+    for (const e of highlighted) {
+      if (moving(e)) continue;
+      const b = boundsOf(e); union.union(b);
+      for (let i = 0; i < CUBE_EDGES.length; i += 3) pts.push(b.min.x + CUBE_EDGES[i] * (b.max.x - b.min.x), b.min.y + CUBE_EDGES[i + 1] * (b.max.y - b.min.y), b.min.z + CUBE_EDGES[i + 2] * (b.max.z - b.min.z));
+    }
+    const old = highlightLine.geometry;
+    highlightLine.geometry = new LineSegmentsGeometry().setPositions(pts.length ? pts : [0, 0, 0, 0, 0, 0]);
+    old.dispose();
+    highlightLine.visible = pts.length > 0;
+    if (!union.isEmpty()) {
+      const g = fit({ box: { x0: union.min.x, x1: union.max.x, y0: union.min.z, y1: union.max.z }, z: [union.min.y, union.max.y] }, 1.6);
+      goal.x = g.x; goal.y = g.y; goal.logZ = clamp(g.logZ, homeLog, logOf(0.85)); named = null;
+    }
+  }
+
+  // ---- picking ----
+  const raycaster = new THREE.Raycaster(), ndc = new THREE.Vector2();
+  const shown = (obj: THREE.Object3D | null) => { for (let x = obj; x; x = x.parent) if (!x.visible) return false; return true; };
+  const owner = (obj: THREE.Object3D | null): Entity | null => { for (let x = obj; x; x = x.parent) if (x.userData.entity) return x.userData.entity as Entity; return null; };
+  function pickAt(px: number, py: number): Entity | null {
+    ndc.set((px / w) * 2 - 1, -(py / h) * 2 + 1);
+    raycaster.setFromCamera(ndc, camera);
+    for (const root of [ctx.sky, ctx.scene]) {
+      for (const hit of raycaster.intersectObject(root, true)) {
+        if (!shown(hit.object)) continue;
+        const ent = owner(hit.object);
+        if (!ent) continue;
+        const resolved = ent.resolve ? ent.resolve(hit.point) : ent;
+        if (resolved.kind === 'zone') continue;
+        return resolved;
+      }
     }
     return null;
   }
-  // walk an entity's groups, stopping at anything that belongs to another entity (a pallet on a truck)
-  function eachOwn(ent: Entity, fn: (o: THREE.Object3D) => void) {
-    const walk = (o: THREE.Object3D) => { if (o.userData.entity && o.userData.entity !== ent) return; fn(o); o.children.forEach(walk); };
-    for (const g of ent.groups) { fn(g); g.children.forEach(walk); }
-  }
-  let liveG: THREE.Object3D | null = null;
-  function setLive(ent: Entity | null, on: boolean) { if (ent) eachOwn(ent, (o) => { if (o instanceof LineSegments2 && o.userData.line === 'line') o.material = on ? theme.line.live : theme.line.line; }); }
-  function bounds(ent: Entity) { box.makeEmpty(); if (ent.bbox) return box.copy(ent.bbox); for (const g of ent.groups) box.expandByObject(g); return box; }
-  const isBuilding = (e: Entity) => !e.isPerson && !VEHICLE_KINDS.has(e.kind);
-  let lit: Entity[] = [];
-  function setHighlight(ids: readonly string[]) {
-    for (const e of lit) if (e !== selected) setLive(e, false);
-    lit = ids.length ? ctx.entities.filter((e) => ids.includes(e.id) || (e.tags?.some((t) => ids.includes(t)) ?? false)) : [];
-    for (const e of lit) setLive(e, true);
-  }
-  function select(ent: Entity | null) {
-    if (ent === selected) return;
-    setLive(selected, false); selected = ent; setLive(selected, true); liveG = ent?.groups?.[0] ?? null;
-    if (ent && isBuilding(ent)) lastBuilding = ent;
-    setFollow(false); drawRoute();
-    o.onSelect?.(ent ? { id: ent.id, kind: ent.kind, info: ent.info() } : null);
-  }
-  ctx.hooks.forget = (ent) => { if (selected === ent) select(null); if (hovered === ent) hovered = null; };
-  ctx.hooks.select = (ent) => select(ent);
-  ctx.hooks.isSelected = (ent) => !!ent && selected === ent;
-  // Track: select a vehicle, follow it and come in close
-  ctx.hooks.track = (ent) => { select(ent); setFollow(true); goal = { zoom: Math.max(camera.zoom, fitZoom * 8) }; };
-  // Look inside: frame the building close enough to see its rooms (it is open while it is selected)
-  ctx.hooks.lookInside = (ent) => { const pk = ent.groups[0].userData.peek as Peek | undefined; if (!pk) return; const [x0, x1, y0, y1] = pk.box; frameBox({ x0: x0 - 4, x1: x1 + 4, y0: y0 - 4, y1: y1 + 4 }, pk.z ?? [0, 5]); };
-  ctx.hooks.handOff = (from, to) => { if (selected === from) { const f = follow; select(to); setFollow(f); } };
-  const VEHICLE_KINDS = new Set(['truck', 'reefer', 'forklift', 'train', 'crane', 'tractor', 'car', 'van', 'coin']);
-  const followable = (ent: Entity | null): ent is Entity => !!ent && (ent.isPerson === true || VEHICLE_KINDS.has(ent.kind));
-  function setFollow(on: boolean) { follow = on && followable(selected); }
-  const screenAt = (v: THREE.Vector3): [number, number] => { tmp.copy(v).project(camera); return [(tmp.x + 1) / 2 * container.clientWidth, (1 - tmp.y) / 2 * container.clientHeight]; };
-  // the corners are rebuilt only when the selection's footprint changes size; moving it is a translation
-  let retKey = '';
-  function updateReticle() {
-    if (!selected) { retLine.visible = false; return; }
-    const b = bounds(selected), x0 = b.min.x - 0.8, z0 = b.min.z - 0.8, y = Math.max(0, b.min.y) + 0.06;
-    const w = b.max.x + 0.8 - x0, d = b.max.z + 0.8 - z0, key = `${w.toFixed(1)}|${d.toFixed(1)}`;
-    if (key !== retKey) {
-      retKey = key; const L = Math.min(3, w / 3, d / 3), s: number[] = [];
-      for (const [x, dx] of [[0, 1], [w, -1]]) for (const [z, dz] of [[0, 1], [d, -1]]) s.push(x, 0, z, x + dx * L, 0, z, x, 0, z, x, 0, z + dz * L);
-      retLine.geometry.dispose(); retLine.geometry = new LineSegmentsGeometry().setPositions(s);
-    }
-    retLine.position.set(x0, y, z0); retLine.visible = true;
-  }
-  // the selection's route: dashes ahead of it (a whole loop for loop vehicles) and a ring at its next stop
-  let routeNext: { p: THREE.Vector3; stop?: string } | null = null;
-  function drawRoute() {
-    const r: EntityRoute | null | undefined = selected?.route?.();
-    const path = r && (r.path ?? (r.pts ? new Path(r.pts, 0.01) : null));
-    if (!r || !path || !path.length) { routeLine.visible = false; routeNext = null; return; }
-    const z = 0.24, s: number[] = [], s0 = r.s ?? 0, s1 = r.closed ? s0 + path.length : path.length;
-    for (let d = s0; d < s1; d += 1.6) { const a = path.at(d), b = path.at(Math.min(d + 0.8, s1)); s.push(a.x, z, a.y, b.x, z, b.y); }
-    routeNext = r.next ? { p: W(r.next[0], r.next[1], z), stop: r.stop } : null;
-    if (r.next) { const rr = selected?.isPerson ? 1.1 : 3.2; for (const v of ring(r.next[0], r.next[1], rr, z, 32)) s.push(v.x, v.y, v.z); }
-    routeLine.geometry.dispose(); routeLine.geometry = new LineSegmentsGeometry().setPositions(s); routeLine.visible = true;
-  }
-  // A closed building opens up while it, or something inside it, is selected. Sections are drawn the first time they open.
-  ctx.hooks.inBuilding = (x, y) => ctx.peeks.some(([g]) => { const b = (g.userData.peek as Peek).box; return x > b[0] && x < b[1] && y > b[2] && y < b[3]; });
-  ctx.hooks.closedAt = (x, y) => { for (const [g] of ctx.peeks) { const pk = g.userData.peek as Peek, b = pk.box; if (x > b[0] && x < b[1] && y > b[2] && y < b[3]) return !pk.cut?.visible; } return false; };
-  function updatePeek() {
-    let c: [number, number] | null = null; if (selected) { const b = bounds(selected); c = [(b.min.x + b.max.x) / 2, (b.min.z + b.max.z) / 2]; }
-    for (const [g, ent] of ctx.peeks) { const pk = g.userData.peek as Peek, [x0, x1, y0, y1] = pk.box;
-      const inside = (p: [number, number] | null) => !!p && p[0] > x0 && p[0] < x1 && p[1] > y0 && p[1] < y1;
-      const near = pk.near && camera.zoom > fitZoom * 9 && controls.target.x > x0 - 6 && controls.target.x < x1 + 6 && controls.target.z > y0 - 6 && controls.target.z < y1 + 6;
-      const on = selected === ent || inside(c) || (!!routeNext && inside([routeNext.p.x, routeNext.p.z])) || !!near || !!ent.opened?.();
-      if (on && !pk.cut && pk.section) { const s = pk.section(); s.cut.visible = s.inside.visible = false; g.add(s.cut, s.inside); pk.cut = s.cut; pk.inside = s.inside; }
-      if (pk.cut && pk.cut.visible !== on) { pk.cut.visible = on; pk.shell.visible = !on; if (pk.inside) pk.inside.visible = on; ent.peeked?.(on); }
-      if (on) ent.whileOpen?.(); }
-  }
 
-  let down: { x: number; y: number; t: number } | null = null, pointer: [number, number] | null = null, hoverDirty = false;
-  listen(canvas, 'pointerdown', (e: PointerEvent) => { down = { x: e.clientX, y: e.clientY, t: performance.now() }; });
-  listen(canvas, 'pointerup', (e: PointerEvent) => {
-    if (down && Math.hypot(e.clientX - down.x, e.clientY - down.y) < 6 && performance.now() - down.t < 700) select(hit(e.clientX, e.clientY));
-    down = null;
-  });
-  listen(canvas, 'pointermove', (e: PointerEvent) => {
-    if (down && Math.hypot(e.clientX - down.x, e.clientY - down.y) >= 6) { goal = null; setFollow(false); }   // a real drag takes the camera back
-    if (e.pointerType === 'mouse' && !e.buttons) { pointer = [e.clientX, e.clientY]; hoverDirty = true; }
-  });
-  listen(canvas, 'pointerleave', () => { pointer = null; hovered = null; canvas.classList.remove('over'); });
-  const buildings = () => ctx.entities.filter(isBuilding);
-  function cycle(d: 1 | -1) { const v = buildings(), i = selected ? v.indexOf(selected) : -1; if (v.length) select(v[i < 0 ? (d > 0 ? 0 : v.length - 1) : (i + d + v.length) % v.length]); }
-  // keys per PRD §7.3: 1–5 and 0 are the places, [ ] cycle buildings, Enter opens the hovered thing, Esc closes, +/− zoom, F follows
-  const PLACE_KEYS: Record<string, ViewName> = { '1': 'ring', '2': 'estate', '3': 'gateway', '4': 'town', '5': 'thinktank', '0': 'whole' };
-  listen(canvas, 'keydown', (e: KeyboardEvent) => {
+  // ---- input: everything on the canvas ----
+  const local = (e: { clientX: number; clientY: number }): [number, number] => { const r = canvas.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
+  const pointers = new Map<number, [number, number]>();
+  let press: { id: number; x: number; y: number; moved: boolean } | null = null, spread = 0, lastHover = 0;
+  const onDown = (e: PointerEvent) => {
+    if (typeof canvas.focus === 'function') canvas.focus({ preventScroll: true });
+    try { canvas.setPointerCapture(e.pointerId); } catch { /* not every environment captures */ }
+    const p = local(e); pointers.set(e.pointerId, p);
+    if (pointers.size === 1) press = { id: e.pointerId, x: p[0], y: p[1], moved: false };
+    else { press = null; const [a, b] = [...pointers.values()]; spread = Math.hypot(a[0] - b[0], a[1] - b[1]); }
+    canvas.style.cursor = 'grabbing';
+  };
+  const onMove = (e: PointerEvent) => {
+    const p = local(e), prev = pointers.get(e.pointerId);
+    if (!prev) {
+      // hover: a pointer over something clickable, checked a few times a second
+      const now = typeof performance !== 'undefined' ? performance.now() : 0;
+      if (e.pointerType === 'mouse' && now - lastHover > 120) { lastHover = now; canvas.style.cursor = pickAt(p[0], p[1]) ? 'pointer' : 'grab'; }
+      return;
+    }
+    pointers.set(e.pointerId, p);
+    if (pointers.size === 2) {
+      const [a, b] = [...pointers.values()], d = Math.hypot(a[0] - b[0], a[1] - b[1]);
+      if (spread > 0 && d > 0) zoomAt((a[0] + b[0]) / 2, (a[1] + b[1]) / 2, d / spread);
+      spread = d;
+      return;
+    }
+    if (press && !press.moved && Math.hypot(p[0] - press.x, p[1] - press.y) > 5) press.moved = true;
+    if (!press || press.moved) panBy(p[0] - prev[0], p[1] - prev[1]);
+  };
+  const onUp = (e: PointerEvent) => {
+    const p = local(e);
+    pointers.delete(e.pointerId);
+    try { canvas.releasePointerCapture(e.pointerId); } catch { /* already released */ }
+    if (press && press.id === e.pointerId && !press.moved && e.type === 'pointerup') select(pickAt(p[0], p[1]));
+    if (!pointers.size) { press = null; canvas.style.cursor = 'grab'; }
+  };
+  const onWheel = (e: WheelEvent) => {
+    // the page scrolls past the world until the visitor has put a hand on it (focus), or pinches (ctrl + wheel)
+    if (!e.ctrlKey && document.activeElement !== canvas) return;
+    e.preventDefault();
+    const dy = e.deltaY * (e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? h : 1);
+    const [x, y] = local(e);
+    zoomAt(x, y, Math.exp(-dy * 0.0015));
+  };
+  const onKey = (e: KeyboardEvent) => {
     if (e.metaKey || e.ctrlKey || e.altKey) return;
-    if (e.key.startsWith('Arrow')) { goal = null; setFollow(false); return; }
-    const place = PLACE_KEYS[e.key];
-    const act: (() => void) | undefined = place ? () => lookAt(place) : ({
-      Escape: () => select(null), f: () => setFollow(!follow), F: () => setFollow(!follow), ']': () => cycle(1), '[': () => cycle(-1),
-      '+': () => zoomBy(1.4), '=': () => zoomBy(1.4), '-': () => zoomBy(1 / 1.4), '_': () => zoomBy(1 / 1.4), Home: reset,
-      Enter: () => { if (hovered) select(hovered); else if (selected) o.onSelect?.({ id: selected.id, kind: selected.kind, info: selected.info() }); },
-    } as Record<string, () => void>)[e.key];
-    if (act) { act(); e.preventDefault(); }
-  });
-  // The GPU can drop the context (driver reset, memory pressure, a GPU switch). three.js restores it by itself;
-  // meanwhile nothing is drawn, then everything is re-tinted once it is back.
-  let lost = false;
-  listen(canvas, 'webglcontextlost', (e: Event) => { e.preventDefault(); lost = true; });
-  listen(canvas, 'webglcontextrestored', () => { lost = false; theme.apply(); resize(); });
-  if (typeof matchMedia === 'function') { const mq = matchMedia('(prefers-color-scheme: light)'); const onTheme = () => theme.apply(); mq.addEventListener('change', onTheme); disposers.push(() => mq.removeEventListener('change', onTheme)); }
+    let used = true;
+    if (e.key === ']') cycle(1);
+    else if (e.key === '[') cycle(-1);
+    else if (e.key === 'Escape') select(null);
+    else if (KEY_VIEWS[e.key]) lookAt(KEY_VIEWS[e.key]);
+    else if (e.key === '+' || e.key === '=') zoomBy(1.4);
+    else if (e.key === '-' || e.key === '_') zoomBy(1 / 1.4);
+    else if (e.key === 'ArrowLeft') panBy(80, 0);
+    else if (e.key === 'ArrowRight') panBy(-80, 0);
+    else if (e.key === 'ArrowUp') panBy(0, 80);
+    else if (e.key === 'ArrowDown') panBy(0, -80);
+    else used = false;
+    if (used) e.preventDefault();
+  };
+  const listeners: [string, EventListener, AddEventListenerOptions?][] = [
+    ['pointerdown', onDown as EventListener], ['pointermove', onMove as EventListener], ['pointerup', onUp as EventListener],
+    ['pointercancel', onUp as EventListener], ['wheel', onWheel as EventListener, { passive: false }], ['keydown', onKey as EventListener],
+  ];
+  for (const [type, fn, opts] of listeners) canvas.addEventListener(type, fn, opts);
+  canvas.style.cursor = 'grab';
+  let observer: ResizeObserver | null = null;
+  if (typeof ResizeObserver === 'function') { observer = new ResizeObserver(() => resize()); observer.observe(container); }
 
-  // ---- one frame ----
-  let TINY = false, FAR = false;
-  function tick(dt: number, paused: boolean) {
-    const k = ctx.reduced ? 1 : 1 - Math.exp(-dt * 6);
-    theme.shade(clock.night());
-    // (followed where it is seen: its middle, slid down the view ray to the ground)
-    if (follow && selected) { const b = bounds(selected), c = b.getCenter(v3()); moveTarget(controls.target.clone().lerp(c.addScaledVector(ISO, -c.y / ISO.y), k)); }
-    if (goal) {
-      if (goal.target) moveTarget(controls.target.clone().lerp(goal.target, k));
-      camera.zoom += (goal.zoom - camera.zoom) * k; camera.updateProjectionMatrix();
-      if (Math.abs(goal.zoom - camera.zoom) < 1e-3 * goal.zoom && (!goal.target || controls.target.distanceTo(goal.target) < 0.05)) goal = null;
+  // ---- the hooks scene code calls ----
+  ctx.hooks = {
+    forget(e) { if (chosen === e) select(null); if (focus === e) focus = null; if (highlighted.includes(e)) highlighted = highlighted.filter((x) => x !== e); },
+    select: (e) => select(e),
+    isSelected: (e) => chosen === e,
+    track(e) { select(e); const [x, y] = centreOn(e); goal.x = x; goal.y = y; named = null; },
+    lookInside(e) { select(e); setDistance(1); },
+    handOff(from, to) { if (chosen === from) select(to); },
+  };
+
+  // ---- the level of detail, the sections, the frame ----
+  let far: boolean | null = null, tiny: boolean | null = null, calls = 0;
+  const open = new Set<THREE.Group>();
+  function detail() {
+    const t = distOf(cur.logZ);
+    const nextFar = t < (o.reducedDetail ? FAR_PHONE : FAR), nextTiny = t < (o.reducedDetail ? TINY_PHONE : TINY);
+    if (nextFar !== far || nextTiny !== tiny) {
+      if (nextFar !== far) setTextFar(ctx.texts, nextFar);
+      far = nextFar; tiny = nextTiny;
+      o.onDetail?.(tiny, far);
     }
-    controls.update(dt);
-    // slide the target along the view ray onto the ground (an invisible move), then keep it over the world
-    const t = controls.target; moveTarget(t.clone().addScaledVector(ISO, -t.y / ISO.y));
-    const home = v3(clamp(t.x, WORLD.x0, WORLD.x1), 0, clamp(t.z, WORLD.y0, WORLD.y1));
-    if (!(follow && selected?.aloft?.())) moveTarget(home.distanceTo(t) > 1 ? t.clone().lerp(home, k) : home);
-    camera.updateMatrixWorld();
-    // detail by how big things are on screen (zoom is screen px per metre): lite figures under about 4 px a metre, none under about 1.5
-    const tinyAt = o.reducedDetail ? 6 : 4.2, farAt = o.reducedDetail ? 2.2 : 1.5;
-    const tiny = camera.zoom < tinyAt, far = camera.zoom < farAt;
-    if (tiny !== TINY || far !== FAR) { TINY = tiny; FAR = far; setTextFar(ctx.texts, far); o.onDetail?.(tiny, far); }
-    updatePeek();
-    // a selection that has changed its model gets its highlight again
-    if (selected && selected.groups?.[0] !== liveG) { liveG = selected.groups?.[0] ?? null; setLive(selected, true); }
-    if (hoverDirty && pointer) { hoverDirty = false; hovered = hit(...pointer); canvas.classList.toggle('over', !!hovered); }
-    updateReticle();
-    if (!paused) drawRoute();
-    if (!lost) { renderer.info.autoReset = false; renderer.info.reset(); renderer.render(scene, camera);
-      if (sky.children.length) { const cp = renderer.clippingPlanes; renderer.clippingPlanes = []; renderer.autoClear = false; renderer.render(sky, camera); renderer.autoClear = true; renderer.clippingPlanes = cp; } }
   }
+  const within = (g: THREE.Object3D, inner: THREE.Object3D | undefined) => { for (let x = inner ?? null; x; x = x.parent) if (x === g) return true; return false; };
+  function sections() {
+    const t = distOf(cur.logZ);
+    for (const [g, ent] of ctx.peeks) {
+      const peek = g.userData.peek as Peek | undefined;
+      if (!peek) continue;
+      // the point at the building's floor height under the middle of the frame (a raised floor sits up-screen of its ground)
+      const z0 = peek.z?.[0] ?? 0, mx = cur.x + z0, my = cur.y + z0;
+      const over = !!peek.near && t >= NEAR_OPEN && mx >= peek.box[0] - 20 && mx <= peek.box[1] + 20 && my >= peek.box[2] - 20 && my <= peek.box[3] + 20;
+      const want = chosen === ent || (!!chosen && within(g, chosen.groups[0])) || over;
+      const isOpen = open.has(g);
+      if (want && !isOpen) {
+        if (!peek.cut && peek.section) { const s = peek.section(); g.add(s.cut, s.inside); peek.cut = s.cut; peek.inside = s.inside; }
+        peek.shell.visible = false;
+        if (peek.cut) peek.cut.visible = true;
+        if (peek.inside) peek.inside.visible = true;
+        open.add(g); ent.peeked?.(true);
+      } else if (!want && isOpen) {
+        peek.shell.visible = true;
+        if (peek.cut) peek.cut.visible = false;
+        if (peek.inside) peek.inside.visible = false;
+        open.delete(g); ent.peeked?.(false);
+      }
+      if (want) ent.whileOpen?.();
+    }
+  }
+
+  function tick(dt: number, paused: boolean) {
+    const k = ctx.reduced ? 1 : approach(EASE, dt);
+    cur.x += (goal.x - cur.x) * k; cur.y += (goal.y - cur.y) * k; cur.logZ += (goal.logZ - cur.logZ) * k;
+    if (Math.abs(goal.x - cur.x) < 1e-3 && Math.abs(goal.y - cur.y) < 1e-3 && Math.abs(goal.logZ - cur.logZ) < 1e-4) { cur.x = goal.x; cur.y = goal.y; cur.logZ = goal.logZ; }
+    applyCamera();
+    detail();
+    sections();
+    if (chosen && moving(chosen)) placeFrame();
+    routeAge += dt;
+    if (chosen?.route && !paused && routeAge > 0.2) { routeAge = 0; drawRoute(); }
+    ctx.theme.shade(o.clock.night());
+    renderer.info.reset();
+    renderer.autoClear = true;
+    renderer.render(ctx.scene, camera);
+    renderer.autoClear = false;
+    renderer.render(ctx.sky, camera);
+    calls = renderer.info.render.calls;
+  }
+
+  function resize() {
+    const t = distOf(cur.logZ), atHome = named === 'whole' && cur.logZ === homeLog;
+    measure();
+    if (atHome) { cur.x = goal.x = home.x; cur.y = goal.y = home.y; cur.logZ = goal.logZ = homeLog; }
+    else if (named) lookAt(named);
+    else { cur.logZ = logOf(t); goal.logZ = clamp(goal.logZ, ...zoomRange()); }
+    applyCamera();
+  }
+
+  function screenOf(e: Entity): [number, number] {
+    applyCamera();
+    const v = anchorOf(e).project(camera);
+    return [((v.x + 1) / 2) * w, ((1 - v.y) / 2) * h];
+  }
+
+  // ---- start at home ----
+  renderer.info.autoReset = false;
+  measure();
+  cur.x = goal.x = home.x; cur.y = goal.y = home.y; cur.logZ = goal.logZ = homeLog;
+  applyCamera();
+  detail();
 
   return {
-    camera, controls, select, selected: () => selected, hovered: () => hovered, lookAt, frameBox, setDistance, distanceOf, zoomBy, reset, cycle, setFollow, setHighlight, currentView, tick,
-    drawCalls: () => { tick(0, true); return renderer.info.render.calls; },
-    screenOf: (e) => { scene.updateMatrixWorld(); camera.updateMatrixWorld(); const pk = e.pick ?? [0, 0, 1];
-      const p = (e.groups[0] ? e.groups[0].localToWorld(W(...pk)) : W(...pk)).project(camera), r = canvas.getBoundingClientRect();
-      return [r.left + (p.x + 1) / 2 * r.width, r.top + (1 - p.y) / 2 * r.height]; },
-    look: (x, y, k) => { goal = null; setFollow(false); moveTarget(W(x, y, 0)); camera.zoom = fitZoom * k; camera.updateProjectionMatrix(); },
+    camera,
+    select,
+    selected: () => chosen,
+    lookAt,
+    setDistance,
+    distanceOf: () => distOf(cur.logZ),
+    zoomBy,
+    cycle,
+    setHighlight,
+    currentView: () => named,
+    tick,
+    drawCalls: () => calls,
+    screenOf,
+    look(x, y, zoom) { const [lo, hi] = zoomRange(); cur.x = goal.x = x; cur.y = goal.y = y; cur.logZ = goal.logZ = clamp(Math.log(Math.max(zoom, 1e-6)), lo, hi); named = null; applyCamera(); },
     resize,
-    dispose: () => {
-      for (const d of disposers.splice(0)) d();
-      ro?.disconnect(); ro = null;
-      controls.dispose();
-      for (const l of [retLine, routeLine]) { scene.remove(l); l.geometry.dispose(); }
-      selected = null; hovered = null; liveG = null; lastBuilding = null; goal = null; lit = [];
+    dispose() {
+      for (const [type, fn, opts] of listeners) canvas.removeEventListener(type, fn, opts);
+      observer?.disconnect(); observer = null;
+      pointers.clear(); open.clear(); highlighted = []; chosen = null; focus = null;
+      ctx.hooks = idleHooks();
+      sky.removeFromParent();
+      for (const l of [frameLine, routeLine, highlightLine]) l.geometry.dispose();
+      markerMat.dispose();
     },
   };
 }

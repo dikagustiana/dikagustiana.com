@@ -36,6 +36,10 @@ const frames = new Set<number>();
 let rafSeq = 1;
 
 beforeEach(() => {
+  // jsdom builds its selector engine lazily, the first time getComputedStyle runs (the engine reads the site's
+  // tokens with it), and that engine attaches mouseover and mouseout listeners to the document which it never
+  // removes. Run it once here, before anything is counted, so the environment's two are not taken for the engine's.
+  getComputedStyle(document.documentElement);
   net.clear(); frames.clear();
   added.length = 0;
   EventTarget.prototype.addEventListener = function (this: EventTarget, ...a: Parameters<EventTarget['addEventListener']>) { net.set(this, (net.get(this) ?? 0) + 1); added.push(`${Object.prototype.toString.call(this)}:${String(a[0])}`); return origAdd.apply(this, a); };

@@ -1,19 +1,29 @@
 /**
- * Checks the world engine under src/world/engine, after Factory Yard's
- * scripts/check-yard.mjs (github.com/Khalidabdi1/factory, commit 148758a):
+ * The world engine's static check (CI: npm run check:world). Original to
+ * this repository.
  *
- *   - every file parses, and every relative import names a module that exists
- *     and exports what is imported;
- *   - every name a module uses is declared, imported, or a browser/JS global;
- *   - simulating ES module evaluation from the entry (index.ts), nothing is
- *     used at load time before its own module has run.
+ * Over every .ts file under src/world:
  *
- * Difference from the original: files not reachable from the entry are
- * reported as PENDING (vendored, not yet wired) and their unresolved imports
- * of modules that were deliberately not ported (../layout, ./sahel, …) do not
- * fail the run. Files reachable from the entry must be clean. Pass --strict
- * to make pending files fail too; the build does that once Phase D has wired
- * every ported module.
+ *   1. it parses;
+ *   2. every import or re-export of a module under src/world (relative or
+ *      '@/…') names a file that exists, and every name it takes is exported
+ *      there;
+ *   3. every identifier a file uses is declared in it, imported, or a
+ *      JavaScript or browser global;
+ *   4. loading the engine from its entry (src/world/engine/index.ts) the way
+ *      ES modules evaluate (dependencies first, in import order, a cycle
+ *      entered once), no module touches an imported binding at load time
+ *      before the module that exports it has run.
+ *
+ * Files the entry does not reach (the data boundary, the placement and its
+ * generated layout) are listed as pending: their problems are counted but do
+ * not fail the run, unless --strict is passed.
+ *
+ * And over every file under src/:
+ *
+ *   5. provenance: no file carries code adapted from Factory Yard (NOTICE.md).
+ *      A file with the adaptation header or a link to that repository fails
+ *      the run, whatever --strict says.
  *
  *   node scripts/world/check-engine.mjs [--strict]
  */
@@ -21,131 +31,181 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parse } from '@babel/parser';
-import traverseMod from '@babel/traverse';
+import babelTraverse from '@babel/traverse';
 
-const traverse = traverseMod.default;
+const traverse = babelTraverse.default ?? babelTraverse;
 const SRC = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../src');
-const ROOT = path.join(SRC, 'world');
-const ENTRY = path.join(ROOT, 'engine/index.ts');
-const STRICT = process.argv.includes('--strict');
-const rel = (f) => path.relative(ROOT, f);
+const WORLD = path.join(SRC, 'world');
+const ENTRY = path.join(WORLD, 'engine', 'index.ts');
+const strict = process.argv.includes('--strict');
+const short = (file) => path.relative(WORLD, file);
 
-const files = [];
-(function walk(d) {
-  for (const f of fs.readdirSync(d)) {
-    const p = path.join(d, f);
-    if (fs.statSync(p).isDirectory()) walk(p);
-    else if (p.endsWith('.ts')) files.push(p);
+/** Names that exist without a declaration: the JavaScript globals of this Node, and the browser's the engine uses. */
+const GLOBALS = new Set([...Object.getOwnPropertyNames(globalThis),
+  'window', 'document', 'location', 'navigator', 'performance', 'localStorage', 'devicePixelRatio', 'matchMedia', 'getComputedStyle',
+  'requestAnimationFrame', 'cancelAnimationFrame', 'ResizeObserver', 'Element', 'HTMLElement', 'HTMLCanvasElement',
+  'KeyboardEvent', 'PointerEvent', 'WheelEvent', 'EventListener', 'AddEventListenerOptions']);
+
+function listFiles(dir, keep) {
+  const out = [];
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) out.push(...listFiles(full, keep));
+    else if (keep(full)) out.push(full);
   }
-})(ROOT);
-files.sort();
+  return out.sort();
+}
 
-const BROWSER = new Set(['window', 'document', 'location', 'performance', 'requestAnimationFrame', 'cancelAnimationFrame', 'matchMedia', 'getComputedStyle',
-  'devicePixelRatio', 'ResizeObserver', 'navigator', 'localStorage', 'HTMLElement', 'HTMLCanvasElement', 'KeyboardEvent', 'PointerEvent', 'WheelEvent', 'Element']);
-
-// ---- parse and collect exports ----
-const mods = new Map();
-for (const f of files) {
+// ---- 1. parse ----
+const modules = new Map();
+for (const file of listFiles(WORLD, (f) => f.endsWith('.ts'))) {
   let ast;
   try {
-    ast = parse(fs.readFileSync(f, 'utf8'), { sourceType: 'module', plugins: ['typescript'], allowAwaitOutsideFunction: true });
-  } catch (e) {
-    console.log(`${rel(f)}:${e.loc?.line}:${e.loc?.column} syntax error · ${e.message}`);
+    ast = parse(fs.readFileSync(file, 'utf8'), { sourceType: 'module', plugins: ['typescript'] });
+  } catch (err) {
+    console.log(`${short(file)}:${err.loc?.line ?? 0}: does not parse (${err.message})`);
     process.exit(1);
   }
-  const names = new Set();
-  for (const st of ast.program.body) {
-    if (st.type === 'ExportNamedDeclaration') {
-      const d = st.declaration;
-      if (d?.declarations) d.declarations.forEach((x) => { if (x.id.type === 'Identifier') names.add(x.id.name); else if (x.id.type === 'ObjectPattern') x.id.properties.forEach((pr) => pr.value?.name && names.add(pr.value.name)); });
-      else if (d?.id) names.add(d.id.name);
-      for (const sp of st.specifiers ?? []) names.add(sp.exported.name ?? sp.exported.value);
-    }
-    if (st.type === 'ExportDefaultDeclaration') names.add('default');
-  }
-  mods.set(f, { ast, names });
+  modules.set(file, { ast, exports: exportedNames(ast), specs: moduleSpecifiers(ast) });
 }
 
-// './view' is view.ts or view/index.ts, as the bundler resolves it; '@/x' is src/x
-const resolve = (from, spec) => {
+function exportedNames(ast) {
+  const names = new Set();
+  const addPattern = (id) => {
+    if (!id) return;
+    if (id.type === 'Identifier') names.add(id.name);
+    else if (id.type === 'ObjectPattern') for (const p of id.properties) addPattern(p.type === 'RestElement' ? p.argument : p.value);
+    else if (id.type === 'ArrayPattern') for (const e of id.elements) addPattern(e);
+  };
+  for (const node of ast.program.body) {
+    if (node.type === 'ExportDefaultDeclaration') names.add('default');
+    if (node.type !== 'ExportNamedDeclaration') continue;
+    const decl = node.declaration;
+    if (decl?.type === 'VariableDeclaration') for (const d of decl.declarations) addPattern(d.id);
+    else if (decl?.id) names.add(decl.id.name);
+    for (const s of node.specifiers ?? []) names.add(s.exported.type === 'Identifier' ? s.exported.name : s.exported.value);
+  }
+  return names;
+}
+
+/** The module requests a file makes (imports and re-exports), with the names each one takes. */
+function moduleSpecifiers(ast) {
+  const out = [];
+  for (const node of ast.program.body) {
+    const isImport = node.type === 'ImportDeclaration';
+    const isReexport = (node.type === 'ExportNamedDeclaration' || node.type === 'ExportAllDeclaration') && node.source;
+    if (!isImport && !isReexport) continue;
+    const spec = node.source.value;
+    if (!spec.startsWith('.') && !spec.startsWith('@/')) continue;
+    const taken = [];
+    for (const s of node.specifiers ?? []) {
+      if (s.type === 'ImportSpecifier') taken.push(s.imported.type === 'Identifier' ? s.imported.name : s.imported.value);
+      else if (s.type === 'ExportSpecifier') taken.push(s.local.type === 'Identifier' ? s.local.name : s.local.value);
+    }
+    out.push({ spec, taken, line: node.loc?.start.line ?? 0 });
+  }
+  return out;
+}
+
+/** A specifier as the bundler resolves it: '@/x' is src/x; 'a/b' is a/b.ts, else a/b/index.ts. */
+function resolveSpec(from, spec) {
   const base = spec.startsWith('@/') ? path.join(SRC, spec.slice(2)) : path.resolve(path.dirname(from), spec);
-  if (spec.endsWith('.ts')) return base;
-  return fs.existsSync(base + '.ts') ? base + '.ts' : path.join(base, 'index.ts');
-};
-// the relative modules a file loads: its imports and its re-exports
-const edges = (ast) => ast.program.body
-  .filter((st) => (st.type === 'ImportDeclaration' || st.type === 'ExportNamedDeclaration' || st.type === 'ExportAllDeclaration') && st.source && (st.source.value.startsWith('.') || st.source.value.startsWith('@/')))
-  .map((st) => st.source.value);
+  if (base.endsWith('.ts')) return base;
+  return fs.existsSync(`${base}.ts`) ? `${base}.ts` : path.join(base, 'index.ts');
+}
 
 // ---- reachability from the entry ----
-const reachable = new Set();
-if (fs.existsSync(ENTRY)) {
-  (function visit(f) {
-    if (reachable.has(f) || !mods.has(f)) return;
-    reachable.add(f);
-    for (const spec of edges(mods.get(f).ast)) visit(resolve(f, spec));
-  })(ENTRY);
-} else {
-  console.log('no entry (index.ts) yet: every file is pending');
-}
-const pending = files.filter((f) => !reachable.has(f));
+const wired = new Set();
+const reach = (file) => {
+  if (wired.has(file) || !modules.has(file)) return;
+  wired.add(file);
+  for (const { spec } of modules.get(file).specs) reach(resolveSpec(file, spec));
+};
+if (fs.existsSync(ENTRY)) reach(ENTRY);
+else console.log('no entry (engine/index.ts): every file is pending');
+const pending = [...modules.keys()].filter((f) => !wired.has(f));
 
-// ---- imports and free names ----
-let bad = 0, pendingProblems = 0;
-const report = (f, msg) => { if (reachable.has(f) || STRICT) { console.log(`${rel(f)}: ${msg}`); bad++; } else pendingProblems++; };
-for (const f of files) {
-  const { ast } = mods.get(f);
-  for (const st of ast.program.body) {
-    const isImport = st.type === 'ImportDeclaration', isReexport = (st.type === 'ExportNamedDeclaration' || st.type === 'ExportAllDeclaration') && !!st.source;
-    if (!(isImport || isReexport) || !(st.source.value.startsWith('.') || st.source.value.startsWith('@/'))) continue;
-    const target = resolve(f, st.source.value), ex = mods.get(target);
-    // a module outside src/world (the registry, the chain data) is not checked here
-    if (!ex) { if (target.startsWith(ROOT)) report(f, `no module ${st.source.value}`); continue; }
-    for (const sp of st.specifiers ?? []) {
-      const name = sp.type === 'ImportSpecifier' ? (sp.imported.name ?? sp.imported.value) : sp.type === 'ExportSpecifier' ? (sp.local.name ?? sp.local.value) : null;
-      if (name && !ex.names.has(name)) report(f, `${name} is not exported by ${st.source.value}`);
+let problems = 0, pendingProblems = 0;
+const problem = (file, msg) => {
+  if (wired.has(file) || strict) { console.log(`${short(file)}: ${msg}`); problems++; } else pendingProblems++;
+};
+
+// ---- 2. imports resolve to real exports ----
+for (const [file, mod] of modules) {
+  for (const { spec, taken, line } of mod.specs) {
+    const target = resolveSpec(file, spec), there = modules.get(target);
+    if (!there) {
+      // modules outside src/world (the registry, the chain data) are another check's business
+      if (target.startsWith(WORLD)) problem(file, `line ${line}: ${spec} does not exist`);
+      continue;
     }
+    for (const name of taken) if (!there.exports.has(name)) problem(file, `line ${line}: ${spec} does not export ${name}`);
   }
-  const free = new Set();
-  const inType = (p) => !!p.findParent((q) => q.node.type.startsWith('TS') && !['TSAsExpression', 'TSNonNullExpression', 'TSSatisfiesExpression'].includes(q.node.type));
+}
+
+// ---- 3. every name used is declared, imported or global ----
+/** Node types that put whatever is inside them in type position; the TS wrappers of a value expression are not among them. */
+const TYPE_POSITION = new Set(['TSTypeAnnotation', 'TSTypeParameterInstantiation', 'TSTypeParameterDeclaration', 'TSInterfaceDeclaration',
+  'TSTypeAliasDeclaration', 'TSDeclareFunction', 'TSModuleDeclaration', 'TSTypeReference', 'TSQualifiedName', 'TSTypeQuery',
+  'TSExpressionWithTypeArguments', 'TSInterfaceHeritage', 'TSImportType', 'TSIndexedAccessType']);
+const inTypePosition = (p) => !!p.findParent((q) => TYPE_POSITION.has(q.node.type));
+for (const [file, { ast }] of modules) {
+  const unknown = new Set();
   traverse(ast, {
     ReferencedIdentifier(p) {
-      const n = p.node.name;
-      if (!p.scope.hasBinding(n) && !BROWSER.has(n) && !(n in globalThis) && !inType(p)) free.add(n);
+      const name = p.node.name;
+      // a constructor's parameter property (constructor(readonly id: string)) declares the name, it does not read it
+      if (p.parent.type === 'TSParameterProperty') return;
+      if (p.scope.hasBinding(name) || GLOBALS.has(name) || inTypePosition(p)) return;
+      unknown.add(name);
     },
   });
-  for (const n of free) report(f, `free ${n}`);
+  for (const name of unknown) problem(file, `${name} is used but never declared or imported`);
 }
 
-// ---- load order from the entry ----
-let tdz = 0;
+// ---- 4. load order from the entry ----
+let orderProblems = 0;
 if (fs.existsSync(ENTRY)) {
-  const importsOf = new Map(), evalDeps = new Map();
-  for (const f of reachable) {
-    const { ast } = mods.get(f), imps = [], deps = new Set();
-    for (const spec of edges(ast)) imps.push(resolve(f, spec));
-    traverse(ast, {
+  /** For each wired module: the imported bindings it reads at load time (outside any function), with their source module. */
+  const loadTimeReads = new Map();
+  for (const file of wired) {
+    const reads = [];
+    traverse(modules.get(file).ast, {
       ReferencedIdentifier(p) {
-        if (p.getFunctionParent()) return;
-        const b = p.scope.getBinding(p.node.name);
-        const spec = b?.kind === 'module' ? b.path.parent.source?.value : null;
-        if (spec && (spec.startsWith('.') || spec.startsWith('@/'))) { const m = resolve(f, spec); if (mods.has(m)) deps.add(`${m}|${p.node.name}`); }
+        if (p.getFunctionParent() || inTypePosition(p)) return;
+        const binding = p.scope.getBinding(p.node.name);
+        if (binding?.kind !== 'module') return;
+        const spec = binding.path.parent.source?.value;
+        if (spec && (spec.startsWith('.') || spec.startsWith('@/'))) reads.push({ name: p.node.name, from: resolveSpec(file, spec) });
       },
     });
-    importsOf.set(f, imps); evalDeps.set(f, deps);
+    loadTimeReads.set(file, reads);
   }
-  const state = new Map(), done = new Set();
-  (function visit(f) {
-    if (state.has(f) || !mods.has(f)) return;
-    state.set(f, 'busy');
-    for (const d of importsOf.get(f) ?? []) visit(d);
-    for (const dep of evalDeps.get(f) ?? []) { const [m, n] = dep.split('|'); if (m !== f && !done.has(m)) { console.log(`LOAD ORDER ${rel(f)} uses ${n} before ${rel(m)} has run`); tdz++; } }
-    done.add(f);
-  })(ENTRY);
+  const entered = new Set(), evaluated = new Set();
+  const evaluate = (file) => {
+    if (entered.has(file) || !modules.has(file)) return;
+    entered.add(file);
+    for (const { spec } of modules.get(file).specs) evaluate(resolveSpec(file, spec));
+    for (const { name, from } of loadTimeReads.get(file) ?? []) {
+      if (from !== file && modules.has(from) && !evaluated.has(from)) { console.log(`LOAD ORDER ${short(file)} reads ${name} before ${short(from)} has run`); orderProblems++; }
+    }
+    evaluated.add(file);
+  };
+  evaluate(ENTRY);
 }
 
-console.log(`${files.length} files · ${reachable.size} wired from the entry · ${pending.length} pending`);
-if (pending.length) console.log(`pending (not yet wired): ${pending.map(rel).join(', ')}${pendingProblems ? ` · ${pendingProblems} unresolved reference(s) in pending files` : ''}`);
-console.log(bad ? `${bad} problem(s)` : 'wired files clean');
-console.log(tdz ? `${tdz} load-order problem(s)` : 'load order ok');
-process.exit(bad || tdz ? 1 : 0);
+// ---- 5. provenance: no Factory Yard code anywhere in src/ ----
+const FOREIGN = [/Adapted from Factory Yard/i, /github\.com\/Khalidabdi1\/factory/i];
+const foreign = [];
+for (const file of listFiles(SRC, (f) => /\.(ts|tsx|js|jsx|mjs|css|json|md|html)$/.test(f))) {
+  const lines = fs.readFileSync(file, 'utf8').split('\n');
+  lines.forEach((line, i) => { if (FOREIGN.some((re) => re.test(line))) foreign.push(`${path.relative(path.dirname(SRC), file)}:${i + 1}`); });
+}
+for (const hit of foreign) console.log(`FACTORY YARD ${hit}: carries Factory Yard's adaptation header or source link (see NOTICE.md)`);
+
+console.log(`${modules.size} files · ${wired.size} wired from the entry · ${pending.length} pending`);
+if (pending.length) console.log(`pending (not wired from the entry): ${pending.map(short).join(', ')}${pendingProblems ? ` · ${pendingProblems} problem(s) in pending files` : ''}`);
+console.log(problems ? `${problems} problem(s)` : 'wired files clean');
+console.log(orderProblems ? `${orderProblems} load-order problem(s)` : 'load order ok');
+console.log(foreign.length ? `${foreign.length} line(s) of Factory Yard provenance in src/` : 'no Factory Yard code in src/');
+process.exit(problems || orderProblems || foreign.length ? 1 : 0);

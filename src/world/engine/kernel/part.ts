@@ -1,173 +1,374 @@
-// Adapted from Factory Yard (github.com/Khalidabdi1/factory, commit 148758a), after ai-iso-skill (MIT, © 2026 Tolga Cohce).
+// Original to this repository (Kawasan Industri world engine, fallback kernel), after ai-iso-skill (MIT, © 2026 Tolga Cohce).
+/**
+ * Part: the drawing primitive the world is built with. A builder adds faces,
+ * solids, lines and text to a Part in world coordinates, then build() merges
+ * everything into a handful of meshes, so a whole zone of buildings costs a
+ * few draw calls, not thousands:
+ *
+ *   - one mesh per flat fill key (a yard, a road, a decal on a wall);
+ *   - one mesh for every solid (boxes, prisms, cylinders, any geometry),
+ *     coloured per vertex by tone and by which way the face looks: a roof
+ *     at full tone, the south wall a little darker, the east wall darker
+ *     still (ai-iso-skill's three faces, done as shading);
+ *   - one fat-line object per line key (the hairline outlines);
+ *   - one textured mesh per page of text.
+ *
+ * The camera never turns, so a face looking away from it can never be
+ * seen: solids keep only the faces that look toward the viewer, and only
+ * the edges at least one visible face touches.
+ *
+ * Text written with text() is checked by the context's guard (in
+ * development it throws if a figure reaches a scene builder); note() is the
+ * unguarded variant, for the whiteboard's pre-formatted figures only.
+ */
 import * as THREE from 'three';
 import { LineSegments2 } from 'three/addons/lines/LineSegments2.js';
 import { LineSegmentsGeometry } from 'three/addons/lines/LineSegmentsGeometry.js';
-import { W, type V3 } from './iso';
-import type { FillKey, LineKey, TextKey, Theme } from '../theme';
+import { VIEWER, W, type V3 } from './iso';
+import type { FillKey, LineKey, TextKey, Theme, Tone } from '../theme';
 import type { TextRegistry } from '../context';
 
-// ---- parts: boxes and flat detail, collected into a few draw calls ----
+export type { Tone } from '../theme';
+
+/** A raw three.js vector (three.js axes, y up): for scales and offsets handed straight to three.js. */
 export const v3 = (x = 0, y = 0, z = 0): THREE.Vector3 => new THREE.Vector3(x, y, z);
-export const noop = (): void => {};
 
-export type Tone = 'n' | 'k' | 'g' | 'gr' | 'gs' | 'l' | 'w' | 's' | 'nb' | 'kb';
-const TONE: Record<Tone, [FillKey, FillKey, LineKey]> = {
-  n: ['body', 'deck', 'line'], k: ['kob', 'kod', 'koline'], g: ['glass', 'glass', 'line'], gr: ['body', 'ground', 'line'], gs: ['body', 'grass', 'line'],
-  l: ['lamp', 'lamp', 'line'], w: ['window', 'window', 'line'], s: ['body', 'sand', 'line'],
-  // one fill for every face: small moving parts (a person's limbs) cost two draw calls instead of three
-  nb: ['body', 'body', 'line'], kb: ['kob', 'kob', 'koline'],
-};
-export const TEX_PX = 64;
-
-/** What a Part needs from the world it is drawn into. */
+/** What a Part needs from the engine's context. */
 export interface PartContext {
   theme: Theme;
   gfx: { aniso: number };
   texts: TextRegistry;
   font: string;
+  /** False where no 2D canvas exists (a test environment): text is then checked but not drawn. */
   text2d: boolean;
-  /** Development only: throws if a figure with a currency or a unit is about to be drawn (mega prompt §8.1). */
   guard?: (text: string) => void;
 }
 
-/** A figure a scene builder must never draw: a rupiah amount, a percentage, a thousands-grouped number, a number with a unit. */
-export const FIGURE = /(^|[\s(])(Rp|USD|IDR)\s?\d|\d\s?%|\d{1,3}([.,]\d{3})+|\b\d+([.,]\d+)?\s?(bn|mn|jt|tn|rb|USD|IDR)\b/i;
+/**
+ * A figure: an amount with a currency, a percentage, a number with a
+ * decimal or thousands separator, a number with a magnitude word, or a bare
+ * number of four digits or more. Codes (C111), tickers, counts in prose
+ * ("Gate 3", "2 of 2") and quarters ("Q4 25") are not figures.
+ */
+export const FIGURE = /\b(?:Rp|IDR|USD|US\$|EUR|SGD|JPY|CNY)\s?-?\d|\d\s?%|\d[.,]\d|\d\s?(?:bn|mn|tn|rb|jt|k|m|b|t|juta|ribu|miliar|triliun|thousand|million|billion|trillion)\b|(?<![\w.,])\d{4,}(?!\w)/i;
+
+/** Throws when a string carries a figure: scene builders draw names and words, never numbers from a model. */
 export function assertNoFigure(text: string): void {
-  if (FIGURE.test(text)) throw new Error(`world: a figure reached a scene builder: "${text}" (PRD §9.3.4; figures live on cards and the board)`);
+  if (FIGURE.test(text)) throw new Error(`World engine: a figure reached a scene builder ("${text}"); figures go on the board, or on the whiteboard through Part.note.`);
 }
 
-interface TextSpec { M: THREE.Matrix4; str: string; x: number; y: number; size: number; k: TextKey; anchor: 'start' | 'middle' | 'end'; lift: number }
-type Anchor = TextSpec['anchor'];
+type Anchor = 'start' | 'middle' | 'end';
+interface TextSpec { M: THREE.Matrix4; str: string; x: number; y: number; size: number; k: TextKey; anchor: Anchor; lift: number }
+interface SolidOptions { seams?: boolean; lines?: boolean }
+
+/** Text at or above this size (world units) is a region label and stays visible at the far view. */
+const LARGE_TEXT = 4;
+const ATLAS_MAX = 2048;
+/** How far each line moves toward the camera, per three.js axis (the viewer looks along -(1, 1, 1)). */
+const LINE_BIAS = 0.03;
+const noRaycast = () => {};
+
+/** The face's brightness by the way it looks (world normal): roof 1, south wall 0.93, east wall 0.86. */
+function shadeOf(nx: number, ny: number, nz: number): number {
+  const s = 0.895 + 0.105 * nz - 0.035 * nx + 0.035 * ny;
+  return Math.max(0.6, Math.min(1, s));
+}
+const facing = (nx: number, ny: number, nz: number) => nx * VIEWER[0] + ny * VIEWER[1] + nz * VIEWER[2] > 1e-6;
+
+/** Newell's normal of a planar polygon given in world terms, normalised. */
+function newell(pts: readonly V3[]): V3 {
+  let x = 0, y = 0, z = 0;
+  for (let i = 0; i < pts.length; i++) {
+    const a = pts[i], b = pts[(i + 1) % pts.length];
+    x += (a[1] - b[1]) * (a[2] + b[2]);
+    y += (a[2] - b[2]) * (a[0] + b[0]);
+    z += (a[0] - b[0]) * (a[1] + b[1]);
+  }
+  const l = Math.hypot(x, y, z) || 1;
+  return [x / l, y / l, z / l];
+}
+
+/** Triangles of a simple polygon (any winding, convex or not), as index triples. */
+function triangulate(pts: readonly V3[], n: V3): number[][] {
+  if (pts.length === 3) return [[0, 1, 2]];
+  // flatten onto the axis plane the polygon faces most
+  const ax = Math.abs(n[0]), ay = Math.abs(n[1]), az = Math.abs(n[2]);
+  const [i, j] = az >= ax && az >= ay ? [0, 1] : ay >= ax ? [0, 2] : [1, 2];
+  const flat = pts.map((p) => new THREE.Vector2(p[i], p[j]));
+  return THREE.ShapeUtils.triangulateShape(flat, []);
+}
+
+const toWorld = (v: THREE.Vector3): V3 => [v.x, v.z, v.y];
 
 export class Part {
-  fill: Partial<Record<FillKey, number[]>> = {};
-  lines: Partial<Record<LineKey, number[]>> = {};
-  texts: TextSpec[] = [];
-  constructor(readonly ctx: PartContext) {}
-  tri(k: FillKey, a: THREE.Vector3, b: THREE.Vector3, c: THREE.Vector3): void { (this.fill[k] ??= []).push(a.x, a.y, a.z, b.x, b.y, b.z, c.x, c.y, c.z); }
-  poly(k: FillKey, p: THREE.Vector3[]): void { for (let i = 1; i < p.length - 1; i++) this.tri(k, p[0], p[i], p[i + 1]); }
-  seg(k: LineKey, a: THREE.Vector3, b: THREE.Vector3): this { (this.lines[k] ??= []).push(a.x, a.y, a.z, b.x, b.y, b.z); return this; }
-  // A flat polygon swept along e. Faces are turned to point away from the solid's middle; up-facing ones take the
-  // deck fill, and only those steeper than 35° downward are left out, since the camera never sees them at any heading.
-  extrude(pts: readonly V3[], e: V3, tone: Tone = 'n', { seams = true, lines = true }: { seams?: boolean; lines?: boolean } = {}): this {
-    const [bodyK, deckK, lineK] = TONE[tone];
-    const A = pts.map((p) => W(...p)), E = W(...e), B = A.map((p) => p.clone().add(E));
-    const mid = [...A, ...B].reduce((s, p) => s.add(p), v3()).multiplyScalar(1 / (A.length * 2));
-    const face = (q: THREE.Vector3[]) => {
-      const n = v3().crossVectors(q[1].clone().sub(q[0]), q[2].clone().sub(q[0])).normalize();
-      if (n.dot(q.reduce((s, p) => s.add(p), v3()).multiplyScalar(1 / q.length).sub(mid)) < 0) n.negate();
-      if (n.y < -0.82) return;
-      this.poly(n.y > 0.6 ? deckK : bodyK, q);
-    };
-    face(A); face(B);
-    for (let i = 0; i < A.length; i++) { const j = (i + 1) % A.length; face([A[i], A[j], B[j], B[i]]); }
-    if (lines) for (let i = 0; i < A.length; i++) { const j = (i + 1) % A.length;
-      this.seg(lineK, A[i], A[j]); this.seg(lineK, B[i], B[j]); if (seams) this.seg(lineK, A[i], B[i]); }
+  readonly ctx: PartContext;
+  private readonly fills = new Map<FillKey, number[]>();
+  private readonly solidPos: number[] = [];
+  private readonly solidCol: number[] = [];
+  private readonly lineSets = new Map<LineKey, number[]>();
+  private readonly texts: TextSpec[] = [];
+
+  constructor(ctx: PartContext) { this.ctx = ctx; }
+
+  // ---- flat fills ----
+
+  /** One flat triangle (three.js points). */
+  tri(k: FillKey, a: THREE.Vector3, b: THREE.Vector3, c: THREE.Vector3): this {
+    let arr = this.fills.get(k);
+    if (!arr) { arr = []; this.fills.set(k, arr); }
+    arr.push(a.x, a.y, a.z, b.x, b.y, b.z, c.x, c.y, c.z);
     return this;
   }
-  // box at (x,y,z), size w along x, d along y, h along z — same signature as the skill's box()
-  box(x: number, y: number, z: number, w: number, d: number, h: number, tone?: Tone, o?: { seams?: boolean; lines?: boolean }): this {
-    return this.extrude([[x, y, z], [x + w, y, z], [x + w, y + d, z], [x, y + d, z]], [0, 0, h], tone, o);
-  }
-  cylZ(cx: number, cy: number, z: number, r: number, h: number, n = 12, tone?: Tone): this {
-    const p: V3[] = []; for (let i = 0; i < n; i++) { const a = i / n * Math.PI * 2; p.push([cx + r * Math.cos(a), cy + r * Math.sin(a), z]); }
-    return this.extrude(p, [0, 0, h], tone, { seams: false });
-  }
-  cylY(cx: number, y: number, cz: number, r: number, len: number, n = 10, tone?: Tone): this {
-    const p: V3[] = []; for (let i = 0; i < n; i++) { const a = i / n * Math.PI * 2; p.push([cx + r * Math.cos(a), y, cz + r * Math.sin(a)]); }
-    return this.extrude(p, [0, len, 0], tone, { seams: false });
-  }
-  // 2D linework in a face's local units, like drawing inside the skill's <g transform="${FRONT(…)}">.
-  // lift nudges it off the face along the outward normal (negative for faces whose plane normal points out).
-  draw(M: THREE.Matrix4, segs: readonly number[], k: LineKey = 'detail', lift = 0.04): this {
-    const off = v3().setFromMatrixColumn(M, 2).normalize().multiplyScalar(-lift);
-    const at = (u: number, v: number) => v3(u, v, 0).applyMatrix4(M).add(off);
-    for (let i = 0; i < segs.length; i += 4) this.seg(k, at(segs[i], segs[i + 1]), at(segs[i + 2], segs[i + 3]));
+
+  /** A flat polygon (three.js points, from W), convex or not. */
+  poly(k: FillKey, pts: THREE.Vector3[]): this {
+    if (pts.length < 3) return this;
+    const w = pts.map(toWorld);
+    for (const [a, b, c] of triangulate(w, newell(w))) this.tri(k, pts[a], pts[b], pts[c]);
     return this;
   }
-  rect2(M: THREE.Matrix4, x: number, y: number, w: number, h: number, k?: LineKey, lift?: number): this {
+
+  /** A rectangle in a face's own units: (x, y) its top-left, w right, h down, lifted off the face. */
+  fill2(M: THREE.Matrix4, x: number, y: number, w: number, h: number, k: FillKey = 'body', lift = 0): this {
+    const p = (u: number, v: number) => new THREE.Vector3(u, v, lift).applyMatrix4(M);
+    const a = p(x, y), b = p(x + w, y), c = p(x + w, y + h), d = p(x, y + h);
+    return this.tri(k, a, b, c).tri(k, a, c, d);
+  }
+
+  // ---- lines ----
+
+  /**
+   * One line between two three.js points. Every line but the grid is moved a few centimetres toward the camera,
+   * straight along the line of sight, so it wins the depth test against the faces it outlines; the camera is
+   * orthographic, so the move does not shift it on screen.
+   */
+  seg(k: LineKey, a: THREE.Vector3, b: THREE.Vector3): this {
+    let arr = this.lineSets.get(k);
+    if (!arr) { arr = []; this.lineSets.set(k, arr); }
+    const d = k === 'grid' ? 0 : LINE_BIAS;
+    arr.push(a.x + d, a.y + d, a.z + d, b.x + d, b.y + d, b.z + d);
+    return this;
+  }
+
+  /** Segments in a face's own units, four numbers each: x1, y1, x2, y2. */
+  draw(M: THREE.Matrix4, segs: readonly number[], k: LineKey = 'line', lift = 0): this {
+    for (let i = 0; i + 3 < segs.length; i += 4) {
+      this.seg(k, new THREE.Vector3(segs[i], segs[i + 1], lift).applyMatrix4(M), new THREE.Vector3(segs[i + 2], segs[i + 3], lift).applyMatrix4(M));
+    }
+    return this;
+  }
+
+  /** A rectangle's outline in a face's own units. */
+  rect2(M: THREE.Matrix4, x: number, y: number, w: number, h: number, k: LineKey = 'line', lift = 0): this {
     return this.draw(M, [x, y, x + w, y, x + w, y, x + w, y + h, x + w, y + h, x, y + h, x, y + h, x, y], k, lift);
   }
-  fill2(M: THREE.Matrix4, x: number, y: number, w: number, h: number, k: FillKey = 'glass', lift = 0.03): this {
-    const off = v3().setFromMatrixColumn(M, 2).normalize().multiplyScalar(-lift);
-    const at = (u: number, v: number) => v3(u, v, 0).applyMatrix4(M).add(off);
-    this.poly(k, [at(x, y), at(x + w, y), at(x + w, y + h), at(x, y + h)]);
+
+  // ---- solids ----
+
+  /** A face of a solid, in world terms, with its outward normal; dropped when it looks away from the camera. */
+  private face(pts: readonly V3[], n: V3, tone: Tone): boolean {
+    if (!facing(n[0], n[1], n[2])) return false;
+    const c = this.ctx.theme.tone(tone, shadeOf(n[0], n[1], n[2]));
+    for (const [a, b, d] of triangulate(pts, n)) {
+      for (const i of [a, b, d]) { const p = pts[i]; this.solidPos.push(p[0], p[2], p[1]); this.solidCol.push(c.r, c.g, c.b); }
+    }
+    return true;
+  }
+
+  private edge(a: V3, b: V3, k: LineKey = 'line'): void { this.seg(k, W(a[0], a[1], a[2]), W(b[0], b[1], b[2])); }
+
+  /**
+   * A prism: the polygon pts (world points, in any plane) swept along e.
+   * Outlines go round both caps, and down every corner unless seams is
+   * false (round things); lines: false leaves the outline off entirely.
+   */
+  extrude(pts: readonly V3[], e: V3, tone: Tone = 'n', { seams = true, lines = true }: SolidOptions = {}): this {
+    if (pts.length < 3) return this;
+    const n = newell(pts);
+    const along = n[0] * e[0] + n[1] * e[1] + n[2] * e[2];
+    if (Math.abs(along) < 1e-9) return this;
+    const sgn = along > 0 ? 1 : -1;
+    const top = pts.map((p): V3 => [p[0] + e[0], p[1] + e[1], p[2] + e[2]]);
+    const baseSeen = this.face(pts, [-n[0] * sgn, -n[1] * sgn, -n[2] * sgn], tone);
+    const topSeen = this.face(top, [n[0] * sgn, n[1] * sgn, n[2] * sgn], tone);
+    const sideSeen: boolean[] = [];
+    for (let i = 0; i < pts.length; i++) {
+      const a = pts[i], b = pts[(i + 1) % pts.length];
+      const ex = b[0] - a[0], ey = b[1] - a[1], ez = b[2] - a[2];
+      let nx = (ey * e[2] - ez * e[1]) * sgn, ny = (ez * e[0] - ex * e[2]) * sgn, nz = (ex * e[1] - ey * e[0]) * sgn;
+      const l = Math.hypot(nx, ny, nz);
+      if (l < 1e-12) { sideSeen.push(false); continue; }
+      nx /= l; ny /= l; nz /= l;
+      sideSeen.push(this.face([a, b, top[(i + 1) % pts.length], top[i]], [nx, ny, nz], tone));
+    }
+    if (!lines) return this;
+    for (let i = 0; i < pts.length; i++) {
+      const j = (i + 1) % pts.length, prev = (i - 1 + pts.length) % pts.length;
+      if (baseSeen || sideSeen[i]) this.edge(pts[i], pts[j]);
+      if (topSeen || sideSeen[i]) this.edge(top[i], top[j]);
+      if (seams && (sideSeen[prev] || sideSeen[i])) this.edge(pts[i], top[i]);
+    }
     return this;
   }
-  text(M: THREE.Matrix4, str: string, x: number, y: number, size: number, k: TextKey = 'ink', anchor: Anchor = 'start', lift = 0.035): this {
-    this.ctx.guard?.(str);
-    this.texts.push({ M, str, x, y, size, k, anchor, lift }); return this;
+
+  /** A box standing at (x, y, z): w along x, d along y, h up. */
+  box(x: number, y: number, z: number, w: number, d: number, h: number, tone: Tone = 'n', o: SolidOptions = {}): this {
+    return this.extrude([[x, y, z], [x + w, y, z], [x + w, y + d, z], [x, y + d, z]], [0, 0, h], tone, o);
   }
-  /** Text the guard does not check: the whiteboard's figures, formatted by the shell (src/world/engine/whiteboard.ts only; a rule test holds that). */
-  note(M: THREE.Matrix4, str: string, x: number, y: number, size: number, k: TextKey = 'ink', anchor: Anchor = 'start', lift = 0.035): this {
-    this.texts.push({ M, str, x, y, size, k, anchor, lift }); return this;
+
+  /** An upright cylinder: centre (cx, cy), from z up by h, n sides. */
+  cylZ(cx: number, cy: number, z: number, r: number, h: number, n = 12, tone: Tone = 'n'): this {
+    const ring: V3[] = [];
+    for (let i = 0; i < n; i++) { const a = (i / n) * Math.PI * 2; ring.push([cx + r * Math.cos(a), cy + r * Math.sin(a), z]); }
+    this.extrude(ring, [0, 0, h], tone, { seams: false });
+    // the two silhouette lines, where the side turns away from the viewer
+    for (const a of [-Math.PI / 4, (3 * Math.PI) / 4]) this.edge([cx + r * Math.cos(a), cy + r * Math.sin(a), z], [cx + r * Math.cos(a), cy + r * Math.sin(a), z + h]);
+    return this;
   }
-  // any three.js geometry, flat-filled by facet direction, every facet edge a hairline
+
+  /** A lying cylinder along +y: its axis at (cx, cz), from y for len, n sides. */
+  cylY(cx: number, y: number, cz: number, r: number, len: number, n = 12, tone: Tone = 'n'): this {
+    const ring: V3[] = [];
+    for (let i = 0; i < n; i++) { const a = (i / n) * Math.PI * 2; ring.push([cx + r * Math.cos(a), y, cz + r * Math.sin(a)]); }
+    this.extrude(ring, [0, len, 0], tone, { seams: false });
+    for (const a of [-Math.PI / 4, (3 * Math.PI) / 4]) this.edge([cx + r * Math.cos(a), y, cz + r * Math.sin(a)], [cx + r * Math.cos(a), y + len, cz + r * Math.sin(a)]);
+    return this;
+  }
+
+  /** Any three.js geometry, placed by a three.js matrix, shaded face by face; no outline. */
   geo(g: THREE.BufferGeometry, m: THREE.Matrix4, tone: Tone = 'n'): this {
-    const [bodyK, deckK, lineK] = TONE[tone];
-    const geom = (g.index ? g.toNonIndexed() : g.clone()).applyMatrix4(m);
-    const p = geom.attributes.position as THREE.BufferAttribute, a = v3(), b = v3(), c = v3(), n = v3();
-    for (let i = 0; i < p.count; i += 3) {
-      a.fromBufferAttribute(p, i); b.fromBufferAttribute(p, i + 1); c.fromBufferAttribute(p, i + 2);
-      n.crossVectors(b.clone().sub(a), c.clone().sub(a)).normalize();
-      if (n.y > -0.82) this.tri(n.y > 0.45 ? deckK : bodyK, a, b, c);
+    const pos = g.getAttribute('position');
+    if (!pos) return this;
+    const index = g.getIndex();
+    const count = index ? index.count : pos.count;
+    const a = new THREE.Vector3(), b = new THREE.Vector3(), c = new THREE.Vector3(), ab = new THREE.Vector3(), ac = new THREE.Vector3();
+    const vertex = (i: number, out: THREE.Vector3) => out.fromBufferAttribute(pos, index ? index.getX(i) : i).applyMatrix4(m);
+    for (let i = 0; i + 2 < count; i += 3) {
+      vertex(i, a); vertex(i + 1, b); vertex(i + 2, c);
+      const nrm = ab.subVectors(b, a).cross(ac.subVectors(c, a));
+      const l = nrm.length(); if (l < 1e-12) continue;
+      nrm.divideScalar(l);
+      // three.js geometries wind outward faces counter-clockwise, so this is the outward normal; read it in world terms
+      const wx = nrm.x, wy = nrm.z, wz = nrm.y;
+      if (!facing(wx, wy, wz)) continue;
+      const col = this.ctx.theme.tone(tone, shadeOf(wx, wy, wz));
+      for (const v of [a, b, c]) { this.solidPos.push(v.x, v.y, v.z); this.solidCol.push(col.r, col.g, col.b); }
     }
-    const e = new THREE.EdgesGeometry(geom).attributes.position as THREE.BufferAttribute;
-    for (let i = 0; i < e.count; i += 2) this.seg(lineK, a.fromBufferAttribute(e, i).clone(), b.fromBufferAttribute(e, i + 1).clone());
     return this;
   }
-  // another part's faces and lines, turned to heading h and set down at (x, y, z): a model drawn into a shared part
-  // at any angle (texts are left out)
-  put(q: Part, x: number, y: number, h = 0, z = 0): this {
-    const m = new THREE.Matrix4().makeRotationY(-h).setPosition(x, z, y), v = v3();
-    const copy = <K extends string>(src: Partial<Record<K, number[]>>, dst: Partial<Record<K, number[]>>) => {
-      for (const k of Object.keys(src) as K[]) { const a = src[k]!, o = (dst[k] ??= []);
-        for (let i = 0; i < a.length; i += 3) { v.set(a[i], a[i + 1], a[i + 2]).applyMatrix4(m); o.push(v.x, v.y, v.z); } }
-    };
-    copy(q.fill, this.fill); copy(q.lines, this.lines);
+
+  // ---- text ----
+
+  /** Words on a face: (x, y) the anchor on the baseline, size the font size in world units. Checked by the guard. */
+  text(M: THREE.Matrix4, str: string, x: number, y: number, size: number, k: TextKey = 'ink', anchor: Anchor = 'start', lift = 0.02): this {
+    this.ctx.guard?.(str);
+    return this.note(M, str, x, y, size, k, anchor, lift);
+  }
+
+  /** Text that skips the guard: the whiteboard's figures, formatted by the house formatter on the shell's side. */
+  note(M: THREE.Matrix4, str: string, x: number, y: number, size: number, k: TextKey = 'ink', anchor: Anchor = 'start', lift = 0.02): this {
+    if (this.ctx.text2d && str) this.texts.push({ M, str, x, y, size, k, anchor, lift });
     return this;
   }
-  build(name?: string): THREE.Group {
-    const g = new THREE.Group(); if (name) g.name = name;
-    for (const k of Object.keys(this.fill) as FillKey[]) {
-      const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.Float32BufferAttribute(this.fill[k]!, 3));
-      const m = new THREE.Mesh(geo, this.ctx.theme.fill[k]); m.userData.fill = k; g.add(m);
+
+  // ---- build ----
+
+  /** Everything drawn so far, merged into one group of meshes. */
+  build(name = 'part'): THREE.Group {
+    const group = new THREE.Group();
+    group.name = name;
+    const { theme } = this.ctx;
+    for (const [k, arr] of this.fills) {
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.Float32BufferAttribute(arr, 3));
+      group.add(new THREE.Mesh(geo, theme.fill[k]));
     }
-    for (const k of Object.keys(this.lines) as LineKey[]) {
-      const l = new LineSegments2(new LineSegmentsGeometry().setPositions(this.lines[k]!), this.ctx.theme.line[k]);
-      l.userData.line = k; l.raycast = noop; g.add(l);
+    if (this.solidPos.length) {
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.Float32BufferAttribute(this.solidPos, 3));
+      geo.setAttribute('color', new THREE.Float32BufferAttribute(this.solidCol, 3));
+      group.add(new THREE.Mesh(geo, theme.solid));
     }
-    for (const t of this.texts) { const m = textMesh(this.ctx, t); if (m) g.add(m); }
-    return g;
+    for (const [k, arr] of this.lineSets) {
+      const line = new LineSegments2(new LineSegmentsGeometry().setPositions(arr), theme.line[k]);
+      line.raycast = noRaycast;
+      group.add(line);
+    }
+    if (this.texts.length) this.buildText(group);
+    return group;
+  }
+
+  /** Text pages: one canvas atlas per colour and size class, one quad per string. */
+  private buildText(group: THREE.Group): void {
+    const classes = new Map<string, TextSpec[]>();
+    for (const t of this.texts) {
+      const key = `${t.k}|${t.size >= LARGE_TEXT ? 'large' : 'small'}`;
+      const list = classes.get(key); if (list) list.push(t); else classes.set(key, [t]);
+    }
+    for (const [key, specs] of classes) {
+      const large = key.endsWith('large'), k = key.split('|')[0] as TextKey;
+      const px = large ? 96 : 48, pad = Math.ceil(px * 0.12), ascent = Math.ceil(px * 0.95), descent = Math.ceil(px * 0.3);
+      const cellH = ascent + descent + pad * 2;
+      const probe = document.createElement('canvas').getContext('2d');
+      if (!probe) return;
+      const font = `500 ${px}px ${this.ctx.font}`;
+      probe.font = font;
+      // shelf-pack the strings into pages no larger than the atlas limit
+      interface Cell { spec: TextSpec; w: number; x: number; y: number }
+      const pages: { cells: Cell[]; w: number; h: number }[] = [];
+      let page = { cells: [] as Cell[], w: 0, h: cellH }, x = 0;
+      for (const spec of specs) {
+        const w = Math.min(ATLAS_MAX, Math.ceil(probe.measureText(spec.str).width) + pad * 2);
+        if (x + w > ATLAS_MAX) { x = 0; page.h += cellH; }
+        if (page.h > ATLAS_MAX) { pages.push(page); page = { cells: [], w: 0, h: cellH }; x = 0; }
+        page.cells.push({ spec, w, x, y: page.h - cellH });
+        x += w; page.w = Math.max(page.w, x);
+      }
+      if (page.cells.length) pages.push(page);
+      for (const pg of pages) {
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.max(1, pg.w); canvas.height = Math.max(1, pg.h);
+        const g = canvas.getContext('2d');
+        if (!g) return;
+        g.font = font; g.fillStyle = 'white'; g.textBaseline = 'alphabetic'; g.textAlign = 'left';
+        for (const c of pg.cells) g.fillText(c.spec.str, c.x + pad, c.y + pad + ascent);
+        const tex = new THREE.CanvasTexture(canvas);
+        tex.colorSpace = THREE.SRGBColorSpace;
+        tex.anisotropy = this.ctx.gfx.aniso;
+        const pos: number[] = [], uv: number[] = [];
+        const W2 = canvas.width, H2 = canvas.height;
+        for (const c of pg.cells) {
+          const s = c.spec, unit = s.size / px;
+          const width = c.w * unit;
+          const left = s.anchor === 'middle' ? s.x - width / 2 : s.anchor === 'end' ? s.x - width + pad * unit : s.x - pad * unit;
+          const top = s.y - (ascent + pad) * unit, bottom = s.y + (descent + pad) * unit;
+          const corner = (u: number, v: number) => new THREE.Vector3(u, v, s.lift).applyMatrix4(s.M);
+          const p00 = corner(left, top), p10 = corner(left + width, top), p11 = corner(left + width, bottom), p01 = corner(left, bottom);
+          const u0 = c.x / W2, u1 = (c.x + c.w) / W2, v0 = 1 - c.y / H2, v1 = 1 - (c.y + cellH) / H2;
+          for (const [p, tu, tv] of [[p00, u0, v0], [p10, u1, v0], [p11, u1, v1], [p00, u0, v0], [p11, u1, v1], [p01, u0, v1]] as const) { pos.push(p.x, p.y, p.z); uv.push(tu, tv); }
+        }
+        const geo = new THREE.BufferGeometry();
+        geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+        geo.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+        const mesh = new THREE.Mesh(geo, this.ctx.theme.textMaterial(k, tex));
+        mesh.userData.small = !large;
+        mesh.raycast = noRaycast;
+        if (this.ctx.texts.far && !large) mesh.visible = false;
+        this.ctx.texts.meshes.push(mesh);
+        group.add(mesh);
+      }
+    }
   }
 }
 
-// From far away (a few pixels a metre) lettering is a smudge: small text is left out there, a draw call each saved
-export const setTextFar = (texts: TextRegistry, far: boolean): void => { texts.far = far; for (const m of texts.meshes) m.visible = !far || m.userData.textSize >= 3; };
-
-// Text drawn flat on a plane: a canvas glyph texture (white) tinted by its token colour. Where no 2D canvas exists
-// (a headless test), the text is left out rather than drawn wrong.
-function textMesh(ctx: PartContext, { M, str, x, y, size, k, anchor, lift }: TextSpec): THREE.Mesh | null {
-  if (!ctx.text2d || typeof document === 'undefined') return null;
-  const font = `500 ${TEX_PX}px ${ctx.font}`;
-  const c = document.createElement('canvas'), g = c.getContext('2d');
-  if (!g) return null;
-  g.font = font;
-  c.width = Math.ceil(g.measureText(str).width) + 8; c.height = Math.round(TEX_PX * 1.25);
-  // the glyphs are a white mask; the token colour tints them through the material, so no colour is chosen here
-  g.font = font; g.fillStyle = 'white'; g.fillText(str, 4, TEX_PX * 0.95);
-  const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = ctx.gfx.aniso;
-  const s = size / TEX_PX, w = c.width * s, h = c.height * s;
-  const x0 = anchor === 'middle' ? x - w / 2 : anchor === 'end' ? x - w : x - 4 * s, top = y - TEX_PX * 0.95 * s;
-  const geo = new THREE.PlaneGeometry(w, h).scale(1, -1, 1).translate(x0 + w / 2, top + h / 2, 0).applyMatrix4(M);
-  const off = v3().setFromMatrixColumn(M, 2).normalize().multiplyScalar(-lift);
-  geo.translate(off.x, off.y, off.z);
-  const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, side: THREE.DoubleSide, color: ctx.theme.textColor(k) });
-  ctx.theme.text[k].push(mat);
-  const mesh = new THREE.Mesh(geo, mat); mesh.raycast = noop; mesh.userData.textSize = size; mesh.visible = !ctx.texts.far || size >= 3; ctx.texts.meshes.push(mesh); return mesh;
+/** Small text hides at the far view, where it would be a smudge; region labels stay. */
+export function setTextFar(texts: TextRegistry, far: boolean): void {
+  texts.far = far;
+  for (const m of texts.meshes) if (m.userData.small) m.visible = !far;
 }
-export const pose = (o: THREE.Object3D, x: number, y: number, h = 0, z = 0): void => { o.position.set(x, z, y); o.rotation.y = -h; };
-// light a part up: its faces take the live colour (LineSegments2 is also a Mesh, so go by the fill key)
-export const glow = (theme: Theme, g: THREE.Object3D, on: boolean): void => {
-  for (const m of g.children) { const k = m.userData.fill as FillKey | undefined; if (k && m instanceof THREE.Mesh) m.material = on ? theme.fill.livef : theme.fill[k]; }
-};
+
+/** Stand an object at world (x, y, z), turned to heading h (radians from +x toward +y). */
+export function pose(o: THREE.Object3D, x: number, y: number, h = 0, z = 0): void {
+  o.position.set(x, z, y);
+  o.rotation.set(0, -h, 0);
+}

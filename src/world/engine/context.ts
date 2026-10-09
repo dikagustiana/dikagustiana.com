@@ -1,81 +1,83 @@
-// Adapted from Factory Yard (github.com/Khalidabdi1/factory, commit 148758a), after ai-iso-skill (MIT, © 2026 Tolga Cohce).
+// Original to this repository (Kawasan Industri world engine, fallback kernel).
+/**
+ * The engine context: everything one mounted world shares, held on one
+ * object created by createWorld and passed to every builder, so two worlds
+ * on one page share nothing and dispose leaves no module-level state.
+ *
+ *   scene     the world, drawn first
+ *   sky       what is drawn over it, never hidden (marks, markers, labels)
+ *   hooks     what builders may ask of the view; the view installs them
+ *   entities  everything clickable, in the order it was built
+ *   peeks     the groups that open as a section drawing, with their entity
+ *   texts     the text meshes, so the view can hide small text at the far view
+ *   guard     in development (or with the debug API), throws when a figure
+ *             reaches a scene builder through Part.text
+ */
 import * as THREE from 'three';
 import type { Rng } from './kernel/math';
 import type { Theme } from './theme';
 import type { Entity } from './types';
 import type { GeneratedLayout } from '@/world/placement/types';
+import { assertNoFigure } from './kernel/part';
 
-// ---- the scene, the flags and the late-bound calls every module shares ----
-//
-// Factory Yard kept these as module globals in shared.ts (and found its page
-// elements by id). Here they are one object made by createWorld and handed to
-// every builder and system, so a world can be mounted, disposed and mounted
-// again with nothing left behind (mega prompt §4.2).
-
-/** Late-bound calls into the view, so the simulation never imports it. */
+/** What scene code may ask of the view. Until a view exists these do nothing. */
 export interface Hooks {
+  /** An entity is going away: drop it from the selection and anything else that holds it. */
   forget(ent: Entity): void;
   select(ent: Entity | null): void;
   isSelected(ent: Entity): boolean;
+  /** Bring an entity into view and keep it there while it is selected. */
   track(ent: Entity): void;
+  /** Select a building and come in close enough for it to open as a section. */
   lookInside(ent: Entity): void;
-  /** Someone selected turns into someone else: the selection goes with them. */
+  /** A selected thing became another (a load handed from one vehicle to the next): carry the selection over. */
   handOff(from: Entity, to: Entity): void;
-  inBuilding(x: number, y: number): boolean;
-  closedAt(x: number, y: number, p?: unknown): boolean;
 }
 
-/** Text drawn on faces: registered so far-zoom can hide the small lettering and dispose can free the textures. */
 export interface TextRegistry {
   meshes: THREE.Mesh[];
+  /** True while the view is far: small text is hidden. */
   far: boolean;
 }
 
 export interface EngineContext {
   scene: THREE.Scene;
-  /** What is up in the sky past the plate's edges: drawn after the scene, never cut off. */
   sky: THREE.Scene;
-  /** Set once the renderer exists: texture anisotropy for text drawn on faces. */
   gfx: { aniso: number };
   hooks: Hooks;
   rng: Rng;
   theme: Theme;
   layout: GeneratedLayout;
   texts: TextRegistry;
-  /** The CSS font family the text textures are drawn in, read from the shell's variable. */
   font: string;
-  /** Whether a 2D canvas exists to draw text textures with (a headless test has none; text is then left out). */
   text2d: boolean;
-  /** Development only: throws if a figure with a currency or a unit is about to be drawn (mega prompt §8.1). */
   guard?: (text: string) => void;
+  /** The visitor asks for reduced motion. */
   reduced: boolean;
   debug: boolean;
-  /** Every entity that can be clicked, in creation order; the view cycles through them. */
   entities: Entity[];
-  /** Closed buildings that open as a section drawing while selected: [the group carrying userData.peek, its entity]. */
   peeks: [THREE.Group, Entity][];
 }
 
-import { assertNoFigure } from './kernel/part';
+export function idleHooks(): Hooks {
+  return { forget() {}, select() {}, isSelected: () => false, track() {}, lookInside() {}, handOff() {} };
+}
 
-const noop = () => {};
-
-export function createContext(o: {
-  rng: Rng; theme: Theme; layout: GeneratedLayout; font: string; reduced: boolean; debug: boolean; text2d: boolean;
-}): EngineContext {
+export function createContext(o: { rng: Rng; theme: Theme; layout: GeneratedLayout; font: string; reduced: boolean; debug: boolean; text2d: boolean }): EngineContext {
+  const scene = new THREE.Scene(), sky = new THREE.Scene();
+  scene.name = 'world'; sky.name = 'sky';
+  const checked = o.debug === true || import.meta.env.DEV === true;
   return {
-    scene: new THREE.Scene(),
-    sky: new THREE.Scene(),
+    scene, sky,
     gfx: { aniso: 1 },
-    hooks: { forget: noop, select: noop, isSelected: () => false, track: noop, lookInside: noop, handOff: noop, inBuilding: () => false, closedAt: () => false },
+    hooks: idleHooks(),
     rng: o.rng,
     theme: o.theme,
     layout: o.layout,
     texts: { meshes: [], far: false },
     font: o.font,
     text2d: o.text2d,
-    // the guard is on in development and under the debug flag; a production build pays nothing for it
-    guard: o.debug || import.meta.env.DEV ? assertNoFigure : undefined,
+    guard: checked ? assertNoFigure : undefined,
     reduced: o.reduced,
     debug: o.debug,
     entities: [],

@@ -217,3 +217,36 @@ Deviations from the PRD or the mega prompt, with reasons, are in each gate repor
 ones: Factory Yard's simulation and world modules were not kept (compact typed systems replaced them);
 warm-up is 1 s; the board's waterfall bars do not light stations (the model page's component is reused
 unchanged; the board's own driver list does); the frames and Lighthouse come from a software GPU.
+
+## 8. Engine fallback (branch `claude/world-engine-fallback`)
+
+A fallback in case Factory Yard's author never grants a licence: the nine files that were adapted from
+it (`theme`, `context`, `world/ground`, `kernel/path`, `kernel/iso`, `kernel/math`, `kernel/part`,
+`sim/clock`, `view/index` under `src/world/engine/`) are replaced by implementations original to this
+repository, written against the API their callers use (three.js, isometric geometry, and ai-iso-skill
+for the face-plane kernel and the monochrome vocabulary). `scripts/world/check-engine.mjs` is
+rewritten too and now fails on any Factory Yard header or source link under `src/`; a unit test holds
+the same rule. `NOTICE.md` records the replacement. With this branch, rule 10 no longer waits on the
+author.
+
+```
+$ npx eslint . --max-warnings=35           0 errors, 22 warnings
+$ npm run typecheck                        clean
+$ vitest run (TZ=America/Chicago)          1,011 tests, 0 failed (floor 1,006)
+$ npm run check:world                      36 files · 32 wired · wired files clean · load order ok · no Factory Yard code in src/
+$ npm run build                            assert-no-synthetic ok · assert-world-flag: no world code in dist/ (flag off)
+$ VITE_WORLD_KAWASAN=true vite build       WorldFrame 222.52 kB · world-engine (three.js) 554.94 kB (was 570.90 kB) · Board 43.87 kB
+$ npm run test:e2e:world                   7 passed (SwiftShader)
+```
+
+What differs from the adapted engine: the camera is the view's own (no OrbitControls): drag pans,
+the wheel zooms once the canvas has focus (or with a pinch), two fingers pinch, the canvas takes `[` `]`,
+Escape, `0`–`5`, `+` `−` and the arrows, and the view never turns. Faces are flat-shaded by the way they look, from the site's tokens;
+the survey grid shows on the bare slab only; lit windows read as glass by day and glow after dark; the
+whiteboard's bars and the weighbridge plates use the muted tones. A simulated day is 480 s and opens
+at 10:00. The layout and the poster are unchanged (the random generator is mulberry32, as before).
+Draw calls at 1,440 × 900 (SwiftShader): far 318, middle 715 (C111 at distance 0.5), near 109, an
+exposed company 114 (budgets 1,200 / 1,600 / 1,900). Frames: `frames/fallback-landing-*.png`, the
+landing page with the flag on (far, middle, near, exposed company). `worldEngineMount.test.ts` now runs
+jsdom's lazy selector engine once before counting listeners: its two document listeners had been
+offset by OrbitControls' unconditional removals, which the engine no longer makes.

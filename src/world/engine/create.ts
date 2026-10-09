@@ -1,10 +1,9 @@
 /**
  * createWorld: the engine's one entry (mega prompt §4.2).
  *
- * Factory Yard assembled its town at import time: applyTheme() ran, the
- * renderer was created, eighty simulated seconds of warm-up ran, and
- * initView() found the plate's elements by id. Here nothing happens at
- * import. createWorld(container, options) does all of it, in this order:
+ * Nothing happens at import: no theme read, no renderer, no warm-up, no
+ * element looked up by id. createWorld(container, options) does all of it,
+ * in this order:
  * theme → context → ground → the layout's builders (Phase D) → warm-up →
  * view → frame loop, and hands back a handle whose dispose() leaves no
  * listener, no loop, no WebGL context and no module-level reference behind.

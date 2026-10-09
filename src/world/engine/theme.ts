@@ -1,124 +1,186 @@
-// Adapted from Factory Yard (github.com/Khalidabdi1/factory, commit 148758a), after ai-iso-skill (MIT, © 2026 Tolga Cohce).
+// Original to this repository (Kawasan Industri world engine, fallback kernel), after ai-iso-skill (MIT, © 2026 Tolga Cohce).
+/**
+ * The world's colours: the one mapping from the site's design tokens
+ * (src/index.css) to the engine's materials. Nothing else in the engine
+ * writes a colour; scene code names a key ('deck', 'line', 'ink', a tone)
+ * and the theme answers with a material or a colour read from the page.
+ *
+ * The vocabulary follows ai-iso-skill's monochrome look: a body and a deck
+ * for faces, a structure line and a detail line, and one live colour kept
+ * for whatever is live (the selection, a published model, a measured
+ * link, the money layer). A few keys are mixes of two tokens, so the world
+ * follows the light and the dark theme without a colour of its own.
+ *
+ * The only literal colours in the engine live here: the night palette (the
+ * warm glow lit windows take after dark). The day fallbacks, used where no
+ * stylesheet is present (tests, a detached container), are the light
+ * theme's token values in the tokens' own HSL form.
+ */
 import * as THREE from 'three';
 import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
 
-// ---- tokens → materials ----
-//
-// THE ONE MAPPING TABLE (PRD §7.13, mega prompt §4.5). The engine names its
-// tones after Factory Yard; each is read from one of the site's design tokens
-// in src/index.css. No other file under src/world/engine or src/world/interiors
-// may carry a colour: a test greps for hex outside this file. The night palette
-// below is the one place hex is allowed, because night is one palette for
-// both themes and no site token describes it.
-
-export type FillKey = 'ground' | 'road' | 'body' | 'deck' | 'kob' | 'kod' | 'glass' | 'livef' | 'window' | 'lamp' | 'sea' | 'sand' | 'grass' | 'snow' | 'screen';
-export type LineKey = 'line' | 'detail' | 'koline' | 'live';
+/** Flat fills: ground, yards, decals, the whiteboard's bars. */
+export type FillKey = 'ground' | 'body' | 'deck' | 'road' | 'glass' | 'sand' | 'grass' | 'sea' | 'kob' | 'kod' | 'livef' | 'window' | 'lamp' | 'screen';
+/** Lines: structure, detail, the slab's grid, and the live colour. */
+export type LineKey = 'line' | 'detail' | 'grid' | 'live';
+/** Text: ink for what is read, paint for what is marked on the ground. */
 export type TextKey = 'ink' | 'paint';
+/**
+ * Solid tones, for boxes, prisms and cylinders: n the plain body, w white,
+ * k dark, g pale glass-grey, gr rock, gs grass slope, s sand, l a lamp,
+ * nb and kb a walker's light and dark parts.
+ */
+export type Tone = 'n' | 'w' | 'k' | 'g' | 'gr' | 'gs' | 's' | 'l' | 'nb' | 'kb';
 
-/** Engine tone → the site's CSS custom property it is read from. */
-export const SITE_TOKENS: { fill: Record<FillKey, string>; line: Record<LineKey, string>; text: Record<TextKey, string> } = {
+/** A key's colour: a token, or a mix of two tokens (t of the way from the first to the second). */
+type Source = string | readonly [from: string, to: string, t: number];
+
+/** Which token each key reads; the CSS custom properties of src/index.css. */
+export const SITE_TOKENS: { fill: Record<FillKey, string>; line: Record<LineKey, string>; text: Record<TextKey, string>; tone: Record<Tone, string> } = {
   fill: {
-    ground: '--background',   // the slab
-    road: '--muted',          // asphalt, a step darker than the ground
-    body: '--card',           // walls
-    deck: '--background',     // roofs and tops, lighter than walls
-    kob: '--primary',         // two-tone goods and uniforms: the dark fill
-    kod: '--accent',          // two-tone goods and uniforms: the deck of the dark fill
-    glass: '--border',        // glazing by day
-    livef: '--accent',        // the live fill: selection, busy lamps, beacons
-    window: '--border',       // dark glass by day, lit after dark
-    lamp: '--background',     // pale metal by day, lit after dark
-    sea: '--secondary',       // the port's water
-    sand: '--card',           // aprons and yards
-    grass: '--muted',         // fields and plantation blocks
-    snow: '--background',     // the hill's top
-    screen: '--primary',      // a pierced screen's holes, lit after dark
+    ground: '--background', body: '--card', deck: '--secondary', road: '--muted', glass: '--border', sand: '--muted', grass: '--secondary', sea: '--background',
+    kob: '--muted-foreground', kod: '--muted-foreground', livef: '--accent', window: '--border', lamp: '--popover', screen: '--background',
+  },
+  line: { line: '--foreground', detail: '--muted-foreground', grid: '--border', live: '--accent' },
+  text: { ink: '--foreground', paint: '--muted-foreground' },
+  tone: { n: '--card', w: '--background', k: '--muted-foreground', g: '--secondary', gr: '--muted', gs: '--muted', s: '--muted', l: '--background', nb: '--card', kb: '--primary' },
+};
+
+/** Keys that are a mix of their token and a second one. */
+const MIX: { fill: Partial<Record<FillKey, Source>>; line: Partial<Record<LineKey, Source>>; tone: Partial<Record<Tone, Source>> } = {
+  fill: {
+    sand: ['--muted', '--fia-cost', 0.1],
+    grass: ['--secondary', '--section-green', 0.12],
+    sea: ['--background', '--accent', 0.16],
+    kod: ['--muted-foreground', '--background', 0.5],
+    screen: ['--background', '--accent', 0.4],
   },
   line: {
-    line: '--muted-foreground',   // the heavier of the two greys
-    detail: '--border',           // the lighter of the two greys
-    koline: '--foreground',       // outlines of two-tone goods
-    live: '--accent',             // the one live colour
+    line: ['--foreground', '--background', 0.2],
+    detail: ['--muted-foreground', '--background', 0.25],
   },
-  text: {
-    ink: '--foreground',          // signs and labels
-    paint: '--muted-foreground',  // paint on the ground
+  tone: {
+    gs: ['--muted', '--section-green', 0.14],
+    s: ['--muted', '--fia-cost', 0.12],
+    l: ['--background', '--accent-editorial', 0.6],
   },
 };
 
-// Night is one palette for both themes: the day colours slide toward it after dusk.
-const NIGHT = {
-  fill: { ground: '#0e0f10', road: '#0a0b0b', body: '#111213', deck: '#141516', kob: '#8c9093', kod: '#999da0', glass: '#08090a', livef: '#f4f5f5',
-    window: '#e9ebec', lamp: '#f4f5f5', sea: '#090a0b', sand: '#141516', grass: '#0c0d0e', snow: '#232628', screen: '#e9ebec' } satisfies Record<FillKey, string>,
-  line: { line: '#33373a', detail: '#202325', koline: '#3d4144', live: '#f4f5f5' } satisfies Record<LineKey, string>,
-  text: { ink: '#70757a', paint: '#33373a' } satisfies Record<TextKey, string>,
+/** The light theme's values, for a page without the stylesheet. */
+const FALLBACK: Record<string, string> = {
+  '--background': '0 0% 98%', '--foreground': '215 25% 17%', '--card': '200 40% 96%', '--popover': '0 0% 100%',
+  '--primary': '215 28% 17%', '--secondary': '200 30% 94%', '--muted': '200 20% 92%', '--muted-foreground': '215 15% 45%',
+  '--accent': '215 60% 32%', '--border': '215 20% 88%', '--section-green': '142 71% 45%', '--fia-cost': '24 75% 38%',
+  '--accent-editorial': '20.4 100% 54.9%',
 };
 
-/** What getComputedStyle gives back for a token: an HSL triplet ("215 60% 32%"), or any CSS colour. */
-export function colorFromToken(raw: string, fallback = '#808080'): THREE.Color {
-  const v = raw.trim();
-  const c = new THREE.Color();
-  if (!v) return c.setStyle(fallback);
-  const triplet = v.match(/^(-?[\d.]+)\s+([\d.]+)%\s+([\d.]+)%$/);
-  if (triplet) return c.setStyle(`hsl(${triplet[1]}, ${triplet[2]}%, ${triplet[3]}%)`);
-  try { c.setStyle(v); } catch { c.setStyle(fallback); }
-  return c;
+/** The night palette: lit windows glow warm after dark. */
+const NIGHT_WINDOW = '#ffc978';
+
+/** Line widths in CSS pixels. */
+const WIDTH: Record<LineKey, number> = { line: 1, detail: 1, grid: 1, live: 2 };
+
+/**
+ * A token's value as a colour. Reads the forms a stylesheet gives: shadcn's
+ * bare "H S% L%", hsl(…), rgb(…) and #hex; anything else gives the fallback
+ * (itself in one of those forms), or black.
+ */
+export function colorFromToken(raw: string, fallback?: string): THREE.Color {
+  const parsed = parseColor(raw);
+  if (parsed) return parsed;
+  return (fallback !== undefined ? parseColor(fallback) : null) ?? new THREE.Color(0, 0, 0);
+}
+
+function parseColor(raw: string): THREE.Color | null {
+  const s = (raw ?? '').trim();
+  if (!s) return null;
+  if (s.startsWith('#')) {
+    const hex = s.slice(1);
+    const full = hex.length === 3 ? hex.split('').map((c) => c + c).join('') : hex.slice(0, 6);
+    if (!/^[0-9a-f]{6}$/i.test(full)) return null;
+    const n = parseInt(full, 16);
+    return new THREE.Color().setRGB(((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255, THREE.SRGBColorSpace);
+  }
+  const nums = (s.match(/-?\d*\.?\d+/g) ?? []).map(Number);
+  if (/^rgba?\(/i.test(s) && nums.length >= 3) return new THREE.Color().setRGB(nums[0] / 255, nums[1] / 255, nums[2] / 255, THREE.SRGBColorSpace);
+  if ((/^hsla?\(/i.test(s) || /^-?\d*\.?\d+(deg)?[\s,]+-?\d*\.?\d+%?[\s,]+-?\d*\.?\d+%?/.test(s)) && nums.length >= 3) {
+    const h = (((nums[0] % 360) + 360) % 360) / 360;
+    return new THREE.Color().setHSL(h, Math.min(1, nums[1] / 100), Math.min(1, nums[2] / 100), THREE.SRGBColorSpace);
+  }
+  return null;
 }
 
 export interface Theme {
   fill: Record<FillKey, THREE.MeshBasicMaterial>;
   line: Record<LineKey, LineMaterial>;
-  /** Text materials, pushed by every text mesh so the night blend can tint them. */
-  text: Record<TextKey, THREE.MeshBasicMaterial[]>;
-  /** The current day colour of a text tone, for a new text mesh. */
+  /** The one material every solid is drawn with: its colours ride on the vertices (tone × face shade). */
+  solid: THREE.MeshBasicMaterial;
   textColor(k: TextKey): THREE.Color;
-  /** Re-read the site's tokens (after a theme change) and re-tint. */
-  apply(): void;
-  /** 0 is full day, 1 full night; windows and lamps come on early in the dusk and go off late in the dawn. */
-  shade(n: number, force?: boolean): void;
-  /** Hairlines are 1 CSS px at any zoom; the line materials need the view's size. */
+  /** A tone's colour, shaded for a face: 1 for a roof, less for the walls (sRGB-space factor). */
+  tone(t: Tone, shade?: number): THREE.Color;
+  /** A material for one page of text, its glyphs drawn white and tinted by the key's colour. */
+  textMaterial(k: TextKey, map: THREE.Texture): THREE.MeshBasicMaterial;
+  /** Night, 0 by day to 1 at midnight: lit windows warm toward their night glow. */
+  shade(night: number): void;
+  /** Lines are drawn in screen pixels; they need the canvas size. */
   setResolution(w: number, h: number): void;
   dispose(): void;
 }
 
 export function createTheme(read: (token: string) => string): Theme {
+  const token = (name: string) => colorFromToken(read(name), FALLBACK[name]);
+  const resolve = (src: Source): THREE.Color => (typeof src === 'string' ? token(src) : token(src[0]).lerp(token(src[1]), src[2]));
+  const colourOf = <K extends string>(key: K, tokens: Record<K, string>, mixes: Partial<Record<K, Source>>) => resolve(mixes[key] ?? tokens[key]);
+
+  // Faces are drawn from both sides (Part keeps only the ones the camera sees); outlines win over the faces they
+  // bound because Part nudges every line toward the camera, not because faces are pushed back.
+  const faceMaterial = (color: THREE.Color) => new THREE.MeshBasicMaterial({ color, side: THREE.DoubleSide });
+
   const fill = {} as Record<FillKey, THREE.MeshBasicMaterial>;
+  for (const k of Object.keys(SITE_TOKENS.fill) as FillKey[]) fill[k] = faceMaterial(colourOf(k, SITE_TOKENS.fill, MIX.fill));
+  const windowDay = fill.window.color.clone(), windowNight = colorFromToken(NIGHT_WINDOW);
+
   const line = {} as Record<LineKey, LineMaterial>;
-  const text: Record<TextKey, THREE.MeshBasicMaterial[]> = { ink: [], paint: [] };
-  // Faces are flat and unlit, pushed back a hair so the hairlines drawn on them always win the depth test.
-  for (const k of Object.keys(SITE_TOKENS.fill) as FillKey[]) fill[k] = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1 });
-  // 1 css px at any zoom: the WebGL stand-in for vector-effect:non-scaling-stroke.
-  for (const k of Object.keys(SITE_TOKENS.line) as LineKey[]) line[k] = new LineMaterial({ linewidth: 1, worldUnits: false });
-  const day = { fill: {} as Record<FillKey, THREE.Color>, line: {} as Record<LineKey, THREE.Color>, text: {} as Record<TextKey, THREE.Color> };
-  const night = {
-    fill: Object.fromEntries(Object.entries(NIGHT.fill).map(([k, v]) => [k, new THREE.Color(v)])) as Record<FillKey, THREE.Color>,
-    line: Object.fromEntries(Object.entries(NIGHT.line).map(([k, v]) => [k, new THREE.Color(v)])) as Record<LineKey, THREE.Color>,
-    text: Object.fromEntries(Object.entries(NIGHT.text).map(([k, v]) => [k, new THREE.Color(v)])) as Record<TextKey, THREE.Color>,
-  };
-  let dusk = 0;
-  const shade = (n: number, force = false) => {
-    if (!force && Math.abs(n - dusk) < 0.002) return;
-    dusk = n; const lit = Math.min(1, n * 1.8);
-    for (const k of Object.keys(fill) as FillKey[]) fill[k].color.copy(day.fill[k]).lerp(night.fill[k], k === 'window' || k === 'lamp' || k === 'screen' ? lit : n);
-    for (const k of Object.keys(line) as LineKey[]) line[k].color.copy(day.line[k]).lerp(night.line[k], n);
-    for (const k of Object.keys(text) as TextKey[]) { const c = day.text[k].clone().lerp(night.text[k], n); for (const m of text[k]) m.color.copy(c); }
-  };
-  const apply = () => {
-    for (const k of Object.keys(SITE_TOKENS.fill) as FillKey[]) day.fill[k] = colorFromToken(read(SITE_TOKENS.fill[k]));
-    for (const k of Object.keys(SITE_TOKENS.line) as LineKey[]) day.line[k] = colorFromToken(read(SITE_TOKENS.line[k]));
-    for (const k of Object.keys(SITE_TOKENS.text) as TextKey[]) day.text[k] = colorFromToken(read(SITE_TOKENS.text[k]));
-    shade(dusk, true);
-  };
-  apply();
+  for (const k of Object.keys(SITE_TOKENS.line) as LineKey[]) {
+    line[k] = new LineMaterial({ linewidth: WIDTH[k], worldUnits: false });
+    line[k].color.copy(colourOf(k, SITE_TOKENS.line, MIX.line));
+  }
+
+  const solid = new THREE.MeshBasicMaterial({ color: new THREE.Color(1, 1, 1), vertexColors: true, side: THREE.DoubleSide });
+
+  const text: Record<TextKey, THREE.Color> = { ink: colourOf('ink', SITE_TOKENS.text, {}), paint: colourOf('paint', SITE_TOKENS.text, {}) };
+  const tones = new Map<string, THREE.Color>();
+  const base = {} as Record<Tone, THREE.Color>;
+  for (const t of Object.keys(SITE_TOKENS.tone) as Tone[]) base[t] = colourOf(t, SITE_TOKENS.tone, MIX.tone);
+
+  let lastNight = -1;
   return {
-    fill, line, text,
-    textColor: (k) => day.text[k].clone().lerp(night.text[k], dusk),
-    apply, shade,
-    setResolution: (w, h) => { for (const m of Object.values(line)) m.resolution.set(w, h); },
-    dispose: () => {
+    fill, line, solid,
+    textColor: (k) => text[k].clone(),
+    tone(t, shade = 1) {
+      const key = `${t}:${shade.toFixed(3)}`;
+      let c = tones.get(key);
+      if (!c) {
+        const rgb = { r: 0, g: 0, b: 0 };
+        base[t].getRGB(rgb, THREE.SRGBColorSpace);
+        c = new THREE.Color().setRGB(Math.min(1, rgb.r * shade), Math.min(1, rgb.g * shade), Math.min(1, rgb.b * shade), THREE.SRGBColorSpace);
+        tones.set(key, c);
+      }
+      return c;
+    },
+    textMaterial: (k, map) => new THREE.MeshBasicMaterial({ map, color: text[k].clone(), transparent: true, depthWrite: false, side: THREE.DoubleSide }),
+    shade(night) {
+      const n = Math.max(0, Math.min(1, night));
+      if (Math.abs(n - lastNight) < 0.005) return;
+      lastNight = n;
+      fill.window.color.copy(windowDay).lerp(windowNight, n);
+    },
+    setResolution(w, h) { for (const m of Object.values(line)) m.resolution.set(Math.max(1, w), Math.max(1, h)); },
+    dispose() {
       for (const m of Object.values(fill)) m.dispose();
       for (const m of Object.values(line)) m.dispose();
-      for (const k of Object.keys(text) as TextKey[]) { for (const m of text[k]) { m.map?.dispose(); m.dispose(); } text[k].length = 0; }
+      solid.dispose();
+      tones.clear();
     },
   };
 }
