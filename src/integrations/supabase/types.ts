@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.15"
+    PostgrestVersion: "14.5"
   }
   public: {
     Tables: {
@@ -206,6 +206,13 @@ export type Database = {
             foreignKeyName: "essay_revisions_essay_id_fkey"
             columns: ["essay_id"]
             isOneToOne: false
+            referencedRelation: "essay_structure"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "essay_revisions_essay_id_fkey"
+            columns: ["essay_id"]
+            isOneToOne: false
             referencedRelation: "essays"
             referencedColumns: ["id"]
           },
@@ -226,7 +233,6 @@ export type Database = {
           fsli_slug: string | null
           id: string
           is_selected: boolean
-          selected_rank: number | null
           layout_config: Json | null
           learning_outcomes: string[] | null
           lesson_type: Database["public"]["Enums"]["lesson_type_enum"] | null
@@ -237,6 +243,7 @@ export type Database = {
           published: boolean | null
           read_time: string | null
           section: string
+          selected_rank: number | null
           slug: string
           snippet: string | null
           sort_order: number | null
@@ -262,7 +269,6 @@ export type Database = {
           fsli_slug?: string | null
           id?: string
           is_selected?: boolean
-          selected_rank?: number | null
           layout_config?: Json | null
           learning_outcomes?: string[] | null
           lesson_type?: Database["public"]["Enums"]["lesson_type_enum"] | null
@@ -273,6 +279,7 @@ export type Database = {
           published?: boolean | null
           read_time?: string | null
           section: string
+          selected_rank?: number | null
           slug: string
           snippet?: string | null
           sort_order?: number | null
@@ -298,7 +305,6 @@ export type Database = {
           fsli_slug?: string | null
           id?: string
           is_selected?: boolean
-          selected_rank?: number | null
           layout_config?: Json | null
           learning_outcomes?: string[] | null
           lesson_type?: Database["public"]["Enums"]["lesson_type_enum"] | null
@@ -309,6 +315,7 @@ export type Database = {
           published?: boolean | null
           read_time?: string | null
           section?: string
+          selected_rank?: number | null
           slug?: string
           snippet?: string | null
           sort_order?: number | null
@@ -505,6 +512,7 @@ export type Database = {
           dec_2023: string | null
           dec_2024: string | null
           id: string
+          is_component: boolean | null
           notes_ref: string | null
           slug: string
           sort_order: number | null
@@ -518,6 +526,7 @@ export type Database = {
           dec_2023?: string | null
           dec_2024?: string | null
           id?: string
+          is_component?: boolean | null
           notes_ref?: string | null
           slug: string
           sort_order?: number | null
@@ -531,6 +540,7 @@ export type Database = {
           dec_2023?: string | null
           dec_2024?: string | null
           id?: string
+          is_component?: boolean | null
           notes_ref?: string | null
           slug?: string
           sort_order?: number | null
@@ -678,6 +688,32 @@ export type Database = {
           snippet: string | null
           title: string | null
         }
+        Insert: {
+          author?: string | null
+          finance_order?: number | null
+          id?: string | null
+          lesson_type?: never
+          module_id?: string | null
+          published?: boolean | null
+          read_time?: never
+          section?: string | null
+          slug?: string | null
+          snippet?: string | null
+          title?: string | null
+        }
+        Update: {
+          author?: string | null
+          finance_order?: number | null
+          id?: string | null
+          lesson_type?: never
+          module_id?: string | null
+          published?: boolean | null
+          read_time?: never
+          section?: string | null
+          slug?: string | null
+          snippet?: string | null
+          title?: string | null
+        }
         Relationships: [
           {
             foreignKeyName: "essays_module_id_fkey"
@@ -724,12 +760,12 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -753,11 +789,11 @@ export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -778,11 +814,11 @@ export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -803,11 +839,11 @@ export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -820,11 +856,11 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+    : never) = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
