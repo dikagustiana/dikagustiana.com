@@ -408,6 +408,8 @@ export function createFlows(ctx: EngineContext, layout: GeneratedLayout, links: 
     if (container) for (let k = 0; k < 5; k++) p.box(-L + 15 + k * 7.5, -B / 2 + 1.2, 3.2, 6.6, B - 2.4, 2.6 + (k % 2) * 2.6, 'g');
     else for (let k = 0; k < 4; k++) p.box(-L + 16 + k * 9, -B / 2 + 1.5, 3.2, 7.6, B - 3, 1.1, 'k');
     const g = p.build(container ? 'container-ship' : 'bulk-ship');
+    // the mast's light and the stern's, lit after dark (PRD v2 §3.8)
+    for (const [lx, lz] of [[-L + 6, 15], [4, 5]]) { const light = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.9, 0.9), theme.glow.lamp); light.position.set(lx, lz, 0); light.raycast = () => {}; g.add(light); }
     // the bulk ship's hold mark: a heap that grows as it loads
     const hp = new Part(ctx); hp.cull = false; hp.box(0, -(B - 4) / 2, 0, 30, B - 4, 3.2, 's');
     const hold = hp.build('hold'); hold.position.set(-L + 15, 3.4, 0);
@@ -460,6 +462,7 @@ export function createFlows(ctx: EngineContext, layout: GeneratedLayout, links: 
     const q = layout.port.quay, p = new Part(ctx); p.cull = false;
     p.box(-0.8, -0.8, 24, 1.6, 1.6, 2); p.box(-1, -0.6, 26, 30, 1.2, 1.2); p.seg('line', W(26, 0, 27.2), W(26, 0, 8)); p.box(25.2, -0.9, 7, 1.6, 1.8, 1, 'k');
     crane = p.build('crane'); pose(crane, (q.x0 + q.x1) / 2 + 40, q.y0 + 4, 0); groups.port.add(crane);
+    const light = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.9, 0.9), theme.glow.lamp); light.position.set(29, 28, 0); light.raycast = () => {}; crane.add(light);
   }
 
   // ---- walkers: the town's pavements and the think tank's terrace, at the street band ----

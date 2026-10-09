@@ -25,7 +25,7 @@ import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
  * and the recovery yard, meadow for the biological arc and the hill, pale for the estate), the water's rim, and the
  * buildings' cast shadow, which is the only translucent fill.
  */
-export type FillKey = 'ground' | 'body' | 'deck' | 'road' | 'glass' | 'sand' | 'grass' | 'sea' | 'kob' | 'kod' | 'livef' | 'window' | 'lamp' | 'screen' | 'dust' | 'meadow' | 'pale' | 'rim' | 'shadow';
+export type FillKey = 'ground' | 'body' | 'deck' | 'road' | 'glass' | 'sand' | 'grass' | 'sea' | 'kob' | 'kod' | 'livef' | 'window' | 'dim' | 'lamp' | 'screen' | 'dust' | 'meadow' | 'pale' | 'rim' | 'shadow';
 /** Lines: structure, detail, the slab's grid, and the live colour. */
 export type LineKey = 'line' | 'detail' | 'grid' | 'live';
 /** Text: ink for what is read, paint for what is marked on the ground. */
@@ -45,7 +45,7 @@ type Source = string | readonly [from: string, to: string, t: number];
 export const SITE_TOKENS: { fill: Record<FillKey, string>; line: Record<LineKey, string>; text: Record<TextKey, string>; tone: Record<Tone, string> } = {
   fill: {
     ground: '--background', body: '--card', deck: '--secondary', road: '--muted', glass: '--border', sand: '--muted', grass: '--secondary', sea: '--background',
-    kob: '--muted-foreground', kod: '--muted-foreground', livef: '--accent', window: '--border', lamp: '--popover', screen: '--background',
+    kob: '--muted-foreground', kod: '--muted-foreground', livef: '--accent', window: '--border', dim: '--border', lamp: '--popover', screen: '--background',
     dust: '--muted', meadow: '--secondary', pale: '--background', rim: '--background', shadow: '--foreground',
   },
   line: { line: '--foreground', detail: '--muted-foreground', grid: '--border', live: '--accent' },
@@ -87,8 +87,18 @@ const FALLBACK: Record<string, string> = {
 
 /** The night palette: windows and lamps glow warm after dark; kilns and flares burn. */
 const NIGHT_WINDOW = '#ffc978', NIGHT_FIRE = '#ff9a3c';
+/** How bright an unpublished building's warm windows are at night (dim), and how light a published one's accent glows. */
+const DIM_NIGHT = 0.5, ACCENT_NIGHT_LIGHTNESS = 0.86;
 /** The pool of light under a lamp at midnight. */
 const POOL_OPACITY = 0.3;
+/**
+ * How far every unlit surface sinks toward the night (the primary token, the shell's veil colour) at midnight: the
+ * engine darkens the world itself, so what lights after dark (windows, lamps, fires) stays bright above it, and the
+ * shell's veil only finishes the tone (PRD v2 §3.8).
+ */
+const NIGHT_SINK = 0.6;
+/** Fills that light or are drawn translucent, and so do not sink. */
+const LIT_FILLS: readonly FillKey[] = ['window', 'dim', 'lamp', 'shadow', 'livef'];
 
 /** Line widths in CSS pixels; at the district band the hairlines thicken by half (PRD v2 §3.2). */
 const WIDTH: Record<LineKey, number> = { line: 1, detail: 1, grid: 1, live: 2 };
@@ -143,7 +153,7 @@ export interface Theme {
   glow: { lamp: THREE.MeshBasicMaterial; fire: THREE.MeshBasicMaterial; pool: THREE.MeshBasicMaterial };
   /** How dark it is now (the last shade), 0 by day to 1 at midnight. */
   night(): number;
-  /** Night, 0 by day to 1 at midnight: lit windows warm toward their night glow; lamps and fires light. */
+  /** Night, 0 by day to 1 at midnight: every window warms (dim), a published company's glows in the accent, lamps and fires light. */
   shade(night: number): void;
   /** Lines are drawn in screen pixels; they need the canvas size. */
   setResolution(w: number, h: number): void;
@@ -164,7 +174,10 @@ export function createTheme(read: (token: string) => string): Theme {
   const fill = {} as Record<FillKey, THREE.MeshBasicMaterial>;
   for (const k of Object.keys(SITE_TOKENS.fill) as FillKey[]) { fill[k] = faceMaterial(colourOf(k, SITE_TOKENS.fill, MIX.fill)); fill[k].name = k; }
   fill.shadow.transparent = true; fill.shadow.opacity = SHADOW_OPACITY; fill.shadow.depthWrite = false; fill.shadow.name = 'shadow';
-  const windowDay = fill.window.color.clone(), warm = colorFromToken(NIGHT_WINDOW);
+  // every building's windows warm and dim at night; a published company's light brighter, in the accent (PRD v2 §3.8)
+  const windowDay = fill.window.color.clone(), dimDay = fill.dim.color.clone(), warm = colorFromToken(NIGHT_WINDOW);
+  const dimNight = warm.clone().multiplyScalar(DIM_NIGHT), accentHsl = token('--accent').getHSL({ h: 0, s: 0, l: 0 });
+  const accentNight = new THREE.Color().setHSL(accentHsl.h, accentHsl.s, Math.max(accentHsl.l, ACCENT_NIGHT_LIGHTNESS));
 
   const line = {} as Record<LineKey, LineMaterial>;
   for (const k of Object.keys(SITE_TOKENS.line) as LineKey[]) {
@@ -180,6 +193,10 @@ export function createTheme(read: (token: string) => string): Theme {
   for (const t of Object.keys(SITE_TOKENS.tone) as Tone[]) base[t] = colourOf(t, SITE_TOKENS.tone, MIX.tone);
 
   const lampDay = base.k.clone(), fireDay = base.l.clone(), fire = colorFromToken(NIGHT_FIRE);
+  // the night every unlit surface sinks toward, and each fill's own day colour to come back to
+  const sink = token('--primary'), white = new THREE.Color(1, 1, 1), fillDay = new Map<FillKey, THREE.Color>();
+  for (const k of Object.keys(fill) as FillKey[]) if (!LIT_FILLS.includes(k)) fillDay.set(k, fill[k].color.clone());
+  const lineDay = new Map<LineKey, THREE.Color>((Object.keys(line) as LineKey[]).map((k) => [k, line[k].color.clone()]));
   // drawn from both sides, as every face is (Part's triangles keep no winding)
   const glow = {
     lamp: new THREE.MeshBasicMaterial({ color: lampDay.clone(), side: THREE.DoubleSide }),
@@ -209,10 +226,15 @@ export function createTheme(read: (token: string) => string): Theme {
       const n = Math.max(0, Math.min(1, night));
       if (Math.abs(n - lastNight) < 0.005) return;
       lastNight = n;
-      fill.window.color.copy(windowDay).lerp(warm, n);
+      fill.window.color.copy(windowDay).lerp(accentNight, n);
+      fill.dim.color.copy(dimDay).lerp(dimNight, n);
       glow.lamp.color.copy(lampDay).lerp(warm, n);
       glow.fire.color.copy(fireDay).lerp(fire, n);
       glow.pool.opacity = n * POOL_OPACITY;
+      // every unlit surface sinks toward the night; the solids through their one material's colour
+      for (const [k, c] of fillDay) fill[k].color.copy(c).lerp(sink, n * NIGHT_SINK);
+      solid.color.copy(white).lerp(sink, n * NIGHT_SINK);
+      for (const [k, c] of lineDay) line[k].color.copy(c).lerp(sink, n * NIGHT_SINK * 0.5);
     },
     setResolution(w, h) { for (const m of Object.values(line)) m.resolution.set(Math.max(1, w), Math.max(1, h)); },
     setDistrict(on) { for (const k of ['line', 'detail'] as const) line[k].linewidth = on ? DISTRICT_WIDTH : WIDTH[k]; },

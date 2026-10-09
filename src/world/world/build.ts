@@ -143,10 +143,13 @@ function regionsPart(ctx: EngineContext, layout: GeneratedLayout): THREE.Group {
   const g = p.build('regions'); g.traverse((o) => { o.raycast = () => {}; }); return g;
 }
 
-/** A zone's windows as one mesh per material: the unlit glass and the lit windows of published companies. */
+/**
+ * A zone's windows as one mesh per material: every building's (dim, warm and dim at night) and the windows of published
+ * companies (brighter, in the accent at night; PRD v2 §3.8).
+ */
 function windowsPart(ctx: EngineContext, unlit: readonly WindowRect[], lit: readonly WindowRect[], name: string): THREE.Group {
   const p = new Part(ctx);
-  for (const r of unlit) p.fill2(r.M, r.x, r.y, r.w, r.h, 'glass', 0.03);
+  for (const r of unlit) p.fill2(r.M, r.x, r.y, r.w, r.h, 'dim', 0.03);
   for (const r of lit) p.fill2(r.M, r.x, r.y, r.w, r.h, 'window', 0.03);
   const g = p.build(name); g.traverse((o) => { o.raycast = () => {}; });
   return g;
