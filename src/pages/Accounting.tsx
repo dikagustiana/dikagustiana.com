@@ -10,7 +10,7 @@ export default function Accounting() {
     {
       title: 'FSLI Detail',
       path: '/accounting/fsli',
-      description: 'The line items of one consolidated statement of financial position, with the reported figures and note references.',
+      description: 'The asset-side line items of one consolidated statement of financial position, with the reported figures and note references.',
       standing: isSuccess ? `${fsliPages.length} line items` : null,
     },
     {

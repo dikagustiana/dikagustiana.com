@@ -24,7 +24,10 @@ The audit's suggested fix (post +85,000 to goodwill and NCI) would have unbalanc
 paper balanced only because 113,000 of related-party receivables were eliminated against 22,000
 of payables, a 91,000 gap equal to the missing NCI. The elimination column now matches intragroup
 balances on both sides, recognises NCI at 91,000 (acquisition-date fair value) and derives goodwill
-from it. `tests/unit/consolidationWorkingPaper.test.ts` holds the arithmetic. Owner question Q4
+from it. Intragroup trade also reconciles by counterparty (`INTRAGROUP_TRADE`, who owes whom), not
+only in total; the first rebuild left Dummy C's related-party receivable larger than everything the
+other entities owed, which review caught. `tests/unit/consolidationWorkingPaper.test.ts` holds the
+arithmetic. Owner question Q4
 still applies if a different worked example is wanted.
 
 ## Empty sections collapse in the nav (Q14 default)

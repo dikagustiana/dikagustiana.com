@@ -39,9 +39,11 @@ export default function StatutoryReporting() {
           <div className="space-y-4 text-foreground leading-relaxed">
             <p>
               An Indonesian group keeps two parallel sets: the consolidated PSAK statements the
-              parent reports, and the standalone PSAK statements each PT files for tax and corporate
-              purposes. The reconciliation work is between book and tax, and between entity and
-              group, not between PSAK and IFRS.
+              parent reports, and the standalone statements each PT files for tax and corporate
+              purposes, under PSAK or, for a subsidiary without public accountability, SAK Entitas
+              Privat. A subsidiary on SAK Entitas Privat has to be brought onto the group's PSAK
+              policies before it consolidates. The reconciliation work is between book and tax, and
+              between entity and group, not between PSAK and IFRS.
             </p>
             <p>
               Indonesian tax rules do not always follow PSAK. Depreciation rates, provisions and the

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { WORKING_PAPER_ROWS, type WorkingPaperRow } from '@/data/consolidationWorkingPaper';
+import { ENTITY_NAMES, INTRAGROUP_TRADE, WORKING_PAPER_ROWS, type WorkingPaperRow } from '@/data/consolidationWorkingPaper';
 
 // The page is a teaching example for readers who will check the arithmetic, so
 // the arithmetic is a test, not a review comment. A null cell is a blank, not a
@@ -69,6 +69,26 @@ describe('consolidation working paper', () => {
     const out = (labels: string[]) => labels.reduce((s, l) => s - n(byLabel(l).elimination), 0);
     expect(out(receivables)).toBe(113000);
     expect(out(payables)).toBe(113000);
+  });
+
+  it('reconciles intragroup trade entity by entity, not only in total', () => {
+    // The aggregate test above passed while Dummy C's related-party receivable
+    // exceeded everything the other three entities owed. The matrix is the
+    // counterparty view; its sums must be the entity columns exactly.
+    const receivable = byLabel('Trade Receivables — Related Parties').values!.map(n);
+    const payable = byLabel('Trade Payables — Related Parties').values!.map(n);
+    const owedTo = ENTITY_NAMES.map(() => 0);
+    const owedBy = ENTITY_NAMES.map(() => 0);
+    for (const [debtor, creditor, amount] of INTRAGROUP_TRADE) {
+      expect(debtor, 'an entity cannot owe itself').not.toBe(creditor);
+      owedTo[creditor] += amount;
+      owedBy[debtor] += amount;
+    }
+    expect(owedTo, 'receivables by creditor').toEqual(receivable);
+    expect(owedBy, 'payables by debtor').toEqual(payable);
+    expect(-n(byLabel('Trade Receivables — Related Parties').elimination)).toBe(
+      INTRAGROUP_TRADE.reduce((s, [, , a]) => s + a, 0),
+    );
   });
 
   it('derives goodwill from the investment elimination', () => {

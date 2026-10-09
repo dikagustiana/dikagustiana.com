@@ -232,6 +232,10 @@ const App = () => (
 
             {/* Books */}
             <Route path="/books-academia" element={<BooksAcademia />} />
+            {/* Retired 9 Oct 2026 (an orphan index with its own taxonomy). Without
+                this the URL fell through to /books/:category as an empty
+                "Categories" shelf. */}
+            <Route path="/books/categories" element={<Navigate to="/books-academia" replace />} />
             <Route path="/books/:category" element={<BooksList />} />
             <Route path="/books/:category/:bookId/read" element={<BookReader />} />
 

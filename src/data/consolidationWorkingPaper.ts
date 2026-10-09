@@ -16,6 +16,10 @@
 //      acquisition-date fair value: 250,000 + 91,000 - 256,000 = 85,000.
 // Not allocated here: NCI's share of post-acquisition earnings.
 //
+// The intragroup trade balances also reconcile entity by entity, not just in
+// total: INTRAGROUP_TRADE below says who owes whom, and its row and column
+// sums are each entity's related-party receivable and payable.
+//
 // tests/unit/consolidationWorkingPaper.test.ts holds every one of those
 // statements to the numbers below.
 
@@ -32,12 +36,27 @@ export interface WorkingPaperRow {
 
 export const ENTITY_NAMES = ['Dummy C', 'Dummy D', 'Dummy E', 'Dummy F'] as const;
 
+/**
+ * Who owes whom on intragroup trade, by index into ENTITY_NAMES:
+ * [debtor, creditor, amount]. A practitioner rebuilding the intercompany
+ * matrix from the entity columns should land on exactly this.
+ */
+export const INTRAGROUP_TRADE: [number, number, number][] = [
+  [1, 0, 14000], // D owes C
+  [2, 0, 10000], // E owes C
+  [3, 0, 6000], //  F owes C
+  [0, 1, 20000], // C owes D
+  [0, 2, 7000], //  C owes E
+  [0, 3, 3000], //  C owes F
+  [2, 3, 2000], //  E owes F
+];
+
 export const WORKING_PAPER_ROWS: WorkingPaperRow[] = [
   { label: 'ASSET', isHeader: true },
   { label: 'CURRENT ASSET', isHeader: true },
   { label: 'Cash and cash equivalents', values: [125000, 45000, 32000, 18000], combined: 220000, elimination: 0, consolidated: 220000, indent: 1 },
-  { label: 'Trade Receivables — Third Parties', values: [89000, 23000, 15000, 8000], combined: 135000, elimination: 0, consolidated: 135000, indent: 1 },
-  { label: 'Trade Receivables — Related Parties', values: [45000, 12000, 0, 5000], combined: 62000, elimination: -62000, consolidated: 0, indent: 1 },
+  { label: 'Trade Receivables — Third Parties', values: [104000, 15000, 8000, 8000], combined: 135000, elimination: 0, consolidated: 135000, indent: 1 },
+  { label: 'Trade Receivables — Related Parties', values: [30000, 20000, 7000, 5000], combined: 62000, elimination: -62000, consolidated: 0, indent: 1 },
   { label: 'Unbilled — Third Parties', values: [34000, 8000, 6000, 0], combined: 48000, elimination: 0, consolidated: 48000, indent: 1 },
   { label: 'Current portion of Lease receivables', values: [0, 0, 4500, 0], combined: 4500, elimination: 0, consolidated: 4500, indent: 1 },
   { label: 'Employee Receivables', values: [2300, 800, 400, 200], combined: 3700, elimination: 0, consolidated: 3700, indent: 1 },
