@@ -75,6 +75,8 @@ interface DebugApi {
   follow(): FollowReading | null;
   /** Space at a Follow's stop. */
   followNext(): void;
+  /** The governance or regulation layer's pulses: how many, and where the first few stand along their links (0 supplier, 1 customer). */
+  pulses(layer: 'governance' | 'regulation'): { count: number; along: number[] };
   statuses(): Record<string, ModelStatus>;
   /** Codes in the lit chain, the selected one first. */
   chain(): string[];
@@ -307,6 +309,7 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
       tick: (dt, render = true) => { last += dt * 1000; advance(Math.max(0, Math.min(FRAME_MAX, dt)), render); },
       follow: () => follow.reading(),
       followNext: () => follow.next(),
+      pulses: (layer) => flows.pulses(layer),
       statuses: () => Object.fromEntries(statuses),
       chain: () => chain.codes(),
       chainDrawn: () => ({ ...chain.drawn(), dimmed: chain.dimmed(), offset: chain.offset() }),

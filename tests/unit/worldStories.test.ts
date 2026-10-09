@@ -66,3 +66,27 @@ describe('the stories (PRD v2 §3.10, D2)', () => {
     expect(window.world!.chainDrawn().dimmed).toBe(0);
   });
 });
+
+describe('the governance and regulation pulses (PRD v2 §3.6, §3.12, D5)', () => {
+  beforeEach(installWorldStubs);
+  afterEach(disposeWorlds);
+
+  it('runs a pulse up every link’s route from the customer with governance, and down it from the supplier with regulation; nothing until a layer is on', async () => {
+    const { handle, scene } = await mountWorld();
+    expect(window.world!.pulses('governance').count).toBe(0);
+    expect(scene.getObjectByName('pulses-governance')!.visible).toBe(false);
+    handle.setLayer('governance', true); handle.setLayer('regulation', true);
+    const g0 = window.world!.pulses('governance'), r0 = window.world!.pulses('regulation');
+    // pulses on every link with a lot at each end, one every hundred and twenty metres of its route
+    expect(g0.count).toBeGreaterThan(150);
+    expect(r0.count).toBe(g0.count);
+    handle.step(1);
+    const g1 = window.world!.pulses('governance'), r1 = window.world!.pulses('regulation');
+    // governance runs against the goods (towards the supplier), regulation with them; a pulse at a run's end starts again
+    const moved = (a: number[], b: number[], sign: number) => a.filter((x, i) => Math.abs(b[i] - x) < 0.5 && Math.sign(b[i] - x) === sign).length;
+    expect(moved(g0.along, g1.along, -1)).toBeGreaterThanOrEqual(g0.along.length - 1);
+    expect(moved(r0.along, r1.along, 1)).toBeGreaterThanOrEqual(r0.along.length - 1);
+    handle.setLayer('governance', false);
+    expect(scene.getObjectByName('pulses-governance')!.visible).toBe(false);
+  });
+});

@@ -44,6 +44,7 @@ import type { Block, GeneratedLayout, Lot, Pt, RegionId } from '@/world/placemen
 import type { EngineContext } from '../engine/context';
 import { W } from '../engine/kernel/iso';
 import { Part, pose } from '../engine/kernel/part';
+import type { Tone } from '../engine/theme';
 import { Path } from '../engine/kernel/path';
 import type { Entity, EntityInfo, EntityRoute, LayerName } from '../engine/types';
 import { TRAFFIC_LINE } from '../world/build';
@@ -64,6 +65,8 @@ export const JAM_HOLD = 0.15;
 const SIDE_CADENCE = 45;
 /** A link's route is drawn through a point every so many metres along it. */
 const ROUTE_STEP = 4;
+/** The governance and regulation pulses: one every so many metres of a link's route, at this speed in metres per second. */
+const PULSE_GAP = 120, PULSE_SPEED = 9;
 /** Speed on a driveway, the gap a vehicle keeps to the one ahead, and how near the end of its lane a vehicle looks at the junction, in metres. */
 const DRIVEWAY_SPEED = 5, GAP = 3, LOOK_OUT = 10;
 /** How near a gate a vehicle lifts its boom, in metres either way. */
@@ -216,6 +219,8 @@ export interface FlowSystem {
   lotsOf(code: string): string[];
   /** Send a flow's vehicle now, from the given lot when it is one of the flow's origins (Follow; search by load). */
   send(key: string, fromLot?: string | null): Vehicle | null;
+  /** The governance and regulation layers' pulses (PRD v2 §3.6): how many, and where the first few stand along their links (0 the supplier, 1 the customer). */
+  pulses(layer: 'governance' | 'regulation'): { count: number; along: number[] };
   dispose(): void;
 }
 
@@ -413,6 +418,49 @@ export function createFlows(ctx: EngineContext, layout: GeneratedLayout, links: 
     return line;
   })();
 
+  // ---- governance and regulation (PRD v2 §3.6, §3.12): with its layer on, a pulse runs up every link's route from the
+  // customer (the demand signal, governance) or down it from the supplier (specifications, regulation) ----
+  interface PulseRun { pts: readonly Pt[]; cum: number[]; len: number; offsets: number[] }
+  interface PulseLayer { group: THREE.Group; up: boolean; tone: Tone; runs: PulseRun[]; mesh: THREE.InstancedMesh | null }
+  const pulseLayers: Record<'governance' | 'regulation', PulseLayer> = {
+    governance: { group: new THREE.Group(), up: true, tone: 'a', runs: [], mesh: null },
+    regulation: { group: new THREE.Group(), up: false, tone: 'kb', runs: [], mesh: null },
+  };
+  for (const [name, l] of Object.entries(pulseLayers)) { l.group.name = `pulses-${name}`; l.group.visible = false; root.add(l.group); }
+  const pm4 = new THREE.Matrix4(), pq = new THREE.Quaternion(), pv = new THREE.Vector3(), ps = new THREE.Vector3(1, 1, 1), pup = new THREE.Vector3(0, 1, 0);
+  /** Built the first time its layer is shown: the routes of every link that has a lot at each end. */
+  function buildPulses(l: PulseLayer) {
+    if (l.mesh) return;
+    for (const link of links) {
+      const r = api.routesOf(link.from, link.to)[0]; if (!r || r.pts.length < 2) continue;
+      const cum = [0]; for (let i = 1; i < r.pts.length; i++) cum.push(cum[i - 1] + Math.hypot(r.pts[i][0] - r.pts[i - 1][0], r.pts[i][1] - r.pts[i - 1][1]));
+      const len = cum[cum.length - 1], n = Math.max(1, Math.floor(len / PULSE_GAP));
+      l.runs.push({ pts: r.pts, cum, len, offsets: Array.from({ length: n }, (_, k) => (k / n) * len) });
+    }
+    const p = new Part(ctx); p.cull = false;
+    p.geo(new THREE.OctahedronGeometry(1.3, 0), new THREE.Matrix4(), l.tone);
+    const n = l.runs.reduce((a, r) => a + r.offsets.length, 0);
+    l.mesh = new THREE.InstancedMesh(p.solidGeometry(), theme.solid, Math.max(1, n));
+    l.mesh.count = n; l.mesh.frustumCulled = false; l.mesh.raycast = () => {}; l.mesh.name = `${l.group.name}-mesh`;
+    l.group.add(l.mesh);
+  }
+  /** Where a pulse stands along its run at time t: from the supplier's end, or the customer's for governance. */
+  const pulseS = (l: PulseLayer, r: PulseRun, k: number) => { const d = (r.offsets[k] + t * PULSE_SPEED) % r.len; return l.up ? r.len - d : d; };
+  function placePulses() {
+    for (const l of Object.values(pulseLayers)) {
+      if (!l.group.visible || !l.mesh) continue;
+      let i = 0;
+      for (const r of l.runs) for (let k = 0; k < r.offsets.length; k++, i++) {
+        const s = pulseS(l, r, k);
+        let j = 1; while (j < r.cum.length - 1 && r.cum[j] < s) j++;
+        const a = r.pts[j - 1], b = r.pts[j], f = (s - r.cum[j - 1]) / Math.max(1e-6, r.cum[j] - r.cum[j - 1]);
+        pv.copy(W(a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f, 3.2)); pq.setFromAxisAngle(pup, t * 1.5);
+        l.mesh.setMatrixAt(i, pm4.compose(pv, pq, ps));
+      }
+      l.mesh.instanceMatrix.needsUpdate = true;
+    }
+  }
+
   // ---- ships at the quays: a bulk ship loads the raw export, a container ship brings the imports ----
   interface Ship { ent: Mover; g: THREE.Group; hold: THREE.Object3D; berth: Pt; t: number; cycle: number; loads: boolean }
   const ships: Ship[] = [];
@@ -517,6 +565,23 @@ export function createFlows(ctx: EngineContext, layout: GeneratedLayout, links: 
 
   const busy = new Set<string>(), weighbridges = layout.gates.filter((g) => g.weighbridge);
   const linkRoutes = new Map<string, LinkRoute[]>();
+  /** A link's routes on the roads (PRD v2 §3.9), one per supplier lot, cached. */
+  function routesOf(from: string, to: string): LinkRoute[] {
+    const key = `${from}>${to}`, hit = linkRoutes.get(key); if (hit) return hit;
+    // an unplaced end is the port, as for the flows
+    const os = lotsOf(from), ds = lotsOf(to), origins = os.length ? os : quay, dests = ds.length ? ds : quay, out: LinkRoute[] = [];
+    origins.forEach((a, i) => {
+      const b = dests[i % dests.length]; if (a === b) return;
+      const ba = roads.bays(a.id), bb = roads.bays(b.id); if (!ba || !bb) return;
+      const r = roads.route(ba.despatch, bb.receiving); if (!r) return;
+      const pts: Pt[] = []; for (let s = 0; s < r.length; s += ROUTE_STEP) { const p = r.path.at(s); pts.push([p.x, p.y]); }
+      const end = r.path.at(r.length); pts.push([end.x, end.y]);
+      out.push({ from: host.lotEntityId(a), to: host.lotEntityId(b), pts, gates: r.stops.map((x) => x.gate), length: r.length });
+    });
+    linkRoutes.set(key, out);
+    return out;
+  }
+  const api = { routesOf };
   let t = 0;
   /** Per flow: its vehicles queued at the customer's bay, and whether its last one is still near the despatch bay; per gate, its queue. */
   const queuedAt = new Map<Flow, number>(), atDoor = new Set<Lot>(), laneQueue = new Map<number, number>(), gateQueue = new Map<string, number>();
@@ -564,6 +629,7 @@ export function createFlows(ctx: EngineContext, layout: GeneratedLayout, links: 
         fleet.place(w.m, p.x, p.y, h, w.z);
       }
       syncCoins();
+      placePulses();
       fleet.commit();
       // which gates have a vehicle at them, for their booms (sim/activity.ts)
       busy.clear();
@@ -574,6 +640,7 @@ export function createFlows(ctx: EngineContext, layout: GeneratedLayout, links: 
       if (name === 'logistics') { groups.goods.visible = on; groups.loops.visible = on; groups.port.visible = on; }
       if (name === 'cold-chain') groups.cold.visible = on;
       if (name === 'credit') groups.coins.visible = on;
+      if (name === 'governance' || name === 'regulation') { const l = pulseLayers[name]; l.group.visible = on; if (on) { buildPulses(l); placePulses(); } }
     },
     setFlows(next) {
       // a measured link sends its vehicles more often (PRD v2 §3.6); nothing else about it changes here
@@ -592,20 +659,11 @@ export function createFlows(ctx: EngineContext, layout: GeneratedLayout, links: 
     live: () => live.length,
     busyGates: () => busy,
     cap: () => cap,
-    routesOf(from, to) {
-      const key = `${from}>${to}`, hit = linkRoutes.get(key); if (hit) return hit;
-      // an unplaced end is the port, as for the flows
-      const os = lotsOf(from), ds = lotsOf(to), origins = os.length ? os : quay, dests = ds.length ? ds : quay, out: LinkRoute[] = [];
-      origins.forEach((a, i) => {
-        const b = dests[i % dests.length]; if (a === b) return;
-        const ba = roads.bays(a.id), bb = roads.bays(b.id); if (!ba || !bb) return;
-        const r = roads.route(ba.despatch, bb.receiving); if (!r) return;
-        const pts: Pt[] = []; for (let s = 0; s < r.length; s += ROUTE_STEP) { const p = r.path.at(s); pts.push([p.x, p.y]); }
-        const end = r.path.at(r.length); pts.push([end.x, end.y]);
-        out.push({ from: host.lotEntityId(a), to: host.lotEntityId(b), pts, gates: r.stops.map((x) => x.gate), length: r.length });
-      });
-      linkRoutes.set(key, out);
-      return out;
+    routesOf: (from, to) => routesOf(from, to),
+    pulses(layer) {
+      const l = pulseLayers[layer], along: number[] = [];
+      for (const r of l.runs) { if (along.length >= 8) break; along.push(pulseS(l, r, 0) / r.len); }
+      return { count: l.mesh?.count ?? 0, along };
     },
     lotsOf: (code) => lotsOf(code).map((l) => host.lotEntityId(l)),
     send(key, fromLot) {
