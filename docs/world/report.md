@@ -167,6 +167,10 @@ viewer only with `VITE_FIA_PREVIEW=true` as well (discovery item K).
 
 ## 6. What remains for the owner
 
+**v2 (9 October 2026):** the owner found the world dead; the measured diagnosis, the plan, the
+PRD and the execution prompt are in `v2/PLAN.md`, `v2/PRD-kawasan-v2.md` and
+`v2/MEGA-PROMPT-kawasan-v2.md`; the baseline probe is `frames/v1-probe/`.
+
 State on 9 October 2026, after the merge: `run-2026-10-09.md` (preview flags set, the
 `fsre_published` and backup blockers with their exact steps, the Factory Yard issue text).
 
