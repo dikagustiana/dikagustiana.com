@@ -544,7 +544,8 @@ export function createFlows(ctx: EngineContext, layout: GeneratedLayout, links: 
       fleet.commit();
     },
     setLayer(name, on) {
-      if (name === 'logistics') { groups.goods.visible = on; groups.loops.visible = on; }
+      // the port's movers (the ships, the rail shuttle, the quay's crane) are logistics too
+      if (name === 'logistics') { groups.goods.visible = on; groups.loops.visible = on; groups.port.visible = on; }
       if (name === 'cold-chain') groups.cold.visible = on;
       if (name === 'credit') groups.coins.visible = on;
     },
@@ -557,8 +558,9 @@ export function createFlows(ctx: EngineContext, layout: GeneratedLayout, links: 
     vehicles: () => [...live],
     flows: () => flows,
     flowsThrough(gateId) {
+      // every route a flow alternates between counts: two companies' lots may leave by different gates
       let n = 0;
-      for (const f of flows) if (tripFor(f.origins[0], f.destinations[0], f, 'out')?.stops.some((x) => x.gate === gateId)) n++;
+      for (const f of flows) if (f.gates.includes(gateId)) n++;
       return n;
     },
     live: () => live.length,

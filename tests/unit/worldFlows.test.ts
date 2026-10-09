@@ -284,6 +284,32 @@ describe('flows from the registry’s links (PRD v2 §3.6, Appendix A)', () => {
     expect(full).toBe(n);
   });
 
+  it('counts at a gate every flow any of whose alternating routes weighs there', () => {
+    const { f } = keep(flowsOf());
+    const roads = f.roads;
+    for (const gate of LAYOUT.gates) {
+      let expected = 0;
+      for (const fl of f.flows()) {
+        const crosses = fl.origins.some((o) => fl.destinations.some((d) => o !== d && roads.route(roads.bays(o.id)!.despatch, roads.bays(d.id)!.receiving, fl.prefer)?.stops.some((x) => x.gate === gate.id)));
+        if (crosses) expected++;
+      }
+      expect(f.flowsThrough(gate.id), gate.id).toBe(expected);
+    }
+    // a flow whose two lots leave by different gates counts at both
+    const split = f.flows().find((fl) => new Set(fl.origins.flatMap((o) => fl.destinations.map((d) => roads.route(roads.bays(o.id)!.despatch, roads.bays(d.id)!.receiving, fl.prefer)?.stops[0]?.gate ?? ''))).size > 1);
+    if (split) expect(split.gates.length).toBeGreaterThan(1);
+  });
+
+  it('hides the port’s movers with the goods when the logistics layer is off', () => {
+    const { ctx, f } = keep(flowsOf());
+    const shown = (id: string) => { for (let o: THREE.Object3D | null = ctx.entities.find((e) => e.id === id)!.groups[0]; o; o = o.parent) if (!o.visible) return false; return true; };
+    for (const id of ['SHIP-BULK', 'SHIP-CONTAINER', 'TRAIN-SHUTTLE']) expect(shown(id), id).toBe(true);
+    f.setLayer('logistics', false);
+    for (const id of ['SHIP-BULK', 'SHIP-CONTAINER', 'TRAIN-SHUTTLE', f.vehicles()[0].id]) expect(shown(id), id).toBe(false);
+    f.setLayer('logistics', true);
+    expect(shown('TRAIN-SHUTTLE')).toBe(true);
+  });
+
   it('counts in words, never in figures', () => {
     expect(countInWords(0)).toBe('no'); expect(countInWords(1)).toBe('one'); expect(countInWords(12)).toBe('twelve');
     expect(countInWords(20)).toBe('twenty'); expect(countInWords(21)).toBe('more than twenty');

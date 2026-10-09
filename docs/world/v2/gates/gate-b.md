@@ -55,7 +55,7 @@ SwiftShader drew in its second, not with the vehicles' speeds. Page errors: none
 
 ```
 $ TZ=America/Chicago npx vitest run --reporter=json --outputFile=vitest.json && node scripts/assert-test-count.mjs vitest.json
-assert-test-count: 1117 tests, 0 failed, 0 failed suite(s) (floor 1113)    # before: 1093; floor was 1089
+assert-test-count: 1119 tests, 0 failed, 0 failed suite(s) (floor 1115)    # before: 1093; floor was 1089
 $ npx eslint . --max-warnings=35
 ✖ 22 problems (0 errors, 22 warnings)
 $ npm run check:world
@@ -66,7 +66,7 @@ $ npm run test:e2e:world
 10 passed                    # 8 before; two new: a vehicle's card by a click, a weighbridge stop and an unloading
 ```
 
-New unit tests (20, `tests/unit/worldFlows.test.ts`): the roads' two lanes per edge kept right; the route cache, the
+New unit tests (22, `tests/unit/worldFlows.test.ts`): the roads' two lanes per edge kept right; the route cache, the
 route end to end and its weighbridge stops; the raw-export road taken by the export trucks and by no other route
 (but the two pits whose driveway joins it); goods → vehicle kind and every truck ≥ 18 px at the hero; a flow per
 moving link, the six returns between their lots, the raw export and the imports; every vehicle's origin, destination
@@ -74,7 +74,8 @@ and load (B1); the cap on a laptop and a phone, the world starting full; the cad
 a heavy flow's share at the cap; the roads kept moving (three in four on the move in the sixth minute); the
 weighbridge's 1.5 s on the gate's plate and the bay's 2 s (B3); nothing left behind by spawn and despawn, and the
 lighter tone on the way back; a coin per laden vehicle with the credit layer; ships, the train and walkers (B5); the
-fleet's draw calls the same at three hundred as at a few (B6); counts in words; the vehicle's card (no digit in any
+fleet's draw calls the same at three hundred as at a few (B6); a gate counting every flow any of whose alternating
+routes weighs there, and the port's movers following the logistics layer (both from the review); counts in words; the vehicle's card (no digit in any
 row), the gate's card in words, a vehicle picked through its instance.
 
 Rewritten to the new behaviour, PRD section in the comment: the scene's entity count names the flows' kinds (§3.6);
