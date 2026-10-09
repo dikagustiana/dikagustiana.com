@@ -1,5 +1,5 @@
 {
-  "ranAt": "2026-10-09T22:31:21.146Z",
+  "ranAt": "2026-10-09T23:06:35.261Z",
   "base": "http://127.0.0.1:4410",
   "gate": "c",
   "frames": [
@@ -8,7 +8,7 @@
       "note": "the hero at 20:00: every building’s windows warm, published companies’ brighter in the accent, lamps and their pools along every road, the kilns’ glow",
       "zoom": 1.25,
       "band": "district",
-      "drawCalls": 217,
+      "drawCalls": 218,
       "selected": null
     },
     {
@@ -16,7 +16,7 @@
       "note": "the street band at 20:00 over INTP: lit windows, the lamps’ heads and pools, the kilns",
       "zoom": 5,
       "band": "street",
-      "drawCalls": 121,
+      "drawCalls": 122,
       "selected": null
     },
     {
@@ -24,7 +24,7 @@
       "note": "the street band by day over INTP: stack smoke, forklifts at the docks, conveyors, walkers at the doors",
       "zoom": 5,
       "band": "street",
-      "drawCalls": 119,
+      "drawCalls": 120,
       "selected": null
     },
     {

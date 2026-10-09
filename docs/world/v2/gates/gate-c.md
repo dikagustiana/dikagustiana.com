@@ -11,16 +11,17 @@ Branch `world-v2/c-activity` from `main` at `ee0c49f` (phase B merged), 9 Octobe
    di overpass, crane menara berputar, hoist naik-turun, beacon berkedip, pejalan kaki di pintu (band street).
 2. Builder tiap keluarga kini mengembalikan **titik jangkar** (cerobong, pintu, dok, crane…), jadi aktivitas berdiri
    tepat di bentuk yang digambar.
-3. Semua **ter-instance**: 32 jenis aktivitas, ribuan instance, ±664 lampu, ±27 draw call tambahan di hero
-   (anggaran aktivitas 60; hero 188 → 215, anggaran 900).
+3. Semua **ter-instance**: 32 jenis aktivitas, ribuan instance, ±664 lampu, ±28 draw call tambahan di hero
+   (anggaran aktivitas 60; hero 188 → 216, anggaran 900). Di ponsel asap dan uap dimatikan (PRD §3.14).
 4. Aktivitas **berhenti bersama jam dunia** dan **berulang sama dengan seed** (diuji).
 5. **Malam untuk semua**: pukul 20:00 jendela setiap bangunan menyala hangat-redup, perusahaan yang dipublikasikan
    lebih terang dalam warna aksen, lampu dan genangan cahayanya di sepanjang setiap jalan dan di depan setiap
    blok (125 dari 125 blok), kiln dan flare berpijar, kapal dan crane berlampu. Hari = **enam menit** dari 10:00.
 6. Agar cahaya terbaca, engine menggelapkan permukaan tak bercahaya sendiri; veil shell dikurangi 0,55 → 0,25.
 7. **Palang jembatan timbang** kini terangkat saat ada kendaraan di gerbang (tertunda dari fase B).
-8. Layer energi: jalur listrik dari pylon PLTU dengan pulsa berjalan; layer cold-chain: cold store diberi tint.
-9. Probe hero: **180 dari 208** kendaraan bergerak, **4,4 px/s**, draw call 215. Build flag-off **identik byte
+8. Layer energi: jalur listrik dari pylon PLTU ke gardu tiap wilayah lalu ke **setiap blok (125 dari 125)**,
+   dengan pulsa berjalan; layer cold-chain: cold store diberi tint; pita bursa menyala di malam hari.
+9. Probe hero: **181 dari 208** kendaraan bergerak, **3,8 px/s**, draw call 216. Build flag-off **identik byte
    demi byte** dengan `main` (210 berkas, termasuk poster).
 10. 37 keluarga yang ada di dunia punya frame masing-masing; 7 keluarga tidak dipakai oleh blok mana pun
     (O-V2-9).
@@ -37,26 +38,29 @@ runs of one build).
 
 | view | moving on screen: B → **C** | truck px/s: B → **C** | draw calls: B → **C** | click at INTP |
 |---|---|---|---|---|
-| home (hero) | 177 of 208 → **180 of 208** | 3.6 → **4.4** | 188 → **215** | **company** |
-| whole (map) | 255 of 280 → **237 of 284** | 3.2 → **2.3** | 217 → **248** | **company** |
-| estate | 198 of 200 → **198 of 198** | 5.7 → **4.2** | 157 → **183** | **company** |
-| street (6 px/m) | 33 of 34 → **32 of 32** | 12.2 → **18.3** | 92 → **119** | **company** |
-| inside (12 px/m) | 9 of 9 → **9 of 9** | 51.4 → **45.7** | 86 → **113** | **company** |
-| phone home | 42 of 45 → **41 of 44** | 4.7 → **5.7** | 98 → **124** | **company** |
+| home (hero) | 177 of 208 → **181 of 208** | 3.6 → **3.8** | 188 → **216** | **company** |
+| whole (map) | 255 of 280 → **242 of 284** | 3.2 → **2.7** | 217 → **249** | **company** |
+| estate | 198 of 200 → **194 of 199** | 5.7 → **3.2** | 157 → **184** | **company** |
+| street (6 px/m) | 33 of 34 → **32 of 32** | 12.2 → **24.4** | 92 → **120** | **company** |
+| inside (12 px/m) | 9 of 9 → **8 of 8** | 51.4 → **53.4** | 86 → **114** | **company** |
+| phone home | 42 of 45 → **41 of 44** | 4.7 → **5.6** | 98 → **124** | **company** |
+
+The probe ran again after the review's fixes (§4.1, 10–13); the two-second reading still swings by about a pixel a
+second between runs of one build on SwiftShader (the first run of this branch read 4.4 at the hero).
 
 Every goods vehicle still reports its origin, destination and load (284 of 284 at the hero); trucks 18.8 px.
 
 The activity in the world (`window.world.activity().counts`): smoke 98 stacks, steam 4, dust 5, compressor 4,
-plume 4; forklifts 106, walkers at 129 doors, conveyors 22, kilns 16, pumpjacks 12, beacons 6, pulses 6, ripples 8,
+plume 4; forklifts 106, walkers at 129 doors, conveyors 22, kilns 16, pumpjacks 12, beacons 6, ripples 8,
 aerators 3, excavators 5, haul loops 5, quay cranes 4, planes 2, straddle carriers 2, loaders 2, overpass lanes 2,
 parking 2, ambulances 2, exchange bands 2, tower cranes 2, hoists 2, log trucks 2, harvester 1, boat 1, shunter 1;
-5 weighbridge booms; 664 lamps; 125 of 125 blocks lit after dark.
+5 weighbridge booms; 664 lamps; 125 of 125 blocks lit after dark; the energy line feeds 125 of 125 blocks.
 
 ### 2.2 Tests and checks
 
 ```
 $ TZ=America/Chicago npx vitest run --reporter=json --outputFile=vitest.json && node scripts/assert-test-count.mjs vitest.json
-assert-test-count: 1129 tests, 0 failed, 0 failed suite(s) (floor 1125)    # before: 1119; floor was 1115
+assert-test-count: 1133 tests, 0 failed, 0 failed suite(s) (floor 1129)    # before: 1119; floor was 1115
 $ npx eslint . --max-warnings=35
 ✖ 22 problems (0 errors, 22 warnings)
 $ npm run check:world
@@ -66,13 +70,16 @@ $ npm run test:e2e:world
 11 passed                    # 10 before; one new: night at 20:00 and every family's activity by day
 ```
 
-New unit tests (10, `tests/unit/worldActivity.test.ts`): every family has an activity entry of kinds the activity
+New unit tests (14, `tests/unit/worldActivity.test.ts`): every family has an activity entry of kinds the activity
 draws (a test over `FAMILY_ACTIVITY` against `BUILDING_FAMILIES`); every family's builder returns the anchors its
 activity stands on, at the sizes it is drawn at, inside its box; every kind of each family that stands in the world
 is shown; the activity and lamps within their draw-call budget at the district band, instanced (instances ≥ 30 ×
 calls); paused with the clock; replayed with the seed; the doors' walkers at the street band only, the energy
-layer's line and pulses, the cold-chain layer's tint; the weighbridges' booms up and down; a six-minute day from
-10:00; at 20:00 every zone's windows warm, the published brighter, lamps on, pools shown, 125 of 125 blocks lit.
+layer's line and pulses, the cold-chain layer's tint; the energy line from the power plant to every block, its
+pulses posed when the layer is shown, even paused; the vehicles' scale carried once (a forklift and a car at 1.25 ×
+their metric length); no smoke or steam on a phone, the lamps kept; the weighbridges' booms up and down; a
+six-minute day from 10:00; at 20:00 every zone's windows warm, the published brighter, lamps on, pools shown, 125 of
+125 blocks lit; the exchange's band lit in the accent after dark.
 
 Rewritten: the chain test's translucency count skips what is translucent by design, a lamp's pool of light and
 the cold-chain tint (PRD v2 §3.8, §3.12), as it already skipped the cast shadow. The debug API's `tick(dt)` now
@@ -89,8 +96,10 @@ $ node scripts/world/assert-world-flag.mjs
 assert-world-flag: no world code in dist/ (flag off).
 ```
 
-Flag-on chunks (bytes, gzip −9), B → C: `world-scene` 106,523 / 41,415 → 126,382 / 48,336 (budget 120 kB gzipped);
-`WorldFrame` 241,030 / 34,768 → 241,030 / 34,766; `layout.generated` and the three.js chunks unchanged.
+Flag-on chunks (bytes, gzip −9), `main` at `ee0c49f` → C: `world-scene` 106,347 / 41,340 → 126,835 / 48,502 (budget
+120 kB gzipped); `WorldFrame` 266,501 / 44,119 → 266,501 / 44,118; `layout.generated` and the three.js chunks
+unchanged. (Gate B's `WorldFrame` figure, 241,030, was its branch's before `main` moved; `main`'s own build is the
+baseline here.)
 
 ## 3. Frames
 
@@ -100,6 +109,7 @@ Flag-on chunks (bytes, gzip −9), B → C: `world-scene` 106,523 / 41,415 → 1
 - `gate-c-night-street.png` — the street band at 20:00 over INTP: lit windows, lamp heads and pools, kilns, smoke.
 - `gate-c-day-street.png` — the street band by day over INTP: stack smoke, forklifts, conveyors, walkers at doors.
 - `gate-c-boom.png` — the east gate at the street band: the boom up over a truck on the weighbridge.
+- (All frames re-shot after the review's fixes.)
 - `families/<family>.png` — one frame per family that stands in the world (37), at 3.5 px/m by day, centred on one
   of its sites: the activity Appendix C lists for it.
 - `gate-c/probe-*.png` — the probe's frames.
@@ -124,6 +134,14 @@ Flag-on chunks (bytes, gzip −9), B → C: `world-scene` 106,523 / 41,415 → 1
 8. Puffs are low balls (icosahedra), shrinking as they rise instead of fading (instances share one opaque
    material).
 9. The probe's speed window is two seconds (§2.1).
+10. **The energy line** runs from the power plant's last pylon to a substation at each region's label anchor and
+    from there to every block's kerb anchor: one line per block, pulses every 18 m. A hidden layer's pulses are not
+    posed; showing the layer poses them on the next frame, even paused. (Review finding on the pull request.)
+11. **Phones draw no puffs** (smoke, steam, dust, vents, the plume): PRD v2 §3.14. (Review finding.)
+12. **The vehicles' scale is carried by the instances only**; the activity's models were scaled in their geometry
+    as well, so they stood at 1.5625 ×. (Review finding.)
+13. **The exchange's band** draws with its own glow material, light by day and lit in the accent after dark, above
+    the darkened world (PRD v2 §3.8). (Review finding.)
 
 ### 4.2 Needed from the owner
 
