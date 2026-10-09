@@ -1,0 +1,192 @@
+{
+  "ranAt": "2026-10-09T23:11:36.156Z",
+  "base": "http://127.0.0.1:4410",
+  "gate": "c-families",
+  "frames": [
+    {
+      "frame": "families/process-plant.png",
+      "note": "process-plant at the district band",
+      "zoom": 3.5
+    },
+    {
+      "frame": "families/power-plant.png",
+      "note": "power-plant at the district band",
+      "zoom": 3.5
+    },
+    {
+      "frame": "families/operator-office.png",
+      "note": "operator-office at the district band",
+      "zoom": 3.5
+    },
+    {
+      "frame": "families/water-plant.png",
+      "note": "water-plant at the district band",
+      "zoom": 3.5
+    },
+    {
+      "frame": "families/factory.png",
+      "note": "factory at the district band",
+      "zoom": 3.5
+    },
+    {
+      "frame": "families/packaging-plant.png",
+      "note": "packaging-plant at the district band",
+      "zoom": 3.5
+    },
+    {
+      "frame": "families/forest-block.png",
+      "note": "forest-block at the district band",
+      "zoom": 3.5
+    },
+    {
+      "frame": "families/pond.png",
+      "note": "pond at the district band",
+      "zoom": 3.5
+    },
+    {
+      "frame": "families/plantation-block.png",
+      "note": "plantation-block at the district band",
+      "zoom": 3.5
+    },
+    {
+      "frame": "families/well-pad.png",
+      "note": "well-pad at the district band",
+      "zoom": 3.5
+    },
+    {
+      "frame": "families/pit.png",
+      "note": "pit at the district band",
+      "zoom": 3.5
+    },
+    {
+      "frame": "families/depot.png",
+      "note": "depot at the district band",
+      "zoom": 3.5
+    },
+    {
+      "frame": "families/apron.png",
+      "note": "apron at the district band",
+      "zoom": 3.5
+    },
+    {
+      "frame": "families/quay.png",
+      "note": "quay at the district band",
+      "zoom": 3.5
+    },
+    {
+      "frame": "families/stockpile.png",
+      "note": "stockpile at the district band",
+      "zoom": 3.5
+    },
+    {
+      "frame": "families/interchange.png",
+      "note": "interchange at the district band",
+      "zoom": 3.5
+    },
+    {
+      "frame": "families/rail-yard.png",
+      "note": "rail-yard at the district band",
+      "zoom": 3.5
+    },
+    {
+      "frame": "families/3pl-shed.png",
+      "note": "3pl-shed at the district band",
+      "zoom": 3.5
+    },
+    {
+      "frame": "families/supermarket.png",
+      "note": "supermarket at the district band",
+      "zoom": 3.5
+    },
+    {
+      "frame": "families/shop.png",
+      "note": "shop at the district band",
+      "zoom": 3.5
+    },
+    {
+      "frame": "families/department-store.png",
+      "note": "department-store at the district band",
+      "zoom": 3.5
+    },
+    {
+      "frame": "families/dealership.png",
+      "note": "dealership at the district band",
+      "zoom": 3.5
+    },
+    {
+      "frame": "families/cinema.png",
+      "note": "cinema at the district band",
+      "zoom": 3.5
+    },
+    {
+      "frame": "families/hotel.png",
+      "note": "hotel at the district band",
+      "zoom": 3.5
+    },
+    {
+      "frame": "families/restaurant.png",
+      "note": "restaurant at the district band",
+      "zoom": 3.5
+    },
+    {
+      "frame": "families/school.png",
+      "note": "school at the district band",
+      "zoom": 3.5
+    },
+    {
+      "frame": "families/office-tower.png",
+      "note": "office-tower at the district band",
+      "zoom": 3.5
+    },
+    {
+      "frame": "families/hospital.png",
+      "note": "hospital at the district band",
+      "zoom": 3.5
+    },
+    {
+      "frame": "families/lab.png",
+      "note": "lab at the district band",
+      "zoom": 3.5
+    },
+    {
+      "frame": "families/bank-tower.png",
+      "note": "bank-tower at the district band",
+      "zoom": 3.5
+    },
+    {
+      "frame": "families/exchange.png",
+      "note": "exchange at the district band",
+      "zoom": 3.5
+    },
+    {
+      "frame": "families/recycling-plant.png",
+      "note": "recycling-plant at the district band",
+      "zoom": 3.5
+    },
+    {
+      "frame": "families/construction-site.png",
+      "note": "construction-site at the district band",
+      "zoom": 3.5
+    },
+    {
+      "frame": "families/telecom-tower.png",
+      "note": "telecom-tower at the district band",
+      "zoom": 3.5
+    },
+    {
+      "frame": "families/warehouse.png",
+      "note": "warehouse at the district band",
+      "zoom": 3.5
+    },
+    {
+      "frame": "families/cold-store.png",
+      "note": "cold-store at the district band",
+      "zoom": 3.5
+    },
+    {
+      "frame": "families/think-tank.png",
+      "note": "think-tank at the district band",
+      "zoom": 3.5
+    }
+  ]
+}

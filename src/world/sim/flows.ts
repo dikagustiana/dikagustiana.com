@@ -64,6 +64,8 @@ export const JAM_HOLD = 0.15;
 const SIDE_CADENCE = 45;
 /** Speed on a driveway, the gap a vehicle keeps to the one ahead, and how near the end of its lane a vehicle looks at the junction, in metres. */
 const DRIVEWAY_SPEED = 5, GAP = 3, LOOK_OUT = 10;
+/** How near a gate a vehicle lifts its boom, in metres either way. */
+const BOOM_NEAR = 16;
 /** A vehicle held this long by a ring of vehicles each waiting on the next (a knot at a junction) drives through for a moment. */
 const STUCK = 8, UNSTICK = 3;
 
@@ -198,6 +200,8 @@ export interface FlowSystem {
   /** How many flows cross a gate (its card counts them in words). */
   flowsThrough(gateId: string): number;
   live(): number;
+  /** The gates with a vehicle at them now (on the plate or about to cross): their booms are up. */
+  busyGates(): ReadonlySet<string>;
   cap(): number;
   dispose(): void;
 }
@@ -408,6 +412,8 @@ export function createFlows(ctx: EngineContext, layout: GeneratedLayout, links: 
     if (container) for (let k = 0; k < 5; k++) p.box(-L + 15 + k * 7.5, -B / 2 + 1.2, 3.2, 6.6, B - 2.4, 2.6 + (k % 2) * 2.6, 'g');
     else for (let k = 0; k < 4; k++) p.box(-L + 16 + k * 9, -B / 2 + 1.5, 3.2, 7.6, B - 3, 1.1, 'k');
     const g = p.build(container ? 'container-ship' : 'bulk-ship');
+    // the mast's light and the stern's, lit after dark (PRD v2 §3.8)
+    for (const [lx, lz] of [[-L + 6, 15], [4, 5]]) { const light = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.9, 0.9), theme.glow.lamp); light.position.set(lx, lz, 0); light.raycast = () => {}; g.add(light); }
     // the bulk ship's hold mark: a heap that grows as it loads
     const hp = new Part(ctx); hp.cull = false; hp.box(0, -(B - 4) / 2, 0, 30, B - 4, 3.2, 's');
     const hold = hp.build('hold'); hold.position.set(-L + 15, 3.4, 0);
@@ -460,6 +466,7 @@ export function createFlows(ctx: EngineContext, layout: GeneratedLayout, links: 
     const q = layout.port.quay, p = new Part(ctx); p.cull = false;
     p.box(-0.8, -0.8, 24, 1.6, 1.6, 2); p.box(-1, -0.6, 26, 30, 1.2, 1.2); p.seg('line', W(26, 0, 27.2), W(26, 0, 8)); p.box(25.2, -0.9, 7, 1.6, 1.8, 1, 'k');
     crane = p.build('crane'); pose(crane, (q.x0 + q.x1) / 2 + 40, q.y0 + 4, 0); groups.port.add(crane);
+    const light = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.9, 0.9), theme.glow.lamp); light.position.set(29, 28, 0); light.raycast = () => {}; crane.add(light);
   }
 
   // ---- walkers: the town's pavements and the think tank's terrace, at the street band ----
@@ -494,6 +501,7 @@ export function createFlows(ctx: EngineContext, layout: GeneratedLayout, links: 
     }
   }
 
+  const busy = new Set<string>(), weighbridges = layout.gates.filter((g) => g.weighbridge);
   let t = 0;
   /** Per flow: its vehicles queued at the customer's bay, and whether its last one is still near the despatch bay; per gate, its queue. */
   const queuedAt = new Map<Flow, number>(), atDoor = new Set<Lot>(), laneQueue = new Map<number, number>(), gateQueue = new Map<string, number>();
@@ -542,6 +550,9 @@ export function createFlows(ctx: EngineContext, layout: GeneratedLayout, links: 
       }
       syncCoins();
       fleet.commit();
+      // which gates have a vehicle at them, for their booms (sim/activity.ts)
+      busy.clear();
+      for (const v of live) for (const g of weighbridges) if (Math.abs(v.x - g.at[0]) < BOOM_NEAR && Math.abs(v.y - g.at[1]) < BOOM_NEAR) busy.add(g.id);
     },
     setLayer(name, on) {
       // the port's movers (the ships, the rail shuttle, the quay's crane) are logistics too
@@ -564,6 +575,7 @@ export function createFlows(ctx: EngineContext, layout: GeneratedLayout, links: 
       return n;
     },
     live: () => live.length,
+    busyGates: () => busy,
     cap: () => cap,
     dispose() { for (const v of live) leaveSpan(v); live.length = 0; walkers.length = 0; ships.length = 0; fleet.dispose(); money.geometry.dispose(); root.removeFromParent(); },
   };

@@ -254,7 +254,7 @@ export class Part {
       nrm.divideScalar(l);
       // three.js geometries wind outward faces counter-clockwise, so this is the outward normal; read it in world terms
       const wx = nrm.x, wy = nrm.z, wz = nrm.y;
-      if (!facing(wx, wy, wz)) continue;
+      if (this.cull && !facing(wx, wy, wz)) continue;
       const col = this.ctx.theme.tone(tone, shadeOf(wx, wy, wz) * this.tint);
       for (const v of [a, b, c]) { this.solidPos.push(v.x, v.y, v.z); this.solidCol.push(col.r, col.g, col.b); }
     }

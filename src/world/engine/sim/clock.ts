@@ -9,8 +9,8 @@
 
 /** One simulation step, in simulated seconds. */
 export const STEP = 1 / 60;
-/** Simulated seconds in one day. */
-export const DAY = 480;
+/** Simulated seconds in one day: six minutes (PRD v2 §3.8). */
+export const DAY = 360;
 /** Simulated seconds run before the first frame. Vehicles start spaced along their lanes, so one second is enough. */
 export const WARMUP_SECONDS = 1;
 /** The hour the world opens at. */

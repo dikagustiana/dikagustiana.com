@@ -30,7 +30,8 @@ import { drawWhiteboard } from '../engine/whiteboard';
 import { buildRooms } from '../interiors/thinktank';
 import type { WhiteboardContent } from '@/world/data/types';
 import type { Archetype } from '@/lib/world/registry/types';
-import { FAMILY_BUILDERS, blockYard, drawFamily, kerbSign, officeUnit, sharedBox, signboard, statusBar, type WindowRect } from './families';
+import { FAMILY_BUILDERS, blockYard, drawFamily, kerbSign, officeUnit, sharedBox, signboard, statusBar, type Anchors, type WindowRect } from './families';
+import type { BuildingFamily } from '@/lib/world/registry/types';
 import { LARGE_FAMILIES, LOT_MARGIN, OFFICE_UNIT } from '@/world/placement/place';
 import { createRng } from '../engine/kernel/math';
 
@@ -77,6 +78,19 @@ export interface WorldScene {
   setStatuses(statuses: Map<string, ModelStatus>): void;
   /** The published-model statuses as last set, by ticker. */
   statuses(): Map<string, ModelStatus>;
+  /** Where activity happens (PRD v2 §3.7): every drawn form's anchors, by lot, shared form, office unit or fixture. */
+  sites: readonly ActivitySite[];
+}
+
+/** One drawn form's activity: what its family is, where it stands, the block it belongs to, and its anchors. */
+export interface ActivitySite {
+  /** The lot's id, the block's code for a large family's shared form, `<lot>:office` for an office unit, or the fixture's id. */
+  id: string;
+  /** The block's code, or null for a fixture. */
+  code: string | null;
+  family: BuildingFamily;
+  box: Box;
+  act: Anchors;
 }
 
 /** A stable number from a string, for a block's own seeded generator (its look never changes when its zone redraws). */
@@ -129,10 +143,13 @@ function regionsPart(ctx: EngineContext, layout: GeneratedLayout): THREE.Group {
   const g = p.build('regions'); g.traverse((o) => { o.raycast = () => {}; }); return g;
 }
 
-/** A zone's windows as one mesh per material: the unlit glass and the lit windows of published companies. */
+/**
+ * A zone's windows as one mesh per material: every building's (dim, warm and dim at night) and the windows of published
+ * companies (brighter, in the accent at night; PRD v2 §3.8).
+ */
 function windowsPart(ctx: EngineContext, unlit: readonly WindowRect[], lit: readonly WindowRect[], name: string): THREE.Group {
   const p = new Part(ctx);
-  for (const r of unlit) p.fill2(r.M, r.x, r.y, r.w, r.h, 'glass', 0.03);
+  for (const r of unlit) p.fill2(r.M, r.x, r.y, r.w, r.h, 'dim', 0.03);
   for (const r of lit) p.fill2(r.M, r.x, r.y, r.w, r.h, 'window', 0.03);
   const g = p.build(name); g.traverse((o) => { o.raycast = () => {}; });
   return g;
@@ -155,6 +172,9 @@ export function buildWorldScene(ctx: EngineContext, layout: GeneratedLayout, onA
   interface Zone { id: string; blocks: Block[]; container: THREE.Group; part: THREE.Group | null; windows: THREE.Group | null; rects: Map<string, WindowRect[]>; tops: Map<string, number>; skip: Set<string> }
   const zoneOf = new Map<string, Zone>();
   const OFFICE_STRIP = OFFICE_UNIT.depth + 2 * LOT_MARGIN;
+  // the activity sites, recorded the first time each form is drawn (a zone redrawn round an open lot draws them again)
+  const sites = new Map<string, ActivitySite>();
+  const site = (id: string, code: string | null, family: BuildingFamily, box: Box, act: Anchors | undefined) => { if (!sites.has(id)) sites.set(id, { id, code, family, box, act: act ?? {} }); };
   function drawBlock(p: Part, z: Zone, b: Block) {
     // every block draws from its own generator, so a zone redrawn later looks exactly as it did
     const r = createRng(hashOf(`${ctx.rng.seed}:${b.code}`));
@@ -162,15 +182,15 @@ export function buildWorldScene(ctx: EngineContext, layout: GeneratedLayout, onA
     blockYard(p, b.family, b.box);
     if (LARGE_FAMILIES.includes(b.family)) {
       const shared = sharedBox(b.box, b.entry, OFFICE_STRIP), d = FAMILY_BUILDERS[b.family](p, shared, r);
-      shadow(p, shared, d.top); z.rects.set(b.code, d.windows); z.tops.set(b.code, d.top);
-      for (const l of b.lots) { if (z.skip.has(l.id)) continue; const o = officeUnit(p, l.box); shadow(p, l.box, o.top); z.rects.set(l.id, o.windows); z.tops.set(l.id, o.top); }
+      shadow(p, shared, d.top); z.rects.set(b.code, d.windows); z.tops.set(b.code, d.top); site(b.code, b.code, b.family, shared, d.act);
+      for (const l of b.lots) { if (z.skip.has(l.id)) continue; const o = officeUnit(p, l.box); shadow(p, l.box, o.top); z.rects.set(l.id, o.windows); z.tops.set(l.id, o.top); site(`${l.id}:office`, b.code, 'operator-office', l.box, o.act); }
     } else {
       let top = 0;
       for (const l of b.lots) {
         if (z.skip.has(l.id)) continue;
         p.tint = 1 + r.rand(-TONE_STEP, TONE_STEP);
         const d = FAMILY_BUILDERS[b.family](p, l.box, r); shadow(p, l.box, d.top);
-        z.rects.set(l.id, d.windows); z.tops.set(l.id, d.top); top = Math.max(top, d.top);
+        z.rects.set(l.id, d.windows); z.tops.set(l.id, d.top); top = Math.max(top, d.top); site(l.id, b.code, b.family, l.box, d.act);
       }
       if (!z.tops.has(b.code)) z.tops.set(b.code, top);
     }
@@ -325,9 +345,9 @@ export function buildWorldScene(ctx: EngineContext, layout: GeneratedLayout, onA
   const gatesPart = new Part(ctx);
   for (const gt of layout.gates) {
     const [x, y] = gt.at, c = Math.cos(gt.heading), sn = Math.sin(gt.heading);
-    // a booth, a boom, the weighbridge plate across the road, a sign
+    // a booth, the boom's post (the boom itself swings, sim/activity.ts), the weighbridge plate across the road, a sign
     gatesPart.box(x - sn * 7 - 1.5, y + c * 7 - 1.5, 0, 3, 3, 3.2); gatesPart.box(x - sn * 7 - 1.7, y + c * 7 - 1.7, 3.2, 3.4, 3.4, 0.2);
-    gatesPart.box(x - sn * 5 - 0.2, y + c * 5 - 0.2, 0, 0.4, 0.4, 1.1); gatesPart.seg('line', W(x - sn * 5, y + c * 5, 1.1), W(x + sn * 5, y - c * 5, 1.1));
+    gatesPart.box(x - sn * 5 - 0.2, y + c * 5 - 0.2, 0, 0.4, 0.4, 1.1);
     // the weighbridge's plate is drawn with the gate's own small part below, so pointing at it finds the gate
     const L = 8, Wd = 3.4;
     if (gt.weighbridge) gatesPart.rect2(TOP(0, 0, 0.08), x - L, y - Wd, 2 * L, 2 * Wd, 'line', 0.02);
@@ -358,7 +378,13 @@ export function buildWorldScene(ctx: EngineContext, layout: GeneratedLayout, onA
     const z0 = f.kind === 'think-tank' && layout.hill ? layout.hill.height : 0;
     const bx = { ...f.box };
     if (f.kind === 'quay') { p.extrude([[bx.x0, bx.y0, -0.6], [bx.x1, bx.y0, -0.6], [bx.x1, bx.y1, -0.6], [bx.x0, bx.y1, -0.6]], [0, 0, 0.6]); for (let x = bx.x0 + 6; x < bx.x1; x += 12) p.box(x, bx.y1 - 1.2, 0, 0.6, 0.6, 0.9, 'k'); }
-    else { const d = drawFamily(p, fam, bx, rng, label); void d; }
+    else {
+      const d = drawFamily(p, fam, bx, rng, label);
+      // a fixture's activity stands where it does (the think tank on its hill)
+      const lift = (a: readonly [number, number, number]) => [a[0], a[1], a[2] + z0] as const;
+      const act: Anchors = z0 && d.act?.door ? { ...d.act, door: d.act.door.map(lift) } : d.act ?? {};
+      site(f.id, null, fam as BuildingFamily, bx, act);
+    }
     const shell = p.build(`fixture-${f.id}`); const g = new THREE.Group(); g.name = `fixture-${f.id}`; g.add(shell); if (z0) g.position.y = z0; scene.add(g);
     // the think tank's card lists its rooms, the registry's research programmes that are on (PRD §7.10)
     const rooms = f.kind === 'think-tank' ? REGISTRY.rooms.filter((r) => r.on).map((r) => ({ id: r.id, label: r.label })) : [];
@@ -382,6 +408,7 @@ export function buildWorldScene(ctx: EngineContext, layout: GeneratedLayout, onA
   rebuildMarks();
   return {
     buildings, lots, nearGroup,
+    sites: [...sites.values()],
     archetypeOf(ticker) { const l = lots.get(ticker.toUpperCase()); return l ? archetypeFor(l.ticker, subIndustryByCode(l.code)?.zone ?? 'unplaced') : null; },
     setStatuses(next) {
       statuses = next;

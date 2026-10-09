@@ -12,7 +12,8 @@
  *   buildingPx     the on-screen width of a 40 m block at that zoom
  *   vehiclesMoving road and rail vehicles that are rendered, on screen and moving, of those rendered and on screen
  *   walkersMoving  the same for walkers; coinsMoving for the money layer's coins
- *   truckPxPerSec  the median on-screen speed of the rendered, moving trucks
+ *   truckPxPerSec  the median on-screen speed of the rendered, moving trucks, over two seconds (SwiftShader draws about
+ *                  two frames a second, so one slow frame halved a one-second reading; it was one second to gate B)
  *   vehiclePx      the shortest and the median on-screen length of those trucks (drawn length × px/m, the
  *                  measure the PRD's 5 px of v1 was taken by); the town's parcel vans, a car's size, are left out
  *                  and counted apart (vans)
@@ -53,10 +54,12 @@ await page.waitForTimeout(2500);
 const canvas = await page.evaluate(() => { const r = document.querySelector('canvas').getBoundingClientRect(); return { w: r.width, h: r.height, top: r.top, left: r.left }; });
 
 /** Movers by kind, from their ids (traffic until phase B; vehicles, ships and walkers after). */
+/** The measuring window, in seconds. */
+const WINDOW = 2;
 const KINDS = { vehicles: '^(TRUCK|REEFER|LOOP|RAW|VAN|FORKLIFT|TRAIN|DUMP|HOPPER|TANKER|BOX|BUS|CAR|RAIL|V)-', walkers: '^WALKER-', coins: '^COIN-' };
 
 async function measure(name) {
-  const m = await page.evaluate(async ({ ticker, code, kinds }) => {
+  const m = await page.evaluate(async ({ ticker, code, kinds, win }) => {
     const w = window.world;
     const zoom = w.zoom?.() ?? null;
     // only rendered movers count: the LOD and the layers hide whole groups, and a hidden mover's anchor still projects
@@ -67,7 +70,7 @@ async function measure(name) {
     // the goods vehicles' facts, sampled through the second: who stood on a weighbridge, who unloaded
     const weighing = new Set(), unloading = new Set(), facts = new Map();
     const sample = () => { for (const e of w.all()) if (e.facts) { facts.set(e.id, e.facts); if (e.facts.state === 'weighing') weighing.add(e.id); if (e.facts.state === 'unloading') unloading.add(e.id); } };
-    for (let k = 0; k < 5; k++) { sample(); await new Promise((r) => setTimeout(r, 200)); }
+    for (let k = 0; k < 10; k++) { sample(); await new Promise((r) => setTimeout(r, 200)); }
     const after = Object.fromEntries(movers.map((id) => [id, at(id)]));
     const cw = document.querySelector('canvas').clientWidth, ch = document.querySelector('canvas').clientHeight;
     const count = { vehicles: [0, 0], walkers: [0, 0], coins: [0, 0] }, truckSpeeds = [], lengths = [];
@@ -76,7 +79,7 @@ async function measure(name) {
       const a = before[id], b = after[id]; if (!a || !b) continue;
       const on = a[0] >= 0 && a[0] <= cw && a[1] >= 0 && a[1] <= ch; if (!on) continue;
       const k = kindOf(id); count[k][1]++;
-      const d = Math.hypot(a[0] - b[0], a[1] - b[1]);
+      const d = Math.hypot(a[0] - b[0], a[1] - b[1]) / win;
       if (d > 0.5) { count[k][0]++; if (k === 'vehicles') { truckSpeeds.push(d); const f = facts.get(id); if (f?.kind === 'van') vans++; else if (f?.len) lengths.push(f.len * zoom); } }
     }
     truckSpeeds.sort((x, y) => x - y);
@@ -86,7 +89,7 @@ async function measure(name) {
     const goods = [...facts.values()], withRoute = goods.filter((f) => f.from && f.to && f.load).length;
     const vehiclePx = lengths.length ? `${Math.round(lengths[0] * 10) / 10} / ${Math.round(lengths[Math.floor(lengths.length / 2)] * 10) / 10}` : null;
     return { zoom, band: w.band?.() ?? null, vehiclesMoving: of(count.vehicles), walkersMoving: of(count.walkers), coinsMoving: of(count.coins), truckPxPerSec: Math.round(truck * 10) / 10, vehiclePx, withRoute: goods.length ? `${withRoute} of ${goods.length}` : null, weighing: `${weighing.size} weighing, ${unloading.size} unloading`, vans, drawCalls: w.drawCalls(), distance: Math.round(w.distance() * 100) / 100, company: at(ticker), building: at(code) };
-  }, { ticker: TICKER, code: CODE, kinds: KINDS });
+  }, { ticker: TICKER, code: CODE, kinds: KINDS, win: WINDOW });
   const pxPerMetre = m.zoom;
   const r = { view: name, pxPerMetre: pxPerMetre ? Math.round(pxPerMetre * 100) / 100 : null, band: m.band, buildingPx: pxPerMetre ? Math.round(40 * Math.SQRT2 * pxPerMetre) : null, vehiclesMoving: m.vehiclesMoving, walkersMoving: m.walkersMoving, coinsMoving: m.coinsMoving, truckPxPerSec: m.truckPxPerSec, vehiclePx: m.vehiclePx, vans: m.vans, withRoute: m.withRoute, weighing: m.weighing, drawCalls: m.drawCalls, distance: m.distance };
   // hover and click at the company's anchor, if it is on the canvas

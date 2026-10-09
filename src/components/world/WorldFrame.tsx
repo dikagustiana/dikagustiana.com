@@ -201,7 +201,8 @@ export default function WorldFrame({ variant, heading, boardTicker = null, onBoa
         <PosterImage hidden={ready} />
         <Stage className="sr-only">The map</Stage>
         <div className="world-frame__canvas-host" ref={host} data-ready={ready} />
-        <div className="world-frame__night" style={{ opacity: night * 0.55 }} aria-hidden="true" />
+        {/* the engine sinks the unlit world itself after dark, so its lights stay bright; the veil only finishes the tone */}
+        <div className="world-frame__night" style={{ opacity: night * 0.25 }} aria-hidden="true" />
         {reading && <div className="world-frame__clock" aria-hidden="true">{reading.clock}{night > 0.5 ? ' · night' : ''}{reading.paused ? ' · paused' : ''}</div>}
         {failed && <p className="world-note" role="status">The world needs WebGL, which this browser has turned off. The poster stays; press Skema for the schematic.</p>}
         {phone && !ready && !failed && !wanted.current && <button type="button" className="world-btn world-frame__start" onClick={() => void mount()}>Start the world</button>}
