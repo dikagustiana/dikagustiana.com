@@ -142,4 +142,4 @@ Flag-on chunks (bytes, gzip −9), B → C: `world-scene` 106,523 / 41,415 → 1
 
 ## 6. The pull request
 
-(to follow)
+https://github.com/dikagustiana/dikagustiana.com/pull/56
