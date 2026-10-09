@@ -197,7 +197,7 @@ export default function WorldFrame({ variant, heading, boardTicker = null, onBoa
     <div className="world-frame" data-world="on" data-ready={ready}>
       <FrameHeader heading={heading} variant={variant} phone={phone} coverage={coverageLine(data.state, data.covered)} view={view} ready={ready} distance={distance} overlay={overlay} layers={layers} on={controls}
         search={<Search pieces={pieces} onPick={(hit) => { if (hit.kind === 'piece') act({ type: 'open-piece', slug: hit.id }); else act({ type: 'select', id: hit.id }); }} />} />
-      <div className="world-frame__stage" onPointerDown={() => void mount()} onKeyDown={() => void mount()}>
+      <div className="world-frame__stage" onPointerDown={() => void mount()} onKeyDown={(e) => { void mount(); if (e.key === 'Enter' && selection && (e.target as HTMLElement).classList?.contains('world-canvas')) { e.preventDefault(); host.current?.parentElement?.querySelector<HTMLElement>('.world-card__title')?.focus(); } }}>
         <PosterImage hidden={ready} />
         <Stage className="sr-only">The map</Stage>
         <div className="world-frame__canvas-host" ref={host} data-ready={ready} />

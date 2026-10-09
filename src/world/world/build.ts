@@ -224,12 +224,13 @@ export function buildWorldScene(ctx: EngineContext, layout: GeneratedLayout, onA
 
   // ---- the entities: a building per block, a company per lot; the zone's resolver maps a hit to the lot whose
   // footprint holds the point, else the block (its signboard, its yard, a large family's shared form) ----
+  const registryOrder = new Map(REGISTRY.subIndustries.map((x, i) => [x.code, i]));
   for (const b of layout.blocks) {
-    const s = subIndustryByCode(b.code)!, z = zoneOf.get(b.zone)!, top = z.tops.get(b.code) ?? 8;
+    const s = subIndustryByCode(b.code)!, z = zoneOf.get(b.zone)!, top = z.tops.get(b.code) ?? 8, order = registryOrder.get(b.code) ?? 0;
     const [cx, cy] = [(b.box.x0 + b.box.x1) / 2, (b.box.y0 + b.box.y1) / 2];
     const ent: BuildingEntity = {
       kind: 'building', id: b.code, sub: s, block: b, box: b.box, groups: [z.container], pick: b.front === 's' ? [cx, b.box.y1 - 1.5, 4.5] : [b.box.x1 - 1.5, cy, 4.5],
-      tags: [b.code, s.chainNodeId, ...s.companies.map((c) => c.ticker)],
+      tags: [b.code, s.chainNodeId, ...s.companies.map((c) => c.ticker)], order,
       bbox: new THREE.Box3(W(b.box.x0, b.box.y0, 0), W(b.box.x1, b.box.y1, Math.max(4, top))),
       resolve: () => ent,
       statusKey() {
@@ -262,7 +263,7 @@ export function buildWorldScene(ctx: EngineContext, layout: GeneratedLayout, onA
         // the lot's middle, low: whatever is drawn there (its building, else its yard) is inside its footprint
         pick: [lx, ly, Math.min(2, lotTop / 2)],
         bbox: new THREE.Box3(W(l.box.x0, l.box.y0, 0), W(l.box.x1, l.box.y1, Math.max(3, lotTop))),
-        tags: ticker ? [ticker, b.code] : [b.code],
+        tags: ticker ? [ticker, b.code] : [b.code], order: order * 2 + i,
         setWhiteboard(content) {
           whiteboard = content;
           // an exposed company's section exists at once (the view only opens it), so the whiteboard is there before the next frame

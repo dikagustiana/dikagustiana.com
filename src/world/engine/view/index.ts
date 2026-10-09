@@ -61,8 +61,8 @@ export interface View {
   /** The band of detail the camera's zoom is in (PRD v2 §3.3). */
   band(): Band;
   zoomBy(k: number): void;
-  /** Select the next or previous building, in the order they were built. */
-  cycle(d: 1 | -1): void;
+  /** Select the next or previous company (a lot with a ticker) or building, in registry order (PRD v2 §3.4). */
+  cycle(d: 1 | -1, kind?: 'company' | 'building'): void;
   /** What the pointer is over, as the hover label shows it. */
   hovered(): Hover | null;
   /** Hover the thing at a canvas point now, as the pointer would (tests, the debug API). */
@@ -302,8 +302,9 @@ export function createView(ctx: EngineContext, o: ViewOptions): View {
     goal.x = cur.x; goal.y = cur.y;
     named = null;
   }
-  function cycle(d: 1 | -1) {
-    const list = ctx.entities.filter((e) => e.kind === 'building');
+  function cycle(d: 1 | -1, kind: 'company' | 'building' = 'company') {
+    // companies are the lots with a ticker; both lists run in the registry's order (Entity.order), else as built
+    const list = ctx.entities.filter((e) => e.kind === kind && (kind !== 'company' || !!(e as Entity & { ticker?: string | null }).ticker)).sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
     if (!list.length) return;
     const i = chosen ? list.indexOf(chosen) : -1;
     const next = list[i < 0 ? (d > 0 ? 0 : list.length - 1) : (i + d + list.length) % list.length];
@@ -460,8 +461,9 @@ export function createView(ctx: EngineContext, o: ViewOptions): View {
   const onKey = (e: KeyboardEvent) => {
     if (e.metaKey || e.ctrlKey || e.altKey) return;
     let used = true;
-    if (e.key === ']') cycle(1);
-    else if (e.key === '[') cycle(-1);
+    // [ and ] step through the companies; with Shift ({ and } on most layouts) through the buildings
+    if (e.key === ']' || e.key === '}') cycle(1, e.key === '}' || e.shiftKey ? 'building' : 'company');
+    else if (e.key === '[' || e.key === '{') cycle(-1, e.key === '{' || e.shiftKey ? 'building' : 'company');
     else if (e.key === 'Escape') select(null);
     else if (KEY_VIEWS[e.key]) lookAt(KEY_VIEWS[e.key]);
     else if (e.key === '+' || e.key === '=') zoomBy(1.4);

@@ -53,6 +53,8 @@ export interface Entity {
   update?(dt: number): void;
   /** What a highlight by tag can find this entity by: its code, its chain id, its tickers. */
   tags?: readonly string[];
+  /** Its place in the keyboard's cycle: the registry's order (PRD v2 §3.4). */
+  order?: number;
 }
 
 /** A closed building's shell and its section drawing, on the group's userData.peek. */

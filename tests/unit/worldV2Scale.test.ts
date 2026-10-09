@@ -127,3 +127,23 @@ describe('pointing (PRD v2 §3.4, A2)', () => {
     expect(seen.at(-1)).toBeNull();
   });
 });
+
+describe('the keyboard (PRD v2 §3.4)', () => {
+  it('[ and ] step through the companies in registry order; with Shift, through the sub-industries', async () => {
+    const { container } = await mountWorld();
+    const { REGISTRY } = await import('@/lib/world/registry/subindustries.generated');
+    const canvas = container.querySelector('canvas')!;
+    const key = (k: string, shiftKey = false) => canvas.dispatchEvent(new KeyboardEvent('keydown', { key: k, shiftKey }));
+    const tickers = REGISTRY.subIndustries.filter((s) => s.zone !== 'unplaced').flatMap((s) => s.companies.map((c) => c.ticker));
+    const seen: string[] = [];
+    for (let i = 0; i < tickers.length; i++) { key(']'); seen.push(window.world!.selected()!); }
+    expect(seen).toEqual(tickers);
+    key(']'); expect(window.world!.selected()).toBe(tickers[0]);
+    key('['); expect(window.world!.selected()).toBe(tickers[tickers.length - 1]);
+    const codes = REGISTRY.subIndustries.filter((s) => s.zone !== 'unplaced').map((s) => s.code);
+    key('Escape'); expect(window.world!.selected()).toBeNull();
+    key('}', true); expect(window.world!.selected()).toBe(codes[0]);
+    key('}', true); expect(window.world!.selected()).toBe(codes[1]);
+    key('{', true); key('{', true); expect(window.world!.selected()).toBe(codes[codes.length - 1]);
+  });
+});
