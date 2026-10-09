@@ -55,6 +55,12 @@ export interface Entity {
   tags?: readonly string[];
   /** Its place in the keyboard's cycle: the registry's order (PRD v2 §3.4). */
   order?: number;
+  /** A thing that moves on its own (a vehicle, a ship, a walker): its pick is local to its first group, which follows it. */
+  moves?: boolean;
+  /** Its box where it stands now, for the selection's frame and the hover's outline (a vehicle drawn by instancing). */
+  extent?(): THREE.Box3;
+  /** What the debug API reports about it (a vehicle's origin, destination, load and state); never shown on a card. */
+  facts?(): Record<string, string | number>;
 }
 
 /** A closed building's shell and its section drawing, on the group's userData.peek. */
