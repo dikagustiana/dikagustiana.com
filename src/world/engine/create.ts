@@ -187,7 +187,7 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
     setDistance: (t) => view.setDistance(t),
     setOverlay: (name) => { overlay = name; if (name === 'none') marks.set([]); },
     setMarks: (list) => marks.set(list),
-    setLayer: (name, on) => { layers.set(name, on); flows.setLayer(name, on); },
+    setLayer: (name, on) => { layers.set(name, on); flows.setLayer(name, on); activity.setLayer(name, on); },
     setModelStatus: (s) => { statuses = s; world.setStatuses(s); },
     setFlowWeights: (weights: FlowWeight[]) => { flows.setFlows(weights); chain.setFlows(weights); },
     highlightChain: (id, depth) => chain.set(id, depth),
