@@ -316,10 +316,14 @@ export function createActivity(ctx: EngineContext, layout: GeneratedLayout, site
     if (s.model === 'pool') mesh.renderOrder = 1;
     s.mesh = mesh; s.parent.add(mesh); meshes.push(mesh);
   }
-  // the dashes' and the puffs' colours are fixed; statics are posed once
+  // the dashes' and the puffs' colours are fixed; statics are posed once (the first render uploads them), and only
+  // the meshes of what moves upload again each frame
   for (const d of dashes) if (d.color) tint(d.x, d.color);
   for (const p of puffs) tint(p.x, p.color);
   for (const s of statics) pose(s.x, s.at[0], s.at[1], s.at[2], s.h, s.scale);
+  const moving = new Set<THREE.InstancedMesh>();
+  for (const list of [puffs, swings, runs, loops, dashes, rings, blinks, walks, hoists, planes, booms] as { x: Inst }[][]) for (const a of list) moving.add(a.x.s.mesh!);
+  const ringMesh = rings[0]?.x.s.mesh ?? null;
 
   let t = 0, posed = -1;
   const lerp3 = (a: At, b: At, k: number): At => [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k];
@@ -380,7 +384,8 @@ export function createActivity(ctx: EngineContext, layout: GeneratedLayout, site
       else if (u < 0.8) { const k = (u - run) / (0.8 - run); pose(p.x, p.to[0] + dx * k * 0.8, p.to[1] + dy * k * 0.8, 60 * k * k, h, VEHICLE_SCALE, -0.25 * Math.min(1, k * 3)); }
       else pose(p.x, p.from[0], p.from[1], -50, h, 0.01);
     }
-    for (const m of meshes) { m.instanceMatrix.needsUpdate = true; if (m.instanceColor) m.instanceColor.needsUpdate = true; }
+    for (const m of moving) m.instanceMatrix.needsUpdate = true;
+    if (ringMesh?.instanceColor) ringMesh.instanceColor.needsUpdate = true;
     // the pools of light show only after dark
     poolGroup.visible = theme.night() > 0.02;
   }
