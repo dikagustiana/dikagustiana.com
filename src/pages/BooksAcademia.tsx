@@ -43,8 +43,6 @@ export default function BooksAcademia() {
         { label: 'Home', path: '/' },
         { label: 'Books' }
       ]}
-      showManifesto
-      manifesto="Books are tools. Use them or do not pick them up."
     >
       <SEO 
         title="Books"

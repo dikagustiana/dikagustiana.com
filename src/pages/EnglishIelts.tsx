@@ -50,8 +50,6 @@ export default function EnglishIelts() {
         { label: 'Home', path: '/' },
         { label: 'IELTS Preparation' }
       ]}
-      showManifesto
-      manifesto="A score is the only measure. Everything else is preparation."
     >
       <SEO 
         title="IELTS Preparation"

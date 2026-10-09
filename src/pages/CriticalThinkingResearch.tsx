@@ -44,8 +44,6 @@ export default function CriticalThinkingResearch() {
         { label: 'Home', path: '/' },
         { label: 'Critical Thinking and Research' }
       ]}
-      showManifesto
-      manifesto="Most people accept information without examination. This is intellectual laziness. Learn to think or remain a vessel for others' ideas."
     >
       <SEO
         title="Critical Thinking and Research"

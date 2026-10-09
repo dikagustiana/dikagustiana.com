@@ -47,8 +47,6 @@ export default function CriticalThinkingPhase() {
         { label: 'Critical Thinking and Research', path: '/critical-thinking-research' },
         { label: details?.title || 'Phase' }
       ]}
-      showManifesto
-      manifesto={details ? `The ignorance this phase fights: ${details.ignorance}` : undefined}
     >
       <SEO
         title={`${details?.title || 'Phase'} - Critical Thinking`}

@@ -82,8 +82,6 @@ export default function CriticalThinkingEssay() {
         { label: phase ? phaseNames[phase] : 'Phase', path: `/critical-thinking-research/${phase}` },
         { label: title }
       ]}
-      showManifesto={!!essay?.voice_role}
-      manifesto={essay?.snippet || undefined}
     >
       <SEO
         title={title}
