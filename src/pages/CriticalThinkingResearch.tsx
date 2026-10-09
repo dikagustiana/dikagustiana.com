@@ -42,11 +42,11 @@ export default function CriticalThinkingResearch() {
       role="educator"
       breadcrumbs={[
         { label: 'Home', path: '/' },
-        { label: 'Critical Thinking and Research' }
+        { label: 'Critical Thinking' }
       ]}
     >
       <SEO
-        title="Critical Thinking and Research"
+        title="Critical Thinking"
         description="Four-phase methodology for rigorous analysis: Clarify, Analyze, Construct, Apply. Stop consuming information passively."
       />
       

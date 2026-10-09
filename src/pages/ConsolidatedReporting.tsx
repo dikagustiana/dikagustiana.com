@@ -3,7 +3,11 @@ import { SEO } from '@/components/SEO';
 import { ConceptPanel } from '@/components/consolidation/ConceptPanel';
 import { ConsolidationProcessStep } from '@/components/consolidation/ConsolidationProcessStep';
 import { AccountRow } from '@/components/consolidation/AccountRow';
+import { Link } from 'react-router-dom';
 import { ENTITY_NAMES, WORKING_PAPER_ROWS } from '@/data/consolidationWorkingPaper';
+import { CONSOLIDATION_TOPICS } from '@/config/consolidationTopics';
+import { useTopicCounts } from '@/hooks/queries/useTopicCounts';
+import { sectionStanding } from '@/lib/sectionStanding';
 
 const PROCESS_STEPS = [
   { title: 'Individual Books', description: 'Each entity maintains its own complete set of financials.' },
@@ -14,6 +18,8 @@ const PROCESS_STEPS = [
 ];
 
 export default function ConsolidatedReporting() {
+  const { data: topicCounts, isSuccess: countsLoaded } = useTopicCounts('accounting');
+
   return (
     <PageLayout
       variant="content"
@@ -164,6 +170,29 @@ export default function ConsolidatedReporting() {
               counted: 250,000 + 91,000 − 256,000 = 85,000. NCI is shown at its acquisition-date
               value; its share of earnings since is not allocated in this example.
             </p>
+          </section>
+
+          {/* The nine topic pages essays are placed on. They were reachable
+              only by typing the URL; listed here with what each holds. */}
+          <section className="mb-14 max-w-3xl">
+            <h2 className="text-2xl font-bold text-foreground mb-4">Topics</h2>
+            <ul className="divide-y divide-border border-y border-border">
+              {CONSOLIDATION_TOPICS.map((topic) => (
+                <li key={topic.slug}>
+                  <Link
+                    to={`/accounting/consolidation/${topic.slug}`}
+                    className="group flex flex-col gap-1 py-3 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4"
+                  >
+                    <span className="font-medium text-foreground group-hover:text-accent transition-colors">
+                      {topic.title}
+                    </span>
+                    <span className="shrink-0 text-xs font-mono text-muted-foreground sm:text-right">
+                      {sectionStanding(countsLoaded, topicCounts?.[topic.slug])}
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </section>
 
         </div>

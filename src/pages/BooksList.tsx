@@ -23,8 +23,7 @@ export default function BooksList() {
       role="educator"
       breadcrumbs={[
         { label: 'Home', path: '/' },
-        { label: 'Books and Academia', path: '/books-academia' },
-        { label: 'Categories', path: '/books/categories' },
+        { label: 'Books', path: '/books-academia' },
         { label: heading },
       ]}
     >

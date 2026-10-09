@@ -49,7 +49,6 @@ const CriticalThinkingResearch = lazy(() => import("./pages/CriticalThinkingRese
 const CriticalThinkingPhase = lazy(() => import("./pages/CriticalThinkingPhase"));
 const CriticalThinkingEssay = lazy(() => import("./pages/CriticalThinkingEssay"));
 const BooksAcademia = lazy(() => import("./pages/BooksAcademia"));
-const BooksCategories = lazy(() => import("./pages/BooksCategories"));
 const BooksList = lazy(() => import("./pages/BooksList"));
 const BookReader = lazy(() => import("./pages/BookReader"));
 const EnglishIelts = lazy(() => import("./pages/EnglishIelts"));
@@ -233,7 +232,6 @@ const App = () => (
 
             {/* Books */}
             <Route path="/books-academia" element={<BooksAcademia />} />
-            <Route path="/books/categories" element={<BooksCategories />} />
             <Route path="/books/:category" element={<BooksList />} />
             <Route path="/books/:category/:bookId/read" element={<BookReader />} />
 

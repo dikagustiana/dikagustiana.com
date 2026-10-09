@@ -44,7 +44,7 @@ export default function CriticalThinkingPhase() {
       role="educator"
       breadcrumbs={[
         { label: 'Home', path: '/' },
-        { label: 'Critical Thinking and Research', path: '/critical-thinking-research' },
+        { label: 'Critical Thinking', path: '/critical-thinking-research' },
         { label: details?.title || 'Phase' }
       ]}
     >

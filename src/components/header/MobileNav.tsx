@@ -12,6 +12,7 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import { navSections, type NavSection } from '@/config/navConfig';
+import { useNavSectionCollapsed } from '@/hooks/useNavSectionCollapsed';
 
 export function MobileNav() {
   const [isOpen, setIsOpen] = useState(false);
@@ -19,6 +20,7 @@ export function MobileNav() {
   const location = useLocation();
   const { user, isAdmin, signOut } = useAuth();
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const isCollapsed = useNavSectionCollapsed();
 
   // Close sheet on route change
   useEffect(() => {
@@ -48,7 +50,7 @@ export function MobileNav() {
 
   return (
     // Paired with MainNav's `xl:flex` — see the capacity note there. Below that
-    // width the desktop row cannot hold seven labels without truncating one.
+    // width the desktop row cannot hold eight labels without truncating one.
     <div className="xl:hidden">
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
         <SheetTrigger asChild>
@@ -76,7 +78,7 @@ export function MobileNav() {
 
               return (
                 <div key={section.label}>
-                  {section.items ? (
+                  {section.items && !isCollapsed(section) ? (
                     <>
                       {/* Section header: clickable label + expand toggle */}
                       <div
@@ -134,7 +136,7 @@ export function MobileNav() {
                     </>
                   ) : (
                     <Link
-                      to={section.path!}
+                      to={(section.path ?? section.basePath)!}
                       onClick={() => setIsOpen(false)}
                       className={cn(
                         'flex min-h-[44px] items-center py-3 px-4 font-medium hover:bg-secondary rounded-lg transition-colors',
