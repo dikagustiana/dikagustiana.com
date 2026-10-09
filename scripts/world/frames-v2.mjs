@@ -80,12 +80,32 @@ const GATES = {
       await page.mouse.click(box.x + x, box.y + y); await settle(page, 1500);
     }],
   ],
+  c: [
+    ['gate-c-night.png', 'the hero at 20:00: every building’s windows warm, published companies’ brighter in the accent, lamps and their pools along every road, the kilns’ glow', async (page) => { await page.evaluate(() => { window.world.view('hero'); window.world.skip(10); }); await settle(page, 4000); }],
+    ['gate-c-night-street.png', 'the street band at 20:00 over INTP: lit windows, the lamps’ heads and pools, the kilns', async (page) => { await page.evaluate(() => window.world.centre('INTP', 5)); await settle(page, 2500); }],
+    ['gate-c-day-street.png', 'the street band by day over INTP: stack smoke, forklifts at the docks, conveyors, walkers at the doors', async (page) => { await page.evaluate(() => { window.world.skip(14); window.world.centre('INTP', 5); }); await settle(page, 4000); }],
+  ],
+  'c-families': 'families',
   'a-phone': [
     ['gate-a-phone.png', 'a phone at 390 px after "Start the world": the hero at 1 px/m', async (page) => { await settle(page, 1000); }],
   ],
 };
 
+// a frame per family (mega prompt §5, PRD v2 C1): the district band's 3.5 px/m over one site of each family, by day
+async function families(page) {
+  const dir = path.join(out, 'families'); fs.mkdirSync(dir, { recursive: true });
+  // by day: the world held at its opening hour, so a long run of frames does not cross into the night
+  const sites = await page.evaluate(() => { window.world.pause(true); return window.world.activity().families; });
+  for (const [family, [x, y]] of Object.entries(sites)) {
+    await page.evaluate(([fx, fy]) => window.world.look(fx, fy, 3.5), [x, y]); await settle(page, 1800);
+    await page.locator('.world-frame__stage').screenshot({ path: path.join(dir, `${family}.png`) });
+    log.push({ frame: `families/${family}.png`, note: `${family} at the district band`, zoom: 3.5 });
+  }
+  console.log('families:', Object.keys(sites).length);
+}
+
 for (const key of Object.keys(GATES).filter((k) => k === gate || k.startsWith(`${gate}-`))) {
+  if (GATES[key] === 'families') { const { page } = await world(); await families(page); await page.close(); continue; }
   const { page, errors } = await world({ phone: key.endsWith('-phone') });
   for (const [name, note, act] of GATES[key]) {
     if (only && !only.includes(name)) continue;

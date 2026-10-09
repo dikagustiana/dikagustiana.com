@@ -12,7 +12,7 @@ import { readFileSync } from 'node:fs';
  * description and the card's and board's focus. The published index is one
  * mock package (the SYNTHETIC cement fixture re-labelled, never shipped).
  */
-declare global { interface Window { world: { step(s: number): void; pause(on: boolean): void; all(): { id: string; kind: string; status: string; facts?: Record<string, string | number> }[]; select(id: string | null): void; selected(): string | null; view(name: string): void; drawCalls(): number; distance(): number; zoom(): number; band(): string; chain(): string[]; exposed(): unknown; expose(t: string): void; screenOf(id: string): [number, number] | null; centre(id: string, zoom: number): void; hovered(): { id: string; kind: string; label: string } | null } } }
+declare global { interface Window { world: { step(s: number): void; pause(on: boolean): void; skip(hours: number): void; activity(): { counts: Record<string, number>; hour: number; night: number; litBlocks: number }; all(): { id: string; kind: string; status: string; facts?: Record<string, string | number> }[]; select(id: string | null): void; selected(): string | null; view(name: string): void; drawCalls(): number; distance(): number; zoom(): number; band(): string; chain(): string[]; exposed(): unknown; expose(t: string): void; screenOf(id: string): [number, number] | null; centre(id: string, zoom: number): void; hovered(): { id: string; kind: string; label: string } | null } } }
 
 const fixture = JSON.parse(readFileSync('src/data/finance-in-action/fixtures/XCEM.SYNTHETIC.json', 'utf8'));
 const MOCK = { ...fixture, meta: { ...fixture.meta, ticker: 'INTP', name: 'INTP (SYNTHETIC mock, never ships)', status: 'published', pair: ['SMGR', 'SMCB'] } };
@@ -183,6 +183,26 @@ test('a laden vehicle crossing a gate stops on the weighbridge, then goes on; on
   expect(unloading).not.toBeNull();
   expect(unloading.facts!.leg).toBe('out');
   await page.evaluate(() => window.world.pause(false));
+  expect(errors).toEqual([]);
+});
+
+test('at 20:00 the world is lit: every block, lamps along every road, the clock says night; every family’s activity runs by day (PRD v2 C1, C2)', async ({ page }) => {
+  test.setTimeout(180_000);
+  const errors = await open(page);
+  await ready(page);
+  const day = await page.evaluate(() => window.world.activity());
+  expect(day.night).toBe(0);
+  for (const k of ['smoke', 'forklift', 'excavator', 'pumpjack', 'plane', 'tower-crane', 'beacon']) expect(day.counts[k] ?? 0, k).toBeGreaterThan(0);
+  const calls = await page.evaluate(() => window.world.drawCalls());
+  expect(calls).toBeLessThanOrEqual(900);
+  await page.evaluate(() => window.world.skip(10));
+  await expect.poll(() => page.evaluate(() => window.world.activity().night), { timeout: 10_000 }).toBe(1);
+  const night = await page.evaluate(() => window.world.activity());
+  expect(night.hour).toBeGreaterThanOrEqual(20);
+  expect(night.litBlocks).toBeGreaterThanOrEqual(120);
+  expect(night.counts.lamps).toBeGreaterThan(500);
+  await expect(page.locator('.world-frame__clock')).toContainText('night');
+  expect(await page.evaluate(() => window.world.drawCalls())).toBeLessThanOrEqual(900);
   expect(errors).toEqual([]);
 });
 

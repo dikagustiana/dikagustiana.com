@@ -250,7 +250,8 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
       distance: () => view.distanceOf(),
       zoom: () => view.camera.zoom,
       visible: (id) => { const e = find(id); const g = e?.groups[0]; if (!g) return false; for (let o: THREE.Object3D | null = g; o; o = o.parent) if (!o.visible) return false; return true; },
-      tick: (dt) => tick(last + dt * 1000),
+      // an exact dt, not one read back from the clock: a seed and a number of frames always give the same world
+      tick: (dt) => { last += dt * 1000; advance(Math.max(0, Math.min(FRAME_MAX, dt))); },
       statuses: () => Object.fromEntries(statuses),
       chain: () => chain.codes(),
       chainDrawn: () => ({ ...chain.drawn(), dimmed: chain.dimmed() }),
