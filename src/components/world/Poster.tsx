@@ -23,7 +23,7 @@
  */
 import { lazy, startTransition, Suspense, useCallback, useEffect, useRef, useState, type ComponentType, type RefObject } from 'react';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
-import { prefersReducedMotion } from '@/lib/motion';
+import { REDUCED_MOTION_QUERY } from '@/lib/motion';
 import { DEFAULT_LAYERS, REDUCED_NOTE, coverageLine } from '@/lib/world/constants';
 import { FrameHeader, PHONE_QUERY, PosterImage, SearchField, type FrameControls } from './FrameShell';
 import FRAME_CSS from './frame.css?inline';
@@ -95,8 +95,10 @@ export function WorldPoster({ variant, heading, onPainted, onWake }: { variant: 
 export function WorldSlot({ variant, heading, Schematic }: { variant: Variant; heading: Heading; Schematic: ComponentType<{ variant?: Variant; heading?: Heading }> }) {
   const [go, setGo] = useState(false);
   const fetchFrame = useCallback(() => startTransition(() => setGo(true)), []);
+  // subscribed, not a snapshot: a reader who turns reduced motion off while the page is open gets the world
+  const reduced = useMediaQuery(REDUCED_MOTION_QUERY);
   if (!WorldSection) return null;
-  if (prefersReducedMotion()) {
+  if (reduced) {
     return (
       <section id="industry-chain" className="border-b border-border py-12">
         <div className="container">
