@@ -12,10 +12,10 @@ import { SUB_INDUSTRIES, subIndustryByCode } from '@/lib/world/registry/subindus
 import { linksFrom, linksTo } from '@/lib/world/registry/links.generated';
 import { INDEX_PATH, modelPath, subIndustryPath } from '@/lib/finance-in-action/routes';
 import { ENERGY_DRILLDOWN, GOODS_WORD, STATUS_VOCAB, boardPath } from '@/lib/world/constants';
-import type { Goods } from '@/lib/world/registry/types';
+import type { Goods, Story } from '@/lib/world/registry/types';
 import { conditionHref, conditionOf, conditionShort } from '@/lib/finance-in-action/conditions';
 import { labelOf, marksFor } from '@/lib/world/presentation';
-import type { Selection } from '@/world/engine/types';
+import type { LitHop, Selection } from '@/world/engine/types';
 import type { FlowWeight } from '@/world/data/types';
 import type { Piece } from '@/lib/world/thinkTank';
 
@@ -23,6 +23,8 @@ export interface CardProps {
   selection: Selection | null;
   /** The mark whose condition card is open, if the selection is a mark. */
   mark?: { shift: ShiftId; targetId: string } | null;
+  /** The lit story, when nothing else is selected (PRD v2 §3.11): its title, standfirst and hops. */
+  story?: { story: Story; hops: readonly LitHop[] } | null;
   lens: LensId;
   flows: readonly FlowWeight[];
   /** Measured link weights by `from>to`, from the data layer through the shell; the engine never sees them. */
@@ -31,7 +33,7 @@ export interface CardProps {
   fullChain?: boolean;
   pieces: readonly Piece[];
   onClose: () => void;
-  onAction: (a: { type: 'open-board'; ticker: string } | { type: 'open-index'; code: string } | { type: 'open-thinktank' } | { type: 'select'; id: string } | { type: 'open-piece'; slug: string } | { type: 'chain-depth'; full: boolean }) => void;
+  onAction: (a: { type: 'open-board'; ticker: string } | { type: 'open-index'; code: string } | { type: 'open-thinktank' } | { type: 'select'; id: string } | { type: 'open-piece'; slug: string } | { type: 'chain-depth'; full: boolean } | { type: 'story'; id: string | null }) => void;
 }
 
 /** The energy drill-down, v0 (discovery item D): the band's three lines and the two PLN conditions, by number. */
@@ -52,11 +54,28 @@ const companyByTicker = (ticker: string) => { for (const sub of SUB_INDUSTRIES) 
 
 const stateOf = (status: string): keyof typeof STATUS_VOCAB | undefined => (Object.keys(STATUS_VOCAB) as (keyof typeof STATUS_VOCAB)[]).find((k) => STATUS_VOCAB[k].word === status);
 
-export function Card({ selection, mark, lens, flows, weights, fullChain = false, pieces, onClose, onAction }: CardProps) {
+export function Card({ selection, mark, story, lens, flows, weights, fullChain = false, pieces, onClose, onAction }: CardProps) {
   const ref = useRef<HTMLElement>(null);
   // The card's title takes focus when it opens, so a screen reader announces it; unless the canvas has focus (the
   // keyboard is cycling with [ and ]), in which case the region's live announcement carries the title and focus stays.
-  useEffect(() => { if (document.activeElement?.classList.contains('world-canvas')) return; ref.current?.querySelector<HTMLElement>('h3')?.focus(); }, [selection?.id, mark?.targetId]);
+  useEffect(() => { if (document.activeElement?.classList.contains('world-canvas')) return; ref.current?.querySelector<HTMLElement>('h3')?.focus(); }, [selection?.id, mark?.targetId, story?.story.id]);
+  if (!selection && !mark && story) {
+    // the story's card (PRD v2 §3.11): its title, its standfirst, its hops; a measured hop says so, the rest are expected
+    const { story: s, hops } = story;
+    const name = (code: string) => subIndustryByCode(code)?.nameEn ?? code;
+    return (
+      <aside className="world-card" role="region" aria-label="Story" aria-live="polite" ref={ref} data-story={s.id}>
+        <div className="world-card__kind"><span>Story</span><button type="button" className="world-card__close" aria-label="Clear the story" onClick={() => onAction({ type: 'story', id: null })}>×</button></div>
+        <h3 className="world-card__title" tabIndex={-1}>{s.title}</h3>
+        <p>{s.standfirst}</p>
+        <div className="world-card__section"><h4>{s.direction === 'upstream' ? 'Hops, against the goods' : 'Hops'}</h4>
+          <ol>{hops.map((h) => { const v = h.measured ? STATUS_VOCAB.measured : STATUS_VOCAB.expected; return <li key={`${h.from}>${h.to}`}><button type="button" className="underline" onClick={() => onAction({ type: 'select', id: h.from })}>{name(h.from)}</button> → <button type="button" className="underline" onClick={() => onAction({ type: 'select', id: h.to })}>{name(h.to)}</button> <span className="text-muted-foreground"><span aria-hidden="true">{v.glyph}</span>{h.measured ? ` ${v.word}` : ''} · {GOODS_WORD[h.goods]}</span></li>; })}</ol>
+        </div>
+        {hops.some((h) => !h.measured) && <p className="world-card__section text-muted-foreground" data-chain-note=""><span aria-hidden="true">{STATUS_VOCAB.expected.glyph}</span> {STATUS_VOCAB.expected.word}: the hops marked so are links of the registry; a published model marks a link <span aria-hidden="true">{STATUS_VOCAB.measured.glyph}</span> {STATUS_VOCAB.measured.word}.</p>}
+        <div className="world-card__foot"><button type="button" className="world-btn" onClick={() => onAction({ type: 'story', id: null })}>Clear</button></div>
+      </aside>
+    );
+  }
   if (!selection && !mark) return null;
 
   if (mark) {

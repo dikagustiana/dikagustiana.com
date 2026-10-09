@@ -44,7 +44,7 @@ export interface ChainSource {
 /** A story as the chain lights it (src/lib/world/registry/stories.generated.ts). */
 export interface ChainStory { id: string; hops: readonly string[]; goods: readonly Goods[]; direction: 'downstream' | 'upstream'; with: readonly string[] }
 /** A story's hop as lit: its link's ends in the order the story reads them, its goods, the gates its routes cross. */
-export interface StoryHop { from: string; to: string; goods: Goods; gates: string[]; measured: boolean }
+export interface StoryHop { from: string; to: string; goods: Goods; gates: string[]; measured: boolean; box: Box | null }
 
 export interface Chain {
   /** Light the chain of a building (a sub-industry code), a company (its lot) or a vehicle (its route); null clears. */
@@ -240,7 +240,12 @@ export function createChain(ctx: EngineContext, links: readonly Link[], source: 
       const ps = pathsOf(l, up);
       if (isMeasured(l)) counts.measured++; else counts.expected++;
       paths.push(...ps);
-      hops.push({ from: a, to: b, goods: s.goods[i] ?? l.goods, gates: [...new Set(ps.flatMap((p) => p.gates))], measured: isMeasured(l) });
+      // the hop's own ground, for the strip's button to frame: its routes and its two ends' lots
+      let hb: Box | null = null;
+      const add = (x: number, y: number) => { hb = hb ? { x0: Math.min(hb.x0, x), x1: Math.max(hb.x1, x), y0: Math.min(hb.y0, y), y1: Math.max(hb.y1, y) } : { x0: x, x1: x, y0: y, y1: y }; };
+      for (const p of ps) for (const q of p.pts) add(q[0], q[1]);
+      for (const c of [a, b]) for (const id of source.lotsOf(c)) { const e = byId(id) as (Entity & { box?: Box }) | null; if (e?.box) { add(e.box.x0, e.box.y0); add(e.box.x1, e.box.y1); } }
+      hops.push({ from: a, to: b, goods: s.goods[i] ?? l.goods, gates: [...new Set(ps.flatMap((p) => p.gates))], measured: isMeasured(l), box: hb });
     }
     lit = [...codes];
     const lots = new Set<string>(); for (const c of codes) for (const x of source.lotsOf(c)) lots.add(x);

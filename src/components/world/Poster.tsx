@@ -24,7 +24,7 @@
 import { lazy, startTransition, Suspense, useCallback, useEffect, useRef, useState, type ComponentType, type RefObject } from 'react';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { REDUCED_MOTION_QUERY } from '@/lib/motion';
-import { DEFAULT_LAYERS, REDUCED_NOTE, coverageLine } from '@/lib/world/constants';
+import { DEFAULT_LAYERS, REDUCED_NOTE, STORIES, coverageLine } from '@/lib/world/constants';
 import { FrameHeader, PHONE_QUERY, PosterImage, SearchField, type FrameControls } from './FrameShell';
 import FRAME_CSS from './frame.css?inline';
 
@@ -72,14 +72,14 @@ export function WorldPoster({ variant, heading, onPainted, onWake }: { variant: 
   const img = useRef<HTMLImageElement>(null);
   useAfterPosterPaint(img, onPainted);
   const wake = () => onWake?.();
-  const inert: FrameControls = { place: wake, distance: wake, dragging: wake, overlay: wake, layer: wake, skema: wake };
+  const inert: FrameControls = { place: wake, distance: wake, dragging: wake, overlay: wake, layer: wake, story: wake, skema: wake };
   const Stage = heading === 'h1' ? 'h3' : 'h4';
   return (
     <section id="industry-chain" className="border-b border-border py-12">
       <div className="container">
         <div className="world-frame" data-world="loading" onPointerDown={wake} onFocus={wake} onKeyDown={wake}>
           <style>{FRAME_CSS}</style>
-          <FrameHeader heading={heading} variant={variant} phone={phone} coverage={coverageLine('loading', 0)} view={null} ready={false} distance={0} overlay="none" layers={DEFAULT_LAYERS} on={inert}
+          <FrameHeader heading={heading} variant={variant} phone={phone} coverage={coverageLine('loading', 0)} view={null} ready={false} distance={0} overlay="none" layers={DEFAULT_LAYERS} stories={STORIES} story={null} on={inert}
             search={<SearchField value="" onChange={wake} />} />
           <div className="world-frame__stage">
             <PosterImage imgRef={img} />

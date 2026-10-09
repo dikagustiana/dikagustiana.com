@@ -15,13 +15,13 @@ import { createContext, type EngineContext } from './context';
 import { createClock, STEP, WARMUP_SECONDS } from './sim/clock';
 import { buildSlab } from './world/ground';
 import { createView, type View } from './view';
-import { VIEW_NAMES, type Entity, type FrameReading, type LayerName, type OverlayName, type RendererLike, type ViewName, type WorldHandle, type WorldOptions } from './types';
+import { VIEW_NAMES, type Entity, type FrameReading, type LayerName, type LitHop, type OverlayName, type RendererLike, type ViewName, type WorldHandle, type WorldOptions } from './types';
 import type { FlowWeight, ModelStatus, StationBinding, WhiteboardContent } from '@/world/data/types';
 import { buildWorldScene, type WorldScene } from '@/world/world/build';
 import { countInWords, createFlows, type FlowSystem } from '@/world/sim/flows';
 import { createActivity, type Activity } from '@/world/sim/activity';
 import { createMarks, type Marks } from './marks';
-import { createChain, type Chain } from './chain';
+import { createChain, type Chain, type StoryHop } from './chain';
 import { createStations, type Stations } from './stations';
 
 export { WARMUP_SECONDS };
@@ -144,6 +144,9 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
   const marks: Marks = createMarks(ctx, (a) => options.onAction?.(a));
   // the chain lights the roads its links' goods take (PRD v2 §3.9): the flows know the lots and the routes
   const chain: Chain = createChain(ctx, options.registry.links, { routesOf: (a, b) => flows.routesOf(a, b), lotsOf: (c) => flows.lotsOf(c) });
+  // the lit story's hops (PRD v2 §3.10); the joint a hop crosses is its gates' (the layout says which joint each gate carries)
+  let story: StoryHop[] | null = null;
+  const jointOf = new Map(options.layout.gates.map((g) => [g.id, g.jointId]));
   const stations: Stations = createStations(ctx);
 
   // ---- state the shell sets through the handle; Phase E–G give them their effects ----
@@ -192,11 +195,19 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
     setModelStatus: (s) => { statuses = s; world.setStatuses(s); },
     setFlowWeights: (weights: FlowWeight[]) => { flows.setFlows(weights); chain.setFlows(weights); },
     highlightChain: (id, depth) => {
+      story = null;
       chain.set(id, depth);
       // the full chain refits the camera to what is lit, at the district band (PRD v2 §3.9)
       const b = depth === 'all' && id ? chain.bounds() : null;
       if (b) view.frame(b);
     },
+    lightStory: (s): LitHop[] => {
+      if (!s) { if (story) { chain.story(null); story = null; } return []; }
+      story = chain.story(s);
+      const b = chain.bounds(); if (b) view.frame(b);
+      return story.map((h) => ({ from: h.from, to: h.to, goods: h.goods, measured: h.measured, joints: [...new Set(h.gates.map((g) => jointOf.get(g)).filter((j): j is string => !!j))] }));
+    },
+    frameHop: (i) => { const b = story?.[i]?.box; if (b) view.frame(b); },
     setHighlight: (ids) => view.setHighlight(ids),
     exposeCompany: (ticker, bindings, whiteboard = null) => {
       const plot = world.lots.get(ticker.toUpperCase()), arch = world.archetypeOf(ticker);

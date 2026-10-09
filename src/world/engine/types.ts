@@ -3,7 +3,7 @@
  * clickable thing in the world honours (Factory Yard's, kept).
  */
 import type * as THREE from 'three';
-import type { Registry } from '@/lib/world/registry/types';
+import type { Goods, Registry, Story } from '@/lib/world/registry/types';
 import type { GeneratedLayout } from '@/world/placement/types';
 import type { FlowWeight, ModelStatus, StationBinding, WhiteboardContent } from '@/world/data/types';
 
@@ -146,6 +146,9 @@ export interface RendererLike {
   capabilities: { getMaxAnisotropy(): number };
 }
 
+/** A lit story's hop (PRD v2 §3.10): its ends in reading order, its goods, the joints its routes cross, whether measured. */
+export interface LitHop { from: string; to: string; goods: Goods; joints: string[]; measured: boolean }
+
 /** What a card's action asks the shell to do. */
 export type WorldAction =
   | { type: 'open-board'; ticker: string }
@@ -189,6 +192,10 @@ export interface WorldHandle {
   setFlowWeights(flows: FlowWeight[]): void;
   /** Light the chain of a building or company (PRD §7.9): one level, or the whole connected chain; null clears. */
   highlightChain(id: string | null, depth: 1 | 'all'): void;
+  /** Light a story end to end and frame it (PRD v2 §3.10): every hop's routes, every lot outlined, the rest dimmed; null clears it. */
+  lightStory(story: Story | null): LitHop[];
+  /** Frame one hop of the lit story (the strip's hop buttons). */
+  frameHop(i: number): void;
   /** Light the entities whose id, code or chain id is named (a think-tank piece's tags); an empty list clears. */
   setHighlight(ids: readonly string[]): void;
   /** Open a company's plot as a section and mark its bound stations with the cost lines' labels (PRD §7.8). */
