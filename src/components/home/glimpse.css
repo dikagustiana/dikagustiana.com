@@ -1,0 +1,30 @@
+/* The glimpse's track (Glimpse.tsx): one row that runs to the viewport's
+   edges and scrolls sideways, its first column aligned with the container's
+   left edge and its last with the right. The inset is the container's own
+   margin: centred, 2rem of padding, at most 1400px wide (tailwind.config.ts).
+   Percentages, not 100vw, because the row is as wide as the page and 100vw
+   also counts a vertical scrollbar the page is not using. A column snaps to
+   the inset, so the row never rests on a column cut in half. */
+.glimpse__track {
+  --glimpse-inset: calc((100% - min(100%, 1400px)) / 2 + 2rem);
+  display: flex;
+  gap: 2rem;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  padding: 0 var(--glimpse-inset) 1rem;
+  scroll-padding-inline: var(--glimpse-inset);
+  scrollbar-width: thin;
+}
+
+.glimpse__item {
+  flex: 0 0 auto;
+  width: 16rem;
+  scroll-snap-align: start;
+}
+
+@media (min-width: 640px) {
+  .glimpse__item {
+    width: 18rem;
+  }
+}

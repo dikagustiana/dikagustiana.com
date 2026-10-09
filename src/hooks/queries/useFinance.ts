@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { isMissingColumn } from '@/hooks/queries/useSelectedEssays';
 
 // ── Finance Sections (DB-backed domain metadata) ──
 
@@ -113,20 +114,30 @@ export const useFeaturedFinanceEssay = () => {
       // read finance_settings.featured_finance_essay_id — a third path for
       // one page. The landing shows the most recently selected finance
       // essay, or nothing at all when none is selected.
-      const { data, error } = await supabase
-        .from('essays')
-        .select(`
-          id, slug, title, snippet, author, date, read_time, thumbnail_url,
-          presentation, section, phase, finance_section, fsli_slug, topic,
-          finance_modules!essays_module_id_fkey ( slug, track_slug )
-        `)
-        .eq('section', 'finance')
-        .eq('is_selected', true)
-        .eq('published', true)
+      // The landing shows the finance essay the owner placed first
+      // (essays.selected_rank, the homepage order), newest first among the
+      // unplaced; until the rank column exists (42703) newest first alone.
+      const base = () =>
+        supabase
+          .from('essays')
+          .select(`
+            id, slug, title, snippet, author, date, read_time, thumbnail_url,
+            presentation, section, phase, finance_section, fsli_slug, topic,
+            finance_modules!essays_module_id_fkey ( slug, track_slug )
+          `)
+          .eq('section', 'finance')
+          .eq('is_selected', true)
+          .eq('published', true);
+
+      const ranked = await base()
+        .order('selected_rank', { ascending: true, nullsFirst: false })
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle();
+      if (!ranked.error) return ranked.data;
+      if (!isMissingColumn(ranked.error)) return null;
 
+      const { data, error } = await base().order('created_at', { ascending: false }).limit(1).maybeSingle();
       if (error) return null;
       return data;
     },

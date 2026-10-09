@@ -42,3 +42,13 @@ export function fullDate(isoDate: string): string {
     timeZone: 'UTC',
   });
 }
+
+/**
+ * The month and the year only: "Aug 2026". For a row of essays read at a
+ * glance, where the day is noise. Rendered in UTC for the reason above.
+ */
+export function monthYear(isoDate: string): string {
+  const date = new Date(isoDate);
+  if (Number.isNaN(date.getTime())) return isoDate;
+  return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric', timeZone: 'UTC' });
+}

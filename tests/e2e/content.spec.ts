@@ -50,8 +50,8 @@ test('homepage renders featured essays returned by the backend', async ({ page }
 
   await page.goto('/', { waitUntil: 'load' });
 
-  // The "Selected Analysis" section only renders when essays are returned.
-  await expect(page.getByRole('heading', { name: 'Selected Analysis' })).toBeVisible();
+  // The glimpse only renders when essays are returned.
+  await expect(page.getByRole('heading', { name: 'Glimpse' })).toBeVisible();
   await expect(page.getByText(seededTitle)).toBeVisible();
   await expect(page.getByText('A deterministic snippet rendered from mock data.')).toBeVisible();
 
