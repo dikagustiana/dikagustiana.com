@@ -64,6 +64,8 @@ export const JAM_HOLD = 0.15;
 const SIDE_CADENCE = 45;
 /** Speed on a driveway, the gap a vehicle keeps to the one ahead, and how near the end of its lane a vehicle looks at the junction, in metres. */
 const DRIVEWAY_SPEED = 5, GAP = 3, LOOK_OUT = 10;
+/** How near a gate a vehicle lifts its boom, in metres either way. */
+const BOOM_NEAR = 16;
 /** A vehicle held this long by a ring of vehicles each waiting on the next (a knot at a junction) drives through for a moment. */
 const STUCK = 8, UNSTICK = 3;
 
@@ -198,6 +200,8 @@ export interface FlowSystem {
   /** How many flows cross a gate (its card counts them in words). */
   flowsThrough(gateId: string): number;
   live(): number;
+  /** The gates with a vehicle at them now (on the plate or about to cross): their booms are up. */
+  busyGates(): ReadonlySet<string>;
   cap(): number;
   dispose(): void;
 }
@@ -497,6 +501,7 @@ export function createFlows(ctx: EngineContext, layout: GeneratedLayout, links: 
     }
   }
 
+  const busy = new Set<string>(), weighbridges = layout.gates.filter((g) => g.weighbridge);
   let t = 0;
   /** Per flow: its vehicles queued at the customer's bay, and whether its last one is still near the despatch bay; per gate, its queue. */
   const queuedAt = new Map<Flow, number>(), atDoor = new Set<Lot>(), laneQueue = new Map<number, number>(), gateQueue = new Map<string, number>();
@@ -545,6 +550,9 @@ export function createFlows(ctx: EngineContext, layout: GeneratedLayout, links: 
       }
       syncCoins();
       fleet.commit();
+      // which gates have a vehicle at them, for their booms (sim/activity.ts)
+      busy.clear();
+      for (const v of live) for (const g of weighbridges) if (Math.abs(v.x - g.at[0]) < BOOM_NEAR && Math.abs(v.y - g.at[1]) < BOOM_NEAR) busy.add(g.id);
     },
     setLayer(name, on) {
       // the port's movers (the ships, the rail shuttle, the quay's crane) are logistics too
@@ -567,6 +575,7 @@ export function createFlows(ctx: EngineContext, layout: GeneratedLayout, links: 
       return n;
     },
     live: () => live.length,
+    busyGates: () => busy,
     cap: () => cap,
     dispose() { for (const v of live) leaveSpan(v); live.length = 0; walkers.length = 0; ships.length = 0; fleet.dispose(); money.geometry.dispose(); root.removeFromParent(); },
   };

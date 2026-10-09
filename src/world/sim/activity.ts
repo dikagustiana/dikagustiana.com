@@ -59,10 +59,12 @@ export const FAMILY_ACTIVITY: Record<BuildingFamily, readonly ActivityKind[]> = 
 
 /** All activity and the lamps together draw in at most this many calls (PRD v2 §3.7). */
 export const ACTIVITY_BUDGET = 60;
+/** How fast a boom swings (full travel in a second and a half), and how far up it goes. */
+const BOOM_SPEED = 1 / 0.7, BOOM_LIFT = 1.35;
 /** A lamp every so many metres along a road, alternating sides; one at every lot's front. */
 const LAMP_PITCH = 44;
 
-type Model = 'puff' | 'ring' | 'dash' | 'arm' | 'haul' | 'pump-frame' | 'pump-beam' | 'loader' | 'harvester' | 'boat' | 'log-truck' | 'forklift'
+type Model = 'boom' | 'puff' | 'ring' | 'dash' | 'arm' | 'haul' | 'pump-frame' | 'pump-beam' | 'loader' | 'harvester' | 'boat' | 'log-truck' | 'forklift'
   | 'straddle' | 'shunter' | 'car' | 'ambulance' | 'plane' | 'trolley' | 'jib-tower' | 'jib-magnet' | 'hoist' | 'walker' | 'post';
 type GlowModel = 'flame' | 'kiln' | 'beacon' | 'lamp-head' | 'pool';
 
@@ -74,6 +76,8 @@ function drawActor(p: Part, m: Model): void {
   switch (m) {
     // a puff: a low ball, a unit across, faces shaded as every solid's are
     case 'puff': p.geo(PUFF, new THREE.Matrix4(), 'w'); break;
+    // a weighbridge's boom: a bar across the road from its post, white with dark bands
+    case 'boom': p.box(0, -0.15, -0.15, 10, 0.3, 0.3, 'w'); for (let k = 1; k < 10; k += 2) p.box(k, -0.17, -0.17, 1, 0.34, 0.34, 'kb'); break;
     case 'ring': {
       // a ring of unit radius, a tenth wide, flat on the water
       const n = 18, ro = 1, ri = 0.88;
@@ -142,7 +146,7 @@ export interface Activity {
   dispose(): void;
 }
 
-export function createActivity(ctx: EngineContext, layout: GeneratedLayout, sites: readonly ActivitySite[], o: { phone: boolean }): Activity {
+export function createActivity(ctx: EngineContext, layout: GeneratedLayout, sites: readonly ActivitySite[], o: { phone: boolean; busyGates?: () => ReadonlySet<string> }): Activity {
   const { scene, rng, theme } = ctx;
   const root = new THREE.Group(); root.name = 'activity'; scene.add(root);
   const near = new THREE.Group(); near.name = 'activity-near'; near.visible = false; root.add(near);
@@ -262,6 +266,13 @@ export function createActivity(ctx: EngineContext, layout: GeneratedLayout, site
   // the town's vans and cars are the flows'; the fixtures' and the blocks' lamps light every block (C2)
   const lit = new Set<string>();
 
+  // ---- the weighbridges' booms: up while a vehicle is at the gate, down when none is (PRD v2 §3.6) ----
+  const booms = layout.gates.filter((g) => g.weighbridge).map((g) => {
+    const c = Math.cos(g.heading), sn = Math.sin(g.heading);
+    return { id: g.id, x: take(slot('boom')), at: [g.at[0] - sn * 5, g.at[1] + c * 5, 1.1] as At, h: Math.atan2(-c, sn), up: 0 };
+  });
+  count('booms', booms.length);
+
   // ---- lamps: along every road, alternating sides, and one at every drawn form's front (PRD v2 §3.8) ----
   const lampAt = (x: number, y: number, h: number) => {
     statics.push({ x: take(slot('post')), at: [x, y, 0], h, scale: 1 });
@@ -360,6 +371,7 @@ export function createActivity(ctx: EngineContext, layout: GeneratedLayout, site
       pose(w.x, x, y, w.from[2], Math.atan2(w.out[1] - w.from[1], w.out[0] - w.from[0]) + (u < 0.5 ? 0 : Math.PI), VEHICLE_SCALE);
     }
     for (const h of hoists) { const k = tri((((t + h.phase) / h.period) % 1 + 1) % 1); const p = lerp3(h.from, h.to, k); pose(h.x, p[0], p[1], p[2]); }
+    for (const b of booms) pose(b.x, b.at[0], b.at[1], b.at[2], b.h, 1, b.up * BOOM_LIFT);
     for (const p of planes) {
       // taxi along the apron, take off past its end, and gone until the next
       const u = (((t + p.phase) / p.period) % 1 + 1) % 1, run = 0.55;
@@ -375,7 +387,11 @@ export function createActivity(ctx: EngineContext, layout: GeneratedLayout, site
   draw();
 
   return {
-    update(dt) { t += dt; },
+    update(dt) {
+      t += dt;
+      const busy = o.busyGates?.();
+      for (const b of booms) b.up = busy?.has(b.id) ? Math.min(1, b.up + dt * BOOM_SPEED) : Math.max(0, b.up - dt * BOOM_SPEED);
+    },
     draw,
     setLayer(name, on) { if (name === 'energy') energy.visible = on; if (name === 'cold-chain') cold.visible = on; },
     setDetail(tiny) { near.visible = !tiny && !o.phone; },

@@ -345,9 +345,9 @@ export function buildWorldScene(ctx: EngineContext, layout: GeneratedLayout, onA
   const gatesPart = new Part(ctx);
   for (const gt of layout.gates) {
     const [x, y] = gt.at, c = Math.cos(gt.heading), sn = Math.sin(gt.heading);
-    // a booth, a boom, the weighbridge plate across the road, a sign
+    // a booth, the boom's post (the boom itself swings, sim/activity.ts), the weighbridge plate across the road, a sign
     gatesPart.box(x - sn * 7 - 1.5, y + c * 7 - 1.5, 0, 3, 3, 3.2); gatesPart.box(x - sn * 7 - 1.7, y + c * 7 - 1.7, 3.2, 3.4, 3.4, 0.2);
-    gatesPart.box(x - sn * 5 - 0.2, y + c * 5 - 0.2, 0, 0.4, 0.4, 1.1); gatesPart.seg('line', W(x - sn * 5, y + c * 5, 1.1), W(x + sn * 5, y - c * 5, 1.1));
+    gatesPart.box(x - sn * 5 - 0.2, y + c * 5 - 0.2, 0, 0.4, 0.4, 1.1);
     // the weighbridge's plate is drawn with the gate's own small part below, so pointing at it finds the gate
     const L = 8, Wd = 3.4;
     if (gt.weighbridge) gatesPart.rect2(TOP(0, 0, 0.08), x - L, y - Wd, 2 * L, 2 * Wd, 'line', 0.02);

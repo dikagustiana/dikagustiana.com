@@ -121,7 +121,7 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
   ctx.flowsAt = (gateId) => { const n = flows.flowsThrough(gateId); const w = countInWords(n); return n ? `${w[0].toUpperCase()}${w.slice(1)} ${n === 1 ? 'flow crosses' : 'flows cross'} it` : 'No flow crosses it'; };
 
   // every family's activity, the lamps along the roads and the night's fires (PRD v2 §3.7, §3.8)
-  const activity: Activity = createActivity(ctx, options.layout, world.sites, { phone: !!options.reducedDetail });
+  const activity: Activity = createActivity(ctx, options.layout, world.sites, { phone: !!options.reducedDetail, busyGates: () => flows.busyGates() });
 
   // ---- the simulation step ----
   const systems: { update(dt: number): void }[] = [flows, activity];
