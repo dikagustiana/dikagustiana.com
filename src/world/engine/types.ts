@@ -223,6 +223,8 @@ export interface WorldHandle {
   /** Ride along (PRD v2 §3.10): 'story:<id>' rides a story from its first lot, a vehicle's id rides that vehicle; null lets go. */
   follow(id: string | null): void;
   following(): FollowReading | null;
+  /** A vehicle carrying a link's load ('from>to'): one on the road, laden if any is, else one sent now; null when the link moves nothing (search by load, PRD v2 §3.13). */
+  vehicleOn(key: string): string | null;
   pause(on: boolean): void;
   /** Per-frame readings for the shell's clock and readout; returns the unsubscribe. */
   subscribe(fn: (r: FrameReading) => void): () => void;

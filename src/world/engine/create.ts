@@ -256,6 +256,10 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
     lightStation: (lineId) => stations.light(lineId),
     follow: (id) => { if (!id) follow.stop(); else if (id.startsWith('story:')) followStory(id.slice(6)); else follow.start({ vehicle: id }); },
     following: () => follow.reading(),
+    vehicleOn: (key) => {
+      const on = flows.vehicles().filter((v) => v.flow.key === key);
+      return (on.find((v) => v.laden) ?? on[0] ?? flows.send(key))?.id ?? null;
+    },
     pause: (on) => { paused = on; },
     subscribe: (fn) => { subscribers.add(fn); return () => { subscribers.delete(fn); }; },
     step: (seconds) => { for (let t = 0; t < seconds; t += STEP) stepOnce(STEP); },

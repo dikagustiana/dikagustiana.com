@@ -70,6 +70,12 @@ describe('search index', () => {
     expect(searchIndex('a', []).length).toBeLessThanOrEqual(8);
     expect(searchIndex('a', [], 3).length).toBe(3);
   });
+  it('finds the stories by title and the vehicles by their load, never a link that moves nothing (PRD v2 §3.13, D6)', () => {
+    expect(searchIndex('palm', [])).toContainEqual({ kind: 'story', id: 'palm', title: 'Palm', detail: 'Story' });
+    const coal = searchIndex('coal fired', []).find((h) => h.kind === 'load');
+    expect(coal).toMatchObject({ kind: 'load', id: 'A121>J411', title: 'Coal fired in power generation' });
+    expect(searchIndex('electricity for', []).some((h) => h.kind === 'load')).toBe(false);
+  });
   it('finds a think-tank piece by title', () => {
     const piece = { slug: 'x', title: 'Cold storage capacity', section: 'next-big-thing', date: null, phase: null, room: 'next-big-thing', kind: 'thesis' as const, tags: [], evidence: [], falsifier: null, tagged: false };
     expect(searchIndex('storage cap', [piece])).toEqual([{ kind: 'piece', id: 'x', title: 'Cold storage capacity', detail: 'Think tank' }]);

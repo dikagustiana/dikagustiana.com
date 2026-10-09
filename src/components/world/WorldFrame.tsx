@@ -218,7 +218,12 @@ export default function WorldFrame({ variant, heading, boardTicker = null, onBoa
   return (
     <div className="world-frame" data-world="on" data-ready={ready}>
       <FrameHeader heading={heading} variant={variant} phone={phone} coverage={coverageLine(data.state, data.covered)} view={view} ready={ready} distance={distance} overlay={overlay} layers={layers} stories={STORIES} story={story} on={controls}
-        search={<Search pieces={pieces} onPick={(hit) => { if (hit.kind === 'piece') act({ type: 'open-piece', slug: hit.id }); else act({ type: 'select', id: hit.id }); }} />} />
+        search={<Search pieces={pieces} onPick={(hit) => {
+          if (hit.kind === 'piece') act({ type: 'open-piece', slug: hit.id });
+          else if (hit.kind === 'story') act({ type: 'story', id: hit.id });
+          else if (hit.kind === 'load') { const id = handle.current?.vehicleOn(hit.id); if (id) act({ type: 'select', id }); }
+          else act({ type: 'select', id: hit.id });
+        }} />} />
       <div className="world-frame__stage" onPointerDown={() => void mount()} onKeyDown={(e) => {
           void mount();
           // S lights the stories in turn, then none (PRD v2 §3.10)

@@ -90,3 +90,18 @@ describe('the governance and regulation pulses (PRD v2 §3.6, §3.12, D5)', () =
     expect(scene.getObjectByName('pulses-governance')!.visible).toBe(false);
   });
 });
+
+describe('search by load (PRD v2 §3.13, D6)', () => {
+  beforeEach(installWorldStubs);
+  afterEach(disposeWorlds);
+
+  it('finds a vehicle carrying a link’s load, sending one when none is on the road, and none for a link that moves nothing', async () => {
+    const { handle } = await mountWorld();
+    const id = handle.vehicleOn('A121>J411')!;
+    expect(window.world!.all().find((e) => e.id === id)!.facts!.link).toBe('A121>J411');
+    // the shops' recovery link: one on the road, or one sent now
+    const sent = handle.vehicleOn('D113>C222')!;
+    expect(window.world!.all().find((e) => e.id === sent)!.facts!.link).toBe('D113>C222');
+    expect(handle.vehicleOn('J411>B121')).toBeNull();
+  });
+});
