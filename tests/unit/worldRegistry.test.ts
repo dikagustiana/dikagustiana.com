@@ -19,6 +19,7 @@ import { CHAIN_IDS, EXPECTED, RegistryError, generate, type Sources } from '@/li
 import { REGISTRY, SUB_INDUSTRIES } from '@/lib/world/registry/subindustries.generated';
 import { LINKS } from '@/lib/world/registry/links.generated';
 import { isMeasured } from '@/lib/finance-in-action/contract/links';
+import { assertNoFigure } from '@/world/engine/kernel/part';
 
 const ROOT = path.resolve(__dirname, '../..');
 const SRC = path.join(ROOT, 'docs/world/sources');
@@ -77,6 +78,20 @@ describe('the registry', () => {
         demandShare: l.demandShare ? { value: l.demandShare.value, period: l.demandShare.period, source: l.demandShare.source } : null })).toBe(true);
     }
     expect(REGISTRY.links).toBe(LINKS);
+  });
+
+  it('says what every company does in one line with no figure, sourced, and lists every line for the owner (PRD v2 §4.1)', () => {
+    const companies = SUB_INDUSTRIES.flatMap((s) => s.companies);
+    expect(companies.length).toBeGreaterThan(150);
+    for (const c of companies) {
+      expect(c.does, c.ticker).toMatch(/^[A-Z].{8,140}\.$/);
+      expect(() => assertNoFigure(c.does!), c.ticker).not.toThrow();
+      expect(c.doesSource, c.ticker).toMatch(/annual report/);
+      expect(c.source ?? '', c.ticker).not.toContain('description:');
+    }
+    const review = fs.readFileSync(path.join(ROOT, 'docs/world/v2/review-does.md'), 'utf8');
+    for (const c of companies) expect(review, c.ticker).toContain(`| ${c.ticker} |`);
+    expect(generate(sources()).files.reviewDoesMd).toBe(review);
   });
 
   it('exposes the two default rooms on and the two switchable rooms off', () => {

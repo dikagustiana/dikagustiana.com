@@ -42,14 +42,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Medco Energi Internasional Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 12 October 1994): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Explores for and produces oil and natural gas, and holds interests in power generation and in copper and gold mining.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "SUGI",
         "name": "Sugih Energy Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 19 June 2002): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Holds interests in oil and gas exploration and production blocks.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report; its current business to be confirmed"
       }
     ],
     "archetypeFallback": "MINE",
@@ -89,14 +93,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Capitalinc Investment Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 16 April 1990): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Holds investments in oil and gas exploration and production.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report; its current business to be confirmed"
       },
       {
         "ticker": "AKRA",
         "name": "AKR Corporindo Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 3 October 1994): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Distributes fuel and basic chemicals from its own tank terminals, and develops an industrial estate with a port.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "DIST",
@@ -136,14 +144,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Bukit Asam Tbk",
         "status": "proposed",
         "reason": "FSRE first slate (mining archetype, after INTP and SMGR)",
-        "source": "src/data/finance-in-action/fixtures/slate.json; PRD §2.2"
+        "source": "src/data/finance-in-action/fixtures/slate.json; PRD §2.2",
+        "does": "Mines coal and sells it to power plants and industry at home and abroad, and generates electricity from coal.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "ITMG",
         "name": "Indo Tambangraya Megah Tbk",
         "status": "proposed",
         "reason": "FSRE first slate (mining archetype, after INTP and SMGR)",
-        "source": "src/data/finance-in-action/fixtures/slate.json; PRD §2.2"
+        "source": "src/data/finance-in-action/fixtures/slate.json; PRD §2.2",
+        "does": "Mines thermal coal and sells it to power plants and industrial buyers across Asia.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "MINE",
@@ -183,14 +195,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Rig Tenders Indonesia Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 26 March 1990): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Provides tugs, barges and offshore vessels that carry coal and other cargo by sea.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report; its current business to be confirmed"
       },
       {
         "ticker": "CNKO",
         "name": "Exploitasi Energi Indonesia Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 20 November 2001): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Trades and transports coal, and holds coal mining concessions.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report; its current business to be confirmed"
       }
     ],
     "archetypeFallback": "DIST",
@@ -230,14 +246,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Elnusa Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 6 February 2008): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Provides oil and gas services: seismic surveys, drilling and well services, and the distribution of fuel.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "APEX",
         "name": "Apexindo Pratama Duta Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 5 June 2013): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Operates onshore and offshore drilling rigs for oil and gas producers.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "MINE",
@@ -277,14 +297,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Petrosea Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 21 May 1990): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Provides mining contracting, engineering and construction services to miners and the oil and gas industry.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "ITMA",
         "name": "Sumber Energi Andalan Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 10 December 1990): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Holds investments in coal mining services.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report; its current business to be confirmed"
       }
     ],
     "archetypeFallback": "MINE",
@@ -324,14 +348,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Sky Energy Indonesia Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 28 March 2018): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Makes and installs solar panels and solar power systems.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "SEMA",
         "name": "Semacom Integrated Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 10 January 2022): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Supplies electrical equipment and power panels for industrial and utility installations.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report; its current business to be confirmed"
       }
     ],
     "archetypeFallback": "PROC",
@@ -371,7 +399,9 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Eterindo Wahanatama Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 16 May 1997): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Produces chemicals and biodiesel from palm oil derivatives.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report; its current business to be confirmed"
       }
     ],
     "archetypeFallback": "PROC",
@@ -411,14 +441,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Unggul Indah Cahaya Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 6 November 1989): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Produces alkylbenzene, the base chemical for detergents.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "INCI",
         "name": "Intanwijaya Internasional Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 24 July 1990): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Produces formaldehyde and the resins used in wood panels and adhesives.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "PROC",
@@ -458,14 +492,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Saraswanti Anugerah Makmur Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 31 March 2020): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Produces and sells fertilisers for plantations and farms.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "NPGF",
         "name": "Nusa Palapa Gemilang Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 14 April 2021): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Produces and sells organic and compound fertilisers.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report; its current business to be confirmed"
       }
     ],
     "archetypeFallback": "PROC",
@@ -505,14 +543,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Duta Pertiwi Nusantara Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 8 August 1990): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Produces adhesives, resins and chemicals for the wood-panel industry.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report; its current business to be confirmed"
       },
       {
         "ticker": "EKAD",
         "name": "Ekadharma International Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 14 August 1990): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Makes and distributes adhesive tapes for packaging and industry.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "PROC",
@@ -552,14 +594,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Indocement Tunggal Prakarsa Tbk",
         "status": "proposed",
         "reason": "FSRE first slate: the reference build",
-        "source": "src/data/finance-in-action/fixtures/slate.json; PRD §2.2"
+        "source": "src/data/finance-in-action/fixtures/slate.json; PRD §2.2",
+        "does": "Produces and sells cement, ready-mix concrete and aggregates.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "SMGR",
         "name": "Semen Indonesia (Persero) Tbk",
         "status": "proposed",
         "reason": "FSRE first slate, second cement model",
-        "source": "src/data/finance-in-action/fixtures/slate.json; PRD §2.2"
+        "source": "src/data/finance-in-action/fixtures/slate.json; PRD §2.2",
+        "does": "Produces and sells cement and other building materials from plants across the country.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "PROC",
@@ -599,14 +645,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Berlina Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 6 November 1989): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Makes plastic packaging: bottles, tubes and containers for makers of consumer goods.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "TRST",
         "name": "Trias Sentosa Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 2 July 1990): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Produces plastic films for flexible packaging.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "PROC",
@@ -646,14 +696,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Alakasa Industrindo Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 12 July 1990): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Trades and processes aluminium products.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report; its current business to be confirmed"
       },
       {
         "ticker": "INAI",
         "name": "Indal Aluminium Industry Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 5 December 1994): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Extrudes and fabricates aluminium profiles for building and industry.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "PROC",
@@ -693,14 +747,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Tembaga Mulia Semanan Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 23 May 1990): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Produces copper rod and wire for cable makers.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "AMMN",
         "name": "Amman Mineral Internasional Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 7 July 2023): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Mines copper and gold ore and smelts its own concentrate.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "MINE",
@@ -740,14 +798,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "J Resources Asia Pasifik Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 22 April 2003): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Mines and processes gold ore.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "SQMI",
         "name": "Wilton Makmur Indonesia Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 15 July 2004): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Holds a gold mining concession and processes gold ore.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report; its current business to be confirmed"
       }
     ],
     "archetypeFallback": "MINE",
@@ -787,14 +849,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Citra Tubindo Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 28 November 1989): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Makes and threads steel pipes for oil and gas wells.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "LMSH",
         "name": "Lionmesh Prima Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 4 June 1990): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Makes welded steel wire mesh for concrete construction.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "PROC",
@@ -866,14 +932,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Vale Indonesia Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 16 May 1990): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Mines nickel ore and smelts it into nickel matte.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "TINS",
         "name": "Timah (Persero) Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 19 October 1995): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Mines and smelts tin and sells refined tin.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "MINE",
@@ -945,14 +1015,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "SLJ Global Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 21 March 1994): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Produces timber and wood panels from forest concessions.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report; its current business to be confirmed"
       },
       {
         "ticker": "TIRT",
         "name": "Tirta Mahakam Resources Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 13 December 1999): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Produces plywood and wood products.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report; its current business to be confirmed"
       }
     ],
     "archetypeFallback": "FARM",
@@ -992,14 +1066,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Inter Delta Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 18 December 1989): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Distributes photographic and imaging paper and supplies.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report; its current business to be confirmed"
       },
       {
         "ticker": "TKIM",
         "name": "Pabrik Kertas Tjiwi Kimia Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 3 April 1990): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Produces paper, stationery and paper packaging.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "PROC",
@@ -1039,14 +1117,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Indo Komoditi Korpora Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 6 September 2016): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Trades commodities and wood products.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report; its current business to be confirmed"
       },
       {
         "ticker": "KMTR",
         "name": "Kirana Megatara Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 19 June 2017): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Processes natural rubber into crumb rubber for tyre makers.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "FARM",
@@ -1118,14 +1200,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Surya Toto Indonesia Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 30 October 1990): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Makes sanitary ware and plumbing fittings.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "MLIA",
         "name": "Mulia Industrindo Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 17 January 1994): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Makes glass containers, float glass and ceramic tiles.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report; its current business to be confirmed"
       }
     ],
     "archetypeFallback": "PROC",
@@ -1165,14 +1251,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Supreme Cable Manufacturing & Commerce Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 20 July 1982): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Makes power, telecommunication and other cables.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "VOKS",
         "name": "Voksel Electric Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 20 December 1990): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Makes power and telecommunication cables.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "PROC",
@@ -1244,14 +1334,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "United Tractors Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 19 September 1989): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Sells and services heavy equipment, contracts coal mining and owns mines.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "INTA",
         "name": "Intraco Penta Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 23 August 1993): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Sells, rents and services heavy equipment.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "PROC",
@@ -1323,14 +1417,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Arita Prima Indonesia Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 29 October 2013): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Distributes industrial valves and flow-control equipment.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "AMIN",
         "name": "Ateliers Mecaniques D'Indonesie Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 10 December 2015): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Fabricates machinery and steel structures for industrial plants.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report; its current business to be confirmed"
       }
     ],
     "archetypeFallback": "PROC",
@@ -1370,14 +1468,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Tira Austenite Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 27 July 1993): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Distributes industrial gases, welding equipment and engineering products.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report; its current business to be confirmed"
       },
       {
         "ticker": "TRIL",
         "name": "Triwira Insanlestari Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 28 January 2008): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Trades industrial products.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report; its current business to be confirmed"
       }
     ],
     "archetypeFallback": "DIST",
@@ -1417,7 +1519,9 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Jasuindo Tiga Perkasa Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 16 April 2002): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Prints security documents, cards and business forms.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "SERVICE",
@@ -1457,14 +1561,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Ecocare Indo Pasifik Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 13 February 2024): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Provides hygiene and pest-control services and products for buildings.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "MHKI",
         "name": "Multi Hanna Kreasindo Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 16 April 2024): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Provides waste management and environmental services.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report; its current business to be confirmed"
       }
     ],
     "archetypeFallback": "PROC",
@@ -1504,14 +1612,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Modern Internasional Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 16 July 1991): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Distributes office equipment and imaging supplies.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report; its current business to be confirmed"
       },
       {
         "ticker": "LION",
         "name": "Lion Metal Works Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 20 August 1993): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Makes steel office furniture, storage racks and building products.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "SERVICE",
@@ -1551,14 +1663,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Astra Graphia Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 15 November 1989): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Provides document solutions, office equipment and information technology services.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "ICON",
         "name": "Island Concepts Indonesia Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 8 July 2005): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Provides office interior fit-out and business support services.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report; its current business to be confirmed"
       }
     ],
     "archetypeFallback": "SERVICE",
@@ -1598,14 +1714,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Shield On Service Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 6 November 2018): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Provides outsourced staff, security and facility services.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "PADA",
         "name": "Personel Alih Daya Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 8 December 2022): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Provides outsourced staff and recruitment services.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "SERVICE",
@@ -1645,14 +1765,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Tanah Laut Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 17 May 2001): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Provides consulting and business support services.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report; its current business to be confirmed"
       },
       {
         "ticker": "CRSN",
         "name": "Carsurin Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 10 July 2023): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Provides inspection, testing and certification services for commodities.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "SERVICE",
@@ -1692,14 +1816,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Bakrie & Brothers Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 28 August 1989): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Holds businesses in building materials, manufacturing and infrastructure.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "MLPL",
         "name": "Multipolar Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 6 November 1989): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Holds businesses in retail, technology and media.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "SERVICE",
@@ -1739,14 +1867,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Millennium Pharmacon International Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 7 May 1990): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Distributes medicines and health products to pharmacies and hospitals.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "EPMT",
         "name": "Enseval Putera Megatrading Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 1 August 1994): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Distributes medicines, consumer health products and medical devices.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "DIST",
@@ -1786,14 +1918,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Wicaksana Overseas International Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 8 August 1994): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Distributes food and consumer goods to retailers.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "PCAR",
         "name": "Prima Cakrawala Abadi Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 29 December 2017): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Processes and distributes crab meat and seafood.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report; its current business to be confirmed"
       }
     ],
     "archetypeFallback": "DIST",
@@ -1833,14 +1969,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "DFI Retail Nusantara Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 21 August 1989): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Runs supermarkets, health and beauty stores and home furnishing stores.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "MPPA",
         "name": "Matahari Putra Prima Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 21 December 1992): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Runs hypermarkets and supermarkets.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "DIST",
@@ -1880,14 +2020,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Multi Bintang Indonesia Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 15 December 1981): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Brews and sells beer and soft drinks.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "DLTA",
         "name": "Delta Djakarta Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 27 February 1984): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Brews and sells beer.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "PROC",
@@ -1927,14 +2071,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Akasha Wira International Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 13 June 1994): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Makes bottled drinking water and personal care products.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "ALTO",
         "name": "Tri Banyan Tirta Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 10 July 2012): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Makes bottled drinking water.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "PROC",
@@ -1974,14 +2122,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Ultrajaya Milk Industry & Trading Company Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 2 July 1990): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Makes long-life milk, tea and juice drinks.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "CAMP",
         "name": "Campina Ice Cream Industry Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 19 December 2017): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Makes and sells ice cream.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "PROC",
@@ -2021,14 +2173,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Tigaraksa Satria Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 11 June 1990): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Distributes consumer products and makes infant nutrition products.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report; its current business to be confirmed"
       },
       {
         "ticker": "MYOR",
         "name": "Mayora Indah Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 4 July 1990): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Makes biscuits, confectionery, coffee and other packaged foods and drinks.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "PROC",
@@ -2068,14 +2224,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Japfa Comfeed Indonesia Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 23 October 1989): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Makes animal feed and breeds and processes poultry, cattle and fish.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "CPIN",
         "name": "Charoen Pokphand Indonesia Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 18 March 1991): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Makes animal feed, breeds day-old chicks and processes chicken.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "FARM",
@@ -2115,14 +2275,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Bakrie Sumatera Plantations Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 6 March 1990): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Grows oil palm and rubber and processes them into palm oil and rubber.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "SMAR",
         "name": "Sinar Mas Agro Resources and Technology Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 20 November 1992): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Grows oil palm and refines palm oil into cooking oil, margarine and fats.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "FARM",
@@ -2162,14 +2326,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Hanjaya Mandala Sampoerna Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 15 August 1990): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Makes and sells cigarettes.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "GGRM",
         "name": "Gudang Garam Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 27 August 1990): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Makes and sells clove cigarettes.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "PROC",
@@ -2241,14 +2409,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Unilever Indonesia Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 11 January 1982): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Makes and sells personal care, home care and food products.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "TCID",
         "name": "Mandom Indonesia Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 30 September 1993): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Makes hair care, skin care and cosmetic products.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "PROC",
@@ -2288,14 +2460,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Multi Prima Sejahtera Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 5 February 1990): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Makes spark plugs and automotive components.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report; its current business to be confirmed"
       },
       {
         "ticker": "INDS",
         "name": "Indospring Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 10 August 1990): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Makes leaf and coil springs for vehicles.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "PROC",
@@ -2335,14 +2511,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Goodyear Indonesia Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 22 December 1980): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Makes tyres.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "GJTL",
         "name": "Gajah Tunggal Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 8 May 1990): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Makes tyres, inner tubes and tyre cord.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "PROC",
@@ -2446,14 +2626,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Gema Grahasarana Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 12 August 2002): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Makes furniture and interior fit-outs.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "CINT",
         "name": "Chitose Internasional Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 27 June 2014): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Makes chairs and furniture.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "PROC",
@@ -2493,7 +2677,9 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Selaras Citra Nusantara Perkasa Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 7 September 2020): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Makes small household appliances.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "PROC",
@@ -2533,14 +2719,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Kedaung Indah Can Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 28 October 1993): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Makes enamelled and stainless steel kitchenware.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "LMPI",
         "name": "Langgeng Makmur Industri Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 17 October 1994): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Makes plastic and aluminium housewares.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "PROC",
@@ -2580,7 +2770,9 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Global Sukses Digital Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 7 August 2024): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Sells consumer electronics.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report; its current business to be confirmed"
       }
     ],
     "archetypeFallback": "PROC",
@@ -2620,14 +2812,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Inti Agri Resources Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 14 October 2002): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Breeds and sells ornamental fish.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "TOYS",
         "name": "Sunindo Adipersada Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 6 August 2020): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Makes and sells toys and children's products.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report; its current business to be confirmed"
       }
     ],
     "archetypeFallback": "PROC",
@@ -2667,14 +2863,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Pan Brothers Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 16 August 1990): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Makes garments for international apparel brands.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "ERTX",
         "name": "Eratex Djaja Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 21 August 1990): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Makes garments and textiles.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "PROC",
@@ -2714,14 +2914,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Sepatu Bata Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 24 March 1982): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Makes and sells footwear.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "BIMA",
         "name": "Primarindo Asia Infrastructure Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 30 August 1994): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Makes footwear.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report; its current business to be confirmed"
       }
     ],
     "archetypeFallback": "PROC",
@@ -2761,14 +2965,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Century Textile Industry Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 22 May 1979): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Makes woven textiles.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "TFCO",
         "name": "Tifico Fiber Indonesia Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 26 February 1980): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Makes polyester fibre and yarn.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "PROC",
@@ -2840,14 +3048,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Jakarta International Hotels & Development Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 29 February 1984): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Owns and runs hotels and develops property.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "PNSE",
         "name": "Pudjiadi & Sons Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 1 May 1990): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Owns and runs hotels.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "SERVICE",
@@ -2887,14 +3099,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Bayu Buana Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 30 October 1989): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Sells travel, tours and airline tickets.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "PANR",
         "name": "Panorama Sentrawisata Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 18 September 2001): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Sells travel and tour packages and runs transport and hotel services.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "SERVICE",
@@ -2934,14 +3150,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Pembangunan Jaya Ancol Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 2 July 2004): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Runs a seaside recreation park with its beaches and attractions.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "BLTZ",
         "name": "Graha Layar Prima Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 10 April 2014): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Runs cinemas.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "SERVICE",
@@ -2981,14 +3201,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Fast Food Indonesia Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 11 May 1993): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Runs fast-food restaurants under an international franchise.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "PTSP",
         "name": "Pioneerindo Gourmet International Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 30 May 1994): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Runs fried chicken and noodle restaurants.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "SERVICE",
@@ -3028,14 +3252,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Idea Indonesia Akademi Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 9 September 2021): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Runs vocational and professional courses.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report; its current business to be confirmed"
       },
       {
         "ticker": "BMBL",
         "name": "Lavender Bina Cendikia Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 11 January 2023): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Runs preschools and schools.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report; its current business to be confirmed"
       }
     ],
     "archetypeFallback": "SERVICE",
@@ -3107,14 +3335,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Fortune Indonesia Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 17 January 2002): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Provides advertising and public relations services.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "FUTR",
         "name": "Futura Energi Global Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 27 February 2023): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Provides advertising services.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report; its current business to be confirmed"
       }
     ],
     "archetypeFallback": "SERVICE",
@@ -3154,14 +3386,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Surya Citra Media Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 16 July 2002): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Runs free-to-air television channels and digital media.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "MNCN",
         "name": "Media Nusantara Citra Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 22 June 2007): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Runs free-to-air television channels and produces their content.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "SERVICE",
@@ -3201,14 +3437,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "MNC Sky Vision Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 9 July 2012): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Provides pay television by satellite.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "IPTV",
         "name": "MNC Vision Networks Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 8 July 2019): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Provides pay television and broadband services.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "SERVICE",
@@ -3248,14 +3488,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Tempo Inti Media Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 8 January 2001): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Publishes news magazines and websites.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "ABBA",
         "name": "Mahaka Media Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 3 April 2002): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Publishes newspapers and runs radio and other media.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "SERVICE",
@@ -3295,14 +3539,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "MNC Digital Entertainment Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 8 June 2018): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Produces and distributes television and film content.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "FILM",
         "name": "MD Entertainment Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 7 August 2018): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Produces films and television series.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "SERVICE",
@@ -3342,14 +3590,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Mitra Komunikasi Nusantara Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 26 October 2015): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Distributes mobile phones and prepaid vouchers.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report; its current business to be confirmed"
       },
       {
         "ticker": "YELO",
         "name": "Yelooo Integra Datanet Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 29 October 2018): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Rents mobile internet devices and sells telecommunication products.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report; its current business to be confirmed"
       }
     ],
     "archetypeFallback": "DIST",
@@ -3421,14 +3673,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "MDS Retailing Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 9 October 1989): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Runs department stores.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "SONA",
         "name": "Sona Topas Tourism Industry Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 21 July 1992): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Runs duty-free shops and stores at airports.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report; its current business to be confirmed"
       }
     ],
     "archetypeFallback": "DIST",
@@ -3468,14 +3724,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Mitra Adiperkasa Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 10 November 2004): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Runs stores for international apparel, sports and lifestyle brands, and cafés.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "MAPA",
         "name": "MAP Aktif Adiperkasa Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 5 July 2018): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Runs sports, footwear and children's apparel stores.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "DIST",
@@ -3515,14 +3775,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Trikomsel Oke Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 14 April 2009): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Sells mobile phones and accessories.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report; its current business to be confirmed"
       },
       {
         "ticker": "ERAA",
         "name": "Erajaya Swasembada Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 14 December 2011): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Distributes and sells mobile phones, computers and accessories.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "DIST",
@@ -3562,14 +3826,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Aspirasi Hidup Indonesia Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 6 November 2007): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Runs home improvement and lifestyle stores.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "CSAP",
         "name": "Catur Sentosa Adiprana Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 12 December 2007): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Distributes building materials and runs home improvement stores.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "DIST",
@@ -3641,14 +3909,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Indomobil Sukses Internasional Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 15 November 1993): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Assembles, distributes and sells vehicles and finances their purchase.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "MPMX",
         "name": "Mitra Pinasthika Mustika Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 29 May 2013): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Distributes and sells motorcycles and spare parts, and rents cars.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "DIST",
@@ -3688,7 +3960,9 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Esa Medika Mandiri Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 8 July 2026): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Distributes medical equipment.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report; its current business to be confirmed"
       }
     ],
     "archetypeFallback": "PROC",
@@ -3728,14 +4002,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Itama Ranoraya Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 15 October 2019): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Distributes medical devices and supplies, syringes among them.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "MEDS",
         "name": "Hetzer Medical Indonesia Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 10 August 2022): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Makes and distributes medical supplies.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report; its current business to be confirmed"
       }
     ],
     "archetypeFallback": "DIST",
@@ -3775,14 +4053,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Sejahteraraya Anugrahjaya Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 11 April 2011): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Runs hospitals.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "SAME",
         "name": "Sarana Meditama Metropolitan Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 11 January 2013): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Runs hospitals.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "SERVICE",
@@ -3822,14 +4104,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Merck Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 23 July 1981): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Makes and sells medicines and health products.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "SCPI",
         "name": "Organon Pharma Indonesia Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 8 June 1990): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Makes and sells prescription medicines.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "PROC",
@@ -3901,14 +4187,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Bank Pan Indonesia Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 29 December 1982): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Takes deposits and lends to businesses and households.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "BNII",
         "name": "Bank Maybank Indonesia Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 21 November 1989): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Takes deposits and lends to businesses and households.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "SERVICE",
@@ -3948,14 +4238,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Buana Finance Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 7 May 1990): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Finances vehicles and equipment through leases and loans.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "BFIN",
         "name": "BFI Finance Indonesia Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 16 May 1990): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Lends to households and small businesses against vehicles and property.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "SERVICE",
@@ -4059,7 +4353,9 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Ashmore Asset Management Indonesia Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 14 January 2020): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Manages mutual funds and investment portfolios.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "SERVICE",
@@ -4099,14 +4395,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Trimegah Sekuritas Indonesia Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 31 January 2000): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Brokers securities, underwrites issues and manages investments.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "PANS",
         "name": "Panin Sekuritas Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 31 May 2000): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Brokers securities and underwrites issues.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "SERVICE",
@@ -4242,14 +4542,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Paninvest Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 20 September 1983): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Holds investments in insurance and banking.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report; its current business to be confirmed"
       },
       {
         "ticker": "ABDA",
         "name": "Asuransi Bina Dana Arta Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 6 July 1989): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Sells general insurance.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "SERVICE",
@@ -4289,14 +4593,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Panin Financial Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 14 June 1993): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Holds life insurance and other financial businesses.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "JMAS",
         "name": "Asuransi Jiwa Syariah Jasa Mitra Abadi Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 18 December 2017): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Sells sharia life insurance.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "SERVICE",
@@ -4336,7 +4644,9 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Maskapai Reasuransi Indonesia Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 4 September 1989): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Provides reinsurance to insurers.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "SERVICE",
@@ -4376,14 +4686,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Equity Development Investment Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 13 October 1989): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Holds financial services businesses in insurance and finance.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report; its current business to be confirmed"
       },
       {
         "ticker": "POOL",
         "name": "Pool Advista Indonesia Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 20 May 1991): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Holds investments in financial services.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report; its current business to be confirmed"
       }
     ],
     "archetypeFallback": "SERVICE",
@@ -4423,14 +4737,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Lenox Pasifik Investama Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 28 March 1994): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Holds investments.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report; its current business to be confirmed"
       },
       {
         "ticker": "DNET",
         "name": "Indoritel Makmur Internasional Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 11 December 2000): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Holds investments in retail, food and telecommunication businesses.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "SERVICE",
@@ -4470,14 +4788,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Pakuwon Jati Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 9 October 1989): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Develops and runs shopping malls, offices, hotels and housing.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "LPLI",
         "name": "Star Pacific Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 23 October 1989): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Holds investments in property and media.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report; its current business to be confirmed"
       }
     ],
     "archetypeFallback": "ASSET",
@@ -4517,7 +4839,9 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Royalindo Investa Wijaya Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 13 January 2020): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Develops property and provides property services.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report; its current business to be confirmed"
       }
     ],
     "archetypeFallback": "SERVICE",
@@ -4557,14 +4881,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Quantum Clovera Investama Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 28 June 2002): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Holds investments in digital and financial services.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report; its current business to be confirmed"
       },
       {
         "ticker": "EMTK",
         "name": "Elang Mahkota Teknologi Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 12 January 2010): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Holds media, digital services and technology businesses.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "SERVICE",
@@ -4604,14 +4932,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Limas Indonesia Makmur Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 28 December 2001): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Provides information technology and network services.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report; its current business to be confirmed"
       },
       {
         "ticker": "MLPT",
         "name": "Multipolar Technology Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 8 July 2013): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Provides information technology systems and services to businesses.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "SERVICE",
@@ -4651,14 +4983,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Northcliff Citranusa Indonesia Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 7 July 2010): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Develops software.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report; its current business to be confirmed"
       },
       {
         "ticker": "RUNS",
         "name": "Global Sukses Solusi Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 8 September 2021): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Develops software for businesses.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "SERVICE",
@@ -4698,14 +5034,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Sat Nusapersada Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 8 November 2007): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Assembles electronic products under contract.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "MSTI",
         "name": "Mastersystem Infotama Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 8 November 2023): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Supplies and installs network and information technology infrastructure.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "PROC",
@@ -4745,14 +5085,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Metrodata Electronics Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 9 April 1990): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Distributes computers and IT products and provides IT services.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "LUCK",
         "name": "Sentral Mitra Informatika Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 28 November 2018): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Sells and services printers and office imaging equipment.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report; its current business to be confirmed"
       }
     ],
     "archetypeFallback": "PROC",
@@ -4792,14 +5136,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Galva Technologies Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 23 December 2019): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Distributes electronic and computing equipment.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report; its current business to be confirmed"
       },
       {
         "ticker": "CHIP",
         "name": "Pelita Teknologi Global Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 8 February 2023): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Distributes electronic components.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report; its current business to be confirmed"
       }
     ],
     "archetypeFallback": "PROC",
@@ -4871,14 +5219,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Cahaya Aero Services Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 5 December 2011): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Provides ground handling and aviation services at airports.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "GMFI",
         "name": "Garuda Maintenance Facility Aero Asia Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 10 October 2017): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Maintains and repairs aircraft and their engines.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "ASSET",
@@ -4918,14 +5270,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Citra Marga Nusaphala Persada Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 10 January 1995): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Builds and runs toll roads.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "META",
         "name": "Nusantara Infrastructure Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 18 July 2001): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Invests in and runs toll roads and other infrastructure.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report; its current business to be confirmed"
       }
     ],
     "archetypeFallback": "ASSET",
@@ -4965,14 +5321,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Meratus Jasa Prima Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 20 December 1994): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Provides port and stevedoring services.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report; its current business to be confirmed"
       },
       {
         "ticker": "PORT",
         "name": "Nusantara Pelabuhan Handal Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 16 March 2017): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Runs container terminals and port services.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "ASSET",
@@ -5012,14 +5372,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Surya Semesta Internusa Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 27 March 1997): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Builds buildings and infrastructure, develops industrial estates and runs hotels.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "ADHI",
         "name": "Adhi Karya (Persero) Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 18 March 2004): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Builds infrastructure and buildings and develops property.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "ASSET",
@@ -5059,14 +5423,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "First Media Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 25 February 2000): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Provides cable television and broadband.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report; its current business to be confirmed"
       },
       {
         "ticker": "LINK",
         "name": "Link Net Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 2 June 2014): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Provides broadband internet and cable television over its own fibre network.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "ASSET",
@@ -5106,7 +5474,9 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Telkom Indonesia (Persero) Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 14 November 1995): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Provides fixed and mobile telephone, internet and data services.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "ASSET",
@@ -5146,14 +5516,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Indosat Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 19 October 1994): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Provides mobile telephone and data services.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "CENT",
         "name": "Centratama Telekomunikasi Indonesia Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 1 November 2001): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Owns and leases telecommunication towers.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "ASSET",
@@ -5193,14 +5567,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Leyand International Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 17 July 2001): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Generates electricity.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report; its current business to be confirmed"
       },
       {
         "ticker": "POWR",
         "name": "Cikarang Listrindo Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 14 June 2016): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Generates electricity and sells it to industrial estates and the state utility.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "ASSET",
@@ -5240,7 +5618,9 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Himalaya Energi Perkasa Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 12 April 2004): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Distributes gas.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report; its current business to be confirmed"
       }
     ],
     "archetypeFallback": "ASSET",
@@ -5312,14 +5692,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "AirAsia Indonesia Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 8 December 1994): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Flies passengers on short-haul routes as a low-cost airline.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "GIAA",
         "name": "Garuda Indonesia (Persero) Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 11 February 2011): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Flies passengers and cargo on domestic and international routes.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "ASSET",
@@ -5423,14 +5807,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Steady Safe Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 15 August 1994): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Runs buses and land transport services.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report; its current business to be confirmed"
       },
       {
         "ticker": "WEHA",
         "name": "WEHA Transportasi Indonesia Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 31 May 2007): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Runs tourist buses and passenger transport.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "ASSET",
@@ -5470,14 +5858,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "name": "Berlian Laju Tanker Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 26 March 1990): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Carries oil, gas and chemicals by tanker.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "MIRA",
         "name": "Mitra International Resources Tbk",
         "status": "proposed",
         "reason": "earliest-listed issuer in the sub-industry (IPO 30 January 1997): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)"
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Provides logistics and transport services.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report; its current business to be confirmed"
       }
     ],
     "archetypeFallback": "DIST",

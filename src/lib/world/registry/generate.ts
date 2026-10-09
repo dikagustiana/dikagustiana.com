@@ -18,7 +18,10 @@
  *   - example pairs: the owner's companies.tsv first, then the two
  *     earliest-listed issuers of the sub-industry from the snapshot, marked
  *     proposed with the rule as the reason; a sub-industry absent from the
- *     snapshot gets "not yet counted" and no proposal.
+ *     snapshot gets "not yet counted" and no proposal;
+ *   - what each company does (PRD v2 §4.1): companies.tsv's `does` column,
+ *     one line with no figure, its source after " | description: " in the
+ *     source column; review-does.md lists every line for the owner.
  */
 import { createHash } from 'node:crypto';
 import { BANDS, BORDERS, BYPRODUCT, NODES, NON_PHYSICAL, RETAIL, RETAIL_GROUP, RETURNS, STAGES } from '../../../data/industryChain.ts';
@@ -67,12 +70,15 @@ export interface Generated {
   links: Link[];
   rooms: readonly Room[];
   counts: { subSectors: number; industries: number; subIndustries: number; placed: number; links: number; proposedPlacements: number; proposedCompanies: number; emptySlots: number };
-  files: { subIndustriesTs: string; linksTs: string; reviewMd: string };
+  files: { subIndustriesTs: string; linksTs: string; reviewMd: string; reviewDoesMd: string };
 }
 
 export class RegistryError extends Error {
   constructor(message: string) { super(message); this.name = 'RegistryError'; }
 }
+
+/** A figure in a does line: an amount, a percentage, a decimal, a magnitude word or a bare number of four digits or more (as Part.text's guard). */
+const DOES_FIGURE = /\b(?:Rp|IDR|USD|US\$)\s?-?\d|\d\s?%|\d[.,]\d|\d\s?(?:bn|mn|tn|rb|jt|k|m|b|t|juta|ribu|miliar|triliun|thousand|million|billion|trillion)\b|(?<![\w.,])\d{4,}(?!\w)/i;
 
 export const sha256 = (s: string): string => createHash('sha256').update(s, 'utf8').digest('hex');
 
@@ -170,7 +176,12 @@ export function generate(src: Sources): Generated {
     for (const c of ownerCompanies.filter((c) => c.code === r.code)) {
       if (c.status !== 'confirmed' && c.status !== 'proposed') throw new RegistryError(`${c.ticker}: status must be confirmed or proposed`);
       if (c.status === 'confirmed' && p.placedBy !== 'owner') throw new RegistryError(`${c.ticker} is confirmed but ${r.code}'s placement is not the owner's`);
-      companies.push({ ticker: takeTicker(c.ticker, r.code), name: c.name, status: c.status, reason: c.reason, source: c.source });
+      // the source column carries where the listing was checked and, after " | description: ", where the does line comes from
+      const [listing, described] = (c.source ?? '').split(' | description: ');
+      const does = (c.does ?? '').trim();
+      if (does && DOES_FIGURE.test(does)) throw new RegistryError(`${c.ticker}: the does line carries a figure ("${does}")`);
+      companies.push({ ticker: takeTicker(c.ticker, r.code), name: c.name, status: c.status, reason: c.reason, source: listing, ...(does ? { does, ...(described ? { doesSource: described } : {}) } : {}) });
+      if (c.status === 'proposed' && (c.reason ?? '').startsWith('earliest-listed issuer')) proposedCompanies++;
     }
     if (listedRows) {
       const have = new Set(companies.map((c) => c.ticker));
@@ -223,6 +234,7 @@ export function generate(src: Sources): Generated {
       subIndustriesTs: renderSubIndustriesTs(subIndustries, src.citation, clsHash),
       linksTs: renderLinksTs(links),
       reviewMd: renderReview(subIndustries, links, all, src.citation),
+      reviewDoesMd: renderDoesReview(subIndustries),
     },
   };
 }
@@ -298,6 +310,21 @@ function renderReview(rows: SubIndustry[], links: Link[], counts: Generated['cou
   for (const s of rows) for (const c of s.companies) lines.push(`| ${s.code} | ${c.ticker} | ${esc(c.name)} | ${c.status} | ${esc(c.reason ?? '')} | ${esc(c.source ?? '')} |`);
   lines.push('', '## Expected links', '', '| From | To | State | Rationale |', '|---|---|---|---|');
   for (const l of links) lines.push(`| ${l.from} | ${l.to} | ${l.state} | ${esc(l.note ?? '')} |`);
+  lines.push('');
+  return lines.join('\n');
+}
+
+function renderDoesReview(rows: SubIndustry[]): string {
+  const esc = (s: string) => s.replace(/\|/g, '\\|');
+  const all = rows.flatMap((s) => s.companies.map((c) => ({ s, c })));
+  const check = all.filter(({ c }) => (c.doesSource ?? '').includes('to be confirmed'));
+  const lines: string[] = [];
+  lines.push('# What each company does: the lines for the owner\'s review', '');
+  lines.push(GENERATED.replace('// ', '').replace(' — do not edit by hand; edit the source tables and regenerate.', '. Do not edit by hand: edit the `does` column of `docs/world/sources/companies.tsv` and run `npm run build:registry`.'), '');
+  lines.push('PRD v2 §4.1, open decision 5. Every company the world places gets one line: factual, present tense, what it sells or operates, no figure, no market data, no person\'s name. The company card shows it with its source (PRD v2 §3.11).', '');
+  lines.push(`${all.length} lines; ${all.filter(({ c }) => c.does).length} written. Every line is the agent's draft from the issuer's public profile and is to be checked against the issuer's latest annual report; the ${check.length} marked **check** are companies whose business may have changed since the agent's information, so their line most needs the owner's eye.`, '');
+  lines.push('| Code | Sub-industry | Ticker | Company | What it does | Check |', '|---|---|---|---|---|---|');
+  for (const { s, c } of all) lines.push(`| ${s.code} | ${esc(s.nameEn)} | ${c.ticker} | ${esc(c.name)} | ${esc(c.does ?? 'not yet written')} | ${(c.doesSource ?? '').includes('to be confirmed') ? '**check**' : ''} |`);
   lines.push('');
   return lines.join('\n');
 }

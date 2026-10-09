@@ -6,8 +6,8 @@
  * Reads docs/world/sources/{idx-ic-classification.tsv, idx-ic-sectors.tsv,
  * idx-ic-subsektor.tsv, placement.tsv, companies.tsv, links.tsv,
  * issuers-snapshot.json, citation.json}; writes
- * src/lib/world/registry/subindustries.generated.ts, links.generated.ts and
- * docs/world/review-registry.md. Deterministic and idempotent: running it
+ * src/lib/world/registry/subindustries.generated.ts, links.generated.ts,
+ * docs/world/review-registry.md and docs/world/v2/review-does.md. Deterministic and idempotent: running it
  * twice changes nothing. Fails on a missing citation, a changed source, or
  * counts other than 35 / 69 / 130 / 125 (src/lib/world/registry/generate.ts).
  */
@@ -35,6 +35,7 @@ try {
     ['src/lib/world/registry/subindustries.generated.ts', out.files.subIndustriesTs],
     ['src/lib/world/registry/links.generated.ts', out.files.linksTs],
     ['docs/world/review-registry.md', out.files.reviewMd],
+    ['docs/world/v2/review-does.md', out.files.reviewDoesMd],
   ];
   let changed = 0;
   for (const [rel, content] of targets) {
