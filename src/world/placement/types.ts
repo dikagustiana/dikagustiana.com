@@ -22,13 +22,24 @@ export interface Region {
   anchor: Pt;
 }
 
-export interface Plot {
+/**
+ * A company's lot (PRD v2 §3.5, D-V2-4): its family's form drawn at lot size, or, for a large family, an office unit
+ * at the block's front beside the shared form. Its two bays stand on its driveway, the short road from its front to
+ * the nearest road centreline, so goods leave from and arrive at the company, not the block.
+ */
+export interface Lot {
   id: string;
-  /** Slot index inside the block, 0 and 1 by default. */
+  /** Slot index inside the block, 0 and 1. */
   slot: number;
+  /** The lot's footprint: the family form at lot size, or the office unit. */
   box: Box;
-  /** Where the plot's sign stands, on a face the camera sees. */
+  /** True when the lot is an office unit beside a large family's shared form. */
+  office: boolean;
+  /** Where the lot's kerb sign stands, in front of the block on a face the camera sees. */
   sign: Pt;
+  bays: { despatch: Pt; receiving: Pt };
+  /** From the lot's front (the despatch bay) to a point on the nearest road's centreline. */
+  driveway: readonly Pt[];
 }
 
 export interface Block {
@@ -41,8 +52,9 @@ export interface Block {
   box: Box;
   /** Which way the block's front faces: 's' south or 'e' east (the two faces the camera sees). */
   front: 's' | 'e';
-  plots: readonly Plot[];
-  /** Where the block's label and status mark sit at the middle view. */
+  /** Two company lots along the front, side by side (PRD v2 §3.5). */
+  lots: readonly Lot[];
+  /** Where the block's signboard, label and status mark stand: its front centre, on the kerb. */
   anchor: Pt;
 }
 

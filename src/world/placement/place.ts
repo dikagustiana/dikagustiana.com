@@ -2,7 +2,8 @@
  * The placement algorithm (PRD §9.4; PRD v2 §3.2, §3.5, §4.1): the registry
  * in, the generated layout out. Region templates are fixed; blocks are
  * allocated by zone, sized by family (grown where two company lots would not
- * fit), laid out on each region's grid; two plots per block. Deterministic for
+ * fit), laid out on each region's grid; two company lots per block, each with
+ * its bays and a driveway to the nearest road. Deterministic for
  * a given registry and seed, and committed as layout.generated.ts so every
  * change is a reviewable diff.
  *
@@ -16,7 +17,7 @@
  */
 import type { BuildingFamily, Registry, SubIndustry, Zone } from '../../lib/world/registry/types.ts';
 import { createRng } from '../engine/kernel/math.ts';
-import type { Block, Box, Fixture, Gate, GeneratedLayout, Label, Plot, Pt, Region, RegionId, Road, Signpost } from './types.ts';
+import type { Block, Box, Fixture, Gate, GeneratedLayout, Label, Lot, Pt, Region, RegionId, Road, Signpost } from './types.ts';
 
 /** Footprints by family: width along x, depth along y, in metres. */
 export const FAMILY_SIZE: Record<BuildingFamily, readonly [number, number]> = {
@@ -111,15 +112,62 @@ export function blockSize(family: BuildingFamily, front: 's' | 'e' = 's'): reado
   return front === 's' ? [Math.max(w, along), Math.max(d, deep)] : [Math.max(w, deep), Math.max(d, along)];
 }
 
-function plotsFor(id: string, b: Box, front: 's' | 'e'): Plot[] {
-  // two plots on the front face, each with its sign on the kerb
-  const depth = 14, margin = 3;
-  if (front === 's') {
-    const w = (b.x1 - b.x0 - margin * 3) / 2;
-    return [0, 1].map((i) => { const x0 = b.x0 + margin + i * (w + margin); const pb = box(x0, b.y1 - depth - margin, w, depth); return { id: `${id}-plot-${i + 1}`, slot: i, box: pb, sign: [pb.x0 + 1.5, pb.y1 + 1] }; });
+/**
+ * The two lots along a block's front (PRD v2 §3.5): side by side for a block facing south, one above the other for one
+ * facing east, the signboard's gap between them; for a large family, an office unit at each end of the front strip.
+ */
+export function lotBoxes(b: Box, family: BuildingFamily, front: 's' | 'e'): { box: Box; office: boolean }[] {
+  const m = LOT_MARGIN, W = b.x1 - b.x0, D = b.y1 - b.y0;
+  const { front: of, depth: od } = OFFICE_UNIT;
+  if (LARGE_FAMILIES.includes(family)) {
+    return [0, 1].map((i) => ({ office: true, box: front === 's' ? box(i === 0 ? b.x0 + m : b.x1 - m - of, b.y1 - m - od, of, od) : box(b.x1 - m - od, i === 0 ? b.y0 + m : b.y1 - m - of, od, of) }));
   }
-  const d = (b.y1 - b.y0 - margin * 3) / 2;
-  return [0, 1].map((i) => { const y0 = b.y0 + margin + i * (d + margin); const pb = box(b.x1 - depth - margin, y0, depth, d); return { id: `${id}-plot-${i + 1}`, slot: i, box: pb, sign: [pb.x1 + 1, pb.y0 + 1.5] }; });
+  if (front === 's') { const w = (W - 2 * m - SIGN_GAP) / 2; return [0, 1].map((i) => ({ office: false, box: box(b.x0 + m + i * (w + SIGN_GAP), b.y0 + m, w, D - 2 * m) })); }
+  const d = (D - 2 * m - SIGN_GAP) / 2;
+  return [0, 1].map((i) => ({ office: false, box: box(b.x0 + m, b.y0 + m + i * (d + SIGN_GAP), W - 2 * m, d) }));
+}
+
+/** The point of a segment nearest to p. */
+function nearestOn(p: Pt, a: Pt, b: Pt): Pt {
+  const dx = b[0] - a[0], dy = b[1] - a[1], l2 = dx * dx + dy * dy;
+  const t = l2 ? Math.max(0, Math.min(1, ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / l2)) : 0;
+  return [a[0] + dx * t, a[1] + dy * t];
+}
+/** Whether a segment passes through the inside of a box (Liang–Barsky). */
+export function segmentCrosses(a: Pt, b: Pt, x: Box): boolean {
+  let t0 = 0, t1 = 1; const dx = b[0] - a[0], dy = b[1] - a[1];
+  for (const [p, q] of [[-dx, a[0] - x.x0], [dx, x.x1 - a[0]], [-dy, a[1] - x.y0], [dy, x.y1 - a[1]]]) {
+    if (p === 0) { if (q < 0) return false; continue; }
+    const r = q / p;
+    if (p < 0) { if (r > t1) return false; t0 = Math.max(t0, r); } else { if (r < t0) return false; t1 = Math.min(t1, r); }
+  }
+  return t1 - t0 > 1e-9;
+}
+const round = (p: Pt): Pt => [Math.round(p[0] * 100) / 100, Math.round(p[1] * 100) / 100];
+
+/**
+ * A lot's driveway and bays: from the middle of its front straight to the nearest point of a road centreline that it
+ * can reach without passing through another block or lot; the despatch bay at the lot's front, the receiving bay a
+ * few metres out on the same driveway.
+ */
+function driveway(lot: Box, front: 's' | 'e', own: Box, roads: readonly Road[], others: readonly Box[]): { driveway: Pt[]; bays: Lot['bays'] } {
+  const f: Pt = front === 's' ? [(lot.x0 + lot.x1) / 2, lot.y1] : [lot.x1, (lot.y0 + lot.y1) / 2];
+  const candidates: { at: Pt; d: number; score: number }[] = [];
+  // a road in front of the lot wins over a nearer one behind it, so goods leave by the front
+  const n: Pt = front === 's' ? [0, 1] : [1, 0];
+  for (const r of roads) {
+    const pts = r.closed ? [...r.points, r.points[0]] : r.points;
+    for (let i = 0; i + 1 < pts.length; i++) {
+      const at = nearestOn(f, pts[i], pts[i + 1]), d = Math.hypot(at[0] - f[0], at[1] - f[1]);
+      candidates.push({ at, d, score: d + ((at[0] - f[0]) * n[0] + (at[1] - f[1]) * n[1] < -0.5 ? 200 : 0) });
+    }
+  }
+  candidates.sort((a, b) => a.score - b.score);
+  const shrink = (x: Box): Box => ({ x0: x.x0 + 0.25, x1: x.x1 - 0.25, y0: x.y0 + 0.25, y1: x.y1 - 0.25 });
+  const clear = candidates.find((c) => !others.some((o) => o !== own && segmentCrosses(f, c.at, shrink(o)))) ?? candidates[0];
+  const len = clear.d, k = len > 0 ? Math.min(4, len / 2) / len : 0;
+  const receiving: Pt = [f[0] + (clear.at[0] - f[0]) * k, f[1] + (clear.at[1] - f[1]) * k];
+  return { driveway: [round(f), round(clear.at)], bays: { despatch: round(f), receiving: round(receiving) } };
 }
 
 export function placeWorld(registry: Registry, seed = 20261004, registrySha256 = ''): GeneratedLayout {
@@ -132,7 +180,7 @@ export function placeWorld(registry: Registry, seed = 20261004, registrySha256 =
   // the block's label and status mark stand at its front centre, on the kerb (PRD v2 §3.5)
   const anchorOf = (b: Box, front: 's' | 'e'): Pt => (front === 's' ? [centre(b)[0], b.y1 + 4] : [b.x1 + 4, centre(b)[1]]);
   const mk = (s: SubIndustry, b: Box, region: RegionId, front: 's' | 'e' = 's'): Block => ({
-    id: s.code, code: s.code, zone: s.zone, region, family: s.buildingFamily, box: b, front, plots: plotsFor(s.code, b, front), anchor: anchorOf(b, front),
+    id: s.code, code: s.code, zone: s.zone, region, family: s.buildingFamily, box: b, front, lots: [], anchor: anchorOf(b, front),
   });
   const roads: Road[] = [];
   const road = (id: string, kind: Road['kind'], points: Pt[], width: number, dashed = false, closed = false) => { roads.push({ id, kind, points, closed, width, dashed }); };
@@ -274,6 +322,20 @@ export function placeWorld(registry: Registry, seed = 20261004, registrySha256 =
   for (let r = 1; r < ROWS; r++) { road(`town-street-${++k}`, 'town', [[TOWN_X0 - 5, -16 - r * PITCH + 6], [TOWN_X1, -16 - r * PITCH + 6]], 7); road(`town-street-${++k}`, 'town', [[TOWN_X0 - 5, 16 + r * PITCH - 6], [TOWN_X1, 16 + r * PITCH - 6]], 7); }
   for (const y of [TOWN.y0 - 10, TOWN.y1 + 10]) road(`town-cross-${++k}`, 'town', [[TOWN_X0 - 5, y], [TOWN_X1, y]], 8);
   road('hill-road', 'town', [[HILL.centre[0], TOWN.y0 - 10], [HILL.centre[0], HILL.centre[1] + 30]], 6);
+
+  // ---- the lots, now the roads are known: two per block, each with its sign, bays and driveway ----
+  const lotList = blocks.flatMap((b) => lotBoxes(b.box, b.family, b.front).map((l) => ({ block: b, ...l })));
+  const obstacles = [...blocks.map((b) => b.box), ...fixtures.map((f) => f.box)];
+  for (const b of blocks) {
+    const own = lotList.filter((l) => l.block === b);
+    // a lot's driveway may cross its own block (a quay's office faces the water) but no other block, fixture or lot
+    const others = [...obstacles.filter((o) => o !== b.box), ...own.slice(1).map((l) => l.box)];
+    b.lots = own.map((l, i): Lot => {
+      const sign: Pt = b.front === 's' ? [l.box.x0 + 1.5, b.box.y1 + 1] : [b.box.x1 + 1, l.box.y0 + 1.5];
+      const route = driveway(l.box, b.front, b.box, roads, i === 0 ? others : [...obstacles.filter((o) => o !== b.box), own[0].box]);
+      return { id: `${b.code}-lot-${i + 1}`, slot: i, box: l.box, office: l.office, sign, ...route };
+    });
+  }
 
   // ---- gates with weighbridges on every road leaving the estate ----
   const gates: Gate[] = [

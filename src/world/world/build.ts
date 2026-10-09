@@ -188,7 +188,7 @@ export function buildWorldScene(ctx: EngineContext, layout: GeneratedLayout, onA
   // ---- plots: each its own small group (it opens as a section drawing), all under the near group ----
   for (const b of layout.blocks) {
     const s = subIndustryByCode(b.code)!;
-    b.plots.forEach((pl, i) => {
+    b.lots.forEach((pl, i) => {
       const company = s.companies[i] ?? null, ticker = company?.ticker ?? null;
       const p = new Part(ctx); drawPlot(p, pl.box, b.front, ticker);
       const shell = p.build(`plot-${pl.id}`); const g = new THREE.Group(); g.name = pl.id; g.add(shell); nearGroup.add(g);
@@ -203,10 +203,10 @@ export function buildWorldScene(ctx: EngineContext, layout: GeneratedLayout, onA
         info(): EntityInfo {
           const st = ticker ? statuses.get(ticker) : undefined;
           const status = st?.state === 'unavailable' ? STATUS_WORD.unavailable : st?.state === 'published' ? STATUS_WORD.published : STATUS_WORD.none;
-          const rows: [string, string][] = [['Sub-industry', s.nameEn], ['Plot', `${i + 1} of ${b.plots.length}`]];
+          const rows: [string, string][] = [['Sub-industry', s.nameEn], ['Lot', `${i + 1} of ${b.lots.length}`]];
           if (company) rows.push(['Ticker', company.ticker], ['Pair status', company.status]); else rows.push(['Company', 'not yet proposed']);
           if (st?.period) rows.push(['Latest period', st.period]);
-          return { kind: 'Company', title: company?.name ?? `${s.nameEn}: plot ${i + 1}`, status, rows,
+          return { kind: 'Company', title: company?.name ?? `${s.nameEn}: lot ${i + 1}`, status, rows,
             actions: ticker ? [['Open board', () => onAction({ type: 'open-board', ticker })], ['Look inside', () => ctx.hooks.lookInside(ent)]] : [['Look inside', () => ctx.hooks.lookInside(ent)]] };
         },
         readout: () => `${ticker ?? pl.id} · ${s.nameEn}`,
