@@ -8,9 +8,10 @@
  *   - nothing in the engine calls Math.random(): every draw goes through the
  *     instance's seeded generator, so a seed replays the same world.
  *
- * Files still carrying Factory Yard's `// @ts-nocheck` are vendored and not
- * yet wired (the check script lists them); the rules apply to them too, so
- * a pending file that breaks one is named here before it is adapted.
+ * And one rule of provenance (NOTICE.md): no file under src/ carries code
+ * adapted from Factory Yard, so none may carry its adaptation header or a
+ * link to its repository. scripts/world/check-engine.mjs holds the same
+ * line in CI.
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -57,5 +58,16 @@ describe('engine code rules', () => {
     expect(imports).toEqual([]);
     const dynamic = hits(/import\(\s*['"](@\/lib\/finance-in-action|@\/world\/data\/boundary|@\/integrations)/);
     expect(dynamic).toEqual([]);
+  });
+
+  it('carries no Factory Yard code: no file under src/ has its adaptation header or links its repository', () => {
+    const SRC = path.resolve(__dirname, '../../src');
+    const all = (fs.readdirSync(SRC, { recursive: true }) as string[]).map((f) => path.join(SRC, f)).filter((f) => /\.(ts|tsx|js|mjs|css|json|md)$/.test(f) && fs.statSync(f).isFile());
+    const foreign = all.flatMap((f) => fs.readFileSync(f, 'utf8').split('\n').flatMap((line, i) => (/Adapted from Factory Yard|github\.com\/Khalidabdi1\/factory/i.test(line) ? [`${path.relative(process.cwd(), f)}:${i + 1}`] : [])));
+    expect(foreign).toEqual([]);
+    // the nine kernel files that were adapted say what they are now
+    for (const f of ['theme.ts', 'context.ts', 'world/ground.ts', 'kernel/path.ts', 'kernel/iso.ts', 'kernel/math.ts', 'kernel/part.ts', 'sim/clock.ts', 'view/index.ts']) {
+      expect(fs.readFileSync(path.join(SRC, 'world/engine', f), 'utf8').split('\n')[0], f).toMatch(/^\/\/ Original to this repository/);
+    }
   });
 });

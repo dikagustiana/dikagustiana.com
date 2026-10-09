@@ -1,7 +1,8 @@
 /**
- * The world engine: Factory Yard's kernel, theme, view and simulation, made
- * mountable (docs/world/PRD-kawasan-industri.md §9). Importing this module
- * has no side effects; everything happens inside createWorld.
+ * The world engine: the kernel (iso, path, part, math), the theme, the view
+ * and the simulation, mountable (docs/world/PRD-kawasan-industri.md §9).
+ * Importing this module has no side effects; everything happens inside
+ * createWorld.
  */
 export { createWorld, WorldError, WARMUP_SECONDS } from './create';
 export type { WorldHandle, WorldOptions, ViewName, LayerName, OverlayName, Selection, FrameReading, Entity, EntityInfo, ThemeTokens, RendererLike } from './types';

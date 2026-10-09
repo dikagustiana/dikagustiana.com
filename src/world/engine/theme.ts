@@ -39,7 +39,7 @@ type Source = string | readonly [from: string, to: string, t: number];
 export const SITE_TOKENS: { fill: Record<FillKey, string>; line: Record<LineKey, string>; text: Record<TextKey, string>; tone: Record<Tone, string> } = {
   fill: {
     ground: '--background', body: '--card', deck: '--secondary', road: '--muted', glass: '--border', sand: '--muted', grass: '--secondary', sea: '--background',
-    kob: '--fia-cost', kod: '--muted-foreground', livef: '--accent', window: '--border', lamp: '--popover', screen: '--background',
+    kob: '--muted-foreground', kod: '--muted-foreground', livef: '--accent', window: '--border', lamp: '--popover', screen: '--background',
   },
   line: { line: '--foreground', detail: '--muted-foreground', grid: '--border', live: '--accent' },
   text: { ink: '--foreground', paint: '--muted-foreground' },
@@ -52,6 +52,7 @@ const MIX: { fill: Partial<Record<FillKey, Source>>; line: Partial<Record<LineKe
     sand: ['--muted', '--fia-cost', 0.1],
     grass: ['--secondary', '--section-green', 0.12],
     sea: ['--background', '--accent', 0.16],
+    kod: ['--muted-foreground', '--background', 0.5],
     screen: ['--background', '--accent', 0.4],
   },
   line: {
