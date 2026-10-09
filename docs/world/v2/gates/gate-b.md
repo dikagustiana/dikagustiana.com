@@ -168,4 +168,4 @@ gzipped); `layout.generated` 77,872 / 14,669 → 207,811 / 36,356 (the road grap
 
 ## 6. The pull request
 
-(to follow)
+https://github.com/dikagustiana/dikagustiana.com/pull/55
