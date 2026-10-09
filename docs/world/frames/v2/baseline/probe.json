@@ -1,0 +1,54 @@
+{
+  "ranAt": "2026-10-09T14:54:37.683Z",
+  "base": "http://127.0.0.1:4402",
+  "route": "/finance/kawasan",
+  "canvas": {
+    "w": 1246,
+    "h": 700
+  },
+  "results": [
+    {
+      "view": "home",
+      "pxPerMetre": 0.42,
+      "buildingPx": 24,
+      "vehiclesMoving": "47 of 47",
+      "walkersMoving": "0 of 0",
+      "coinsMoving": "0 of 0",
+      "truckPxPerSec": 1.4,
+      "drawCalls": 317,
+      "distance": 0,
+      "hoverCursor": "pointer",
+      "clickSelects": "B121",
+      "clickResolves": "building"
+    },
+    {
+      "view": "estate",
+      "pxPerMetre": 1.33,
+      "buildingPx": 75,
+      "vehiclesMoving": "24 of 24",
+      "walkersMoving": "0 of 0",
+      "coinsMoving": "0 of 0",
+      "truckPxPerSec": 34.3,
+      "drawCalls": 682,
+      "distance": 0.33,
+      "hoverCursor": "pointer",
+      "clickSelects": null,
+      "clickResolves": "nothing"
+    },
+    {
+      "view": "near",
+      "pxPerMetre": 14.84,
+      "buildingPx": 839,
+      "vehiclesMoving": "0 of 0",
+      "walkersMoving": "0 of 0",
+      "coinsMoving": "0 of 0",
+      "truckPxPerSec": 0,
+      "drawCalls": 95,
+      "distance": 0.99,
+      "hoverCursor": "pointer",
+      "clickSelects": "B121",
+      "clickResolves": "building"
+    }
+  ],
+  "pageErrors": []
+}

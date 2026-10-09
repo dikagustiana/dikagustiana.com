@@ -1,0 +1,47 @@
+{
+  "ranAt": "2026-10-09T16:03:12.745Z",
+  "base": "http://127.0.0.1:4410",
+  "gate": "a",
+  "frames": [
+    {
+      "frame": "gate-a-hero.png",
+      "note": "the hero, the home view: the estate at 1.25 px/m, every company a building",
+      "zoom": 1.25,
+      "band": "district",
+      "drawCalls": 236,
+      "selected": null
+    },
+    {
+      "frame": "gate-a-district.png",
+      "note": "the map (Whole) at the district band: every region, block and lot",
+      "zoom": 0.77,
+      "band": "district",
+      "drawCalls": 283,
+      "selected": null
+    },
+    {
+      "frame": "gate-a-street.png",
+      "note": "the street band over INTP: the lots with their kerb signs and tickers, the block’s signboard, mark and name",
+      "zoom": 6,
+      "band": "street",
+      "drawCalls": 91,
+      "selected": null
+    },
+    {
+      "frame": "gate-a-company-card.png",
+      "note": "a click on INTP’s building at the hero: the company card v2 with what it does, its suppliers and customers",
+      "zoom": 1.25,
+      "band": "district",
+      "drawCalls": 304,
+      "selected": "INTP"
+    },
+    {
+      "frame": "gate-a-phone.png",
+      "note": "a phone at 390 px after \"Start the world\": the hero at 1 px/m",
+      "zoom": 1,
+      "band": "district",
+      "drawCalls": 112,
+      "selected": null
+    }
+  ]
+}
