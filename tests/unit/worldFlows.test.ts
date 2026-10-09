@@ -333,12 +333,13 @@ describe('the cards and the pointer on flows (PRD v2 §3.4, §3.11)', () => {
       for (const [, v] of card.rows) expect(v, `${id}: ${v}`).not.toMatch(/\d/);
       expect(card.title).not.toMatch(/\d/);
       expect(card.rows.find(([k]) => k === 'Link')![1]).toMatch(/^(Expected, not measured|Measured by a published model|A return or a port call)/);
-      expect(card.actions!.map(([k]) => k)).toEqual(['Open the supplier', 'Open the customer']);
+      // PRD v2 §3.11: a vehicle's card offers Follow · Open the supplier · Open the customer
+      expect(card.actions!.map(([k]) => k)).toEqual(['Follow', 'Open the supplier', 'Open the customer']);
     }
     // the supplier's button selects the supplier's lot
     handle.select(ids[0]);
     const from = window.world!.all().find((e) => e.id === ids[0])!.facts!.from;
-    sel!.info.actions![0][1]();
+    sel!.info.actions!.find(([k]) => k === 'Open the supplier')![1]();
     expect(handle.selected()).toBe(from);
   });
 

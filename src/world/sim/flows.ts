@@ -62,6 +62,8 @@ export const QUEUE_HOLD = 5, LANE_HOLD = 3;
 export const JAM_HOLD = 0.15;
 /** The cadence of the returns, the raw-export trucks and the import trucks: slower than a link's. */
 const SIDE_CADENCE = 45;
+/** A link's route is drawn through a point every so many metres along it. */
+const ROUTE_STEP = 4;
 /** Speed on a driveway, the gap a vehicle keeps to the one ahead, and how near the end of its lane a vehicle looks at the junction, in metres. */
 const DRIVEWAY_SPEED = 5, GAP = 3, LOOK_OUT = 10;
 /** How near a gate a vehicle lifts its boom, in metres either way. */
@@ -122,6 +124,8 @@ export interface VehicleHost {
   lotEntityId(lot: Lot): string;
   classOf(link: Link): FlowClass;
   select(lot: Lot): void;
+  /** Ride along with a vehicle (PRD v2 §3.10). */
+  follow(v: Vehicle): void;
 }
 
 /** A goods vehicle on a flow: an entity a click on its instance finds. */
@@ -162,7 +166,7 @@ export class Vehicle implements Entity {
         ['From', this.host.describe(this.origin)], ['To', this.host.describe(this.dest)],
         ['Link', capital(this.linkState())], ['Traffic', TRAFFIC_LINE],
       ],
-      actions: [['Open the supplier', () => this.host.select(this.origin)], ['Open the customer', () => this.host.select(this.dest)]],
+      actions: [['Follow', () => this.host.follow(this)], ['Open the supplier', () => this.host.select(this.origin)], ['Open the customer', () => this.host.select(this.dest)]],
     };
   }
   label(): string { return `${capital(this.flow.load)} · from ${this.host.nameOf(this.origin)} to ${this.host.nameOf(this.dest)}`; }
@@ -189,6 +193,9 @@ class Mover implements Entity {
   readout(): string { return this.text(); }
 }
 
+/** A link's way on the roads, from a supplier's lot to a customer's (PRD v2 §3.9): its points, the gates it crosses. */
+export interface LinkRoute { from: string; to: string; pts: Pt[]; gates: string[]; length: number }
+
 export interface FlowSystem {
   update(dt: number): void;
   setLayer(name: LayerName, on: boolean): void;
@@ -203,6 +210,12 @@ export interface FlowSystem {
   /** The gates with a vehicle at them now (on the plate or about to cross): their booms are up. */
   busyGates(): ReadonlySet<string>;
   cap(): number;
+  /** The roads a link's goods take: one route per supplier lot, each to a customer lot in turn; none when an end has no lot. */
+  routesOf(from: string, to: string): LinkRoute[];
+  /** The lot entity ids of a sub-industry: its companies' lots, else its first (an unplaced one has none). */
+  lotsOf(code: string): string[];
+  /** Send a flow's vehicle now, from the given lot when it is one of the flow's origins (Follow; search by load). */
+  send(key: string, fromLot?: string | null): Vehicle | null;
   dispose(): void;
 }
 
@@ -240,6 +253,7 @@ export function createFlows(ctx: EngineContext, layout: GeneratedLayout, links: 
       lotIndex ??= new Map(ctx.entities.filter((e) => e.kind === 'company').map((e) => [(e as Entity & { lot?: Lot }).lot?.id ?? '', e]));
       const e = lotIndex.get(lot.id); if (e) ctx.hooks.select(e);
     },
+    follow: (v) => ctx.follow?.(v.id),
   };
 
   // ---- the flows: every link whose goods move, the six returns, the raw export and the imports ----
@@ -502,6 +516,7 @@ export function createFlows(ctx: EngineContext, layout: GeneratedLayout, links: 
   }
 
   const busy = new Set<string>(), weighbridges = layout.gates.filter((g) => g.weighbridge);
+  const linkRoutes = new Map<string, LinkRoute[]>();
   let t = 0;
   /** Per flow: its vehicles queued at the customer's bay, and whether its last one is still near the despatch bay; per gate, its queue. */
   const queuedAt = new Map<Flow, number>(), atDoor = new Set<Lot>(), laneQueue = new Map<number, number>(), gateQueue = new Map<string, number>();
@@ -577,6 +592,29 @@ export function createFlows(ctx: EngineContext, layout: GeneratedLayout, links: 
     live: () => live.length,
     busyGates: () => busy,
     cap: () => cap,
+    routesOf(from, to) {
+      const key = `${from}>${to}`, hit = linkRoutes.get(key); if (hit) return hit;
+      // an unplaced end is the port, as for the flows
+      const os = lotsOf(from), ds = lotsOf(to), origins = os.length ? os : quay, dests = ds.length ? ds : quay, out: LinkRoute[] = [];
+      origins.forEach((a, i) => {
+        const b = dests[i % dests.length]; if (a === b) return;
+        const ba = roads.bays(a.id), bb = roads.bays(b.id); if (!ba || !bb) return;
+        const r = roads.route(ba.despatch, bb.receiving); if (!r) return;
+        const pts: Pt[] = []; for (let s = 0; s < r.length; s += ROUTE_STEP) { const p = r.path.at(s); pts.push([p.x, p.y]); }
+        const end = r.path.at(r.length); pts.push([end.x, end.y]);
+        out.push({ from: host.lotEntityId(a), to: host.lotEntityId(b), pts, gates: r.stops.map((x) => x.gate), length: r.length });
+      });
+      linkRoutes.set(key, out);
+      return out;
+    },
+    lotsOf: (code) => lotsOf(code).map((l) => host.lotEntityId(l)),
+    send(key, fromLot) {
+      const f = flows.find((x) => x.key === key); if (!f) return null;
+      const i = fromLot ? f.origins.findIndex((l) => host.lotEntityId(l) === fromLot) : -1;
+      // spawn() takes the origin the count of vehicles sent points at: move the count on to the asked-for lot
+      if (i >= 0) while (f.sent % f.origins.length !== i) f.sent++;
+      return spawn(f);
+    },
     dispose() { for (const v of live) leaveSpan(v); live.length = 0; walkers.length = 0; ships.length = 0; fleet.dispose(); money.geometry.dispose(); root.removeFromParent(); },
   };
 }

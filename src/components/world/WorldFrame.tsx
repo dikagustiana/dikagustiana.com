@@ -98,7 +98,7 @@ export default function WorldFrame({ variant, heading, boardTicker = null, onBoa
       const h = createWorld(host.current, {
         registry: REGISTRY, layout: LAYOUT, theme: { font }, initialView: 'hero', reducedDetail: phone,
         debug: typeof location !== 'undefined' && new URLSearchParams(location.search).has('debug'),
-        onSelect: (sel) => { if (sel?.kind === 'whiteboard') { const t = sel.info.rows.find(([k]) => k === 'Ticker')?.[1]; if (t) act({ type: 'open-board', ticker: t }); return; } if (sel?.kind === 'mark') { const id = sel.info.rows.find(([k]) => k === 'Target')?.[1]; setSelection(null); setMark(id && shiftRef.current ? { shift: shiftRef.current, targetId: id } : null); return; } setSelection(sel); if (sel) setMark(null); handle.current?.highlightChain(sel && (sel.kind === 'building' || sel.kind === 'company') ? sel.id : null, fullChainRef.current ? 'all' : 1); },
+        onSelect: (sel) => { if (sel?.kind === 'whiteboard') { const t = sel.info.rows.find(([k]) => k === 'Ticker')?.[1]; if (t) act({ type: 'open-board', ticker: t }); return; } if (sel?.kind === 'mark') { const id = sel.info.rows.find(([k]) => k === 'Target')?.[1]; setSelection(null); setMark(id && shiftRef.current ? { shift: shiftRef.current, targetId: id } : null); return; } setSelection(sel); if (sel) setMark(null); if (sel?.kind === 'route') return; handle.current?.highlightChain(sel && (sel.kind === 'building' || sel.kind === 'company' || sel.kind === 'vehicle') ? sel.id : null, sel?.kind === 'vehicle' ? 1 : fullChainRef.current ? 'all' : 1); },
         onHover: setHovered,
         onAction: act,
         onReady: () => setReady(true),

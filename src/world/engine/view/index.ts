@@ -48,6 +48,10 @@ export interface ViewOptions {
   onHover?: (h: Hover | null) => void;
   /** The band of detail changed (PRD v2 §3.3): tiny hides the smallest movers, far hides the small text and street details. */
   onDetail?: (tiny: boolean, far: boolean, band: Band) => void;
+  /** The visitor moved the frame by hand (a drag, the arrows): a Follow lets go (PRD v2 §3.10). */
+  onDrag?: () => void;
+  /** A key, offered to the engine first (Follow's Escape, Space and F); true when it used it. */
+  onKey?: (e: KeyboardEvent) => boolean;
 }
 
 export interface View {
@@ -76,6 +80,10 @@ export interface View {
   look(x: number, y: number, zoom: number): void;
   /** Put the camera over an entity's anchor at a zoom in pixels per metre, at once. */
   lookAtEntity(e: Entity, zoom: number): void;
+  /** Frame a ground box, no closer than the district band (the full chain, a story: PRD v2 §3.9, §3.10). */
+  frame(box: Box): void;
+  /** Keep the camera over a moving ground point, eased and never rotated, at a zoom (Follow, PRD v2 §3.10); null lets go. */
+  follow(target: (() => readonly [number, number] | null) | null, zoom?: number): void;
   resize(): void;
   dispose(): void;
 }
@@ -299,6 +307,7 @@ export function createView(ctx: EngineContext, o: ViewOptions): View {
   }
   /** Move the frame by a drag of (dx, dy) screen pixels, at once: the ground follows the pointer. */
   function panBy(dx: number, dy: number) {
+    o.onDrag?.();
     const z = Math.exp(cur.logZ), [gx, gy] = groundAt(-dx / z, dy / z);
     const { x0, x1, y0, y1 } = ctx.layout.world;
     cur.x = clamp(cur.x + gx, x0 - 200, x1 + 200); cur.y = clamp(cur.y + gy, y0 - 200, y1 + 200);
@@ -467,6 +476,7 @@ export function createView(ctx: EngineContext, o: ViewOptions): View {
   };
   const onKey = (e: KeyboardEvent) => {
     if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (o.onKey?.(e)) { e.preventDefault(); return; }
     let used = true;
     // [ and ] step through the companies; with Shift ({ and } on most layouts) through the buildings
     if (e.key === ']' || e.key === '}') cycle(1, e.key === '}' || e.shiftKey ? 'building' : 'company');
@@ -548,6 +558,7 @@ export function createView(ctx: EngineContext, o: ViewOptions): View {
   }
 
   function tick(dt: number, paused: boolean) {
+    if (followed) { const p = followed(); if (p) { goal.x = p[0]; goal.y = p[1]; named = null; } }
     const k = ctx.reduced ? 1 : approach(EASE, dt);
     cur.x += (goal.x - cur.x) * k; cur.y += (goal.y - cur.y) * k; cur.logZ += (goal.logZ - cur.logZ) * k;
     if (Math.abs(goal.x - cur.x) < 1e-3 && Math.abs(goal.y - cur.y) < 1e-3 && Math.abs(goal.logZ - cur.logZ) < 1e-4) { cur.x = goal.x; cur.y = goal.y; cur.logZ = goal.logZ; }
@@ -582,6 +593,9 @@ export function createView(ctx: EngineContext, o: ViewOptions): View {
     return [((v.x + 1) / 2) * w, ((1 - v.y) / 2) * h];
   }
 
+  // ---- Follow: the ground point the camera keeps over ----
+  let followed: (() => readonly [number, number] | null) | null = null;
+
   // ---- start at home ----
   renderer.info.autoReset = false;
   measure();
@@ -608,12 +622,20 @@ export function createView(ctx: EngineContext, o: ViewOptions): View {
     screenOf,
     look(x, y, zoom) { const [lo, hi] = zoomRange(); cur.x = goal.x = x; cur.y = goal.y = y; cur.logZ = goal.logZ = clamp(Math.log(Math.max(zoom, 1e-6)), lo, hi); named = null; applyCamera(); },
     lookAtEntity(e, zoom) { const [x, y] = centreOn(e), [lo, hi] = zoomRange(); cur.x = goal.x = x; cur.y = goal.y = y; cur.logZ = goal.logZ = clamp(Math.log(Math.max(zoom, 1e-6)), lo, hi); named = null; applyCamera(); },
+    frame(box) {
+      const g = fit({ box, z: [0, 20] }, 1.15);
+      goal.x = g.x; goal.y = g.y; goal.logZ = clamp(g.logZ, zoomRange()[0], Math.log(STREET * (1 - HYSTERESIS) * 0.95)); named = null;
+    },
+    follow(target, zoom) {
+      followed = target;
+      if (target && zoom) { const [lo, hi] = zoomRange(); goal.logZ = clamp(Math.log(zoom), lo, hi); }
+    },
     resize,
     dispose() {
       for (const [type, fn, opts] of listeners) canvas.removeEventListener(type, fn, opts);
       observer?.disconnect(); observer = null;
       clearTimers(); dropLabel(); hoverEnt = null; hoverInfo = null;
-      pointers.clear(); open.clear(); highlighted = []; chosen = null; focus = null;
+      pointers.clear(); open.clear(); highlighted = []; chosen = null; focus = null; followed = null;
       ctx.hooks = idleHooks();
       sky.removeFromParent();
       for (const l of [frameLine, routeLine, highlightLine, hoverLine]) l.geometry.dispose();

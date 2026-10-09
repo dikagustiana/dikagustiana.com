@@ -71,7 +71,7 @@ interface DebugApi {
   statuses(): Record<string, ModelStatus>;
   /** Codes in the lit chain, the selected one first. */
   chain(): string[];
-  chainDrawn(): { measured: number; expected: number; dimmed: number };
+  chainDrawn(): { measured: number; expected: number; routes: number; outlined: number; dimmed: number; offset: number };
   expose(ticker: string, bindings?: StationBinding[], whiteboard?: WhiteboardContent | null): void;
   exposed(): { ticker: string; placed: Record<string, string>; lit: string | null } | null;
   dispose(): void;
@@ -142,7 +142,8 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
   });
   if (options.initialView && options.initialView !== 'hero') view.lookAt(options.initialView);
   const marks: Marks = createMarks(ctx, (a) => options.onAction?.(a));
-  const chain: Chain = createChain(ctx, options.registry.links);
+  // the chain lights the roads its links' goods take (PRD v2 §3.9): the flows know the lots and the routes
+  const chain: Chain = createChain(ctx, options.registry.links, { routesOf: (a, b) => flows.routesOf(a, b), lotsOf: (c) => flows.lotsOf(c) });
   const stations: Stations = createStations(ctx);
 
   // ---- state the shell sets through the handle; Phase E–G give them their effects ----
@@ -173,7 +174,7 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
     activity.draw();
     view.tick(dt, paused);
     marks.update(view.camera.zoom);
-    chain.update(view.camera.zoom);
+    chain.update(view.camera.zoom, paused ? 0 : dt);
     stations.update(view.camera.zoom);
     if (exposed && view.selected()?.id !== exposed.ticker) { exposed = null; stations.clear(); }
     if (subscribers.size) { const r = reading(); for (const fn of subscribers) fn(r); }
@@ -190,7 +191,12 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
     setLayer: (name, on) => { layers.set(name, on); flows.setLayer(name, on); activity.setLayer(name, on); },
     setModelStatus: (s) => { statuses = s; world.setStatuses(s); },
     setFlowWeights: (weights: FlowWeight[]) => { flows.setFlows(weights); chain.setFlows(weights); },
-    highlightChain: (id, depth) => chain.set(id, depth),
+    highlightChain: (id, depth) => {
+      chain.set(id, depth);
+      // the full chain refits the camera to what is lit, at the district band (PRD v2 §3.9)
+      const b = depth === 'all' && id ? chain.bounds() : null;
+      if (b) view.frame(b);
+    },
     setHighlight: (ids) => view.setHighlight(ids),
     exposeCompany: (ticker, bindings, whiteboard = null) => {
       const plot = world.lots.get(ticker.toUpperCase()), arch = world.archetypeOf(ticker);
@@ -254,7 +260,7 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
       tick: (dt) => { last += dt * 1000; advance(Math.max(0, Math.min(FRAME_MAX, dt))); },
       statuses: () => Object.fromEntries(statuses),
       chain: () => chain.codes(),
-      chainDrawn: () => ({ ...chain.drawn(), dimmed: chain.dimmed() }),
+      chainDrawn: () => ({ ...chain.drawn(), dimmed: chain.dimmed(), offset: chain.offset() }),
       expose: (ticker, bindings = [], whiteboard = null) => handle.exposeCompany(ticker, bindings, whiteboard),
       exposed: () => (exposed ? { ticker: exposed.ticker, placed: Object.fromEntries(stations.placed()), lit: stations.lit() } : null),
       dispose,
