@@ -143,6 +143,9 @@ viewer only with `VITE_FIA_PREVIEW=true` as well (discovery item K).
 
 ## 6. What remains for the owner
 
+State on 9 October 2026, after the merge: `run-2026-10-09.md` (preview flags set, the
+`fsre_published` and backup blockers with their exact steps, the Factory Yard issue text).
+
 1. **Licence (rule 10).** Factory Yard's licence file or the author's written permission, recorded in
    `NOTICE.md`; until then the pull request stays a draft. Ask for an MIT licence file (D9).
 2. **Expose `fsre_published`** in the Supabase Data API (item A); until then every company reads
