@@ -24,7 +24,7 @@ export interface CardProps {
   /** The mark whose condition card is open, if the selection is a mark. */
   mark?: { shift: ShiftId; targetId: string } | null;
   /** The lit story, when nothing else is selected (PRD v2 §3.11): its title, standfirst and hops. */
-  story?: { story: Story; hops: readonly LitHop[] } | null;
+  story?: { story: Story; hops: readonly LitHop[]; following?: string | null } | null;
   lens: LensId;
   flows: readonly FlowWeight[];
   /** Measured link weights by `from>to`, from the data layer through the shell; the engine never sees them. */
@@ -33,7 +33,7 @@ export interface CardProps {
   fullChain?: boolean;
   pieces: readonly Piece[];
   onClose: () => void;
-  onAction: (a: { type: 'open-board'; ticker: string } | { type: 'open-index'; code: string } | { type: 'open-thinktank' } | { type: 'select'; id: string } | { type: 'open-piece'; slug: string } | { type: 'chain-depth'; full: boolean } | { type: 'story'; id: string | null }) => void;
+  onAction: (a: { type: 'open-board'; ticker: string } | { type: 'open-index'; code: string } | { type: 'open-thinktank' } | { type: 'select'; id: string } | { type: 'open-piece'; slug: string } | { type: 'chain-depth'; full: boolean } | { type: 'story'; id: string | null } | { type: 'follow'; id: string | null }) => void;
 }
 
 /** The energy drill-down, v0 (discovery item D): the band's three lines and the two PLN conditions, by number. */
@@ -72,7 +72,8 @@ export function Card({ selection, mark, story, lens, flows, weights, fullChain =
           <ol>{hops.map((h) => { const v = h.measured ? STATUS_VOCAB.measured : STATUS_VOCAB.expected; return <li key={`${h.from}>${h.to}`}><button type="button" className="underline" onClick={() => onAction({ type: 'select', id: h.from })}>{name(h.from)}</button> → <button type="button" className="underline" onClick={() => onAction({ type: 'select', id: h.to })}>{name(h.to)}</button> <span className="text-muted-foreground"><span aria-hidden="true">{v.glyph}</span>{h.measured ? ` ${v.word}` : ''} · {GOODS_WORD[h.goods]}</span></li>; })}</ol>
         </div>
         {hops.some((h) => !h.measured) && <p className="world-card__section text-muted-foreground" data-chain-note=""><span aria-hidden="true">{STATUS_VOCAB.expected.glyph}</span> {STATUS_VOCAB.expected.word}: the hops marked so are links of the registry; a published model marks a link <span aria-hidden="true">{STATUS_VOCAB.measured.glyph}</span> {STATUS_VOCAB.measured.word}.</p>}
-        <div className="world-card__foot"><button type="button" className="world-btn" onClick={() => onAction({ type: 'story', id: null })}>Clear</button></div>
+        {story.following === 'end' && <p className="world-card__section">The ride has ended at the story’s last lot.</p>}
+        <div className="world-card__foot"><button type="button" className="world-btn" onClick={() => onAction({ type: 'follow', id: `story:${s.id}` })}>{story.following === 'end' ? 'Follow again' : 'Follow'}</button><button type="button" className="world-btn" onClick={() => onAction({ type: 'story', id: null })}>Clear</button></div>
       </aside>
     );
   }

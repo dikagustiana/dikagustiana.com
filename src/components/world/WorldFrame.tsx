@@ -19,7 +19,7 @@ import { archetypeForZone, stationFor } from '@/world/interiors/stations';
 import { whiteboardFor } from '@/lib/world/whiteboard';
 import type { StationBinding, WhiteboardContent } from '@/world/data/types';
 import { JOINT_BY_ID, STATUS, type JointId, type LensId, type ShiftId } from '@/data/industryChain';
-import type { FrameReading, Hover, LitHop, OverlayName, Selection, ViewName, WorldHandle, WorldAction, WorldMark } from '@/world/engine/types';
+import type { FollowReading, FrameReading, Hover, LitHop, OverlayName, Selection, ViewName, WorldHandle, WorldAction, WorldMark } from '@/world/engine/types';
 import { Card } from './Card';
 import { FrameHeader, PHONE_QUERY, PosterImage, type FrameControls } from './FrameShell';
 import { Search } from './Search';
@@ -29,6 +29,9 @@ import './frame.css';
 import './world.css';
 
 const Board = lazy(() => import('./Board'));
+
+/** What the strip says Follow is doing (PRD v2 §3.10); in words, never a number but the hop's place. */
+const FOLLOW_WORD: Record<FollowReading['mode'], string> = { ride: 'Riding a vehicle', glide: 'Along the route (nothing drives it)', stop: 'At the bay', end: 'The ride has ended' };
 const ThinkTank = lazy(() => import('./ThinkTank'));
 
 export interface WorldFrameProps {
@@ -64,6 +67,9 @@ export default function WorldFrame({ variant, heading, boardTicker = null, onBoa
   const [story, setStory] = useState<string | null>(null);
   const [hops, setHops] = useState<LitHop[]>([]);
   const storyRef = useRef(story); storyRef.current = story;
+  // Follow (PRD v2 §3.10): the engine rides and reports; while it rides, its stops' selections keep the story lit
+  const [following, setFollowing] = useState<FollowReading | null>(null);
+  const followingRef = useRef(following); followingRef.current = following;
   const fullChainRef = useRef(fullChain); fullChainRef.current = fullChain;
   const host = useRef<HTMLDivElement>(null);
   const handle = useRef<WorldHandle | null>(null);
@@ -81,7 +87,7 @@ export default function WorldFrame({ variant, heading, boardTicker = null, onBoa
   }), [marks]);
   const dragging = useRef(false);
 
-  const act = useCallback((a: WorldAction | { type: 'select'; id: string } | { type: 'open-piece'; slug: string } | { type: 'chain-depth'; full: boolean } | { type: 'story'; id: string | null }) => {
+  const act = useCallback((a: WorldAction | { type: 'select'; id: string } | { type: 'open-piece'; slug: string } | { type: 'chain-depth'; full: boolean } | { type: 'story'; id: string | null } | { type: 'follow'; id: string | null }) => {
     if (a.type === 'open-board') { if (onBoard) onBoard(a.ticker); else navigate(boardPath(a.ticker)); }
     else if (a.type === 'open-index') navigate(`/finance/finance-in-action#sub-${a.code}`);
     else if (a.type === 'open-thinktank') setThinkTank(true);
@@ -89,7 +95,9 @@ export default function WorldFrame({ variant, heading, boardTicker = null, onBoa
     else if (a.type === 'open-piece') { setPiece(a.slug); setThinkTank(true); }
     else if (a.type === 'open-condition') setMark(shift ? { shift, targetId: a.targetId } : null);
     else if (a.type === 'chain-depth') setFullChain(a.full);
-    else if (a.type === 'story') setStory(a.id);
+    else if (a.type === 'story') { if (!a.id) handle.current?.follow(null); setStory(a.id); }
+    // the canvas takes focus, so Space and Escape reach the ride
+    else if (a.type === 'follow') { handle.current?.follow(a.id); host.current?.querySelector('canvas')?.focus(); }
   }, [navigate, onBoard, shift]);
 
   // mount the engine lazily: after first paint, or on the first pointer or keyboard interaction, whichever first
@@ -103,8 +111,9 @@ export default function WorldFrame({ variant, heading, boardTicker = null, onBoa
       const h = createWorld(host.current, {
         registry: REGISTRY, layout: LAYOUT, theme: { font }, initialView: 'hero', reducedDetail: phone,
         debug: typeof location !== 'undefined' && new URLSearchParams(location.search).has('debug'),
-        onSelect: (sel) => { if (sel?.kind === 'whiteboard') { const t = sel.info.rows.find(([k]) => k === 'Ticker')?.[1]; if (t) act({ type: 'open-board', ticker: t }); return; } if (sel?.kind === 'mark') { const id = sel.info.rows.find(([k]) => k === 'Target')?.[1]; setSelection(null); setMark(id && shiftRef.current ? { shift: shiftRef.current, targetId: id } : null); return; } setSelection(sel); if (sel) setMark(null); if (sel?.kind === 'route') return; if (sel && storyRef.current && ['building', 'company', 'vehicle'].includes(sel.kind)) setStory(null); handle.current?.highlightChain(sel && (sel.kind === 'building' || sel.kind === 'company' || sel.kind === 'vehicle') ? sel.id : null, sel?.kind === 'vehicle' ? 1 : fullChainRef.current ? 'all' : 1); },
+        onSelect: (sel) => { if (sel?.kind === 'whiteboard') { const t = sel.info.rows.find(([k]) => k === 'Ticker')?.[1]; if (t) act({ type: 'open-board', ticker: t }); return; } if (sel?.kind === 'mark') { const id = sel.info.rows.find(([k]) => k === 'Target')?.[1]; setSelection(null); setMark(id && shiftRef.current ? { shift: shiftRef.current, targetId: id } : null); return; } setSelection(sel); if (sel) setMark(null); if (sel?.kind === 'route') return; const f = followingRef.current; if (f && f.mode !== 'end') return; if (sel && storyRef.current && ['building', 'company', 'vehicle'].includes(sel.kind)) setStory(null); handle.current?.highlightChain(sel && (sel.kind === 'building' || sel.kind === 'company' || sel.kind === 'vehicle') ? sel.id : null, sel?.kind === 'vehicle' ? 1 : fullChainRef.current ? 'all' : 1); },
         onHover: setHovered,
+        onFollow: (f) => { setFollowing(f); if (f?.story && f.story !== storyRef.current) setStory(f.story); },
         onAction: act,
         onReady: () => setReady(true),
       });
@@ -223,7 +232,7 @@ export default function WorldFrame({ variant, heading, boardTicker = null, onBoa
         {reading && <div className="world-frame__clock" aria-hidden="true">{reading.clock}{night > 0.5 ? ' · night' : ''}{reading.paused ? ' · paused' : ''}</div>}
         {failed && <p className="world-note" role="status">The world needs WebGL, which this browser has turned off. The poster stays; press Skema for the schematic.</p>}
         {phone && !ready && !failed && !wanted.current && <button type="button" className="world-btn world-frame__start" onClick={() => void mount()}>Start the world</button>}
-        <Card selection={selection} mark={mark} story={story && !selection && !mark ? { story: storyById(story)!, hops } : null} lens={lens} flows={data.flows} weights={data.weights} fullChain={fullChain} pieces={pieces} onClose={closeCard} onAction={act} />
+        <Card selection={selection} mark={mark} story={story && !selection && !mark ? { story: storyById(story)!, hops, following: following?.story === story ? following.mode : null } : null} lens={lens} flows={data.flows} weights={data.weights} fullChain={fullChain} pieces={pieces} onClose={closeCard} onAction={act} />
         {boardTicker && (
           <Suspense fallback={<div className="world-board" role="status">Opening the board…</div>}>
             <Board ticker={boardTicker} data={data} pieces={pieces} bindings={bindings} onStation={(lineId) => handle.current?.lightStation(lineId)} onClose={() => { if (onBoard) onBoard(null); else navigate(WORLD_PATH); host.current?.querySelector('canvas')?.focus(); }} />
@@ -241,9 +250,16 @@ export default function WorldFrame({ variant, heading, boardTicker = null, onBoa
         </ol>
       )}
       {story && hops.length > 0 && (
-        <ol className="world-frame__strip" aria-label={`Story: ${storyById(story)?.title ?? story}, its hops in order`} data-story={story}>
-          {hops.map((h, i) => <li key={`${h.from}>${h.to}`}><button type="button" onClick={() => handle.current?.frameHop(i)}><span aria-hidden="true">{i + 1}</span>{subIndustryByCode(h.from)?.nameEn ?? h.from} → {subIndustryByCode(h.to)?.nameEn ?? h.to} · {GOODS_WORD[h.goods]} · {h.joints.length ? `crosses ${h.joints.map((j) => JOINT_BY_ID[j as JointId]?.label ?? j).join(' and ')}` : 'crosses no joint'}</button></li>)}
-        </ol>
+        <div className="world-frame__story" data-story={story}>
+          <ol className="world-frame__strip" aria-label={`Story: ${storyById(story)?.title ?? story}, its hops in order`}>
+            {hops.map((h, i) => <li key={`${h.from}>${h.to}`}><button type="button" aria-current={following?.story === story && following.hop === i && following.mode !== 'end' ? 'step' : undefined} onClick={() => handle.current?.frameHop(i)}><span aria-hidden="true">{i + 1}</span>{subIndustryByCode(h.from)?.nameEn ?? h.from} → {subIndustryByCode(h.to)?.nameEn ?? h.to} · {GOODS_WORD[h.goods]} · {h.joints.length ? `crosses ${h.joints.map((j) => JOINT_BY_ID[j as JointId]?.label ?? j).join(' and ')}` : 'crosses no joint'}</button></li>)}
+          </ol>
+          <div className="world-frame__follow">
+            {following?.story === story && following.mode !== 'end'
+              ? <><progress max={1} value={following.progress} aria-label="How far the ride has come" /><span role="status">{FOLLOW_WORD[following.mode]} · hop {following.hop + 1} of {following.hops}{following.mode === 'stop' ? ' · Space goes on' : ''}</span><button type="button" className="world-btn" onClick={() => act({ type: 'follow', id: null })}>Stop following</button></>
+              : <button type="button" className="world-btn" onClick={() => act({ type: 'follow', id: `story:${story}` })}>{following?.story === story ? 'Follow again' : 'Follow'}</button>}
+          </div>
+        </div>
       )}
       <p className="sr-only">{CANVAS_DESCRIPTION}</p>
       {/* the hover label, else the selection's readout, read out as it changes (PRD v2 §3.4, §3.15) */}

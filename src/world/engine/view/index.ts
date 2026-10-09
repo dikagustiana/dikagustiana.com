@@ -73,7 +73,8 @@ export interface View {
   hoverAt(px: number, py: number): Hover | null;
   setHighlight(ids: readonly string[]): void;
   currentView(): ViewName | null;
-  tick(dt: number, paused: boolean): void;
+  /** One frame: the camera eases, the detail switches, and (unless render is false) the scene draws. */
+  tick(dt: number, paused: boolean, render?: boolean): void;
   drawCalls(): number;
   screenOf(ent: Entity): [number, number];
   /** Put the camera over world (x, y) at a zoom in pixels per metre, at once. */
@@ -557,7 +558,7 @@ export function createView(ctx: EngineContext, o: ViewOptions): View {
     }
   }
 
-  function tick(dt: number, paused: boolean) {
+  function tick(dt: number, paused: boolean, render = true) {
     if (followed) { const p = followed(); if (p) { goal.x = p[0]; goal.y = p[1]; named = null; } }
     const k = ctx.reduced ? 1 : approach(EASE, dt);
     cur.x += (goal.x - cur.x) * k; cur.y += (goal.y - cur.y) * k; cur.logZ += (goal.logZ - cur.logZ) * k;
@@ -570,6 +571,7 @@ export function createView(ctx: EngineContext, o: ViewOptions): View {
     routeAge += dt;
     if (chosen?.route && !paused && routeAge > 0.2) { routeAge = 0; drawRoute(); }
     ctx.theme.shade(o.clock.night());
+    if (!render) return;
     renderer.info.reset();
     renderer.autoClear = true;
     renderer.render(ctx.scene, camera);

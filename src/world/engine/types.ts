@@ -146,6 +146,22 @@ export interface RendererLike {
   capabilities: { getMaxAnisotropy(): number };
 }
 
+/** Follow's state (PRD v2 §3.10): riding a vehicle, gliding a hop no vehicle carries, stopped at a lot, or ended. */
+export interface FollowReading {
+  mode: 'ride' | 'glide' | 'stop' | 'end';
+  /** The story ridden, or null for a single vehicle. */
+  story: string | null;
+  hop: number;
+  hops: number;
+  vehicle: string | null;
+  /** The lot the camera stands at (a stop, the end). */
+  lot: string | null;
+  /** How far through the ride, 0 to 1. */
+  progress: number;
+  /** Seconds of the frame's clock since the ride began. */
+  elapsed: number;
+}
+
 /** A lit story's hop (PRD v2 §3.10): its ends in reading order, its goods, the joints its routes cross, whether measured. */
 export interface LitHop { from: string; to: string; goods: Goods; joints: string[]; measured: boolean }
 
@@ -172,6 +188,8 @@ export interface WorldOptions {
   /** The thing under the pointer changed: its label for the shell's readout (PRD v2 §3.4). */
   onHover?: (h: Hover | null) => void;
   onAction?: (action: WorldAction) => void;
+  /** Follow began, moved on, stopped at a lot, ended (a reading) or let go (null) (PRD v2 §3.10). */
+  onFollow?: (f: FollowReading | null) => void;
   onReady?: () => void;
   /** Tests pass a fake renderer; the default creates a WebGLRenderer on the engine's canvas. */
   createRenderer?: (canvas: HTMLCanvasElement) => RendererLike;
@@ -202,6 +220,9 @@ export interface WorldHandle {
   exposeCompany(ticker: string, stations: readonly StationBinding[], whiteboard?: WhiteboardContent | null): void;
   /** Light the marker of one cost line while the board hovers or focuses it; null lights none. */
   lightStation(lineId: string | null): void;
+  /** Ride along (PRD v2 §3.10): 'story:<id>' rides a story from its first lot, a vehicle's id rides that vehicle; null lets go. */
+  follow(id: string | null): void;
+  following(): FollowReading | null;
   pause(on: boolean): void;
   /** Per-frame readings for the shell's clock and readout; returns the unsubscribe. */
   subscribe(fn: (r: FrameReading) => void): () => void;
