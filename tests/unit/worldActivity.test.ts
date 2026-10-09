@@ -16,6 +16,7 @@ import { createTheme } from '@/world/engine/theme';
 import { createContext } from '@/world/engine/context';
 import { DAY } from '@/world/engine/sim/clock';
 import { ACTIVITY_BUDGET, ACTIVITY_KINDS, FAMILY_ACTIVITY, createActivity } from '@/world/sim/activity';
+import { VEHICLE_SCALE } from '@/world/sim/vehicles';
 import { FAMILY_BUILDERS, type Anchors } from '@/world/world/families';
 import { LARGE_FAMILIES } from '@/world/placement/place';
 import { disposeWorlds, frames, installWorldStubs, mountWorld } from './helpers/mountWorld';
@@ -139,6 +140,43 @@ describe('the activity in the world (PRD v2 §3.7, C1, C3)', () => {
     expect(energy.children.some((c) => (c as THREE.InstancedMesh).isInstancedMesh && (c as THREE.InstancedMesh).count > 0)).toBe(true);
     expect(cold.children.length).toBeGreaterThan(0);
   });
+
+  it('runs the energy layer’s line from the power plant to every block, its pulses in place when the layer is shown, even paused', async () => {
+    const { scene, handle } = await mountWorld();
+    frames(1);
+    const { counts } = window.world!.activity();
+    expect(counts.fed).toBe(LAYOUT.blocks.length);
+    const energy = scene.getObjectByName('activity-energy')!;
+    const wire = energy.children.find((c) => (c as { isLineSegments2?: boolean }).isLineSegments2) as THREE.Mesh;
+    // a segment per pylon span, per region's feeder and per block's drop
+    expect(wire.geometry.getAttribute('instanceStart').count).toBeGreaterThan(LAYOUT.blocks.length);
+    const pulses = energy.children.find((c) => (c as THREE.InstancedMesh).isInstancedMesh) as THREE.InstancedMesh;
+    expect(pulses.count).toBeGreaterThan(LAYOUT.blocks.length);
+    handle.pause(true); handle.setLayer('energy', true); frames(1);
+    const m = new THREE.Matrix4(), moved = Array.from({ length: pulses.count }, (_, i) => { pulses.getMatrixAt(i, m); return m.elements[12] !== 0 || m.elements[14] !== 0; });
+    expect(moved.every(Boolean)).toBe(true);
+  });
+
+  it('carries the vehicles’ scale once: a forklift and a car stand at 1.25 × their metric length', async () => {
+    const { scene } = await mountWorld();
+    frames(1);
+    for (const [name, metres] of [['activity-forklift', 3.85], ['activity-car', 4.2]] as const) {
+      const mesh = scene.getObjectByName(name) as THREE.InstancedMesh, geo = mesh.geometry;
+      geo.computeBoundingBox();
+      const m = new THREE.Matrix4(), s = new THREE.Vector3(); mesh.getMatrixAt(0, m); m.decompose(new THREE.Vector3(), new THREE.Quaternion(), s);
+      expect(geo.boundingBox!.max.x - geo.boundingBox!.min.x, name).toBeCloseTo(metres, 1);
+      expect(s.x, name).toBeCloseTo(VEHICLE_SCALE, 3);
+    }
+  });
+
+  it('draws no smoke or steam on a phone; the lamps stay', async () => {
+    const { scene } = await mountWorld({ reducedDetail: true, width: 390, height: 700 });
+    frames(1);
+    const { counts } = window.world!.activity();
+    for (const k of ['smoke', 'steam', 'dust', 'compressor', 'plume']) expect(counts[k] ?? 0, k).toBe(0);
+    expect(scene.getObjectByName('activity-puff')).toBeUndefined();
+    expect(counts.lamps).toBeGreaterThan(500);
+  });
 });
 
 describe('day and night (PRD v2 §3.8, C2)', () => {
@@ -179,5 +217,18 @@ describe('day and night (PRD v2 §3.8, C2)', () => {
     expect(((pools.children[0] as THREE.Mesh).material as THREE.MeshBasicMaterial).opacity).toBeGreaterThan(0.2);
     expect(window.world!.activity().litBlocks).toBe(LAYOUT.blocks.length);
     expect(window.world!.activity().counts.lamps).toBeGreaterThan(500);
+  });
+
+  it('lights the exchange’s band after dark, in the accent, above the darkened world', async () => {
+    const { scene } = await mountWorld();
+    frames(2);
+    const band = (scene.getObjectByName('activity-band') as THREE.InstancedMesh).material as THREE.MeshBasicMaterial;
+    expect(band.name).toBe('glow-band');
+    const day = band.color.clone();
+    window.world!.skip(10); frames(3);
+    expect(window.world!.activity().night).toBe(1);
+    const hsl = (c: THREE.Color) => c.getHSL({ h: 0, s: 0, l: 0 });
+    expect(band.color.equals(day)).toBe(false);
+    expect(hsl(band.color).l).toBeGreaterThanOrEqual(0.8);
   });
 });

@@ -148,9 +148,10 @@ export interface Theme {
   textMaterial(k: TextKey, map: THREE.Texture): THREE.MeshBasicMaterial;
   /**
    * What glows after dark (PRD v2 §3.8): a lamp's head and a ship's or crane's light (lamp), a kiln's mouth, a flare and
-   * a beacon (fire); and the pool of light a lamp casts on the road, transparent, seen only at night.
+   * a beacon (fire); the exchange's band, light by day and lit in the accent after dark (band); and the pool of light a
+   * lamp casts on the road, transparent, seen only at night.
    */
-  glow: { lamp: THREE.MeshBasicMaterial; fire: THREE.MeshBasicMaterial; pool: THREE.MeshBasicMaterial };
+  glow: { lamp: THREE.MeshBasicMaterial; fire: THREE.MeshBasicMaterial; band: THREE.MeshBasicMaterial; pool: THREE.MeshBasicMaterial };
   /** How dark it is now (the last shade), 0 by day to 1 at midnight. */
   night(): number;
   /** Night, 0 by day to 1 at midnight: every window warms (dim), a published company's glows in the accent, lamps and fires light. */
@@ -201,9 +202,10 @@ export function createTheme(read: (token: string) => string): Theme {
   const glow = {
     lamp: new THREE.MeshBasicMaterial({ color: lampDay.clone(), side: THREE.DoubleSide }),
     fire: new THREE.MeshBasicMaterial({ color: fireDay.clone(), side: THREE.DoubleSide }),
+    band: new THREE.MeshBasicMaterial({ color: fireDay.clone(), side: THREE.DoubleSide }),
     pool: new THREE.MeshBasicMaterial({ color: warm.clone(), transparent: true, opacity: 0, depthWrite: false, side: THREE.DoubleSide }),
   };
-  glow.lamp.name = 'glow-lamp'; glow.fire.name = 'glow-fire'; glow.pool.name = 'glow-pool';
+  glow.lamp.name = 'glow-lamp'; glow.fire.name = 'glow-fire'; glow.band.name = 'glow-band'; glow.pool.name = 'glow-pool';
 
   let lastNight = -1;
   return {
@@ -230,6 +232,7 @@ export function createTheme(read: (token: string) => string): Theme {
       fill.dim.color.copy(dimDay).lerp(dimNight, n);
       glow.lamp.color.copy(lampDay).lerp(warm, n);
       glow.fire.color.copy(fireDay).lerp(fire, n);
+      glow.band.color.copy(fireDay).lerp(accentNight, n);
       glow.pool.opacity = n * POOL_OPACITY;
       // every unlit surface sinks toward the night; the solids through their one material's colour
       for (const [k, c] of fillDay) fill[k].color.copy(c).lerp(sink, n * NIGHT_SINK);

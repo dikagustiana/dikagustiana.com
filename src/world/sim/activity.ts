@@ -63,10 +63,12 @@ export const ACTIVITY_BUDGET = 60;
 const BOOM_SPEED = 1 / 0.7, BOOM_LIFT = 1.35;
 /** A lamp every so many metres along a road, alternating sides; one at every lot's front. */
 const LAMP_PITCH = 44;
+/** The energy layer: a pulse every so many metres along its lines; the feeders' and the drops' heights. */
+const PULSE_PITCH = 18, FEEDER_Z = 12, DROP_Z = 4;
 
 type Model = 'boom' | 'puff' | 'ring' | 'dash' | 'arm' | 'haul' | 'pump-frame' | 'pump-beam' | 'loader' | 'harvester' | 'boat' | 'log-truck' | 'forklift'
   | 'straddle' | 'shunter' | 'car' | 'ambulance' | 'plane' | 'trolley' | 'jib-tower' | 'jib-magnet' | 'hoist' | 'walker' | 'post';
-type GlowModel = 'flame' | 'kiln' | 'beacon' | 'lamp-head' | 'pool';
+type GlowModel = 'flame' | 'kiln' | 'beacon' | 'band' | 'lamp-head' | 'pool';
 
 const PUFF = new THREE.IcosahedronGeometry(0.6, 0);
 
@@ -112,12 +114,14 @@ function drawGlow(p: Part, m: GlowModel): void {
     case 'flame': p.box(-0.5, -0.5, 0, 1, 1, 2.2, 'l', { lines: false }); break;
     case 'kiln': p.box(-1.4, -0.4, 0, 2.8, 0.8, 1.6, 'l', { lines: false }); break;
     case 'beacon': p.box(-0.5, -0.5, 0, 1, 1, 1, 'l', { lines: false }); break;
+    // the exchange's band: a dash, lit after dark
+    case 'band': p.box(-0.8, -0.3, -0.15, 1.6, 0.6, 0.3, 'l', { lines: false }); break;
     case 'lamp-head': p.box(1.4, -0.45, 6.4, 1.1, 0.9, 0.45, 'l', { lines: false }); break;
     case 'pool': { const n = 16, pts: [number, number, number][] = []; for (let i = 0; i < n; i++) { const a = (i / n) * Math.PI * 2; pts.push([1.9 + 5.5 * Math.cos(a), 5.5 * Math.sin(a), 0]); } p.extrude(pts, [0, 0, 0.02], 'l', { seams: false, lines: false }); break; }
   }
 }
 
-/** Models drawn at the vehicles' scale (PRD v2 §3.2: vehicles at 1.25 × metric size). */
+/** Models drawn at the vehicles' scale (PRD v2 §3.2: vehicles at 1.25 × metric size), carried by their instances. */
 const SCALED = new Set<Model>(['haul', 'loader', 'harvester', 'boat', 'log-truck', 'forklift', 'straddle', 'shunter', 'car', 'ambulance', 'plane', 'walker']);
 /** What each run kind is drawn with, and its speed in metres per second. */
 const RUN_MODEL: Record<RunKind, Model> = { loader: 'loader', harvester: 'harvester', boat: 'boat', 'log-truck': 'log-truck', forklift: 'forklift', straddle: 'straddle', shunter: 'shunter', car: 'car', ambulance: 'ambulance' };
@@ -156,6 +160,7 @@ export function createActivity(ctx: EngineContext, layout: GeneratedLayout, site
   // the cold stores' tint: the accent, translucent, with the cold-chain layer
   const coldTint = new THREE.MeshBasicMaterial({ color: theme.fill.livef.color.clone(), transparent: true, opacity: 0.2, depthWrite: false }); coldTint.name = 'cold-tint';
   const counts: Record<string, number> = {};
+  let fed = false;
   const count = (k: string, n = 1) => { counts[k] = (counts[k] ?? 0) + n; };
 
   // ---- the instanced meshes, created on first use, sized when everything is placed ----
@@ -194,9 +199,11 @@ export function createActivity(ctx: EngineContext, layout: GeneratedLayout, site
   const puffs: Puff[] = [], swings: Swing[] = [], runs: Run[] = [], loops: Loop[] = [], dashes: Dash[] = [], rings: Ring[] = [], blinks: Blink[] = [], walks: Walk[] = [], hoists: Hoist[] = [], planes: Plane[] = [];
   const statics: { x: Inst; at: At; h: number; scale: number }[] = [];
   const toneOf = (t: Tone) => theme.tone(t).clone();
-  const smokeCol = toneOf('g'), steamCol = toneOf('w'), dustCol = toneOf('s'), bandCol = toneOf('l'), pulseCol = toneOf('a'), beltCol = toneOf('k');
+  const smokeCol = toneOf('g'), steamCol = toneOf('w'), dustCol = toneOf('s'), pulseCol = toneOf('a'), beltCol = toneOf('k');
 
   const emit = (kind: ActivityKind, at: At, color: THREE.Color, o2: { n?: number; period?: number; rise?: number; size?: number; drift?: number } = {}) => {
+    // phones draw no smoke or steam (PRD v2 §3.14)
+    if (o.phone) return;
     const n = o2.n ?? 4, period = o2.period ?? 6, phase = rng.rand(0, period);
     for (let k = 0; k < n; k++) puffs.push({ x: take(slot('puff')), at, k, n, period, rise: o2.rise ?? 9, size: o2.size ?? 1.6, drift: o2.drift ?? 3, phase, color });
     count(kind);
@@ -207,11 +214,11 @@ export function createActivity(ctx: EngineContext, layout: GeneratedLayout, site
     runs.push({ x: take(slot(model)), from, to, len, speed: RUN_SPEED[kind], phase: rng.rand(0, 2 * len / RUN_SPEED[kind]), scale: SCALED.has(model) ? VEHICLE_SCALE : 1 });
     count(RUN_KIND[kind]);
   };
-  const belt = (kind: ActivityKind, from: At, to: At, color: THREE.Color, pitch = 3, parent: THREE.Group = root, speed = 2.5) => {
+  const belt = (kind: ActivityKind | null, from: At, to: At, color: THREE.Color | undefined, pitch = 3, parent: THREE.Group = root, speed = 2.5, lit = false) => {
     const len = Math.hypot(to[0] - from[0], to[1] - from[1], to[2] - from[2]); if (len < 1) return;
     const n = Math.max(1, Math.floor(len / pitch));
-    for (let k = 0; k < n; k++) dashes.push({ x: take(slot('dash', false, parent)), from, to, len, speed, offset: (k / n) * len, color });
-    count(kind);
+    for (let k = 0; k < n; k++) dashes.push({ x: take(lit ? slot('band', true, parent) : slot('dash', false, parent)), from, to, len, speed, offset: (k / n) * len, color });
+    if (kind) count(kind);
   };
 
   // ---- every site's activity, from its anchors ----
@@ -236,7 +243,8 @@ export function createActivity(ctx: EngineContext, layout: GeneratedLayout, site
     for (const at of a.kiln ?? []) { statics.push({ x: take(slot('kiln', true)), at, h: 0, scale: 1 }); statics.push({ x: take(slot('pool', true, poolGroup)), at: [at[0] - 1.9, at[1] + 2, 0.25], h: 0, scale: 0.9 }); count('kiln'); }
     for (const at of a.beacon ?? []) { blinks.push({ x: take(slot('beacon', true)), at, period: 2, phase: rng.rand(0, 2), flicker: false }); count('beacon'); }
     for (const [f, t] of a.conveyor ?? []) belt('conveyor', f, t, beltCol);
-    if (a.band) belt('band', a.band[0], a.band[1], bandCol, 2.4, root, 4);
+    // the band's colour is its glow material's: light by day, lit in the accent after dark (PRD v2 §3.8)
+    if (a.band) belt('band', a.band[0], a.band[1], undefined, 2.4, root, 4, true);
     for (const r of a.run ?? []) run(r.kind, r.from, r.to);
     for (const r of a.rings ?? []) { for (let k = 0; k < 2; k++) rings.push({ x: take(slot('ring')), at: r.at, r: r.r, period: 4, phase: rng.rand(0, 4) + k * 2 }); count(st.family === 'pond' ? 'aerator' : 'ripples'); }
     for (const at of a.door ?? []) {
@@ -249,12 +257,25 @@ export function createActivity(ctx: EngineContext, layout: GeneratedLayout, site
     for (const [f, t] of a.overpass ?? []) { const len = Math.hypot(t[0] - f[0], t[1] - f[1]); for (let k = 0; k < 3; k++) runs.push({ x: take(slot('car')), from: f, to: t, len, speed: -6, phase: (k / 3) * (len / 6) + rng.rand(0, 1), scale: VEHICLE_SCALE }); count('cars'); }
     for (const j of a.jib ?? []) { swings.push({ x: take(slot(j.kind === 'tower' ? 'jib-tower' : 'jib-magnet')), at: j.at, base: rng.rand(0, Math.PI * 2), amp: j.kind === 'tower' ? 1.4 : 1.1, period: j.kind === 'tower' ? 24 : 12, phase: rng.rand(0, 24) }); count(j.kind === 'tower' ? 'tower-crane' : 'magnet'); }
     if (a.hoist) { hoists.push({ x: take(slot('hoist')), from: a.hoist[0], to: a.hoist[1], period: 16, phase: rng.rand(0, 16) }); count('hoist'); }
-    // the power plant's pylons: the energy layer's line and its pulses (PRD v2 §3.7 Appendix C, §3.12)
+    // the power plant's pylons: the energy layer's line out of the plant and on to every block (PRD v2 §3.9)
     if (a.pylons?.length) {
-      const hub: At = [0, 0, 12];
-      const line: At[] = [...a.pylons, hub];
-      for (let i = 0; i + 1 < line.length; i++) belt('pulse', line[i], line[i + 1], pulseCol, 14, energy, 12);
-      const segs: number[] = []; for (let i = 0; i + 1 < line.length; i++) segs.push(line[i][0], line[i][2], line[i][1], line[i + 1][0], line[i + 1][2], line[i + 1][1]);
+      const lines: [At, At][] = [];
+      for (let i = 0; i + 1 < a.pylons.length; i++) lines.push([a.pylons[i], a.pylons[i + 1]]);
+      if (!fed) {
+        // from the last pylon a feeder to each region's substation, and from there a drop to each of its blocks
+        fed = true;
+        const last = a.pylons[a.pylons.length - 1];
+        for (const r of layout.regions) {
+          const blocks = layout.blocks.filter((b) => b.region === r.id); if (!blocks.length) continue;
+          const sub: At = [r.anchor[0], r.anchor[1], FEEDER_Z];
+          lines.push([last, sub]);
+          for (const b of blocks) lines.push([sub, [b.anchor[0], b.anchor[1], DROP_Z]]);
+          count('fed', blocks.length);
+        }
+      }
+      for (const [f, t] of lines) belt(null, f, t, pulseCol, PULSE_PITCH, energy, 12);
+      count('pulse');
+      const segs: number[] = []; for (const [f, t] of lines) segs.push(f[0], f[2], f[1], t[0], t[2], t[1]);
       const wire = new LineSegments2(new LineSegmentsGeometry().setPositions(segs), theme.line.live); wire.raycast = () => {}; wire.frustumCulled = false; energy.add(wire);
     }
     // the cold-chain layer tints the cold stores (PRD v2 §3.12)
@@ -308,8 +329,7 @@ export function createActivity(ctx: EngineContext, layout: GeneratedLayout, site
     const p = new Part(ctx); p.cull = false;
     if (s.glow) drawGlow(p, s.model as GlowModel); else drawActor(p, s.model as Model);
     const geo = p.solidGeometry();
-    if (SCALED.has(s.model as Model)) { geo.scale(VEHICLE_SCALE, VEHICLE_SCALE, VEHICLE_SCALE); geo.computeBoundingSphere(); }
-    const mat = s.glow ? (s.model === 'pool' ? theme.glow.pool : s.model === 'lamp-head' ? theme.glow.lamp : theme.glow.fire) : theme.solid;
+    const mat = s.glow ? (s.model === 'pool' ? theme.glow.pool : s.model === 'lamp-head' ? theme.glow.lamp : s.model === 'band' ? theme.glow.band : theme.glow.fire) : theme.solid;
     const mesh = new THREE.InstancedMesh(geo, mat, Math.max(1, s.n));
     mesh.name = `activity-${s.model}`; mesh.count = s.n; mesh.frustumCulled = false; mesh.raycast = () => {};
     if (!s.glow) for (let i = 0; i < s.n; i++) mesh.setColorAt(i, col.setRGB(1, 1, 1));
@@ -355,6 +375,8 @@ export function createActivity(ctx: EngineContext, layout: GeneratedLayout, site
       pose(l.x, a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, a[2], Math.atan2(b[1] - a[1], b[0] - a[0]), VEHICLE_SCALE * 0.9);
     }
     for (const d of dashes) {
+      // a hidden layer's pulses wait until it is shown
+      if (!d.x.s.parent.visible) continue;
       const s = (d.offset + t * d.speed) % d.len, p = lerp3(d.from, d.to, s / d.len);
       pose(d.x, p[0], p[1], p[2], Math.atan2(d.to[1] - d.from[1], d.to[0] - d.from[0]));
     }
@@ -384,7 +406,7 @@ export function createActivity(ctx: EngineContext, layout: GeneratedLayout, site
       else if (u < 0.8) { const k = (u - run) / (0.8 - run); pose(p.x, p.to[0] + dx * k * 0.8, p.to[1] + dy * k * 0.8, 60 * k * k, h, VEHICLE_SCALE, -0.25 * Math.min(1, k * 3)); }
       else pose(p.x, p.from[0], p.from[1], -50, h, 0.01);
     }
-    for (const m of moving) m.instanceMatrix.needsUpdate = true;
+    for (const m of moving) if (m.parent?.visible) m.instanceMatrix.needsUpdate = true;
     if (ringMesh?.instanceColor) ringMesh.instanceColor.needsUpdate = true;
     // the pools of light show only after dark
     poolGroup.visible = theme.night() > 0.02;
@@ -398,8 +420,16 @@ export function createActivity(ctx: EngineContext, layout: GeneratedLayout, site
       for (const b of booms) b.up = busy?.has(b.id) ? Math.min(1, b.up + dt * BOOM_SPEED) : Math.max(0, b.up - dt * BOOM_SPEED);
     },
     draw,
-    setLayer(name, on) { if (name === 'energy') energy.visible = on; if (name === 'cold-chain') cold.visible = on; },
-    setDetail(tiny) { near.visible = !tiny && !o.phone; },
+    setLayer(name, on) {
+      if (name === 'energy') energy.visible = on;
+      if (name === 'cold-chain') cold.visible = on;
+      // pose again on the next frame, even with the clock paused, so a layer shown has its pulses in place
+      posed = -1;
+    },
+    setDetail(tiny) {
+      const show = !tiny && !o.phone;
+      if (show !== near.visible) { near.visible = show; posed = -1; }
+    },
     counts: () => ({ ...counts }),
     litBlocks: () => new Set(lit),
     families() {
