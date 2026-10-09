@@ -74,6 +74,8 @@ export interface View {
   screenOf(ent: Entity): [number, number];
   /** Put the camera over world (x, y) at a zoom in pixels per metre, at once. */
   look(x: number, y: number, zoom: number): void;
+  /** Put the camera over an entity's anchor at a zoom in pixels per metre, at once. */
+  lookAtEntity(e: Entity, zoom: number): void;
   resize(): void;
   dispose(): void;
 }
@@ -411,9 +413,9 @@ export function createView(ctx: EngineContext, o: ViewOptions): View {
     try { canvas.setPointerCapture(e.pointerId); } catch { /* not every environment captures */ }
     const p = local(e); pointers.set(e.pointerId, p);
     if (pointers.size === 1) press = { id: e.pointerId, x: p[0], y: p[1], moved: false };
+    else { press = null; const [a, b] = [...pointers.values()]; spread = Math.hypot(a[0] - b[0], a[1] - b[1]); }
     // a touch that rests shows the hover label (a long press)
     if (e.pointerType === 'touch' && pointers.size === 1) { if (pressTimer) clearTimeout(pressTimer); pressTimer = setTimeout(() => { pressTimer = null; if (press && !press.moved) hover(pickAt(press.x, press.y)); }, LONG_PRESS); }
-    else { press = null; const [a, b] = [...pointers.values()]; spread = Math.hypot(a[0] - b[0], a[1] - b[1]); }
     canvas.style.cursor = 'grabbing';
   };
   let hoverTimer: ReturnType<typeof setTimeout> | null = null, pressTimer: ReturnType<typeof setTimeout> | null = null, hoverAtPt: [number, number] | null = null;
@@ -600,6 +602,7 @@ export function createView(ctx: EngineContext, o: ViewOptions): View {
     drawCalls: () => calls,
     screenOf,
     look(x, y, zoom) { const [lo, hi] = zoomRange(); cur.x = goal.x = x; cur.y = goal.y = y; cur.logZ = goal.logZ = clamp(Math.log(Math.max(zoom, 1e-6)), lo, hi); named = null; applyCamera(); },
+    lookAtEntity(e, zoom) { const [x, y] = centreOn(e), [lo, hi] = zoomRange(); cur.x = goal.x = x; cur.y = goal.y = y; cur.logZ = goal.logZ = clamp(Math.log(Math.max(zoom, 1e-6)), lo, hi); named = null; applyCamera(); },
     resize,
     dispose() {
       for (const [type, fn, opts] of listeners) canvas.removeEventListener(type, fn, opts);

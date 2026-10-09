@@ -147,3 +147,20 @@ describe('the keyboard (PRD v2 §3.4)', () => {
     key('{', true); key('{', true); expect(window.world!.selected()).toBe(codes[codes.length - 1]);
   });
 });
+
+describe('the pointer on the canvas (PRD v2 §3.4, A3)', () => {
+  it('a click (pointer down and up in place) at a company’s anchor selects the company; a mouse moving over it hovers it', async () => {
+    const { container } = await mountWorld();
+    frames(2);
+    const canvas = container.querySelector('canvas')!;
+    const pointer = (type: string, x: number, y: number, pointerType = 'mouse') => { const e = new MouseEvent(type, { clientX: x, clientY: y, bubbles: true }); Object.defineProperty(e, 'pointerId', { value: 1 }); Object.defineProperty(e, 'pointerType', { value: pointerType }); canvas.dispatchEvent(e); };
+    const [x, y] = window.world!.screenOf('INTP')!;
+    pointer('pointermove', x, y);
+    expect(window.world!.hovered()?.id).toBe('INTP');
+    pointer('pointerdown', x, y); pointer('pointerup', x, y);
+    expect(window.world!.selected()).toBe('INTP');
+    // a second finger and a drag do not select
+    pointer('pointerdown', x, y, 'touch'); pointer('pointermove', x + 40, y + 40, 'touch'); pointer('pointerup', x + 40, y + 40, 'touch');
+    expect(window.world!.selected()).toBe('INTP');
+  });
+});

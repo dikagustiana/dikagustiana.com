@@ -36,6 +36,8 @@ interface DebugApi {
   selected(): string | null;
   screenOf(id: string): [number, number] | null;
   look(x: number, y: number, zoom: number): void;
+  /** Centre the camera on an entity at a zoom in pixels per metre, at once (the probe sets each band with it). */
+  centre(id: string, zoom: number): void;
   view(name: string): void;
   all(): { id: string; kind: string; status: string }[];
   drawCalls(): number;
@@ -210,6 +212,7 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
       select: (id) => handle.select(id), selected: handle.selected,
       screenOf: (id) => { const e = find(id); return e ? view.screenOf(e) : null; },
       look: (x, y, k) => view.look(x, y, k),
+      centre: (id, k) => { const e = find(id); if (e) view.lookAtEntity(e, k); },
       view: (name) => { if ((VIEW_NAMES as readonly string[]).includes(name)) view.lookAt(name as ViewName); },
       band: () => view.band(),
       hovered: () => view.hovered(),
