@@ -21,13 +21,17 @@
  *     snapshot gets "not yet counted" and no proposal;
  *   - what each company does (PRD v2 §4.1): companies.tsv's `does` column,
  *     one line with no figure, its source after " | description: " in the
- *     source column; review-does.md lists every line for the owner.
+ *     source column; review-does.md lists every line for the owner;
+ *   - the stories (PRD v2 §3.10, §4.1, Appendix B): every hop's codes are
+ *     placed, every hop is a link of the register (read against the goods,
+ *     as money, in an upstream story, whose hops carry no goods), its goods
+ *     class is the link's, and no title or standfirst carries a figure.
  */
 import { createHash } from 'node:crypto';
 import { BANDS, BORDERS, BYPRODUCT, NODES, NON_PHYSICAL, RETAIL, RETAIL_GROUP, RETURNS, STAGES } from '../../../data/industryChain.ts';
 import {
   ARCHETYPES, BUILDING_FAMILIES, CHAIN_STAGES, GOODS, ZONES,
-  type Archetype, type BuildingFamily, type ChainStage, type CompanyRef, type Link, type ListedCount, type Room, type SubIndustry, type Zone,
+  type Archetype, type BuildingFamily, type ChainStage, type CompanyRef, type Link, type ListedCount, type Room, type Story, type SubIndustry, type Zone,
 } from './types.ts';
 
 export const EXPECTED = { subSectors: 35, industries: 69, subIndustries: 130, placed: 125 } as const;
@@ -62,15 +66,17 @@ export interface Sources {
   placement: string;
   companies: string;
   links: string;
+  stories: string;
   issuersJson: string;
   citation: Citation;
 }
 export interface Generated {
   subIndustries: SubIndustry[];
   links: Link[];
+  stories: Story[];
   rooms: readonly Room[];
   counts: { subSectors: number; industries: number; subIndustries: number; placed: number; links: number; proposedPlacements: number; proposedCompanies: number; emptySlots: number };
-  files: { subIndustriesTs: string; linksTs: string; reviewMd: string; reviewDoesMd: string };
+  files: { subIndustriesTs: string; linksTs: string; storiesTs: string; reviewMd: string; reviewDoesMd: string };
 }
 
 export class RegistryError extends Error {
@@ -229,12 +235,44 @@ export function generate(src: Sources): Generated {
     links.push({ from: l.from, to: l.to, goods: l.goods, state: 'expected', note: l.note });
   }
 
+  // ---- the stories ----
+  const placedCodes = new Set(subIndustries.filter((x) => x.zone !== 'unplaced').map((x) => x.code));
+  const stories: Story[] = [];
+  const storyIds = new Set<string>();
+  for (const r of parseTsv(src.stories)) {
+    const id = r.id;
+    if (!/^[a-z][a-z0-9-]*$/.test(id)) throw new RegistryError(`story "${id}": the id must be lower-case words joined by hyphens`);
+    if (storyIds.has(id)) throw new RegistryError(`story ${id} is listed twice`);
+    storyIds.add(id);
+    if (!r.title || !r.standfirst) throw new RegistryError(`story ${id} needs a title and a standfirst`);
+    for (const t of [r.title, r.standfirst]) if (DOES_FIGURE.test(t)) throw new RegistryError(`story ${id}: "${t}" carries a figure`);
+    const hops = r.hops.split('>').map((x) => x.trim()).filter(Boolean);
+    const goods = r.goods.split('>').map((x) => x.trim()).filter(Boolean);
+    if (hops.length < 2) throw new RegistryError(`story ${id} needs at least two codes`);
+    if (goods.length !== hops.length - 1) throw new RegistryError(`story ${id}: ${hops.length} codes need ${hops.length - 1} goods, not ${goods.length}`);
+    if (!is(['economy', 'finance'] as const, r.lens)) throw new RegistryError(`story ${id}: the lens must be economy or finance, not "${r.lens}"`);
+    if (!is(['downstream', 'upstream'] as const, r.direction)) throw new RegistryError(`story ${id}: the direction must be downstream or upstream, not "${r.direction}"`);
+    const withCodes = (r.with ?? '').split(/[ ,]+/).map((x) => x.trim()).filter(Boolean);
+    for (const c of [...hops, ...withCodes]) if (!placedCodes.has(c)) throw new RegistryError(`story ${id}: ${c} is not a placed sub-industry`);
+    const up = r.direction === 'upstream';
+    hops.slice(1).forEach((b, i) => {
+      const a = hops[i], g = goods[i];
+      if (!is(GOODS, g)) throw new RegistryError(`story ${id}: goods must be one of ${GOODS.join(', ')}, not "${g}"`);
+      // an upstream story reads a link against the goods: the money runs from the customer back to the supplier
+      const l = links.find((x) => (up ? x.from === b && x.to === a : x.from === a && x.to === b));
+      if (!l) throw new RegistryError(`story ${id}: ${a} → ${b} is not a link of the register${up ? ' read upstream' : ''}`);
+      if (up ? g !== 'none' : g !== l.goods) throw new RegistryError(`story ${id}: ${a} → ${b} carries ${up ? 'money (none)' : l.goods}, not ${g}`);
+    });
+    stories.push({ id, title: r.title, standfirst: r.standfirst, hops, goods: goods as Story['goods'][number][], lens: r.lens, direction: r.direction, with: withCodes });
+  }
+
   const all = { subSectors: counts.subSectors, industries: counts.industries, subIndustries: counts.subIndustries, placed: counts.placed, links: links.length, proposedPlacements, proposedCompanies, emptySlots };
   return {
-    subIndustries, links, rooms: ROOMS, counts: all,
+    subIndustries, links, stories, rooms: ROOMS, counts: all,
     files: {
       subIndustriesTs: renderSubIndustriesTs(subIndustries, src.citation, clsHash),
       linksTs: renderLinksTs(links),
+      storiesTs: renderStoriesTs(stories),
       reviewMd: renderReview(subIndustries, links, all, src.citation),
       reviewDoesMd: renderDoesReview(subIndustries),
     },
@@ -289,6 +327,23 @@ export const LINKS: readonly Link[] = ${JSON.stringify(links, null, 2)};
 
 export const linksFrom = (code: string): Link[] => LINKS.filter((l) => l.from === code);
 export const linksTo = (code: string): Link[] => LINKS.filter((l) => l.to === code);
+`;
+}
+
+function renderStoriesTs(stories: Story[]): string {
+  return `${GENERATED}
+/**
+ * The stories (PRD v2 §3.10, Appendix B): curated chains the visitor lights
+ * end to end and can ride with Follow. They are the owner's, in
+ * docs/world/sources/stories.tsv; every hop is a link of the register (read
+ * upstream, as money, in an upstream story), so a story needs no data of its
+ * own: a measured link draws measured. No title or standfirst carries a figure.
+ */
+import type { Story } from './types.ts';
+
+export const STORIES: readonly Story[] = ${JSON.stringify(stories, null, 2)};
+
+export const storyById = (id: string): Story | undefined => STORIES.find((s) => s.id === id);
 `;
 }
 

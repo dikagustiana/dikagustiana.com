@@ -9,6 +9,8 @@ import type { Goods } from '@/lib/world/registry/types';
 
 /** What a link carries (PRD v2 Appendix A): the registry's list, read here by the shell. */
 export { GOODS, type Goods } from '@/lib/world/registry/types';
+/** The six stories (PRD v2 §3.10, Appendix B), the owner's, from docs/world/sources/stories.tsv. */
+export { STORIES, storyById } from '@/lib/world/registry/stories.generated';
 
 /** How a card names a link's goods class next to a supplier or a customer (PRD v2 §3.11). */
 export const GOODS_WORD: Record<Goods, string> = {

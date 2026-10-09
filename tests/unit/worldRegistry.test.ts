@@ -19,6 +19,7 @@ import { CHAIN_IDS, EXPECTED, RegistryError, generate, type Sources } from '@/li
 import { REGISTRY, SUB_INDUSTRIES } from '@/lib/world/registry/subindustries.generated';
 import { GOODS } from '@/lib/world/registry/types';
 import { LINKS } from '@/lib/world/registry/links.generated';
+import { STORIES, storyById } from '@/lib/world/registry/stories.generated';
 import { isMeasured } from '@/lib/finance-in-action/contract/links';
 import { assertNoFigure } from '@/world/engine/kernel/part';
 
@@ -32,6 +33,7 @@ const sources = (): Sources => ({
   placement: read('placement.tsv'),
   companies: read('companies.tsv'),
   links: read('links.tsv'),
+  stories: read('stories.tsv'),
   issuersJson: read('issuers-snapshot.json'),
   citation: JSON.parse(read('citation.json')),
 });
@@ -118,6 +120,7 @@ describe('the registry', () => {
     const out = generate(sources());
     expect(out.files.subIndustriesTs).toBe(fs.readFileSync(path.join(ROOT, 'src/lib/world/registry/subindustries.generated.ts'), 'utf8'));
     expect(out.files.linksTs).toBe(fs.readFileSync(path.join(ROOT, 'src/lib/world/registry/links.generated.ts'), 'utf8'));
+    expect(out.files.storiesTs).toBe(fs.readFileSync(path.join(ROOT, 'src/lib/world/registry/stories.generated.ts'), 'utf8'));
     expect(out.files.reviewMd).toBe(fs.readFileSync(path.join(ROOT, 'docs/world/review-registry.md'), 'utf8'));
     const again = generate(sources());
     expect(again.files).toEqual(out.files);
@@ -128,6 +131,33 @@ describe('the registry', () => {
     s.classification = s.classification.replace('Coal Production', 'Coal production');
     expect(() => generate(s)).toThrow(RegistryError);
     expect(() => generate(s)).toThrow(/citation/);
+  });
+
+  it('resolves the six stories of Appendix B to placed codes, every hop a link of the register with its goods (PRD v2 §3.10, D2)', () => {
+    expect(STORIES.map((s) => s.id)).toEqual(['coal', 'cement', 'well-to-shelf', 'palm', 'nickel', 'rupiah-upstream']);
+    const placed = new Set(SUB_INDUSTRIES.filter((s) => s.zone !== 'unplaced').map((s) => s.code));
+    for (const st of STORIES) {
+      expect(st.goods.length, st.id).toBe(st.hops.length - 1);
+      for (const c of [...st.hops, ...st.with]) expect(placed.has(c), `${st.id}: ${c}`).toBe(true);
+      for (let i = 0; i + 1 < st.hops.length; i++) {
+        const [a, b] = [st.hops[i], st.hops[i + 1]], up = st.direction === 'upstream';
+        const l = LINKS.find((x) => (up ? x.from === b && x.to === a : x.from === a && x.to === b));
+        expect(l, `${st.id}: ${a} > ${b}`).toBeTruthy();
+        expect(st.goods[i], `${st.id}: ${a} > ${b}`).toBe(up ? 'none' : l!.goods);
+      }
+      for (const t of [st.title, st.standfirst]) expect(() => assertNoFigure(t), t).not.toThrow();
+    }
+    // the rupiah runs upstream, with the banks lit beside it
+    expect(storyById('rupiah-upstream')).toMatchObject({ direction: 'upstream', lens: 'finance', with: ['G111'] });
+  });
+
+  it('refuses a story whose hop is not a link, whose goods are not the link’s, or whose standfirst carries a figure', () => {
+    const swap = (from: string, to: string) => { const s = sources(); s.stories = s.stories.replace(from, to); return s; };
+    expect(() => generate(swap('A121 > J411 > B121 > J211', 'A121 > B121 > J411 > J211'))).toThrow(/not a link/);
+    expect(() => generate(swap('bulk > none > bulk', 'bulk > bulk > bulk'))).toThrow(/carries none/);
+    expect(() => generate(swap('Cement leaves the kiln', 'Cement leaves the 40 kilns'))).not.toThrow();
+    expect(() => generate(swap('Cement leaves the kiln for the builders', 'Cement leaves the kiln, 2,500 tonnes a day, for the builders'))).toThrow(/figure/);
+    expect(() => generate(swap('B146 > B144 > J113', 'B146 > B144 > Z999'))).toThrow(/placed/);
   });
 
   it('refuses a placement the owner has not written for every code, and a wrong count', () => {

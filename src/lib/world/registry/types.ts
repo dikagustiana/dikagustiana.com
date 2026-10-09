@@ -114,6 +114,24 @@ export interface Link {
   note?: string;
 }
 
+/** A story (PRD v2 §3.10, Appendix B): a curated chain the visitor lights end to end and can ride. The owner's. */
+export interface Story {
+  id: string;
+  title: string;
+  /** One line, present tense, no figure. */
+  standfirst: string;
+  /** Sub-industry codes in reading order, each placed in the world. */
+  hops: readonly string[];
+  /** The goods class of each hop, one fewer than the codes. */
+  goods: readonly Goods[];
+  /** The lens the story reads best at. */
+  lens: 'economy' | 'finance';
+  /** Downstream reads with the goods; upstream against them, as money (Appendix B, 6). */
+  direction: 'downstream' | 'upstream';
+  /** Codes lit beside the hops: the banks that fund each step. */
+  with: readonly string[];
+}
+
 export interface Room {
   id: string;
   label: string;
