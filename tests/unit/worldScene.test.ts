@@ -1,6 +1,6 @@
 /**
  * The world as built from the generated layout (mega prompt §6.2, §11):
- * every placed sub-industry is an entity with two plots, the gates,
+ * every placed sub-industry is an entity with two lots, the gates,
  * signposts and fixtures are entities, model statuses light the right
  * buildings with the right glyph word (and an outage never reads as
  * absence), the layers switch their vehicles, flow classes add trucks
@@ -54,7 +54,7 @@ function drawables(scene: THREE.Scene): number {
 }
 
 describe('the world scene', () => {
-  it('has an entity for every placed sub-industry, two plots each, every gate, signpost and fixture, and traffic', async () => {
+  it('has an entity for every placed sub-industry, two lots each, every gate, signpost and fixture, and traffic', async () => {
     const { handle } = await mount();
     const all = window.world!.all();
     const kinds = new Map<string, number>(); for (const e of all) kinds.set(e.kind, (kinds.get(e.kind) ?? 0) + 1);

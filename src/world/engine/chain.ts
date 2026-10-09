@@ -66,7 +66,8 @@ export function createChain(ctx: EngineContext, links: readonly Link[]): Chain {
   const swapped = new Map<Dimmable, THREE.Material | THREE.Material[]>();
   const dimOf = (m: THREE.Material): THREE.Material => {
     let d = dims.get(m);
-    if (!d) { d = m.clone(); d.transparent = true; d.opacity = DIM; d.depthWrite = false; dims.set(m, d); }
+    // a translucent material (the cast shadow) dims from its own opacity, not from full
+    if (!d) { d = m.clone(); d.transparent = true; d.opacity = DIM * (m.transparent ? m.opacity : 1); d.depthWrite = false; dims.set(m, d); }
     return d;
   };
   const refreshDims = () => {

@@ -19,7 +19,7 @@ import { archetypeForZone, stationFor } from '@/world/interiors/stations';
 import { whiteboardFor } from '@/lib/world/whiteboard';
 import type { StationBinding, WhiteboardContent } from '@/world/data/types';
 import { STATUS, type LensId, type ShiftId } from '@/data/industryChain';
-import type { FrameReading, OverlayName, Selection, ViewName, WorldHandle, WorldAction, WorldMark } from '@/world/engine/types';
+import type { FrameReading, Hover, OverlayName, Selection, ViewName, WorldHandle, WorldAction, WorldMark } from '@/world/engine/types';
 import { Card } from './Card';
 import { FrameHeader, PHONE_QUERY, PosterImage, type FrameControls } from './FrameShell';
 import { Search } from './Search';
@@ -50,6 +50,7 @@ export default function WorldFrame({ variant, heading, boardTicker = null, onBoa
   const [ready, setReady] = useState(false);
   const [failed, setFailed] = useState<string | null>(null);
   const [selection, setSelection] = useState<Selection | null>(null);
+  const [hovered, setHovered] = useState<Hover | null>(null);
   const [mark, setMark] = useState<{ shift: ShiftId; targetId: string } | null>(null);
   const [overlay, setOverlay] = useState<OverlayName>('none');
   const [layers, setLayers] = useState(DEFAULT_LAYERS);
@@ -95,9 +96,10 @@ export default function WorldFrame({ variant, heading, boardTicker = null, onBoa
       if (!host.current) return;
       const font = getComputedStyle(document.documentElement).getPropertyValue('--font-sans').trim() || 'sans-serif';
       const h = createWorld(host.current, {
-        registry: REGISTRY, layout: LAYOUT, theme: { font }, initialView: phone ? 'estate' : 'whole', reducedDetail: phone,
+        registry: REGISTRY, layout: LAYOUT, theme: { font }, initialView: 'hero', reducedDetail: phone,
         debug: typeof location !== 'undefined' && new URLSearchParams(location.search).has('debug'),
         onSelect: (sel) => { if (sel?.kind === 'whiteboard') { const t = sel.info.rows.find(([k]) => k === 'Ticker')?.[1]; if (t) act({ type: 'open-board', ticker: t }); return; } if (sel?.kind === 'mark') { const id = sel.info.rows.find(([k]) => k === 'Target')?.[1]; setSelection(null); setMark(id && shiftRef.current ? { shift: shiftRef.current, targetId: id } : null); return; } setSelection(sel); if (sel) setMark(null); handle.current?.highlightChain(sel && (sel.kind === 'building' || sel.kind === 'company') ? sel.id : null, fullChainRef.current ? 'all' : 1); },
+        onHover: setHovered,
         onAction: act,
         onReady: () => setReady(true),
       });
@@ -195,7 +197,7 @@ export default function WorldFrame({ variant, heading, boardTicker = null, onBoa
     <div className="world-frame" data-world="on" data-ready={ready}>
       <FrameHeader heading={heading} variant={variant} phone={phone} coverage={coverageLine(data.state, data.covered)} view={view} ready={ready} distance={distance} overlay={overlay} layers={layers} on={controls}
         search={<Search pieces={pieces} onPick={(hit) => { if (hit.kind === 'piece') act({ type: 'open-piece', slug: hit.id }); else act({ type: 'select', id: hit.id }); }} />} />
-      <div className="world-frame__stage" onPointerDown={() => void mount()} onKeyDown={() => void mount()}>
+      <div className="world-frame__stage" onPointerDown={() => void mount()} onKeyDown={(e) => { void mount(); if (e.key === 'Enter' && selection && (e.target as HTMLElement).classList?.contains('world-canvas')) { e.preventDefault(); host.current?.parentElement?.querySelector<HTMLElement>('.world-card__title')?.focus(); } }}>
         <PosterImage hidden={ready} />
         <Stage className="sr-only">The map</Stage>
         <div className="world-frame__canvas-host" ref={host} data-ready={ready} />
@@ -217,10 +219,12 @@ export default function WorldFrame({ variant, heading, boardTicker = null, onBoa
       </div>
       {shift && (
         <ol className="world-frame__strip" aria-label="Reading strip: the marks of this shift in argument order">
-          {marks.map((m) => { const st = STATUS[m.target.condition!.status]; return <li key={m.targetId}><button type="button" aria-pressed={mark?.targetId === m.targetId} onClick={() => { setMark({ shift, targetId: m.targetId }); setSelection(null); const h = handle.current; if (!h) return; if (m.carrier.kind === 'gate' || m.carrier.kind === 'signpost') { h.select(m.carrier.id); h.setDistance(0.6); } else if (m.carrier.kind === 'region') { h.select(null); h.lookAt(REGION_VIEW[m.carrier.id] ?? 'whole'); } }}><span aria-hidden="true">{m.n}</span><span aria-hidden="true">{st.form === 'filled' ? '●' : st.form === 'open' ? '○' : '◌'}</span>{m.label} · {st.label}</button></li>; })}
+          {marks.map((m) => { const st = STATUS[m.target.condition!.status]; return <li key={m.targetId}><button type="button" aria-pressed={mark?.targetId === m.targetId} onClick={() => { setMark({ shift, targetId: m.targetId }); setSelection(null); const h = handle.current; if (!h) return; if (m.carrier.kind === 'gate' || m.carrier.kind === 'signpost') { h.select(m.carrier.id); h.setDistance(0.6); } else if (m.carrier.kind === 'region') { h.select(null); h.lookAt(REGION_VIEW[m.carrier.id] ?? 'hero'); } }}><span aria-hidden="true">{m.n}</span><span aria-hidden="true">{st.form === 'filled' ? '●' : st.form === 'open' ? '○' : '◌'}</span>{m.label} · {st.label}</button></li>; })}
         </ol>
       )}
       <p className="sr-only">{CANVAS_DESCRIPTION}</p>
+      {/* the hover label, else the selection's readout, read out as it changes (PRD v2 §3.4, §3.15) */}
+      <p className="sr-only" aria-live="polite" data-world-readout="">{hovered?.label ?? (selection ? reading?.readout ?? selection.info.title : '')}</p>
     </div>
   );
 }

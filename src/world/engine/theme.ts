@@ -19,8 +19,12 @@
 import * as THREE from 'three';
 import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
 
-/** Flat fills: ground, yards, decals, the whiteboard's bars. */
-export type FillKey = 'ground' | 'body' | 'deck' | 'road' | 'glass' | 'sand' | 'grass' | 'sea' | 'kob' | 'kod' | 'livef' | 'window' | 'lamp' | 'screen';
+/**
+ * Flat fills: ground, yards, decals, the whiteboard's bars; the region tones (PRD v2 §3.2: dust for the geological arc
+ * and the recovery yard, meadow for the biological arc and the hill, pale for the estate), the water's rim, and the
+ * buildings' cast shadow, which is the only translucent fill.
+ */
+export type FillKey = 'ground' | 'body' | 'deck' | 'road' | 'glass' | 'sand' | 'grass' | 'sea' | 'kob' | 'kod' | 'livef' | 'window' | 'lamp' | 'screen' | 'dust' | 'meadow' | 'pale' | 'rim' | 'shadow';
 /** Lines: structure, detail, the slab's grid, and the live colour. */
 export type LineKey = 'line' | 'detail' | 'grid' | 'live';
 /** Text: ink for what is read, paint for what is marked on the ground. */
@@ -28,9 +32,10 @@ export type TextKey = 'ink' | 'paint';
 /**
  * Solid tones, for boxes, prisms and cylinders: n the plain body, w white,
  * k dark, g pale glass-grey, gr rock, gs grass slope, s sand, l a lamp,
- * nb and kb a walker's light and dark parts.
+ * nb and kb a walker's light and dark parts, a the accent (a published
+ * company's status bar, PRD v2 §3.5).
  */
-export type Tone = 'n' | 'w' | 'k' | 'g' | 'gr' | 'gs' | 's' | 'l' | 'nb' | 'kb';
+export type Tone = 'n' | 'w' | 'k' | 'g' | 'gr' | 'gs' | 's' | 'l' | 'nb' | 'kb' | 'a';
 
 /** A key's colour: a token, or a mix of two tokens (t of the way from the first to the second). */
 type Source = string | readonly [from: string, to: string, t: number];
@@ -40,10 +45,11 @@ export const SITE_TOKENS: { fill: Record<FillKey, string>; line: Record<LineKey,
   fill: {
     ground: '--background', body: '--card', deck: '--secondary', road: '--muted', glass: '--border', sand: '--muted', grass: '--secondary', sea: '--background',
     kob: '--muted-foreground', kod: '--muted-foreground', livef: '--accent', window: '--border', lamp: '--popover', screen: '--background',
+    dust: '--muted', meadow: '--secondary', pale: '--background', rim: '--background', shadow: '--foreground',
   },
   line: { line: '--foreground', detail: '--muted-foreground', grid: '--border', live: '--accent' },
   text: { ink: '--foreground', paint: '--muted-foreground' },
-  tone: { n: '--card', w: '--background', k: '--muted-foreground', g: '--secondary', gr: '--muted', gs: '--muted', s: '--muted', l: '--background', nb: '--card', kb: '--primary' },
+  tone: { n: '--card', w: '--background', k: '--muted-foreground', g: '--secondary', gr: '--muted', gs: '--muted', s: '--muted', l: '--background', nb: '--card', kb: '--primary', a: '--accent' },
 };
 
 /** Keys that are a mix of their token and a second one. */
@@ -54,6 +60,10 @@ const MIX: { fill: Partial<Record<FillKey, Source>>; line: Partial<Record<LineKe
     sea: ['--background', '--accent', 0.16],
     kod: ['--muted-foreground', '--background', 0.5],
     screen: ['--background', '--accent', 0.4],
+    dust: ['--muted', '--fia-cost', 0.14],
+    meadow: ['--secondary', '--section-green', 0.22],
+    pale: ['--background', '--muted', 0.6],
+    rim: ['--background', '--accent', 0.07],
   },
   line: {
     line: ['--foreground', '--background', 0.2],
@@ -77,8 +87,11 @@ const FALLBACK: Record<string, string> = {
 /** The night palette: lit windows glow warm after dark. */
 const NIGHT_WINDOW = '#ffc978';
 
-/** Line widths in CSS pixels. */
+/** Line widths in CSS pixels; at the district band the hairlines thicken by half (PRD v2 §3.2). */
 const WIDTH: Record<LineKey, number> = { line: 1, detail: 1, grid: 1, live: 2 };
+const DISTRICT_WIDTH = 1.5;
+/** How dark the cast shadow lies on the ground: the foreground token at this opacity. */
+const SHADOW_OPACITY = 0.1;
 
 /**
  * A token's value as a colour. Reads the forms a stylesheet gives: shadcn's
@@ -124,6 +137,8 @@ export interface Theme {
   shade(night: number): void;
   /** Lines are drawn in screen pixels; they need the canvas size. */
   setResolution(w: number, h: number): void;
+  /** Hairlines are 1.5 px wide at the district band and 1 px closer in (PRD v2 §3.2). */
+  setDistrict(on: boolean): void;
   dispose(): void;
 }
 
@@ -138,6 +153,7 @@ export function createTheme(read: (token: string) => string): Theme {
 
   const fill = {} as Record<FillKey, THREE.MeshBasicMaterial>;
   for (const k of Object.keys(SITE_TOKENS.fill) as FillKey[]) fill[k] = faceMaterial(colourOf(k, SITE_TOKENS.fill, MIX.fill));
+  fill.shadow.transparent = true; fill.shadow.opacity = SHADOW_OPACITY; fill.shadow.depthWrite = false; fill.shadow.name = 'shadow';
   const windowDay = fill.window.color.clone(), windowNight = colorFromToken(NIGHT_WINDOW);
 
   const line = {} as Record<LineKey, LineMaterial>;
@@ -176,6 +192,7 @@ export function createTheme(read: (token: string) => string): Theme {
       fill.window.color.copy(windowDay).lerp(windowNight, n);
     },
     setResolution(w, h) { for (const m of Object.values(line)) m.resolution.set(Math.max(1, w), Math.max(1, h)); },
+    setDistrict(on) { for (const k of ['line', 'detail'] as const) line[k].linewidth = on ? DISTRICT_WIDTH : WIDTH[k]; },
     dispose() {
       for (const m of Object.values(fill)) m.dispose();
       for (const m of Object.values(line)) m.dispose();

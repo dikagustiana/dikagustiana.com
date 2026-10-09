@@ -9,12 +9,16 @@
  * pixels tall whatever the distance, which is how the sky's markers keep
  * their size.
  *
- * Distance is the slider's reading of the zoom: 0 at the home view (the
- * whole world in the frame) and 1 at the near view, on a log scale between
- * the two, so every step of the slider feels the same. Moving between views
- * eases; dragging and the wheel act at once. The far view hides the plots
- * and the small text (the level of detail is reported to the caller through
- * onDetail); coming close opens a selected building as its section drawing.
+ * Distance is the slider's reading of the zoom: 0 at the hero, the home view
+ * (PRD v2 §3.1: the estate with the ring's near arc and the gateway's first
+ * blocks, at no less than 1.25 px/m on a wide stage and 1 px/m on a phone),
+ * and 1 at the near view, on a log scale between the two, so every step of the
+ * slider feels the same. The map view (Whole) zooms out past the hero to frame
+ * everything drawn. Moving between views eases; dragging and the wheel act at
+ * once. The zoom decides the level of detail (PRD v2 §3.3), in three bands with
+ * hysteresis: district below 4 px/m (small text and walkers hidden), street from
+ * 4 px/m, inside from 10 px/m (a selected lot opens as its section drawing);
+ * the band is reported to the caller through onDetail.
  *
  * The view owns no DOM beyond the canvas it is given: every listener it
  * adds is on that canvas, plus one ResizeObserver on the container, and
@@ -29,19 +33,21 @@ import { setTextFar } from '../kernel/part';
 import { approach, clamp } from '../kernel/math';
 import { idleHooks, type EngineContext } from '../context';
 import type { Clock } from '../sim/clock';
-import type { Entity, Peek, RendererLike, Selection, ViewName } from '../types';
-import type { Box, GeneratedLayout } from '@/world/placement/types';
+import type { Band, Entity, Hover, Peek, RendererLike, Selection, ViewName } from '../types';
+import type { Box, GeneratedLayout, Pt } from '@/world/placement/types';
 
 export interface ViewOptions {
   container: HTMLElement;
   canvas: HTMLCanvasElement;
   renderer: RendererLike;
   clock: Clock;
-  /** Phones: the plots and the walkers wait for a closer view. */
+  /** Phones: the walkers wait for a closer view, and the hero's floor is lower. */
   reducedDetail: boolean;
   onSelect?: (sel: Selection | null) => void;
-  /** The level of detail changed: tiny hides the smallest movers, far hides the plots. */
-  onDetail?: (tiny: boolean, far: boolean) => void;
+  /** The thing under the pointer changed (PRD v2 §3.4): its id, kind and label, or null. */
+  onHover?: (h: Hover | null) => void;
+  /** The band of detail changed (PRD v2 §3.3): tiny hides the smallest movers, far hides the small text and street details. */
+  onDetail?: (tiny: boolean, far: boolean, band: Band) => void;
 }
 
 export interface View {
@@ -52,9 +58,15 @@ export interface View {
   /** 0 the home view … 1 the near view on the selected (or last selected) building. */
   setDistance(t: number): void;
   distanceOf(): number;
+  /** The band of detail the camera's zoom is in (PRD v2 §3.3). */
+  band(): Band;
   zoomBy(k: number): void;
-  /** Select the next or previous building, in the order they were built. */
-  cycle(d: 1 | -1): void;
+  /** Select the next or previous company (a lot with a ticker) or building, in registry order (PRD v2 §3.4). */
+  cycle(d: 1 | -1, kind?: 'company' | 'building'): void;
+  /** What the pointer is over, as the hover label shows it. */
+  hovered(): Hover | null;
+  /** Hover the thing at a canvas point now, as the pointer would (tests, the debug API). */
+  hoverAt(px: number, py: number): Hover | null;
   setHighlight(ids: readonly string[]): void;
   currentView(): ViewName | null;
   tick(dt: number, paused: boolean): void;
@@ -62,20 +74,27 @@ export interface View {
   screenOf(ent: Entity): [number, number];
   /** Put the camera over world (x, y) at a zoom in pixels per metre, at once. */
   look(x: number, y: number, zoom: number): void;
+  /** Put the camera over an entity's anchor at a zoom in pixels per metre, at once. */
+  lookAtEntity(e: Entity, zoom: number): void;
   resize(): void;
   dispose(): void;
 }
 
-/** A region of the world to frame: its footprint and the heights it spans. */
-export interface Frame { box: Box; z: readonly [number, number] }
+/** A region of the world to frame: its footprint and the heights it spans; pts, when given, are the ground points to fit instead of the box's corners. */
+export interface Frame { box: Box; z: readonly [number, number]; pts?: readonly Pt[] }
+
+const boundsOfPts = (pts: readonly Pt[]): Box => ({ x0: Math.min(...pts.map((p) => p[0])), x1: Math.max(...pts.map((p) => p[0])), y0: Math.min(...pts.map((p) => p[1])), y1: Math.max(...pts.map((p) => p[1])) });
+const corners = (b: Box): Pt[] => [[b.x0, b.y0], [b.x1, b.y0], [b.x1, b.y1], [b.x0, b.y1]];
 
 /** The places the shell's buttons name, as boxes to frame. */
 export function viewBoxes(layout: GeneratedLayout): Record<ViewName, Frame> {
-  const whole: Frame = { box: layout.world, z: [-4, 30] };
+  // the map frames everything drawn, point by point, so an empty corner of the slab costs it no zoom
+  const drawn: Pt[] = [...layout.regions.flatMap((r) => r.polygon), ...layout.blocks.flatMap((b) => corners(b.box)), ...layout.fixtures.flatMap((f) => corners(f.box))];
+  if (layout.port) drawn.push(...corners(layout.port.water));
+  const whole: Frame = drawn.length ? { box: boundsOfPts(drawn), z: [-4, 30], pts: drawn } : { box: layout.world, z: [-4, 30] };
   const boundsOf = (ids: readonly string[]): Box | null => {
     const pts = layout.regions.filter((r) => ids.includes(r.id)).flatMap((r) => r.polygon);
-    if (!pts.length) return null;
-    return { x0: Math.min(...pts.map((p) => p[0])), x1: Math.max(...pts.map((p) => p[0])), y0: Math.min(...pts.map((p) => p[1])), y1: Math.max(...pts.map((p) => p[1])) };
+    return pts.length ? boundsOfPts(pts) : null;
   };
   const region = (ids: readonly string[]): Frame => { const b = boundsOf(ids); return b ? { box: b, z: [0, 20] } : whole; };
   const tank = layout.fixtures.find((f) => f.kind === 'think-tank');
@@ -83,7 +102,10 @@ export function viewBoxes(layout: GeneratedLayout): Record<ViewName, Frame> {
   const thinktank: Frame = tank
     ? { box: { x0: tank.box.x0 - 30, x1: tank.box.x1 + 30, y0: tank.box.y0 - 30, y1: tank.box.y1 + 30 }, z: [hillZ, hillZ + 10] }
     : layout.hill ? { box: { x0: layout.hill.centre[0] - layout.hill.radius, x1: layout.hill.centre[0] + layout.hill.radius, y0: layout.hill.centre[1] - layout.hill.radius, y1: layout.hill.centre[1] + layout.hill.radius }, z: [0, hillZ + 10] } : region(['hill']);
-  return { whole, ring: region(['ring-geological', 'ring-biological']), estate: region(['estate']), gateway: region(['gateway']), town: region(['town']), thinktank };
+  // the hero (PRD v2 §3.1): the layout's own frame (the poster draws the same), else the estate
+  const est = boundsOf(['estate']);
+  const hero: Frame = layout.hero ? { box: layout.hero, z: [0, 20] } : est ? { box: est, z: [0, 20] } : whole;
+  return { hero, whole, ring: region(['ring-geological', 'ring-biological']), estate: region(['estate']), gateway: region(['gateway']), town: region(['town']), thinktank };
 }
 
 // ---- the projection ----
@@ -97,13 +119,19 @@ const groundAt = (r: number, u: number): [number, number] => [(r * S2 - u * S6) 
 /** A world point's screen offset (right, up, in metres) from the ground origin. */
 const screenOfPoint = (x: number, y: number, z: number): [number, number] => [(x - y) / S2, (2 * z - x - y) / S6];
 
-/** Distance below which the view is far (plots and small text hidden), and below which it is tiny (walkers hidden). */
-const FAR = 0.22, TINY = 0.45, FAR_PHONE = 0.32, TINY_PHONE = 0.58;
-/** Distance from which a building marked "near" opens as the camera comes over it. */
-const NEAR_OPEN = 0.72;
+/** The hero's floor in pixels per metre (PRD v2 §2.3, §3.14): a wide stage, and a phone's. */
+const HERO_ZOOM = 1.25, HERO_ZOOM_PHONE = 1.0, PHONE_WIDTH = 640;
+/** The bands of detail (PRD v2 §3.3), in pixels per metre, each switching with a hysteresis of a tenth either side. */
+const STREET = 4, INSIDE = 10, HYSTERESIS = 0.1;
 /** Easing rate of the camera, per second. */
 const EASE = 6;
-const KEY_VIEWS: Record<string, ViewName> = { '0': 'whole', '1': 'ring', '2': 'estate', '3': 'gateway', '4': 'town', '5': 'thinktank' };
+/** How often the pointer is checked for what is under it, in milliseconds: the label shows within 150 ms (PRD v2 §3.4). */
+const HOVER_EVERY = 60;
+/** How long a touch must rest for the hover label (a long press), in milliseconds. */
+const LONG_PRESS = 500;
+/** The hover label's text height on screen, in CSS pixels. */
+const LABEL_PX = 15;
+const KEY_VIEWS: Record<string, ViewName> = { '0': 'whole', '1': 'ring', '2': 'estate', '3': 'gateway', '4': 'town', '5': 'thinktank', h: 'hero', H: 'hero' };
 const noRaycast = () => {};
 
 /** The twelve edges of a unit cube, for the selection frame (scaled to an entity's bounds). */
@@ -125,13 +153,15 @@ export function createView(ctx: EngineContext, o: ViewOptions): View {
 
   // ---- camera state: the ground point at the centre of the frame, and the zoom (kept as its log) ----
   const cur = { x: 0, y: 0, logZ: 0 }, goal = { x: 0, y: 0, logZ: 0 };
-  let homeLog = 0, nearLog = 1, home = { x: 0, y: 0 };
-  let named: ViewName | null = 'whole';
+  // homeLog is the hero's zoom (the slider's 0), mapLog the map's (the furthest out), nearLog the slider's 1
+  let homeLog = 0, mapLog = 0, nearLog = 1, home = { x: 0, y: 0 }, map = { x: 0, y: 0 };
+  let named: ViewName | null = 'hero';
 
-  /** The centre and zoom that frame a box with a margin. */
+  /** The centre and zoom that frame a box (or the frame's points) with a margin. */
   function fit(f: Frame, margin: number): { x: number; y: number; logZ: number } {
     let r0 = Infinity, r1 = -Infinity, u0 = Infinity, u1 = -Infinity;
-    for (const x of [f.box.x0, f.box.x1]) for (const y of [f.box.y0, f.box.y1]) for (const z of f.z) {
+    const pts = f.pts ?? [[f.box.x0, f.box.y0], [f.box.x1, f.box.y0], [f.box.x1, f.box.y1], [f.box.x0, f.box.y1]];
+    for (const [x, y] of pts) for (const z of f.z) {
       const [r, u] = screenOfPoint(x, y, z);
       r0 = Math.min(r0, r); r1 = Math.max(r1, r); u0 = Math.min(u0, u); u1 = Math.max(u1, u);
     }
@@ -145,15 +175,18 @@ export function createView(ctx: EngineContext, o: ViewOptions): View {
   function measure() {
     w = Math.max(1, container.clientWidth || canvas.clientWidth || 0);
     h = Math.max(1, container.clientHeight || canvas.clientHeight || 0);
-    const homeFit = fit(frames.whole, 1.04);
-    homeLog = homeFit.logZ; home = { x: homeFit.x, y: homeFit.y };
+    // the hero frames its box, never below its floor; on a narrow stage the floor wins and the hero shows part of it
+    const heroFit = fit(frames.hero, 1.04), floor = Math.log(w < PHONE_WIDTH ? HERO_ZOOM_PHONE : HERO_ZOOM);
+    homeLog = Math.max(heroFit.logZ, floor); home = { x: heroFit.x, y: heroFit.y };
+    const mapFit = fit(frames.whole, 1.03);
+    mapLog = Math.min(mapFit.logZ, homeLog); map = { x: mapFit.x, y: mapFit.y };
     nearLog = Math.max(homeLog + Math.log(8), Math.log(Math.min(w, h) / 40));
     camera.left = -w / 2; camera.right = w / 2; camera.top = h / 2; camera.bottom = -h / 2;
     renderer.setSize(w, h, false);
     ctx.theme.setResolution(w, h);
-    markerMat.resolution.set(w, h);
+    markerMat.resolution.set(w, h); hoverMat.resolution.set(w, h);
   }
-  const zoomRange = () => [homeLog + Math.log(0.85), nearLog + Math.log(1.25)] as const;
+  const zoomRange = () => [mapLog + Math.log(0.85), nearLog + Math.log(1.25)] as const;
   const distOf = (logZ: number) => clamp((logZ - homeLog) / (nearLog - homeLog), 0, 1);
   const logOf = (t: number) => homeLog + clamp(t, 0, 1) * (nearLog - homeLog);
 
@@ -233,7 +266,7 @@ export function createView(ctx: EngineContext, o: ViewOptions): View {
     t = clamp(t, 0, 1);
     goal.logZ = logOf(t);
     const target = chosen ?? focus;
-    if (t === 0) { goal.x = home.x; goal.y = home.y; named = 'whole'; return; }
+    if (t === 0) { goal.x = home.x; goal.y = home.y; named = 'hero'; return; }
     named = null;
     if (target) {
       // the frame slides from the home view toward the building over the first part of the slider
@@ -243,8 +276,9 @@ export function createView(ctx: EngineContext, o: ViewOptions): View {
   }
   function lookAt(name: ViewName) {
     const f = frames[name] ?? frames.whole;
-    if (name === 'whole') { goal.x = home.x; goal.y = home.y; goal.logZ = homeLog; }
-    else { const g = fit(f, 1.08); goal.x = g.x; goal.y = g.y; goal.logZ = clamp(g.logZ, homeLog, nearLog); }
+    if (name === 'hero') { goal.x = home.x; goal.y = home.y; goal.logZ = homeLog; }
+    else if (name === 'whole') { goal.x = map.x; goal.y = map.y; goal.logZ = mapLog; }
+    else { const g = fit(f, 1.08); goal.x = g.x; goal.y = g.y; goal.logZ = clamp(g.logZ, mapLog, nearLog); }
     named = name;
   }
   function zoomBy(k: number) {
@@ -270,8 +304,9 @@ export function createView(ctx: EngineContext, o: ViewOptions): View {
     goal.x = cur.x; goal.y = cur.y;
     named = null;
   }
-  function cycle(d: 1 | -1) {
-    const list = ctx.entities.filter((e) => e.kind === 'building');
+  function cycle(d: 1 | -1, kind: 'company' | 'building' = 'company') {
+    // companies are the lots with a ticker; both lists run in the registry's order (Entity.order), else as built
+    const list = ctx.entities.filter((e) => e.kind === kind && (kind !== 'company' || !!(e as Entity & { ticker?: string | null }).ticker)).sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
     if (!list.length) return;
     const i = chosen ? list.indexOf(chosen) : -1;
     const next = list[i < 0 ? (d > 0 ? 0 : list.length - 1) : (i + d + list.length) % list.length];
@@ -299,6 +334,54 @@ export function createView(ctx: EngineContext, o: ViewOptions): View {
       const g = fit({ box: { x0: union.min.x, x1: union.max.x, y0: union.min.z, y1: union.max.z }, z: [union.min.y, union.max.y] }, 1.6);
       goal.x = g.x; goal.y = g.y; goal.logZ = clamp(g.logZ, homeLog, logOf(0.85)); named = null;
     }
+  }
+
+  // ---- hover (PRD v2 §3.4): one label in the sky over the thing under the pointer, a hairline round it, the pointer ----
+  const hoverMat = ctx.theme.line.line.clone() as LineMaterial;
+  hoverMat.depthTest = false; hoverMat.depthWrite = false;
+  const hoverLine = new LineSegments2(new LineSegmentsGeometry().setPositions(CUBE_EDGES), hoverMat);
+  hoverLine.visible = false; hoverLine.renderOrder = 11; hoverLine.frustumCulled = false; hoverLine.raycast = noRaycast; sky.add(hoverLine);
+  let hoverEnt: Entity | null = null, hoverInfo: Hover | null = null, hoverLabel: THREE.Sprite | null = null;
+  const labelOf = (e: Entity) => { try { return e.label?.() ?? e.info().title; } catch { return e.id; } };
+  function labelSprite(text: string): THREE.Sprite | null {
+    if (!ctx.text2d) return null;
+    // the label is drawn at twice its size for crisp text, and kept at its size on screen whatever the zoom
+    const k = 2, pad = 8 * k, fontPx = LABEL_PX * k, c = document.createElement('canvas'), g = c.getContext('2d');
+    if (!g) return null;
+    g.font = `600 ${fontPx}px ${ctx.font}`;
+    const tw = Math.ceil(g.measureText(text).width), cw = tw + pad * 2, ch = Math.ceil(fontPx * 1.6);
+    c.width = cw; c.height = ch;
+    g.fillStyle = `#${ctx.theme.fill.lamp.color.getHexString()}`; g.fillRect(0, 0, cw, ch);
+    g.strokeStyle = `#${ctx.theme.textColor('ink').getHexString()}`; g.lineWidth = k; g.strokeRect(k / 2, k / 2, cw - k, ch - k);
+    g.fillStyle = `#${ctx.theme.textColor('ink').getHexString()}`; g.font = `600 ${fontPx}px ${ctx.font}`; g.textBaseline = 'middle'; g.fillText(text, pad, ch / 2 + k / 2);
+    const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = ctx.gfx.aniso;
+    const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: t, transparent: true, depthTest: false }));
+    sp.renderOrder = 13; sp.center.set(0.5, 0); sp.userData.px = [cw / k, ch / k]; sp.raycast = noRaycast;
+    return sp;
+  }
+  function dropLabel() { if (hoverLabel) { sky.remove(hoverLabel); hoverLabel.material.map?.dispose(); hoverLabel.material.dispose(); hoverLabel = null; } }
+  function placeHover() {
+    if (!hoverEnt) { hoverLine.visible = false; return; }
+    const b = boundsOf(hoverEnt);
+    hoverLine.position.copy(b.min);
+    hoverLine.scale.set(Math.max(1e-3, b.max.x - b.min.x), Math.max(1e-3, b.max.y - b.min.y), Math.max(1e-3, b.max.z - b.min.z));
+    hoverLine.visible = true;
+    if (hoverLabel) {
+      // above the thing's top, at its middle; a constant size on screen
+      const z = Math.exp(cur.logZ), [pw, ph] = hoverLabel.userData.px as [number, number];
+      hoverLabel.position.set((b.min.x + b.max.x) / 2, b.max.y, (b.min.z + b.max.z) / 2);
+      hoverLabel.scale.set(pw / z, ph / z, 1);
+    }
+  }
+  function hover(ent: Entity | null) {
+    if (ent === hoverEnt) return;
+    hoverEnt = ent;
+    dropLabel();
+    hoverInfo = ent ? { id: ent.id, kind: ent.kind, label: labelOf(ent) } : null;
+    if (ent && hoverInfo) { hoverLabel = labelSprite(hoverInfo.label); if (hoverLabel) sky.add(hoverLabel); }
+    placeHover();
+    if (!pointers.size) canvas.style.cursor = ent ? 'pointer' : 'grab';
+    o.onHover?.(hoverInfo);
   }
 
   // ---- picking ----
@@ -331,16 +414,25 @@ export function createView(ctx: EngineContext, o: ViewOptions): View {
     const p = local(e); pointers.set(e.pointerId, p);
     if (pointers.size === 1) press = { id: e.pointerId, x: p[0], y: p[1], moved: false };
     else { press = null; const [a, b] = [...pointers.values()]; spread = Math.hypot(a[0] - b[0], a[1] - b[1]); }
+    // a touch that rests shows the hover label (a long press)
+    if (e.pointerType === 'touch' && pointers.size === 1) { if (pressTimer) clearTimeout(pressTimer); pressTimer = setTimeout(() => { pressTimer = null; if (press && !press.moved) hover(pickAt(press.x, press.y)); }, LONG_PRESS); }
     canvas.style.cursor = 'grabbing';
   };
+  let hoverTimer: ReturnType<typeof setTimeout> | null = null, pressTimer: ReturnType<typeof setTimeout> | null = null, hoverAtPt: [number, number] | null = null;
+  const clearTimers = () => { if (hoverTimer) { clearTimeout(hoverTimer); hoverTimer = null; } if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; } };
   const onMove = (e: PointerEvent) => {
     const p = local(e), prev = pointers.get(e.pointerId);
     if (!prev) {
-      // hover: a pointer over something clickable, checked a few times a second
+      // hover: what is under a mouse, checked at most every HOVER_EVERY ms, and once more where the pointer comes to rest
+      if (e.pointerType !== 'mouse' && e.pointerType !== 'pen') return;
       const now = typeof performance !== 'undefined' ? performance.now() : 0;
-      if (e.pointerType === 'mouse' && now - lastHover > 120) { lastHover = now; canvas.style.cursor = pickAt(p[0], p[1]) ? 'pointer' : 'grab'; }
+      hoverAtPt = p;
+      if (now - lastHover >= HOVER_EVERY) { lastHover = now; hover(pickAt(p[0], p[1])); }
+      if (hoverTimer) clearTimeout(hoverTimer);
+      hoverTimer = setTimeout(() => { hoverTimer = null; if (hoverAtPt && !pointers.size) { lastHover = typeof performance !== 'undefined' ? performance.now() : 0; hover(pickAt(hoverAtPt[0], hoverAtPt[1])); } }, HOVER_EVERY);
       return;
     }
+    if (pressTimer && press && Math.hypot(p[0] - press.x, p[1] - press.y) > 5) { clearTimeout(pressTimer); pressTimer = null; }
     pointers.set(e.pointerId, p);
     if (pointers.size === 2) {
       const [a, b] = [...pointers.values()], d = Math.hypot(a[0] - b[0], a[1] - b[1]);
@@ -351,12 +443,14 @@ export function createView(ctx: EngineContext, o: ViewOptions): View {
     if (press && !press.moved && Math.hypot(p[0] - press.x, p[1] - press.y) > 5) press.moved = true;
     if (!press || press.moved) panBy(p[0] - prev[0], p[1] - prev[1]);
   };
+  const onLeave = () => { hoverAtPt = null; clearTimers(); if (!pointers.size) hover(null); };
   const onUp = (e: PointerEvent) => {
     const p = local(e);
+    if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
     pointers.delete(e.pointerId);
     try { canvas.releasePointerCapture(e.pointerId); } catch { /* already released */ }
     if (press && press.id === e.pointerId && !press.moved && e.type === 'pointerup') select(pickAt(p[0], p[1]));
-    if (!pointers.size) { press = null; canvas.style.cursor = 'grab'; }
+    if (!pointers.size) { press = null; canvas.style.cursor = hoverEnt ? 'pointer' : 'grab'; }
   };
   const onWheel = (e: WheelEvent) => {
     // the page scrolls past the world until the visitor has put a hand on it (focus), or pinches (ctrl + wheel)
@@ -369,8 +463,9 @@ export function createView(ctx: EngineContext, o: ViewOptions): View {
   const onKey = (e: KeyboardEvent) => {
     if (e.metaKey || e.ctrlKey || e.altKey) return;
     let used = true;
-    if (e.key === ']') cycle(1);
-    else if (e.key === '[') cycle(-1);
+    // [ and ] step through the companies; with Shift ({ and } on most layouts) through the buildings
+    if (e.key === ']' || e.key === '}') cycle(1, e.key === '}' || e.shiftKey ? 'building' : 'company');
+    else if (e.key === '[' || e.key === '{') cycle(-1, e.key === '{' || e.shiftKey ? 'building' : 'company');
     else if (e.key === 'Escape') select(null);
     else if (KEY_VIEWS[e.key]) lookAt(KEY_VIEWS[e.key]);
     else if (e.key === '+' || e.key === '=') zoomBy(1.4);
@@ -384,7 +479,7 @@ export function createView(ctx: EngineContext, o: ViewOptions): View {
   };
   const listeners: [string, EventListener, AddEventListenerOptions?][] = [
     ['pointerdown', onDown as EventListener], ['pointermove', onMove as EventListener], ['pointerup', onUp as EventListener],
-    ['pointercancel', onUp as EventListener], ['wheel', onWheel as EventListener, { passive: false }], ['keydown', onKey as EventListener],
+    ['pointercancel', onUp as EventListener], ['pointerleave', onLeave as EventListener], ['wheel', onWheel as EventListener, { passive: false }], ['keydown', onKey as EventListener],
   ];
   for (const [type, fn, opts] of listeners) canvas.addEventListener(type, fn, opts);
   canvas.style.cursor = 'grab';
@@ -393,7 +488,7 @@ export function createView(ctx: EngineContext, o: ViewOptions): View {
 
   // ---- the hooks scene code calls ----
   ctx.hooks = {
-    forget(e) { if (chosen === e) select(null); if (focus === e) focus = null; if (highlighted.includes(e)) highlighted = highlighted.filter((x) => x !== e); },
+    forget(e) { if (hoverEnt === e) hover(null); if (chosen === e) select(null); if (focus === e) focus = null; if (highlighted.includes(e)) highlighted = highlighted.filter((x) => x !== e); },
     select: (e) => select(e),
     isSelected: (e) => chosen === e,
     track(e) { select(e); const [x, y] = centreOn(e); goal.x = x; goal.y = y; named = null; },
@@ -402,27 +497,34 @@ export function createView(ctx: EngineContext, o: ViewOptions): View {
   };
 
   // ---- the level of detail, the sections, the frame ----
-  let far: boolean | null = null, tiny: boolean | null = null, calls = 0;
+  let band: Band | null = null, calls = 0;
   const open = new Set<THREE.Group>();
+  /** The band the zoom z is in, switching only past the hysteresis so a zoom resting on a threshold never flickers. */
+  function bandOf(z: number, was: Band | null): Band {
+    const up = (t: number) => t * (1 + HYSTERESIS), down = (t: number) => t * (1 - HYSTERESIS);
+    if (was === 'inside') return z < down(INSIDE) ? (z < down(STREET) ? 'district' : 'street') : 'inside';
+    if (was === 'street') return z >= up(INSIDE) ? 'inside' : z < down(STREET) ? 'district' : 'street';
+    if (was === 'district') return z >= up(INSIDE) ? 'inside' : z >= up(STREET) ? 'street' : 'district';
+    return z >= INSIDE ? 'inside' : z >= STREET ? 'street' : 'district';
+  }
   function detail() {
-    const t = distOf(cur.logZ);
-    const nextFar = t < (o.reducedDetail ? FAR_PHONE : FAR), nextTiny = t < (o.reducedDetail ? TINY_PHONE : TINY);
-    if (nextFar !== far || nextTiny !== tiny) {
-      if (nextFar !== far) setTextFar(ctx.texts, nextFar);
-      far = nextFar; tiny = nextTiny;
-      o.onDetail?.(tiny, far);
-    }
+    const next = bandOf(Math.exp(cur.logZ), band);
+    if (next === band) return;
+    const far = next === 'district';
+    if (band === null || (band === 'district') !== far) { setTextFar(ctx.texts, far); ctx.theme.setDistrict(far); }
+    band = next;
+    o.onDetail?.(far || o.reducedDetail, far, next);
   }
   const within = (g: THREE.Object3D, inner: THREE.Object3D | undefined) => { for (let x = inner ?? null; x; x = x.parent) if (x === g) return true; return false; };
   function sections() {
-    const t = distOf(cur.logZ);
     for (const [g, ent] of ctx.peeks) {
       const peek = g.userData.peek as Peek | undefined;
       if (!peek) continue;
       // the point at the building's floor height under the middle of the frame (a raised floor sits up-screen of its ground)
       const z0 = peek.z?.[0] ?? 0, mx = cur.x + z0, my = cur.y + z0;
-      const over = !!peek.near && t >= NEAR_OPEN && mx >= peek.box[0] - 20 && mx <= peek.box[1] + 20 && my >= peek.box[2] - 20 && my <= peek.box[3] + 20;
-      const want = chosen === ent || (!!chosen && within(g, chosen.groups[0])) || over;
+      const over = !!peek.near && band === 'inside' && mx >= peek.box[0] - 20 && mx <= peek.box[1] + 20 && my >= peek.box[2] - 20 && my <= peek.box[3] + 20;
+      // a selected lot opens as its section at the inside band (PRD v2 §3.3); its whiteboard keeps it open while chosen
+      const want = (chosen === ent && band === 'inside') || (!!chosen && chosen !== ent && within(g, chosen.groups[0])) || over;
       const isOpen = open.has(g);
       if (want && !isOpen) {
         if (!peek.cut && peek.section) { const s = peek.section(); g.add(s.cut, s.inside); peek.cut = s.cut; peek.inside = s.inside; }
@@ -448,6 +550,7 @@ export function createView(ctx: EngineContext, o: ViewOptions): View {
     detail();
     sections();
     if (chosen && moving(chosen)) placeFrame();
+    if (hoverEnt) placeHover();
     routeAge += dt;
     if (chosen?.route && !paused && routeAge > 0.2) { routeAge = 0; drawRoute(); }
     ctx.theme.shade(o.clock.night());
@@ -460,7 +563,7 @@ export function createView(ctx: EngineContext, o: ViewOptions): View {
   }
 
   function resize() {
-    const t = distOf(cur.logZ), atHome = named === 'whole' && cur.logZ === homeLog;
+    const t = distOf(cur.logZ), atHome = named === 'hero' && cur.logZ === homeLog;
     measure();
     if (atHome) { cur.x = goal.x = home.x; cur.y = goal.y = home.y; cur.logZ = goal.logZ = homeLog; }
     else if (named) lookAt(named);
@@ -488,23 +591,28 @@ export function createView(ctx: EngineContext, o: ViewOptions): View {
     lookAt,
     setDistance,
     distanceOf: () => distOf(cur.logZ),
+    band: () => band ?? 'district',
     zoomBy,
     cycle,
+    hovered: () => hoverInfo,
+    hoverAt(px, py) { hover(pickAt(px, py)); return hoverInfo; },
     setHighlight,
     currentView: () => named,
     tick,
     drawCalls: () => calls,
     screenOf,
     look(x, y, zoom) { const [lo, hi] = zoomRange(); cur.x = goal.x = x; cur.y = goal.y = y; cur.logZ = goal.logZ = clamp(Math.log(Math.max(zoom, 1e-6)), lo, hi); named = null; applyCamera(); },
+    lookAtEntity(e, zoom) { const [x, y] = centreOn(e), [lo, hi] = zoomRange(); cur.x = goal.x = x; cur.y = goal.y = y; cur.logZ = goal.logZ = clamp(Math.log(Math.max(zoom, 1e-6)), lo, hi); named = null; applyCamera(); },
     resize,
     dispose() {
       for (const [type, fn, opts] of listeners) canvas.removeEventListener(type, fn, opts);
       observer?.disconnect(); observer = null;
+      clearTimers(); dropLabel(); hoverEnt = null; hoverInfo = null;
       pointers.clear(); open.clear(); highlighted = []; chosen = null; focus = null;
       ctx.hooks = idleHooks();
       sky.removeFromParent();
-      for (const l of [frameLine, routeLine, highlightLine]) l.geometry.dispose();
-      markerMat.dispose();
+      for (const l of [frameLine, routeLine, highlightLine, hoverLine]) l.geometry.dispose();
+      markerMat.dispose(); hoverMat.dispose();
     },
   };
 }

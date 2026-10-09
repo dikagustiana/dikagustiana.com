@@ -1,14 +1,14 @@
 // Original to this repository (Kawasan Industri world engine, fallback kernel).
 /**
- * The ground and what grows on it: the slab the world stands on (its top,
- * its two visible edges and a survey grid), trees and pines for the
- * builders to scatter, a dashed line on a face, and a ring of points for
+ * The ground and what grows on it: the slab the world stands on (its top
+ * and its two visible edges), a building's cast shadow, trees and pines for
+ * the builders to scatter, a dashed line on a face, and a ring of points for
  * markers. The shared geometries (a tree's crown, a cone) are unit shapes
  * the builders place with a matrix; Part copies their triangles, so they are
  * never uploaded or disposed themselves.
  */
 import * as THREE from 'three';
-import { TOP, W } from '../kernel/iso';
+import { W } from '../kernel/iso';
 import { Part, v3 } from '../kernel/part';
 import type { Rng } from '../kernel/math';
 import type { EngineContext } from '../context';
@@ -59,20 +59,26 @@ export const ring = (cx: number, cy: number, r: number, z: number, n = 48): THRE
 
 /** Depth of the slab under the ground. */
 const SLAB = 4;
-/** Survey grid spacing, metres. */
-const GRID = 40;
 
-/** The slab: the world's footprint as a shallow block, its top the ground (z = 0), with a survey grid drawn on it. */
+/**
+ * The slab: the world's footprint as a shallow block, its top the ground (z = 0). No survey grid (PRD v2 §3.2,
+ * D-V2-3): the regions lie on it in their own tones, and the bare slab between them stays plain.
+ */
 export function buildSlab(ctx: EngineContext): THREE.Group {
   const { x0, x1, y0, y1 } = ctx.layout.world;
   const p = new Part(ctx);
   p.box(x0, y0, -SLAB, x1 - x0, y1 - y0, SLAB, 'w');
-  // the grid lies on the bare slab, just under the region fills, so it shows only where nothing is drawn
-  const G = TOP(0, 0, 0.005), segs: number[] = [];
-  for (let x = Math.ceil(x0 / GRID) * GRID; x <= x1; x += GRID) segs.push(x, y0, x, y1);
-  for (let y = Math.ceil(y0 / GRID) * GRID; y <= y1; y += GRID) segs.push(x0, y, x1, y);
-  p.draw(G, segs, 'grid');
   const g = p.build('slab');
   g.traverse((o) => { o.raycast = () => {}; });
   return g;
+}
+
+/**
+ * A building's cast shadow (PRD v2 §3.2): its footprint swept toward the north-west by a length that grows with its
+ * height, as one flat polygon on the ground in the translucent shadow fill. Drawn into the zone's part, so a zone's
+ * shadows are one mesh.
+ */
+export function shadow(p: Part, b: { x0: number; x1: number; y0: number; y1: number }, height: number): void {
+  const s = Math.min(24, Math.max(0.5, height * 0.55));
+  p.poly('shadow', [W(b.x0 - s, b.y0 - s, 0.03), W(b.x1 - s, b.y0 - s, 0.03), W(b.x1, b.y0, 0.03), W(b.x1, b.y1, 0.03), W(b.x0, b.y1, 0.03), W(b.x0 - s, b.y1 - s, 0.03)]);
 }

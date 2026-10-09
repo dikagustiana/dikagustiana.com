@@ -107,6 +107,8 @@ export class Part {
   private readonly solidCol: number[] = [];
   private readonly lineSets = new Map<LineKey, number[]>();
   private readonly texts: TextSpec[] = [];
+  /** A brightness step for the solids drawn next (PRD v2 §3.2: neighbouring buildings differ by a few per cent). */
+  tint = 1;
 
   constructor(ctx: PartContext) { this.ctx = ctx; }
 
@@ -168,7 +170,7 @@ export class Part {
   /** A face of a solid, in world terms, with its outward normal; dropped when it looks away from the camera. */
   private face(pts: readonly V3[], n: V3, tone: Tone): boolean {
     if (!facing(n[0], n[1], n[2])) return false;
-    const c = this.ctx.theme.tone(tone, shadeOf(n[0], n[1], n[2]));
+    const c = this.ctx.theme.tone(tone, shadeOf(n[0], n[1], n[2]) * this.tint);
     for (const [a, b, d] of triangulate(pts, n)) {
       for (const i of [a, b, d]) { const p = pts[i]; this.solidPos.push(p[0], p[2], p[1]); this.solidCol.push(c.r, c.g, c.b); }
     }
@@ -251,7 +253,7 @@ export class Part {
       // three.js geometries wind outward faces counter-clockwise, so this is the outward normal; read it in world terms
       const wx = nrm.x, wy = nrm.z, wz = nrm.y;
       if (!facing(wx, wy, wz)) continue;
-      const col = this.ctx.theme.tone(tone, shadeOf(wx, wy, wz));
+      const col = this.ctx.theme.tone(tone, shadeOf(wx, wy, wz) * this.tint);
       for (const v of [a, b, c]) { this.solidPos.push(v.x, v.y, v.z); this.solidCol.push(col.r, col.g, col.b); }
     }
     return this;

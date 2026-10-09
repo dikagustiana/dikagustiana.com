@@ -12,7 +12,7 @@ import { readFileSync } from 'node:fs';
  * description and the card's and board's focus. The published index is one
  * mock package (the SYNTHETIC cement fixture re-labelled, never shipped).
  */
-declare global { interface Window { world: { step(s: number): void; all(): { id: string; kind: string; status: string }[]; select(id: string | null): void; selected(): string | null; view(name: string): void; drawCalls(): number; distance(): number; chain(): string[]; exposed(): unknown; expose(t: string): void } } }
+declare global { interface Window { world: { step(s: number): void; all(): { id: string; kind: string; status: string }[]; select(id: string | null): void; selected(): string | null; view(name: string): void; drawCalls(): number; distance(): number; zoom(): number; band(): string; chain(): string[]; exposed(): unknown; expose(t: string): void; screenOf(id: string): [number, number] | null; centre(id: string, zoom: number): void; hovered(): { id: string; kind: string; label: string } | null } } }
 
 const fixture = JSON.parse(readFileSync('src/data/finance-in-action/fixtures/XCEM.SYNTHETIC.json', 'utf8'));
 const MOCK = { ...fixture, meta: { ...fixture.meta, ticker: 'INTP', name: 'INTP (SYNTHETIC mock, never ships)', status: 'published', pair: ['SMGR', 'SMCB'] } };
@@ -52,7 +52,7 @@ test('starts without a console error, runs 600 simulated seconds clean, and keep
 test('every place button, every layer, each overlay with its strip, the energy drill-down and back, and the cycle through every building', async ({ page }) => {
   const errors = await open(page);
   await ready(page);
-  for (const name of ['Ring', 'Estate', 'Gateway', 'Town', 'Think tank', 'Whole']) { await page.getByRole('button', { name: new RegExp(`^${name}`) }).click(); await page.waitForTimeout(300); }
+  for (const name of ['Ring', 'Estate', 'Gateway', 'Town', 'Hill', 'Whole']) { await page.getByRole('button', { name: new RegExp(`^${name}`) }).click(); await page.waitForTimeout(300); }
   for (const name of ['Logistics', 'Cold chain', 'Credit', 'Energy', 'Contract governance', 'Regulation']) { const b = page.getByRole('button', { name, exact: true }); await b.click(); await settle(page, 2); await b.click(); }
   await page.getByRole('radio', { name: 'Reindustrialisation' }).click();
   await expect(page.locator('.world-frame__strip li')).toHaveCount(8);
@@ -67,16 +67,21 @@ test('every place button, every layer, each overlay with its strip, the energy d
   await expect(card).toHaveCount(0);
   await page.getByRole('radio', { name: 'No shift' }).click();
   expect(await page.evaluate(() => window.world.all().filter((e) => e.kind === 'mark').length)).toBe(0);
-  // [ and ] through every building
+  // [ and ] through every company, Shift with them through every building (PRD v2 §3.4)
   const canvas = page.locator('.world-frame__canvas-host canvas');
   await canvas.focus();
+  const companies = await page.evaluate(() => window.world.all().filter((e) => e.kind === 'company' && /^[A-Z]{4}$/.test(e.id)).length);
+  expect(companies).toBeGreaterThan(150);
+  const seen = new Set<string>();
+  for (let i = 0; i < companies; i++) { await page.keyboard.press(']'); seen.add((await page.evaluate(() => window.world.selected())) ?? ''); }
+  expect(seen.size).toBe(companies);
   const n = await page.evaluate(() => window.world.all().filter((e) => e.kind === 'building').length);
   expect(n).toBe(125);
-  const seen = new Set<string>();
-  for (let i = 0; i < n; i++) { await page.keyboard.press(']'); seen.add((await page.evaluate(() => window.world.selected())) ?? ''); }
-  expect(seen.size).toBe(n);
+  const blocks = new Set<string>();
+  for (let i = 0; i < n; i++) { await page.keyboard.press('Shift+BracketRight'); blocks.add((await page.evaluate(() => window.world.selected())) ?? ''); }
+  expect(blocks.size).toBe(n);
   await page.keyboard.press('['); await page.keyboard.press('Escape');
-  await page.keyboard.press('2'); await page.keyboard.press('+'); await page.keyboard.press('-'); await page.keyboard.press('0');
+  await page.keyboard.press('2'); await page.keyboard.press('+'); await page.keyboard.press('-'); await page.keyboard.press('0'); await page.keyboard.press('h');
   await settle(page, 2);
   expect(errors).toEqual([]);
 });
@@ -104,6 +109,29 @@ test('exposes a company (card, section, whiteboard, station markers), opens and 
   await page.keyboard.press('Escape');
   await expect(board).toHaveCount(0);
   await expect(page.locator('.world-frame__canvas-host canvas')).toBeFocused();
+  expect(errors).toEqual([]);
+});
+
+test('a click on a company’s building selects the company at the district, street and inside bands; hovering shows the pointer and its label (PRD v2 A2, A3)', async ({ page }) => {
+  test.setTimeout(240_000);
+  const errors = await open(page);
+  await ready(page);
+  const canvas = page.locator('.world-frame__canvas-host canvas');
+  const box = (await canvas.boundingBox())!;
+  for (const zoom of [0, 6, 12]) {
+    if (zoom) await page.evaluate((z) => window.world.centre('INTP', z), zoom); else await page.evaluate(() => window.world.view('hero'));
+    await page.waitForTimeout(2500);
+    expect(await page.evaluate(() => window.world.band())).toBe(zoom === 0 ? 'district' : zoom === 6 ? 'street' : 'inside');
+    const [x, y] = (await page.evaluate(() => window.world.screenOf('INTP')))!;
+    await page.mouse.move(box.x + x, box.y + y);
+    await expect.poll(() => page.evaluate(() => window.world.hovered()?.label ?? null), { timeout: 5000 }).toBe('INTP · Indocement Tunggal Prakarsa Tbk');
+    expect(await canvas.evaluate((c) => (c as HTMLCanvasElement).style.cursor)).toBe('pointer');
+    await expect(page.locator('[data-world-readout]')).toHaveText('INTP · Indocement Tunggal Prakarsa Tbk');
+    await page.mouse.click(box.x + x, box.y + y);
+    await expect.poll(() => page.evaluate(() => window.world.selected())).toBe('INTP');
+    await page.keyboard.press('Escape');
+  }
+  expect(await page.evaluate(() => window.world.zoom())).toBeGreaterThan(10);
   expect(errors).toEqual([]);
 });
 

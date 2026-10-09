@@ -42,7 +42,7 @@ export interface FrameHeaderProps {
 export function FrameHeader({ heading, variant, phone, coverage, view, ready, distance, overlay, layers, search, on }: FrameHeaderProps) {
   const H = heading;
   const Sub = heading === 'h1' ? 'h2' : 'h3';
-  const places: ReactNode = PLACES.map((p) => <button key={p.view} type="button" className="world-btn" aria-current={view === p.view || (p.view === 'whole' && view === null && ready)} title={`${p.label} (${p.key})`} onClick={() => on.place(p.view)}>{p.label}</button>);
+  const places: ReactNode = PLACES.map((p) => <button key={p.view} type="button" className="world-btn" aria-current={view === p.view} title={`${p.label} (${p.key})`} onClick={() => on.place(p.view)}>{p.label}</button>);
   return (
     <header className="grid gap-2">
       <div className="flex flex-wrap items-baseline justify-between gap-3">
