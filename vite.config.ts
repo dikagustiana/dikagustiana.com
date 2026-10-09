@@ -26,11 +26,16 @@ export default defineConfig(({ mode }) => ({
     // With the world on, its poster is the landing page's largest paint and
     // would otherwise be discovered only after three lazy chunks; the preload
     // makes it discoverable in the initial document (Lighthouse, gate 2).
+    // The frame's title face (Spectral 700) is preloaded with it (gate 4, O8):
+    // on a wide screen Chrome passes over the compact poster as a placeholder
+    // (under 0.05 bits per pixel), the title is the largest paint, and a title
+    // first painted in the fallback face is outgrown by the frame's own title,
+    // drawn in Spectral when the frame takes over, a later and larger paint.
     {
       name: "world-poster-preload",
       transformIndexHtml(html) {
         if (loadEnv(mode, process.cwd(), "VITE_").VITE_WORLD_KAWASAN !== "true") return html;
-        return html.replace("</head>", '    <link rel="preload" as="image" href="/world/poster-far.svg" fetchpriority="high" />\n  </head>');
+        return html.replace("</head>", '    <link rel="preload" as="image" href="/world/poster-far.svg" fetchpriority="high" />\n    <link rel="preload" as="font" type="font/woff2" href="/fonts/spectral-normal-700-latin.woff2" crossorigin />\n  </head>');
       },
     },
   ],
