@@ -58,7 +58,7 @@ export function kindFor(goods: Goods, from: RegionId | null, to: RegionId | null
  * The models, each built facing +x with its front at the origin, in metric sizes before the scale. The cabs are
  * dark and the bodies mid-toned, so a vehicle reads against the pale road at the district band without an outline.
  */
-function drawModel(p: Part, kind: FleetKind): void {
+export function drawModel(p: Part, kind: FleetKind): void {
   const wheels = (xs: number[], half = 1.25, r = 0.5) => { for (const x of xs) { p.cylY(x, half, r, r, 0.45, 8, 'kb'); p.cylY(x, -half - 0.45, r, r, 0.45, 8, 'kb'); } };
   const cab = (tone: Tone = 'kb') => { p.box(-2.4, -1.2, 0.5, 2.4, 2.4, 2.2, tone); p.box(-0.08, -1.1, 1.4, 0.08, 2.2, 1, 'g'); };
   const tank = (x0: number, len: number, r: number, z: number, tone: Tone) => { const ring: [number, number, number][] = []; for (let i = 0; i < 10; i++) { const a = (i / 10) * Math.PI * 2; ring.push([x0, r * Math.cos(a), z + r * Math.sin(a)]); } p.extrude(ring, [len, 0, 0], tone, { seams: false }); };

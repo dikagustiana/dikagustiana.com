@@ -19,6 +19,7 @@ import { VIEW_NAMES, type Entity, type FrameReading, type LayerName, type Overla
 import type { FlowWeight, ModelStatus, StationBinding, WhiteboardContent } from '@/world/data/types';
 import { buildWorldScene, type WorldScene } from '@/world/world/build';
 import { countInWords, createFlows, type FlowSystem } from '@/world/sim/flows';
+import { createActivity, type Activity } from '@/world/sim/activity';
 import { createMarks, type Marks } from './marks';
 import { createChain, type Chain } from './chain';
 import { createStations, type Stations } from './stations';
@@ -48,6 +49,8 @@ interface DebugApi {
   all(): { id: string; kind: string; status: string; facts?: Record<string, string | number> }[];
   /** The flows' state: live vehicles and the cap, how many flows and cached routes, the fleet's draw calls. */
   flows(): { live: number; cap: number; flows: number; routes: number; instanced: number };
+  /** The activity's state: how many of each kind stand in the world, its own time, and the clock's hour. */
+  activity(): { counts: Record<string, number>; time: number; hour: number; night: number; families: Record<string, [number, number]>; litBlocks: number };
   drawCalls(): number;
   /** The distance control's reading of the camera, 0 at home and 1 at the near view. */
   distance(): number;
@@ -117,8 +120,11 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
   // a gate's card counts the flows that cross it, in words (PRD v2 §3.11)
   ctx.flowsAt = (gateId) => { const n = flows.flowsThrough(gateId); const w = countInWords(n); return n ? `${w[0].toUpperCase()}${w.slice(1)} ${n === 1 ? 'flow crosses' : 'flows cross'} it` : 'No flow crosses it'; };
 
+  // every family's activity, the lamps along the roads and the night's fires (PRD v2 §3.7, §3.8)
+  const activity: Activity = createActivity(ctx, options.layout, world.sites, { phone: !!options.reducedDetail });
+
   // ---- the simulation step ----
-  const systems: { update(dt: number): void }[] = [flows];
+  const systems: { update(dt: number): void }[] = [flows, activity];
   const stepOnce = (dt: number) => {
     clock.t += dt;
     for (const s of systems) s.update(dt);
@@ -132,7 +138,7 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
     container, canvas, renderer, clock, reducedDetail: !!options.reducedDetail,
     onSelect: options.onSelect,
     onHover: options.onHover,
-    onDetail: (tiny, far) => { world.nearGroup.visible = !far; flows.setDetail(tiny, far); },
+    onDetail: (tiny, far) => { world.nearGroup.visible = !far; flows.setDetail(tiny, far); activity.setDetail(tiny, far); },
   });
   if (options.initialView && options.initialView !== 'hero') view.lookAt(options.initialView);
   const marks: Marks = createMarks(ctx, (a) => options.onAction?.(a));
@@ -158,8 +164,13 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
   function tick(now: number) {
     // a slow frame runs up to a quarter of a second of the world, so a slow device keeps near real time (a hidden tab does not burst)
     const dt = Math.max(0, Math.min(FRAME_MAX, (now - last) / 1000)); last = Math.max(last, now);
+    advance(dt);
+  }
+  /** One frame of dt seconds: the world's steps, the camera, the marks; the debug API's tick runs it with an exact dt. */
+  function advance(dt: number) {
     if (!paused) { acc += dt; while (acc >= STEP) { stepOnce(STEP); acc -= STEP; } }
     if (clock.shift.h < clock.shift.goal) clock.shift.h = Math.min(clock.shift.goal, clock.shift.h + dt * (reduced ? 60 : 5));
+    activity.draw();
     view.tick(dt, paused);
     marks.update(view.camera.zoom);
     chain.update(view.camera.zoom);
@@ -205,7 +216,7 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
     marks.dispose();
     chain.dispose();
     view.dispose();
-    flows.dispose(); ctx.flowsAt = undefined;
+    flows.dispose(); ctx.flowsAt = undefined; activity.dispose();
     ctx.scene.traverse((o) => disposeObject(o));
     ctx.sky.traverse((o) => disposeObject(o));
     ctx.scene.clear(); ctx.sky.clear();
@@ -233,6 +244,7 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
       hovered: () => view.hovered(),
       hoverAt: (px, py) => view.hoverAt(px, py),
       all: () => ctx.entities.map((e: Entity) => { const facts = e.facts?.(); return facts ? { id: e.id, kind: e.kind, status: e.info().status, facts } : { id: e.id, kind: e.kind, status: e.info().status }; }),
+      activity: () => ({ counts: activity.counts(), time: activity.time(), hour: clock.hourAt(clock.t), night: clock.night(), families: activity.families(), litBlocks: activity.litBlocks().size }),
       flows: () => ({ live: flows.live(), cap: flows.cap(), flows: flows.flows().length, routes: flows.roads.cached(), instanced: ctx.scene.getObjectByName('flows') ? flows.vehicles().length : 0 }),
       drawCalls: () => view.drawCalls(),
       distance: () => view.distanceOf(),

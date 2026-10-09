@@ -12,7 +12,8 @@
  * follows the light and the dark theme without a colour of its own.
  *
  * The only literal colours in the engine live here: the night palette (the
- * warm glow lit windows take after dark). The day fallbacks, used where no
+ * warm glow windows and lamps take after dark, the fire of kilns and
+ * flares). The day fallbacks, used where no
  * stylesheet is present (tests, a detached container), are the light
  * theme's token values in the tokens' own HSL form.
  */
@@ -84,8 +85,10 @@ const FALLBACK: Record<string, string> = {
   '--accent-editorial': '20.4 100% 54.9%',
 };
 
-/** The night palette: lit windows glow warm after dark. */
-const NIGHT_WINDOW = '#ffc978';
+/** The night palette: windows and lamps glow warm after dark; kilns and flares burn. */
+const NIGHT_WINDOW = '#ffc978', NIGHT_FIRE = '#ff9a3c';
+/** The pool of light under a lamp at midnight. */
+const POOL_OPACITY = 0.3;
 
 /** Line widths in CSS pixels; at the district band the hairlines thicken by half (PRD v2 §3.2). */
 const WIDTH: Record<LineKey, number> = { line: 1, detail: 1, grid: 1, live: 2 };
@@ -133,7 +136,14 @@ export interface Theme {
   tone(t: Tone, shade?: number): THREE.Color;
   /** A material for one page of text, its glyphs drawn white and tinted by the key's colour. */
   textMaterial(k: TextKey, map: THREE.Texture): THREE.MeshBasicMaterial;
-  /** Night, 0 by day to 1 at midnight: lit windows warm toward their night glow. */
+  /**
+   * What glows after dark (PRD v2 §3.8): a lamp's head and a ship's or crane's light (lamp), a kiln's mouth, a flare and
+   * a beacon (fire); and the pool of light a lamp casts on the road, transparent, seen only at night.
+   */
+  glow: { lamp: THREE.MeshBasicMaterial; fire: THREE.MeshBasicMaterial; pool: THREE.MeshBasicMaterial };
+  /** How dark it is now (the last shade), 0 by day to 1 at midnight. */
+  night(): number;
+  /** Night, 0 by day to 1 at midnight: lit windows warm toward their night glow; lamps and fires light. */
   shade(night: number): void;
   /** Lines are drawn in screen pixels; they need the canvas size. */
   setResolution(w: number, h: number): void;
@@ -152,9 +162,9 @@ export function createTheme(read: (token: string) => string): Theme {
   const faceMaterial = (color: THREE.Color) => new THREE.MeshBasicMaterial({ color, side: THREE.DoubleSide });
 
   const fill = {} as Record<FillKey, THREE.MeshBasicMaterial>;
-  for (const k of Object.keys(SITE_TOKENS.fill) as FillKey[]) fill[k] = faceMaterial(colourOf(k, SITE_TOKENS.fill, MIX.fill));
+  for (const k of Object.keys(SITE_TOKENS.fill) as FillKey[]) { fill[k] = faceMaterial(colourOf(k, SITE_TOKENS.fill, MIX.fill)); fill[k].name = k; }
   fill.shadow.transparent = true; fill.shadow.opacity = SHADOW_OPACITY; fill.shadow.depthWrite = false; fill.shadow.name = 'shadow';
-  const windowDay = fill.window.color.clone(), windowNight = colorFromToken(NIGHT_WINDOW);
+  const windowDay = fill.window.color.clone(), warm = colorFromToken(NIGHT_WINDOW);
 
   const line = {} as Record<LineKey, LineMaterial>;
   for (const k of Object.keys(SITE_TOKENS.line) as LineKey[]) {
@@ -169,9 +179,19 @@ export function createTheme(read: (token: string) => string): Theme {
   const base = {} as Record<Tone, THREE.Color>;
   for (const t of Object.keys(SITE_TOKENS.tone) as Tone[]) base[t] = colourOf(t, SITE_TOKENS.tone, MIX.tone);
 
+  const lampDay = base.k.clone(), fireDay = base.l.clone(), fire = colorFromToken(NIGHT_FIRE);
+  // drawn from both sides, as every face is (Part's triangles keep no winding)
+  const glow = {
+    lamp: new THREE.MeshBasicMaterial({ color: lampDay.clone(), side: THREE.DoubleSide }),
+    fire: new THREE.MeshBasicMaterial({ color: fireDay.clone(), side: THREE.DoubleSide }),
+    pool: new THREE.MeshBasicMaterial({ color: warm.clone(), transparent: true, opacity: 0, depthWrite: false, side: THREE.DoubleSide }),
+  };
+  glow.lamp.name = 'glow-lamp'; glow.fire.name = 'glow-fire'; glow.pool.name = 'glow-pool';
+
   let lastNight = -1;
   return {
-    fill, line, solid,
+    fill, line, solid, glow,
+    night: () => Math.max(0, lastNight),
     textColor: (k) => text[k].clone(),
     tone(t, shade = 1) {
       const key = `${t}:${shade.toFixed(3)}`;
@@ -189,7 +209,10 @@ export function createTheme(read: (token: string) => string): Theme {
       const n = Math.max(0, Math.min(1, night));
       if (Math.abs(n - lastNight) < 0.005) return;
       lastNight = n;
-      fill.window.color.copy(windowDay).lerp(windowNight, n);
+      fill.window.color.copy(windowDay).lerp(warm, n);
+      glow.lamp.color.copy(lampDay).lerp(warm, n);
+      glow.fire.color.copy(fireDay).lerp(fire, n);
+      glow.pool.opacity = n * POOL_OPACITY;
     },
     setResolution(w, h) { for (const m of Object.values(line)) m.resolution.set(Math.max(1, w), Math.max(1, h)); },
     setDistrict(on) { for (const k of ['line', 'detail'] as const) line[k].linewidth = on ? DISTRICT_WIDTH : WIDTH[k]; },
@@ -197,6 +220,7 @@ export function createTheme(read: (token: string) => string): Theme {
       for (const m of Object.values(fill)) m.dispose();
       for (const m of Object.values(line)) m.dispose();
       solid.dispose();
+      for (const m of Object.values(glow)) m.dispose();
       tones.clear();
     },
   };

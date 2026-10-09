@@ -34,8 +34,10 @@ async function mount() {
   const handle = createWorld(container, { registry: REGISTRY, layout: LAYOUT, theme: { font: 'sans-serif' }, seed: 3, debug: true, createRenderer: renderer });
   mounted.push({ handle, container }); return { handle, scene: scenes[before] };
 }
-// the cast shadow is translucent by design (PRD v2 §3.2), so it is not a dimmed thing
-const translucent = (scene: THREE.Scene) => { let n = 0; scene.traverse((o) => { const m = (o as THREE.Mesh).material as THREE.Material | undefined; if (m && !Array.isArray(m) && m.transparent && m.opacity < 0.5 && m.name !== 'shadow') n++; }); return n; };
+// translucent by design, so not a dimmed thing: the cast shadow (PRD v2 §3.2), a lamp's pool of light (§3.8) and the
+// cold-chain layer's tint on the cold stores (§3.12)
+const DESIGNED = new Set(['shadow', 'glow-pool', 'cold-tint']);
+const translucent = (scene: THREE.Scene) => { let n = 0; scene.traverse((o) => { const m = (o as THREE.Mesh).material as THREE.Material | undefined; if (m && !Array.isArray(m) && m.transparent && m.opacity < 0.5 && !DESIGNED.has(m.name)) n++; }); return n; };
 
 describe('the chain highlight', () => {
   const placed = REGISTRY.subIndustries.filter((s) => s.zone !== 'unplaced');
