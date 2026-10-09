@@ -7,7 +7,7 @@
  * and a glyph beside the word on every status the shell shows.
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactElement } from 'react';
@@ -26,6 +26,7 @@ vi.mock('@/integrations/supabase/client', () => { const b: Record<string, unknow
 vi.mock('@/lib/finance-in-action/published', async (orig) => ({ ...(await orig<object>()), fetchPublishedPackages: async () => [] }));
 
 import WorldFrame from '@/components/world/WorldFrame';
+import { WorldPoster } from '@/components/world/Poster';
 
 function mount(ui: ReactElement) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -95,6 +96,34 @@ describe('the shell’s fallbacks', () => {
     expect(document.querySelector('details summary')).toHaveTextContent('Places');
     await new Promise((r) => setTimeout(r, 50));
     expect(document.querySelector('.world-frame__canvas-host')!.children.length).toBe(0);
+  });
+});
+
+describe('the first paint (gate 4, O8)', () => {
+  beforeEach(() => { reduced.value = false; phone.value = false; HTMLCanvasElement.prototype.getContext = (() => null) as unknown as HTMLCanvasElement['getContext']; });
+  afterEach(() => { document.body.innerHTML = ''; });
+  // useId differs between two trees; everything else must be the same markup
+  const html = (el: Element | null) => (el?.outerHTML ?? '').replace(/ws:?r[0-9a-z]+:?/g, 'ws-id');
+  const firstPaint = (ui: ReactElement) => { const { container, unmount } = mount(ui); const out = { header: html(container.querySelector('.world-frame > header')), poster: html(container.querySelector('.world-frame__stage > img')), frame: container.querySelector('.world-frame')!.className }; unmount(); return out; };
+
+  for (const [variant, heading, onPhone] of [['preview', 'h1', false], ['full', 'h2', false], ['preview', 'h1', true]] as const) {
+    it(`draws the frame's own header and poster before the frame arrives, so nothing moves when it takes over (${variant}, ${heading}${onPhone ? ', phone' : ''})`, () => {
+      phone.value = onPhone;
+      const poster = firstPaint(<WorldPoster variant={variant} heading={heading} />);
+      const frame = firstPaint(<WorldFrame variant={variant} heading={heading} />);
+      expect(poster.header).toContain('Reading the published models');
+      expect(poster.header).toBe(frame.header);
+      expect(poster.poster.replace(' data-hidden="false"', '')).toBe(frame.poster.replace(' data-hidden="false"', ''));
+      expect(poster.frame).toBe(frame.frame);
+    });
+  }
+
+  it('fetches the frame on the first touch of the poster, before any paint is reported', () => {
+    const wake = vi.fn();
+    mount(<WorldPoster variant="preview" heading="h1" onWake={wake} />);
+    expect(wake).not.toHaveBeenCalled();
+    fireEvent.pointerDown(screen.getByRole('button', { name: 'Skema' }));
+    expect(wake).toHaveBeenCalled();
   });
 });
 

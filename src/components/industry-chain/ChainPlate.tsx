@@ -55,8 +55,7 @@
  * the document.
  */
 
-import { WorldPoster } from '@/components/world/Poster';
-import { lazy, Suspense, useCallback, useEffect, useId, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent, type ReactNode } from 'react';
+import { useCallback, useEffect, useId, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent, type ReactNode } from 'react';
 import {
   CHAIN_COPY,
   CONDITION_AS_OF,
@@ -85,6 +84,9 @@ import { isDoor, isJointId, isolationSet, markNumber, markedIds, targetLabel } f
 import { asksForFullChain, initialChainUrl, useChainUrl, type ChainUrlState } from './useChainUrl';
 import './chain-plate.css';
 import './chain-review.css';
+// last: with the flag off the slot is dropped, and its own imports (useMediaQuery) must not move ahead of this
+// module's and reorder the flag-off chunk
+import { WorldSlot } from '@/components/world/Poster';
 
 /** The wide plate needs this much room before its type stays readable. */
 export const WIDE_PLATE_QUERY = '(min-width: 1280px)';
@@ -789,16 +791,15 @@ export function ChainPlate({
 /**
  * The Kawasan Industri world takes the map's slot when its flag is on
  * (docs/world/PRD-kawasan-industri.md §7.1). __WORLD_KAWASAN__ is a
- * compile-time constant: unset, WorldSection is null, the two wrappers below
- * render exactly what they rendered before, and the world's modules are
- * never bundled.
+ * compile-time constant: unset, the two wrappers below render exactly what
+ * they rendered before, and the world's modules are never bundled. Set,
+ * WorldSlot paints the poster in the frame's own layout first and fetches
+ * the frame after that paint (gate 4, O8; src/components/world/Poster.tsx).
  */
-const WorldSection = __WORLD_KAWASAN__ ? lazy(() => import('@/components/world/WorldSection')) : null;
 
 /** The plate as an About section: under that page's heading, so the map's title is an h2. */
 export function IndustryChainSection() {
-  // the poster paints while the world's chunk loads (gate 2, D12/D15): the same stage, the same image, nothing moves
-  if (WorldSection) return <Suspense fallback={<WorldPoster heading="h2" />}><WorldSection variant="full" heading="h2" /></Suspense>;
+  if (__WORLD_KAWASAN__) return <WorldSlot variant="full" heading="h2" Schematic={ChainPlate} />;
   return (
     <section id="industry-chain" className="border-b border-border py-12">
       <div className="container">
@@ -815,7 +816,7 @@ export function IndustryChainSection() {
  * more — so its title carries the page's main heading.
  */
 export function IndustryChainPreview() {
-  if (WorldSection) return <Suspense fallback={<WorldPoster heading="h1" />}><WorldSection variant="preview" heading="h1" /></Suspense>;
+  if (__WORLD_KAWASAN__) return <WorldSlot variant="preview" heading="h1" Schematic={ChainPlate} />;
   return (
     <section id="industry-chain" className="border-b border-border py-12">
       <div className="container">
