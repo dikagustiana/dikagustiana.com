@@ -1,0 +1,131 @@
+code	zone	buildingFamily	chainStage	chainNodeId	archetypeFallback	placedBy	note
+A111	ring-geological	well-pad	origins	stage-extraction	MINE	proposed	D1 default: ring, with a refinery annex drawn in the estate's primary block
+A112	gateway	depot	distribution	node-distributor	DIST	proposed	Appendix A: oil, gas and coal storage and distribution sit in the gateway (tank farm)
+A121	ring-geological	pit	origins	stage-extraction	MINE	proposed	FSRE first slate: PTBA, ITMG
+A122	gateway	stockpile	distribution	node-trader	DIST	proposed	coal distribution: the stockpile at the port end of the raw-export road
+A131	ring-geological	well-pad	origins	stage-extraction	MINE	proposed	drilling services: a mining-service yard in the geological arc
+A132	ring-geological	depot	origins	stage-extraction	MINE	proposed	oil, gas and coal equipment and services: a mining-service yard
+A211	estate-manufacturing	factory	manufacturing	stage-manufacturing	PROC	proposed	alternative-energy equipment is manufacturing (Appendix A)
+A221	estate-primary	process-plant	processing	stage-processing	PROC	proposed	alternative fuels are primary processing (Appendix A)
+B111	estate-primary	process-plant	processing	stage-processing	PROC	proposed	chemicals plant
+B112	estate-primary	process-plant	processing	stage-processing	PROC	proposed	chemicals plant (agricultural)
+B113	estate-primary	process-plant	processing	stage-processing	PROC	proposed	chemicals plant (specialty)
+B121	estate-primary	process-plant	processing	stage-processing	PROC	proposed	cement plant; FSRE first slate: INTP, SMGR; the quarry Appendix A lists in the ring is drawn as the plant's feed
+B131	estate-manufacturing	packaging-plant	manufacturing	stage-packaging	PROC	proposed	the packaging plant feeding sideways into the manufacturing blocks
+B141	estate-primary	process-plant	processing	stage-processing	PROC	proposed	aluminium smelter (Appendix A: steel and aluminium in primary processing)
+B142	ring-geological	pit	origins	stage-extraction	MINE	proposed	copper mining
+B143	ring-geological	pit	origins	stage-extraction	MINE	proposed	gold mining
+B144	estate-primary	process-plant	processing	stage-processing	PROC	proposed	steel works
+B145	ring-geological	pit	origins	stage-extraction	MINE	proposed	precious metals and minerals mining
+B146	ring-geological	pit	origins	stage-extraction	MINE	proposed	other metals and minerals mining (nickel among them)
+B147	ring-geological	depot	origins	stage-extraction	MINE	proposed	mining equipment and services yard
+B151	ring-biological	forest-block	origins	stage-biological	FARM	proposed	timber: the forest block with its log yard
+B152	estate-primary	process-plant	processing	stage-processing	PROC	proposed	pulp-and-paper mill
+B153	ring-biological	forest-block	origins	stage-biological	FARM	proposed	other forest products
+C111	estate-manufacturing	factory	manufacturing	stage-manufacturing	PROC	proposed	industrial goods (Appendix A: all of C1)
+C121	estate-manufacturing	factory	manufacturing	stage-manufacturing	PROC	proposed	building products
+C131	estate-manufacturing	factory	manufacturing	stage-manufacturing	PROC	proposed	electrical components
+C132	estate-manufacturing	factory	manufacturing	stage-manufacturing	PROC	proposed	heavy electrical equipment
+C141	estate-manufacturing	factory	manufacturing	stage-manufacturing	PROC	proposed	construction machinery and heavy vehicles
+C142	estate-manufacturing	factory	manufacturing	stage-manufacturing	PROC	proposed	agricultural machinery
+C143	estate-manufacturing	factory	manufacturing	stage-manufacturing	PROC	proposed	industrial machinery
+C211	gateway	depot	distribution	node-trader	DIST	proposed	trading of industrial goods: the trader at the gateway (Appendix A)
+C221	town-business	office-tower	enabling	flow-info-demand	SERVICE	proposed	commercial printing, as a business service; the chain has no printing node
+C222	recovery	recycling-plant	use-recovery	stage-recovery	PROC	proposed	environmental and facilities services: the recovery yard
+C223	town-business	office-tower	enabling	flow-info-demand	SERVICE	proposed	office supplies, in the business district (Appendix A)
+C224	town-business	office-tower	enabling	flow-info-demand	SERVICE	proposed	business support services
+C231	town-business	office-tower	enabling	flow-info-demand	SERVICE	proposed	personnel services
+C232	town-business	office-tower	enabling	flow-info-demand	SERVICE	proposed	research and consulting
+C311	town-business	office-tower	enabling	band-capital	SERVICE	proposed	multi-sector holdings: capital allocated across lines of business
+D111	town-distribution	depot	distribution	node-distributor	DIST	proposed	drug distributors and retail: the distribution district
+D112	town-distribution	depot	distribution	node-distributor	DIST	proposed	food distributors and retail
+D113	town-retail	supermarket	distribution	node-retail-modern	DIST	proposed	supermarkets and minimarkets (modern trade)
+D211	estate-manufacturing	factory	manufacturing	stage-manufacturing	PROC	proposed	beverages
+D212	estate-manufacturing	factory	manufacturing	stage-manufacturing	PROC	proposed	beverages
+D221	estate-manufacturing	factory	manufacturing	stage-manufacturing	PROC	proposed	dairy
+D222	estate-manufacturing	factory	manufacturing	stage-manufacturing	PROC	proposed	processed food
+D231	ring-biological	pond	origins	stage-biological	FARM	proposed	D2 default: ring (poultry, livestock, fish ponds and a jetty), with a processing annex in the estate
+D232	ring-biological	plantation-block	origins	stage-biological	FARM	proposed	plantations and food crops
+D311	estate-manufacturing	factory	manufacturing	stage-manufacturing	PROC	proposed	tobacco
+D411	estate-manufacturing	factory	manufacturing	stage-manufacturing	PROC	proposed	household products
+D421	estate-manufacturing	factory	manufacturing	stage-manufacturing	PROC	proposed	personal care products
+E111	estate-manufacturing	factory	manufacturing	stage-manufacturing	PROC	proposed	auto parts
+E112	estate-manufacturing	factory	manufacturing	stage-manufacturing	PROC	proposed	tyres
+E121	estate-manufacturing	factory	manufacturing	stage-manufacturing	PROC	proposed	car manufacturers
+E122	estate-manufacturing	factory	manufacturing	stage-manufacturing	PROC	proposed	motorcycle manufacturers
+E211	estate-manufacturing	factory	manufacturing	stage-manufacturing	PROC	proposed	furniture
+E212	estate-manufacturing	factory	manufacturing	stage-manufacturing	PROC	proposed	household appliances
+E213	estate-manufacturing	factory	manufacturing	stage-manufacturing	PROC	proposed	housewares
+E311	estate-manufacturing	factory	manufacturing	stage-manufacturing	PROC	proposed	consumer electronics
+E321	estate-manufacturing	factory	manufacturing	stage-manufacturing	PROC	proposed	sport and hobby goods
+E411	estate-manufacturing	factory	manufacturing	stage-manufacturing	PROC	proposed	apparel
+E412	estate-manufacturing	factory	manufacturing	stage-manufacturing	PROC	proposed	footwear
+E413	estate-manufacturing	factory	manufacturing	stage-manufacturing	PROC	proposed	textiles
+E511	town-services	cinema	use-recovery	stage-consumption	SERVICE	proposed	gaming venues: a consumer venue, drawn with the cinema family
+E512	town-services	hotel	use-recovery	stage-consumption	SERVICE	proposed	hotels and resorts
+E513	town-services	shop	use-recovery	stage-consumption	SERVICE	proposed	travel agencies: a shopfront
+E514	town-services	cinema	use-recovery	stage-consumption	SERVICE	proposed	recreational and sports facilities: a venue, drawn with the cinema family
+E515	town-services	restaurant	use-recovery	stage-consumption	SERVICE	proposed	restaurants
+E521	town-services	school	use-recovery	stage-consumption	SERVICE	proposed	education
+E522	town-services	shop	use-recovery	stage-consumption	SERVICE	proposed	consumer support services: a shopfront
+E611	town-services	office-tower	enabling	flow-info-demand	SERVICE	proposed	advertising: information from brands to consumers; the chain has no media node
+E612	town-services	office-tower	enabling	flow-info-demand	SERVICE	proposed	broadcasting
+E613	town-services	office-tower	enabling	flow-info-demand	SERVICE	proposed	cable and satellite
+E614	town-services	office-tower	enabling	flow-info-demand	SERVICE	proposed	publishing
+E621	town-services	cinema	use-recovery	stage-consumption	SERVICE	proposed	entertainment and film
+E711	town-distribution	depot	distribution	node-distributor	DIST	proposed	consumer-goods distributors
+E721	town-retail	shop	distribution	node-retail-ecommerce	DIST	proposed	internet and homeshop retail (first-party e-commerce)
+E731	town-retail	department-store	distribution	node-retail-modern	DIST	proposed	department stores
+E741	town-retail	shop	distribution	node-retail-modern	DIST	proposed	apparel retail
+E742	town-retail	shop	distribution	node-retail-modern	DIST	proposed	electronics retail
+E743	town-retail	shop	distribution	node-retail-modern	DIST	proposed	home improvement retail
+E744	town-retail	shop	distribution	node-retail-modern	DIST	proposed	specialty stores
+E745	town-retail	dealership	distribution	node-retail-modern	DIST	proposed	automotive retail: the car dealership
+F111	estate-manufacturing	factory	manufacturing	stage-manufacturing	PROC	proposed	healthcare equipment is manufacturing (Appendix A)
+F112	town-health	depot	distribution	node-distributor	DIST	proposed	healthcare supplies and distribution: the pharmacy distributor
+F121	town-health	hospital	use-recovery	stage-consumption	SERVICE	proposed	hospitals and clinics
+F211	estate-manufacturing	factory	manufacturing	stage-manufacturing	PROC	proposed	pharmaceuticals plant
+F221	town-health	lab	use-recovery	stage-consumption	SERVICE	proposed	healthcare research: the lab; the chain has no research node
+G111	town-financial	bank-tower	enabling	band-credit	SERVICE	proposed	banks: the credit and working-capital layer
+G211	town-financial	bank-tower	enabling	band-credit	SERVICE	proposed	consumer financing
+G221	town-financial	office-tower	enabling	band-capital	SERVICE	proposed	venture capital
+G222	town-financial	office-tower	enabling	band-capital	SERVICE	proposed	specialised business financing
+G311	town-financial	office-tower	enabling	band-capital	SERVICE	proposed	investment management
+G312	town-financial	office-tower	enabling	band-capital	SERVICE	proposed	investment banking and brokerage
+G313	town-financial	exchange	enabling	band-capital	SERVICE	proposed	market operators: the exchange
+G314	town-financial	office-tower	enabling	band-capital	SERVICE	proposed	investment service support
+G411	town-financial	office-tower	enabling	band-capital	SERVICE	proposed	insurance brokers: risk allocation, read with the asset-finance layer
+G412	town-financial	office-tower	enabling	band-capital	SERVICE	proposed	general insurance
+G413	town-financial	office-tower	enabling	band-capital	SERVICE	proposed	life insurance
+G414	town-financial	office-tower	enabling	band-capital	SERVICE	proposed	reinsurance
+G511	town-business	office-tower	enabling	band-capital	SERVICE	proposed	financial holdings, in the business district (Appendix A)
+G512	town-business	office-tower	enabling	band-capital	SERVICE	proposed	investment companies
+H111	estate-operator	operator-office	enabling	band-capital	ASSET	proposed	the estate developer and operator, at the main gate (Appendix A)
+H112	town-business	office-tower	enabling	flow-info-demand	SERVICE	proposed	real-estate services, in the business district (Appendix A)
+I111	town-business	office-tower	enabling	flow-info-demand	SERVICE	proposed	internet applications and services
+I121	town-business	office-tower	enabling	flow-info-demand	SERVICE	proposed	IT services and consulting
+I131	town-business	office-tower	enabling	flow-info-demand	SERVICE	proposed	software
+I211	estate-manufacturing	factory	manufacturing	stage-manufacturing	PROC	proposed	technology hardware is manufacturing (Appendix A)
+I221	estate-manufacturing	factory	manufacturing	stage-manufacturing	PROC	proposed	computer hardware
+I231	estate-manufacturing	factory	manufacturing	stage-manufacturing	PROC	proposed	electronic equipment and instruments
+I232	estate-manufacturing	factory	manufacturing	stage-manufacturing	PROC	proposed	electronic components and semiconductors
+J111	gateway	apron	enabling	band-logistics	ASSET	proposed	airport operators: the apron
+J112	gateway	interchange	enabling	band-logistics	ASSET	proposed	toll roads and rail tracks: the interchange and the rail yard's tracks
+J113	gateway	quay	enabling	band-logistics	ASSET	proposed	ports: the quay, where the export and import borders are read
+J211	infrastructure	construction-site	enabling	band-capital	ASSET	proposed	construction: the cranes where the registry marks expansion; capacity is what asset finance buys
+J311	infrastructure	telecom-tower	enabling	flow-info-demand	ASSET	proposed	wired telecommunications; the chain has no telecom layer, so the information flow carries it
+J312	infrastructure	telecom-tower	enabling	flow-info-demand	ASSET	proposed	integrated telecommunications
+J321	infrastructure	telecom-tower	enabling	flow-info-demand	ASSET	proposed	wireless telecommunications and towers
+J411	estate-utilities	power-plant	enabling	band-energy	ASSET	proposed	electricity, IPPs included: the power plant and its lines to every block
+J421	estate-utilities	power-plant	enabling	band-energy	ASSET	proposed	gas utilities: the gas plant, drawn with the power-plant family
+J431	estate-utilities	water-plant	enabling	band-energy	ASSET	proposed	water: a purchased input into every function; the chain has no water layer, so the energy band carries it
+K111	gateway	apron	enabling	band-logistics	ASSET	proposed	airlines, at the apron
+K121	gateway	quay	enabling	band-logistics	ASSET	proposed	passenger marine transport, at the quay
+K131	gateway	rail-yard	enabling	band-logistics	ASSET	proposed	rail: the rail yard
+K132	gateway	depot	enabling	band-logistics	ASSET	proposed	road transportation: the truck depot
+K211	gateway	3pl-shed	enabling	band-logistics	DIST	proposed	logistics and deliveries: the logistics park's 3PL sheds
+Z111	unplaced	exchange	enabling	band-capital	SERVICE	proposed	D4 default: no building for listed investment products
+Z112	unplaced	exchange	enabling	band-capital	SERVICE	proposed	D4 default: no building
+Z113	unplaced	exchange	enabling	band-capital	SERVICE	proposed	D4 default: no building
+Z211	unplaced	exchange	enabling	band-capital	SERVICE	proposed	D4 default: no building
+Z212	unplaced	exchange	enabling	band-capital	SERVICE	proposed	D4 default: no building

@@ -1,0 +1,159 @@
+import { test, expect, type Page } from '@playwright/test';
+import { mockSupabase } from './mockSupabase';
+import { readFileSync } from 'node:fs';
+
+/**
+ * The world in a real browser (mega prompt §11, smoke): with ?debug=1, zero
+ * console errors after 600 simulated seconds; every place button; [ and ]
+ * cycle through every building without error; expose and close a company;
+ * open and close the board; toggle every layer; each overlay; the energy
+ * drill-down and back; the keyboard path; the phone layout at 390 px with
+ * the world started by hand; frame times sampled and reported; the canvas
+ * description and the card's and board's focus. The published index is one
+ * mock package (the SYNTHETIC cement fixture re-labelled, never shipped).
+ */
+declare global { interface Window { world: { step(s: number): void; all(): { id: string; kind: string; status: string }[]; select(id: string | null): void; selected(): string | null; view(name: string): void; drawCalls(): number; distance(): number; chain(): string[]; exposed(): unknown; expose(t: string): void } } }
+
+const fixture = JSON.parse(readFileSync('src/data/finance-in-action/fixtures/XCEM.SYNTHETIC.json', 'utf8'));
+const MOCK = { ...fixture, meta: { ...fixture.meta, ticker: 'INTP', name: 'INTP (SYNTHETIC mock, never ships)', status: 'published', pair: ['SMGR', 'SMCB'] } };
+
+async function open(page: Page, path = '/finance/kawasan?debug=1') {
+  await mockSupabase(page, { tables: { model_packages: [{ package: MOCK }] } });
+  await page.route('**/fonts.googleapis.com/**', (r) => r.fulfill({ status: 200, body: '' }));
+  await page.route('**/fonts.gstatic.com/**', (r) => r.abort());
+  const errors: string[] = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+  page.on('console', (m) => { if (m.type() === 'error' && !/_vercel\/insights|Failed to load resource/.test(m.text())) errors.push(m.text()); });
+  await page.goto(path, { waitUntil: 'networkidle' });
+  return errors;
+}
+const ready = (page: Page) => page.waitForSelector('.world-frame__canvas-host[data-ready="true"]', { timeout: 90_000 });
+const settle = async (page: Page, s = 1) => { await page.evaluate((x) => window.world.step(x), s); await page.waitForTimeout(500); };
+
+test('starts without a console error, runs 600 simulated seconds clean, and keeps its draw calls under the budgets', async ({ page }) => {
+  const errors = await open(page);
+  await ready(page);
+  const canvas = page.locator('.world-frame__canvas-host canvas');
+  await expect(canvas).toHaveAttribute('role', 'img');
+  expect((await canvas.getAttribute('aria-label'))!.length).toBeGreaterThan(100);
+  await settle(page, 600);
+  expect(errors).toEqual([]);
+  await page.evaluate(() => window.world.view('whole')); await settle(page);
+  expect(await page.evaluate(() => window.world.drawCalls())).toBeLessThanOrEqual(1200);
+  await page.evaluate(() => window.world.view('estate')); await page.waitForTimeout(2500); await settle(page);
+  expect(await page.evaluate(() => window.world.drawCalls())).toBeLessThanOrEqual(1600);
+  await page.evaluate(() => window.world.select('B121')); await page.locator('input[aria-label^="Distance"]').fill('1'); await page.waitForTimeout(2500); await settle(page);
+  expect(await page.evaluate(() => window.world.drawCalls())).toBeLessThanOrEqual(1900);
+  // frame times, sampled and reported, not asserted: this machine has no GPU
+  const ft = await page.evaluate(() => new Promise<{ p50: number; p95: number }>((res) => { const ts: number[] = []; let last = performance.now(), n = 0; const tick = (now: number) => { ts.push(now - last); last = now; if (++n < 120) requestAnimationFrame(tick); else { ts.sort((a, b) => a - b); res({ p50: ts[60], p95: ts[113] }); } }; requestAnimationFrame(tick); }));
+  test.info().annotations.push({ type: 'frame-time-ms', description: `p50 ${ft.p50.toFixed(1)} · p95 ${ft.p95.toFixed(1)} (SwiftShader)` });
+});
+
+test('every place button, every layer, each overlay with its strip, the energy drill-down and back, and the cycle through every building', async ({ page }) => {
+  const errors = await open(page);
+  await ready(page);
+  for (const name of ['Ring', 'Estate', 'Gateway', 'Town', 'Think tank', 'Whole']) { await page.getByRole('button', { name: new RegExp(`^${name}`) }).click(); await page.waitForTimeout(300); }
+  for (const name of ['Logistics', 'Cold chain', 'Credit', 'Energy', 'Contract governance', 'Regulation']) { const b = page.getByRole('button', { name, exact: true }); await b.click(); await settle(page, 2); await b.click(); }
+  await page.getByRole('radio', { name: 'Reindustrialisation' }).click();
+  await expect(page.locator('.world-frame__strip li')).toHaveCount(8);
+  expect(await page.evaluate(() => window.world.all().filter((e) => e.kind === 'mark').length)).toBe(8);
+  await page.getByRole('radio', { name: 'Green transition' }).click();
+  await expect(page.locator('.world-frame__strip li')).toHaveCount(8);
+  // the energy mark's drill-down lists the band's lines and the two PLN conditions; Escape closes the card
+  await page.locator('.world-frame__strip li button', { hasText: 'Energy' }).click();
+  const card = page.getByRole('region', { name: 'Condition' });
+  await expect(card.locator('[data-drilldown="energy"] a')).toHaveCount(2);
+  await card.getByRole('button', { name: 'Close the card' }).click();
+  await expect(card).toHaveCount(0);
+  await page.getByRole('radio', { name: 'No shift' }).click();
+  expect(await page.evaluate(() => window.world.all().filter((e) => e.kind === 'mark').length)).toBe(0);
+  // [ and ] through every building
+  const canvas = page.locator('.world-frame__canvas-host canvas');
+  await canvas.focus();
+  const n = await page.evaluate(() => window.world.all().filter((e) => e.kind === 'building').length);
+  expect(n).toBe(125);
+  const seen = new Set<string>();
+  for (let i = 0; i < n; i++) { await page.keyboard.press(']'); seen.add((await page.evaluate(() => window.world.selected())) ?? ''); }
+  expect(seen.size).toBe(n);
+  await page.keyboard.press('['); await page.keyboard.press('Escape');
+  await page.keyboard.press('2'); await page.keyboard.press('+'); await page.keyboard.press('-'); await page.keyboard.press('0');
+  await settle(page, 2);
+  expect(errors).toEqual([]);
+});
+
+test('exposes a company (card, section, whiteboard, station markers), opens and closes the board with focus returning to the stage, and lights its chain', async ({ page }) => {
+  test.setTimeout(240_000);
+  const errors = await open(page);
+  await ready(page);
+  await page.evaluate(() => window.world.select('INTP'));
+  const card = page.getByRole('region', { name: 'Selection details' });
+  await expect(card.getByRole('heading', { level: 3 })).toBeFocused();
+  await expect(card).toContainText('Published');
+  expect(await page.evaluate(() => window.world.chain()[0])).toBe('B121');
+  await card.getByRole('button', { name: 'Look inside' }).click();
+  await page.waitForTimeout(2500); await settle(page, 2);
+  expect(await page.evaluate(() => window.world.exposed())).toMatchObject({ ticker: 'INTP', placed: { fuel: 'line', raw: 'receiving' } });
+  expect(await page.evaluate(() => window.world.all().some((e) => e.id === 'wb:INTP' && e.status === 'Published'))).toBe(true);
+  await card.getByRole('link', { name: 'Open board' }).click();
+  const board = page.getByRole('dialog', { name: 'Board: INTP' });
+  await expect(board.getByRole('heading', { level: 3 }).first()).toBeFocused();
+  await expect(board).toContainText('SYNTHETIC mock, never ships');
+  await expect(board.getByRole('button', { name: /Download/ })).toBeVisible();
+  await expect(page).toHaveURL(/\/finance\/kawasan\/intp/);
+  await expect(board.getByRole('list', { name: 'Drivers in the drawing' }).getByRole('button')).toHaveCount(5);
+  await page.keyboard.press('Escape');
+  await expect(board).toHaveCount(0);
+  await expect(page.locator('.world-frame__canvas-host canvas')).toBeFocused();
+  expect(errors).toEqual([]);
+});
+
+test('a company without a model opens a board that says so and carries no figure', async ({ page }) => {
+  const errors = await open(page, '/finance/kawasan/smgr?debug=1');
+  await ready(page);
+  const empty = page.getByRole('dialog', { name: 'Board: SMGR' });
+  await expect(empty).toContainText('No model yet');
+  expect((await empty.innerText()).replace(/\b[A-Z]{4}\b|\b[A-Z]\d{3}\b/g, '')).not.toMatch(/\d/);
+  expect(errors).toEqual([]);
+});
+
+test('at 390 px the world starts by hand, nothing scrolls sideways, and the card is a bottom sheet', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const errors = await open(page);
+  await expect(page.locator('.world-frame__canvas-host[data-ready="true"]')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Start the world' }).click();
+  await ready(page);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+  await page.evaluate(() => window.world.select('C111'));
+  const card = page.getByRole('region', { name: 'Selection details' });
+  const box = (await card.boundingBox())!, stage = (await page.locator('.world-frame__stage').boundingBox())!;
+  expect(box.width).toBeGreaterThan(300);
+  expect(Math.abs(box.y + box.height - (stage.y + stage.height))).toBeLessThan(2);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+  expect(errors).toEqual([]);
+});
+
+test('Skema swaps the world for the schematic in place, and back', async ({ page }) => {
+  const errors = await open(page);
+  await ready(page);
+  await page.getByRole('button', { name: 'Skema', exact: true }).click();
+  await expect(page.locator('.world-frame[data-world="skema"]')).toHaveCount(1);
+  await expect(page.locator('canvas')).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: 'The industry chain', level: 1 })).toBeVisible();
+  await page.getByRole('button', { name: 'Skema', exact: true }).click();
+  await ready(page);
+  expect(errors).toEqual([]);
+});
+
+test.describe('reduced motion', () => {
+  test('shows the schematic and one line, and never mounts the engine', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    const errors = await open(page);
+    expect(await page.evaluate(() => matchMedia('(prefers-reduced-motion: reduce)').matches)).toBe(true);
+    await expect(page.locator('.world-frame')).toHaveCount(1);
+    await expect(page.locator('.world-frame')).toHaveAttribute('data-world', 'reduced');
+    await expect(page.getByText('not shown while your system asks for reduced motion')).toBeVisible();
+    await page.waitForTimeout(1500);
+    await expect(page.locator('canvas')).toHaveCount(0);
+    expect(errors).toEqual([]);
+  });
+});

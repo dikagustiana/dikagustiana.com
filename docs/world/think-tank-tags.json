@@ -1,0 +1,4 @@
+{
+  "about": "Interim think-tank tags (PRD §8.5), owner-authored, read by src/lib/world/thinkTank.ts until the essay schema carries kind, tags, evidence and falsifier in production (supabase/migrations/20261008120000_essay_world_tags.sql, not applied). Shape: entries[<essays.slug>] = { kind: 'thesis' | 'model-based', tags: [<IDX-IC sub-industry code | chain node id | ticker>...], evidence?: [{ label, href }], falsifier?: string }. Proposed entries are in docs/world/review-tags.md; nothing is written to the database.",
+  "entries": {}
+}

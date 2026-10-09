@@ -1,0 +1,123 @@
+/**
+ * Building families (PRD §7.6, mega prompt §6.2): one parametric builder per
+ * family, drawn with the engine's Part into whatever box the layout gives it.
+ * Nothing here is drawn per sub-industry; a family is a form, and the zone
+ * decides the family. No colours: tones only, through the theme's tokens.
+ *
+ * Every builder draws into the Part it is given and returns the glazing it
+ * drew as window rectangles (face matrix and local rect), so the caller can
+ * build lit windows as a separate small part per building and light them
+ * after dark only where a published model exists (PRD §7.12, D7).
+ */
+import * as THREE from 'three';
+import type { BuildingFamily } from '@/lib/world/registry/types';
+import type { Box } from '@/world/placement/types';
+import { FRONT, SIDE, TOP, W } from '../engine/kernel/iso';
+import type { Part } from '../engine/kernel/part';
+import type { Rng } from '../engine/kernel/math';
+import { crown, cone, pine, tree, yaw } from '../engine/world/ground';
+import { v3 } from '../engine/kernel/part';
+
+export interface WindowRect { M: THREE.Matrix4; x: number; y: number; w: number; h: number }
+export interface Drawn { windows: WindowRect[]; /** Where the family's roof or top is, for the status mark. */ top: number }
+
+type Builder = (p: Part, b: Box, rng: Rng) => Drawn;
+
+const w = (b: Box) => b.x1 - b.x0, d = (b: Box) => b.y1 - b.y0;
+
+/** A row of windows along the south and east faces of a box, as rects for the lit part. */
+function windows(b: Box, z0: number, z1: number, step = 4, h = 1.2): WindowRect[] {
+  const out: WindowRect[] = [];
+  for (let z = z0 + 1.2; z + h < z1; z += 3) {
+    for (let x = b.x0 + 2; x + 1.6 < b.x1; x += step) out.push({ M: FRONT(x, b.y1, z + h), x: 0, y: 0, w: 1.6, h });
+    for (let y = b.y0 + 2; y + 1.6 < b.y1; y += step) out.push({ M: SIDE(b.x1, y + 1.6, z + h), x: 0, y: 0, w: 1.6, h });
+  }
+  return out;
+}
+const sawtooth = (p: Part, b: Box, z: number, h: number) => { for (let x = b.x0; x + 6 <= b.x1 + 0.01; x += 6) p.extrude([[x, b.y0, z], [x + 6, b.y0, z], [x + 6, b.y0, z + h * 0.35], [x + 1.2, b.y0, z + h]], [0, d(b), 0]); };
+const stack = (p: Part, x: number, y: number, z: number, h: number, r = 1.2) => p.cylZ(x, y, z, r, h, 10);
+const silo = (p: Part, x: number, y: number, z: number, h: number, r = 3) => { p.cylZ(x, y, z, r, h, 12); p.geo(cone, new THREE.Matrix4().compose(W(x, y, z + h + 1.2), yaw(0), v3(r * 1.1, 2.4, r * 1.1))); };
+const slab = (p: Part, b: Box, z: number, h: number, tone: 'n' | 'g' | 'gr' | 'gs' | 's' = 'n') => p.box(b.x0, b.y0, z, w(b), d(b), h, tone);
+const inset = (b: Box, m: number): Box => ({ x0: b.x0 + m, x1: b.x1 - m, y0: b.y0 + m, y1: b.y1 - m });
+const yard = (p: Part, b: Box, k: 'glass' | 'sand' | 'grass' | 'road' | 'deck' = 'sand') => p.fill2(TOP(b.x0, b.y0, 0), 0, 0, w(b), d(b), k, 0.015);
+const fenceRing = (p: Part, b: Box, h = 2.2) => { const seg = (x1: number, y1: number, x2: number, y2: number) => { const n = Math.max(1, Math.round(Math.hypot(x2 - x1, y2 - y1) / 5)); for (let i = 0; i <= n; i++) p.seg('detail', W(x1 + (x2 - x1) * i / n, y1 + (y2 - y1) * i / n, 0), W(x1 + (x2 - x1) * i / n, y1 + (y2 - y1) * i / n, h)); p.seg('detail', W(x1, y1, h), W(x2, y2, h)); };
+  seg(b.x0, b.y0, b.x1, b.y0); seg(b.x1, b.y0, b.x1, b.y1); seg(b.x1, b.y1, b.x0, b.y1); seg(b.x0, b.y1, b.x0, b.y0); };
+const sign = (p: Part, b: Box, text: string, size = 1.6) => p.text(FRONT(b.x0 + 1, b.y1, 1), text, 0, 0.2, size, 'ink');
+
+// a plain hall: walls, a flat or sawtooth roof, glazing
+const hall = (roof: 'flat' | 'saw', h: number): Builder => (p, b) => { const i = inset(b, 4); yard(p, b); slab(p, i, 0, h); if (roof === 'saw') sawtooth(p, i, h, 3); return { windows: windows(i, 0, h), top: h + (roof === 'saw' ? 3 : 0) }; };
+// a tower: a slender box with a plinth and a roof plant
+const tower = (floors: number): Builder => (p, b) => { const i = inset(b, 5), h = floors * 3.2; yard(p, b, 'deck'); slab(p, { ...b, x0: b.x0 + 2, x1: b.x1 - 2, y0: b.y0 + 2, y1: b.y1 - 2 }, 0, 1.2); slab(p, i, 1.2, h); p.box(i.x0 + 2, i.y0 + 2, h + 1.2, 4, 3, 1.6); return { windows: windows(i, 1.2, h + 1.2, 3.2, 1.6), top: h + 2.8 }; };
+// a low shop or depot with a canopy
+const shopfront = (h: number, canopy = true): Builder => (p, b) => { const i = inset(b, 3); yard(p, b, 'deck'); slab(p, i, 0, h); if (canopy) p.box(i.x0, i.y1, h - 1, w(i), 2.5, 0.2); return { windows: windows(i, 0, h, 3, 1.8), top: h }; };
+// an open pit: terraces cut downward, a haul ramp, a shovel
+const pit: Builder = (p, b, rng) => {
+  const c = [(b.x0 + b.x1) / 2, (b.y0 + b.y1) / 2] as const; yard(p, b, 'sand');
+  for (let k = 0; k < 4; k++) { const r = Math.min(w(b), d(b)) / 2 - 6 - k * 7, z = -k * 3; const ring: [number, number, number][] = []; for (let i = 0; i < 14; i++) { const a = i / 14 * Math.PI * 2; ring.push([c[0] + r * Math.cos(a) * (w(b) / d(b)), c[1] + r * Math.sin(a), z]); } p.extrude(ring, [0, 0, -3], 'gr', { seams: false }); }
+  p.box(c[0] + 10, c[1] - 3, -12, 4, 6, 3, 'k'); p.seg('line', W(c[0] + 12, c[1], -9), W(c[0] + 18, c[1] - 4, -4)); rng.next();
+  return { windows: [], top: 1 };
+};
+const wellPad: Builder = (p, b, rng) => { yard(p, b, 'sand'); const c = [(b.x0 + b.x1) / 2, (b.y0 + b.y1) / 2]; for (const [dx, dy] of [[-10, -6], [10, -6], [0, 8]]) { const x = c[0] + dx, y = c[1] + dy; p.extrude([[x - 2, y - 2, 0], [x + 2, y - 2, 0], [x + 2, y + 2, 0], [x - 2, y + 2, 0]], [0, 0, 0.4]); p.seg('line', W(x - 2, y - 2, 0.4), W(x, y, 14)); p.seg('line', W(x + 2, y - 2, 0.4), W(x, y, 14)); p.seg('line', W(x + 2, y + 2, 0.4), W(x, y, 14)); p.seg('line', W(x - 2, y + 2, 0.4), W(x, y, 14)); } for (let i = 0; i < 3; i++) p.cylZ(b.x0 + 8 + i * 7, b.y1 - 8, 0, 2.6, 5, 10, 'k'); rng.next(); return { windows: [], top: 14 }; };
+const quarry: Builder = (p, b, rng) => { yard(p, b, 'sand'); const i = inset(b, 8); p.extrude([[i.x0, i.y0, 0], [i.x1, i.y0, 0], [i.x1, i.y1, 0], [i.x0, i.y1, 0]], [0, 0, -6], 'gr'); p.box(b.x1 - 16, b.y1 - 12, 0, 10, 6, 4); stack(p, b.x1 - 8, b.y1 - 9, 4, 3, 0.6); rng.next(); return { windows: [], top: 7 }; };
+const stockpile: Builder = (p, b, rng) => { yard(p, b, 'sand'); for (let k = 0; k < 3; k++) { const x = b.x0 + 12 + k * 18, y = (b.y0 + b.y1) / 2; p.geo(cone, new THREE.Matrix4().compose(W(x, y, 3), yaw(rng.rand(0, 3)), v3(7, 6, 7)), 'k'); } p.seg('line', W(b.x0 + 4, b.y0 + 4, 0.5), W(b.x1 - 4, b.y1 - 4, 6)); p.seg('line', W(b.x0 + 4, b.y0 + 4.6, 0.5), W(b.x1 - 4, b.y1 - 3.4, 6)); return { windows: [], top: 6 }; };
+const plantation: Builder = (p, b, rng) => { yard(p, b, 'grass'); for (let x = b.x0 + 6; x < b.x1 - 4; x += 9) for (let y = b.y0 + 6; y < b.y1 - 4; y += 9) tree(p, rng, x + rng.rand(-1, 1), y + rng.rand(-1, 1), 0.7); p.box(b.x0 + 2, b.y1 - 10, 0, 12, 8, 4); return { windows: [], top: 4 }; };
+const field: Builder = (p, b, rng) => { yard(p, b, 'grass'); const G = TOP(0, 0, 0.02); for (let y = b.y0 + 3; y < b.y1 - 2; y += 3) p.draw(G, [b.x0 + 2, y, b.x1 - 2, y], 'detail', 0.03); p.box(b.x0 + 2, b.y1 - 12, 0, 16, 10, 3.6); for (let i = 0; i < 6; i++) p.box(b.x1 - 10 - i * 3, b.y1 - 6, 0, 0.8, 0.6, 0.9, 'k'); rng.next(); return { windows: [], top: 4 }; };
+const pond: Builder = (p, b, rng) => { yard(p, b, 'grass'); const G = TOP(0, 0, 0.03); for (let k = 0; k < 3; k++) { const x0 = b.x0 + 6 + k * ((w(b) - 12) / 3); p.fill2(G, x0 + 1, b.y0 + 6, (w(b) - 12) / 3 - 3, d(b) - 24, 'sea', 0.03); p.rect2(G, x0 + 1, b.y0 + 6, (w(b) - 12) / 3 - 3, d(b) - 24, 'line', 0.04); } p.box(b.x0 + 4, b.y1 - 14, 0, 18, 10, 4); for (const dx of [0, 8]) p.box(b.x1 - 26 + dx, b.y1 - 12, 0, 6, 8, 3); for (let i = 0; i < 6; i++) p.seg('line', W(b.x1 - 8 - i * 2, b.y0 + 2, 0), W(b.x1 - 8 - i * 2, b.y0 + 2, 1.1)); rng.next(); return { windows: [], top: 4 }; };
+const forest: Builder = (p, b, rng) => { yard(p, b, 'grass'); for (let k = 0; k < 60; k++) { const x = rng.rand(b.x0 + 3, b.x1 - 24), y = rng.rand(b.y0 + 3, b.y1 - 3); if (rng.next() < 0.6) pine(p, rng, x, y, rng.rand(0.8, 1.2)); else tree(p, rng, x, y, rng.rand(0.8, 1.1)); } for (let i = 0; i < 4; i++) p.cylY(b.x1 - 18, b.y0 + 8 + i * 3, 0.6, 0.6, 12, 8, 'k'); p.box(b.x1 - 20, b.y1 - 9, 0, 14, 6, 3.6); return { windows: [], top: 4 }; };
+const processPlant: Builder = (p, b, rng) => { const i = inset(b, 4); yard(p, b); slab(p, { ...i, x1: i.x0 + w(i) * 0.5 }, 0, 10); sawtooth(p, { ...i, x1: i.x0 + w(i) * 0.5 }, 10, 2.5); for (let k = 0; k < 3; k++) silo(p, i.x0 + w(i) * 0.62 + k * 7, i.y0 + 8, 0, 16, 3); p.cylY(i.x0 + w(i) * 0.58, i.y0 + 18, 4, 2.6, d(i) - 24, 12); stack(p, i.x1 - 6, i.y0 + 6, 0, 26, 1.4); stack(p, i.x1 - 11, i.y0 + 6, 0, 20, 1.1); p.box(i.x0 + w(i) * 0.6, i.y1 - 10, 0, 16, 8, 4); rng.next(); return { windows: windows({ x0: i.x0, x1: i.x0 + w(i) * 0.5, y0: i.y0, y1: i.y1 }, 0, 10), top: 27 }; };
+const factory: Builder = (p, b) => { const i = inset(b, 3); yard(p, b); slab(p, i, 0, 8); sawtooth(p, i, 8, 2.4); stack(p, i.x1 - 3, i.y0 + 3, 8, 6, 0.8); return { windows: windows(i, 0, 8), top: 11 }; };
+const packaging: Builder = (p, b) => { const i = inset(b, 3); yard(p, b); slab(p, i, 0, 7); for (let x = i.x0 + 4; x < i.x1 - 4; x += 8) p.box(x, i.y1 - 0.4, 0, 3, 0.4, 3.4, 'k'); return { windows: windows(i, 0, 7), top: 7 }; };
+const powerPlant: Builder = (p, b) => { const i = inset(b, 4); yard(p, b, 'glass'); slab(p, { ...i, x1: i.x0 + w(i) * 0.55 }, 0, 14); stack(p, i.x1 - 8, i.y0 + 8, 0, 38, 2.2); stack(p, i.x1 - 16, i.y0 + 8, 0, 32, 1.8); for (let k = 0; k < 3; k++) { const x = i.x0 + w(i) * 0.6 + k * 9, y = i.y1 - 8; p.box(x - 0.3, y - 0.3, 0, 0.6, 0.6, 12); p.seg('line', W(x - 3, y, 12), W(x + 3, y, 12)); p.seg('line', W(x, y - 3, 12), W(x, y + 3, 12)); } return { windows: windows({ ...i, x1: i.x0 + w(i) * 0.55 }, 0, 14, 5), top: 38 }; };
+const waterPlant: Builder = (p, b) => { const i = inset(b, 4); yard(p, b, 'glass'); for (const [dx, dy] of [[0.25, 0.3], [0.7, 0.3], [0.25, 0.72], [0.7, 0.72]]) { p.cylZ(i.x0 + w(i) * dx, i.y0 + d(i) * dy, 0, Math.min(w(i), d(i)) * 0.18, 2.4, 16); p.fill2(TOP(0, 0, 2.42), i.x0 + w(i) * dx - 4, i.y0 + d(i) * dy - 4, 8, 8, 'sea', 0.02); } p.box(i.x0, i.y1 - 6, 0, 12, 6, 4); return { windows: [], top: 4 }; };
+const warehouse: Builder = (p, b) => { const i = inset(b, 3); yard(p, b, 'glass'); slab(p, i, 0, 9); for (let x = i.x0 + 6; x < i.x1 - 6; x += 10) { p.rect2(FRONT(x, i.y1, 4), 0, 0, 4, 4, 'detail'); p.box(x - 1, i.y1 - 0.2, 0.9, 6, 2.6, 0.3, 'k'); } return { windows: [], top: 9 }; };
+const coldStore: Builder = (p, b) => { const i = inset(b, 3); yard(p, b, 'glass'); slab(p, i, 0, 10, 'g'); for (let k = 0; k < 4; k++) p.box(i.x0 + 2 + k * 6, i.y0 + 2, 10, 4, 3, 1.4); return { windows: [], top: 11.4 }; };
+const office: Builder = (p, b) => { const i = inset(b, 3); yard(p, b, 'deck'); slab(p, i, 0, 6.4); p.box(i.x0 - 1, i.y1, 3.2, w(i) + 2, 3, 0.2); return { windows: windows(i, 0, 6.4, 3, 1.6), top: 6.4 }; };
+const quay: Builder = (p, b) => { yard(p, b, 'road'); const G = TOP(0, 0, 0.02); for (let x = b.x0 + 10; x < b.x1 - 10; x += 60) { const legs = [[x, b.y0 + 6], [x + 14, b.y0 + 6], [x, b.y1 - 6], [x + 14, b.y1 - 6]]; for (const [lx, ly] of legs) p.box(lx - 0.5, ly - 0.5, 0, 1, 1, 24); p.box(x - 1, b.y0 + 5, 24, 16, d(b) - 10, 1.6); p.box(x + 6, b.y1 - 2, 25.6, 1.4, 1.4, 40); p.box(x + 5, b.y1 - 1.3, 60, 3, 1.2, 1.2); p.seg('line', W(x + 6.7, b.y1 - 1.3, 65), W(x + 6.7, b.y1 + 22, 48)); } for (let k = 0; k < 10; k++) p.box(b.x0 + 20 + k * 9, b.y0 + 10, 0, 6.1, 2.4, 2.6, 'k'); p.draw(G, [b.x0, b.y1 - 3, b.x1, b.y1 - 3], 'line', 0.04); return { windows: [], top: 66 }; };
+const apron: Builder = (p, b) => { yard(p, b, 'road'); const G = TOP(0, 0, 0.02); for (let x = b.x0 + 10; x < b.x1 - 10; x += 30) p.draw(G, [x, b.y0 + 4, x, b.y1 - 20], 'line', 0.04); const t = { x0: b.x0 + 6, x1: b.x1 - 6, y0: b.y1 - 16, y1: b.y1 - 2 }; slab(p, t, 0, 7, 'g'); p.cylZ(b.x1 - 14, b.y0 + 10, 0, 1.6, 20, 10); p.box(b.x1 - 18, b.y0 + 6, 20, 8, 8, 3, 'g'); for (let k = 0; k < 2; k++) { const x = b.x0 + 24 + k * 36, y = b.y0 + 22; p.box(x, y - 1.6, 1.4, 22, 3.2, 3.2); p.box(x + 8, y - 12, 2.2, 6, 24, 0.7); p.box(x + 20, y - 0.5, 2, 2, 1, 5); } return { windows: windows(t, 0, 7, 3, 1.6), top: 20 }; };
+const interchange: Builder = (p, b) => { yard(p, b, 'grass'); const c = [(b.x0 + b.x1) / 2, (b.y0 + b.y1) / 2]; const G = TOP(0, 0, 0.02); p.fill2(G, b.x0, c[1] - 6, w(b), 12, 'road', 0.02); p.box(c[0] - 6, b.y0, 0, 12, d(b), 0.6, 'k'); p.box(c[0] - 7, b.y0, 0.6, 14, d(b), 5.4); p.fill2(TOP(0, 0, 6.02), c[0] - 6, b.y0, 12, d(b), 'road', 0.02); for (const x of [c[0] - 7, c[0] + 7]) p.seg('line', W(x, b.y0, 6.8), W(x, b.y1, 6.8)); for (let k = 0; k < 4; k++) { p.box(c[0] - 18 + k * 9, c[1] + 8, 0, 3, 5, 3.4); } p.box(c[0] - 20, c[1] + 7, 3.4, 40, 7, 0.4); return { windows: [], top: 7 }; };
+const railYard: Builder = (p, b) => { yard(p, b, 'sand'); const G = TOP(0, 0, 0.03); for (let k = 0; k < 4; k++) { const y = b.y0 + 8 + k * 9; for (const o of [-0.72, 0.72]) p.draw(G, [b.x0 + 2, y + o, b.x1 - 2, y + o], 'line', 0.04); for (let x = b.x0 + 2; x < b.x1 - 2; x += 1.6) p.draw(G, [x, y - 1.2, x, y + 1.2], 'detail', 0.03); } p.box(b.x1 - 14, b.y1 - 10, 0, 10, 6, 5); p.box(b.x1 - 12, b.y1 - 9, 5, 6, 4, 3, 'g'); return { windows: [], top: 8 }; };
+const shed3pl: Builder = (p, b) => { const i = inset(b, 3); yard(p, b, 'glass'); slab(p, i, 0, 9); for (let x = i.x0 + 4; x < i.x1 - 4; x += 7) p.rect2(FRONT(x, i.y1, 4), 0, 0, 4, 4, 'detail'); p.text(FRONT(i.x0 + 2, i.y1, 8.2), '3PL', 0, 0, 2.2, 'paint'); return { windows: [], top: 9 }; };
+const depot: Builder = (p, b) => { const i = inset(b, 3); yard(p, b, 'glass'); slab(p, { ...i, y1: i.y0 + d(i) * 0.55 }, 0, 7); for (let x = i.x0 + 3; x < i.x1 - 3; x += 7) p.rect2(FRONT(x, i.y0 + d(i) * 0.55, 3.6), 0, 0, 3.6, 3.6, 'detail'); for (let k = 0; k < 3; k++) p.box(i.x0 + 4 + k * 10, i.y1 - 8, 0, 6, 2.4, 3, 'k'); return { windows: [], top: 7 }; };
+const marketHall: Builder = (p, b) => { const i = inset(b, 3); yard(p, b, 'deck'); slab(p, i, 0, 5); p.extrude([[i.x0, i.y0, 5], [i.x1, i.y0, 5], [(i.x0 + i.x1) / 2, i.y0, 9]], [0, d(i), 0]); return { windows: windows(i, 0, 5, 3, 1.6), top: 9 }; };
+const supermarket: Builder = (p, b) => { const i = inset(b, 3); yard(p, b, 'road'); slab(p, { ...i, y0: i.y0 + d(i) * 0.4 }, 0, 6); p.box(i.x0, i.y1, 4.6, w(i), 3, 0.3); const G = TOP(0, 0, 0.02); for (let x = i.x0 + 2; x < i.x1 - 2; x += 3) p.draw(G, [x, i.y0 + 2, x, i.y0 + d(i) * 0.36], 'detail', 0.03); return { windows: windows({ ...i, y0: i.y0 + d(i) * 0.4 }, 0, 6, 3, 2), top: 6 }; };
+const departmentStore: Builder = (p, b) => { const i = inset(b, 3); yard(p, b, 'deck'); slab(p, i, 0, 14); p.box(i.x0 - 1, i.y1, 3.6, w(i) + 2, 2.6, 0.3); return { windows: windows(i, 3.6, 14, 3.2, 1.8), top: 14 }; };
+const dealership: Builder = (p, b) => { const i = inset(b, 3); yard(p, b, 'road'); slab(p, { ...i, x0: i.x0 + w(i) * 0.45 }, 0, 6, 'g'); for (let k = 0; k < 5; k++) p.box(i.x0 + 1 + k * 4, i.y1 - 6, 0, 2, 4.4, 1.5, 'k'); return { windows: [], top: 6 }; };
+const hotel: Builder = tower(8);
+const restaurant: Builder = (p, b) => { const i = inset(b, 3); yard(p, b, 'deck'); slab(p, i, 0, 4.4); for (let k = 0; k < 3; k++) { p.cylZ(i.x0 + 3 + k * 5, i.y1 + 2, 0, 0.9, 0.8, 8); } return { windows: windows(i, 0, 4.4, 3, 2), top: 4.4 }; };
+const cinema: Builder = (p, b) => { const i = inset(b, 3); yard(p, b, 'deck'); slab(p, i, 0, 11); p.box(i.x0 + 2, i.y1 - 0.4, 11, w(i) - 4, 0.6, 3, 'k'); return { windows: windows({ ...i, y1: i.y1 }, 0, 4, 4, 2), top: 14 }; };
+const school: Builder = (p, b) => { const i = inset(b, 3); yard(p, b, 'grass'); slab(p, { ...i, y1: i.y0 + d(i) * 0.5 }, 0, 7); p.box(i.x0 - 0.3, i.y0 + d(i) * 0.5, 0, 0.3, 0.3, 9); p.box(i.x0 - 0.3, i.y0 + d(i) * 0.5, 7.5, 2, 0.1, 1.2, 'k'); const G = TOP(0, 0, 0.02); p.rect2(G, i.x0 + 4, i.y0 + d(i) * 0.6, w(i) - 8, d(i) * 0.35, 'line', 0.03); return { windows: windows({ ...i, y1: i.y0 + d(i) * 0.5 }, 0, 7, 3, 1.6), top: 9 }; };
+const hospital: Builder = (p, b) => { const i = inset(b, 3); yard(p, b, 'deck'); slab(p, { ...i, y1: i.y0 + d(i) * 0.6 }, 0, 18); slab(p, { ...i, y0: i.y0 + d(i) * 0.6 }, 0, 5); p.box(i.x0 + w(i) / 2 - 1.2, i.y0 + 4, 18, 2.4, 0.5, 2.4, 'k'); p.box(i.x0 + w(i) / 2 - 0.25, i.y0 + 3, 18, 0.5, 2.4, 2.4, 'k'); return { windows: windows({ ...i, y1: i.y0 + d(i) * 0.6 }, 0, 18, 3.2, 1.6), top: 20 }; };
+const clinic: Builder = shopfront(5, true);
+const lab: Builder = (p, b) => { const i = inset(b, 3); yard(p, b, 'deck'); slab(p, i, 0, 7, 'g'); for (let k = 0; k < 3; k++) stack(p, i.x0 + 3 + k * 4, i.y0 + 3, 7, 2, 0.5); return { windows: [], top: 9 }; };
+const officeTower: Builder = tower(9);
+const bankTower: Builder = (p, b, rng) => { const r = tower(12)(p, b, rng); const i = inset(b, 5); p.box(i.x0 - 1, i.y1, 0, w(i) + 2, 4, 0.3); for (const x of [i.x0, i.x1 - 0.6]) p.box(x, i.y1 + 3.4, 0.3, 0.6, 0.6, 5); return r; };
+const exchange: Builder = (p, b) => { const i = inset(b, 3); yard(p, b, 'deck'); slab(p, i, 0, 12); for (let x = i.x0 + 2; x < i.x1 - 2; x += 3) p.box(x, i.y1 - 2.4, 0, 0.7, 0.7, 12); p.box(i.x0 + 1, i.y1 - 3, 12, w(i) - 2, 3.6, 0.6); return { windows: windows({ ...i, y1: i.y1 - 3 }, 0, 12, 3, 2), top: 12.6 }; };
+const recycling: Builder = (p, b, rng) => { const i = inset(b, 4); yard(p, b, 'sand'); slab(p, { ...i, x1: i.x0 + w(i) * 0.5 }, 0, 9); sawtooth(p, { ...i, x1: i.x0 + w(i) * 0.5 }, 9, 2.4); for (let k = 0; k < 4; k++) p.geo(crown, new THREE.Matrix4().compose(W(i.x0 + w(i) * 0.65 + (k % 2) * 12, i.y0 + 10 + Math.floor(k / 2) * 14, 3), yaw(rng.rand(0, 3)), v3(5, 3, 5)), 'k'); p.seg('line', W(i.x0 + w(i) * 0.5, i.y0 + 6, 4), W(i.x0 + w(i) * 0.5 + 14, i.y0 + 6, 8)); return { windows: [], top: 11 }; };
+const scrapYard: Builder = (p, b, rng) => { yard(p, b, 'sand'); fenceRing(p, inset(b, 2)); for (let k = 0; k < 6; k++) p.box(b.x0 + 6 + (k % 3) * 14, b.y0 + 6 + Math.floor(k / 3) * 14, 0, 8, 8, rng.rand(2, 4), 'k'); return { windows: [], top: 4 }; };
+const compost: Builder = (p, b, rng) => { yard(p, b, 'grass'); for (let k = 0; k < 5; k++) p.extrude([[b.x0 + 4, b.y0 + 4 + k * 7, 0], [b.x1 - 4, b.y0 + 4 + k * 7, 0], [b.x1 - 4, b.y0 + 7 + k * 7, 0], [b.x0 + 4, b.y0 + 7 + k * 7, 0]], [0, 0, 2], 'gs', { seams: false }); rng.next(); return { windows: [], top: 2 }; };
+const telecomTower: Builder = (p, b) => { const c = [(b.x0 + b.x1) / 2, (b.y0 + b.y1) / 2]; yard(p, b, 'glass'); fenceRing(p, inset(b, 2), 2); const h = 46; for (const [dx, dy] of [[-2.5, -2.5], [2.5, -2.5], [2.5, 2.5], [-2.5, 2.5]]) p.seg('line', W(c[0] + dx, c[1] + dy, 0), W(c[0] + dx * 0.25, c[1] + dy * 0.25, h)); for (let z = 6; z < h; z += 8) { const s = 2.5 * (1 - z / h * 0.75); p.draw(TOP(c[0] - s, c[1] - s, z), [0, 0, 2 * s, 0, 2 * s, 0, 2 * s, 2 * s, 2 * s, 2 * s, 0, 2 * s, 0, 2 * s, 0, 0], 'detail', 0); } for (let k = 0; k < 3; k++) p.box(c[0] - 0.4 + Math.cos(k * 2.1) * 1.2, c[1] - 0.2 + Math.sin(k * 2.1) * 1.2, h - 4, 0.8, 0.4, 2.2, 'k'); p.box(c[0] - 0.3, c[1] - 0.3, h, 0.6, 0.6, 1.2, 'l'); p.box(b.x0 + 2, b.y1 - 6, 0, 5, 4, 2.8); return { windows: [], top: h + 1.2 }; };
+const constructionSite: Builder = (p, b, rng) => { yard(p, b, 'sand'); fenceRing(p, inset(b, 2), 2.4); const i = inset(b, 8); slab(p, i, 0, 0.6); for (const [dx, dy] of [[0, 0], [1, 0], [0, 1], [1, 1]]) p.box(i.x0 + 2 + dx * (w(i) - 4.6), i.y0 + 2 + dy * (d(i) - 4.6), 0.6, 0.6, 0.6, 9); for (let z = 3.6; z <= 9.6; z += 3) slab(p, i, z, 0.4); const cx = b.x1 - 6, cy = b.y0 + 6; p.box(cx - 0.6, cy - 0.6, 0, 1.2, 1.2, 28); p.box(cx - 14, cy - 0.4, 28, 24, 0.8, 0.8); p.seg('line', W(cx - 12, cy, 28), W(cx - 12, cy, 12)); p.box(cx - 12.6, cy - 0.6, 11, 1.2, 1.2, 1); rng.next(); return { windows: [], top: 29 }; };
+const thinkTank: Builder = (p, b) => { const i = inset(b, 3); yard(p, b, 'deck'); slab(p, i, 0, 7); p.box(i.x0 - 6, i.y1, 0, w(i) + 12, 10, 0.5); for (let x = i.x0 - 6; x <= i.x1 + 6; x += 3) p.seg('line', W(x, i.y1 + 10, 0.5), W(x, i.y1 + 10, 1.5)); p.seg('line', W(i.x0 - 6, i.y1 + 10, 1.5), W(i.x1 + 6, i.y1 + 10, 1.5)); return { windows: windows(i, 0, 7, 3, 2.2), top: 7 }; };
+
+export const FAMILY_BUILDERS: Record<BuildingFamily, Builder> = {
+  pit, 'well-pad': wellPad, quarry, stockpile, 'plantation-block': plantation, field, pond, 'forest-block': forest,
+  'process-plant': processPlant, factory, 'packaging-plant': packaging, 'power-plant': powerPlant, 'water-plant': waterPlant, warehouse, 'cold-store': coldStore,
+  'operator-office': office, quay, apron, interchange, 'rail-yard': railYard, '3pl-shed': shed3pl, depot, 'market-hall': marketHall,
+  supermarket, minimarket: shopfront(4.4), 'department-store': departmentStore, shop: shopfront(5.2), dealership, hotel, restaurant, cinema,
+  school, hospital, clinic, lab, 'office-tower': officeTower, 'bank-tower': bankTower, exchange, 'recycling-plant': recycling,
+  'scrap-yard': scrapYard, 'compost-site': compost, 'telecom-tower': telecomTower, 'construction-site': constructionSite, 'think-tank': thinkTank,
+};
+
+/** Draw a family into a part; the sign is the sub-industry's name. */
+export function drawFamily(p: Part, family: BuildingFamily, b: Box, rng: Rng, label?: string): Drawn {
+  const drawn = FAMILY_BUILDERS[family](p, b, rng);
+  if (label) sign(p, b, label, 1.4);
+  return drawn;
+}
+/** A company plot: a small unit with a sign post on the kerb; the archetype interior is drawn inside when opened. */
+export function drawPlot(p: Part, b: Box, front: 's' | 'e', ticker: string | null): Drawn {
+  p.fill2(TOP(b.x0, b.y0, 0), 0, 0, w(b), d(b), 'deck', 0.012);
+  const u = inset(b, 1.5); p.box(u.x0, u.y0, 0, w(u), d(u), 4.2);
+  if (ticker) { const [sx, sy] = front === 's' ? [b.x0 + 1, b.y1 + 0.6] : [b.x1 + 0.6, b.y0 + 1]; p.box(sx, sy, 0, 0.3, 0.3, 2.6); p.box(sx - 0.6, sy - 0.15, 2.6, 2.2, 0.3, 0.9); p.text(FRONT(sx - 0.5, sy + 0.16, 3.4), ticker, 0, 0.15, 0.7, 'ink'); }
+  return { windows: windows(u, 0, 4.2, 3, 1.4), top: 4.2 };
+}

@@ -32,7 +32,7 @@ export function buildLiveRegistry(published: ModelPackage[] = []): Registry {
     slate: slate.companies as SlateEntry[],
     subIndustries: subIndustries as SubIndustry[],
     links: links as IndustryLink[],
-  });
+  }, { requireListedSubIndustry: true });
   return {
     ...reg,
     rejected: [

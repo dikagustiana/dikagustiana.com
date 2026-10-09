@@ -1,0 +1,6017 @@
+{
+ "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/…",
+ "fetched": "2026-10-08",
+ "codes": {
+  "A111": [
+   {
+    "ticker": "ENRG",
+    "founded": "Okt 26, 1988",
+    "ipo": "Jun 07, 2004",
+    "name": "Energi Mega Persada Tbk"
+   },
+   {
+    "ticker": "MEDC",
+    "founded": "Jun 09, 1980",
+    "ipo": "Okt 12, 1994",
+    "name": "Medco Energi Internasional Tbk"
+   },
+   {
+    "ticker": "RATU",
+    "founded": "Okt 16, 2006",
+    "ipo": "Jan 08, 2025",
+    "name": "Raharja Energi Cepu Tbk"
+   },
+   {
+    "ticker": "SUGI",
+    "founded": "Mar 26, 1990",
+    "ipo": "Jun 19, 2002",
+    "name": "Sugih Energy Tbk"
+   },
+   {
+    "ticker": "SURE",
+    "founded": "Mei 31, 2011",
+    "ipo": "Okt 05, 2018",
+    "name": "Super Energy Tbk"
+   }
+  ],
+  "A112": [
+   {
+    "ticker": "AKRA",
+    "founded": "Nov 28, 1977",
+    "ipo": "Okt 03, 1994",
+    "name": "AKR Corporindo Tbk"
+   },
+   {
+    "ticker": "BULL",
+    "founded": "Mei 12, 2005",
+    "ipo": "Mei 23, 2011",
+    "name": "Buana Lintas Lautan Tbk"
+   },
+   {
+    "ticker": "CGAS",
+    "founded": "Des 21, 2005",
+    "ipo": "Jan 08, 2024",
+    "name": "Citra Nusantara Gemilang Tbk"
+   },
+   {
+    "ticker": "GTSI",
+    "founded": "Jun 29, 2012",
+    "ipo": "Sep 08, 2021",
+    "name": "GTS Internasional Tbk"
+   },
+   {
+    "ticker": "HITS",
+    "founded": "Des 21, 1992",
+    "ipo": "Des 15, 1997",
+    "name": "Humpuss Intermoda Transportasi Tbk"
+   },
+   {
+    "ticker": "HUMI",
+    "founded": "Sep 20, 2016",
+    "ipo": "Agu 09, 2023",
+    "name": "Humpuss Maritim Internasional Tbk"
+   },
+   {
+    "ticker": "INPS",
+    "founded": "Apr 06, 1990",
+    "ipo": "Apr 06, 2018",
+    "name": "Indah Prakasa Sentosa Tbk"
+   },
+   {
+    "ticker": "KOPI",
+    "founded": "Feb 24, 1981",
+    "ipo": "Mei 04, 2015",
+    "name": "Mitra Energi Persada Tbk"
+   },
+   {
+    "ticker": "LEAD",
+    "founded": "Agu 23, 1995",
+    "ipo": "Des 11, 2013",
+    "name": "Logindo Samudramakmur Tbk"
+   },
+   {
+    "ticker": "MITI",
+    "founded": "Sep 16, 1993",
+    "ipo": "Jul 16, 1997",
+    "name": "Mitra Investindo Tbk"
+   },
+   {
+    "ticker": "MTFN",
+    "founded": "Nov 11, 1983",
+    "ipo": "Apr 16, 1990",
+    "name": "Capitalinc Investment Tbk"
+   },
+   {
+    "ticker": "PGAS",
+    "founded": "Feb 01, 2005",
+    "ipo": "Des 15, 2003",
+    "name": "Perusahaan Gas Negara (Persero) Tbk"
+   },
+   {
+    "ticker": "RAJA",
+    "founded": "Des 24, 1993",
+    "ipo": "Apr 19, 2006",
+    "name": "Rukun Raharja Tbk"
+   },
+   {
+    "ticker": "SHIP",
+    "founded": "Jun 01, 1989",
+    "ipo": "Jun 16, 2016",
+    "name": "Sillo Maritime Perdana Tbk"
+   },
+   {
+    "ticker": "SOCI",
+    "founded": "Agu 13, 2010",
+    "ipo": "Des 03, 2014",
+    "name": "Soechi Lines Tbk"
+   }
+  ],
+  "A121": [
+   {
+    "ticker": "AADI",
+    "founded": "Des 01, 2004",
+    "ipo": "Des 05, 2024",
+    "name": "Adaro Andalan Indonesia Tbk"
+   },
+   {
+    "ticker": "ADMR",
+    "founded": "Sep 25, 2007",
+    "ipo": "Jan 03, 2022",
+    "name": "Alamtri Minerals Indonesia Tbk"
+   },
+   {
+    "ticker": "ADRO",
+    "founded": "Jul 28, 2004",
+    "ipo": "Jul 16, 2008",
+    "name": "Alamtri Resources Indonesia Tbk"
+   },
+   {
+    "ticker": "AIMS",
+    "founded": "Mei 07, 1997",
+    "ipo": "Jul 20, 2001",
+    "name": "Artha Mahiya Investama Tbk"
+   },
+   {
+    "ticker": "ARII",
+    "founded": "Jan 26, 2007",
+    "ipo": "Nov 08, 2011",
+    "name": "Atlas Resources Tbk"
+   },
+   {
+    "ticker": "BOSS",
+    "founded": "Jul 13, 2011",
+    "ipo": "Feb 15, 2018",
+    "name": "Borneo Olah Sarana Sukses Tbk"
+   },
+   {
+    "ticker": "BSSR",
+    "founded": "Okt 31, 1990",
+    "ipo": "Nov 08, 2012",
+    "name": "Baramulti Suksessarana Tbk"
+   },
+   {
+    "ticker": "BUMI",
+    "founded": "Jun 26, 1973",
+    "ipo": "Jul 30, 1990",
+    "name": "Bumi Resources Tbk"
+   },
+   {
+    "ticker": "BYAN",
+    "founded": "Des 21, 2004",
+    "ipo": "Agu 12, 2008",
+    "name": "Bayan Resources Tbk"
+   },
+   {
+    "ticker": "COAL",
+    "founded": "Mar 27, 2017",
+    "ipo": "Sep 07, 2022",
+    "name": "Black Diamond Resources Tbk"
+   },
+   {
+    "ticker": "CUAN",
+    "founded": "Agu 04, 2008",
+    "ipo": "Mar 08, 2023",
+    "name": "Petrindo Jaya Kreasi Tbk"
+   },
+   {
+    "ticker": "DSSA",
+    "founded": "Agu 02, 1996",
+    "ipo": "Des 10, 2009",
+    "name": "Dian Swastatika Sentosa Tbk"
+   },
+   {
+    "ticker": "GEMS",
+    "founded": "Mar 13, 1997",
+    "ipo": "Nov 17, 2011",
+    "name": "Golden Energy Mines Tbk"
+   },
+   {
+    "ticker": "GTBO",
+    "founded": "Jun 10, 1996",
+    "ipo": "Jul 09, 2009",
+    "name": "Garda Tujuh Buana Tbk"
+   },
+   {
+    "ticker": "HRUM",
+    "founded": "Okt 12, 1995",
+    "ipo": "Okt 06, 2010",
+    "name": "Harum Energy Tbk"
+   },
+   {
+    "ticker": "IATA",
+    "founded": "Sep 10, 1968",
+    "ipo": "Sep 13, 2006",
+    "name": "Karya Pacific Energy Tbk"
+   },
+   {
+    "ticker": "INDY",
+    "founded": "Jan 31, 2002",
+    "ipo": "Jun 11, 2008",
+    "name": "Indika Energy Tbk"
+   },
+   {
+    "ticker": "ITMG",
+    "founded": "Sep 02, 1987",
+    "ipo": "Des 18, 2007",
+    "name": "Indo Tambangraya Megah Tbk"
+   },
+   {
+    "ticker": "KKGI",
+    "founded": "Jul 08, 1981",
+    "ipo": "Jul 01, 1991",
+    "name": "Resource Alam Indonesia Tbk"
+   },
+   {
+    "ticker": "MBAP",
+    "founded": "Mei 29, 1992",
+    "ipo": "Jul 10, 2014",
+    "name": "Mitrabara Adiperdana Tbk"
+   },
+   {
+    "ticker": "MCOL",
+    "founded": "Jun 01, 2005",
+    "ipo": "Sep 07, 2021",
+    "name": "Prima Andalan Mandiri Tbk"
+   },
+   {
+    "ticker": "PTBA",
+    "founded": "Mar 02, 1981",
+    "ipo": "Des 23, 2002",
+    "name": "Bukit Asam (Persero) Tbk"
+   },
+   {
+    "ticker": "SMMT",
+    "founded": "Mar 14, 1980",
+    "ipo": "Des 01, 2007",
+    "name": "Golden Eagle Energy Tbk"
+   },
+   {
+    "ticker": "TOBA",
+    "founded": "Agu 03, 2007",
+    "ipo": "Jul 06, 2012",
+    "name": "TBS Energi Utama Tbk"
+   },
+   {
+    "ticker": "TRAM",
+    "founded": "Agu 06, 2004",
+    "ipo": "Sep 10, 2008",
+    "name": "Trada Alam Minera Tbk"
+   }
+  ],
+  "A122": [
+   {
+    "ticker": "ALII",
+    "founded": "Jul 30, 2019",
+    "ipo": "Feb 07, 2024",
+    "name": "Ancara Logistics Indonesia Tbk"
+   },
+   {
+    "ticker": "BBRM",
+    "founded": "Feb 07, 1998",
+    "ipo": "Jan 09, 2013",
+    "name": "Pelayaran Nasional Bina Buana Raya Tbk"
+   },
+   {
+    "ticker": "BESS",
+    "founded": "Mei 25, 2011",
+    "ipo": "Mar 09, 2020",
+    "name": "Batulicin Nusantara Maritim Tbk"
+   },
+   {
+    "ticker": "BIPI",
+    "founded": "Apr 19, 2007",
+    "ipo": "Feb 11, 2010",
+    "name": "Astrindo Nusantara Infrastruktur Tbk"
+   },
+   {
+    "ticker": "BSML",
+    "founded": "Mar 11, 2009",
+    "ipo": "Des 16, 2021",
+    "name": "Bintang Samudera Mandiri Lines Tbk"
+   },
+   {
+    "ticker": "CANI",
+    "founded": "Agu 31, 2004",
+    "ipo": "Jan 16, 2014",
+    "name": "Capitol Nusantara Indonesia Tbk"
+   },
+   {
+    "ticker": "CBRE",
+    "founded": "Jun 17, 2016",
+    "ipo": "Jan 09, 2023",
+    "name": "Cakra Buana Resources Energi Tbk"
+   },
+   {
+    "ticker": "CNKO",
+    "founded": "Sep 13, 1999",
+    "ipo": "Nov 20, 2001",
+    "name": "Exploitasi Energi Indonesia Tbk"
+   },
+   {
+    "ticker": "DWGL",
+    "founded": "Nov 10, 1986",
+    "ipo": "Des 13, 2017",
+    "name": "Dwi Guna Laksana Tbk"
+   },
+   {
+    "ticker": "FIRE",
+    "founded": "Feb 16, 2015",
+    "ipo": "Jun 09, 2017",
+    "name": "Alfa Energi Investama Tbk"
+   },
+   {
+    "ticker": "MAHA",
+    "founded": "Jan 25, 1994",
+    "ipo": "Jul 25, 2023",
+    "name": "Mandiri Herindo Adiperkasa Tbk"
+   },
+   {
+    "ticker": "MBSS",
+    "founded": "Mar 24, 1994",
+    "ipo": "Apr 06, 2011",
+    "name": "Mitrabahtera Segara Sejati Tbk"
+   },
+   {
+    "ticker": "PSAT",
+    "founded": "Des 10, 2007",
+    "ipo": "Jul 08, 2025",
+    "name": "Pancaran Samudera Transport Tbk"
+   },
+   {
+    "ticker": "PSSI",
+    "founded": "Jan 10, 2007",
+    "ipo": "Des 05, 2017",
+    "name": "IMC Pelita Logistik Tbk"
+   },
+   {
+    "ticker": "PTIS",
+    "founded": "Jan 21, 1985",
+    "ipo": "Jul 12, 2011",
+    "name": "Indo Straits Tbk"
+   },
+   {
+    "ticker": "RIGS",
+    "founded": "Jan 22, 1974",
+    "ipo": "Mar 26, 1990",
+    "name": "Rig Tenders Indonesia Tbk"
+   },
+   {
+    "ticker": "RMKE",
+    "founded": "Jun 22, 2009",
+    "ipo": "Des 07, 2021",
+    "name": "RMK Energy Tbk"
+   },
+   {
+    "ticker": "SGER",
+    "founded": "Mar 17, 2008",
+    "ipo": "Agu 10, 2020",
+    "name": "Sumber Global Energy Tbk"
+   },
+   {
+    "ticker": "TCPI",
+    "founded": "Jul 09, 2018",
+    "ipo": "Jul 06, 2018",
+    "name": "Transcoal Pacific Tbk"
+   },
+   {
+    "ticker": "TEBE",
+    "founded": "Jun 26, 2008",
+    "ipo": "Nov 18, 2019",
+    "name": "Dana Brata Luhur Tbk"
+   },
+   {
+    "ticker": "TPMA",
+    "founded": "Jan 24, 2005",
+    "ipo": "Feb 20, 2013",
+    "name": "Trans Power Marine Tbk"
+   }
+  ],
+  "A131": [
+   {
+    "ticker": "APEX",
+    "founded": "Jun 20, 1984",
+    "ipo": "Jun 05, 2013",
+    "name": "Apexindo Pratama Duta Tbk"
+   },
+   {
+    "ticker": "ELSA",
+    "founded": "Jan 25, 1969",
+    "ipo": "Feb 06, 2008",
+    "name": "Elnusa Tbk"
+   }
+  ],
+  "A132": [
+   {
+    "ticker": "ARTI",
+    "founded": "Mar 31, 1993",
+    "ipo": "Apr 30, 2003",
+    "name": "Ratu Prabu Energi Tbk"
+   },
+   {
+    "ticker": "ATLA",
+    "founded": "Nov 22, 2016",
+    "ipo": "Apr 16, 2024",
+    "name": "Atlantis Subsea Indonesia Tbk"
+   },
+   {
+    "ticker": "BOAT",
+    "founded": "Jul 25, 2008",
+    "ipo": "Nov 12, 2024",
+    "name": "Newport Marine Services Tbk"
+   },
+   {
+    "ticker": "DEWA",
+    "founded": "Okt 08, 1991",
+    "ipo": "Sep 26, 2007",
+    "name": "Darma Henwa Tbk"
+   },
+   {
+    "ticker": "DOID",
+    "founded": "Nov 26, 1990",
+    "ipo": "Jun 15, 2001",
+    "name": "BUMA Internasional Grup Tbk"
+   },
+   {
+    "ticker": "HILL",
+    "founded": "Mei 15, 2008",
+    "ipo": "Mar 01, 2023",
+    "name": "Hillcon Tbk"
+   },
+   {
+    "ticker": "ITMA",
+    "founded": "Nov 20, 1987",
+    "ipo": "Des 10, 1990",
+    "name": "Sumber Energi Andalan Tbk"
+   },
+   {
+    "ticker": "MKAP",
+    "founded": "Mei 16, 2002",
+    "ipo": "Feb 12, 2024",
+    "name": "Multikarya Asia Pasifik Raya Tbk"
+   },
+   {
+    "ticker": "MYOH",
+    "founded": "Mar 15, 2000",
+    "ipo": "Jul 27, 2000",
+    "name": "Samindo Resources Tbk"
+   },
+   {
+    "ticker": "PKPK",
+    "founded": "Des 07, 1983",
+    "ipo": "Jul 11, 2007",
+    "name": "Paragon Karya Perkasa Tbk"
+   },
+   {
+    "ticker": "PTRO",
+    "founded": "Feb 21, 1972",
+    "ipo": "Mei 21, 1990",
+    "name": "Petrosea Tbk"
+   },
+   {
+    "ticker": "RGAS",
+    "founded": "Nov 28, 2018",
+    "ipo": "Nov 08, 2023",
+    "name": "Kian Santang Muliatama Tbk"
+   },
+   {
+    "ticker": "RMKO",
+    "founded": "Des 18, 2017",
+    "ipo": "Jul 31, 2023",
+    "name": "Royaltama Mulia Kontraktorindo Tbk"
+   },
+   {
+    "ticker": "RUIS",
+    "founded": "Agu 22, 1984",
+    "ipo": "Jul 12, 2006",
+    "name": "Radiant Utama Interinsco Tbk"
+   },
+   {
+    "ticker": "SICO",
+    "founded": "Apr 03, 2007",
+    "ipo": "Apr 08, 2022",
+    "name": "Sigma Energy Compressindo Tbk"
+   },
+   {
+    "ticker": "SMRU",
+    "founded": "Nov 11, 2003",
+    "ipo": "Okt 10, 2011",
+    "name": "SMR Utama Tbk"
+   },
+   {
+    "ticker": "SUNI",
+    "founded": "Okt 17, 2002",
+    "ipo": "Jan 09, 2023",
+    "name": "Sunindo Pratama Tbk"
+   },
+   {
+    "ticker": "TAMU",
+    "founded": "Agu 27, 1998",
+    "ipo": "Mei 10, 2017",
+    "name": "Pelayaran Tamarin Samudra Tbk"
+   },
+   {
+    "ticker": "UNIQ",
+    "founded": "Agu 25, 1992",
+    "ipo": "Mar 08, 2021",
+    "name": "Ulima Nitra Tbk"
+   },
+   {
+    "ticker": "WINS",
+    "founded": "Des 18, 1995",
+    "ipo": "Nov 29, 2010",
+    "name": "Wintermar Offshore Marine Tbk"
+   },
+   {
+    "ticker": "WOWS",
+    "founded": "Mar 07, 2011",
+    "ipo": "Nov 08, 2019",
+    "name": "Ginting Jaya Energi Tbk"
+   }
+  ],
+  "A211": [
+   {
+    "ticker": "JSKY",
+    "founded": "Jul 04, 2008",
+    "ipo": "Mar 28, 2018",
+    "name": "Sky Energy Indonesia Tbk"
+   },
+   {
+    "ticker": "SEMA",
+    "founded": "Okt 01, 2009",
+    "ipo": "Jan 10, 2022",
+    "name": "Semacom Integrated Tbk"
+   }
+  ],
+  "A221": [
+   {
+    "ticker": "ETWA",
+    "founded": "Mar 06, 1992",
+    "ipo": "Mei 16, 1997",
+    "name": "Eterindo Wahanatama Tbk"
+   }
+  ],
+  "B111": [
+   {
+    "ticker": "ADMG",
+    "founded": "Apr 25, 1986",
+    "ipo": "Okt 20, 1993",
+    "name": "Polychem Indonesia Tbk"
+   },
+   {
+    "ticker": "AGII",
+    "founded": "Sep 21, 1971",
+    "ipo": "Sep 28, 2016",
+    "name": "Samator Indo Gas Tbk"
+   },
+   {
+    "ticker": "BMSR",
+    "founded": "Nov 16, 1989",
+    "ipo": "Des 29, 1999",
+    "name": "Bintang Mitra Semestaraya Tbk"
+   },
+   {
+    "ticker": "BRPT",
+    "founded": "Apr 04, 1979",
+    "ipo": "Okt 01, 1993",
+    "name": "Barito Pacific Tbk"
+   },
+   {
+    "ticker": "CHEM",
+    "founded": "Jan 30, 2004",
+    "ipo": "Jul 08, 2022",
+    "name": "Chemstar Indonesia Tbk"
+   },
+   {
+    "ticker": "ESSA",
+    "founded": "Mar 26, 2006",
+    "ipo": "Feb 01, 2012",
+    "name": "ESSA Industries Indonesia Tbk"
+   },
+   {
+    "ticker": "FPNI",
+    "founded": "Des 09, 1987",
+    "ipo": "Mar 21, 2002",
+    "name": "Lotte Chemical Titan Tbk"
+   },
+   {
+    "ticker": "INCI",
+    "founded": "Apr 23, 1982",
+    "ipo": "Jul 24, 1990",
+    "name": "Intanwijaya Internasional Tbk"
+   },
+   {
+    "ticker": "KKES",
+    "founded": "Nov 09, 1990",
+    "ipo": "Agu 08, 2022",
+    "name": "Kusuma Kemindo Sentosa Tbk"
+   },
+   {
+    "ticker": "LTLS",
+    "founded": "Jan 18, 1951",
+    "ipo": "Jul 21, 1997",
+    "name": "Lautan Luas Tbk"
+   },
+   {
+    "ticker": "MDKI",
+    "founded": "Mar 17, 1981",
+    "ipo": "Sep 25, 2017",
+    "name": "Emdeki Utama Tbk"
+   },
+   {
+    "ticker": "MOLI",
+    "founded": "Jul 24, 1959",
+    "ipo": "Agu 30, 2018",
+    "name": "Madusari Murni Indah Tbk"
+   },
+   {
+    "ticker": "OKAS",
+    "founded": "Sep 15, 2003",
+    "ipo": "Mar 29, 2006",
+    "name": "Ancora Indonesia Resources Tbk"
+   },
+   {
+    "ticker": "SBMA",
+    "founded": "Okt 25, 1980",
+    "ipo": "Sep 08, 2021",
+    "name": "Surya Biru Murni Acetylene Tbk"
+   },
+   {
+    "ticker": "SMLE",
+    "founded": "Mar 18, 2013",
+    "ipo": "Jan 10, 2024",
+    "name": "Sinergi Multi Lestarindo Tbk"
+   },
+   {
+    "ticker": "SRSN",
+    "founded": "Des 07, 1982",
+    "ipo": "Jan 11, 1993",
+    "name": "Indo Acidatama Tbk"
+   },
+   {
+    "ticker": "TDPM",
+    "founded": "Des 16, 2003",
+    "ipo": "Apr 09, 2018",
+    "name": "Tianrong Chemicals Industry Tbk"
+   },
+   {
+    "ticker": "TPIA",
+    "founded": "Nov 02, 1984",
+    "ipo": "Mei 26, 2008",
+    "name": "Chandra Asri Pacific Tbk"
+   },
+   {
+    "ticker": "UNIC",
+    "founded": "Feb 07, 1983",
+    "ipo": "Nov 06, 1989",
+    "name": "Unggul Indah Cahaya Tbk"
+   }
+  ],
+  "B112": [
+   {
+    "ticker": "DGWG",
+    "founded": "Nov 29, 2011",
+    "ipo": "Jan 13, 2025",
+    "name": "Delta Giri Wacana Tbk"
+   },
+   {
+    "ticker": "NPGF",
+    "founded": "Nov 29, 2011",
+    "ipo": "Apr 14, 2021",
+    "name": "Nusa Palapa Gemilang Tbk"
+   },
+   {
+    "ticker": "SAMF",
+    "founded": "Jun 18, 1998",
+    "ipo": "Mar 31, 2020",
+    "name": "Saraswanti Anugerah Makmur Tbk"
+   }
+  ],
+  "B113": [
+   {
+    "ticker": "AKPI",
+    "founded": "Mar 07, 1980",
+    "ipo": "Des 18, 1992",
+    "name": "Argha Karya Prima Industry Tbk"
+   },
+   {
+    "ticker": "APLI",
+    "founded": "Agu 05, 1992",
+    "ipo": "Mei 01, 2000",
+    "name": "Asiaplast Industries Tbk"
+   },
+   {
+    "ticker": "AVIA",
+    "founded": "Mar 01, 1983",
+    "ipo": "Des 08, 2021",
+    "name": "Avia Avian Tbk"
+   },
+   {
+    "ticker": "CLPI",
+    "founded": "Sep 15, 1988",
+    "ipo": "Nov 30, 2001",
+    "name": "Colorpak Indonesia Tbk"
+   },
+   {
+    "ticker": "DPNS",
+    "founded": "Mar 18, 1982",
+    "ipo": "Agu 08, 1990",
+    "name": "Duta Pertiwi Nusantara Tbk"
+   },
+   {
+    "ticker": "EKAD",
+    "founded": "Nov 20, 1981",
+    "ipo": "Agu 14, 1990",
+    "name": "Ekadharma International Tbk"
+   },
+   {
+    "ticker": "OBMD",
+    "founded": "Jan 09, 1996",
+    "ipo": "Des 08, 2021",
+    "name": "OBM Drilchem Tbk"
+   }
+  ],
+  "B121": [
+   {
+    "ticker": "AYLS",
+    "founded": "Des 15, 2010",
+    "ipo": "Feb 12, 2020",
+    "name": "Arkayana Lestari Grup Tbk"
+   },
+   {
+    "ticker": "BATR",
+    "founded": "Sep 09, 2004",
+    "ipo": "Jun 10, 2024",
+    "name": "Benteng Api Technic Tbk"
+   },
+   {
+    "ticker": "BEBS",
+    "founded": "Jan 23, 2019",
+    "ipo": "Mar 10, 2021",
+    "name": "Berkah Beton Sadaya Tbk"
+   },
+   {
+    "ticker": "BLES",
+    "founded": "Nov 03, 2011",
+    "ipo": "Jul 08, 2024",
+    "name": "Superior Prima Sukses Tbk"
+   },
+   {
+    "ticker": "CMNT",
+    "founded": "Jul 04, 2011",
+    "ipo": "Sep 08, 2021",
+    "name": "Cemindo Gemilang Tbk"
+   },
+   {
+    "ticker": "INTP",
+    "founded": "Jan 16, 1985",
+    "ipo": "Des 05, 1989",
+    "name": "Indocement Tunggal Prakarsa Tbk"
+   },
+   {
+    "ticker": "SMBR",
+    "founded": "Nov 14, 1974",
+    "ipo": "Jun 28, 2013",
+    "name": "Semen Baturaja (Persero) Tbk"
+   },
+   {
+    "ticker": "SMCB",
+    "founded": "Jun 15, 1971",
+    "ipo": "Agu 10, 1977",
+    "name": "Solusi Bangun Indonesia Tbk"
+   },
+   {
+    "ticker": "SMGR",
+    "founded": "Mar 25, 1953",
+    "ipo": "Jul 08, 1991",
+    "name": "Semen Indonesia (Persero) Tbk"
+   },
+   {
+    "ticker": "SOLA",
+    "founded": "Des 18, 2014",
+    "ipo": "Mei 08, 2024",
+    "name": "Xolare RCR Energy Tbk"
+   },
+   {
+    "ticker": "WSBP",
+    "founded": "Okt 07, 2014",
+    "ipo": "Sep 20, 2016",
+    "name": "Waskita Beton Precast Tbk"
+   },
+   {
+    "ticker": "WTON",
+    "founded": "Mar 11, 1997",
+    "ipo": "Apr 08, 2014",
+    "name": "Wijaya Karya Beton Tbk"
+   }
+  ],
+  "B131": [
+   {
+    "ticker": "ALDO",
+    "founded": "Jan 31, 1989",
+    "ipo": "Jul 12, 2011",
+    "name": "Alkindo Naratama Tbk"
+   },
+   {
+    "ticker": "ASPR",
+    "founded": "Jul 29, 1991",
+    "ipo": "Jul 08, 2025",
+    "name": "Asia Pramulia Tbk"
+   },
+   {
+    "ticker": "BRNA",
+    "founded": "Mei 22, 2005",
+    "ipo": "Nov 06, 1989",
+    "name": "Berlina Tbk"
+   },
+   {
+    "ticker": "EPAC",
+    "founded": "Jun 18, 2013",
+    "ipo": "Jul 01, 2020",
+    "name": "Megalestari Epack Sentosaraya Tbk"
+   },
+   {
+    "ticker": "ESIP",
+    "founded": "Okt 12, 2001",
+    "ipo": "Nov 14, 2019",
+    "name": "Sinergi Inti Plastindo Tbk"
+   },
+   {
+    "ticker": "FASW",
+    "founded": "Jun 13, 1987",
+    "ipo": "Des 19, 1994",
+    "name": "Fajar Surya Wisesa Tbk"
+   },
+   {
+    "ticker": "IGAR",
+    "founded": "Okt 30, 1975",
+    "ipo": "Nov 05, 1990",
+    "name": "Champion Pacific Indonesia Tbk"
+   },
+   {
+    "ticker": "IPOL",
+    "founded": "Mar 24, 1995",
+    "ipo": "Jul 09, 2010",
+    "name": "Indopoly Swakarsa Industry Tbk"
+   },
+   {
+    "ticker": "KDSI",
+    "founded": "Jan 09, 1973",
+    "ipo": "Jul 29, 1996",
+    "name": "Kedawung Setia Industrial Tbk"
+   },
+   {
+    "ticker": "PACK",
+    "founded": "Nov 08, 2019",
+    "ipo": "Feb 08, 2023",
+    "name": "Abadi Nusantara Hijau Investama Tbk"
+   },
+   {
+    "ticker": "PBID",
+    "founded": "Jan 10, 1990",
+    "ipo": "Des 13, 2017",
+    "name": "Panca Budi Idaman Tbk"
+   },
+   {
+    "ticker": "PDPP",
+    "founded": "Sep 16, 2005",
+    "ipo": "Nov 09, 2022",
+    "name": "Primadaya Plastisindo Tbk"
+   },
+   {
+    "ticker": "PICO",
+    "founded": "Sep 26, 1983",
+    "ipo": "Sep 23, 1996",
+    "name": "Pelangi Indah Canindo Tbk"
+   },
+   {
+    "ticker": "PPRI",
+    "founded": "Feb 14, 2011",
+    "ipo": "Agu 08, 2023",
+    "name": "Paperocks Indonesia Tbk"
+   },
+   {
+    "ticker": "PTMR",
+    "founded": "Mei 26, 2006",
+    "ipo": "Okt 08, 2024",
+    "name": "Master Print Tbk"
+   },
+   {
+    "ticker": "SIMA",
+    "founded": "Jun 07, 1985",
+    "ipo": "Jun 03, 1994",
+    "name": "Siwani Makmur Tbk"
+   },
+   {
+    "ticker": "SMKL",
+    "founded": "Jul 26, 2001",
+    "ipo": "Jul 11, 2019",
+    "name": "Satyamitra Kemas Lestari Tbk"
+   },
+   {
+    "ticker": "SPMA",
+    "founded": "Agu 25, 1976",
+    "ipo": "Nov 16, 1994",
+    "name": "Suparma Tbk"
+   },
+   {
+    "ticker": "TALF",
+    "founded": "Mei 06, 1977",
+    "ipo": "Jan 17, 2014",
+    "name": "Tunas Alfin Tbk"
+   },
+   {
+    "ticker": "TRST",
+    "founded": "Nov 23, 1979",
+    "ipo": "Jul 02, 1990",
+    "name": "Trias Sentosa Tbk"
+   },
+   {
+    "ticker": "YPAS",
+    "founded": "Des 14, 1992",
+    "ipo": "Mar 05, 2008",
+    "name": "Yanaprima Hastapersada Tbk"
+   }
+  ],
+  "B141": [
+   {
+    "ticker": "ALKA",
+    "founded": "Feb 21, 1972",
+    "ipo": "Jul 12, 1990",
+    "name": "Alakasa Industrindo Tbk"
+   },
+   {
+    "ticker": "ALMI",
+    "founded": "Jun 26, 1978",
+    "ipo": "Jan 02, 1997",
+    "name": "Alumindo Light Metal Industry Tbk"
+   },
+   {
+    "ticker": "CITA",
+    "founded": "Jun 27, 1992",
+    "ipo": "Mar 20, 2002",
+    "name": "Cita Mineral Investindo Tbk"
+   },
+   {
+    "ticker": "HKMU",
+    "founded": "Des 13, 2010",
+    "ipo": "Okt 09, 2018",
+    "name": "HK Metals Utama Tbk"
+   },
+   {
+    "ticker": "INAI",
+    "founded": "Jul 16, 1971",
+    "ipo": "Des 05, 1994",
+    "name": "Indal Aluminium Industry Tbk"
+   }
+  ],
+  "B142": [
+   {
+    "ticker": "AMMN",
+    "founded": "Sep 29, 2015",
+    "ipo": "Jul 07, 2023",
+    "name": "Amman Mineral Internasional Tbk"
+   },
+   {
+    "ticker": "TBMS",
+    "founded": "Feb 03, 1977",
+    "ipo": "Mei 23, 1990",
+    "name": "Tembaga Mulia Semanan Tbk"
+   }
+  ],
+  "B143": [
+   {
+    "ticker": "ARCI",
+    "founded": "Sep 14, 2010",
+    "ipo": "Jun 28, 2021",
+    "name": "Archi Indonesia Tbk"
+   },
+   {
+    "ticker": "EMAS",
+    "founded": "Nov 20, 2015",
+    "ipo": "Sep 23, 2025",
+    "name": "Merdeka Gold Resources Tbk"
+   },
+   {
+    "ticker": "MDKA",
+    "founded": "Sep 05, 2012",
+    "ipo": "Jun 19, 2015",
+    "name": "Merdeka Copper Gold Tbk"
+   },
+   {
+    "ticker": "PSAB",
+    "founded": "Jan 14, 2007",
+    "ipo": "Apr 22, 2003",
+    "name": "J Resources Asia Pasifik Tbk"
+   },
+   {
+    "ticker": "SQMI",
+    "founded": "Mar 21, 2000",
+    "ipo": "Jul 15, 2004",
+    "name": "Wilton Makmur Indonesia Tbk"
+   }
+  ],
+  "B144": [
+   {
+    "ticker": "BAJA",
+    "founded": "Okt 04, 1993",
+    "ipo": "Des 21, 2011",
+    "name": "Saranacentral Bajatama Tbk"
+   },
+   {
+    "ticker": "BTON",
+    "founded": "Feb 27, 1995",
+    "ipo": "Jul 18, 2001",
+    "name": "Betonjaya Manunggal Tbk"
+   },
+   {
+    "ticker": "CTBN",
+    "founded": "Agu 23, 1983",
+    "ipo": "Nov 28, 1989",
+    "name": "Citra Tubindo Tbk"
+   },
+   {
+    "ticker": "GDST",
+    "founded": "Apr 08, 1989",
+    "ipo": "Des 23, 2009",
+    "name": "Gunawan Dianjaya Steel Tbk"
+   },
+   {
+    "ticker": "GGRP",
+    "founded": "Agu 20, 1990",
+    "ipo": "Sep 19, 2019",
+    "name": "Gunung Raja Paksi Tbk"
+   },
+   {
+    "ticker": "ISSP",
+    "founded": "Jan 30, 1971",
+    "ipo": "Feb 22, 2013",
+    "name": "Steel Pipe Industry of Indonesia Tbk"
+   },
+   {
+    "ticker": "KRAS",
+    "founded": "Okt 27, 1971",
+    "ipo": "Nov 10, 2010",
+    "name": "Krakatau Steel (Persero) Tbk"
+   },
+   {
+    "ticker": "LMSH",
+    "founded": "Des 14, 1982",
+    "ipo": "Jun 04, 1990",
+    "name": "Lionmesh Prima Tbk"
+   },
+   {
+    "ticker": "OPMS",
+    "founded": "Sep 05, 2012",
+    "ipo": "Sep 23, 2019",
+    "name": "Optima Prima Metal Sinergi Tbk"
+   }
+  ],
+  "B145": [],
+  "B146": [
+   {
+    "ticker": "ANTM",
+    "founded": "Jul 05, 1968",
+    "ipo": "Nov 27, 1997",
+    "name": "Aneka Tambang (Persero) Tbk"
+   },
+   {
+    "ticker": "BRMS",
+    "founded": "Agu 06, 2003",
+    "ipo": "Des 09, 2010",
+    "name": "Bumi Resources Minerals Tbk"
+   },
+   {
+    "ticker": "DAAZ",
+    "founded": "Nov 12, 2009",
+    "ipo": "Nov 11, 2024",
+    "name": "Daaz Bara Lestari Tbk"
+   },
+   {
+    "ticker": "DKFT",
+    "founded": "Feb 22, 1995",
+    "ipo": "Nov 21, 1997",
+    "name": "Central Omega Resources Tbk"
+   },
+   {
+    "ticker": "IFSH",
+    "founded": "Jun 09, 1971",
+    "ipo": "Des 05, 2019",
+    "name": "Ifishdeco Tbk"
+   },
+   {
+    "ticker": "INCO",
+    "founded": "Jul 25, 1968",
+    "ipo": "Mei 16, 1990",
+    "name": "Vale Indonesia Tbk"
+   },
+   {
+    "ticker": "MBMA",
+    "founded": "Agu 20, 2019",
+    "ipo": "Apr 18, 2023",
+    "name": "Merdeka Battery Materials Tbk"
+   },
+   {
+    "ticker": "MINE",
+    "founded": "Des 22, 2004",
+    "ipo": "Mar 10, 2025",
+    "name": "Sinar Terang Mandiri Tbk"
+   },
+   {
+    "ticker": "NCKL",
+    "founded": "Sep 06, 2004",
+    "ipo": "Apr 12, 2023",
+    "name": "Trimegah Bangun Persada Tbk"
+   },
+   {
+    "ticker": "NICE",
+    "founded": "Jul 09, 2008",
+    "ipo": "Jan 09, 2024",
+    "name": "Adhi Kartiko Pratama Tbk"
+   },
+   {
+    "ticker": "NICL",
+    "founded": "Jan 15, 2008",
+    "ipo": "Jul 09, 2021",
+    "name": "PAM Mineral Tbk"
+   },
+   {
+    "ticker": "NIKL",
+    "founded": "Agu 19, 1982",
+    "ipo": "Des 14, 2009",
+    "name": "Pelat Timah Nusantara Tbk"
+   },
+   {
+    "ticker": "PURE",
+    "founded": "Jun 09, 2009",
+    "ipo": "Okt 09, 2019",
+    "name": "Trinitan Metals and Minerals Tbk"
+   },
+   {
+    "ticker": "SMGA",
+    "founded": "Okt 19, 2016",
+    "ipo": "Jan 30, 2024",
+    "name": "Sumber Mineral Global Abadi Tbk"
+   },
+   {
+    "ticker": "TINS",
+    "founded": "Agu 02, 1976",
+    "ipo": "Okt 19, 1995",
+    "name": "Timah (Persero) Tbk"
+   },
+   {
+    "ticker": "ZINC",
+    "founded": "Jul 12, 2005",
+    "ipo": "Okt 16, 2017",
+    "name": "Kapuas Prima Coal Tbk"
+   }
+  ],
+  "B147": [],
+  "B151": [
+   {
+    "ticker": "FWCT",
+    "founded": "Mar 08, 2017",
+    "ipo": "Feb 01, 2023",
+    "name": "Wijaya Cahaya Timber Tbk"
+   },
+   {
+    "ticker": "IFII",
+    "founded": "Sep 24, 2007",
+    "ipo": "Des 10, 2019",
+    "name": "Indonesia Fibreboard Industry Tbk"
+   },
+   {
+    "ticker": "KAYU",
+    "founded": "Jun 03, 2010",
+    "ipo": "Jul 04, 2019",
+    "name": "Darmi Bersaudara Tbk"
+   },
+   {
+    "ticker": "SULI",
+    "founded": "Apr 14, 1980",
+    "ipo": "Mar 21, 1994",
+    "name": "SLJ Global Tbk"
+   },
+   {
+    "ticker": "TIRT",
+    "founded": "Apr 21, 1981",
+    "ipo": "Des 13, 1999",
+    "name": "Tirta Mahakam Resources Tbk"
+   }
+  ],
+  "B152": [
+   {
+    "ticker": "INKP",
+    "founded": "Des 07, 1976",
+    "ipo": "Jul 16, 1990",
+    "name": "Indah Kiat Pulp & Paper Tbk"
+   },
+   {
+    "ticker": "INRU",
+    "founded": "Apr 26, 1983",
+    "ipo": "Jun 18, 1990",
+    "name": "Toba Pulp Lestari Tbk"
+   },
+   {
+    "ticker": "INTD",
+    "founded": "Nov 15, 1976",
+    "ipo": "Des 18, 1989",
+    "name": "Inter Delta Tbk"
+   },
+   {
+    "ticker": "KBRI",
+    "founded": "Okt 12, 1979",
+    "ipo": "Jul 11, 2008",
+    "name": "Kertas Basuki Rachmat Indonesia Tbk"
+   },
+   {
+    "ticker": "SWAT",
+    "founded": "Jun 08, 1990",
+    "ipo": "Jun 08, 2018",
+    "name": "Sriwahana Adityakarta Tbk"
+   },
+   {
+    "ticker": "TKIM",
+    "founded": "Okt 02, 1972",
+    "ipo": "Apr 03, 1990",
+    "name": "Pabrik Kertas Tjiwi Kimia Tbk"
+   }
+  ],
+  "B153": [
+   {
+    "ticker": "INCF",
+    "founded": "Feb 23, 1982",
+    "ipo": "Sep 06, 2016",
+    "name": "Indo Komoditi Korpora Tbk"
+   },
+   {
+    "ticker": "KMTR",
+    "founded": "Mar 25, 1991",
+    "ipo": "Jun 19, 2017",
+    "name": "Kirana Megatara Tbk"
+   },
+   {
+    "ticker": "PNGO",
+    "founded": "Mei 12, 1979",
+    "ipo": "Agu 31, 2020",
+    "name": "Pinago Utama Tbk"
+   }
+  ],
+  "C111": [],
+  "C121": [
+   {
+    "ticker": "AMFG",
+    "founded": "Okt 07, 1971",
+    "ipo": "Nov 08, 1995",
+    "name": "Asahimas Flat Glass Tbk"
+   },
+   {
+    "ticker": "ARNA",
+    "founded": "Feb 22, 1993",
+    "ipo": "Jul 17, 2001",
+    "name": "Arwana Citramulia Tbk"
+   },
+   {
+    "ticker": "CAKK",
+    "founded": "Jun 29, 1995",
+    "ipo": "Okt 31, 2018",
+    "name": "Cahayaputra Asa Keramik Tbk"
+   },
+   {
+    "ticker": "CTTH",
+    "founded": "Sep 26, 1974",
+    "ipo": "Jul 03, 1996",
+    "name": "Citatah Tbk"
+   },
+   {
+    "ticker": "IMPC",
+    "founded": "Jan 26, 1981",
+    "ipo": "Des 17, 2014",
+    "name": "Impack Pratama Industri Tbk"
+   },
+   {
+    "ticker": "KIAS",
+    "founded": "Jan 11, 2001",
+    "ipo": "Des 08, 1994",
+    "name": "Keramika Indonesia Assosiasi Tbk"
+   },
+   {
+    "ticker": "KOIN",
+    "founded": "Jan 01, 2001",
+    "ipo": "Apr 09, 2008",
+    "name": "Kokoh Inti Arebama Tbk"
+   },
+   {
+    "ticker": "KUAS",
+    "founded": "Sep 18, 1989",
+    "ipo": "Okt 25, 2021",
+    "name": "Ace Oldfields Tbk"
+   },
+   {
+    "ticker": "MLIA",
+    "founded": "Nov 15, 1986",
+    "ipo": "Jan 17, 1994",
+    "name": "Mulia Industrindo Tbk"
+   },
+   {
+    "ticker": "PIPA",
+    "founded": "Jan 11, 2012",
+    "ipo": "Apr 10, 2023",
+    "name": "Multi Makmur Lemindo Tbk"
+   },
+   {
+    "ticker": "SINI",
+    "founded": "Sep 23, 2005",
+    "ipo": "Nov 08, 2019",
+    "name": "Singaraja Putra Tbk"
+   },
+   {
+    "ticker": "SPTO",
+    "founded": "Jul 11, 1977",
+    "ipo": "Mei 14, 2018",
+    "name": "Surya Pertiwi Tbk"
+   },
+   {
+    "ticker": "TOTO",
+    "founded": "Jul 11, 1977",
+    "ipo": "Okt 30, 1990",
+    "name": "Surya Toto Indonesia Tbk"
+   }
+  ],
+  "C131": [
+   {
+    "ticker": "CCSI",
+    "founded": "Okt 11, 1995",
+    "ipo": "Jun 18, 2019",
+    "name": "Communication Cable Systems Indonesia Tbk"
+   },
+   {
+    "ticker": "IKBI",
+    "founded": "Jul 23, 1981",
+    "ipo": "Jan 21, 1991",
+    "name": "Sumi Indo Kabel Tbk"
+   },
+   {
+    "ticker": "JECC",
+    "founded": "Apr 17, 1973",
+    "ipo": "Nov 18, 1992",
+    "name": "Jembo Cable Company Tbk"
+   },
+   {
+    "ticker": "KBLI",
+    "founded": "Jan 19, 1972",
+    "ipo": "Jul 06, 1992",
+    "name": "KMI Wire and Cable Tbk"
+   },
+   {
+    "ticker": "KBLM",
+    "founded": "Okt 11, 1979",
+    "ipo": "Jun 01, 1992",
+    "name": "Kabelindo Murni Tbk"
+   },
+   {
+    "ticker": "SCCO",
+    "founded": "Nov 09, 1970",
+    "ipo": "Jul 20, 1982",
+    "name": "Supreme Cable Manufacturing & Commerce Tbk"
+   },
+   {
+    "ticker": "VOKS",
+    "founded": "Apr 19, 1971",
+    "ipo": "Des 20, 1990",
+    "name": "Voksel Electric Tbk"
+   }
+  ],
+  "C132": [],
+  "C141": [
+   {
+    "ticker": "HEXA",
+    "founded": "Nov 28, 1988",
+    "ipo": "Feb 13, 1995",
+    "name": "Hexindo Adiperkasa Tbk"
+   },
+   {
+    "ticker": "HOPE",
+    "founded": "Jan 26, 2005",
+    "ipo": "Mei 24, 2021",
+    "name": "Harapan Duta Pertiwi Tbk"
+   },
+   {
+    "ticker": "INTA",
+    "founded": "Mei 10, 1975",
+    "ipo": "Agu 23, 1993",
+    "name": "Intraco Penta Tbk"
+   },
+   {
+    "ticker": "KOBX",
+    "founded": "Sep 28, 2002",
+    "ipo": "Jul 05, 2012",
+    "name": "Kobexindo Tractors Tbk"
+   },
+   {
+    "ticker": "NTBK",
+    "founded": "Jun 26, 2009",
+    "ipo": "Feb 09, 2022",
+    "name": "Nusatama Berkah Tbk"
+   },
+   {
+    "ticker": "SKRN",
+    "founded": "Mar 27, 1996",
+    "ipo": "Okt 11, 2018",
+    "name": "Superkrane Mitra Utama Tbk"
+   },
+   {
+    "ticker": "SMIL",
+    "founded": "Sep 26, 2006",
+    "ipo": "Mei 12, 2023",
+    "name": "Sarana Mitra Luas Tbk"
+   },
+   {
+    "ticker": "UNTR",
+    "founded": "Okt 13, 1972",
+    "ipo": "Sep 19, 1989",
+    "name": "United Tractors Tbk"
+   },
+   {
+    "ticker": "WIDI",
+    "founded": "Agu 13, 2016",
+    "ipo": "Jul 10, 2023",
+    "name": "Widiant Jaya Krenindo Tbk"
+   }
+  ],
+  "C142": [],
+  "C143": [
+   {
+    "ticker": "AMIN",
+    "founded": "Mar 24, 1972",
+    "ipo": "Des 10, 2015",
+    "name": "Ateliers Mecaniques D'Indonesie Tbk"
+   },
+   {
+    "ticker": "APII",
+    "founded": "Okt 05, 2000",
+    "ipo": "Okt 29, 2013",
+    "name": "Arita Prima Indonesia Tbk"
+   },
+   {
+    "ticker": "ARKA",
+    "founded": "Nov 24, 1999",
+    "ipo": "Jul 10, 2019",
+    "name": "Arkha Jayanti Persada Tbk"
+   },
+   {
+    "ticker": "GPSO",
+    "founded": "Mar 06, 1997",
+    "ipo": "Sep 06, 2021",
+    "name": "Geoprima Solusi Tbk"
+   },
+   {
+    "ticker": "LABA",
+    "founded": "Des 06, 1989",
+    "ipo": "Jun 10, 2021",
+    "name": "Green Power Group Tbk"
+   },
+   {
+    "ticker": "MARK",
+    "founded": "Apr 10, 2002",
+    "ipo": "Jul 12, 2017",
+    "name": "Mark Dynamics Indonesia Tbk"
+   },
+   {
+    "ticker": "PTMP",
+    "founded": "Mei 25, 2000",
+    "ipo": "Mar 06, 2023",
+    "name": "Mitra Pack Tbk"
+   }
+  ],
+  "C211": [
+   {
+    "ticker": "BACH",
+    "founded": "Sep 04, 2006",
+    "ipo": "Jul 08, 2026",
+    "name": "Bach Multi Global Tbk"
+   },
+   {
+    "ticker": "NAIK",
+    "founded": "Mei 08, 2007",
+    "ipo": "Nov 13, 2024",
+    "name": "Adiwarna Anugerah Abadi Tbk"
+   },
+   {
+    "ticker": "TIRA",
+    "founded": "Apr 08, 1974",
+    "ipo": "Jul 27, 1993",
+    "name": "Tira Austenite Tbk"
+   },
+   {
+    "ticker": "TRIL",
+    "founded": "Okt 26, 1992",
+    "ipo": "Jan 28, 2008",
+    "name": "Triwira Insanlestari Tbk"
+   }
+  ],
+  "C221": [
+   {
+    "ticker": "JTPE",
+    "founded": "Nov 10, 1990",
+    "ipo": "Apr 16, 2002",
+    "name": "Jasuindo Tiga Perkasa Tbk"
+   }
+  ],
+  "C222": [
+   {
+    "ticker": "HYGN",
+    "founded": "Nov 23, 2006",
+    "ipo": "Feb 13, 2024",
+    "name": "Ecocare Indo Pasifik Tbk"
+   },
+   {
+    "ticker": "MHKI",
+    "founded": "Sep 23, 2004",
+    "ipo": "Apr 16, 2024",
+    "name": "Multi Hanna Kreasindo Tbk"
+   }
+  ],
+  "C223": [
+   {
+    "ticker": "BINO",
+    "founded": "Mei 06, 1992",
+    "ipo": "Nov 25, 2021",
+    "name": "Perma Plasindo Tbk"
+   },
+   {
+    "ticker": "BLUE",
+    "founded": "Jun 24, 2014",
+    "ipo": "Jul 08, 2019",
+    "name": "Berkah Prima Perkasa Tbk"
+   },
+   {
+    "ticker": "KONI",
+    "founded": "Okt 07, 1987",
+    "ipo": "Agu 22, 1995",
+    "name": "Perdana Bangun Pusaka Tbk"
+   },
+   {
+    "ticker": "LION",
+    "founded": "Agu 16, 1972",
+    "ipo": "Agu 20, 1993",
+    "name": "Lion Metal Works Tbk"
+   },
+   {
+    "ticker": "MDRN",
+    "founded": "Mei 12, 1971",
+    "ipo": "Jul 16, 1991",
+    "name": "Modern Internasional Tbk"
+   },
+   {
+    "ticker": "VISI",
+    "founded": "Feb 14, 2018",
+    "ipo": "Feb 27, 2024",
+    "name": "Satu Visi Putra Tbk"
+   }
+  ],
+  "C224": [
+   {
+    "ticker": "ASGR",
+    "founded": "Okt 31, 1975",
+    "ipo": "Nov 15, 1989",
+    "name": "Astra Graphia Tbk"
+   },
+   {
+    "ticker": "DYAN",
+    "founded": "Jul 24, 2007",
+    "ipo": "Mar 25, 2013",
+    "name": "Dyandra Media International Tbk"
+   },
+   {
+    "ticker": "ICON",
+    "founded": "Jul 11, 2001",
+    "ipo": "Jul 08, 2005",
+    "name": "Island Concepts Indonesia Tbk"
+   },
+   {
+    "ticker": "MFMI",
+    "founded": "Jul 09, 1992",
+    "ipo": "Des 29, 2010",
+    "name": "Multifiling Mitra Indonesia Tbk"
+   }
+  ],
+  "C231": [
+   {
+    "ticker": "KING",
+    "founded": "Jan 23, 2008",
+    "ipo": "Feb 16, 2023",
+    "name": "Hoffmen Cleanindo Tbk"
+   },
+   {
+    "ticker": "PADA",
+    "founded": "Apr 21, 2006",
+    "ipo": "Des 08, 2022",
+    "name": "Personel Alih Daya Tbk"
+   },
+   {
+    "ticker": "SOSS",
+    "founded": "Agu 05, 2004",
+    "ipo": "Nov 06, 2018",
+    "name": "Shield On Service Tbk"
+   }
+  ],
+  "C232": [
+   {
+    "ticker": "CRSN",
+    "founded": "Des 14, 1968",
+    "ipo": "Jul 10, 2023",
+    "name": "Carsurin Tbk"
+   },
+   {
+    "ticker": "INDX",
+    "founded": "Sep 19, 1991",
+    "ipo": "Mei 17, 2001",
+    "name": "Tanah Laut Tbk"
+   },
+   {
+    "ticker": "MUTU",
+    "founded": "Mar 02, 1990",
+    "ipo": "Agu 09, 2023",
+    "name": "Mutuagung Lestari Tbk"
+   }
+  ],
+  "C311": [
+   {
+    "ticker": "ABMM",
+    "founded": "Jun 01, 2006",
+    "ipo": "Des 06, 2011",
+    "name": "ABM Investama Tbk"
+   },
+   {
+    "ticker": "ASII",
+    "founded": "Feb 20, 1957",
+    "ipo": "Apr 04, 1990",
+    "name": "Astra International Tbk"
+   },
+   {
+    "ticker": "BHIT",
+    "founded": "Nov 02, 1989",
+    "ipo": "Nov 24, 1997",
+    "name": "MNC Asia Holding Tbk"
+   },
+   {
+    "ticker": "BMTR",
+    "founded": "Jun 30, 1981",
+    "ipo": "Jul 17, 1995",
+    "name": "Global Mediacom Tbk"
+   },
+   {
+    "ticker": "BNBR",
+    "founded": "Mar 13, 1951",
+    "ipo": "Agu 28, 1989",
+    "name": "Bakrie & Brothers Tbk"
+   },
+   {
+    "ticker": "FOLK",
+    "founded": "Apr 10, 2019",
+    "ipo": "Agu 07, 2023",
+    "name": "Multi Garam Utama Tbk"
+   },
+   {
+    "ticker": "MLPL",
+    "founded": "Des 04, 1975",
+    "ipo": "Nov 06, 1989",
+    "name": "Multipolar Tbk"
+   },
+   {
+    "ticker": "ZBRA",
+    "founded": "Jan 08, 1987",
+    "ipo": "Agu 01, 1991",
+    "name": "Dosni Roha Indonesia Tbk"
+   }
+  ],
+  "D111": [
+   {
+    "ticker": "DAYA",
+    "founded": "Jun 16, 2005",
+    "ipo": "Jun 28, 2016",
+    "name": "Duta Intidaya Tbk"
+   },
+   {
+    "ticker": "EPMT",
+    "founded": "Okt 26, 1988",
+    "ipo": "Agu 01, 1994",
+    "name": "Enseval Putera Megatrading Tbk"
+   },
+   {
+    "ticker": "SDPC",
+    "founded": "Okt 20, 1952",
+    "ipo": "Mei 07, 1990",
+    "name": "Millennium Pharmacon International Tbk"
+   }
+  ],
+  "D112": [
+   {
+    "ticker": "BUAH",
+    "founded": "Jun 10, 2017",
+    "ipo": "Agu 09, 2022",
+    "name": "Segar Kumala Indonesia Tbk"
+   },
+   {
+    "ticker": "DMND",
+    "founded": "Feb 03, 1995",
+    "ipo": "Jan 22, 2020",
+    "name": "Diamond Food Indonesia Tbk"
+   },
+   {
+    "ticker": "KMDS",
+    "founded": "Jul 17, 2000",
+    "ipo": "Sep 07, 2020",
+    "name": "Kurniamitra Duta Sentosa Tbk"
+   },
+   {
+    "ticker": "PCAR",
+    "founded": "Jan 29, 2014",
+    "ipo": "Des 29, 2017",
+    "name": "Prima Cakrawala Abadi Tbk"
+   },
+   {
+    "ticker": "WICO",
+    "founded": "Jan 19, 1973",
+    "ipo": "Agu 08, 1994",
+    "name": "Wicaksana Overseas International Tbk"
+   }
+  ],
+  "D113": [
+   {
+    "ticker": "AMRT",
+    "founded": "Feb 22, 1989",
+    "ipo": "Jan 15, 2009",
+    "name": "Sumber Alfaria Trijaya Tbk"
+   },
+   {
+    "ticker": "HERO",
+    "founded": "Okt 05, 1971",
+    "ipo": "Agu 21, 1989",
+    "name": "DFI Retail Nusantara Tbk"
+   },
+   {
+    "ticker": "MIDI",
+    "founded": "Jun 28, 2007",
+    "ipo": "Nov 30, 2010",
+    "name": "Midi Utama Indonesia Tbk"
+   },
+   {
+    "ticker": "MPPA",
+    "founded": "Mar 11, 1986",
+    "ipo": "Des 21, 1992",
+    "name": "Matahari Putra Prima Tbk"
+   },
+   {
+    "ticker": "RANC",
+    "founded": "Mei 28, 1997",
+    "ipo": "Jun 07, 2012",
+    "name": "Supra Boga Lestari Tbk"
+   }
+  ],
+  "D211": [
+   {
+    "ticker": "BEER",
+    "founded": "Jul 25, 2018",
+    "ipo": "Jan 06, 2023",
+    "name": "Jobubu Jarum Minahasa Tbk"
+   },
+   {
+    "ticker": "DLTA",
+    "founded": "Jun 15, 1970",
+    "ipo": "Feb 27, 1984",
+    "name": "Delta Djakarta Tbk"
+   },
+   {
+    "ticker": "MLBI",
+    "founded": "Jun 03, 1929",
+    "ipo": "Des 15, 1981",
+    "name": "Multi Bintang Indonesia Tbk"
+   },
+   {
+    "ticker": "STRK",
+    "founded": "Okt 19, 2010",
+    "ipo": "Okt 10, 2023",
+    "name": "Lovina Beach Brewery Tbk"
+   },
+   {
+    "ticker": "WINE",
+    "founded": "Apr 15, 2000",
+    "ipo": "Jan 10, 2023",
+    "name": "Hatten Bali Tbk"
+   }
+  ],
+  "D212": [
+   {
+    "ticker": "ADES",
+    "founded": "Mar 06, 1985",
+    "ipo": "Jun 13, 1994",
+    "name": "Akasha Wira International Tbk"
+   },
+   {
+    "ticker": "ALTO",
+    "founded": "Jun 03, 1997",
+    "ipo": "Jul 10, 2012",
+    "name": "Tri Banyan Tirta Tbk"
+   },
+   {
+    "ticker": "CLEO",
+    "founded": "Mar 10, 1988",
+    "ipo": "Mei 05, 2017",
+    "name": "Sariguna Primatirta Tbk"
+   },
+   {
+    "ticker": "FORE",
+    "founded": "Jul 03, 2018",
+    "ipo": "Apr 14, 2025",
+    "name": "Fore Kopi Indonesia Tbk"
+   },
+   {
+    "ticker": "GRPM",
+    "founded": "Apr 27, 2007",
+    "ipo": "Jul 10, 2023",
+    "name": "Graha Prima Mentari Tbk"
+   },
+   {
+    "ticker": "SOUL",
+    "founded": "Jun 05, 2009",
+    "ipo": "Jan 06, 2023",
+    "name": "Mitra Tirta Buwana Tbk"
+   }
+  ],
+  "D221": [
+   {
+    "ticker": "CAMP",
+    "founded": "Jul 22, 1972",
+    "ipo": "Des 19, 2017",
+    "name": "Campina Ice Cream Industry Tbk"
+   },
+   {
+    "ticker": "CMRY",
+    "founded": "Sep 02, 2004",
+    "ipo": "Des 06, 2021",
+    "name": "Cisarua Mountain Dairy Tbk"
+   },
+   {
+    "ticker": "KEJU",
+    "founded": "Agu 25, 2006",
+    "ipo": "Nov 25, 2019",
+    "name": "Mulia Boga Raya Tbk"
+   },
+   {
+    "ticker": "TGUK",
+    "founded": "Jun 06, 2018",
+    "ipo": "Jul 10, 2023",
+    "name": "Platinum Wahab Nusantara Tbk"
+   },
+   {
+    "ticker": "ULTJ",
+    "founded": "Nov 02, 1971",
+    "ipo": "Jul 02, 1990",
+    "name": "Ultrajaya Milk Industry & Trading Company Tbk"
+   }
+  ],
+  "D222": [
+   {
+    "ticker": "AISA",
+    "founded": "Jan 26, 1990",
+    "ipo": "Jun 11, 1997",
+    "name": "FKS Food Sejahtera Tbk"
+   },
+   {
+    "ticker": "BEEF",
+    "founded": "Feb 01, 2001",
+    "ipo": "Jan 10, 2019",
+    "name": "Estika Tata Tiara Tbk"
+   },
+   {
+    "ticker": "BOBA",
+    "founded": "Apr 11, 2016",
+    "ipo": "Nov 01, 2021",
+    "name": "Formosa Ingredient Factory Tbk"
+   },
+   {
+    "ticker": "BRRC",
+    "founded": "Sep 21, 2015",
+    "ipo": "Jan 09, 2025",
+    "name": "Raja Roti Cemerlang Tbk"
+   },
+   {
+    "ticker": "BUDI",
+    "founded": "Jan 15, 1979",
+    "ipo": "Mei 08, 1995",
+    "name": "Budi Starch & Sweetener Tbk"
+   },
+   {
+    "ticker": "CEKA",
+    "founded": "Feb 03, 1968",
+    "ipo": "Jul 09, 1996",
+    "name": "Wilmar Cahaya Indonesia Tbk"
+   },
+   {
+    "ticker": "COCO",
+    "founded": "Feb 15, 2006",
+    "ipo": "Mar 20, 2019",
+    "name": "Wahana Interfood Nusantara Tbk"
+   },
+   {
+    "ticker": "FOOD",
+    "founded": "Jun 28, 2004",
+    "ipo": "Jan 08, 2019",
+    "name": "Sentra Food Indonesia Tbk"
+   },
+   {
+    "ticker": "GOOD",
+    "founded": "Agu 24, 1994",
+    "ipo": "Okt 10, 2018",
+    "name": "Garudafood Putra Putri Jaya Tbk"
+   },
+   {
+    "ticker": "GULA",
+    "founded": "Mei 24, 2013",
+    "ipo": "Agu 03, 2022",
+    "name": "Aman Agrindo Tbk"
+   },
+   {
+    "ticker": "HOKI",
+    "founded": "Sep 16, 2003",
+    "ipo": "Jun 22, 2017",
+    "name": "Buyung Poetra Sembada Tbk"
+   },
+   {
+    "ticker": "IBOS",
+    "founded": "Jan 16, 2019",
+    "ipo": "Apr 25, 2022",
+    "name": "Indo Boga Sukses Tbk"
+   },
+   {
+    "ticker": "ICBP",
+    "founded": "Sep 02, 2009",
+    "ipo": "Okt 07, 2010",
+    "name": "Indofood CBP Sukses Makmur Tbk"
+   },
+   {
+    "ticker": "INDF",
+    "founded": "Agu 14, 1990",
+    "ipo": "Jul 14, 1994",
+    "name": "Indofood Sukses Makmur Tbk"
+   },
+   {
+    "ticker": "JELI",
+    "founded": "Nov 22, 1990",
+    "ipo": "Jul 07, 2026",
+    "name": "Niramas Utama Tbk"
+   },
+   {
+    "ticker": "MAXI",
+    "founded": "Jul 11, 2002",
+    "ipo": "Jun 12, 2023",
+    "name": "Maxindo Karya Anugerah Tbk"
+   },
+   {
+    "ticker": "MYOR",
+    "founded": "Feb 17, 1977",
+    "ipo": "Jul 04, 1990",
+    "name": "Mayora Indah Tbk"
+   },
+   {
+    "ticker": "NASI",
+    "founded": "Feb 14, 2015",
+    "ipo": "Des 13, 2021",
+    "name": "Wahana Inti Makmur Tbk"
+   },
+   {
+    "ticker": "NAYZ",
+    "founded": "Okt 02, 2014",
+    "ipo": "Feb 06, 2023",
+    "name": "Hassana Boga Sejahtera Tbk"
+   },
+   {
+    "ticker": "PANI",
+    "founded": "Sep 08, 2000",
+    "ipo": "Sep 18, 2018",
+    "name": "Pantai Indah Kapuk Dua Tbk"
+   },
+   {
+    "ticker": "PMMP",
+    "founded": "Agu 08, 1997",
+    "ipo": "Des 18, 2020",
+    "name": "Panca Mitra Multiperdana Tbk"
+   },
+   {
+    "ticker": "PSDN",
+    "founded": "Apr 16, 1974",
+    "ipo": "Okt 18, 1994",
+    "name": "Prasidha Aneka Niaga Tbk"
+   },
+   {
+    "ticker": "ROTI",
+    "founded": "Mar 08, 1995",
+    "ipo": "Jun 28, 2010",
+    "name": "Nippon Indosari Corpindo Tbk"
+   },
+   {
+    "ticker": "SKBM",
+    "founded": "Apr 12, 1973",
+    "ipo": "Sep 28, 2012",
+    "name": "Sekar Bumi Tbk"
+   },
+   {
+    "ticker": "SKLT",
+    "founded": "Jul 19, 1976",
+    "ipo": "Sep 08, 1993",
+    "name": "Sekar Laut Tbk"
+   },
+   {
+    "ticker": "STTP",
+    "founded": "Mei 12, 1987",
+    "ipo": "Des 16, 1996",
+    "name": "Siantar Top Tbk"
+   },
+   {
+    "ticker": "TAYS",
+    "founded": "Mei 01, 1998",
+    "ipo": "Des 06, 2021",
+    "name": "Jaya Swarasa Agung Tbk"
+   },
+   {
+    "ticker": "TBLA",
+    "founded": "Des 22, 1973",
+    "ipo": "Feb 14, 2000",
+    "name": "Tunas Baru Lampung Tbk"
+   },
+   {
+    "ticker": "TGKA",
+    "founded": "Nov 17, 1986",
+    "ipo": "Jun 11, 1990",
+    "name": "Tigaraksa Satria Tbk"
+   },
+   {
+    "ticker": "TRGU",
+    "founded": "Agu 10, 2020",
+    "ipo": "Jul 08, 2022",
+    "name": "Cerestar Indonesia Tbk"
+   },
+   {
+    "ticker": "YUPI",
+    "founded": "Jul 06, 1995",
+    "ipo": "Mar 25, 2025",
+    "name": "Yupi Indo Jelly Gum Tbk"
+   }
+  ],
+  "D231": [
+   {
+    "ticker": "AGAR",
+    "founded": "Agu 27, 2008",
+    "ipo": "Des 02, 2019",
+    "name": "Asia Sejahtera Mina Tbk"
+   },
+   {
+    "ticker": "AMMS",
+    "founded": "Agu 09, 2007",
+    "ipo": "Agu 04, 2022",
+    "name": "Agung Menjangan Mas Tbk"
+   },
+   {
+    "ticker": "ASHA",
+    "founded": "Okt 01, 1999",
+    "ipo": "Mei 27, 2022",
+    "name": "Cilacap Samudera Fishing Industry Tbk"
+   },
+   {
+    "ticker": "AYAM",
+    "founded": "Des 27, 2007",
+    "ipo": "Nov 30, 2023",
+    "name": "Janu Putra Sejahtera Tbk"
+   },
+   {
+    "ticker": "CPIN",
+    "founded": "Jan 07, 1972",
+    "ipo": "Mar 18, 1991",
+    "name": "Charoen Pokphand Indonesia Tbk"
+   },
+   {
+    "ticker": "CPRO",
+    "founded": "Apr 30, 1980",
+    "ipo": "Nov 28, 2006",
+    "name": "Central Proteina Prima Tbk"
+   },
+   {
+    "ticker": "CRAB",
+    "founded": "Des 23, 1997",
+    "ipo": "Agu 10, 2022",
+    "name": "Toba Surimi Industries Tbk"
+   },
+   {
+    "ticker": "DEWI",
+    "founded": "Sep 17, 2019",
+    "ipo": "Jul 18, 2022",
+    "name": "Dewi Shri Farmindo Tbk"
+   },
+   {
+    "ticker": "DPUM",
+    "founded": "Mei 09, 2012",
+    "ipo": "Des 08, 2015",
+    "name": "Dua Putra Utama Makmur Tbk"
+   },
+   {
+    "ticker": "DSFI",
+    "founded": "Okt 02, 1973",
+    "ipo": "Mar 24, 2000",
+    "name": "Dharma Samudera Fishing Industries Tbk"
+   },
+   {
+    "ticker": "ENZO",
+    "founded": "Jan 10, 2013",
+    "ipo": "Sep 14, 2020",
+    "name": "Morenzo Abadi Perkasa Tbk"
+   },
+   {
+    "ticker": "IKAN",
+    "founded": "Nov 14, 2000",
+    "ipo": "Feb 12, 2020",
+    "name": "Era Mandiri Cemerlang Tbk"
+   },
+   {
+    "ticker": "ISEA",
+    "founded": "Apr 06, 2006",
+    "ipo": "Jul 08, 2024",
+    "name": "Indo American Seafoods Tbk"
+   },
+   {
+    "ticker": "JPFA",
+    "founded": "Jan 18, 1971",
+    "ipo": "Okt 23, 1989",
+    "name": "Japfa Comfeed Indonesia Tbk"
+   },
+   {
+    "ticker": "MAIN",
+    "founded": "Jun 10, 1997",
+    "ipo": "Feb 10, 2006",
+    "name": "Malindo Feedmill Tbk"
+   },
+   {
+    "ticker": "NEST",
+    "founded": "Mar 31, 2000",
+    "ipo": "Agu 08, 2024",
+    "name": "Esta Indonesia Tbk"
+   },
+   {
+    "ticker": "RLCO",
+    "founded": "Agu 11, 2014",
+    "ipo": "Des 08, 2025",
+    "name": "Abadi Lestari Indonesia Tbk"
+   },
+   {
+    "ticker": "SIPD",
+    "founded": "Sep 06, 1985",
+    "ipo": "Des 27, 1996",
+    "name": "Sreeya Sewu Indonesia Tbk"
+   },
+   {
+    "ticker": "UDNG",
+    "founded": "Apr 01, 2019",
+    "ipo": "Okt 31, 2023",
+    "name": "Agro Bahari Nusantara Tbk"
+   },
+   {
+    "ticker": "WMPP",
+    "founded": "Apr 01, 2003",
+    "ipo": "Des 06, 2021",
+    "name": "Widodo Makmur Perkasa Tbk"
+   },
+   {
+    "ticker": "WMUU",
+    "founded": "Mar 04, 2015",
+    "ipo": "Feb 02, 2021",
+    "name": "Widodo Makmur Unggas Tbk"
+   }
+  ],
+  "D232": [
+   {
+    "ticker": "AALI",
+    "founded": "Okt 03, 1988",
+    "ipo": "Des 09, 1997",
+    "name": "Astra Agro Lestari Tbk"
+   },
+   {
+    "ticker": "ANDI",
+    "founded": "Apr 28, 1995",
+    "ipo": "Agu 16, 2018",
+    "name": "Andira Agro Tbk"
+   },
+   {
+    "ticker": "ANJT",
+    "founded": "Apr 16, 1993",
+    "ipo": "Mei 08, 2013",
+    "name": "Austindo Nusantara Jaya Tbk"
+   },
+   {
+    "ticker": "BISI",
+    "founded": "Jun 22, 1983",
+    "ipo": "Mei 28, 2007",
+    "name": "BISI International Tbk"
+   },
+   {
+    "ticker": "BTEK",
+    "founded": "Jun 06, 2001",
+    "ipo": "Mei 14, 2004",
+    "name": "Bumi Teknokultura Unggul Tbk"
+   },
+   {
+    "ticker": "BWPT",
+    "founded": "Nov 06, 2000",
+    "ipo": "Okt 27, 2009",
+    "name": "Eagle High Plantations Tbk"
+   },
+   {
+    "ticker": "CBUT",
+    "founded": "Mar 14, 2013",
+    "ipo": "Nov 08, 2022",
+    "name": "Citra Borneo Utama Tbk"
+   },
+   {
+    "ticker": "CSRA",
+    "founded": "Okt 28, 1983",
+    "ipo": "Jan 09, 2020",
+    "name": "Cisadane Sawit Raya Tbk"
+   },
+   {
+    "ticker": "DSNG",
+    "founded": "Sep 29, 1980",
+    "ipo": "Jun 14, 2013",
+    "name": "Dharma Satya Nusantara Tbk"
+   },
+   {
+    "ticker": "FAPA",
+    "founded": "Des 28, 1994",
+    "ipo": "Jan 04, 2021",
+    "name": "FAP Agri Tbk"
+   },
+   {
+    "ticker": "FISH",
+    "founded": "Jun 27, 1992",
+    "ipo": "Jan 18, 2002",
+    "name": "FKS Multi Agro Tbk"
+   },
+   {
+    "ticker": "GOLL",
+    "founded": "Des 05, 2007",
+    "ipo": "Des 23, 2014",
+    "name": "Golden Plantation Tbk"
+   },
+   {
+    "ticker": "GUNA",
+    "founded": "Agu 05, 1993",
+    "ipo": "Jul 09, 2024",
+    "name": "Gunanusa Eramandiri Tbk"
+   },
+   {
+    "ticker": "GZCO",
+    "founded": "Agu 10, 2001",
+    "ipo": "Mei 15, 2008",
+    "name": "Gozco Plantations Tbk"
+   },
+   {
+    "ticker": "IPPE",
+    "founded": "Mar 20, 2019",
+    "ipo": "Des 09, 2021",
+    "name": "Indo Pureco Pratama Tbk"
+   },
+   {
+    "ticker": "JARR",
+    "founded": "Apr 30, 2014",
+    "ipo": "Agu 04, 2022",
+    "name": "Jhonlin Agro Raya Tbk"
+   },
+   {
+    "ticker": "JAWA",
+    "founded": "Jan 20, 1921",
+    "ipo": "Mei 30, 2011",
+    "name": "Jaya Agra Wattie Tbk"
+   },
+   {
+    "ticker": "LSIP",
+    "founded": "Des 18, 1962",
+    "ipo": "Jul 05, 1996",
+    "name": "PP London Sumatra Indonesia Tbk"
+   },
+   {
+    "ticker": "MAGP",
+    "founded": "Apr 13, 2005",
+    "ipo": "Jan 16, 2013",
+    "name": "Multi Agro Gemilang Plantation Tbk"
+   },
+   {
+    "ticker": "MGRO",
+    "founded": "Jan 07, 2011",
+    "ipo": "Jul 12, 2018",
+    "name": "Mahkota Group Tbk"
+   },
+   {
+    "ticker": "MKTR",
+    "founded": "Okt 04, 2017",
+    "ipo": "Nov 08, 2022",
+    "name": "Menthobi Karyatama Raya Tbk"
+   },
+   {
+    "ticker": "NSSS",
+    "founded": "Apr 01, 2009",
+    "ipo": "Mar 10, 2023",
+    "name": "Nusantara Sawit Sejahtera Tbk"
+   },
+   {
+    "ticker": "OILS",
+    "founded": "Jan 05, 2016",
+    "ipo": "Sep 06, 2021",
+    "name": "Indo Oil Perkasa Tbk"
+   },
+   {
+    "ticker": "PALM",
+    "founded": "Nov 26, 2006",
+    "ipo": "Okt 08, 2012",
+    "name": "Provident Investasi Bersama Tbk"
+   },
+   {
+    "ticker": "PGUN",
+    "founded": "Sep 11, 1995",
+    "ipo": "Jul 07, 2020",
+    "name": "Pradiksi Gunatama Tbk"
+   },
+   {
+    "ticker": "PSGO",
+    "founded": "Jun 03, 2008",
+    "ipo": "Nov 25, 2019",
+    "name": "Palma Serasih Tbk"
+   },
+   {
+    "ticker": "PTPS",
+    "founded": "Okt 01, 1980",
+    "ipo": "Okt 09, 2023",
+    "name": "Pulau Subur Tbk"
+   },
+   {
+    "ticker": "SGRO",
+    "founded": "Jun 07, 1993",
+    "ipo": "Jun 18, 2007",
+    "name": "Prime Agri Resources Tbk"
+   },
+   {
+    "ticker": "SIMP",
+    "founded": "Agu 12, 1992",
+    "ipo": "Jun 09, 2011",
+    "name": "Salim Ivomas Pratama Tbk"
+   },
+   {
+    "ticker": "SMAR",
+    "founded": "Jun 18, 1962",
+    "ipo": "Nov 20, 1992",
+    "name": "Sinar Mas Agro Resources and Technology Tbk"
+   },
+   {
+    "ticker": "SSMS",
+    "founded": "Nov 22, 1995",
+    "ipo": "Des 12, 2013",
+    "name": "Sawit Sumbermas Sarana Tbk"
+   },
+   {
+    "ticker": "STAA",
+    "founded": "Jul 31, 1993",
+    "ipo": "Mar 10, 2022",
+    "name": "Sumber Tani Agung Resources Tbk"
+   },
+   {
+    "ticker": "TAPG",
+    "founded": "Jan 24, 2005",
+    "ipo": "Apr 12, 2021",
+    "name": "Triputra Agro Persada Tbk"
+   },
+   {
+    "ticker": "TLDN",
+    "founded": "Mei 10, 2004",
+    "ipo": "Apr 12, 2022",
+    "name": "Teladan Prima Agro Tbk"
+   },
+   {
+    "ticker": "UNSP",
+    "founded": "Mei 17, 2011",
+    "ipo": "Mar 06, 1990",
+    "name": "Bakrie Sumatera Plantations Tbk"
+   },
+   {
+    "ticker": "WAPO",
+    "founded": "Agu 07, 1993",
+    "ipo": "Jun 22, 2001",
+    "name": "Wahana Pronatural Tbk"
+   }
+  ],
+  "D311": [
+   {
+    "ticker": "GGRM",
+    "founded": "Jun 30, 1971",
+    "ipo": "Agu 27, 1990",
+    "name": "Gudang Garam Tbk"
+   },
+   {
+    "ticker": "HMSP",
+    "founded": "Mar 27, 2005",
+    "ipo": "Agu 15, 1990",
+    "name": "Hanjaya Mandala Sampoerna Tbk"
+   },
+   {
+    "ticker": "ITIC",
+    "founded": "Mei 16, 1955",
+    "ipo": "Jul 04, 2019",
+    "name": "Indonesian Tobacco Tbk"
+   },
+   {
+    "ticker": "WIIM",
+    "founded": "Des 14, 1994",
+    "ipo": "Des 18, 2012",
+    "name": "Wismilak Inti Makmur Tbk"
+   }
+  ],
+  "D411": [],
+  "D421": [
+   {
+    "ticker": "EURO",
+    "founded": "Jan 21, 1980",
+    "ipo": "Agu 08, 2022",
+    "name": "Estee Gold Feet Tbk"
+   },
+   {
+    "ticker": "FLMC",
+    "founded": "Jul 23, 1996",
+    "ipo": "Jul 08, 2021",
+    "name": "Falmaco Nonwoven Industri Tbk"
+   },
+   {
+    "ticker": "KINO",
+    "founded": "Mar 24, 1972",
+    "ipo": "Des 11, 2015",
+    "name": "Kino Indonesia Tbk"
+   },
+   {
+    "ticker": "MBTO",
+    "founded": "Jun 01, 1977",
+    "ipo": "Jan 13, 2011",
+    "name": "Martina Berto Tbk"
+   },
+   {
+    "ticker": "MRAT",
+    "founded": "Mar 14, 1978",
+    "ipo": "Jul 27, 1995",
+    "name": "Mustika Ratu Tbk"
+   },
+   {
+    "ticker": "MSJA",
+    "founded": "Mar 07, 1997",
+    "ipo": "Jan 10, 2024",
+    "name": "Multi Spunindo Jaya Tbk"
+   },
+   {
+    "ticker": "NANO",
+    "founded": "Mei 22, 2019",
+    "ipo": "Mar 10, 2022",
+    "name": "Nanotech Indonesia Global Tbk"
+   },
+   {
+    "ticker": "TCID",
+    "founded": "Nov 05, 1969",
+    "ipo": "Sep 30, 1993",
+    "name": "Mandom Indonesia Tbk"
+   },
+   {
+    "ticker": "UCID",
+    "founded": "Jun 05, 1997",
+    "ipo": "Des 20, 2019",
+    "name": "Uni-Charm Indonesia Tbk"
+   },
+   {
+    "ticker": "UNVR",
+    "founded": "Des 05, 1933",
+    "ipo": "Jan 11, 1982",
+    "name": "Unilever Indonesia Tbk"
+   },
+   {
+    "ticker": "VICI",
+    "founded": "Apr 20, 2006",
+    "ipo": "Des 17, 2020",
+    "name": "Victoria Care Indonesia Tbk"
+   }
+  ],
+  "E111": [
+   {
+    "ticker": "AEGS",
+    "founded": "Sep 10, 2015",
+    "ipo": "Sep 11, 2023",
+    "name": "Anugerah Spareparts Sejahtera Tbk"
+   },
+   {
+    "ticker": "AUTO",
+    "founded": "Sep 20, 1991",
+    "ipo": "Jun 15, 1998",
+    "name": "Astra Otoparts Tbk"
+   },
+   {
+    "ticker": "BOLT",
+    "founded": "Mar 15, 1982",
+    "ipo": "Jul 07, 2015",
+    "name": "Garuda Metalindo Tbk"
+   },
+   {
+    "ticker": "DRMA",
+    "founded": "Mar 27, 1989",
+    "ipo": "Des 20, 2021",
+    "name": "Dharma Polimetal Tbk"
+   },
+   {
+    "ticker": "INDS",
+    "founded": "Mei 05, 1978",
+    "ipo": "Agu 10, 1990",
+    "name": "Indospring Tbk"
+   },
+   {
+    "ticker": "ISAP",
+    "founded": "Okt 22, 2011",
+    "ipo": "Des 09, 2022",
+    "name": "Isra Presisi Indonesia Tbk"
+   },
+   {
+    "ticker": "KAQI",
+    "founded": "Sep 26, 2017",
+    "ipo": "Mar 10, 2025",
+    "name": "Jantra Grupo Indonesia Tbk"
+   },
+   {
+    "ticker": "LMAX",
+    "founded": "Feb 27, 2017",
+    "ipo": "Agu 09, 2023",
+    "name": "Lupromax Pelumas Indonesia Tbk"
+   },
+   {
+    "ticker": "LPIN",
+    "founded": "Jan 07, 1982",
+    "ipo": "Feb 05, 1990",
+    "name": "Multi Prima Sejahtera Tbk"
+   },
+   {
+    "ticker": "PART",
+    "founded": "Jun 05, 2009",
+    "ipo": "Jul 05, 2024",
+    "name": "Cipta Perdana Lancar Tbk"
+   },
+   {
+    "ticker": "SMSM",
+    "founded": "Jan 19, 1976",
+    "ipo": "Sep 09, 1996",
+    "name": "Selamat Sempurna Tbk"
+   },
+   {
+    "ticker": "VKTR",
+    "founded": "Nov 23, 2007",
+    "ipo": "Jun 19, 2023",
+    "name": "VKTR Teknologi Mobilitas Tbk"
+   }
+  ],
+  "E112": [
+   {
+    "ticker": "BRAM",
+    "founded": "Jul 08, 1981",
+    "ipo": "Sep 05, 1990",
+    "name": "Indo Kordsa Tbk"
+   },
+   {
+    "ticker": "GDYR",
+    "founded": "Jan 26, 1917",
+    "ipo": "Des 22, 1980",
+    "name": "Goodyear Indonesia Tbk"
+   },
+   {
+    "ticker": "GJTL",
+    "founded": "Agu 24, 1951",
+    "ipo": "Mei 08, 1990",
+    "name": "Gajah Tunggal Tbk"
+   },
+   {
+    "ticker": "TYRE",
+    "founded": "Agu 02, 2010",
+    "ipo": "Mei 08, 2023",
+    "name": "King Tire Indonesia Tbk"
+   }
+  ],
+  "E121": [],
+  "E122": [],
+  "E211": [
+   {
+    "ticker": "CBMF",
+    "founded": "Feb 09, 2012",
+    "ipo": "Apr 09, 2020",
+    "name": "Cahaya Bintang Medan Tbk"
+   },
+   {
+    "ticker": "CINT",
+    "founded": "Jun 15, 1978",
+    "ipo": "Jun 27, 2014",
+    "name": "Chitose Internasional Tbk"
+   },
+   {
+    "ticker": "GEMA",
+    "founded": "Des 07, 1984",
+    "ipo": "Agu 12, 2002",
+    "name": "Gema Grahasarana Tbk"
+   },
+   {
+    "ticker": "LFLO",
+    "founded": "Jun 20, 2014",
+    "ipo": "Apr 07, 2021",
+    "name": "Imago Mulia Persada Tbk"
+   },
+   {
+    "ticker": "MEJA",
+    "founded": "Nov 21, 2012",
+    "ipo": "Feb 12, 2024",
+    "name": "Harta Djaya Karya Tbk"
+   },
+   {
+    "ticker": "MGLV",
+    "founded": "Jun 06, 2012",
+    "ipo": "Jun 08, 2021",
+    "name": "Panca Anugrah Wisesa Tbk"
+   },
+   {
+    "ticker": "OLIV",
+    "founded": "Sep 01, 2009",
+    "ipo": "Mei 17, 2022",
+    "name": "Oscar Mitra Sukses Sejahtera Tbk"
+   },
+   {
+    "ticker": "SOFA",
+    "founded": "Jul 26, 2012",
+    "ipo": "Jul 07, 2020",
+    "name": "Solusi Environment Asia Tbk"
+   },
+   {
+    "ticker": "WOOD",
+    "founded": "Mei 19, 1989",
+    "ipo": "Jun 21, 2017",
+    "name": "Integra Indocabinet Tbk"
+   }
+  ],
+  "E212": [
+   {
+    "ticker": "SCNP",
+    "founded": "Jan 24, 2000",
+    "ipo": "Sep 07, 2020",
+    "name": "Selaras Citra Nusantara Perkasa Tbk"
+   }
+  ],
+  "E213": [
+   {
+    "ticker": "KICI",
+    "founded": "Jan 11, 1974",
+    "ipo": "Okt 28, 1993",
+    "name": "Kedaung Indah Can Tbk"
+   },
+   {
+    "ticker": "LIVE",
+    "founded": "Mei 09, 2012",
+    "ipo": "Feb 12, 2024",
+    "name": "Homeco Victoria Makmur Tbk"
+   },
+   {
+    "ticker": "LMPI",
+    "founded": "Nov 30, 1972",
+    "ipo": "Okt 17, 1994",
+    "name": "Langgeng Makmur Industri Tbk"
+   },
+   {
+    "ticker": "MICE",
+    "founded": "Jan 11, 1990",
+    "ipo": "Des 21, 2005",
+    "name": "Multi Indocitra Tbk"
+   }
+  ],
+  "E311": [
+   {
+    "ticker": "DOSS",
+    "founded": "Okt 01, 2013",
+    "ipo": "Agu 07, 2024",
+    "name": "Global Sukses Digital Tbk"
+   }
+  ],
+  "E321": [
+   {
+    "ticker": "BIKE",
+    "founded": "Okt 13, 2017",
+    "ipo": "Mar 21, 2022",
+    "name": "Sepeda Bersama Indonesia Tbk"
+   },
+   {
+    "ticker": "IIKP",
+    "founded": "Mar 16, 1999",
+    "ipo": "Okt 14, 2002",
+    "name": "Inti Agri Resources Tbk"
+   },
+   {
+    "ticker": "TOYS",
+    "founded": "Mar 08, 1991",
+    "ipo": "Agu 06, 2020",
+    "name": "Sunindo Adipersada Tbk"
+   },
+   {
+    "ticker": "UNTD",
+    "founded": "Apr 12, 1988",
+    "ipo": "Feb 07, 2024",
+    "name": "Terang Dunia Internusa Tbk"
+   }
+  ],
+  "E411": [
+   {
+    "ticker": "ERTX",
+    "founded": "Okt 12, 1972",
+    "ipo": "Agu 21, 1990",
+    "name": "Eratex Djaja Tbk"
+   },
+   {
+    "ticker": "HRTA",
+    "founded": "Mar 29, 2004",
+    "ipo": "Jun 21, 2017",
+    "name": "Hartadinata Abadi Tbk"
+   },
+   {
+    "ticker": "PBRX",
+    "founded": "Agu 21, 1980",
+    "ipo": "Agu 16, 1990",
+    "name": "Pan Brothers Tbk"
+   },
+   {
+    "ticker": "POLU",
+    "founded": "Mar 07, 1989",
+    "ipo": "Jun 26, 2019",
+    "name": "Golden Flower Tbk"
+   },
+   {
+    "ticker": "RICY",
+    "founded": "Des 22, 1987",
+    "ipo": "Jan 22, 1998",
+    "name": "Ricky Putra Globalindo Tbk"
+   },
+   {
+    "ticker": "TRIS",
+    "founded": "Des 13, 2004",
+    "ipo": "Jun 28, 2012",
+    "name": "Trisula International Tbk"
+   }
+  ],
+  "E412": [
+   {
+    "ticker": "BATA",
+    "founded": "Okt 15, 1931",
+    "ipo": "Mar 24, 1982",
+    "name": "Sepatu Bata Tbk"
+   },
+   {
+    "ticker": "BIMA",
+    "founded": "Jul 01, 1988",
+    "ipo": "Agu 30, 1994",
+    "name": "Primarindo Asia Infrastructure Tbk"
+   }
+  ],
+  "E413": [
+   {
+    "ticker": "ACRO",
+    "founded": "Jul 21, 1989",
+    "ipo": "Jan 11, 2024",
+    "name": "Samcro Hyosung Adilestari Tbk"
+   },
+   {
+    "ticker": "ARGO",
+    "founded": "Jul 12, 1977",
+    "ipo": "Jan 07, 1991",
+    "name": "Argo Pantes Tbk"
+   },
+   {
+    "ticker": "BELL",
+    "founded": "Jan 11, 1971",
+    "ipo": "Okt 03, 2017",
+    "name": "Trisula Textile Industries Tbk"
+   },
+   {
+    "ticker": "CNTX",
+    "founded": "Mei 22, 1970",
+    "ipo": "Mei 22, 1979",
+    "name": "Century Textile Industry Tbk"
+   },
+   {
+    "ticker": "ESTI",
+    "founded": "Des 11, 1973",
+    "ipo": "Okt 13, 1992",
+    "name": "Ever Shine Tex Tbk"
+   },
+   {
+    "ticker": "INDR",
+    "founded": "Apr 03, 1974",
+    "ipo": "Agu 03, 1990",
+    "name": "Indo-Rama Synthetics Tbk"
+   },
+   {
+    "ticker": "INOV",
+    "founded": "Jul 07, 2001",
+    "ipo": "Jul 10, 2019",
+    "name": "Inocycle Technology Group Tbk"
+   },
+   {
+    "ticker": "MYTX",
+    "founded": "Feb 10, 1987",
+    "ipo": "Okt 10, 1989",
+    "name": "Asia Pacific Investama Tbk"
+   },
+   {
+    "ticker": "POLY",
+    "founded": "Jan 11, 2001",
+    "ipo": "Mar 12, 1991",
+    "name": "Asia Pacific Fibers Tbk"
+   },
+   {
+    "ticker": "SBAT",
+    "founded": "Jul 17, 2003",
+    "ipo": "Apr 08, 2020",
+    "name": "Sejahtera Bintang Abadi Textile Tbk"
+   },
+   {
+    "ticker": "SPRE",
+    "founded": "Mar 05, 2015",
+    "ipo": "Jul 03, 2024",
+    "name": "Soraya Berjaya Indonesia Tbk"
+   },
+   {
+    "ticker": "SRIL",
+    "founded": "Mei 22, 1978",
+    "ipo": "Jun 17, 2013",
+    "name": "Sri Rejeki Isman Tbk"
+   },
+   {
+    "ticker": "SSTM",
+    "founded": "Nov 18, 1972",
+    "ipo": "Agu 20, 1997",
+    "name": "Sunson Textile Manufacturer Tbk"
+   },
+   {
+    "ticker": "TFCO",
+    "founded": "Okt 25, 1973",
+    "ipo": "Feb 26, 1980",
+    "name": "Tifico Fiber Indonesia Tbk"
+   },
+   {
+    "ticker": "UNIT",
+    "founded": "Mei 30, 1988",
+    "ipo": "Apr 18, 2002",
+    "name": "Nusantara Inti Corpora Tbk"
+   }
+  ],
+  "E511": [],
+  "E512": [
+   {
+    "ticker": "AKKU",
+    "founded": "Apr 05, 2001",
+    "ipo": "Nov 01, 2004",
+    "name": "Anugerah Kagum Karya Utama Tbk"
+   },
+   {
+    "ticker": "ARTA",
+    "founded": "Jun 29, 1990",
+    "ipo": "Nov 05, 2002",
+    "name": "Arthavest Tbk"
+   },
+   {
+    "ticker": "BUVA",
+    "founded": "Des 15, 2000",
+    "ipo": "Jul 12, 2010",
+    "name": "Bukit Uluwatu Villa Tbk"
+   },
+   {
+    "ticker": "CLAY",
+    "founded": "Des 16, 2009",
+    "ipo": "Jan 18, 2019",
+    "name": "Citra Putra Realty Tbk"
+   },
+   {
+    "ticker": "DFAM",
+    "founded": "Jul 07, 2010",
+    "ipo": "Apr 27, 2018",
+    "name": "Dafam Property Indonesia Tbk"
+   },
+   {
+    "ticker": "EAST",
+    "founded": "Jul 26, 2011",
+    "ipo": "Jul 09, 2019",
+    "name": "Eastparc Hotel Tbk"
+   },
+   {
+    "ticker": "ESTA",
+    "founded": "Sep 30, 2011",
+    "ipo": "Mar 09, 2020",
+    "name": "Esta Multi Usaha Tbk"
+   },
+   {
+    "ticker": "FITT",
+    "founded": "Jan 24, 2014",
+    "ipo": "Jun 11, 2019",
+    "name": "Hotel Fitra International Tbk"
+   },
+   {
+    "ticker": "GRPH",
+    "founded": "Apr 14, 2010",
+    "ipo": "Jan 18, 2024",
+    "name": "Griptha Putra Persada Tbk"
+   },
+   {
+    "ticker": "HOME",
+    "founded": "Okt 28, 1986",
+    "ipo": "Jul 17, 2008",
+    "name": "Hotel Mandarine Regency Tbk"
+   },
+   {
+    "ticker": "HOTL",
+    "founded": "Mar 23, 2006",
+    "ipo": "Jan 10, 2013",
+    "name": "Saraswati Griya Lestari Tbk"
+   },
+   {
+    "ticker": "HRME",
+    "founded": "Jun 28, 2007",
+    "ipo": "Apr 12, 2019",
+    "name": "Menteng Heritage Realty Tbk"
+   },
+   {
+    "ticker": "IKAI",
+    "founded": "Jun 26, 1991",
+    "ipo": "Jun 04, 1997",
+    "name": "Intikeramik Alamasri Industri Tbk"
+   },
+   {
+    "ticker": "JIHD",
+    "founded": "Nov 07, 1969",
+    "ipo": "Feb 29, 1984",
+    "name": "Jakarta International Hotels & Development Tbk"
+   },
+   {
+    "ticker": "JSPT",
+    "founded": "Jul 02, 1998",
+    "ipo": "Jan 12, 1998",
+    "name": "Jakarta Setiabudi Internasional Tbk"
+   },
+   {
+    "ticker": "KDTN",
+    "founded": "Jul 08, 2008",
+    "ipo": "Nov 09, 2022",
+    "name": "Puri Sentul Permai Tbk"
+   },
+   {
+    "ticker": "KPIG",
+    "founded": "Jun 11, 1990",
+    "ipo": "Mar 30, 2000",
+    "name": "MNC Tourism Indonesia Tbk"
+   },
+   {
+    "ticker": "MABA",
+    "founded": "Nov 11, 2009",
+    "ipo": "Jun 22, 2017",
+    "name": "Marga Abhinaya Abadi Tbk"
+   },
+   {
+    "ticker": "MINA",
+    "founded": "Des 29, 1993",
+    "ipo": "Apr 28, 2017",
+    "name": "Sanurhasta Mitra Tbk"
+   },
+   {
+    "ticker": "NASA",
+    "founded": "Apr 01, 2014",
+    "ipo": "Agu 07, 2017",
+    "name": "Andalan Perkasa Abadi Tbk"
+   },
+   {
+    "ticker": "NATO",
+    "founded": "Apr 17, 2015",
+    "ipo": "Jan 18, 2019",
+    "name": "Olympus Strategic Indonesia Tbk"
+   },
+   {
+    "ticker": "NUSA",
+    "founded": "Mei 30, 2014",
+    "ipo": "Jul 12, 2018",
+    "name": "Sinergi Megah Internusa Tbk"
+   },
+   {
+    "ticker": "PGLI",
+    "founded": "Mar 05, 1999",
+    "ipo": "Apr 05, 2000",
+    "name": "Pembangunan Graha Lestari Indah Tbk"
+   },
+   {
+    "ticker": "PLAN",
+    "founded": "Jun 07, 2003",
+    "ipo": "Sep 15, 2020",
+    "name": "Planet Properindo Jaya Tbk"
+   },
+   {
+    "ticker": "PNSE",
+    "founded": "Des 17, 1970",
+    "ipo": "Mei 01, 1990",
+    "name": "Pudjiadi & Sons Tbk"
+   },
+   {
+    "ticker": "PSKT",
+    "founded": "Apr 10, 1989",
+    "ipo": "Sep 19, 1995",
+    "name": "Red Planet Indonesia Tbk"
+   },
+   {
+    "ticker": "SHID",
+    "founded": "Mei 23, 1969",
+    "ipo": "Mei 08, 1990",
+    "name": "Hotel Sahid Jaya International Tbk"
+   },
+   {
+    "ticker": "SNLK",
+    "founded": "Nov 15, 1991",
+    "ipo": "Mar 29, 2021",
+    "name": "Sunter Lakeside Hotel Tbk"
+   },
+   {
+    "ticker": "SOTS",
+    "founded": "Jun 16, 2004",
+    "ipo": "Des 10, 2018",
+    "name": "Satria Mega Kencana Tbk"
+   },
+   {
+    "ticker": "UANG",
+    "founded": "Mar 08, 1971",
+    "ipo": "Jul 06, 2020",
+    "name": "Pakuan Tbk"
+   }
+  ],
+  "E513": [
+   {
+    "ticker": "BAYU",
+    "founded": "Okt 17, 1972",
+    "ipo": "Okt 30, 1989",
+    "name": "Bayu Buana Tbk"
+   },
+   {
+    "ticker": "HAJJ",
+    "founded": "Nov 21, 2016",
+    "ipo": "Apr 05, 2023",
+    "name": "Arsy Buana Travelindo Tbk"
+   },
+   {
+    "ticker": "PANR",
+    "founded": "Jul 22, 1995",
+    "ipo": "Sep 18, 2001",
+    "name": "Panorama Sentrawisata Tbk"
+   },
+   {
+    "ticker": "PDES",
+    "founded": "Agu 29, 2000",
+    "ipo": "Jul 08, 2008",
+    "name": "Destinasi Tirta Nusantara Tbk"
+   }
+  ],
+  "E514": [
+   {
+    "ticker": "BLTZ",
+    "founded": "Feb 03, 2004",
+    "ipo": "Apr 10, 2014",
+    "name": "Graha Layar Prima Tbk"
+   },
+   {
+    "ticker": "BOLA",
+    "founded": "Des 03, 2014",
+    "ipo": "Jun 17, 2019",
+    "name": "Bali Bintang Sejahtera Tbk"
+   },
+   {
+    "ticker": "CNMA",
+    "founded": "Jun 07, 1988",
+    "ipo": "Agu 02, 2023",
+    "name": "Nusantara Sejahtera Raya Tbk"
+   },
+   {
+    "ticker": "GOLF",
+    "founded": "Des 04, 2007",
+    "ipo": "Jul 08, 2024",
+    "name": "Intra Golflink Resorts Tbk"
+   },
+   {
+    "ticker": "JGLE",
+    "founded": "Jun 15, 1988",
+    "ipo": "Jun 29, 2016",
+    "name": "Graha Andrasentra Propertindo Tbk"
+   },
+   {
+    "ticker": "PJAA",
+    "founded": "Jul 10, 1992",
+    "ipo": "Jul 02, 2004",
+    "name": "Pembangunan Jaya Ancol Tbk"
+   }
+  ],
+  "E515": [
+   {
+    "ticker": "BAIK",
+    "founded": "Feb 07, 2018",
+    "ipo": "Feb 15, 2024",
+    "name": "Bersama Mencapai Puncak Tbk"
+   },
+   {
+    "ticker": "CSMI",
+    "founded": "Jul 25, 1983",
+    "ipo": "Apr 09, 2020",
+    "name": "Cipta Selera Murni Tbk"
+   },
+   {
+    "ticker": "DUCK",
+    "founded": "Mar 19, 2013",
+    "ipo": "Okt 10, 2018",
+    "name": "Jaya Bersama Indo Tbk"
+   },
+   {
+    "ticker": "ENAK",
+    "founded": "Mar 22, 2010",
+    "ipo": "Feb 08, 2022",
+    "name": "Champ Resto Indonesia Tbk"
+   },
+   {
+    "ticker": "FAST",
+    "founded": "Jun 19, 1978",
+    "ipo": "Mei 11, 1993",
+    "name": "Fast Food Indonesia Tbk"
+   },
+   {
+    "ticker": "LUCY",
+    "founded": "Okt 25, 2011",
+    "ipo": "Mei 05, 2021",
+    "name": "Lima Dua Lima Tiga Tbk"
+   },
+   {
+    "ticker": "MAPB",
+    "founded": "Jan 07, 2013",
+    "ipo": "Jun 21, 2017",
+    "name": "MAP Boga Adiperkasa Tbk"
+   },
+   {
+    "ticker": "PTSP",
+    "founded": "Des 13, 1983",
+    "ipo": "Mei 30, 1994",
+    "name": "Pioneerindo Gourmet International Tbk"
+   },
+   {
+    "ticker": "PZZA",
+    "founded": "Mei 23, 1987",
+    "ipo": "Mei 23, 2018",
+    "name": "Sarimelati Kencana Tbk"
+   },
+   {
+    "ticker": "RAFI",
+    "founded": "Jul 17, 2017",
+    "ipo": "Agu 05, 2022",
+    "name": "Sari Kreasi Boga Tbk"
+   }
+  ],
+  "E521": [
+   {
+    "ticker": "BMBL",
+    "founded": "Nov 27, 2013",
+    "ipo": "Jan 11, 2023",
+    "name": "Lavender Bina Cendikia Tbk"
+   },
+   {
+    "ticker": "IDEA",
+    "founded": "Agu 13, 2019",
+    "ipo": "Sep 09, 2021",
+    "name": "Idea Indonesia Akademi Tbk"
+   },
+   {
+    "ticker": "MERI",
+    "founded": "Jun 23, 2016",
+    "ipo": "Jul 10, 2025",
+    "name": "Merry Riana Edukasi Tbk"
+   }
+  ],
+  "E522": [],
+  "E611": [
+   {
+    "ticker": "DOOH",
+    "founded": "Jan 14, 2021",
+    "ipo": "Mei 08, 2023",
+    "name": "Era Media Sejahtera Tbk"
+   },
+   {
+    "ticker": "FORU",
+    "founded": "Mei 05, 1970",
+    "ipo": "Jan 17, 2002",
+    "name": "Fortune Indonesia Tbk"
+   },
+   {
+    "ticker": "FUTR",
+    "founded": "Jul 29, 2021",
+    "ipo": "Feb 27, 2023",
+    "name": "Futura Energi Global Tbk"
+   }
+  ],
+  "E612": [
+   {
+    "ticker": "MARI",
+    "founded": "Jul 04, 2006",
+    "ipo": "Feb 11, 2016",
+    "name": "Mahaka Radio Integra Tbk"
+   },
+   {
+    "ticker": "MDIA",
+    "founded": "Feb 25, 2008",
+    "ipo": "Apr 11, 2014",
+    "name": "Intermedia Capital Tbk"
+   },
+   {
+    "ticker": "MNCN",
+    "founded": "Jun 17, 1997",
+    "ipo": "Jun 22, 2007",
+    "name": "Media Nusantara Citra Tbk"
+   },
+   {
+    "ticker": "NETV",
+    "founded": "Jul 23, 2004",
+    "ipo": "Jan 26, 2022",
+    "name": "MDTV Media Technologies Tbk"
+   },
+   {
+    "ticker": "SCMA",
+    "founded": "Jan 29, 1999",
+    "ipo": "Jul 16, 2002",
+    "name": "Surya Citra Media Tbk"
+   },
+   {
+    "ticker": "VIVA",
+    "founded": "Nov 08, 2004",
+    "ipo": "Nov 21, 2011",
+    "name": "Visi Media Asia Tbk"
+   }
+  ],
+  "E613": [
+   {
+    "ticker": "IPTV",
+    "founded": "Des 27, 2006",
+    "ipo": "Jul 08, 2019",
+    "name": "MNC Vision Networks Tbk"
+   },
+   {
+    "ticker": "MSKY",
+    "founded": "Agu 08, 1988",
+    "ipo": "Jul 09, 2012",
+    "name": "MNC Sky Vision Tbk"
+   }
+  ],
+  "E614": [
+   {
+    "ticker": "ABBA",
+    "founded": "Nov 28, 1992",
+    "ipo": "Apr 03, 2002",
+    "name": "Mahaka Media Tbk"
+   },
+   {
+    "ticker": "DIGI",
+    "founded": "Mar 06, 2012",
+    "ipo": "Sep 18, 2018",
+    "name": "Arkadia Digital Media Tbk"
+   },
+   {
+    "ticker": "TMPO",
+    "founded": "Agu 27, 1996",
+    "ipo": "Jan 08, 2001",
+    "name": "Tempo Inti Media Tbk"
+   }
+  ],
+  "E621": [
+   {
+    "ticker": "FILM",
+    "founded": "Agu 01, 2002",
+    "ipo": "Agu 07, 2018",
+    "name": "MD Entertainment Tbk"
+   },
+   {
+    "ticker": "MSIN",
+    "founded": "Jul 13, 2000",
+    "ipo": "Jun 08, 2018",
+    "name": "MNC Digital Entertainment Tbk"
+   },
+   {
+    "ticker": "RAAM",
+    "founded": "Des 06, 1990",
+    "ipo": "Mei 08, 2023",
+    "name": "Tripar Multivision Plus Tbk"
+   },
+   {
+    "ticker": "RANS",
+    "founded": "Okt 18, 2016",
+    "ipo": "Jul 10, 2026",
+    "name": "Rans Entertainmen Indonesia Tbk"
+   },
+   {
+    "ticker": "VERN",
+    "founded": "Sep 02, 2010",
+    "ipo": "Okt 08, 2024",
+    "name": "Verona Indah Pictures Tbk"
+   }
+  ],
+  "E711": [
+   {
+    "ticker": "MKNT",
+    "founded": "Jul 14, 2008",
+    "ipo": "Okt 26, 2015",
+    "name": "Mitra Komunikasi Nusantara Tbk"
+   },
+   {
+    "ticker": "PMUI",
+    "founded": "Des 06, 2011",
+    "ipo": "Jul 10, 2025",
+    "name": "Prima Multi Usaha Indonesia Tbk"
+   },
+   {
+    "ticker": "YELO",
+    "founded": "Nov 01, 2017",
+    "ipo": "Okt 29, 2018",
+    "name": "Yelooo Integra Datanet Tbk"
+   }
+  ],
+  "E721": [],
+  "E731": [
+   {
+    "ticker": "LPPF",
+    "founded": "Apr 01, 1982",
+    "ipo": "Okt 09, 1989",
+    "name": "MDS Retailing Tbk"
+   },
+   {
+    "ticker": "RALS",
+    "founded": "Des 14, 1983",
+    "ipo": "Jul 24, 1996",
+    "name": "Ramayana Lestari Sentosa Tbk"
+   },
+   {
+    "ticker": "SONA",
+    "founded": "Agu 25, 1978",
+    "ipo": "Jul 21, 1992",
+    "name": "Sona Topas Tourism Industry Tbk"
+   }
+  ],
+  "E741": [
+   {
+    "ticker": "BABY",
+    "founded": "Sep 07, 2004",
+    "ipo": "Sep 07, 2023",
+    "name": "Multitrend Indo Tbk"
+   },
+   {
+    "ticker": "MAPA",
+    "founded": "Mar 11, 2015",
+    "ipo": "Jul 05, 2018",
+    "name": "MAP Aktif Adiperkasa Tbk"
+   },
+   {
+    "ticker": "MAPI",
+    "founded": "Jan 23, 1995",
+    "ipo": "Nov 10, 2004",
+    "name": "Mitra Adiperkasa Tbk"
+   },
+   {
+    "ticker": "ZATA",
+    "founded": "Apr 16, 2012",
+    "ipo": "Nov 10, 2022",
+    "name": "Bersama Zatta Jaya Tbk"
+   },
+   {
+    "ticker": "ZONE",
+    "founded": "Okt 21, 2005",
+    "ipo": "Des 12, 2018",
+    "name": "Mega Perintis Tbk"
+   }
+  ],
+  "E742": [
+   {
+    "ticker": "ECII",
+    "founded": "Apr 29, 2002",
+    "ipo": "Jul 03, 2013",
+    "name": "Electronic City Indonesia Tbk"
+   },
+   {
+    "ticker": "ERAA",
+    "founded": "Okt 08, 1996",
+    "ipo": "Des 14, 2011",
+    "name": "Erajaya Swasembada Tbk"
+   },
+   {
+    "ticker": "ERAL",
+    "founded": "Mar 13, 2009",
+    "ipo": "Agu 08, 2023",
+    "name": "Sinar Eka Selaras Tbk"
+   },
+   {
+    "ticker": "GLOB",
+    "founded": "Mar 01, 2007",
+    "ipo": "Jul 10, 2012",
+    "name": "Globe Kita Terang Tbk"
+   },
+   {
+    "ticker": "SLIS",
+    "founded": "Sep 26, 1996",
+    "ipo": "Okt 07, 2019",
+    "name": "Gaya Abadi Sempurna Tbk"
+   },
+   {
+    "ticker": "TELE",
+    "founded": "Jun 25, 2008",
+    "ipo": "Jan 12, 2012",
+    "name": "Omni Inovasi Indonesia Tbk"
+   },
+   {
+    "ticker": "TRIO",
+    "founded": "Agu 21, 1996",
+    "ipo": "Apr 14, 2009",
+    "name": "Trikomsel Oke Tbk"
+   },
+   {
+    "ticker": "UFOE",
+    "founded": "Jan 29, 2004",
+    "ipo": "Feb 01, 2021",
+    "name": "Damai Sejahtera Abadi Tbk"
+   }
+  ],
+  "E743": [
+   {
+    "ticker": "ACES",
+    "founded": "Feb 03, 1995",
+    "ipo": "Nov 06, 2007",
+    "name": "Aspirasi Hidup Indonesia Tbk"
+   },
+   {
+    "ticker": "BAUT",
+    "founded": "Nov 19, 2012",
+    "ipo": "Jan 28, 2022",
+    "name": "Mitra Angkasa Sejahtera Tbk"
+   },
+   {
+    "ticker": "CSAP",
+    "founded": "Des 31, 1983",
+    "ipo": "Des 12, 2007",
+    "name": "Catur Sentosa Adiprana Tbk"
+   },
+   {
+    "ticker": "DEPO",
+    "founded": "Jan 03, 1996",
+    "ipo": "Nov 25, 2021",
+    "name": "Caturkarda Depo Bangunan Tbk"
+   },
+   {
+    "ticker": "KLIN",
+    "founded": "Nov 04, 2016",
+    "ipo": "Agu 09, 2022",
+    "name": "Klinko Karya Imaji Tbk"
+   },
+   {
+    "ticker": "MDIY",
+    "founded": "Mar 27, 2017",
+    "ipo": "Des 19, 2024",
+    "name": "Daya Intiguna Yasa Tbk"
+   },
+   {
+    "ticker": "TOOL",
+    "founded": "Okt 04, 2014",
+    "ipo": "Agu 09, 2022",
+    "name": "Rohartindo Nusantara Luas Tbk"
+   }
+  ],
+  "E744": [],
+  "E745": [
+   {
+    "ticker": "ASLC",
+    "founded": "Nov 18, 2013",
+    "ipo": "Jan 25, 2022",
+    "name": "Autopedia Sukses Lestari Tbk"
+   },
+   {
+    "ticker": "BOGA",
+    "founded": "Sep 29, 2011",
+    "ipo": "Des 18, 2016",
+    "name": "Apollo Global Interactive Tbk"
+   },
+   {
+    "ticker": "CARS",
+    "founded": "Jun 01, 1969",
+    "ipo": "Apr 10, 2017",
+    "name": "Industri dan Perdagangan Bintraco Dharma Tbk"
+   },
+   {
+    "ticker": "IMAS",
+    "founded": "Mar 20, 1987",
+    "ipo": "Nov 15, 1993",
+    "name": "Indomobil Sukses Internasional Tbk"
+   },
+   {
+    "ticker": "MPMX",
+    "founded": "Nov 02, 1987",
+    "ipo": "Mei 29, 2013",
+    "name": "Mitra Pinasthika Mustika Tbk"
+   },
+   {
+    "ticker": "PMJS",
+    "founded": "Jul 18, 2003",
+    "ipo": "Des 18, 2019",
+    "name": "Putra Mandiri Jembar Tbk"
+   }
+  ],
+  "F111": [
+   {
+    "ticker": "EMMI",
+    "founded": "Jan 26, 2000",
+    "ipo": "Jul 08, 2026",
+    "name": "Esa Medika Mandiri Tbk"
+   }
+  ],
+  "F112": [
+   {
+    "ticker": "CHEK",
+    "founded": "Jul 20, 1989",
+    "ipo": "Jul 10, 2025",
+    "name": "Diastika Biotekindo Tbk"
+   },
+   {
+    "ticker": "HALO",
+    "founded": "Nov 07, 2001",
+    "ipo": "Feb 08, 2023",
+    "name": "Haloni Jane Tbk"
+   },
+   {
+    "ticker": "IRRA",
+    "founded": "Nov 30, 1988",
+    "ipo": "Okt 15, 2019",
+    "name": "Itama Ranoraya Tbk"
+   },
+   {
+    "ticker": "LABS",
+    "founded": "Jun 04, 2014",
+    "ipo": "Jul 10, 2024",
+    "name": "UBC Medical Indonesia Tbk"
+   },
+   {
+    "ticker": "MEDS",
+    "founded": "Des 31, 2010",
+    "ipo": "Agu 10, 2022",
+    "name": "Hetzer Medical Indonesia Tbk"
+   },
+   {
+    "ticker": "MMIX",
+    "founded": "Nov 28, 2020",
+    "ipo": "Des 06, 2022",
+    "name": "Multi Medika Internasional Tbk"
+   },
+   {
+    "ticker": "OMED",
+    "founded": "Des 15, 2000",
+    "ipo": "Nov 08, 2022",
+    "name": "Jayamas Medica Industri Tbk"
+   },
+   {
+    "ticker": "PRDL",
+    "founded": "Apr 16, 2010",
+    "ipo": "Jul 09, 2026",
+    "name": "Prodia Diagnostic Line Tbk"
+   },
+   {
+    "ticker": "SURI",
+    "founded": "Okt 25, 1988",
+    "ipo": "Des 07, 2023",
+    "name": "Maja Agung Latexindo Tbk"
+   }
+  ],
+  "F121": [
+   {
+    "ticker": "BMHS",
+    "founded": "Apr 13, 1978",
+    "ipo": "Jul 06, 2021",
+    "name": "Bundamedik Tbk"
+   },
+   {
+    "ticker": "CARE",
+    "founded": "Okt 07, 2015",
+    "ipo": "Mar 13, 2020",
+    "name": "Metro Healthcare Indonesia Tbk"
+   },
+   {
+    "ticker": "DGNS",
+    "founded": "Agu 29, 2009",
+    "ipo": "Jan 15, 2021",
+    "name": "Diagnos Laboratorium Utama Tbk"
+   },
+   {
+    "ticker": "DKHH",
+    "founded": "Sep 17, 2014",
+    "ipo": "Mei 08, 2025",
+    "name": "Cipta Sarana Medika Tbk"
+   },
+   {
+    "ticker": "HEAL",
+    "founded": "Apr 25, 1985",
+    "ipo": "Mei 16, 2018",
+    "name": "Medikaloka Hermina Tbk"
+   },
+   {
+    "ticker": "JECX",
+    "founded": "Nov 28, 1990",
+    "ipo": "Jul 07, 2026",
+    "name": "Nitrasanata Dharma Tbk"
+   },
+   {
+    "ticker": "MIKA",
+    "founded": "Jan 03, 1995",
+    "ipo": "Mar 24, 2015",
+    "name": "Mitra Keluarga Karyasehat Tbk"
+   },
+   {
+    "ticker": "MTMH",
+    "founded": "Sep 01, 2010",
+    "ipo": "Apr 20, 2022",
+    "name": "Murni Sadar Tbk"
+   },
+   {
+    "ticker": "PRAY",
+    "founded": "Mar 12, 1997",
+    "ipo": "Nov 08, 2022",
+    "name": "Famon Awal Bros Sedaya Tbk"
+   },
+   {
+    "ticker": "PRDA",
+    "founded": "Feb 07, 1988",
+    "ipo": "Des 07, 2016",
+    "name": "Prodia Widyahusada Tbk"
+   },
+   {
+    "ticker": "PRIM",
+    "founded": "Feb 14, 2013",
+    "ipo": "Mei 15, 2018",
+    "name": "Royal Prima Tbk"
+   },
+   {
+    "ticker": "RSCH",
+    "founded": "Feb 11, 2019",
+    "ipo": "Agu 28, 2023",
+    "name": "Charlie Hospital Semarang Tbk"
+   },
+   {
+    "ticker": "RSGK",
+    "founded": "Jun 11, 1990",
+    "ipo": "Sep 08, 2021",
+    "name": "Kedoya Adyaraya Tbk"
+   },
+   {
+    "ticker": "SAME",
+    "founded": "Nov 13, 1984",
+    "ipo": "Jan 11, 2013",
+    "name": "Sarana Meditama Metropolitan Tbk"
+   },
+   {
+    "ticker": "SILO",
+    "founded": "Agu 03, 1996",
+    "ipo": "Sep 12, 2013",
+    "name": "Siloam International Hospitals Tbk"
+   },
+   {
+    "ticker": "SRAJ",
+    "founded": "Mei 20, 1991",
+    "ipo": "Apr 11, 2011",
+    "name": "Sejahteraraya Anugrahjaya Tbk"
+   }
+  ],
+  "F211": [
+   {
+    "ticker": "DVLA",
+    "founded": "Feb 05, 1976",
+    "ipo": "Nov 11, 1994",
+    "name": "Darya-Varia Laboratoria Tbk"
+   },
+   {
+    "ticker": "IKPM",
+    "founded": "Mei 18, 1978",
+    "ipo": "Nov 08, 2023",
+    "name": "Ikapharmindo Putramas Tbk"
+   },
+   {
+    "ticker": "INAF",
+    "founded": "Jan 02, 1996",
+    "ipo": "Apr 17, 2001",
+    "name": "Indofarma (Persero) Tbk"
+   },
+   {
+    "ticker": "KAEF",
+    "founded": "Jan 23, 1969",
+    "ipo": "Jul 04, 2001",
+    "name": "Kimia Farma (Persero) Tbk"
+   },
+   {
+    "ticker": "KLBF",
+    "founded": "Sep 10, 1966",
+    "ipo": "Jul 30, 1991",
+    "name": "Kalbe Farma Tbk"
+   },
+   {
+    "ticker": "MDLA",
+    "founded": "Agu 05, 2011",
+    "ipo": "Apr 15, 2025",
+    "name": "Medela Potentia Tbk"
+   },
+   {
+    "ticker": "MERK",
+    "founded": "Okt 14, 1970",
+    "ipo": "Jul 23, 1981",
+    "name": "Merck Tbk"
+   },
+   {
+    "ticker": "OBAT",
+    "founded": "Des 14, 2015",
+    "ipo": "Jan 13, 2025",
+    "name": "Brigit Biofarmaka Teknologi Tbk"
+   },
+   {
+    "ticker": "PEHA",
+    "founded": "Jun 21, 1954",
+    "ipo": "Des 26, 2018",
+    "name": "Phapros Tbk"
+   },
+   {
+    "ticker": "PEVE",
+    "founded": "Apr 04, 1972",
+    "ipo": "Jan 24, 2023",
+    "name": "Penta Valent Tbk"
+   },
+   {
+    "ticker": "PYFA",
+    "founded": "Nov 27, 1976",
+    "ipo": "Okt 16, 2001",
+    "name": "Pyridam Farma Tbk"
+   },
+   {
+    "ticker": "SCPI",
+    "founded": "Mar 07, 1972",
+    "ipo": "Jun 08, 1990",
+    "name": "Organon Pharma Indonesia Tbk"
+   },
+   {
+    "ticker": "SIDO",
+    "founded": "Mar 18, 1975",
+    "ipo": "Des 18, 2013",
+    "name": "Industri Jamu dan Farmasi Sido Muncul Tbk"
+   },
+   {
+    "ticker": "SOHO",
+    "founded": "Agu 27, 1956",
+    "ipo": "Sep 08, 2020",
+    "name": "Soho Global Health Tbk"
+   },
+   {
+    "ticker": "TSPC",
+    "founded": "Mei 20, 1970",
+    "ipo": "Jun 17, 1994",
+    "name": "Tempo Scan Pacific Tbk"
+   }
+  ],
+  "F221": [],
+  "G111": [
+   {
+    "ticker": "AGRO",
+    "founded": "Sep 27, 1989",
+    "ipo": "Agu 08, 2003",
+    "name": "Bank Raya Indonesia Tbk"
+   },
+   {
+    "ticker": "AGRS",
+    "founded": "Des 07, 1970",
+    "ipo": "Des 22, 2014",
+    "name": "Bank IBK Indonesia Tbk"
+   },
+   {
+    "ticker": "AMAR",
+    "founded": "Mar 15, 1991",
+    "ipo": "Jan 09, 2020",
+    "name": "Bank Amar Indonesia Tbk"
+   },
+   {
+    "ticker": "ARTO",
+    "founded": "Mei 01, 1992",
+    "ipo": "Jan 12, 2016",
+    "name": "Bank Jago Tbk"
+   },
+   {
+    "ticker": "BABP",
+    "founded": "Jul 31, 1989",
+    "ipo": "Jul 15, 2002",
+    "name": "Bank MNC Internasional Tbk"
+   },
+   {
+    "ticker": "BACA",
+    "founded": "Apr 20, 1989",
+    "ipo": "Okt 04, 2007",
+    "name": "Bank Capital Indonesia Tbk"
+   },
+   {
+    "ticker": "BANK",
+    "founded": "Sep 16, 1994",
+    "ipo": "Feb 01, 2021",
+    "name": "Bank Aladin Syariah Tbk"
+   },
+   {
+    "ticker": "BBCA",
+    "founded": "Agu 10, 1955",
+    "ipo": "Mei 31, 2000",
+    "name": "Bank Central Asia Tbk"
+   },
+   {
+    "ticker": "BBHI",
+    "founded": "Okt 21, 1992",
+    "ipo": "Agu 12, 2015",
+    "name": "Allo Bank Indonesia Tbk"
+   },
+   {
+    "ticker": "BBKP",
+    "founded": "Jul 10, 1970",
+    "ipo": "Jul 10, 2006",
+    "name": "Bank KB Indonesia Tbk"
+   },
+   {
+    "ticker": "BBMD",
+    "founded": "Apr 27, 1955",
+    "ipo": "Jul 08, 2013",
+    "name": "Bank Mestika Dharma Tbk"
+   },
+   {
+    "ticker": "BBNI",
+    "founded": "Jul 05, 1946",
+    "ipo": "Okt 28, 1996",
+    "name": "Bank Negara Indonesia (Persero) Tbk"
+   },
+   {
+    "ticker": "BBRI",
+    "founded": "Des 16, 1895",
+    "ipo": "Nov 10, 2003",
+    "name": "Bank Rakyat Indonesia (Persero) Tbk"
+   },
+   {
+    "ticker": "BBSI",
+    "founded": "Mar 16, 1957",
+    "ipo": "Sep 07, 2020",
+    "name": "Krom Bank Indonesia Tbk"
+   },
+   {
+    "ticker": "BBTN",
+    "founded": "Feb 09, 1950",
+    "ipo": "Des 17, 2009",
+    "name": "Bank Tabungan Negara (Persero) Tbk"
+   },
+   {
+    "ticker": "BBYB",
+    "founded": "Sep 19, 1989",
+    "ipo": "Jan 13, 2015",
+    "name": "Bank Neo Commerce Tbk"
+   },
+   {
+    "ticker": "BCIC",
+    "founded": "Mei 30, 1989",
+    "ipo": "Jun 25, 1997",
+    "name": "Bank JTrust Indonesia Tbk"
+   },
+   {
+    "ticker": "BDMN",
+    "founded": "Jul 16, 1956",
+    "ipo": "Des 06, 1989",
+    "name": "Bank Danamon Indonesia Tbk"
+   },
+   {
+    "ticker": "BEKS",
+    "founded": "Sep 11, 1992",
+    "ipo": "Jul 13, 2001",
+    "name": "Bank Pembangunan Daerah Banten Tbk"
+   },
+   {
+    "ticker": "BGTG",
+    "founded": "Mei 15, 1990",
+    "ipo": "Mei 12, 2016",
+    "name": "Bank Ganesha Tbk"
+   },
+   {
+    "ticker": "BINA",
+    "founded": "Feb 09, 1990",
+    "ipo": "Jan 16, 2014",
+    "name": "Bank Ina Perdana Tbk"
+   },
+   {
+    "ticker": "BJBR",
+    "founded": "Apr 08, 1999",
+    "ipo": "Jul 08, 2010",
+    "name": "Bank Pembangunan Daerah Jawa Barat dan Banten Tbk"
+   },
+   {
+    "ticker": "BJTM",
+    "founded": "Agu 17, 1961",
+    "ipo": "Jul 12, 2012",
+    "name": "Bank Pembangunan Daerah Jawa Timur Tbk"
+   },
+   {
+    "ticker": "BKSW",
+    "founded": "Apr 28, 2013",
+    "ipo": "Nov 21, 2002",
+    "name": "Bank QNB Indonesia Tbk"
+   },
+   {
+    "ticker": "BMAS",
+    "founded": "Nov 06, 1989",
+    "ipo": "Jul 11, 2013",
+    "name": "Bank Maspion Indonesia Tbk"
+   },
+   {
+    "ticker": "BMRI",
+    "founded": "Okt 02, 1998",
+    "ipo": "Jul 14, 2003",
+    "name": "Bank Mandiri (Persero) Tbk"
+   },
+   {
+    "ticker": "BNBA",
+    "founded": "Mar 03, 1967",
+    "ipo": "Jun 01, 2006",
+    "name": "Bank Bumi Arta Tbk"
+   },
+   {
+    "ticker": "BNGA",
+    "founded": "Sep 26, 1955",
+    "ipo": "Nov 29, 1989",
+    "name": "Bank CIMB Niaga Tbk"
+   },
+   {
+    "ticker": "BNII",
+    "founded": "Mei 15, 1959",
+    "ipo": "Nov 21, 1989",
+    "name": "Bank Maybank Indonesia Tbk"
+   },
+   {
+    "ticker": "BNLI",
+    "founded": "Des 17, 1954",
+    "ipo": "Jan 15, 1990",
+    "name": "Bank Permata Tbk"
+   },
+   {
+    "ticker": "BRIS",
+    "founded": "Apr 03, 1969",
+    "ipo": "Mei 09, 2018",
+    "name": "Bank Syariah Indonesia (Persero) Tbk"
+   },
+   {
+    "ticker": "BSIM",
+    "founded": "Agu 18, 1989",
+    "ipo": "Des 13, 2010",
+    "name": "Bank Sinarmas Tbk"
+   },
+   {
+    "ticker": "BSWD",
+    "founded": "Sep 28, 1968",
+    "ipo": "Mei 01, 2002",
+    "name": "Bank Of India Indonesia Tbk"
+   },
+   {
+    "ticker": "BTPN",
+    "founded": "Des 06, 1959",
+    "ipo": "Mar 12, 2008",
+    "name": "Bank SMBC Indonesia Tbk"
+   },
+   {
+    "ticker": "BTPS",
+    "founded": "Agu 27, 2013",
+    "ipo": "Mei 08, 2018",
+    "name": "Bank BTPN Syariah Tbk"
+   },
+   {
+    "ticker": "BVIC",
+    "founded": "Okt 28, 1992",
+    "ipo": "Jun 30, 1999",
+    "name": "Bank Victoria International Tbk"
+   },
+   {
+    "ticker": "DNAR",
+    "founded": "Agu 15, 1990",
+    "ipo": "Jul 11, 2014",
+    "name": "Bank Oke Indonesia Tbk"
+   },
+   {
+    "ticker": "INPC",
+    "founded": "Sep 07, 1973",
+    "ipo": "Agu 23, 1990",
+    "name": "Bank Artha Graha Internasional Tbk"
+   },
+   {
+    "ticker": "MASB",
+    "founded": "Jul 28, 1992",
+    "ipo": "Jun 30, 2021",
+    "name": "Bank Multiarta Sentosa Tbk"
+   },
+   {
+    "ticker": "MAYA",
+    "founded": "Sep 07, 1989",
+    "ipo": "Agu 29, 1997",
+    "name": "Bank Mayapada Internasional Tbk"
+   },
+   {
+    "ticker": "MCOR",
+    "founded": "Apr 02, 1974",
+    "ipo": "Jul 03, 2007",
+    "name": "Bank China Construction Bank Indonesia Tbk"
+   },
+   {
+    "ticker": "MEGA",
+    "founded": "Apr 15, 1969",
+    "ipo": "Apr 17, 2000",
+    "name": "Bank Mega Tbk"
+   },
+   {
+    "ticker": "NISP",
+    "founded": "Apr 04, 1941",
+    "ipo": "Okt 20, 1994",
+    "name": "Bank OCBC NISP Tbk"
+   },
+   {
+    "ticker": "NOBU",
+    "founded": "Feb 13, 1990",
+    "ipo": "Mei 20, 2013",
+    "name": "Bank Nationalnobu Tbk"
+   },
+   {
+    "ticker": "PNBN",
+    "founded": "Agu 17, 1971",
+    "ipo": "Des 29, 1982",
+    "name": "Bank Pan Indonesia Tbk"
+   },
+   {
+    "ticker": "PNBS",
+    "founded": "Jan 08, 1972",
+    "ipo": "Jan 15, 2014",
+    "name": "Bank Panin Dubai Syariah Tbk"
+   },
+   {
+    "ticker": "SDRA",
+    "founded": "Jun 15, 1974",
+    "ipo": "Des 15, 2006",
+    "name": "Bank Woori Saudara Indonesia 1906 Tbk"
+   },
+   {
+    "ticker": "SUPA",
+    "founded": "Mar 05, 1993",
+    "ipo": "Des 17, 2025",
+    "name": "Super Bank Indonesia Tbk"
+   }
+  ],
+  "G211": [
+   {
+    "ticker": "ADMF",
+    "founded": "Nov 13, 1990",
+    "ipo": "Mar 31, 2004",
+    "name": "Adira Dinamika Multi Finance Tbk"
+   },
+   {
+    "ticker": "BBLD",
+    "founded": "Jun 07, 1982",
+    "ipo": "Mei 07, 1990",
+    "name": "Buana Finance Tbk"
+   },
+   {
+    "ticker": "BFIN",
+    "founded": "Apr 07, 1982",
+    "ipo": "Mei 16, 1990",
+    "name": "BFI Finance Indonesia Tbk"
+   },
+   {
+    "ticker": "BPFI",
+    "founded": "Des 12, 1994",
+    "ipo": "Jun 01, 2009",
+    "name": "Woori Finance Indonesia Tbk"
+   },
+   {
+    "ticker": "CFIN",
+    "founded": "Jan 15, 1982",
+    "ipo": "Agu 27, 1990",
+    "name": "Clipan Finance Indonesia Tbk"
+   },
+   {
+    "ticker": "DEFI",
+    "founded": "Nov 11, 1994",
+    "ipo": "Jul 06, 2001",
+    "name": "Danasupra Erapacific Tbk"
+   },
+   {
+    "ticker": "FUJI",
+    "founded": "Sep 21, 1982",
+    "ipo": "Jul 09, 2019",
+    "name": "Fuji Finance Indonesia Tbk"
+   },
+   {
+    "ticker": "HDFA",
+    "founded": "Sep 20, 1972",
+    "ipo": "Mei 10, 2011",
+    "name": "Radana Bhaskara Finance Tbk"
+   },
+   {
+    "ticker": "IBFN",
+    "founded": "Sep 04, 1991",
+    "ipo": "Des 22, 2014",
+    "name": "Intan Baru Prana Tbk"
+   },
+   {
+    "ticker": "IMJS",
+    "founded": "Des 14, 2004",
+    "ipo": "Des 10, 2013",
+    "name": "Indomobil Multi Jasa Tbk"
+   },
+   {
+    "ticker": "POLA",
+    "founded": "Mei 21, 2001",
+    "ipo": "Nov 16, 2018",
+    "name": "Pool Advista Finance Tbk"
+   },
+   {
+    "ticker": "TIFA",
+    "founded": "Jun 14, 1989",
+    "ipo": "Jul 08, 2011",
+    "name": "KDB Tifa Finance Tbk"
+   },
+   {
+    "ticker": "TRUS",
+    "founded": "Feb 12, 1990",
+    "ipo": "Nov 28, 2002",
+    "name": "Trust Finance Indonesia Tbk"
+   },
+   {
+    "ticker": "VRNA",
+    "founded": "Nov 04, 1994",
+    "ipo": "Jun 25, 2008",
+    "name": "Mizuho Leasing Indonesia Tbk"
+   },
+   {
+    "ticker": "VTNY",
+    "founded": "Jan 29, 2021",
+    "ipo": "Des 15, 2022",
+    "name": "Venteny Fortuna International Tbk"
+   },
+   {
+    "ticker": "WOMF",
+    "founded": "Mar 23, 1982",
+    "ipo": "Des 13, 2004",
+    "name": "Wahana Ottomitra Multiartha Tbk"
+   }
+  ],
+  "G221": [],
+  "G222": [],
+  "G311": [
+   {
+    "ticker": "AMOR",
+    "founded": "Jan 29, 2010",
+    "ipo": "Jan 14, 2020",
+    "name": "Ashmore Asset Management Indonesia Tbk"
+   }
+  ],
+  "G312": [
+   {
+    "ticker": "PADI",
+    "founded": "Mei 28, 1998",
+    "ipo": "Jan 09, 2012",
+    "name": "Minna Padi Investama Sekuritas Tbk"
+   },
+   {
+    "ticker": "PANS",
+    "founded": "Jul 27, 1989",
+    "ipo": "Mei 31, 2000",
+    "name": "Panin Sekuritas Tbk"
+   },
+   {
+    "ticker": "RELI",
+    "founded": "Feb 22, 1993",
+    "ipo": "Jul 13, 2005",
+    "name": "Reliance Sekuritas Indonesia Tbk"
+   },
+   {
+    "ticker": "TRIM",
+    "founded": "Mei 09, 1990",
+    "ipo": "Jan 31, 2000",
+    "name": "Trimegah Sekuritas Indonesia Tbk"
+   },
+   {
+    "ticker": "YULE",
+    "founded": "Agu 08, 1989",
+    "ipo": "Des 10, 2004",
+    "name": "Yulie Sekuritas Indonesia Tbk"
+   }
+  ],
+  "G313": [],
+  "G314": [],
+  "G411": [],
+  "G412": [
+   {
+    "ticker": "ABDA",
+    "founded": "Okt 12, 1982",
+    "ipo": "Jul 06, 1989",
+    "name": "Asuransi Bina Dana Arta Tbk"
+   },
+   {
+    "ticker": "AHAP",
+    "founded": "Mei 28, 1982",
+    "ipo": "Sep 14, 1990",
+    "name": "Asuransi Harta Aman Pratama Tbk"
+   },
+   {
+    "ticker": "AMAG",
+    "founded": "Nov 14, 1980",
+    "ipo": "Des 23, 2005",
+    "name": "Asuransi Multi Artha Guna Tbk"
+   },
+   {
+    "ticker": "ASBI",
+    "founded": "Mar 17, 1955",
+    "ipo": "Nov 29, 1989",
+    "name": "Asuransi Bintang Tbk"
+   },
+   {
+    "ticker": "ASDM",
+    "founded": "Apr 01, 1982",
+    "ipo": "Des 15, 1989",
+    "name": "Asuransi Dayin Mitra Tbk"
+   },
+   {
+    "ticker": "ASJT",
+    "founded": "Jun 25, 1979",
+    "ipo": "Des 23, 2003",
+    "name": "Asuransi Jasa Tania Tbk"
+   },
+   {
+    "ticker": "ASMI",
+    "founded": "Apr 24, 1956",
+    "ipo": "Jan 16, 2014",
+    "name": "Asuransi Maximus Graha Persada Tbk"
+   },
+   {
+    "ticker": "ASRM",
+    "founded": "Agu 06, 1956",
+    "ipo": "Mar 19, 1990",
+    "name": "Asuransi Ramayana Tbk"
+   },
+   {
+    "ticker": "LPGI",
+    "founded": "Sep 06, 1963",
+    "ipo": "Jul 22, 1997",
+    "name": "Lippo General Insurance Tbk"
+   },
+   {
+    "ticker": "MTWI",
+    "founded": "Des 15, 1952",
+    "ipo": "Okt 11, 2017",
+    "name": "Malacca Trust Wuwungan Insurance Tbk"
+   },
+   {
+    "ticker": "PNIN",
+    "founded": "Okt 24, 1973",
+    "ipo": "Sep 20, 1983",
+    "name": "Paninvest Tbk"
+   },
+   {
+    "ticker": "TUGU",
+    "founded": "Nov 25, 1981",
+    "ipo": "Mei 28, 2018",
+    "name": "Asuransi Tugu Pratama Indonesia Tbk"
+   },
+   {
+    "ticker": "VINS",
+    "founded": "Mei 11, 1978",
+    "ipo": "Sep 28, 2015",
+    "name": "Victoria Insurance Tbk"
+   },
+   {
+    "ticker": "YOII",
+    "founded": "Apr 25, 1987",
+    "ipo": "Jan 08, 2025",
+    "name": "Asuransi Digital Bersama Tbk"
+   }
+  ],
+  "G413": [
+   {
+    "ticker": "BHAT",
+    "founded": "Mei 23, 2017",
+    "ipo": "Apr 15, 2020",
+    "name": "Bhakti Multi Artha Tbk"
+   },
+   {
+    "ticker": "JMAS",
+    "founded": "Agu 15, 2014",
+    "ipo": "Des 18, 2017",
+    "name": "Asuransi Jiwa Syariah Jasa Mitra Abadi Tbk"
+   },
+   {
+    "ticker": "LIFE",
+    "founded": "Jul 17, 1984",
+    "ipo": "Jul 09, 2019",
+    "name": "MSIG Life Insurance Indonesia Tbk"
+   },
+   {
+    "ticker": "PNLF",
+    "founded": "Jul 19, 1974",
+    "ipo": "Jun 14, 1993",
+    "name": "Panin Financial Tbk"
+   }
+  ],
+  "G414": [
+   {
+    "ticker": "MREI",
+    "founded": "Jun 04, 1953",
+    "ipo": "Sep 04, 1989",
+    "name": "Maskapai Reasuransi Indonesia Tbk"
+   }
+  ],
+  "G511": [
+   {
+    "ticker": "APIC",
+    "founded": "Feb 22, 1989",
+    "ipo": "Des 18, 2002",
+    "name": "Pacific Strategic Financial Tbk"
+   },
+   {
+    "ticker": "BCAP",
+    "founded": "Jul 15, 1999",
+    "ipo": "Jun 08, 2001",
+    "name": "MNC Kapital Indonesia Tbk"
+   },
+   {
+    "ticker": "BPII",
+    "founded": "Nov 12, 1998",
+    "ipo": "Jul 08, 2014",
+    "name": "Batavia Prosperindo Internasional Tbk"
+   },
+   {
+    "ticker": "CASA",
+    "founded": "Jun 04, 2009",
+    "ipo": "Jul 19, 2016",
+    "name": "Capital Financial Indonesia Tbk"
+   },
+   {
+    "ticker": "COIN",
+    "founded": "Des 28, 2021",
+    "ipo": "Jul 09, 2025",
+    "name": "Indokripto Koin Semesta Tbk"
+   },
+   {
+    "ticker": "GSMF",
+    "founded": "Nov 01, 1982",
+    "ipo": "Okt 13, 1989",
+    "name": "Equity Development Investment Tbk"
+   },
+   {
+    "ticker": "OCAP",
+    "founded": "Okt 06, 1989",
+    "ipo": "Nov 10, 2003",
+    "name": "Onix Capital Tbk"
+   },
+   {
+    "ticker": "PEGE",
+    "founded": "Agu 13, 1999",
+    "ipo": "Jun 24, 2005",
+    "name": "Panca Global Kapital Tbk"
+   },
+   {
+    "ticker": "PLAS",
+    "founded": "Jul 23, 1992",
+    "ipo": "Mar 16, 2001",
+    "name": "Polaris Investama Tbk"
+   },
+   {
+    "ticker": "POOL",
+    "founded": "Agu 26, 1958",
+    "ipo": "Mei 20, 1991",
+    "name": "Pool Advista Indonesia Tbk"
+   },
+   {
+    "ticker": "SFAN",
+    "founded": "Apr 05, 2016",
+    "ipo": "Jun 19, 2019",
+    "name": "Surya Fajar Capital Tbk"
+   },
+   {
+    "ticker": "SMMA",
+    "founded": "Okt 21, 1982",
+    "ipo": "Jul 05, 1995",
+    "name": "Sinarmas Multiartha Tbk"
+   },
+   {
+    "ticker": "STAR",
+    "founded": "Mei 19, 2008",
+    "ipo": "Jul 13, 2011",
+    "name": "Calculus Global Ventures Tbk"
+   },
+   {
+    "ticker": "VICO",
+    "founded": "Okt 26, 1989",
+    "ipo": "Jul 08, 2013",
+    "name": "Victoria Investama Tbk"
+   }
+  ],
+  "G512": [
+   {
+    "ticker": "DNET",
+    "founded": "Nov 16, 1995",
+    "ipo": "Des 11, 2000",
+    "name": "Indoritel Makmur Internasional Tbk"
+   },
+   {
+    "ticker": "LPPS",
+    "founded": "Jun 20, 1989",
+    "ipo": "Mar 28, 1994",
+    "name": "Lenox Pasifik Investama Tbk"
+   },
+   {
+    "ticker": "MGNA",
+    "founded": "Mar 09, 1984",
+    "ipo": "Jul 07, 2014",
+    "name": "Magna Investama Mandiri Tbk"
+   },
+   {
+    "ticker": "NICK",
+    "founded": "Sep 04, 2007",
+    "ipo": "Mei 02, 2018",
+    "name": "Charnic Capital Tbk"
+   },
+   {
+    "ticker": "SRTG",
+    "founded": "Mei 17, 1991",
+    "ipo": "Jun 26, 2013",
+    "name": "Saratoga Investama Sedaya Tbk"
+   }
+  ],
+  "H111": [
+   {
+    "ticker": "ADCP",
+    "founded": "Mar 09, 2018",
+    "ipo": "Feb 23, 2022",
+    "name": "Adhi Commuter Properti Tbk"
+   },
+   {
+    "ticker": "AMAN",
+    "founded": "Mei 31, 1996",
+    "ipo": "Mar 13, 2020",
+    "name": "Makmur Berkah Amanda Tbk"
+   },
+   {
+    "ticker": "APLN",
+    "founded": "Jul 30, 2004",
+    "ipo": "Nov 11, 2010",
+    "name": "Agung Podomoro Land Tbk"
+   },
+   {
+    "ticker": "ARMY",
+    "founded": "Agu 06, 1994",
+    "ipo": "Jun 21, 2017",
+    "name": "Armidian Karyatama Tbk"
+   },
+   {
+    "ticker": "ASPI",
+    "founded": "Nov 13, 2012",
+    "ipo": "Feb 17, 2020",
+    "name": "Andalan Sakti Primaindo Tbk"
+   },
+   {
+    "ticker": "ASRI",
+    "founded": "Nov 03, 1993",
+    "ipo": "Des 18, 2007",
+    "name": "Alam Sutera Realty Tbk"
+   },
+   {
+    "ticker": "ATAP",
+    "founded": "Mar 23, 2015",
+    "ipo": "Des 11, 2020",
+    "name": "Trimitra Prawara Goldland Tbk"
+   },
+   {
+    "ticker": "BAPA",
+    "founded": "Okt 22, 1993",
+    "ipo": "Jan 14, 2008",
+    "name": "Bekasi Asri Pemula Tbk"
+   },
+   {
+    "ticker": "BAPI",
+    "founded": "Jul 20, 2012",
+    "ipo": "Sep 16, 2019",
+    "name": "Bhakti Agung Propertindo Tbk"
+   },
+   {
+    "ticker": "BBSS",
+    "founded": "Jun 05, 1987",
+    "ipo": "Apr 15, 2020",
+    "name": "Bumi Benowo Sukses Sejahtera Tbk"
+   },
+   {
+    "ticker": "BCIP",
+    "founded": "Mei 03, 2000",
+    "ipo": "Des 11, 2009",
+    "name": "Bumi Citra Permai Tbk"
+   },
+   {
+    "ticker": "BEST",
+    "founded": "Agu 24, 1989",
+    "ipo": "Apr 10, 2012",
+    "name": "Bekasi Fajar Industrial Estate Tbk"
+   },
+   {
+    "ticker": "BIKA",
+    "founded": "Nov 28, 2007",
+    "ipo": "Jul 14, 2015",
+    "name": "Binakarya Jaya Abadi Tbk"
+   },
+   {
+    "ticker": "BIPP",
+    "founded": "Des 21, 1981",
+    "ipo": "Okt 23, 1995",
+    "name": "Bhuwanatala Indah Permai Tbk"
+   },
+   {
+    "ticker": "BKDP",
+    "founded": "Jul 12, 1989",
+    "ipo": "Jun 15, 2007",
+    "name": "Bukit Darmo Property Tbk"
+   },
+   {
+    "ticker": "BKSL",
+    "founded": "Apr 16, 1993",
+    "ipo": "Jul 28, 1997",
+    "name": "Sentul City Tbk"
+   },
+   {
+    "ticker": "BSBK",
+    "founded": "Sep 07, 1994",
+    "ipo": "Nov 08, 2022",
+    "name": "Wulandari Bangun Laksana Tbk"
+   },
+   {
+    "ticker": "BSDE",
+    "founded": "Jan 16, 1984",
+    "ipo": "Jun 06, 2008",
+    "name": "Bumi Serpong Damai Tbk"
+   },
+   {
+    "ticker": "CBDK",
+    "founded": "Apr 03, 2000",
+    "ipo": "Jan 13, 2025",
+    "name": "Bangun Kosambi Sukses Tbk"
+   },
+   {
+    "ticker": "CBPE",
+    "founded": "Agu 24, 2000",
+    "ipo": "Jan 06, 2023",
+    "name": "Citra Buana Prasida Tbk"
+   },
+   {
+    "ticker": "CITY",
+    "founded": "Sep 29, 2011",
+    "ipo": "Sep 28, 2018",
+    "name": "Natura City Developments Tbk"
+   },
+   {
+    "ticker": "COWL",
+    "founded": "Mar 25, 1981",
+    "ipo": "Des 19, 2007",
+    "name": "Cowell Development Tbk"
+   },
+   {
+    "ticker": "CPRI",
+    "founded": "Okt 05, 2011",
+    "ipo": "Apr 11, 2019",
+    "name": "Capri Nusa Satu Properti Tbk"
+   },
+   {
+    "ticker": "CSIS",
+    "founded": "Jun 02, 1995",
+    "ipo": "Mei 10, 2017",
+    "name": "Cahayasakti Investindo Sukses Tbk"
+   },
+   {
+    "ticker": "CTRA",
+    "founded": "Okt 22, 1981",
+    "ipo": "Mar 28, 1994",
+    "name": "Ciputra Development Tbk"
+   },
+   {
+    "ticker": "DADA",
+    "founded": "Des 29, 2014",
+    "ipo": "Feb 14, 2020",
+    "name": "Diamond Citra Propertindo Tbk"
+   },
+   {
+    "ticker": "DART",
+    "founded": "Des 30, 1983",
+    "ipo": "Mei 08, 1990",
+    "name": "Duta Anggada Realty Tbk"
+   },
+   {
+    "ticker": "DILD",
+    "founded": "Jun 10, 1983",
+    "ipo": "Sep 04, 1991",
+    "name": "Intiland Development Tbk"
+   },
+   {
+    "ticker": "DMAS",
+    "founded": "Nov 12, 1993",
+    "ipo": "Mei 29, 2015",
+    "name": "Puradelta Lestari Tbk"
+   },
+   {
+    "ticker": "DUTI",
+    "founded": "Des 29, 1972",
+    "ipo": "Nov 02, 1994",
+    "name": "Duta Pertiwi Tbk"
+   },
+   {
+    "ticker": "ELTY",
+    "founded": "Jun 12, 1990",
+    "ipo": "Okt 30, 1995",
+    "name": "Bakrieland Development Tbk"
+   },
+   {
+    "ticker": "EMDE",
+    "founded": "Sep 10, 1976",
+    "ipo": "Jan 12, 2011",
+    "name": "Megapolitan Developments Tbk"
+   },
+   {
+    "ticker": "FMII",
+    "founded": "Jun 24, 2009",
+    "ipo": "Jun 30, 2000",
+    "name": "Fortune Mate Indonesia Tbk"
+   },
+   {
+    "ticker": "GAMA",
+    "founded": "Des 18, 2003",
+    "ipo": "Jul 11, 2012",
+    "name": "Aksara Global Development Tbk"
+   },
+   {
+    "ticker": "GMTD",
+    "founded": "Mei 14, 1991",
+    "ipo": "Des 11, 2000",
+    "name": "Gowa Makassar Tourism Development Tbk"
+   },
+   {
+    "ticker": "GPRA",
+    "founded": "Mei 21, 1987",
+    "ipo": "Okt 10, 2007",
+    "name": "Perdana Gapuraprima Tbk"
+   },
+   {
+    "ticker": "GRIA",
+    "founded": "Mei 08, 2013",
+    "ipo": "Agu 08, 2023",
+    "name": "Ingria Pratama Capitalindo Tbk"
+   },
+   {
+    "ticker": "GWSA",
+    "founded": "Apr 16, 1990",
+    "ipo": "Des 23, 2011",
+    "name": "Greenwood Sejahtera Tbk"
+   },
+   {
+    "ticker": "HBAT",
+    "founded": "Jan 31, 2020",
+    "ipo": "Agu 07, 2023",
+    "name": "Minahasa Membangun Hebat Tbk"
+   },
+   {
+    "ticker": "HOMI",
+    "founded": "Jan 09, 2006",
+    "ipo": "Sep 10, 2020",
+    "name": "Grand House Mulia Tbk"
+   },
+   {
+    "ticker": "INPP",
+    "founded": "Jun 14, 1996",
+    "ipo": "Des 01, 2004",
+    "name": "Indonesian Paradise Property Tbk"
+   },
+   {
+    "ticker": "IPAC",
+    "founded": "Jul 05, 1991",
+    "ipo": "Jun 30, 2021",
+    "name": "Era Graharealty Tbk"
+   },
+   {
+    "ticker": "JRPT",
+    "founded": "Mei 25, 1979",
+    "ipo": "Jun 29, 1994",
+    "name": "Jaya Real Property Tbk"
+   },
+   {
+    "ticker": "KBAG",
+    "founded": "Feb 14, 2014",
+    "ipo": "Apr 08, 2020",
+    "name": "Karya Bersama Anugerah Tbk"
+   },
+   {
+    "ticker": "KIJA",
+    "founded": "Jan 12, 1989",
+    "ipo": "Jan 10, 1995",
+    "name": "Kawasan Industri Jababeka Tbk"
+   },
+   {
+    "ticker": "KOCI",
+    "founded": "Jul 31, 2019",
+    "ipo": "Okt 06, 2023",
+    "name": "Kokoh Exa Nusantara Tbk"
+   },
+   {
+    "ticker": "KOTA",
+    "founded": "Jan 07, 2011",
+    "ipo": "Jul 09, 2019",
+    "name": "DMS Propertindo Tbk"
+   },
+   {
+    "ticker": "KSIX",
+    "founded": "Okt 27, 1980",
+    "ipo": "Jan 08, 2025",
+    "name": "Kentanix Supra International Tbk"
+   },
+   {
+    "ticker": "LAND",
+    "founded": "Des 13, 2012",
+    "ipo": "Agu 23, 2018",
+    "name": "Trimitra Propertindo Tbk"
+   },
+   {
+    "ticker": "LCGP",
+    "founded": "Mei 17, 2004",
+    "ipo": "Jul 13, 2007",
+    "name": "Eureka Prima Jakarta Tbk"
+   },
+   {
+    "ticker": "LPCK",
+    "founded": "Jul 20, 1987",
+    "ipo": "Jul 24, 1997",
+    "name": "Lippo Cikarang Tbk"
+   },
+   {
+    "ticker": "LPKR",
+    "founded": "Okt 15, 1990",
+    "ipo": "Jun 28, 1996",
+    "name": "Lippo Karawaci Tbk"
+   },
+   {
+    "ticker": "LPLI",
+    "founded": "Mei 28, 1983",
+    "ipo": "Okt 23, 1989",
+    "name": "Star Pacific Tbk"
+   },
+   {
+    "ticker": "MDLN",
+    "founded": "Agu 08, 1983",
+    "ipo": "Jan 18, 1993",
+    "name": "Modernland Realty Tbk"
+   },
+   {
+    "ticker": "MKPI",
+    "founded": "Mar 29, 1972",
+    "ipo": "Jul 10, 2009",
+    "name": "Metropolitan Kentjana Tbk"
+   },
+   {
+    "ticker": "MMLP",
+    "founded": "Agu 23, 2010",
+    "ipo": "Jun 12, 2015",
+    "name": "Mega Manunggal Property Tbk"
+   },
+   {
+    "ticker": "MPRO",
+    "founded": "Mar 05, 2004",
+    "ipo": "Okt 09, 2018",
+    "name": "Maha Properti Indonesia Tbk"
+   },
+   {
+    "ticker": "MSIE",
+    "founded": "Jul 30, 2011",
+    "ipo": "Agu 10, 2023",
+    "name": "Multisarana Intan Eduka Tbk"
+   },
+   {
+    "ticker": "MTLA",
+    "founded": "Feb 16, 1994",
+    "ipo": "Jun 20, 2011",
+    "name": "Metropolitan Land Tbk"
+   },
+   {
+    "ticker": "MTSM",
+    "founded": "Apr 07, 1980",
+    "ipo": "Jan 08, 1992",
+    "name": "Metro Realty Tbk"
+   },
+   {
+    "ticker": "NIRO",
+    "founded": "Des 18, 2003",
+    "ipo": "Sep 13, 2012",
+    "name": "City Retail Developments Tbk"
+   },
+   {
+    "ticker": "NZIA",
+    "founded": "Nov 26, 2007",
+    "ipo": "Sep 25, 2019",
+    "name": "Nusantara Almazia Tbk"
+   },
+   {
+    "ticker": "OMRE",
+    "founded": "Apr 23, 1983",
+    "ipo": "Agu 22, 1994",
+    "name": "Indonesia Prima Property Tbk"
+   },
+   {
+    "ticker": "PAMG",
+    "founded": "Apr 28, 1980",
+    "ipo": "Jul 05, 2019",
+    "name": "Bima Sakti Pertiwi Tbk"
+   },
+   {
+    "ticker": "PLIN",
+    "founded": "Nov 05, 1983",
+    "ipo": "Jun 15, 1992",
+    "name": "Plaza Indonesia Realty Tbk"
+   },
+   {
+    "ticker": "POLI",
+    "founded": "Agu 27, 2009",
+    "ipo": "Jan 10, 2019",
+    "name": "Pollux Hotels Group Tbk"
+   },
+   {
+    "ticker": "POLL",
+    "founded": "Des 16, 2014",
+    "ipo": "Jul 11, 2018",
+    "name": "Pollux Properties Indonesia Tbk"
+   },
+   {
+    "ticker": "POSA",
+    "founded": "Mei 14, 2010",
+    "ipo": "Mei 10, 2019",
+    "name": "Bliss Properti Indonesia Tbk"
+   },
+   {
+    "ticker": "PPRO",
+    "founded": "Des 12, 2013",
+    "ipo": "Mei 19, 2015",
+    "name": "PP Properti Tbk"
+   },
+   {
+    "ticker": "PUDP",
+    "founded": "Sep 11, 1980",
+    "ipo": "Nov 18, 1994",
+    "name": "Pudjiadi Prestige Tbk"
+   },
+   {
+    "ticker": "PURI",
+    "founded": "Jan 20, 2016",
+    "ipo": "Sep 08, 2020",
+    "name": "Puri Global Sukses Tbk"
+   },
+   {
+    "ticker": "PWON",
+    "founded": "Sep 20, 1982",
+    "ipo": "Okt 09, 1989",
+    "name": "Pakuwon Jati Tbk"
+   },
+   {
+    "ticker": "RBMS",
+    "founded": "Mei 22, 1985",
+    "ipo": "Des 19, 1997",
+    "name": "Ristia Bintang Mahkotasejati Tbk"
+   },
+   {
+    "ticker": "RDTX",
+    "founded": "Sep 27, 1980",
+    "ipo": "Mei 14, 1990",
+    "name": "Roda Vivatex Tbk"
+   },
+   {
+    "ticker": "REAL",
+    "founded": "Mar 13, 2011",
+    "ipo": "Des 06, 2019",
+    "name": "Repower Asia Indonesia Tbk"
+   },
+   {
+    "ticker": "RELF",
+    "founded": "Apr 17, 2018",
+    "ipo": "Jun 22, 2023",
+    "name": "Graha Mitra Asia Tbk"
+   },
+   {
+    "ticker": "RIMO",
+    "founded": "Mar 25, 1987",
+    "ipo": "Nov 10, 2000",
+    "name": "Rimo International Lestari Tbk"
+   },
+   {
+    "ticker": "RISE",
+    "founded": "Mei 23, 2003",
+    "ipo": "Jul 09, 2018",
+    "name": "Jaya Sukses Makmur Sentosa Tbk"
+   },
+   {
+    "ticker": "ROCK",
+    "founded": "Mei 16, 2013",
+    "ipo": "Sep 10, 2020",
+    "name": "Rockfields Properti Indonesia Tbk"
+   },
+   {
+    "ticker": "RODA",
+    "founded": "Okt 15, 1984",
+    "ipo": "Okt 22, 2001",
+    "name": "Pikko Land Development Tbk"
+   },
+   {
+    "ticker": "SAGE",
+    "founded": "Jul 29, 1992",
+    "ipo": "Mar 08, 2023",
+    "name": "Saptausaha Gemilangindah Tbk"
+   },
+   {
+    "ticker": "SATU",
+    "founded": "Okt 03, 2012",
+    "ipo": "Nov 05, 2018",
+    "name": "Kota Satu Properti Tbk"
+   },
+   {
+    "ticker": "SMDM",
+    "founded": "Sep 21, 1989",
+    "ipo": "Okt 12, 1995",
+    "name": "Suryamas Dutamakmur Tbk"
+   },
+   {
+    "ticker": "SMRA",
+    "founded": "Nov 26, 1975",
+    "ipo": "Mei 07, 1990",
+    "name": "Summarecon Agung Tbk"
+   },
+   {
+    "ticker": "SWID",
+    "founded": "Agu 02, 2010",
+    "ipo": "Jul 07, 2022",
+    "name": "Saraswanti Indoland Development Tbk"
+   },
+   {
+    "ticker": "TARA",
+    "founded": "Jul 28, 2006",
+    "ipo": "Jul 11, 2014",
+    "name": "Agung Semesta Sejahtera Tbk"
+   },
+   {
+    "ticker": "TRIN",
+    "founded": "Mar 13, 2009",
+    "ipo": "Jan 15, 2020",
+    "name": "Perintis Triniti Properti Tbk"
+   },
+   {
+    "ticker": "TRUE",
+    "founded": "Des 13, 2013",
+    "ipo": "Jun 10, 2021",
+    "name": "Triniti Dinamik Tbk"
+   },
+   {
+    "ticker": "URBN",
+    "founded": "Mei 09, 1995",
+    "ipo": "Des 10, 2018",
+    "name": "Urban Jakarta Propertindo Tbk"
+   },
+   {
+    "ticker": "VAST",
+    "founded": "Feb 21, 2011",
+    "ipo": "Feb 08, 2023",
+    "name": "Vastland Indonesia Tbk"
+   },
+   {
+    "ticker": "WINR",
+    "founded": "Okt 10, 2007",
+    "ipo": "Apr 25, 2022",
+    "name": "Winner Nusantara Jaya Tbk"
+   }
+  ],
+  "H112": [
+   {
+    "ticker": "INDO",
+    "founded": "Jul 06, 2005",
+    "ipo": "Jan 13, 2020",
+    "name": "Royalindo Investa Wijaya Tbk"
+   }
+  ],
+  "I111": [
+   {
+    "ticker": "AWAN",
+    "founded": "Jun 30, 2015",
+    "ipo": "Apr 18, 2023",
+    "name": "Era Digital Media Tbk"
+   },
+   {
+    "ticker": "BELI",
+    "founded": "Mar 12, 2010",
+    "ipo": "Nov 08, 2022",
+    "name": "Global Digital Niaga Tbk"
+   },
+   {
+    "ticker": "BUKA",
+    "founded": "Sep 09, 2011",
+    "ipo": "Agu 06, 2021",
+    "name": "Bukalapakcom Tbk"
+   },
+   {
+    "ticker": "CASH",
+    "founded": "Mei 25, 2004",
+    "ipo": "Mei 04, 2020",
+    "name": "Cashlez Worldwide Indonesia Tbk"
+   },
+   {
+    "ticker": "DIVA",
+    "founded": "Mei 11, 2004",
+    "ipo": "Nov 27, 2018",
+    "name": "Distribusi Voucher Nusantara Tbk"
+   },
+   {
+    "ticker": "EDGE",
+    "founded": "Mar 23, 1994",
+    "ipo": "Feb 08, 2021",
+    "name": "Indointernet Tbk"
+   },
+   {
+    "ticker": "EMTK",
+    "founded": "Agu 03, 1983",
+    "ipo": "Jan 12, 2010",
+    "name": "Elang Mahkota Teknologi Tbk"
+   },
+   {
+    "ticker": "GOTO",
+    "founded": "Des 10, 2015",
+    "ipo": "Apr 11, 2022",
+    "name": "GoTo Gojek Tokopedia Tbk"
+   },
+   {
+    "ticker": "HDIT",
+    "founded": "Jan 07, 2013",
+    "ipo": "Jul 12, 2019",
+    "name": "Hensel Davest Indonesia Tbk"
+   },
+   {
+    "ticker": "JATI",
+    "founded": "Apr 11, 2002",
+    "ipo": "Mei 08, 2023",
+    "name": "Informasi Teknologi Indonesia Tbk"
+   },
+   {
+    "ticker": "KIOS",
+    "founded": "Jun 29, 2015",
+    "ipo": "Okt 05, 2017",
+    "name": "Kioson Komersial Indonesia Tbk"
+   },
+   {
+    "ticker": "KREN",
+    "founded": "Sep 10, 1999",
+    "ipo": "Jun 28, 2002",
+    "name": "Quantum Clovera Investama Tbk"
+   },
+   {
+    "ticker": "MCAS",
+    "founded": "Jun 10, 2010",
+    "ipo": "Nov 01, 2017",
+    "name": "M Cash Integrasi Tbk"
+   },
+   {
+    "ticker": "MPIX",
+    "founded": "Jul 10, 2019",
+    "ipo": "Feb 07, 2024",
+    "name": "Mitra Pedagang Indonesia Tbk"
+   },
+   {
+    "ticker": "NFCX",
+    "founded": "Agu 26, 2013",
+    "ipo": "Jul 12, 2018",
+    "name": "NFC Indonesia Tbk"
+   },
+   {
+    "ticker": "PGJO",
+    "founded": "Feb 20, 2017",
+    "ipo": "Jan 08, 2020",
+    "name": "Bahtera Bumi Raya Tbk"
+   },
+   {
+    "ticker": "TFAS",
+    "founded": "Okt 17, 2008",
+    "ipo": "Sep 17, 2019",
+    "name": "Telefast Indonesia Tbk"
+   },
+   {
+    "ticker": "TOSK",
+    "founded": "Mar 21, 2018",
+    "ipo": "Feb 07, 2024",
+    "name": "Topindo Solusi Komunika Tbk"
+   },
+   {
+    "ticker": "UVCR",
+    "founded": "Jul 07, 2017",
+    "ipo": "Jul 27, 2021",
+    "name": "Trimegah Karya Pratama Tbk"
+   },
+   {
+    "ticker": "WIFI",
+    "founded": "Sep 06, 2012",
+    "ipo": "Des 30, 2020",
+    "name": "Solusi Sinergi Digital Tbk"
+   }
+  ],
+  "I121": [
+   {
+    "ticker": "AREA",
+    "founded": "Mei 18, 2010",
+    "ipo": "Apr 01, 2024",
+    "name": "Dunia Virtual Online Tbk"
+   },
+   {
+    "ticker": "ATIC",
+    "founded": "Nov 01, 2001",
+    "ipo": "Jul 08, 2015",
+    "name": "Anabatic Technologies Tbk"
+   },
+   {
+    "ticker": "CYBR",
+    "founded": "Apr 12, 2010",
+    "ipo": "Agu 08, 2023",
+    "name": "ITSEC Asia Tbk"
+   },
+   {
+    "ticker": "DCII",
+    "founded": "Jul 18, 2011",
+    "ipo": "Jan 06, 2021",
+    "name": "DCI Indonesia Tbk"
+   },
+   {
+    "ticker": "DMMX",
+    "founded": "Sep 15, 2015",
+    "ipo": "Okt 21, 2019",
+    "name": "Digital Mediatama Maxima Tbk"
+   },
+   {
+    "ticker": "ELIT",
+    "founded": "Jun 20, 2011",
+    "ipo": "Jan 06, 2023",
+    "name": "Data Sinergitama Jaya Tbk"
+   },
+   {
+    "ticker": "ENVY",
+    "founded": "Sep 27, 2004",
+    "ipo": "Jul 08, 2019",
+    "name": "Envy Technologies Indonesia Tbk"
+   },
+   {
+    "ticker": "LMAS",
+    "founded": "Jun 04, 1996",
+    "ipo": "Des 28, 2001",
+    "name": "Limas Indonesia Makmur Tbk"
+   },
+   {
+    "ticker": "MLPT",
+    "founded": "Des 28, 2001",
+    "ipo": "Jul 08, 2013",
+    "name": "Multipolar Technology Tbk"
+   },
+   {
+    "ticker": "TECH",
+    "founded": "Jan 19, 2011",
+    "ipo": "Jun 04, 2020",
+    "name": "Indosterling Technomedia Tbk"
+   }
+  ],
+  "I131": [
+   {
+    "ticker": "IRSX",
+    "founded": "Des 17, 2013",
+    "ipo": "Feb 07, 2023",
+    "name": "Folago Global Nusantara Tbk"
+   },
+   {
+    "ticker": "RUNS",
+    "founded": "Mei 31, 2014",
+    "ipo": "Sep 08, 2021",
+    "name": "Global Sukses Solusi Tbk"
+   },
+   {
+    "ticker": "SKYB",
+    "founded": "Jun 10, 1995",
+    "ipo": "Jul 07, 2010",
+    "name": "Northcliff Citranusa Indonesia Tbk"
+   },
+   {
+    "ticker": "TRON",
+    "founded": "Jan 07, 2011",
+    "ipo": "Mar 08, 2023",
+    "name": "Teknologi Karya Digital Nusa Tbk"
+   },
+   {
+    "ticker": "WGSH",
+    "founded": "Sep 07, 2015",
+    "ipo": "Des 06, 2021",
+    "name": "Wira Global Solusi Tbk"
+   },
+   {
+    "ticker": "WIRG",
+    "founded": "Agu 15, 2011",
+    "ipo": "Apr 04, 2022",
+    "name": "WIR ASIA Tbk"
+   }
+  ],
+  "I211": [
+   {
+    "ticker": "MSTI",
+    "founded": "Jul 01, 1994",
+    "ipo": "Nov 08, 2023",
+    "name": "Mastersystem Infotama Tbk"
+   },
+   {
+    "ticker": "PTSN",
+    "founded": "Jun 01, 1990",
+    "ipo": "Nov 08, 2007",
+    "name": "Sat Nusapersada Tbk"
+   }
+  ],
+  "I221": [
+   {
+    "ticker": "AXIO",
+    "founded": "Sep 17, 2007",
+    "ipo": "Jul 20, 2022",
+    "name": "Tera Data Indonusa Tbk"
+   },
+   {
+    "ticker": "LUCK",
+    "founded": "Nov 14, 2008",
+    "ipo": "Nov 28, 2018",
+    "name": "Sentral Mitra Informatika Tbk"
+   },
+   {
+    "ticker": "MTDL",
+    "founded": "Feb 17, 1983",
+    "ipo": "Apr 09, 1990",
+    "name": "Metrodata Electronics Tbk"
+   },
+   {
+    "ticker": "NINE",
+    "founded": "Jun 09, 2010",
+    "ipo": "Des 05, 2022",
+    "name": "Techno9 Indonesia Tbk"
+   },
+   {
+    "ticker": "ZYRX",
+    "founded": "Mei 14, 1996",
+    "ipo": "Mar 30, 2021",
+    "name": "Zyrexindo Mandiri Buana Tbk"
+   }
+  ],
+  "I231": [
+   {
+    "ticker": "CHIP",
+    "founded": "Feb 24, 2017",
+    "ipo": "Feb 08, 2023",
+    "name": "Pelita Teknologi Global Tbk"
+   },
+   {
+    "ticker": "GLVA",
+    "founded": "Sep 01, 1991",
+    "ipo": "Des 23, 2019",
+    "name": "Galva Technologies Tbk"
+   },
+   {
+    "ticker": "IOTF",
+    "founded": "Mei 19, 2015",
+    "ipo": "Okt 06, 2023",
+    "name": "Sumber Sinergi Makmur Tbk"
+   },
+   {
+    "ticker": "MENN",
+    "founded": "Jun 23, 2014",
+    "ipo": "Apr 18, 2023",
+    "name": "Menn Teknologi Indonesia Tbk"
+   }
+  ],
+  "I232": [],
+  "J111": [
+   {
+    "ticker": "CASS",
+    "founded": "Jul 16, 2009",
+    "ipo": "Des 05, 2011",
+    "name": "Cahaya Aero Services Tbk"
+   },
+   {
+    "ticker": "GMFI",
+    "founded": "Apr 26, 2002",
+    "ipo": "Okt 10, 2017",
+    "name": "Garuda Maintenance Facility Aero Asia Tbk"
+   }
+  ],
+  "J112": [
+   {
+    "ticker": "CMNP",
+    "founded": "Apr 13, 1987",
+    "ipo": "Jan 10, 1995",
+    "name": "Citra Marga Nusaphala Persada Tbk"
+   },
+   {
+    "ticker": "JSMR",
+    "founded": "Mar 01, 1978",
+    "ipo": "Nov 12, 2007",
+    "name": "Jasa Marga (Persero) Tbk"
+   },
+   {
+    "ticker": "META",
+    "founded": "Sep 01, 1995",
+    "ipo": "Jul 18, 2001",
+    "name": "Nusantara Infrastructure Tbk"
+   }
+  ],
+  "J113": [
+   {
+    "ticker": "IPCC",
+    "founded": "Nov 05, 2012",
+    "ipo": "Jul 09, 2018",
+    "name": "Indonesia Kendaraan Terminal Tbk"
+   },
+   {
+    "ticker": "IPCM",
+    "founded": "Jul 10, 2013",
+    "ipo": "Des 22, 2017",
+    "name": "Jasa Armada Indonesia Tbk"
+   },
+   {
+    "ticker": "KARW",
+    "founded": "Feb 18, 1978",
+    "ipo": "Des 20, 1994",
+    "name": "Meratus Jasa Prima Tbk"
+   },
+   {
+    "ticker": "PORT",
+    "founded": "Des 29, 2003",
+    "ipo": "Mar 16, 2017",
+    "name": "Nusantara Pelabuhan Handal Tbk"
+   }
+  ],
+  "J211": [
+   {
+    "ticker": "ACST",
+    "founded": "Jan 10, 1995",
+    "ipo": "Jun 24, 2013",
+    "name": "Acset Indonusa Tbk"
+   },
+   {
+    "ticker": "ADHI",
+    "founded": "Jun 01, 1974",
+    "ipo": "Mar 18, 2004",
+    "name": "Adhi Karya (Persero) Tbk"
+   },
+   {
+    "ticker": "ASLI",
+    "founded": "Des 20, 2008",
+    "ipo": "Jan 05, 2024",
+    "name": "Asri Karya Lestari Tbk"
+   },
+   {
+    "ticker": "BDKR",
+    "founded": "Feb 27, 1984",
+    "ipo": "Mar 03, 2023",
+    "name": "Berdikari Pondasi Perkasa Tbk"
+   },
+   {
+    "ticker": "BUKK",
+    "founded": "Okt 25, 1978",
+    "ipo": "Jun 29, 2015",
+    "name": "Bukaka Teknik Utama Tbk"
+   },
+   {
+    "ticker": "DGIK",
+    "founded": "Jan 11, 1982",
+    "ipo": "Des 19, 2007",
+    "name": "Nusa Konstruksi Enjiniring Tbk"
+   },
+   {
+    "ticker": "FIMP",
+    "founded": "Feb 08, 1993",
+    "ipo": "Apr 09, 2021",
+    "name": "Fimperkasa Utama Tbk"
+   },
+   {
+    "ticker": "IDPR",
+    "founded": "Okt 21, 1977",
+    "ipo": "Des 10, 2015",
+    "name": "Indonesia Pondasi Raya Tbk"
+   },
+   {
+    "ticker": "JKON",
+    "founded": "Des 23, 1982",
+    "ipo": "Des 04, 2007",
+    "name": "Jaya Konstruksi Manggala Pratama Tbk"
+   },
+   {
+    "ticker": "KOKA",
+    "founded": "Jun 21, 2011",
+    "ipo": "Okt 11, 2023",
+    "name": "Koka Indonesia Tbk"
+   },
+   {
+    "ticker": "KRYA",
+    "founded": "Jan 07, 2007",
+    "ipo": "Jul 25, 2022",
+    "name": "Bangun Karya Perkasa Jaya Tbk"
+   },
+   {
+    "ticker": "MANG",
+    "founded": "Feb 05, 1992",
+    "ipo": "Jan 11, 2024",
+    "name": "Manggung Polahraya Tbk"
+   },
+   {
+    "ticker": "MTPS",
+    "founded": "Mei 16, 1975",
+    "ipo": "Apr 10, 2019",
+    "name": "Meta Epsi Tbk"
+   },
+   {
+    "ticker": "MTRA",
+    "founded": "Agu 21, 1980",
+    "ipo": "Feb 10, 2016",
+    "name": "Mitra Pemuda Tbk"
+   },
+   {
+    "ticker": "NRCA",
+    "founded": "Sep 17, 1975",
+    "ipo": "Jun 27, 2013",
+    "name": "Nusa Raya Cipta Tbk"
+   },
+   {
+    "ticker": "PBSA",
+    "founded": "Nov 27, 2002",
+    "ipo": "Sep 28, 2016",
+    "name": "Paramita Bangun Sarana Tbk"
+   },
+   {
+    "ticker": "PPRE",
+    "founded": "Mei 26, 2004",
+    "ipo": "Nov 24, 2017",
+    "name": "PP Presisi Tbk"
+   },
+   {
+    "ticker": "PTDU",
+    "founded": "Feb 22, 1971",
+    "ipo": "Des 08, 2020",
+    "name": "Djasa Ubersakti Tbk"
+   },
+   {
+    "ticker": "PTPP",
+    "founded": "Agu 26, 1953",
+    "ipo": "Feb 09, 2010",
+    "name": "PP (Persero) Tbk"
+   },
+   {
+    "ticker": "PTPW",
+    "founded": "Jun 03, 1981",
+    "ipo": "Feb 07, 2020",
+    "name": "Pratama Widya Tbk"
+   },
+   {
+    "ticker": "RONY",
+    "founded": "Agu 04, 2017",
+    "ipo": "Apr 09, 2020",
+    "name": "Aracord Nusantara Group Tbk"
+   },
+   {
+    "ticker": "SMKM",
+    "founded": "Feb 04, 1981",
+    "ipo": "Mar 09, 2022",
+    "name": "Sumber Mas Konstruksi Tbk"
+   },
+   {
+    "ticker": "SSIA",
+    "founded": "Jun 15, 1971",
+    "ipo": "Mar 27, 1997",
+    "name": "Surya Semesta Internusa Tbk"
+   },
+   {
+    "ticker": "TAMA",
+    "founded": "Jun 01, 1990",
+    "ipo": "Feb 10, 2020",
+    "name": "Lancartama Sejati Tbk"
+   },
+   {
+    "ticker": "TOPS",
+    "founded": "Okt 31, 1996",
+    "ipo": "Jun 16, 2017",
+    "name": "Totalindo Eka Persada Tbk"
+   },
+   {
+    "ticker": "TOTL",
+    "founded": "Sep 04, 1970",
+    "ipo": "Jul 25, 2006",
+    "name": "Total Bangun Persada Tbk"
+   },
+   {
+    "ticker": "WEGE",
+    "founded": "Okt 24, 2008",
+    "ipo": "Nov 30, 2017",
+    "name": "Wijaya Karya Bangunan Gedung Tbk"
+   },
+   {
+    "ticker": "WIKA",
+    "founded": "Mar 11, 1960",
+    "ipo": "Okt 29, 2007",
+    "name": "Wijaya Karya (Persero) Tbk"
+   },
+   {
+    "ticker": "WSKT",
+    "founded": "Jan 01, 1961",
+    "ipo": "Des 19, 2012",
+    "name": "Waskita Karya (Persero) Tbk"
+   }
+  ],
+  "J311": [
+   {
+    "ticker": "DATA",
+    "founded": "Mar 15, 2004",
+    "ipo": "Mei 07, 2024",
+    "name": "Remala Abadi Tbk"
+   },
+   {
+    "ticker": "INET",
+    "founded": "Des 16, 2016",
+    "ipo": "Jul 24, 2023",
+    "name": "Sinergi Inti Andalan Prima Tbk"
+   },
+   {
+    "ticker": "JAST",
+    "founded": "Jan 25, 1996",
+    "ipo": "Mei 16, 2019",
+    "name": "Jasnita Telekomindo Tbk"
+   },
+   {
+    "ticker": "KBLV",
+    "founded": "Jan 06, 1994",
+    "ipo": "Feb 25, 2000",
+    "name": "First Media Tbk"
+   },
+   {
+    "ticker": "KETR",
+    "founded": "Nov 25, 1994",
+    "ipo": "Nov 10, 2022",
+    "name": "Ketrosden Triasmitra Tbk"
+   },
+   {
+    "ticker": "LINK",
+    "founded": "Mar 14, 1996",
+    "ipo": "Jun 02, 2014",
+    "name": "Link Net Tbk"
+   },
+   {
+    "ticker": "MORA",
+    "founded": "Agu 08, 2000",
+    "ipo": "Agu 08, 2022",
+    "name": "Ekamas Mora Republik Tbk"
+   }
+  ],
+  "J312": [
+   {
+    "ticker": "TLKM",
+    "founded": "Sep 24, 1991",
+    "ipo": "Nov 14, 1995",
+    "name": "Telkom Indonesia (Persero) Tbk"
+   }
+  ],
+  "J321": [
+   {
+    "ticker": "BALI",
+    "founded": "Jul 06, 2006",
+    "ipo": "Mar 13, 2014",
+    "name": "Bali Towerindo Sentra Tbk"
+   },
+   {
+    "ticker": "BTEL",
+    "founded": "Agu 13, 1993",
+    "ipo": "Feb 03, 2006",
+    "name": "Bakrie Telecom Tbk"
+   },
+   {
+    "ticker": "CENT",
+    "founded": "Feb 11, 1987",
+    "ipo": "Nov 01, 2001",
+    "name": "Centratama Telekomunikasi Indonesia Tbk"
+   },
+   {
+    "ticker": "EXCL",
+    "founded": "Okt 06, 1989",
+    "ipo": "Sep 29, 2005",
+    "name": "XLSMART Telecom Sejahtera Tbk"
+   },
+   {
+    "ticker": "GHON",
+    "founded": "Apr 27, 2001",
+    "ipo": "Apr 09, 2018",
+    "name": "Gihon Telekomunikasi Indonesia Tbk"
+   },
+   {
+    "ticker": "GOLD",
+    "founded": "Nov 08, 1995",
+    "ipo": "Jul 07, 2010",
+    "name": "Visi Telekomunikasi Infrastruktur Tbk"
+   },
+   {
+    "ticker": "IBST",
+    "founded": "Apr 28, 2006",
+    "ipo": "Agu 31, 2012",
+    "name": "Inti Bangun Sejahtera Tbk"
+   },
+   {
+    "ticker": "ISAT",
+    "founded": "Nov 10, 1967",
+    "ipo": "Okt 19, 1994",
+    "name": "Indosat Tbk"
+   },
+   {
+    "ticker": "LCKM",
+    "founded": "Jul 31, 2013",
+    "ipo": "Jan 16, 2018",
+    "name": "LCK Global Kedaton Tbk"
+   },
+   {
+    "ticker": "MTEL",
+    "founded": "Okt 18, 1995",
+    "ipo": "Nov 22, 2021",
+    "name": "Dayamitra Telekomunikasi Tbk"
+   },
+   {
+    "ticker": "OASA",
+    "founded": "Apr 20, 2006",
+    "ipo": "Jul 18, 2016",
+    "name": "Maharaksa Biru Energi Tbk"
+   },
+   {
+    "ticker": "SUPR",
+    "founded": "Jul 25, 2006",
+    "ipo": "Okt 11, 2011",
+    "name": "Solusi Tunas Pratama Tbk"
+   },
+   {
+    "ticker": "TBIG",
+    "founded": "Nov 08, 2004",
+    "ipo": "Okt 26, 2010",
+    "name": "Tower Bersama Infrastructure Tbk"
+   },
+   {
+    "ticker": "TOWR",
+    "founded": "Jun 02, 2008",
+    "ipo": "Mar 08, 2010",
+    "name": "Sarana Menara Nusantara Tbk"
+   }
+  ],
+  "J411": [
+   {
+    "ticker": "ARKO",
+    "founded": "Agu 05, 2010",
+    "ipo": "Jul 08, 2022",
+    "name": "Arkora Hydro Tbk"
+   },
+   {
+    "ticker": "BREN",
+    "founded": "Feb 05, 2018",
+    "ipo": "Okt 09, 2023",
+    "name": "Barito Renewables Energy Tbk"
+   },
+   {
+    "ticker": "CDIA",
+    "founded": "Feb 08, 2023",
+    "ipo": "Jul 09, 2025",
+    "name": "Chandra Daya Investasi Tbk"
+   },
+   {
+    "ticker": "HGII",
+    "founded": "Okt 08, 2010",
+    "ipo": "Jan 09, 2025",
+    "name": "Hero Global Investment Tbk"
+   },
+   {
+    "ticker": "KEEN",
+    "founded": "Mei 05, 2008",
+    "ipo": "Sep 02, 2019",
+    "name": "Kencana Energi Lestari Tbk"
+   },
+   {
+    "ticker": "LAPD",
+    "founded": "Jun 07, 1990",
+    "ipo": "Jul 17, 2001",
+    "name": "Leyand International Tbk"
+   },
+   {
+    "ticker": "MPOW",
+    "founded": "Agu 01, 2007",
+    "ipo": "Jul 05, 2017",
+    "name": "Megapower Makmur Tbk"
+   },
+   {
+    "ticker": "PGEO",
+    "founded": "Des 12, 2006",
+    "ipo": "Feb 24, 2023",
+    "name": "Pertamina Geothermal Energy Tbk"
+   },
+   {
+    "ticker": "POWR",
+    "founded": "Jul 28, 1990",
+    "ipo": "Jun 14, 2016",
+    "name": "Cikarang Listrindo Tbk"
+   },
+   {
+    "ticker": "TGRA",
+    "founded": "Nov 07, 1995",
+    "ipo": "Mei 16, 2017",
+    "name": "Terregra Asia Energy Tbk"
+   }
+  ],
+  "J421": [
+   {
+    "ticker": "HADE",
+    "founded": "Feb 10, 1989",
+    "ipo": "Apr 12, 2004",
+    "name": "Himalaya Energi Perkasa Tbk"
+   }
+  ],
+  "J431": [],
+  "K111": [
+   {
+    "ticker": "CMPP",
+    "founded": "Jul 25, 1989",
+    "ipo": "Des 08, 1994",
+    "name": "AirAsia Indonesia Tbk"
+   },
+   {
+    "ticker": "GIAA",
+    "founded": "Mar 31, 1950",
+    "ipo": "Feb 11, 2011",
+    "name": "Garuda Indonesia (Persero) Tbk"
+   },
+   {
+    "ticker": "HELI",
+    "founded": "Apr 16, 2007",
+    "ipo": "Mar 27, 2018",
+    "name": "Jaya Trishindo Tbk"
+   }
+  ],
+  "K121": [],
+  "K131": [],
+  "K132": [
+   {
+    "ticker": "ASSA",
+    "founded": "Des 17, 1999",
+    "ipo": "Nov 12, 2012",
+    "name": "Adi Sarana Armada Tbk"
+   },
+   {
+    "ticker": "BIRD",
+    "founded": "Mar 29, 2001",
+    "ipo": "Nov 05, 2014",
+    "name": "Blue Bird Tbk"
+   },
+   {
+    "ticker": "BPTR",
+    "founded": "Des 08, 2014",
+    "ipo": "Jul 09, 2018",
+    "name": "Batavia Prosperindo Trans Tbk"
+   },
+   {
+    "ticker": "LRNA",
+    "founded": "Feb 26, 2002",
+    "ipo": "Apr 15, 2014",
+    "name": "Eka Sari Lorena Transport Tbk"
+   },
+   {
+    "ticker": "SAFE",
+    "founded": "Des 21, 1971",
+    "ipo": "Agu 15, 1994",
+    "name": "Steady Safe Tbk"
+   },
+   {
+    "ticker": "TAXI",
+    "founded": "Jun 11, 1981",
+    "ipo": "Nov 02, 2012",
+    "name": "Express Transindo Utama Tbk"
+   },
+   {
+    "ticker": "TRJA",
+    "founded": "Jan 14, 2002",
+    "ipo": "Agu 27, 2020",
+    "name": "Transkon Jaya Tbk"
+   },
+   {
+    "ticker": "WEHA",
+    "founded": "Sep 11, 2001",
+    "ipo": "Mei 31, 2007",
+    "name": "WEHA Transportasi Indonesia Tbk"
+   }
+  ],
+  "K211": [
+   {
+    "ticker": "AKSI",
+    "founded": "Feb 12, 1990",
+    "ipo": "Jul 13, 2001",
+    "name": "Mineral Sumberdaya Mandiri Tbk"
+   },
+   {
+    "ticker": "BLOG",
+    "founded": "Okt 26, 2009",
+    "ipo": "Jul 10, 2025",
+    "name": "Trimitra Trans Persada Tbk"
+   },
+   {
+    "ticker": "BLTA",
+    "founded": "Mar 12, 1981",
+    "ipo": "Mar 26, 1990",
+    "name": "Berlian Laju Tanker Tbk"
+   },
+   {
+    "ticker": "DEAL",
+    "founded": "Jan 14, 1995",
+    "ipo": "Nov 09, 2018",
+    "name": "Dewata Freightinternational Tbk"
+   },
+   {
+    "ticker": "ELPI",
+    "founded": "Apr 20, 1992",
+    "ipo": "Agu 08, 2022",
+    "name": "Pelayaran Nasional Ekalya Purnamasari Tbk"
+   },
+   {
+    "ticker": "GTRA",
+    "founded": "Agu 11, 2004",
+    "ipo": "Mar 30, 2023",
+    "name": "Grahaprima Suksesmandiri Tbk"
+   },
+   {
+    "ticker": "HAIS",
+    "founded": "Des 14, 2009",
+    "ipo": "Sep 01, 2021",
+    "name": "Hasnur Internasional Shipping Tbk"
+   },
+   {
+    "ticker": "HATM",
+    "founded": "Agu 08, 2019",
+    "ipo": "Jul 26, 2022",
+    "name": "Habco Trans Maritima Tbk"
+   },
+   {
+    "ticker": "JAYA",
+    "founded": "Mei 30, 2012",
+    "ipo": "Feb 21, 2019",
+    "name": "Armada Berjaya Trans Tbk"
+   },
+   {
+    "ticker": "KJEN",
+    "founded": "Okt 01, 1998",
+    "ipo": "Jul 01, 2019",
+    "name": "Krida Jaringan Nusantara Tbk"
+   },
+   {
+    "ticker": "KLAS",
+    "founded": "Jan 26, 2011",
+    "ipo": "Jun 12, 2023",
+    "name": "Pelayaran Kurnia Lautan Semesta Tbk"
+   },
+   {
+    "ticker": "LAJU",
+    "founded": "Mei 31, 2007",
+    "ipo": "Jan 27, 2023",
+    "name": "Jasa Berdikari Logistics Tbk"
+   },
+   {
+    "ticker": "LOPI",
+    "founded": "Nov 22, 2013",
+    "ipo": "Okt 11, 2023",
+    "name": "Logisticsplus International Tbk"
+   },
+   {
+    "ticker": "MIRA",
+    "founded": "Okt 24, 1979",
+    "ipo": "Jan 30, 1997",
+    "name": "Mitra International Resources Tbk"
+   },
+   {
+    "ticker": "MPXL",
+    "founded": "Mar 17, 2017",
+    "ipo": "Mei 09, 2023",
+    "name": "MPX Logistics International Tbk"
+   },
+   {
+    "ticker": "NELY",
+    "founded": "Feb 05, 1977",
+    "ipo": "Okt 11, 2012",
+    "name": "Pelayaran Nelly Dwi Putri Tbk"
+   },
+   {
+    "ticker": "PJHB",
+    "founded": "Okt 09, 2008",
+    "ipo": "Nov 06, 2025",
+    "name": "Pelayaran Jaya Hidup Baru Tbk"
+   },
+   {
+    "ticker": "PPGL",
+    "founded": "Jun 19, 2015",
+    "ipo": "Jul 20, 2020",
+    "name": "Prima Globalindo Logistik Tbk"
+   },
+   {
+    "ticker": "PURA",
+    "founded": "Apr 17, 2012",
+    "ipo": "Jan 29, 2020",
+    "name": "Putra Rajawali Kencana Tbk"
+   },
+   {
+    "ticker": "RCCC",
+    "founded": "Mar 09, 2012",
+    "ipo": "Agu 02, 2022",
+    "name": "Utama Radar Cahaya Tbk"
+   },
+   {
+    "ticker": "SAPX",
+    "founded": "Jul 01, 2014",
+    "ipo": "Okt 03, 2018",
+    "name": "Satria Antaran Prima Tbk"
+   },
+   {
+    "ticker": "SDMU",
+    "founded": "Jan 13, 1993",
+    "ipo": "Jul 12, 2011",
+    "name": "Sidomulyo Selaras Tbk"
+   },
+   {
+    "ticker": "SMDR",
+    "founded": "Nov 13, 1964",
+    "ipo": "Jul 05, 1999",
+    "name": "Samudera Indonesia Tbk"
+   },
+   {
+    "ticker": "TMAS",
+    "founded": "Sep 17, 1987",
+    "ipo": "Jul 09, 2003",
+    "name": "Temas Tbk"
+   },
+   {
+    "ticker": "TNCA",
+    "founded": "Jun 28, 1995",
+    "ipo": "Jun 28, 2018",
+    "name": "Trimuda Nuansa Citra Tbk"
+   },
+   {
+    "ticker": "TRUK",
+    "founded": "Agu 01, 1980",
+    "ipo": "Mei 23, 2018",
+    "name": "Guna Timur Raya Tbk"
+   },
+   {
+    "ticker": "WBSA",
+    "founded": "Mar 19, 2021",
+    "ipo": "Apr 10, 2026",
+    "name": "BSA Logistics Indonesia Tbk"
+   }
+  ],
+  "Z111": [],
+  "Z112": [],
+  "Z113": [],
+  "Z211": [],
+  "Z212": []
+ }
+}

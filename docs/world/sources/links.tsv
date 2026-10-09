@@ -1,0 +1,127 @@
+from	to	note
+A121	B121	coal burnt as kiln fuel in cement
+A121	J411	coal fired in power generation
+A121	B144	coal and coke in iron and steel making
+A111	B111	naphtha and gas as petrochemical feedstock
+A111	A112	crude and products into storage and distribution
+A111	J421	gas supplied to gas utilities
+J421	B112	gas as fertiliser feedstock (ammonia and urea)
+J421	B111	gas as a chemical feedstock and fuel
+A112	K132	fuel for road transport fleets
+A112	K111	jet fuel for airlines
+B142	C131	copper for cables and electrical components
+B141	E111	aluminium castings for auto parts
+B141	B131	aluminium for cans and foil packaging
+B144	C141	steel for construction machinery and heavy vehicles
+B144	C143	steel for industrial machinery
+B144	E121	steel for car bodies
+B144	E122	steel for motorcycle frames
+B144	C121	steel for building products
+B144	J211	steel for construction
+B121	J211	cement for construction
+B121	C121	cement for building products
+B146	B144	nickel and other ores into metal making
+B143	G412	gold as an insured and financed asset: a weak link, kept for review
+B151	E211	timber for furniture
+B151	B152	wood pulp for paper
+B153	B152	other forest products into pulp and paper
+B152	B131	paper and board for packaging
+B152	E614	paper for publishing
+B111	B131	polymers for plastic packaging
+B111	E413	synthetic fibres for textiles
+B111	E112	synthetic rubber and carbon black for tyres
+B112	D232	fertiliser for plantations and crops
+B113	D421	specialty chemicals for personal care products
+B113	F211	active ingredients and excipients for pharmaceuticals
+B131	D222	packaging for processed food
+B131	D212	packaging for soft drinks
+B131	D221	packaging for dairy
+B131	D411	packaging for household products
+B131	D421	packaging for personal care products
+B131	F211	packaging for pharmaceuticals
+B131	D311	packaging for tobacco products
+D232	D222	crops into processed food
+D232	D212	sugar and crops into soft drinks
+D232	D211	crops into liquor
+D232	B111	palm oil into oleochemicals
+D232	A221	palm oil into biodiesel
+D231	D222	fish, meat and poultry into processed food
+D231	D112	fresh produce into food retail and distribution
+D222	D112	processed food to food distributors
+D222	E711	processed food to consumer-goods distributors
+D212	E711	soft drinks to consumer-goods distributors
+D221	D112	dairy to food distributors
+D411	E711	household products to consumer-goods distributors
+D421	E711	personal care products to consumer-goods distributors
+D311	E711	tobacco products to consumer-goods distributors
+F211	F112	pharmaceuticals to healthcare supplies and distribution
+F211	D111	pharmaceuticals to drug distributors and retail
+F111	F121	healthcare equipment to hospitals and clinics
+F112	F121	healthcare supplies to hospitals and clinics
+D111	F121	drug distribution to hospitals and clinics
+E111	E121	auto parts into car manufacturing
+E111	E122	auto parts into motorcycle manufacturing
+E112	E121	tyres into car manufacturing
+E112	E122	tyres into motorcycle manufacturing
+E121	E745	cars to automotive retail
+E122	E745	motorcycles to automotive retail
+C131	C132	electrical components into heavy electrical equipment
+C132	J411	heavy electrical equipment for power generation and transmission
+C131	E212	electrical components into household appliances
+I232	E311	electronic components into consumer electronics
+I232	I221	electronic components into computer hardware
+I232	I211	electronic components into networking equipment
+E311	E742	consumer electronics to electronics retail
+E212	E742	household appliances to electronics retail
+E211	E743	furniture to home-improvement retail
+C121	E743	building products to home-improvement retail
+E411	E741	apparel to apparel retail
+E412	E741	footwear to apparel retail
+E413	E411	textiles into apparel
+E321	E744	sport and hobby goods to specialty stores
+E711	D113	consumer-goods distributors supplying supermarkets and minimarkets
+D112	D113	food distributors supplying supermarkets and minimarkets
+E711	E744	consumer-goods distributors supplying specialty stores
+E711	E721	consumer-goods distributors supplying internet retail
+E711	E731	consumer-goods distributors supplying department stores
+C141	A121	construction machinery and heavy vehicles for coal mining
+C141	B146	construction machinery and heavy vehicles for metal mining
+C141	J211	construction machinery for construction
+C142	D232	agricultural machinery for plantations and crops
+C143	B121	industrial machinery for cement plants
+C143	B144	industrial machinery for steel works
+B147	A121	mining equipment and services for coal mining
+B147	B146	mining equipment and services for metal mining
+A131	A111	drilling services for oil and gas production
+A132	A111	oil and gas equipment and services for production
+C211	C143	industrial trading supplying machinery and parts
+J411	B141	electricity for aluminium smelting
+J411	B144	electricity for steel making
+J411	B121	electricity for cement grinding
+J411	E121	electricity for car assembly
+J411	D113	electricity for supermarkets and cold display
+J411	J311	electricity for telecommunication networks
+K211	E721	logistics and deliveries for internet retail
+K211	E711	logistics for consumer-goods distribution
+K132	D112	road transport for food distribution
+J113	A122	the port handling coal exports
+J113	B146	the port handling ore and metal exports
+J113	C211	the port handling imported industrial goods
+J112	K132	toll roads used by road transport
+K131	A121	rail haulage of coal
+G111	E711	bank working-capital lines to distributors
+G111	B121	bank term lending to cement plants
+G211	E745	consumer financing for car and motorcycle purchases
+G412	K132	general insurance for transport fleets
+E611	D222	advertising bought by food brands
+E611	D421	advertising bought by personal care brands
+I111	E721	internet platforms serving e-commerce retail
+I131	G111	software for banks
+I121	G111	IT services for banks
+J321	I111	wireless networks carrying internet applications
+H111	B121	the estate operator leasing land to plants
+J211	H111	construction building the estate
+C222	B131	recovered material back into packaging
+C222	B111	recovered plastics back into basic chemicals
+C222	B144	scrap back into steel making
+C222	B152	recovered paper back into paper making

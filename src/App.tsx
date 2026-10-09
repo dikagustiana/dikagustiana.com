@@ -67,6 +67,10 @@ const FinanceLanding = lazy(() => import("./pages/FinanceLanding"));
 const FinanceInMotion = lazy(() => import("./pages/FinanceInMotion"));
 const CapitalConditionDetail = lazy(() => import("./pages/CapitalConditionDetail"));
 const FinanceTrackIndex = lazy(() => import("./pages/FinanceTrackIndex"));
+// Kawasan Industri (docs/world/PRD-kawasan-industri.md). __WORLD_KAWASAN__ is a
+// compile-time constant like __FIA_PREVIEW__: unset, the route is the 404 page
+// and the world's chunk is never emitted.
+const KawasanPage = lazy(() => (__WORLD_KAWASAN__ ? import("./pages/world/KawasanPage") : import("./pages/NotFound")));
 // Finance in Action v3.1 (docs/company-models/implementation-brief-v3.1.md).
 // __FIA_PREVIEW__ and __FIA_LIVE__ are compile-time constants (vite.config.ts).
 // Preview: the viewer with its SYNTHETIC fixtures. Live: the same viewer over
@@ -168,6 +172,8 @@ const App = () => (
             <Route path="/finance/capital-allocation/:conditionSlug" element={<CapitalConditionDetail />} />
             <Route path="/finance/finance-in-action" element={<FinanceInActionIndex />} />
             <Route path="/finance/finance-in-action/:modelSlug" element={<FinanceModelDetail />} />
+            <Route path="/finance/kawasan" element={<KawasanPage />} />
+            <Route path="/finance/kawasan/:ticker" element={<KawasanPage />} />
             <Route path="/finance/:track" element={<FinanceTrackIndex />} />
             {/* One route owns /finance/:track/:slug — module page or essay,
                 decided by lookup (the two shapes are indistinguishable to the

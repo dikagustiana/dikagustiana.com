@@ -1,0 +1,50 @@
+{
+  "ranAt": "2026-10-08T19:33:13.745Z",
+  "lighthouse": "13.5.0",
+  "runs": {
+    "off-mobile": {
+      "performance": 80,
+      "accessibility": 98,
+      "bestPractices": 96,
+      "lcpMs": 4295,
+      "cls": 0.011,
+      "tbtMs": 43,
+      "fcpMs": 2888,
+      "transferKb": 436,
+      "lcpElement": null
+    },
+    "off-desktop": {
+      "performance": 99,
+      "accessibility": 98,
+      "bestPractices": 96,
+      "lcpMs": 891,
+      "cls": 0.001,
+      "tbtMs": 0,
+      "fcpMs": 630,
+      "transferKb": 436,
+      "lcpElement": null
+    },
+    "on-mobile": {
+      "performance": 74,
+      "accessibility": 98,
+      "bestPractices": 96,
+      "lcpMs": 5271,
+      "cls": 0.001,
+      "tbtMs": 34,
+      "fcpMs": 3236,
+      "transferKb": 494,
+      "lcpElement": null
+    },
+    "on-desktop": {
+      "performance": 95,
+      "accessibility": 98,
+      "bestPractices": 96,
+      "lcpMs": 1123,
+      "cls": 0.001,
+      "tbtMs": 120,
+      "fcpMs": 702,
+      "transferKb": 676,
+      "lcpElement": null
+    }
+  }
+}

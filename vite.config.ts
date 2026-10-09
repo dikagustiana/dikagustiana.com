@@ -18,6 +18,11 @@ export default defineConfig(({ mode }) => ({
   define: {
     __FIA_PREVIEW__: JSON.stringify(loadEnv(mode, process.cwd(), "VITE_").VITE_FIA_PREVIEW === "true"),
     __FIA_LIVE__: JSON.stringify(loadEnv(mode, process.cwd(), "VITE_").VITE_FIA_LIVE === "true"),
+    // The Kawasan Industri world (docs/world/PRD-kawasan-industri.md §7.1):
+    // VITE_WORLD_KAWASAN=true builds the world behind the chain map's slot.
+    // Unset, the schematic renders exactly as before and the world's
+    // modules are dead code Rollup drops (scripts/world/assert-world-flag.mjs).
+    __WORLD_KAWASAN__: JSON.stringify(loadEnv(mode, process.cwd(), "VITE_").VITE_WORLD_KAWASAN === "true"),
   },
   server: {
     host: "::",
@@ -25,6 +30,16 @@ export default defineConfig(({ mode }) => ({
   },
   plugins: [
     react(),
+    // With the world on, its poster is the landing page's largest paint and
+    // would otherwise be discovered only after three lazy chunks; the preload
+    // makes it discoverable in the initial document (Lighthouse, gate 2).
+    {
+      name: "world-poster-preload",
+      transformIndexHtml(html) {
+        if (loadEnv(mode, process.cwd(), "VITE_").VITE_WORLD_KAWASAN !== "true") return html;
+        return html.replace("</head>", '    <link rel="preload" as="image" href="/world/poster-far.svg" fetchpriority="high" />\n  </head>');
+      },
+    },
   ],
   resolve: {
     alias: {
@@ -46,6 +61,10 @@ export default defineConfig(({ mode }) => ({
           // Rollup emit STATIC imports of that chunk from every page that
           // might lazily need it, defeating the lazy load. Left alone,
           // Rollup gives the dynamic import its own async chunk.
+          // The Kawasan Industri world's renderer. Its only importer is the
+          // world's lazily imported engine, so this chunk is never part of
+          // the initial bundle (docs/world/PRD-kawasan-industri.md §10).
+          if (id.includes("/node_modules/three/")) return "world-engine";
           if (id.includes("@supabase")) return "supabase";
           if (id.includes("@tanstack")) return "query";
           if (

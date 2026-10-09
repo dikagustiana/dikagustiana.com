@@ -4,3 +4,6 @@
 declare const __FIA_PREVIEW__: boolean;
 /** VITE_FIA_LIVE === "true" at build time: the published-only section in production; see vite.config.ts. */
 declare const __FIA_LIVE__: boolean;
+
+/** VITE_WORLD_KAWASAN === "true" at build time; see vite.config.ts and src/lib/world/flag.ts. */
+declare const __WORLD_KAWASAN__: boolean;

@@ -1,0 +1,48 @@
+Kode	Sub-sektor	Industri	Sub-ind.	Isi sub-industri
+A	Energi			
+A1	Minyak, Gas & Batu Bara / Oil, Gas & Coal	3	6	Produksi & penyulingan migas, storage & distribusi migas, produksi batu bara, distribusi batu bara, jasa pengeboran migas, jasa & peralatan migas/batu bara
+A2	Energi Alternatif / Alternative Energy	2	2	Peralatan energi alternatif, bahan bakar alternatif
+B	Barang Baku			
+B1	Barang Baku / Basic Materials	5	15	Kimia (dasar, pertanian, khusus), material konstruksi, wadah & kemasan, 7 logam & mineral (aluminium, tembaga, emas, baja, logam mulia, lainnya, jasa tambang), kayu, kertas, produk hutan lain
+C	Perindustrian			
+C1	Barang Perindustrian / Industrial Goods	4	7	Dirgantara & pertahanan, produk bangunan, komponen listrik, alat listrik berat, mesin konstruksi & kendaraan berat, mesin pertanian, mesin industri
+C2	Jasa Perindustrian / Industrial Services	3	7	Trading barang industri, percetakan komersial, jasa lingkungan & fasilitas, peralatan kantor, jasa pendukung bisnis, jasa personalia, riset & konsultasi
+C3	Holding Multi Sektor / Multi-sector Holdings	1	1	Holding non-keuangan dengan ≥2 lini bisnis, tanpa lini yang mayoritas
+D	Barang Konsumen Primer			
+D1	Ritel Barang Primer / Food & Staples Retailing	1	3	Ritel & distributor obat, ritel & distributor makanan, supermarket & minimarket
+D2	Makanan & Minuman / Food & Beverage	3	6	Minuman keras, minuman ringan, susu olahan, makanan olahan, ikan/daging/unggas, perkebunan & tanaman pangan
+D3	Rokok / Tobacco	1	1	Rokok
+D4	Produk RT Tidak Tahan Lama / Nondurable Household Products	2	2	Produk keperluan RT, produk perawatan tubuh
+E	Barang Konsumen Non-Primer			
+E1	Otomotif & Komponen / Automobiles & Components	2	4	Suku cadang, ban, produsen mobil, produsen motor
+E2	Barang Rumah Tangga / Household Goods	1	3	Furnitur, peralatan RT elektrik, perlengkapan RT
+E3	Barang Rekreasi / Leisure Goods	2	2	Elektronik konsumen, olahraga & hobi
+E4	Pakaian & Barang Mewah / Apparel & Luxury Goods	1	3	Pakaian/aksesoris/tas, alas kaki, tekstil
+E5	Jasa Konsumen / Consumer Services	2	7	Gaming venue, hotel & resor, agen perjalanan, fasilitas rekreasi & olahraga, restoran, pendidikan, jasa penunjang konsumen
+E6	Media & Hiburan / Media & Entertainment	2	5	Periklanan, penyiaran, TV berbayar, penerbitan, hiburan & film
+E7	Perdagangan Ritel / Retailing	4	8	Distributor barang konsumen, ritel internet, department store, ritel pakaian, ritel elektronik, home improvement, toko khusus, ritel otomotif
+F	Kesehatan			
+F1	Jasa & Peralatan Kesehatan / Healthcare Equipment & Providers	2	3	Peralatan kesehatan, perlengkapan & distribusi, penyedia jasa (RS, klinik, lab)
+F2	Farmasi & Riset Kesehatan / Pharmaceuticals & Health Care Research	2	2	Farmasi, riset kesehatan
+G	Keuangan			
+G1	Bank / Banks	1	1	Bank (termasuk BPD dan BPR)
+G2	Jasa Pembiayaan / Financing Service	2	3	Pembiayaan konsumen, modal ventura, pembiayaan usaha khusus
+G3	Jasa Investasi / Investment Service	1	4	Manajer investasi, IB & broker, penyelenggara pasar, pendukung jasa investasi
+G4	Asuransi / Insurance	1	4	Pialang, asuransi umum, asuransi jiwa, reasuransi
+G5	Holding & Investasi / Holding & Investment Companies	1	2	Holding keuangan, perusahaan investasi
+H	Properti & Real Estat			
+H1	Properti & Real Estat / Properties & Real Estate	1	2	Pengembang & operator, jasa real estat
+I	Teknologi			
+I1	Software & Jasa TI / Software & IT Services	3	3	Aplikasi & jasa internet, jasa & konsultan TI, software
+I2	Hardware & Peralatan Teknologi / Technology Hardware & Equipment	3	4	Peralatan jaringan, perangkat komputer, instrumen elektronik, komponen & semikonduktor
+J	Infrastruktur			
+J1	Infrastruktur Transportasi / Transportation Infrastructure	1	3	Bandara, tol & rel, pelabuhan
+J2	Konstruksi Bangunan / Heavy Constructions & Civil Engineering	1	1	Konstruksi berbasis fee
+J3	Telekomunikasi / Telecommunication	2	3	Telko kabel, telko terintegrasi, telko nirkabel (termasuk menara)
+J4	Utilitas / Utilities	3	3	Listrik (termasuk IPP), gas, air
+K	Transportasi & Logistik			
+K1	Transportasi / Transportation	3	4	Maskapai, angkutan laut penumpang, kereta api, transportasi jalan
+K2	Logistik & Pengantaran / Logistics & Deliveries	1	1	Kargo, kurir, pengiriman multimoda
+Z	Produk Investasi Tercatat			
+Z1	Kontrak Investasi Kolektif / Investment Trusts	1	3	Reksa dana/ETF, DIRE, DINFRA
+Z2	Obligasi / Bonds	1	2	Obligasi pemerintah, obligasi korporasi
