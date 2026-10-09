@@ -47,8 +47,10 @@ describe('SHOW_CASE_COMPANIES = true', () => {
     await screen.findByRole('heading', { level: 1, name: c.title });
 
     const situation = screen.getByRole('heading', { level: 2, name: 'The Situation' }).nextElementSibling;
-    expect(situation?.textContent).toBe(
-      `This is a ${getLayerLabel(c.layer).toLowerCase()} condition observed in the case of ${c.caseCompany}.`,
+    const layer = getLayerLabel(c.layer).toLowerCase();
+    const article = /^[aeiou]/.test(layer) ? 'an' : 'a';
+    expect(situation?.textContent?.replace(/\s+/g, ' ')).toBe(
+      `This is ${article} ${layer} condition observed in the case of ${c.caseCompany}.`,
     );
   });
 

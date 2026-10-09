@@ -10,15 +10,28 @@ import {
   nextBigThingItems,
   developmentFinanceItems,
 } from '@/config/navConfig';
+import { useNavSectionCollapsed } from '@/hooks/useNavSectionCollapsed';
 
 export function MainNav() {
   const location = useLocation();
   const { isAdmin } = useAuth();
+  const isCollapsed = useNavSectionCollapsed();
+
+  // A dropdown over a section with no published essay is a plain link to its
+  // landing page (navConfig: NavSection.essaySection).
+  const sectionLink = (label: string, basePath: string) => (
+    <Link
+      to={basePath}
+      className={cn('nav-link', location.pathname.startsWith(basePath) && 'nav-link-active')}
+    >
+      {label}
+    </Link>
+  );
 
   return (
     /* TWO CAPACITY RULES, both measured.
-       `xl` and not `lg`: at 1024px the seven labels did not fit and the row did
-       not wrap, so flexbox compressed them — "The Green Transition" ran to
+       `xl` and not `lg`: at 1024px the labels (seven then, eight now) did not
+       fit and the row did not wrap, so flexbox compressed them — "The Green Transition" ran to
        three lines inside a 64px header and "The Next Big Thing" was clipped
        mid-word. A truncated destination is worse than a drawer, and the drawer
        carries every one of them.
@@ -69,12 +82,16 @@ export function MainNav() {
         basePath="/finance"
       />
 
-      <NavDropdown
-        label="The Green Transition"
-        items={greenTransitionItems}
-        width="w-56"
-        basePath="/green-transition"
-      />
+      {isCollapsed({ essaySection: 'green-transition' }) ? (
+        sectionLink('Green Transition', '/green-transition')
+      ) : (
+        <NavDropdown
+          label="Green Transition"
+          items={greenTransitionItems}
+          width="w-56"
+          basePath="/green-transition"
+        />
+      )}
 
       <NavDropdown
         label="The Next Big Thing"
@@ -83,12 +100,16 @@ export function MainNav() {
         basePath="/the-next-big-thing"
       />
 
-      <NavDropdown
-        label="Development Finance"
-        items={developmentFinanceItems}
-        width="w-72"
-        basePath="/development-finance"
-      />
+      {isCollapsed({ essaySection: 'development-finance' }) ? (
+        sectionLink('Development Finance', '/development-finance')
+      ) : (
+        <NavDropdown
+          label="Development Finance"
+          items={developmentFinanceItems}
+          width="w-72"
+          basePath="/development-finance"
+        />
+      )}
 
       <NavDropdown label="Learning" items={learningItems} width="w-48" />
 

@@ -23,8 +23,7 @@ export default function BooksList() {
       role="educator"
       breadcrumbs={[
         { label: 'Home', path: '/' },
-        { label: 'Books and Academia', path: '/books-academia' },
-        { label: 'Categories', path: '/books/categories' },
+        { label: 'Books', path: '/books-academia' },
         { label: heading },
       ]}
     >
@@ -53,7 +52,7 @@ export default function BooksList() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {books.map((book) => (
               <Link key={book.id} to={`/books/${category}/${book.id}/read`}>
-                <Card className="h-full hover:shadow-lg transition-all hover:-translate-y-1 cursor-pointer">
+                <Card className="h-full hover:border-primary/40 transition-colors cursor-pointer">
                   <CardHeader>
                     <CardTitle className="text-lg">{book.title || book.filename}</CardTitle>
                     <CardDescription>

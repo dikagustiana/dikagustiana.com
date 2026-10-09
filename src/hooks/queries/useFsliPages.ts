@@ -10,6 +10,8 @@ export interface FsliPage {
   dec_2024: string | null;
   dec_2023: string | null;
   category: string | null;
+  // Added by 20261009090000_fsli_component_flag.sql; absent until it is applied.
+  is_component?: boolean | null;
   sort_order: number | null;
   created_at: string;
   updated_at: string;

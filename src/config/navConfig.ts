@@ -10,6 +10,14 @@ export interface NavSection {
   path?: string;
   basePath?: string;
   items?: NavItem[];
+  /**
+   * The `essays.section` behind this dropdown's items. While that section has
+   * no published essay, the dropdown collapses to a plain link to `basePath`:
+   * a menu of four destinations that each say "nothing published yet" is a
+   * promise the site cannot keep. The landing page still lists every phase,
+   * with its count. Owner question Q14; this is the stated default.
+   */
+  essaySection?: string;
 }
 
 export const accountingItems: NavItem[] = [
@@ -20,8 +28,11 @@ export const accountingItems: NavItem[] = [
 
 /**
  * Track paths must use the SLUGS FROM `finance_sections` — fundamentals,
- * strategic-finance, planning, analytics (+ capital-allocation, deliberately
- * absent below until it has modules). These used to say
+ * strategic-finance, planning, analytics, capital-allocation. The last was
+ * left out "until it has modules", but its route is not a module index: it
+ * renders the 21 capital conditions (FinanceInMotion), which /finance already
+ * lists as the fifth track. Added 9 October 2026 so nav and landing agree.
+ * These used to say
  * `/finance/planning-forecasting` and `/finance/financial-analytics`: readable
  * labels, nonexistent tracks, and the two menu items rendered empty indexes
  * while the route sweep stayed green — it opened canonical URLs directly and
@@ -32,6 +43,7 @@ export const financeItems: NavItem[] = [
   { label: 'Strategic Finance', path: '/finance/strategic-finance' },
   { label: 'Planning & Forecasting', path: '/finance/planning' },
   { label: 'Financial Analytics', path: '/finance/analytics' },
+  { label: 'Capital Allocation', path: '/finance/capital-allocation' },
   { label: 'Finance in Action', path: '/finance/finance-in-action' },
 ];
 
@@ -88,9 +100,10 @@ export const navSections: NavSection[] = [
     items: financeItems,
   },
   {
-    label: 'The Green Transition',
+    label: 'Green Transition',
     basePath: '/green-transition',
     items: greenTransitionItems,
+    essaySection: 'green-transition',
   },
   {
     label: 'The Next Big Thing',
@@ -101,6 +114,7 @@ export const navSections: NavSection[] = [
     label: 'Development Finance',
     basePath: '/development-finance',
     items: developmentFinanceItems,
+    essaySection: 'development-finance',
   },
   {
     label: 'Learning',

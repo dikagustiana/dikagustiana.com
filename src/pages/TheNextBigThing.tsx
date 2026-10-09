@@ -21,7 +21,6 @@ export default function TheNextBigThing() {
 
   return (
     <PageLayout
-      role="economist"
       breadcrumbs={[
         { label: 'Home', path: '/' },
         { label: 'The Next Big Thing' },
@@ -47,45 +46,28 @@ export default function TheNextBigThing() {
         <h1 className="text-3xl md:text-4xl font-display font-bold mb-2">
           The Next Big Thing
         </h1>
-        <div className="mb-2 max-w-2xl">
-          <p className="text-base text-muted-foreground leading-relaxed">
-            Speculative but reasoned essays on emerging forces in industry,
-            finance, and policy. Critical questions, not predictions.
-          </p>
-          <p className="text-base text-muted-foreground mt-3">
-            The goal is to think seriously about forces that might reshape how
-            we work, invest, and organize. Some ideas will be wrong. The value
-            is in the reasoning, not the conclusions.
-          </p>
-        </div>
+        <p className="mb-2 max-w-2xl text-base text-muted-foreground leading-relaxed">
+          Essays that reason through big structural shifts while they are still taking shape.
+        </p>
       </div>
 
       {/* Main Content */}
       <div className="container max-w-4xl py-12">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h2 className="text-2xl font-display font-semibold text-foreground mb-1">
-              Essays & Analysis
-            </h2>
-            <p className="text-muted-foreground">
-              Explorations of technology shifts, policy experiments, and market structure changes.
-            </p>
-          </div>
-
-          {/* Writing happens in the studio — the one authoring surface with
-              validation, revisions and the placement modal. The quick-add
-              dialog this replaced inserted rows that dodged the category
-              taxonomy (essays.category_id silently defaulted to
-              finance-general). */}
-          {isAdmin && (
+        {/* Writing happens in the studio — the one authoring surface with
+            validation, revisions and the placement modal. The quick-add
+            dialog this replaced inserted rows that dodged the category
+            taxonomy (essays.category_id silently defaulted to
+            finance-general). */}
+        {isAdmin && (
+          <div className="mb-8 flex justify-end">
             <Button asChild>
               <Link to="/admin/writer/next-big-thing/new">
                 <PenLine className="h-4 w-4 mr-2" />
                 Write essay
               </Link>
             </Button>
-          )}
-        </div>
+          </div>
+        )}
 
         <EditorialFeed
           section="next-big-thing"

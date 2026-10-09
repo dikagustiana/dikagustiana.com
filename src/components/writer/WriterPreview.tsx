@@ -2,6 +2,8 @@ import { useMemo } from 'react';
 import { User, Calendar, Clock, Tag } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { ArticleBody } from '@/components/editorial/ArticleBody';
+import { KeyTakeaways } from '@/components/editorial/KeyTakeaways';
+import { AuthorBox } from '@/components/editorial/AuthorBox';
 
 interface WriterPreviewProps {
   title: string;
@@ -152,25 +154,9 @@ export function WriterPreview({
         </p>
       )}
 
-      {/* Key Takeaways */}
-      {keyTakeaways.length > 0 && (
-        <div className="bg-muted/50 border border-border rounded-lg p-6 my-10">
-          <div className="flex items-center gap-2 mb-4">
-            <span className="text-lg">💡</span>
-            <h3 className="font-semibold text-foreground">Key Takeaways</h3>
-          </div>
-          <ul className="space-y-3">
-            {keyTakeaways.map((takeaway, idx) => (
-              <li key={idx} className="flex items-start gap-3">
-                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 text-primary text-sm font-medium flex items-center justify-center mt-0.5">
-                  {idx + 1}
-                </span>
-                <span className="text-muted-foreground">{takeaway}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+      {/* The published page's own component, so the preview cannot drift
+          from it (it had: an emoji heading and its own numbered circles). */}
+      <KeyTakeaways takeaways={keyTakeaways} />
 
       {/* References */}
       {references.length > 0 && (
@@ -200,22 +186,8 @@ export function WriterPreview({
         </div>
       )}
 
-      {/* Author Box */}
-      {author && (
-        <div className="border-t border-border pt-8 mt-10">
-          <div className="flex items-start gap-4">
-            <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center">
-              <User className="h-8 w-8 text-muted-foreground" />
-            </div>
-            <div>
-              <p className="font-semibold text-foreground mb-1">{author}</p>
-              <p className="text-sm text-muted-foreground">
-                {authorBio || 'Author and analyst'}
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Author Box — the published component, for the same reason. */}
+      {author && <AuthorBox name={author} bio={authorBio || null} />}
     </article>
   );
 }

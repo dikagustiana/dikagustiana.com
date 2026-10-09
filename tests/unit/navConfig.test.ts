@@ -86,12 +86,25 @@ describe('navConfig', () => {
     }
   });
 
+  it('names each section once: the nav label is the landing page title', () => {
+    const labels = navSections.map(s => s.label);
+    expect(labels).toContain('Green Transition');
+    expect(labels).not.toContain('The Green Transition');
+  });
+
+  it('collapses only dropdowns that have a landing page to collapse to', () => {
+    for (const section of navSections.filter(s => s.essaySection)) {
+      expect(section.basePath, `${section.label} has essaySection but no basePath`).toBeTruthy();
+    }
+  });
+
   it('links the tracks it advertises to the slugs the database uses', () => {
     const trackPaths = financeItems
       .map(i => i.path.replace(/^\/finance\//, ''))
       .filter(seg => FINANCE_TRACK_SLUGS.includes(seg));
-    // The four tracks with content today. capital-allocation is deliberately
-    // absent from the nav until it has modules (0 today).
-    expect(trackPaths).toEqual(['fundamentals', 'strategic-finance', 'planning', 'analytics']);
+    // All five tracks, in the landing page's order. capital-allocation was
+    // absent until 9 October 2026; its route renders the capital conditions,
+    // not an empty module index, and /finance already listed it.
+    expect(trackPaths).toEqual(['fundamentals', 'strategic-finance', 'planning', 'analytics', 'capital-allocation']);
   });
 });

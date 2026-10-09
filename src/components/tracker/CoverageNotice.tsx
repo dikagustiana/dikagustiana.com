@@ -29,7 +29,7 @@ export function CoverageNotice({ className }: { className?: string }) {
       <p className="mt-2 text-[15px] leading-relaxed text-muted-foreground max-w-[640px]">
         {TRACKER_COVERAGE.note}
       </p>
-      <p className="mt-2 text-[13px] text-muted-foreground">
+      <p className="mt-2 text-sm text-muted-foreground">
         Last substantive update {fullDate(TRACKER_COVERAGE.lastSubstantiveUpdate)}.{' '}
         {TRACKER_COVERAGE.lastSubstantiveUpdateNote}
       </p>

@@ -1,200 +1,74 @@
 import { PageLayout } from '@/components/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+
+// Each entry below is a recurring problem, not a step: the order carries no
+// meaning, so the list is plain and unnumbered.
+const PROBLEMS = [
+  {
+    title: 'Intercompany reconciliation',
+    body: 'Group companies that transact across borders book the same deal at different dates and FX rates. The mismatch has to be reconciled before the year-end close, not after the audit finds it.',
+  },
+  {
+    title: 'Transfer pricing support',
+    body: 'Related-party transactions have to be at arm’s length, and the statutory accounts are where a tax authority will look for the evidence.',
+  },
+  {
+    title: 'Two charts of accounts',
+    body: 'The group chart of accounts is built for consolidation and the statutory one for local presentation, so every entity needs a mapping between them.',
+  },
+  {
+    title: 'Audit coordination',
+    body: 'A local statutory audit feeds the group audit but runs to its own deadline, sometimes with a different auditor.',
+  },
+];
 
 export default function StatutoryReporting() {
   return (
-    <PageLayout variant="content" role="manager" breadcrumbs={[{ label: 'Home', path: '/' }, { label: 'Accounting', path: '/accounting' }, { label: 'Statutory Reporting' }]}>
-      <SEO title="Statutory Reporting" description="Local statutory (PSAK) reporting requirements, filing obligations, and the standalone financial statements behind the consolidated group." />
+    <PageLayout variant="content" breadcrumbs={[{ label: 'Home', path: '/' }, { label: 'Accounting', path: '/accounting' }, { label: 'Statutory Reporting' }]}>
+      <SEO title="Statutory Reporting" description="Why each legal entity in an Indonesian group files its own accounts, and where book and tax part." />
       <div className="flex-1 container py-8">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-3xl">
           <h1 className="text-3xl md:text-4xl font-display font-bold mb-4">
             Statutory Reporting
           </h1>
           <p className="text-xl text-muted-foreground mb-8">
-            Every legal entity has reporting obligations to its local jurisdiction. 
-            These aren't optional—they're requirements with deadlines and penalties.
+            Every legal entity in a group files its own statutory accounts, on its own deadlines,
+            regardless of what the consolidated set says.
           </p>
 
-          {/* Core Insight */}
-          <Card className="mb-8 bg-secondary/50">
-            <CardContent className="p-6">
-              <h3 className="font-semibold text-foreground mb-3">Statutory vs. Consolidated: Two Parallel Tracks</h3>
-              <p className="text-muted-foreground text-sm leading-relaxed">
-                Multinationals prepare two sets of accounts: consolidated reports for the group 
-                (often under IFRS), and statutory accounts for each legal entity under local GAAP. 
-                These can differ significantly, creating reconciliation work and sometimes different 
-                profit figures.
-              </p>
-            </CardContent>
-          </Card>
-
-          <div className="space-y-8">
-            {/* Indonesian Context */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Indonesian Statutory Requirements</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-muted-foreground">
-                  Indonesian companies prepare statutory accounts under PSAK and file with various authorities:
-                </p>
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div>
-                    <h4 className="font-semibold text-foreground mb-2">Key Filings</h4>
-                    <ul className="space-y-2 text-muted-foreground text-sm">
-                      <li>• Annual financial statements to OJK (public companies)</li>
-                      <li>• Tax returns to DJP (Dirjen Pajak)</li>
-                      <li>• Annual report filing with Kemenkumham</li>
-                      <li>• Industry-specific regulators as applicable</li>
-                    </ul>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-foreground mb-2">Deadlines</h4>
-                    <ul className="space-y-2 text-muted-foreground text-sm">
-                      <li>• Audited financials: 4 months after year-end</li>
-                      <li>• Corporate tax return: 4 months after year-end</li>
-                      <li>• Annual report: 5 months after year-end</li>
-                      <li>• Quarterly reports: 1 month after quarter-end (public)</li>
-                    </ul>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* PSAK Specifics */}
-            <Card>
-              <CardHeader>
-                <CardTitle>PSAK Considerations for Statutory Accounts</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-4">
-                  <div className="border-l-2 border-accent pl-4">
-                    <h4 className="font-semibold text-foreground">PSAK vs. IFRS Timing Differences</h4>
-                    <p className="text-muted-foreground text-sm">
-                      Indonesia typically adopts IFRS standards with a 1-2 year lag. This creates 
-                      temporary differences between group (IFRS) and local (PSAK) accounting.
-                    </p>
-                  </div>
-                  <div className="border-l-2 border-accent pl-4">
-                    <h4 className="font-semibold text-foreground">Tax-Book Differences</h4>
-                    <p className="text-muted-foreground text-sm">
-                      Indonesian tax regulations don't always follow PSAK. Depreciation rates, 
-                      provisions, and revenue timing can differ—creating deferred tax assets and liabilities.
-                    </p>
-                  </div>
-                  <div className="border-l-2 border-accent pl-4">
-                    <h4 className="font-semibold text-foreground">Functional Currency</h4>
-                    <p className="text-muted-foreground text-sm">
-                      Statutory accounts for Indonesian entities are presented in Rupiah. 
-                      Entities with USD functional currency still file in IDR, requiring translation.
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Common Challenges */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Common Statutory Reporting Challenges</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex gap-4">
-                    <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center flex-shrink-0">
-                      <span className="text-foreground text-sm font-semibold">1</span>
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-foreground">Intercompany Reconciliation</h4>
-                      <p className="text-muted-foreground text-sm">
-                        When group companies transact across borders, timing differences and FX rates 
-                        create mismatches. Reconciling these before year-end close is critical.
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex gap-4">
-                    <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center flex-shrink-0">
-                      <span className="text-foreground text-sm font-semibold">2</span>
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-foreground">Transfer Pricing Documentation</h4>
-                      <p className="text-muted-foreground text-sm">
-                        Related-party transactions must be at arm's length. Statutory accounts need 
-                        to support transfer pricing positions that can withstand tax authority scrutiny.
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex gap-4">
-                    <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center flex-shrink-0">
-                      <span className="text-foreground text-sm font-semibold">3</span>
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-foreground">Different Chart of Accounts</h4>
-                      <p className="text-muted-foreground text-sm">
-                        Group COA is designed for consolidation; statutory COA must meet local 
-                        presentation requirements. Mapping between them is often messy.
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex gap-4">
-                    <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center flex-shrink-0">
-                      <span className="text-foreground text-sm font-semibold">4</span>
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-foreground">Audit Coordination</h4>
-                      <p className="text-muted-foreground text-sm">
-                        Local statutory audits feed into group audits but have different deadlines 
-                        and sometimes different auditors. Coordinating findings and adjustments is complex.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Best Practices */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Making Statutory Reporting Less Painful</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-3 text-muted-foreground text-sm">
-                  <li className="flex gap-2">
-                    <span className="text-accent">•</span>
-                    <span>
-                      <strong className="text-foreground">Standardize close calendars</strong> — 
-                      align subsidiary closes with group timelines to avoid last-minute scrambles.
-                    </span>
-                  </li>
-                  <li className="flex gap-2">
-                    <span className="text-accent">•</span>
-                    <span>
-                      <strong className="text-foreground">Document GAAP differences</strong> — 
-                      maintain a reconciliation template that bridges local PSAK to group IFRS.
-                    </span>
-                  </li>
-                  <li className="flex gap-2">
-                    <span className="text-accent">•</span>
-                    <span>
-                      <strong className="text-foreground">Automate intercompany matching</strong> — 
-                      implement tools that flag discrepancies before they become audit issues.
-                    </span>
-                  </li>
-                  <li className="flex gap-2">
-                    <span className="text-accent">•</span>
-                    <span>
-                      <strong className="text-foreground">Track regulatory changes</strong> — 
-                      PSAK and tax rules evolve; build processes to catch changes early.
-                    </span>
-                  </li>
-                </ul>
-              </CardContent>
-            </Card>
+          <div className="space-y-4 text-foreground leading-relaxed">
+            <p>
+              An Indonesian group keeps two parallel sets: the consolidated PSAK statements the
+              parent reports, and the standalone statements each PT files for tax and corporate
+              purposes, under PSAK or, for a subsidiary without public accountability, SAK Entitas
+              Privat. A subsidiary on SAK Entitas Privat has to be brought onto the group's PSAK
+              policies before it consolidates. The reconciliation work is between book and tax, and
+              between entity and group, not between PSAK and IFRS.
+            </p>
+            <p>
+              Indonesian tax rules do not always follow PSAK. Depreciation rates, provisions and the
+              timing of revenue can differ, and that difference is what creates deferred tax assets
+              and liabilities.
+            </p>
+            <p className="text-sm text-muted-foreground">
+              The filings and deadlines that apply depend on the kind of entity (listed, unlisted,
+              branch). None are listed here until each can be tied to the regulation that sets it.
+            </p>
           </div>
+
+          <h2 className="mt-12 mb-4 text-xl font-display font-semibold text-foreground">
+            Where the work goes wrong
+          </h2>
+          <ul className="divide-y divide-border border-y border-border">
+            {PROBLEMS.map((problem) => (
+              <li key={problem.title} className="py-5">
+                <h3 className="font-semibold text-foreground">{problem.title}</h3>
+                <p className="mt-1 text-sm text-muted-foreground">{problem.body}</p>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
-
     </PageLayout>
   );
 }

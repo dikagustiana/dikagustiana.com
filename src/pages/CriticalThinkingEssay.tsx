@@ -7,9 +7,8 @@ import { RelatedContent } from '@/components/RelatedContent';
 import { contentToHtml } from '@/lib/tiptap/serialize';
 import { LoadingState, ErrorState } from '@/components/states';
 import { useAuth } from '@/contexts/AuthContext';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Pencil, Clock, User, Calendar } from 'lucide-react';
+import { EssayEditLink } from '@/components/EssayEditLink';
 import { sanitizeHtml } from '@/lib/sanitizeHtml';
 
 const phaseNames: Record<string, string> = {
@@ -82,8 +81,6 @@ export default function CriticalThinkingEssay() {
         { label: phase ? phaseNames[phase] : 'Phase', path: `/critical-thinking-research/${phase}` },
         { label: title }
       ]}
-      showManifesto={!!essay?.voice_role}
-      manifesto={essay?.snippet || undefined}
     >
       <SEO
         title={title}
@@ -101,12 +98,8 @@ export default function CriticalThinkingEssay() {
               <h1 className="text-3xl md:text-4xl font-display font-bold">
                 {title}
               </h1>
-              {isAdmin && (
-                <Button variant="outline" size="sm">
-                  <Pencil className="h-4 w-4 mr-2" />
-                  Edit
-                </Button>
-              )}
+              {/* Was an "Edit" button with no handler. Renders for admins only. */}
+              <EssayEditLink slug={essay.slug} section={essay.section ?? 'critical-thinking'} />
             </div>
             
             {essay?.snippet && (
@@ -115,26 +108,11 @@ export default function CriticalThinkingEssay() {
               </p>
             )}
             
-            <div className="mt-4 flex flex-wrap items-center gap-4 text-muted-foreground text-sm">
-              {essay?.author && (
-                <span className="flex items-center gap-1">
-                  <User className="h-4 w-4" />
-                  {essay.author}
-                </span>
-              )}
-              {essay?.read_time && (
-                <span className="flex items-center gap-1">
-                  <Clock className="h-4 w-4" />
-                  {essay.read_time}
-                </span>
-              )}
-              {essay?.date && (
-                <span className="flex items-center gap-1">
-                  <Calendar className="h-4 w-4" />
-                  {essay.date}
-                </span>
-              )}
-            </div>
+            {(essay.author || essay.read_time || essay.date) && (
+              <p className="mt-4 text-muted-foreground text-sm">
+                {[essay.author, essay.date, essay.read_time].filter(Boolean).join(' · ')}
+              </p>
+            )}
 
             {essay?.prerequisites && essay.prerequisites.length > 0 && (
               <div className="mt-4">
@@ -159,13 +137,11 @@ export default function CriticalThinkingEssay() {
             )}
           </header>
 
-          <div className="prose prose-neutral dark:prose-invert max-w-none">
+          <div className="prose prose-neutral max-w-none">
             {essay?.content ? (
               <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(contentToHtml(essay.content)) }} />
             ) : (
-              <p className="text-muted-foreground italic">
-                This essay content is being developed. Check back soon for comprehensive insights on this topic.
-              </p>
+              <p className="text-muted-foreground">Not written yet.</p>
             )}
           </div>
 

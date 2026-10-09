@@ -1,10 +1,14 @@
-import { Lightbulb } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface KeyTakeawaysProps {
   takeaways: string[];
   className?: string;
 }
+
+// Heading follows the reading path's vocabulary ("establishes"); owner
+// question Q19 may restore "Key takeaways". No icon and no numbered circles:
+// an ordered list already numbers itself.
+export const TAKEAWAYS_HEADING = 'What this essay establishes';
 
 export function KeyTakeaways({ takeaways, className }: KeyTakeawaysProps) {
   if (!takeaways || takeaways.length === 0) return null;
@@ -14,20 +18,12 @@ export function KeyTakeaways({ takeaways, className }: KeyTakeawaysProps) {
       "bg-muted/50 border border-border rounded-lg p-6 my-10",
       className
     )}>
-      <div className="flex items-center gap-2 mb-4">
-        <Lightbulb className="h-5 w-5 text-primary" />
-        <h3 className="font-semibold text-foreground">Key Takeaways</h3>
-      </div>
-      <ul className="space-y-3">
+      <h3 className="font-semibold text-foreground mb-4">{TAKEAWAYS_HEADING}</h3>
+      <ol className="list-decimal space-y-3 pl-5 text-muted-foreground marker:text-foreground">
         {takeaways.map((takeaway, idx) => (
-          <li key={idx} className="flex items-start gap-3">
-            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 text-primary text-sm font-medium flex items-center justify-center mt-0.5">
-              {idx + 1}
-            </span>
-            <span className="text-muted-foreground">{takeaway}</span>
-          </li>
+          <li key={idx} className="pl-1">{takeaway}</li>
         ))}
-      </ul>
+      </ol>
     </div>
   );
 }

@@ -247,7 +247,7 @@ export function ArticleShell({
                 this appears only where the piece declares it. */}
             {declaredGenre && !showBrief && (
               <div className="mb-8 border-l-2 border-border pl-4" data-genre={declaredGenre.id}>
-                <p className="text-[11px] font-mono uppercase tracking-[0.18em] text-muted-foreground">
+                <p className="eyebrow">
                   {declaredGenre.label}
                 </p>
                 <p className="mt-1 text-[15px] leading-relaxed text-muted-foreground">
@@ -259,7 +259,7 @@ export function ArticleShell({
             {/* What changed since this was first published. */}
             {revisionNote?.trim() && !showBrief && (
               <div className="mb-8 border-l-2 border-foreground bg-muted/40 py-3 pl-4 pr-4" data-revision-note>
-                <p className="text-[11px] font-mono uppercase tracking-[0.18em] text-foreground">
+                <p className="eyebrow text-foreground">
                   {updatedAt ? `Revised ${fullDate(updatedAt)}` : 'Revised'}
                 </p>
                 <p className="mt-1 text-[15px] leading-relaxed text-foreground">{revisionNote}</p>

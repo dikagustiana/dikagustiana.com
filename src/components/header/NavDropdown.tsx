@@ -128,8 +128,11 @@ export function NavDropdown({ label, items, width = 'w-56', basePath }: NavDropd
             {label}
           </Link>
         ) : (
+          // No landing page (Learning): the label only opens the menu, and says so.
           <button
             onClick={() => setIsOpen((prev) => !prev)}
+            aria-expanded={isOpen}
+            aria-haspopup="true"
             className="hover:text-header-foreground transition-colors"
           >
             {label}

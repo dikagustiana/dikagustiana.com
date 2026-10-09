@@ -128,10 +128,13 @@ export const useBookCategories = () => {
         .order('category');
 
       if (error) throw error;
-      
-      // Get unique categories
-      const categories = [...new Set(data?.map(b => b.category) || [])];
-      return categories;
+
+      // Each category once, with how many books it holds, in category order.
+      const counts = new Map<string, number>();
+      for (const row of data ?? []) {
+        counts.set(row.category, (counts.get(row.category) ?? 0) + 1);
+      }
+      return [...counts].map(([category, count]) => ({ category, count }));
     },
   });
 };
