@@ -57,6 +57,10 @@ export interface CompanyRef {
   reason?: string;
   /** Where its listing in this sub-industry was checked. */
   source?: string;
+  /** What the company does (PRD v2 §4.1): one factual line, present tense, no figures, no market data, no person's name. */
+  does?: string;
+  /** Where the line was drawn from: the issuer's own description, or the draft's note for the owner's review. */
+  doesSource?: string;
 }
 
 export interface SubIndustry {

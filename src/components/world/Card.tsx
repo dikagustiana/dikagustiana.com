@@ -8,9 +8,9 @@
 import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { BAND_BY_ID, JOINT_BY_ID, STATUS, BASIS, type JointId, type LensId, type ShiftId, essaysFor } from '@/data/industryChain';
-import { subIndustryByCode } from '@/lib/world/registry/subindustries.generated';
+import { SUB_INDUSTRIES, subIndustryByCode } from '@/lib/world/registry/subindustries.generated';
 import { linksFrom, linksTo } from '@/lib/world/registry/links.generated';
-import { INDEX_PATH, subIndustryPath } from '@/lib/finance-in-action/routes';
+import { INDEX_PATH, modelPath, subIndustryPath } from '@/lib/finance-in-action/routes';
 import { ENERGY_DRILLDOWN, STATUS_VOCAB, boardPath } from '@/lib/world/constants';
 import { conditionHref, conditionOf, conditionShort } from '@/lib/finance-in-action/conditions';
 import { labelOf, marksFor } from '@/lib/world/presentation';
@@ -45,6 +45,9 @@ function EnergyDrillDown() {
     </div>
   );
 }
+
+/** A company in the registry by its ticker, with its sub-industry. */
+const companyByTicker = (ticker: string) => { for (const sub of SUB_INDUSTRIES) { const company = sub.companies.find((c) => c.ticker === ticker); if (company) return { sub, company }; } return null; };
 
 const stateOf = (status: string): keyof typeof STATUS_VOCAB | undefined => (Object.keys(STATUS_VOCAB) as (keyof typeof STATUS_VOCAB)[]).find((k) => STATUS_VOCAB[k].word === status);
 
@@ -83,27 +86,59 @@ export function Card({ selection, mark, lens, flows, weights, fullChain = false,
   const rows = [...info.rows];
   const sections: JSX.Element[] = [];
   const foot: JSX.Element[] = [];
+  const dlExtra: JSX.Element[] = [];
+
+  // the chain as one list per direction: every link a button to the other end, its glyph, a measured link's weight; the
+  // words "expected, not measured" said once for the whole card (PRD v2 §3.9, §3.11)
+  const chainLists = (code: string, onlyUp = 'Upstream', onlyDown = 'Downstream') => {
+    const flowOf = (from: string, to: string) => flows.find((f) => f.from === from && f.to === to)?.cls ?? 'expected';
+    const up = linksTo(code), down = linksFrom(code);
+    const line = (other: string, from: string, to: string, note?: string) => {
+      const cls = flowOf(from, to), o = subIndustryByCode(other), v = cls === 'expected' ? STATUS_VOCAB.expected : STATUS_VOCAB.measured, w = cls === 'expected' ? null : weights?.get(`${from}>${to}`) ?? null;
+      return <li key={`${from}>${to}`}><button type="button" className="underline" onClick={() => onAction({ type: 'select', id: other })}>{o?.nameEn ?? other}</button> <span className="text-muted-foreground"><span aria-hidden="true">{v.glyph}</span>{cls === 'expected' ? null : ` ${v.word}`}{w ? ` · ${w}` : ''}{note ? ` · ${note}` : ''}</span></li>;
+    };
+    const anyExpected = [...up, ...down].some((l) => flowOf(l.from, l.to) === 'expected');
+    return [
+      <div className="world-card__section" key="up"><h4>{onlyUp}</h4>{up.length ? <ul>{up.map((l) => line(l.from, l.from, l.to, l.note))}</ul> : <p>No link recorded.</p>}</div>,
+      <div className="world-card__section" key="down"><h4>{onlyDown}</h4>{down.length ? <ul>{down.map((l) => line(l.to, l.from, l.to, l.note))}</ul> : <p>No link recorded.</p>}</div>,
+      ...(anyExpected ? [<p className="world-card__section text-muted-foreground" key="expected" data-chain-note=""><span aria-hidden="true">{STATUS_VOCAB.expected.glyph}</span> {STATUS_VOCAB.expected.word}: the links marked so come from the registry; a published model marks a link <span aria-hidden="true">{STATUS_VOCAB.measured.glyph}</span> {STATUS_VOCAB.measured.word}.</p>] : []),
+    ];
+  };
+  const relatedTo = (tags: readonly string[]) => pieces.filter((p) => tags.some((t) => p.tags.includes(t)));
+  const relatedSection = (tags: readonly string[], what: string) => { const related = relatedTo(tags); return <div className="world-card__section" key="analyses"><h4>Related analyses</h4>{related.length ? <ul>{related.map((p) => <li key={p.slug}><button type="button" className="underline" onClick={() => onAction({ type: 'open-piece', slug: p.slug })}>{p.title}</button> <span className="text-muted-foreground">{STATUS_VOCAB[p.kind].glyph} {STATUS_VOCAB[p.kind].word}</span></li>)}</ul> : <p>Nothing published about {what} yet.</p>}</div>; };
+  const chainToggle = <p className="world-card__section" key="chain"><button type="button" className="world-btn" aria-pressed={fullChain} onClick={() => onAction({ type: 'chain-depth', full: !fullChain })}>{fullChain ? 'Show one level' : 'Show full chain'}</button> <span className="text-muted-foreground">{fullChain ? 'The whole chain is lit; the rest is dimmed.' : 'One level is lit; the rest is dimmed.'}</span></p>;
 
   if (sel.kind === 'building') {
     const s = subIndustryByCode(sel.id);
     if (s) {
-      const flowOf = (from: string, to: string) => flows.find((f) => f.from === from && f.to === to)?.cls ?? 'expected';
-      const up = linksTo(s.code), down = linksFrom(s.code);
-      const line = (code: string, from: string, to: string) => { const cls = flowOf(from, to); const o = subIndustryByCode(code); const v = cls === 'expected' ? STATUS_VOCAB.expected : STATUS_VOCAB.measured; const w = cls === 'expected' ? null : weights?.get(`${from}>${to}`) ?? null; return <li key={code}><button type="button" className="underline" onClick={() => onAction({ type: 'select', id: code })}>{o?.nameEn ?? code}</button> <span className="text-muted-foreground">{v.glyph} {v.word}{w ? ` · ${w}` : ''}</span></li>; };
-      sections.push(<div className="world-card__section" key="up"><h4>Upstream</h4>{up.length ? <ul>{up.map((l) => line(l.from, l.from, l.to))}</ul> : <p>No link recorded.</p>}</div>);
-      sections.push(<div className="world-card__section" key="down"><h4>Downstream</h4>{down.length ? <ul>{down.map((l) => line(l.to, l.from, l.to))}</ul> : <p>No link recorded.</p>}</div>);
-      if (up.length || down.length) sections.push(<p className="world-card__section" key="chain"><button type="button" className="world-btn" aria-pressed={fullChain} onClick={() => onAction({ type: 'chain-depth', full: !fullChain })}>{fullChain ? 'Show one level' : 'Show full chain'}</button> <span className="text-muted-foreground">{fullChain ? 'The whole chain is lit; the rest is dimmed.' : 'One level is lit; the rest is dimmed.'}</span></p>);
-      const related = pieces.filter((p) => p.tags.includes(s.code) || p.tags.includes(s.chainNodeId) || s.companies.some((c) => p.tags.includes(c.ticker)));
-      sections.push(<div className="world-card__section" key="analyses"><h4>Related analyses</h4>{related.length ? <ul>{related.map((p) => <li key={p.slug}><button type="button" className="underline" onClick={() => onAction({ type: 'open-piece', slug: p.slug })}>{p.title}</button> <span className="text-muted-foreground">{STATUS_VOCAB[p.kind].glyph} {STATUS_VOCAB[p.kind].word}</span></li>)}</ul> : <p>Nothing published about this sub-industry yet.</p>}</div>);
+      // the sub-industry's companies, each a button with its status (PRD v2 §3.11)
+      sections.push(<div className="world-card__section" key="companies"><h4>Companies</h4>{s.companies.length ? <ul>{s.companies.map((c) => <li key={c.ticker}><button type="button" className="underline" onClick={() => onAction({ type: 'select', id: c.ticker })}>{c.ticker} · {c.name}</button> <span className="text-muted-foreground">{c.status === 'confirmed' ? 'confirmed' : 'proposed example'}</span></li>)}</ul> : <p>No company proposed yet.</p>}</div>);
+      sections.push(...chainLists(s.code));
+      if (linksTo(s.code).length || linksFrom(s.code).length) sections.push(chainToggle);
+      sections.push(relatedSection([s.code, s.chainNodeId, ...s.companies.map((c) => c.ticker)], 'this sub-industry'));
       if (state === 'none') sections.push(<p className="world-card__section" key="empty">A model here would show the unit economics of a listed company in this sub-industry, its main cost drivers and where it sits against its peer. None is published yet.</p>);
       foot.push(<Link key="index" className="world-btn" to={subIndustryPath(s.code)}>Open in Finance in Action index</Link>);
-      for (const c of s.companies) foot.push(<button key={c.ticker} type="button" className="world-btn" onClick={() => onAction({ type: 'select', id: c.ticker })}>{c.ticker}</button>);
     }
   } else if (sel.kind === 'company') {
     const ticker = rows.find(([k]) => k === 'Ticker')?.[1];
+    const found = ticker ? companyByTicker(ticker) : null;
+    if (found) {
+      // the company card works without a model (PRD v2 §3.11, D-V2-12): who it is, what it does, its place in the chain
+      const { sub: s, company: c } = found;
+      rows.length = 0;
+      rows.push(['Ticker', c.ticker]);
+      dlExtra.push(<div key="sub" className="contents"><dt>Sub-industry</dt><dd><button type="button" className="underline" onClick={() => onAction({ type: 'select', id: s.code })}>{s.nameEn}</button></dd></div>);
+      dlExtra.push(<div key="does" className="contents"><dt>What it does</dt><dd>{c.does ?? 'Not yet written.'}{c.doesSource ? <small className="block text-muted-foreground">Source: {c.doesSource}</small> : null}</dd></div>);
+      dlExtra.push(<div key="listing" className="contents"><dt>Listing</dt><dd>{c.status === 'confirmed' ? 'Confirmed by the owner' : 'Proposed example, pending the owner’s review'}{c.status !== 'confirmed' && c.reason ? <small className="block text-muted-foreground">{c.reason}</small> : null}</dd></div>);
+      sections.push(...chainLists(s.code, 'Suppliers', 'Customers'));
+      sections.push(chainToggle);
+      if (state !== 'published') sections.push(<div className="world-card__section" key="would"><h4>What a model would show</h4><p>The unit economics of {c.name}: what it sells, what each sale costs it and which few costs drive that, and where it stands against its peer in {s.nameEn}. None is published yet.</p></div>);
+      sections.push(relatedSection([c.ticker, s.code], 'this company'));
+    }
     if (ticker) foot.push(<Link key="board" className="world-btn" to={boardPath(ticker)} onClick={(e) => { e.preventDefault(); onAction({ type: 'open-board', ticker }); }}>Open board</Link>);
     for (const [label, fn] of info.actions ?? []) if (label !== 'Open board') foot.push(<button key={label} type="button" className="world-btn" onClick={fn}>{label}</button>);
-    foot.push(<button key="chain" type="button" className="world-btn" aria-pressed={fullChain} onClick={() => onAction({ type: 'chain-depth', full: !fullChain })}>{fullChain ? 'Show one level' : 'Show full chain'}</button>);
+    if (ticker && found) foot.push(<Link key="fia" className="world-btn" to={modelPath(ticker)}>Open in Finance in Action</Link>);
+    if (!found) foot.push(<button key="chain" type="button" className="world-btn" aria-pressed={fullChain} onClick={() => onAction({ type: 'chain-depth', full: !fullChain })}>{fullChain ? 'Show one level' : 'Show full chain'}</button>);
   } else if (sel.kind === 'gate' || sel.kind === 'signpost') {
     const jointId = rows.find(([k]) => k === 'Joint')?.[1] as JointId | undefined;
     const j = jointId ? JOINT_BY_ID[jointId] : undefined;
@@ -129,7 +164,7 @@ export function Card({ selection, mark, lens, flows, weights, fullChain = false,
       <div className="world-card__kind"><span>{info.kind}</span><button type="button" className="world-card__close" aria-label="Close the card" onClick={onClose}>×</button></div>
       <h3 className="world-card__title" tabIndex={-1}>{info.title}</h3>
       {info.status && <span className="world-card__status" data-state={state ?? ''}>{state ? <span aria-hidden="true">{STATUS_VOCAB[state].glyph}</span> : null}{info.status}</span>}
-      <dl>{rows.map(([k, v]) => <div key={k} className="contents"><dt>{k}</dt><dd>{v}</dd></div>)}</dl>
+      <dl>{rows.map(([k, v]) => <div key={k} className="contents"><dt>{k}</dt><dd>{v}</dd></div>)}{dlExtra}</dl>
       {sections}
       {foot.length ? <div className="world-card__foot">{foot}</div> : null}
     </aside>
