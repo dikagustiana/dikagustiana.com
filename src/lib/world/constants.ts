@@ -5,9 +5,15 @@
  */
 import type { LayerName, OverlayName, ViewName } from '@/world/engine/types';
 import type { ShiftId } from '@/data/industryChain';
+import type { Goods } from '@/lib/world/registry/types';
 
 /** What a link carries (PRD v2 Appendix A): the registry's list, read here by the shell. */
 export { GOODS, type Goods } from '@/lib/world/registry/types';
+
+/** How a card names a link's goods class next to a supplier or a customer (PRD v2 §3.11). */
+export const GOODS_WORD: Record<Goods, string> = {
+  bulk: 'bulk', liquid: 'liquid', cold: 'chilled', boxed: 'boxed', parcel: 'parcels', people: 'people', none: 'no goods: money or information',
+};
 
 /** The place buttons (PRD v2 §3.1): Whole is the map; the hero, the home view, is H and the distance control's 0. */
 export const PLACES: readonly { view: ViewName; label: string; key: string }[] = [

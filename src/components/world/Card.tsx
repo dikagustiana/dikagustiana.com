@@ -11,7 +11,8 @@ import { BAND_BY_ID, JOINT_BY_ID, STATUS, BASIS, type JointId, type LensId, type
 import { SUB_INDUSTRIES, subIndustryByCode } from '@/lib/world/registry/subindustries.generated';
 import { linksFrom, linksTo } from '@/lib/world/registry/links.generated';
 import { INDEX_PATH, modelPath, subIndustryPath } from '@/lib/finance-in-action/routes';
-import { ENERGY_DRILLDOWN, STATUS_VOCAB, boardPath } from '@/lib/world/constants';
+import { ENERGY_DRILLDOWN, GOODS_WORD, STATUS_VOCAB, boardPath } from '@/lib/world/constants';
+import type { Goods } from '@/lib/world/registry/types';
 import { conditionHref, conditionOf, conditionShort } from '@/lib/finance-in-action/conditions';
 import { labelOf, marksFor } from '@/lib/world/presentation';
 import type { Selection } from '@/world/engine/types';
@@ -88,19 +89,19 @@ export function Card({ selection, mark, lens, flows, weights, fullChain = false,
   const foot: JSX.Element[] = [];
   const dlExtra: JSX.Element[] = [];
 
-  // the chain as one list per direction: every link a button to the other end, its glyph, a measured link's weight; the
-  // words "expected, not measured" said once for the whole card (PRD v2 §3.9, §3.11)
+  // the chain as one list per direction: every link a button to the other end, its glyph, its goods class, a measured
+  // link's weight; the words "expected, not measured" said once for the whole card (PRD v2 §3.9, §3.11)
   const chainLists = (code: string, onlyUp = 'Upstream', onlyDown = 'Downstream') => {
     const flowOf = (from: string, to: string) => flows.find((f) => f.from === from && f.to === to)?.cls ?? 'expected';
     const up = linksTo(code), down = linksFrom(code);
-    const line = (other: string, from: string, to: string, note?: string) => {
+    const line = (other: string, from: string, to: string, goods: Goods, note?: string) => {
       const cls = flowOf(from, to), o = subIndustryByCode(other), v = cls === 'expected' ? STATUS_VOCAB.expected : STATUS_VOCAB.measured, w = cls === 'expected' ? null : weights?.get(`${from}>${to}`) ?? null;
-      return <li key={`${from}>${to}`}><button type="button" className="underline" onClick={() => onAction({ type: 'select', id: other })}>{o?.nameEn ?? other}</button> <span className="text-muted-foreground"><span aria-hidden="true">{v.glyph}</span>{cls === 'expected' ? null : ` ${v.word}`}{w ? ` · ${w}` : ''}{note ? ` · ${note}` : ''}</span></li>;
+      return <li key={`${from}>${to}`}><button type="button" className="underline" onClick={() => onAction({ type: 'select', id: other })}>{o?.nameEn ?? other}</button> <span className="text-muted-foreground"><span aria-hidden="true">{v.glyph}</span>{cls === 'expected' ? null : ` ${v.word}`}{w ? ` · ${w}` : ''} · <span data-goods={goods}>{GOODS_WORD[goods]}</span>{note ? ` · ${note}` : ''}</span></li>;
     };
     const anyExpected = [...up, ...down].some((l) => flowOf(l.from, l.to) === 'expected');
     return [
-      <div className="world-card__section" key="up"><h4>{onlyUp}</h4>{up.length ? <ul>{up.map((l) => line(l.from, l.from, l.to, l.note))}</ul> : <p>No link recorded.</p>}</div>,
-      <div className="world-card__section" key="down"><h4>{onlyDown}</h4>{down.length ? <ul>{down.map((l) => line(l.to, l.from, l.to, l.note))}</ul> : <p>No link recorded.</p>}</div>,
+      <div className="world-card__section" key="up"><h4>{onlyUp}</h4>{up.length ? <ul>{up.map((l) => line(l.from, l.from, l.to, l.goods, l.note))}</ul> : <p>No link recorded.</p>}</div>,
+      <div className="world-card__section" key="down"><h4>{onlyDown}</h4>{down.length ? <ul>{down.map((l) => line(l.to, l.from, l.to, l.goods, l.note))}</ul> : <p>No link recorded.</p>}</div>,
       ...(anyExpected ? [<p className="world-card__section text-muted-foreground" key="expected" data-chain-note=""><span aria-hidden="true">{STATUS_VOCAB.expected.glyph}</span> {STATUS_VOCAB.expected.word}: the links marked so come from the registry; a published model marks a link <span aria-hidden="true">{STATUS_VOCAB.measured.glyph}</span> {STATUS_VOCAB.measured.word}.</p>] : []),
     ];
   };
