@@ -12,7 +12,7 @@ import { readFileSync } from 'node:fs';
  * description and the card's and board's focus. The published index is one
  * mock package (the SYNTHETIC cement fixture re-labelled, never shipped).
  */
-declare global { interface Window { world: { step(s: number): void; all(): { id: string; kind: string; status: string }[]; select(id: string | null): void; selected(): string | null; view(name: string): void; drawCalls(): number; distance(): number; zoom(): number; band(): string; chain(): string[]; exposed(): unknown; expose(t: string): void; screenOf(id: string): [number, number] | null; centre(id: string, zoom: number): void; hovered(): { id: string; kind: string; label: string } | null } } }
+declare global { interface Window { world: { step(s: number): void; pause(on: boolean): void; all(): { id: string; kind: string; status: string; facts?: Record<string, string | number> }[]; select(id: string | null): void; selected(): string | null; view(name: string): void; drawCalls(): number; distance(): number; zoom(): number; band(): string; chain(): string[]; exposed(): unknown; expose(t: string): void; screenOf(id: string): [number, number] | null; centre(id: string, zoom: number): void; hovered(): { id: string; kind: string; label: string } | null } } }
 
 const fixture = JSON.parse(readFileSync('src/data/finance-in-action/fixtures/XCEM.SYNTHETIC.json', 'utf8'));
 const MOCK = { ...fixture, meta: { ...fixture.meta, ticker: 'INTP', name: 'INTP (SYNTHETIC mock, never ships)', status: 'published', pair: ['SMGR', 'SMCB'] } };
@@ -132,6 +132,57 @@ test('a click on a company’s building selects the company at the district, str
     await page.keyboard.press('Escape');
   }
   expect(await page.evaluate(() => window.world.zoom())).toBeGreaterThan(10);
+  expect(errors).toEqual([]);
+});
+
+test('a click on a vehicle opens its card: its load, its ends, its link’s state and the illustrative line (PRD v2 B1, §3.11)', async ({ page }) => {
+  test.setTimeout(180_000);
+  const errors = await open(page);
+  await ready(page);
+  // every goods vehicle knows where it comes from, where it goes and what it carries
+  const vehicles = await page.evaluate(() => window.world.all().filter((e) => e.kind === 'vehicle'));
+  expect(vehicles.length).toBeGreaterThan(200);
+  for (const v of vehicles) expect(v.facts!.from && v.facts!.to && v.facts!.load, v.id).toBeTruthy();
+  // held still, a vehicle on a road is pointed at and clicked where it stands
+  await page.evaluate(() => window.world.pause(true));
+  const id = await page.evaluate(() => window.world.all().find((e) => e.kind === 'vehicle' && e.facts!.state === 'out' && !String(e.facts!.road).startsWith('driveway'))!.id);
+  await page.evaluate((v) => window.world.centre(v, 12), id);
+  await page.waitForTimeout(2500);
+  const canvas = page.locator('.world-frame__canvas-host canvas');
+  const box = (await canvas.boundingBox())!;
+  const [x, y] = (await page.evaluate((v) => window.world.screenOf(v), id))!;
+  await page.mouse.move(box.x + x, box.y + y);
+  await expect.poll(() => page.evaluate(() => window.world.hovered()?.kind ?? null), { timeout: 5000 }).toBe('vehicle');
+  await page.mouse.click(box.x + x, box.y + y);
+  await expect.poll(() => page.evaluate(() => window.world.selected())).toMatch(/^V-\d{4}$/);
+  const card = page.locator('.world-card');
+  await expect(card).toContainText('Illustrative traffic; see the model for figures');
+  for (const row of ['Load', 'From', 'To', 'Link']) await expect(card.locator('dt', { hasText: new RegExp(`^${row}$`) })).toHaveCount(1);
+  await expect(card.getByRole('button', { name: 'Open the supplier' })).toBeVisible();
+  await card.getByRole('button', { name: 'Open the supplier' }).click();
+  await expect.poll(() => page.evaluate(() => window.world.all().find((e) => e.id === window.world.selected())?.kind)).toBe('company');
+  await page.evaluate(() => window.world.pause(false));
+  expect(errors).toEqual([]);
+});
+
+test('a laden vehicle crossing a gate stops on the weighbridge, then goes on; one at its customer’s bay unloads (PRD v2 B3)', async ({ page }) => {
+  test.setTimeout(180_000);
+  const errors = await open(page);
+  await ready(page);
+  await page.evaluate(() => window.world.pause(true));
+  // run the world by hand until a vehicle stands on a weighbridge
+  const find = (state: string) => page.evaluate((s) => { for (let k = 0; k < 120; k++) { const v = window.world.all().find((e) => e.facts?.state === s); if (v) return v; window.world.step(0.5); } return null; }, state);
+  const weighing = (await find('weighing'))!;
+  expect(weighing).not.toBeNull();
+  expect(weighing.facts!.speed).toBe(0);
+  expect(weighing.facts!.leg).toBe('out');
+  await page.evaluate(() => window.world.step(2));
+  const after = await page.evaluate((id) => window.world.all().find((e) => e.id === id)?.facts ?? null, weighing.id);
+  expect(after?.state).not.toBe('weighing');
+  const unloading = (await find('unloading'))!;
+  expect(unloading).not.toBeNull();
+  expect(unloading.facts!.leg).toBe('out');
+  await page.evaluate(() => window.world.pause(false));
   expect(errors).toEqual([]);
 });
 
