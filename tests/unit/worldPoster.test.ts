@@ -17,8 +17,9 @@ describe('the poster', () => {
   it('is the committed file, byte for byte', () => {
     expect(fs.readFileSync(FILE, 'utf8')).toBe(svg);
   });
-  it('draws every block and region label, and the dashed raw-export road', () => {
-    expect((svg.match(/<polygon /g) ?? []).length).toBeGreaterThanOrEqual(LAYOUT.blocks.length * 3);
+  it('draws every block and fixture as a prism, every region label, and the dashed raw-export road', () => {
+    // a prism is its outline and its top (class t); the slab is one more
+    expect((svg.match(/<path class="t" /g) ?? []).length).toBe(LAYOUT.blocks.length + LAYOUT.fixtures.length + 1);
     for (const l of LAYOUT.labels.filter((x) => x.level === 'far')) expect(svg).toContain(l.text.toUpperCase());
     expect(svg).toContain('stroke-dasharray');
   });
@@ -26,7 +27,11 @@ describe('the poster', () => {
     expect(svg).not.toMatch(/Published|No model yet|INTP|SMGR|PTBA|ITMG/);
     expect(svg).toMatch(/aria-label="The industrial estate at the far view/);
   });
-  it('is small enough to be the first paint', () => {
-    expect(svg.length).toBeLessThan(400 * 1024);
+  it('is small enough to be the first paint (gate 4, O8: 65 KB before the far view was written compactly)', () => {
+    expect(svg.length).toBeLessThan(24 * 1024);
+  });
+  it('keeps the frame the stage was laid out for: the same viewBox, the aspect of the 1600 by 952 image', () => {
+    const [, , w, h] = svg.match(/viewBox="([^"]+)"/)![1].split(' ').map(Number);
+    expect(w / h).toBeCloseTo(1600 / 952, 2);
   });
 });

@@ -1,15 +1,5 @@
-/* The Kawasan Industri frame (src/components/world). Token-only: every colour is a site token. */
-.world-frame { position: relative; display: grid; gap: 0.75rem; }
-.world-frame__controls { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 1rem; font-size: 0.8125rem; }
-.world-frame__group { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 0.25rem; }
-.world-frame__group[aria-label] > span:first-child { color: hsl(var(--muted-foreground)); margin-right: 0.25rem; text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.6875rem; }
-.world-btn { min-height: 2.75rem; min-width: 2.75rem; padding: 0.25rem 0.75rem; border: 1px solid hsl(var(--border)); border-radius: calc(var(--radius) - 2px); background: hsl(var(--card)); color: hsl(var(--foreground)); font: inherit; cursor: pointer; }
-.world-btn:hover { border-color: hsl(var(--muted-foreground)); }
-.world-btn:focus-visible { outline: 2px solid hsl(var(--ring)); outline-offset: 2px; }
-.world-btn[aria-pressed="true"], .world-btn[aria-current="true"] { background: hsl(var(--accent)); color: hsl(var(--accent-foreground)); border-color: hsl(var(--accent)); }
-.world-frame__stage { position: relative; aspect-ratio: 16 / 9; min-height: 420px; max-height: 78vh; overflow: hidden; border: 1px solid hsl(var(--border)); border-radius: var(--radius); background: hsl(var(--background)); }
-.world-frame__poster { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; pointer-events: none; transition: opacity 600ms ease; }
-.world-frame__poster[data-hidden="true"] { opacity: 0; }
+/* The Kawasan Industri frame (src/components/world), after its first paint: the canvas, the strip, the card, search
+   results and the board. The header, the controls and the stage are in frame.css. Token-only: every colour is a site token. */
 .world-frame__canvas-host { position: absolute; inset: 0; opacity: 0; transition: opacity 600ms ease; }
 .world-frame__canvas-host[data-ready="true"] { opacity: 1; }
 .world-frame__canvas-host .world-canvas:focus-visible { outline: 2px solid hsl(var(--ring)); outline-offset: -2px; }
@@ -39,16 +29,10 @@
 .world-card__section { border-top: 1px solid hsl(var(--border)); padding-top: 0.5rem; }
 .world-card__section h4 { margin: 0 0 0.25rem; font-size: 0.6875rem; letter-spacing: 0.1em; text-transform: uppercase; color: hsl(var(--muted-foreground)); }
 .world-card ul { margin: 0; padding-left: 1rem; }
-.world-search { position: relative; }
-.world-search input { min-height: 2.75rem; padding: 0.25rem 0.75rem; border: 1px solid hsl(var(--border)); border-radius: calc(var(--radius) - 2px); background: hsl(var(--background)); color: hsl(var(--foreground)); font: inherit; width: 14rem; max-width: 100%; }
-.world-search input:focus-visible { outline: 2px solid hsl(var(--ring)); outline-offset: 2px; }
 .world-search ul { position: absolute; z-index: 20; top: 100%; left: 0; margin: 0.25rem 0 0; padding: 0.25rem; list-style: none; width: 20rem; max-width: 80vw; max-height: 16rem; overflow: auto; background: hsl(var(--popover)); border: 1px solid hsl(var(--border)); border-radius: var(--radius); }
 .world-search li button { width: 100%; text-align: left; min-height: 2.5rem; padding: 0.25rem 0.5rem; border: 0; background: transparent; font: inherit; cursor: pointer; border-radius: 4px; }
 .world-search li button:hover, .world-search li button:focus-visible { background: hsl(var(--secondary)); outline: none; }
 .world-search li small { display: block; color: hsl(var(--muted-foreground)); }
-.world-coverage { font-size: 0.875rem; color: hsl(var(--muted-foreground)); }
-.world-distance { display: inline-flex; align-items: center; gap: 0.5rem; }
-.world-distance input { width: 8rem; accent-color: hsl(var(--accent)); }
 .world-frame__start { position: absolute; left: 50%; bottom: 1rem; transform: translateX(-50%); z-index: 2; }
 .world-note { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; padding: 1.5rem; color: hsl(var(--muted-foreground)); font-size: 0.875rem; }
 .world-board { position: absolute; inset: 0; z-index: 30; overflow: auto; background: hsl(var(--background)); color: hsl(var(--foreground)); padding: 1rem 1.25rem 2rem; font-variant-numeric: tabular-nums; }
@@ -63,9 +47,7 @@
 .world-board td.num { text-align: right; }
 .world-board .hatched { background: repeating-linear-gradient(45deg, transparent 0 3px, hsl(var(--fia-unsplit)) 3px 4px); }
 @media (max-width: 640px) {
-  .world-frame__stage { aspect-ratio: 4 / 5; min-height: 360px; margin-inline: -16px; border-radius: 0; border-inline: 0; }
   .world-card { top: auto; bottom: 0; left: 0; right: 0; width: auto; max-height: 55%; border-radius: var(--radius) var(--radius) 0 0; }
   .world-board { padding: 0.75rem 1rem 2rem; }
-  .world-search input { width: 100%; }
 }
-@media (prefers-reduced-motion: reduce) { .world-frame__poster, .world-frame__canvas-host, .world-frame__night { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .world-frame__canvas-host, .world-frame__night { transition: none; } }

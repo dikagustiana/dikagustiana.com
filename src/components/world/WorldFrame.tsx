@@ -6,12 +6,12 @@
  * interaction; the reading strip at the bottom edge; the card dock; and the
  * board host. Under reduced motion it renders the schematic and one line.
  */
-import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChainPlate } from '@/components/industry-chain/ChainPlate';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { prefersReducedMotion } from '@/lib/motion';
-import { CANVAS_DESCRIPTION, LAYERS, OVERLAYS, PLACES, REGION_VIEW, TITLE, TOTAL_PLACED, WORLD_PATH, boardPath } from '@/lib/world/constants';
+import { CANVAS_DESCRIPTION, DEFAULT_LAYERS, LAYERS, OVERLAYS, REDUCED_NOTE, REGION_VIEW, WORLD_PATH, boardPath, coverageLine } from '@/lib/world/constants';
 import { marksFor, type PlacedMark } from '@/lib/world/presentation';
 import { REGISTRY } from '@/lib/world/registry/subindustries.generated';
 import { bindingsFrom } from '@/world/data/boundary';
@@ -19,11 +19,13 @@ import { archetypeForZone, stationFor } from '@/world/interiors/stations';
 import { whiteboardFor } from '@/lib/world/whiteboard';
 import type { StationBinding, WhiteboardContent } from '@/world/data/types';
 import { STATUS, type LensId, type ShiftId } from '@/data/industryChain';
-import type { FrameReading, LayerName, OverlayName, Selection, ViewName, WorldHandle, WorldAction, WorldMark } from '@/world/engine/types';
+import type { FrameReading, OverlayName, Selection, ViewName, WorldHandle, WorldAction, WorldMark } from '@/world/engine/types';
 import { Card } from './Card';
+import { FrameHeader, PHONE_QUERY, PosterImage, type FrameControls } from './FrameShell';
 import { Search } from './Search';
 import { useWorldData } from './useWorldData';
 import { usePieces } from './usePieces';
+import './frame.css';
 import './world.css';
 
 const Board = lazy(() => import('./Board'));
@@ -38,11 +40,8 @@ export interface WorldFrameProps {
   onBoard?: (ticker: string | null) => void;
 }
 
-const DEFAULT_LAYERS: Record<LayerName, boolean> = { logistics: true, 'cold-chain': false, credit: false, energy: false, governance: false, regulation: false };
-
 export default function WorldFrame({ variant, heading, boardTicker = null, onBoard }: WorldFrameProps) {
-  const H = heading;
-  const phone = useMediaQuery('(max-width: 640px)');
+  const phone = useMediaQuery(PHONE_QUERY);
   const reduced = prefersReducedMotion();
   const navigate = useNavigate();
   const data = useWorldData();
@@ -163,18 +162,22 @@ export default function WorldFrame({ variant, heading, boardTicker = null, onBoa
   useEffect(() => { if (ready && exposedTicker && handle.current) { handle.current.exposeCompany(exposedTicker, bindings, whiteboard); if (boardTicker) { handle.current.setDistance(1); setDistance(1); } } }, [ready, exposedTicker, bindings, whiteboard, boardTicker]);
 
   const closeCard = () => { setSelection(null); setMark(null); handle.current?.select(null); host.current?.querySelector('canvas')?.focus(); };
-  const toggleLayer = (name: LayerName) => setLayers((s) => ({ ...s, [name]: !s[name] }));
-  const onDistance = (t: number) => { setDistance(t); handle.current?.setDistance(t); };
   const night = reading?.night ?? 0;
+  const controls: FrameControls = {
+    place: (v) => handle.current?.lookAt(v),
+    distance: (t) => { setDistance(t); handle.current?.setDistance(t); },
+    dragging: (on) => { dragging.current = on; },
+    overlay: (o) => { setOverlay(o); setMark(null); },
+    layer: (name) => setLayers((s) => ({ ...s, [name]: !s[name] })),
+    skema: () => setSkema(true),
+  };
 
-  const headerTitle = <H className="text-2xl font-display font-semibold tracking-tight">{TITLE}</H>;
-  const Sub = heading === 'h1' ? 'h2' : 'h3';
   const Stage = heading === 'h1' ? 'h3' : 'h4';
 
   if (reduced) {
     return (
       <div className="world-frame" data-world="reduced">
-        <p className="world-coverage">A living version of this map exists; it is not shown while your system asks for reduced motion.</p>
+        <p className="world-coverage">{REDUCED_NOTE}</p>
         <ChainPlate variant={variant} heading={heading} />
       </div>
     );
@@ -188,31 +191,12 @@ export default function WorldFrame({ variant, heading, boardTicker = null, onBoa
     );
   }
 
-  const places: ReactNode = PLACES.map((p) => <button key={p.view} type="button" className="world-btn" aria-current={view === p.view || (p.view === 'whole' && view === null && ready)} title={`${p.label} (${p.key})`} onClick={() => handle.current?.lookAt(p.view)}>{p.label}</button>);
-
   return (
     <div className="world-frame" data-world="on" data-ready={ready}>
-      <header className="grid gap-2">
-        <div className="flex flex-wrap items-baseline justify-between gap-3">
-          {headerTitle}
-          <p className="world-coverage" aria-live="polite">
-            {data.state === 'loading' ? 'Reading the published models…' : data.state === 'outage' ? 'Model status unavailable' : `${data.covered} of ${TOTAL_PLACED} sub-industries have a published model`}
-          </p>
-        </div>
-        <Sub className="sr-only">Controls</Sub>
-        <div className="world-frame__controls">
-          {phone ? <details className="world-frame__group"><summary className="world-btn">Places</summary><div className="world-frame__group">{places}</div></details> : <div className="world-frame__group" aria-label="Places"><span>Places</span>{places}</div>}
-          <div className="world-frame__group" aria-label="Zoom"><button type="button" className="world-btn" aria-label="Zoom in" onClick={() => { onDistance(Math.min(1, distance + 0.15)); }}>+</button><button type="button" className="world-btn" aria-label="Zoom out" onClick={() => { onDistance(Math.max(0, distance - 0.15)); }}>−</button></div>
-          <label className="world-distance"><span className="text-muted-foreground">Economy</span><input type="range" min={0} max={1} step={0.01} value={distance} aria-label="Distance: economy to finance" onChange={(e) => onDistance(Number(e.target.value))} onPointerDown={() => { dragging.current = true; }} onPointerUp={() => { dragging.current = false; }} onPointerCancel={() => { dragging.current = false; }} /><span className="text-muted-foreground">Finance</span></label>
-          <div className="world-frame__group" role="radiogroup" aria-label="Shift overlay"><span>Shift</span>{OVERLAYS.map((o) => <button key={o.overlay} type="button" role="radio" className="world-btn" aria-checked={overlay === o.overlay} onClick={() => { setOverlay(o.overlay); setMark(null); }}>{o.label}</button>)}</div>
-          <div className="world-frame__group" aria-label="Layers"><span>Layers</span>{LAYERS.map((l) => <button key={l.layer} type="button" className="world-btn" aria-pressed={layers[l.layer]} onClick={() => toggleLayer(l.layer)}>{l.label}</button>)}</div>
-          <Search pieces={pieces} onPick={(hit) => { if (hit.kind === 'piece') act({ type: 'open-piece', slug: hit.id }); else act({ type: 'select', id: hit.id }); }} />
-          <button type="button" className="world-btn" aria-pressed={false} onClick={() => setSkema(true)}>Skema</button>
-          {variant === 'preview' && <a className="world-btn" href={WORLD_PATH}>Open the world</a>}
-        </div>
-      </header>
+      <FrameHeader heading={heading} variant={variant} phone={phone} coverage={coverageLine(data.state, data.covered)} view={view} ready={ready} distance={distance} overlay={overlay} layers={layers} on={controls}
+        search={<Search pieces={pieces} onPick={(hit) => { if (hit.kind === 'piece') act({ type: 'open-piece', slug: hit.id }); else act({ type: 'select', id: hit.id }); }} />} />
       <div className="world-frame__stage" onPointerDown={() => void mount()} onKeyDown={() => void mount()}>
-        <img className="world-frame__poster" src="/world/poster-far.svg" alt="" data-hidden={ready} width={1600} height={952} decoding="async" fetchPriority="high" />
+        <PosterImage hidden={ready} />
         <Stage className="sr-only">The map</Stage>
         <div className="world-frame__canvas-host" ref={host} data-ready={ready} />
         <div className="world-frame__night" style={{ opacity: night * 0.55 }} aria-hidden="true" />
