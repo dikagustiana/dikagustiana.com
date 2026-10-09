@@ -13731,6 +13731,12 @@ export const LAYOUT: GeneratedLayout = {
    "region": "gateway"
   }
  ],
+ "hero": {
+  "x0": -310,
+  "x1": 470,
+  "y0": -330,
+  "y1": 240
+ },
  "rail": {
   "points": [
    [

@@ -118,6 +118,11 @@ export interface GeneratedLayout {
   signposts: readonly Signpost[];
   labels: readonly Label[];
   fixtures: readonly Fixture[];
+  /**
+   * The hero (PRD v2 §3.1): the ground the home view and the poster frame, the estate with the ring's near arc above
+   * it and the gateway's first blocks to its right. Absent in a layout with no estate.
+   */
+  hero?: Box;
   rail: { points: readonly Pt[]; yard: Box } | null;
   port: { quay: Box; apron: Box; water: Box } | null;
   hill: { centre: Pt; radius: number; height: number } | null;

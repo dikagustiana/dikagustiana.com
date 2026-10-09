@@ -1,16 +1,19 @@
 /**
- * The poster (PRD §7.1, §8.7; mega prompt §6.3): the far view of the world,
+ * The poster (PRD §7.1, §8.7; PRD v2 §3.1): the hero, the world's home view,
  * rendered headlessly to SVG from the same generated layout the engine
  * builds from, so the picture a visitor sees before the engine loads can
- * never drift from the registry. Written to public/world/poster-far.svg and
+ * never drift from the registry and is the frame the engine opens on.
+ * Written to public/world/poster-far.svg (the name the page preloads) and
  * committed; the build regenerates it and a test fails on drift.
  *
  *   node scripts/world/render-poster.mjs      (also the first step of npm run build)
  *
- * It draws what the far view draws: the slab, the regions, the water, the
- * hill, the roads (the raw-export road dashed), every block as an isometric
- * prism and the region labels. No status, no company, no figure: the
- * poster is the world at rest, the same for every visitor.
+ * It draws what the hero shows at the district band: the slab, the regions,
+ * the water, the hill, the roads (the raw-export road dashed), every company's
+ * lot as an isometric prism (a large family's shared form and its office
+ * units), the fixtures and the region labels, leaving out what falls outside
+ * the frame. No status, no ticker, no figure: the poster is the world at rest,
+ * the same for every visitor.
  *
  * It is the landing page's largest paint with the world on (gate 4, O8), so
  * it is written small: integer coordinates (one unit is under half a pixel
@@ -81,40 +84,78 @@ function prism(b, h, z0 = 0, attrs = '') {
 /** Heights by family, the far view's reading of them. */
 const HEIGHT = { pit: 1, 'well-pad': 6, quarry: 3, stockpile: 6, 'plantation-block': 3, field: 2, pond: 2, 'forest-block': 5, 'process-plant': 14, factory: 9, 'packaging-plant': 8, 'power-plant': 16, 'water-plant': 4, warehouse: 9, 'cold-store': 10, 'operator-office': 6, quay: 12, apron: 7, interchange: 7, 'rail-yard': 4, '3pl-shed': 9, depot: 7, 'market-hall': 8, supermarket: 6, minimarket: 4, 'department-store': 14, shop: 5, dealership: 6, hotel: 26, restaurant: 4, cinema: 11, school: 7, hospital: 18, clinic: 5, lab: 7, 'office-tower': 29, 'bank-tower': 38, exchange: 12, 'recycling-plant': 10, 'scrap-yard': 3, 'compost-site': 2, 'telecom-tower': 46, 'construction-site': 12, 'think-tank': 7 };
 
+/** Families drawn as one shared form behind an office unit per company (PRD v2 §3.5); the office strip's depth. */
+const LARGE = new Set(['pit', 'quarry', 'plantation-block', 'field', 'pond', 'forest-block', 'quay', 'apron', 'interchange', 'rail-yard', 'power-plant']);
+const OFFICE_STRIP = 12, OFFICE_HEIGHT = 4.4;
+/** The stage was laid out for a 1600 by 952 image (gate 4, O8): the frame keeps that aspect. */
+const ASPECT = 1600 / 952;
+
+/**
+ * The frame: the hero (PRD v2 §3.1) as the engine opens on it on the reference stage of 1,246 × 700 px, the hero's
+ * ground fitted with the engine's margin but never below its floor of 1.25 px/m, centred where the engine centres it;
+ * at the stage's aspect. One metre of the engine's screen is cos 30° × √2 poster units (both are the same isometric
+ * projection), so the frame is the engine's to the pixel at that stage.
+ */
+const STAGE = { w: 1246, h: 700 }, HERO_ZOOM = 1.25, MARGIN = 1.04, UNIT = C30 * Math.SQRT2;
+export function heroFrame(layout) {
+  const b = layout.hero ?? layout.world, pts = [];
+  for (const x of [b.x0, b.x1]) for (const y of [b.y0, b.y1]) for (const z of [0, 20]) pts.push(P(x, y, z));
+  const xs = pts.map((p) => p[0]), ys = pts.map((p) => p[1]);
+  const cx = (Math.min(...xs) + Math.max(...xs)) / 2, cy = (Math.min(...ys) + Math.max(...ys)) / 2;
+  const rSpan = (Math.max(...xs) - Math.min(...xs)) / UNIT, uSpan = (Math.max(...ys) - Math.min(...ys)) / UNIT;
+  const zoom = Math.max(HERO_ZOOM, Math.min(STAGE.w / (rSpan * MARGIN), STAGE.h / (uSpan * MARGIN)));
+  const fh = (STAGE.h / zoom) * UNIT, fw = fh * ASPECT;
+  return { x: cx - fw / 2, y: cy - fh / 2, w: fw, h: fh };
+}
+
+/**
+ * Every company as a building: a lot's prism at its family's height, a large family's shared form behind its office
+ * units; then the fixtures. The poster draws those near its frame, back to front (nearer = larger x + y).
+ */
+export function posterSolids(layout) {
+  const solids = [];
+  for (const b of layout.blocks) {
+    const h = HEIGHT[b.family] ?? 6;
+    if (LARGE.has(b.family)) {
+      const shared = b.front === 's' ? { ...b.box, y1: b.box.y1 - OFFICE_STRIP } : { ...b.box, x1: b.box.x1 - OFFICE_STRIP };
+      solids.push({ id: b.id, box: shared, h });
+      for (const l of b.lots ?? []) solids.push({ id: l.id, box: l.box, h: OFFICE_HEIGHT });
+    } else for (const l of b.lots ?? []) solids.push({ id: l.id, box: l.box, h });
+  }
+  for (const f of layout.fixtures) solids.push({ id: f.id, box: f.box, h: HEIGHT[f.kind] ?? 6, z0: f.kind === 'think-tank' && layout.hill ? layout.hill.height : 0 });
+  return solids;
+}
+
 export function renderPoster(layout, c = POSTER_COLOURS) {
-  const w = layout.world;
+  const w = layout.world, frame = heroFrame(layout);
+  // what lies wholly outside the frame (with a margin for strokes) is left out
+  const near = (pts) => { const xs = pts.map((p) => p[0]), ys = pts.map((p) => p[1]); return Math.max(...xs) >= frame.x - 40 && Math.min(...xs) <= frame.x + frame.w + 40 && Math.max(...ys) >= frame.y - 40 && Math.min(...ys) <= frame.y + frame.h + 40; };
+  const boxPts = (b, h = 0) => [P(b.x0, b.y0, 0), P(b.x1, b.y0, 0), P(b.x1, b.y1, 0), P(b.x0, b.y1, 0), P(b.x0, b.y0, h), P(b.x1, b.y1, h)];
   // the ground: the slab (its outline in muted, its top in the background), the regions, the water, the hill
   const ground = [prism(w, 4, 0, ` fill="${c.muted}"`)];
   for (const r of layout.regions) {
     const fill = r.id === 'estate' ? c.border : r.id === 'gateway' ? c.card : r.id === 'town' || r.id === 'recovery' ? c.card : r.id === 'hill' ? 'none' : c.muted;
-    if (fill !== 'none') ground.push(`<path fill="${fill}" d="${pathData(r.polygon.map(([x, y]) => P(x, y, 0.1)), true)}"/>`);
+    const pts = r.polygon.map(([x, y]) => P(x, y, 0.1));
+    if (fill !== 'none' && near(pts)) ground.push(`<path fill="${fill}" d="${pathData(pts, true)}"/>`);
   }
-  if (layout.port) { const wb = layout.port.water; ground.push(`<path fill="${c.secondary}" d="${pathData([P(wb.x0, wb.y0, -0.6), P(wb.x1, wb.y0, -0.6), P(wb.x1, wb.y1, -0.6), P(wb.x0, wb.y1, -0.6)], true)}"/>`); }
-  if (layout.hill) { const { centre: [cx, cy], radius, height } = layout.hill; for (let k = 0; k < 3; k++) { const r = radius * (1 - k * 0.28), z = (height / 3) * (k + 1), ring = []; for (let i = 0; i < 20; i++) { const a = i / 20 * Math.PI * 2; ring.push(P(cx + r * Math.cos(a), cy + r * 0.8 * Math.sin(a), z)); } ground.push(`<path fill="${c.muted}" d="${pathData(ring, true)}"/>`); } }
+  if (layout.port) { const wb = layout.port.water, pts = [P(wb.x0, wb.y0, 0), P(wb.x1, wb.y0, 0), P(wb.x1, wb.y1, 0), P(wb.x0, wb.y1, 0)]; if (near(pts)) ground.push(`<path fill="${c.secondary}" d="${pathData(pts, true)}"/>`); }
+  if (layout.hill) { const { centre: [cx, cy], radius, height } = layout.hill; for (let k = 0; k < 3; k++) { const r = radius * (1 - k * 0.28), z = (height / 3) * (k + 1), ring = []; for (let i = 0; i < 20; i++) { const a = i / 20 * Math.PI * 2; ring.push(P(cx + r * Math.cos(a), cy + r * 0.8 * Math.sin(a), z)); } if (near(ring)) ground.push(`<path fill="${c.muted}" d="${pathData(ring, true)}"/>`); } }
   // roads: one path per stroke width, in the order the widths first appear; the raw-export road dashed
   const byWidth = new Map();
   for (const r of layout.roads) {
     const pts = r.points.map(([x, y]) => P(x, y, 0.2));
     if (r.closed) pts.push(pts[0]);
+    if (!near(pts)) continue;
     const key = r.dashed ? 'dashed' : fmt(Math.max(1, r.width / 5));
     byWidth.set(key, (byWidth.get(key) ?? '') + pathData(pts));
   }
   const roads = [...byWidth].map(([k, d]) => (k === 'dashed' ? `<path stroke-dasharray="6 4" d="${d}"/>` : `<path stroke-width="${k}" d="${d}"/>`));
-  // blocks, back to front so nearer prisms cover farther ones (nearer = larger x + y), then the fixtures
-  const blocks = [...layout.blocks].sort((a, b) => (a.box.x0 + a.box.y0) - (b.box.x0 + b.box.y0)).map((b) => prism(b.box, HEIGHT[b.family] ?? 6));
-  for (const f of layout.fixtures) blocks.push(prism(f.box, HEIGHT[f.kind] ?? 6, f.kind === 'think-tank' && layout.hill ? layout.hill.height : 0));
+  const blocks = posterSolids(layout).filter((s) => near(boxPts(s.box, s.h + (s.z0 ?? 0)))).sort((a, b) => (a.box.x0 + a.box.y0) - (b.box.x0 + b.box.y0)).map((s) => prism(s.box, s.h, s.z0 ?? 0));
   // region labels
   const labels = layout.labels.filter((x) => x.level === 'far').map((l) => { const [x, y] = P(l.at[0], l.at[1], 0); return `<text x="${int(x)}" y="${int(y)}">${l.text.toUpperCase()}</text>`; });
-  // the frame: unchanged, so the image keeps its aspect and the stage nothing to re-lay
-  const corners = [P(w.x0, w.y0, 0), P(w.x1, w.y0, 0), P(w.x1, w.y1, 0), P(w.x0, w.y1, 0), P(w.x0, w.y0, -4), P(w.x1, w.y1, -4), P(w.x1, w.y0, 60)];
-  const xs = corners.map((p) => p[0]), ys = corners.map((p) => p[1]);
-  let minX = Math.min(...xs) - 20, maxX = Math.max(...xs) + 20, minY = Math.min(...ys) - 60, maxY = Math.max(...ys) + 20;
-  // the stage was laid out for a 1600 by 952 image: the frame keeps that aspect, the drawing centred in it
-  const ASPECT = 1600 / 952, fw = maxX - minX, fh = maxY - minY;
-  if (fw / fh < ASPECT) { const grow = (fh * ASPECT - fw) / 2; minX -= grow; maxX += grow; } else { const grow = (fw / ASPECT - fh) / 2; minY -= grow; maxY += grow; }
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${fmt(minX)} ${fmt(minY)} ${fmt(maxX - minX)} ${fmt(maxY - minY)}" role="img" aria-label="The industrial estate at the far view: the ring of primary resources, the estate at the centre, the gateway and port to the east, the town beyond, the think tank on its hill. A still of the world before it starts.">
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${fmt(frame.x)} ${fmt(frame.y)} ${fmt(frame.w)} ${fmt(frame.h)}" role="img" aria-label="The industrial estate as the world opens: the estate at the centre with its companies' buildings, the ring of primary resources above it, the gateway and port to the east. A still of the world before it starts.">
 <style>path{vector-effect:non-scaling-stroke;stroke-linejoin:round}.t{fill:${c.background}}</style>
-<rect x="${fmt(minX)}" y="${fmt(minY)}" width="${fmt(maxX - minX)}" height="${fmt(maxY - minY)}" fill="${c.background}"/>
+<rect x="${fmt(frame.x)}" y="${fmt(frame.y)}" width="${fmt(frame.w)}" height="${fmt(frame.h)}" fill="${c.background}"/>
 <g stroke="${c.border}">${ground.join('')}</g>
 <g fill="none" stroke="${c.mutedForeground}">${roads.join('')}</g>
 <g fill="${c.card}" stroke="${c.mutedForeground}">${blocks.join('')}</g>

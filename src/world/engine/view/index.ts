@@ -100,9 +100,9 @@ export function viewBoxes(layout: GeneratedLayout): Record<ViewName, Frame> {
   const thinktank: Frame = tank
     ? { box: { x0: tank.box.x0 - 30, x1: tank.box.x1 + 30, y0: tank.box.y0 - 30, y1: tank.box.y1 + 30 }, z: [hillZ, hillZ + 10] }
     : layout.hill ? { box: { x0: layout.hill.centre[0] - layout.hill.radius, x1: layout.hill.centre[0] + layout.hill.radius, y0: layout.hill.centre[1] - layout.hill.radius, y1: layout.hill.centre[1] + layout.hill.radius }, z: [0, hillZ + 10] } : region(['hill']);
-  // the hero (PRD v2 §3.1): the estate, the ring's near arc above it and the gateway's first blocks to the right
-  const est = boundsOf(['estate']), gw = boundsOf(['gateway']);
-  const hero: Frame = est ? { box: { x0: est.x0 - 20, x1: gw ? Math.max(est.x1, gw.x0 + 90) : est.x1 + 20, y0: est.y0 - 110, y1: est.y1 + 20 }, z: [0, 20] } : whole;
+  // the hero (PRD v2 §3.1): the layout's own frame (the poster draws the same), else the estate
+  const est = boundsOf(['estate']);
+  const hero: Frame = layout.hero ? { box: layout.hero, z: [0, 20] } : est ? { box: est, z: [0, 20] } : whole;
   return { hero, whole, ring: region(['ring-geological', 'ring-biological']), estate: region(['estate']), gateway: region(['gateway']), town: region(['town']), thinktank };
 }
 

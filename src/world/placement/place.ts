@@ -387,8 +387,11 @@ export function placeWorld(registry: Registry, seed = 20261004, registrySha256 =
   ]);
   const world: Box = pad(content, MARGIN);
 
+  // ---- the hero (PRD v2 §3.1): the estate, the ring's near arc above it, the gateway's first blocks to its right ----
+  const hero: Box = { x0: ESTATE.x0 - 20, x1: Math.max(ESTATE.x1, GATEWAY.x0 + 90), y0: ESTATE.y0 - 110, y1: ESTATE.y1 + 20 };
+
   return {
-    world, seed, registrySha256, regions, blocks, roads, gates, signposts, labels, fixtures,
+    world, seed, registrySha256, regions, blocks, roads, gates, signposts, labels, fixtures, hero,
     rail,
     port: { quay: box(GATEWAY.x0, WATER.y0 - 10, GATEWAY.x1 - GATEWAY.x0, 10), apron: box(GATEWAY.x0, WATER.y0 - 60, GATEWAY.x1 - GATEWAY.x0, 50), water: WATER },
     hill: HILL,
