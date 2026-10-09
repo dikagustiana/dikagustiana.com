@@ -15,9 +15,12 @@ institutional), `version`, `last_updated`, `documentation` (jsonb), `module_refe
 ## What the viewer needs from the database
 
 The viewer reads one JSON package per model version (`src/lib/finance-in-action/contract/`).
-The package itself is FSRE's output and belongs in FSRE's published schema
-(`fsre_published.model_snapshots`, FSRE `db/postgres/0003_published.sql`), which is not on
-the project yet. `finance_models` should stay the site's own listing: one row per company in
+The package itself is FSRE's output and belongs in FSRE's published schema: the view
+`fsre_published.model_packages` (FSRE `db/postgres/0004_live.sql`, one row per approved
+`package_release`, the package as JSON), which `src/lib/finance-in-action/published.ts` reads.
+The older views `model_snapshots` and `workbooks` (`0003_published.sql`) belong to the
+`tools/publish.py` xlsx path and are not read by the site. None of it is on the project until
+the FSRE bring-up runbook (`fsre-skills/docs/deployment-runbook-0005.md`) has been run. `finance_models` should stay the site's own listing: one row per company in
 the section, holding what the index needs without opening any package, and pointing at the
 published package version.
 
@@ -57,9 +60,10 @@ Notes:
   existing pages; the v3.1 viewer does not read them.
 - RLS needs no change: anon keeps reading `is_published` rows only. Whether `is_published`
   should follow `status in ('published', 'preview')` is an owner decision.
-- The package is fetched from `fsre_published.model_snapshots` by `(company_id, wave_id)`
-  and checked against `package_hash` before rendering: a package whose hash differs from the
-  listed one is not shown.
+- The package is fetched from `fsre_published.model_packages` (today: every approved package in
+  one read; by `(company_id, version)` once this listing exists) and checked against
+  `package_hash` before rendering: a package whose hash differs from the listed one is not
+  shown.
 
 ## Contract additions recorded in the Commit 0 report
 

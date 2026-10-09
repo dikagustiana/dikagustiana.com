@@ -5,6 +5,14 @@
  * A package is listed only if it passes both the contract rules
  * (validatePackage) and the engine checks (checkFormulas); one that fails is
  * kept aside with its issues so the page can say so instead of drawing it.
+ *
+ * The Finance in Action pages also require a sub-industry the section lists
+ * (`requireListedSubIndustry`): the index draws companies under their
+ * sub-industry, so a package the section cannot place would otherwise be
+ * neither drawn nor reported (found on the first end-to-end run, PRD "FSRE
+ * publish path" M5). It is an option, off by default, because the Kawasan
+ * Industri world builds the same registry and reads companies by ticker
+ * against its own 125 sub-industries, where the section's list says nothing.
  */
 import type { Depth, ModelStatus } from './constants';
 import { STATUSES } from './constants';
@@ -68,12 +76,21 @@ export interface Registry {
 
 const STATUS_ORDER = STATUSES.map((s) => s.id);
 
-export function buildRegistry(src: RegistrySources): Registry {
+export interface RegistryOptions {
+  /** Reject a package whose meta.subIndustry is not in `subIndustries` (the section's pages); default false. */
+  requireListedSubIndustry?: boolean;
+}
+
+export function buildRegistry(src: RegistrySources, options: RegistryOptions = {}): Registry {
   const workbooks = new Map<string, Workbook>();
   const packages: ModelPackage[] = [];
   const rejected: Registry['rejected'] = [];
+  const listed = new Set(src.subIndustries.map((s) => s.code));
   for (const pkg of src.packages) {
     const issues = validatePackage(pkg);
+    if (options.requireListedSubIndustry && !listed.has(pkg.meta.subIndustry)) {
+      issues.push({ path: 'meta.subIndustry', message: `${pkg.meta.subIndustry} is not a sub-industry the section lists, so the package has no place on the chain` });
+    }
     let wb: Workbook | undefined;
     if (!issues.length) {
       wb = new Workbook(pkg);

@@ -9,8 +9,15 @@ export default defineConfig(({ mode }) => ({
   // SYNTHETIC fixtures. It becomes a compile-time constant so that, unset,
   // the viewer and the fixtures are dead code Rollup drops: no chunk of them
   // reaches dist/. scripts/assert-no-synthetic.mjs checks that after the build.
+  //
+  // VITE_FIA_LIVE=true (PRD "FSRE publish path" §6.3 A) is the production
+  // path: the same viewer over the PUBLISHED packages only, with no fixture
+  // in the bundle (src/lib/finance-in-action/live.ts imports none). Both
+  // flags unset: the route renders the legacy pages exactly as before. Both
+  // set is not a build; assert-no-synthetic refuses it.
   define: {
     __FIA_PREVIEW__: JSON.stringify(loadEnv(mode, process.cwd(), "VITE_").VITE_FIA_PREVIEW === "true"),
+    __FIA_LIVE__: JSON.stringify(loadEnv(mode, process.cwd(), "VITE_").VITE_FIA_LIVE === "true"),
     // The Kawasan Industri world (docs/world/PRD-kawasan-industri.md §7.1):
     // VITE_WORLD_KAWASAN=true builds the world behind the chain map's slot.
     // Unset, the schematic renders exactly as before and the world's

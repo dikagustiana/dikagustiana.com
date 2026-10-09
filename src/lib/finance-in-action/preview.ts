@@ -30,7 +30,7 @@ export function buildPreviewRegistry(published: ModelPackage[] = []): Registry {
     slate: slate.companies as SlateEntry[],
     subIndustries: [...subIndustries, ...syntheticSubIndustries] as SubIndustry[],
     links: [...links, ...syntheticLinks] as IndustryLink[],
-  });
+  }, { requireListedSubIndustry: true });
 }
 
 /** The fixtures alone, built once. */
