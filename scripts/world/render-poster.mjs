@@ -117,7 +117,7 @@ export function posterSolids(layout) {
   for (const b of layout.blocks) {
     const h = HEIGHT[b.family] ?? 6;
     if (LARGE.has(b.family)) {
-      const shared = b.front === 's' ? { ...b.box, y1: b.box.y1 - OFFICE_STRIP } : { ...b.box, x1: b.box.x1 - OFFICE_STRIP };
+      const side = b.entry ?? b.front, shared = side === 's' ? { ...b.box, y1: b.box.y1 - OFFICE_STRIP } : side === 'n' ? { ...b.box, y0: b.box.y0 + OFFICE_STRIP } : { ...b.box, x1: b.box.x1 - OFFICE_STRIP };
       solids.push({ id: b.id, box: shared, h });
       for (const l of b.lots ?? []) solids.push({ id: l.id, box: l.box, h: OFFICE_HEIGHT });
     } else for (const l of b.lots ?? []) solids.push({ id: l.id, box: l.box, h });

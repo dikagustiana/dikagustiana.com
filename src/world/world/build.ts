@@ -161,7 +161,7 @@ export function buildWorldScene(ctx: EngineContext, layout: GeneratedLayout, onA
     p.tint = 1 + r.rand(-TONE_STEP, TONE_STEP);
     blockYard(p, b.family, b.box);
     if (LARGE_FAMILIES.includes(b.family)) {
-      const shared = sharedBox(b.box, b.front, OFFICE_STRIP), d = FAMILY_BUILDERS[b.family](p, shared, r);
+      const shared = sharedBox(b.box, b.entry, OFFICE_STRIP), d = FAMILY_BUILDERS[b.family](p, shared, r);
       shadow(p, shared, d.top); z.rects.set(b.code, d.windows); z.tops.set(b.code, d.top);
       for (const l of b.lots) { if (z.skip.has(l.id)) continue; const o = officeUnit(p, l.box); shadow(p, l.box, o.top); z.rects.set(l.id, o.windows); z.tops.set(l.id, o.top); }
     } else {

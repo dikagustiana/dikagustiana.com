@@ -98,6 +98,35 @@ describe('placement', () => {
     expect([...new Set(hits)]).toEqual([]);
   });
 
+  it('builds a road graph on which every bay reaches every other bay, every gate is a node, and no edge crosses a lot (PRD v2 §3.6, B4)', () => {
+    const g = layout.graph!;
+    const adj = new Map<number, number[]>();
+    for (const e of g.edges) { adj.set(e.a, [...(adj.get(e.a) ?? []), e.b]); adj.set(e.b, [...(adj.get(e.b) ?? []), e.a]); }
+    const bays = g.nodes.filter((n) => n.kind === 'despatch' || n.kind === 'receiving');
+    expect(bays).toHaveLength(layout.blocks.length * 2 * 2);
+    // every edge is two-way, so one search from any bay finds the component every bay must be in
+    const seen = new Set([bays[0].id]), queue = [bays[0].id];
+    while (queue.length) for (const m of adj.get(queue.shift()!) ?? []) if (!seen.has(m)) { seen.add(m); queue.push(m); }
+    expect(bays.filter((b) => !seen.has(b.id)).map((b) => `${b.ref} ${b.kind}`)).toEqual([]);
+    // each lot's bays are nodes where the layout puts them
+    for (const b of layout.blocks) for (const l of b.lots) {
+      const d = g.nodes.find((n) => n.kind === 'despatch' && n.ref === l.id)!, r = g.nodes.find((n) => n.kind === 'receiving' && n.ref === l.id)!;
+      expect(Math.hypot(d.at[0] - l.bays.despatch[0], d.at[1] - l.bays.despatch[1]), l.id).toBeLessThan(0.05);
+      expect(Math.hypot(r.at[0] - l.bays.receiving[0], r.at[1] - l.bays.receiving[1]), l.id).toBeLessThan(0.05);
+    }
+    for (const gate of layout.gates) expect(g.nodes.some((n) => n.kind === 'gate' && n.ref === gate.id), gate.id).toBe(true);
+    // no edge passes through a lot (a driveway leaves its own lot's front)
+    const lots = layout.blocks.flatMap((b) => b.lots);
+    const hits: string[] = [];
+    for (const e of g.edges) for (const l of lots) {
+      if (e.road === `driveway:${l.id}`) continue;
+      const box = { x0: l.box.x0 + 0.25, x1: l.box.x1 - 0.25, y0: l.box.y0 + 0.25, y1: l.box.y1 - 0.25 };
+      if (e.points.slice(1).some((q, i) => segmentCrosses(e.points[i], q, box))) hits.push(`${e.road} × ${l.id}`);
+    }
+    expect(hits).toEqual([]);
+    for (const e of g.edges) expect(e.length, `${e.road} ${e.id}`).toBeGreaterThan(0);
+  });
+
   it('keeps every block inside the world', () => {
     for (const b of layout.blocks) expect(inside(b.box, layout.world), b.id).toBe(true);
     for (const f of layout.fixtures) expect(inside(f.box, layout.world), f.id).toBe(true);
