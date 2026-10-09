@@ -179,10 +179,13 @@ describe('case companies stay out of the page while SHOW_CASE_COMPANIES is false
       await h1(title as string);
       await waitFor(() => expect(document.title).toContain(title as string));
 
-      // "The Situation" still names the layer and ends at "condition."
-      const situation = screen.getByRole('heading', { level: 2, name: 'The Situation' }).nextElementSibling;
-      expect(situation?.textContent?.trim().endsWith('condition.')).toBe(true);
-      expect(situation?.textContent).not.toMatch(/observed in the case of/);
+      // With no case to name, "The Situation" is not rendered at all: it used
+      // to be one line of boilerplate ("This is a operational condition.").
+      expect(screen.queryByRole('heading', { level: 2, name: 'The Situation' })).not.toBeInTheDocument();
+      expect(document.body.textContent).not.toMatch(/observed in the case of/);
+      // The tension appears once, not twice.
+      const condition = CONDITIONS.find((c) => c.id === id)!;
+      expect(screen.getAllByText(condition.tension)).toHaveLength(1);
 
       expect(leaksAnyCaseCompany()).toBe(false);
     },
