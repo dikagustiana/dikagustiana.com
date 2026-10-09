@@ -154,4 +154,4 @@ unchanged byte for byte.
 
 ## 6. The pull request
 
-See the pull request for `world-v2/a-scale` (link added on the pull request page; this note is part of it).
+https://github.com/dikagustiana/dikagustiana.com/pull/54
