@@ -3,10 +3,10 @@ import type { GeneratedLayout } from './types';
 
 export const LAYOUT: GeneratedLayout = {
  "world": {
-  "x0": -760,
-  "x1": 1700,
-  "y0": -720,
-  "y1": 720
+  "x0": -560,
+  "x1": 1093,
+  "y0": -518,
+  "y1": 418
  },
  "seed": 20261004,
  "registrySha256": "8430e39e63277aae1d3d6de4bd572607e9cd95b8c07ec86d0a5a7b058a738eb7",
@@ -16,29 +16,33 @@ export const LAYOUT: GeneratedLayout = {
    "label": "Geological arc",
    "polygon": [
     [
-     -670,
-     -590
+     -460,
+     -376
     ],
     [
-     450,
-     -590
+     166,
+     -376
     ],
     [
-     450,
-     -390
+     166,
+     -286
     ],
     [
-     -470,
-     -390
+     -350,
+     -286
     ],
     [
-     -670,
-     60
+     -350,
+     -86
+    ],
+    [
+     -460,
+     -86
     ]
    ],
    "anchor": [
-    -510,
-    -510
+    -147,
+    -394
    ]
   },
   {
@@ -46,29 +50,25 @@ export const LAYOUT: GeneratedLayout = {
    "label": "Biological arc",
    "polygon": [
     [
-     -670,
-     60
+     -480,
+     -86
     ],
     [
-     -470,
-     390
+     -350,
+     -86
     ],
     [
-     350,
-     390
+     -350,
+     280
     ],
     [
-     350,
-     610
-    ],
-    [
-     -670,
-     610
+     -480,
+     280
     ]
    ],
    "anchor": [
-    -510,
-    490
+    -486,
+    97
    ]
   },
   {
@@ -102,25 +102,25 @@ export const LAYOUT: GeneratedLayout = {
    "label": "Gateway",
    "polygon": [
     [
-     500,
-     -330
+     380,
+     -290
     ],
     [
-     780,
-     -330
+     680,
+     -290
     ],
     [
-     780,
-     400
+     680,
+     160
     ],
     [
-     500,
-     400
+     380,
+     160
     ]
    ],
    "anchor": [
-    640,
-    -360
+    530,
+    -310
    ]
   },
   {
@@ -128,25 +128,25 @@ export const LAYOUT: GeneratedLayout = {
    "label": "Town",
    "polygon": [
     [
-     810,
-     -200
+     720,
+     -244
     ],
     [
-     1680,
-     -200
+     1012,
+     -244
     ],
     [
-     1680,
-     250
+     1012,
+     240
     ],
     [
-     810,
-     250
+     720,
+     240
     ]
    ],
    "anchor": [
-    1245,
-    -220
+    866,
+    -268
    ]
   },
   {
@@ -154,25 +154,25 @@ export const LAYOUT: GeneratedLayout = {
    "label": "Recovery yard",
    "polygon": [
     [
-     860,
-     -560
+     752,
+     262
     ],
     [
-     1000,
-     -560
+     892,
+     262
     ],
     [
-     1000,
-     -450
+     892,
+     334
     ],
     [
-     860,
-     -450
+     752,
+     334
     ]
    ],
    "anchor": [
-    930,
-    -580
+    822,
+    356
    ]
   },
   {
@@ -180,25 +180,25 @@ export const LAYOUT: GeneratedLayout = {
    "label": "Think tank",
    "polygon": [
     [
-     1370,
-     -650
+     772,
+     -438
     ],
     [
-     1590,
-     -650
+     944,
+     -438
     ],
     [
-     1590,
-     -430
+     944,
+     -266
     ],
     [
-     1370,
-     -430
+     772,
+     -266
     ]
    ],
    "anchor": [
-    1480,
-    -670
+    858,
+    -458
    ]
   }
  ],
@@ -248,7 +248,7 @@ export const LAYOUT: GeneratedLayout = {
    ],
    "anchor": [
     -239,
-    -208
+    -150
    ]
   },
   {
@@ -296,7 +296,7 @@ export const LAYOUT: GeneratedLayout = {
    ],
    "anchor": [
     -157,
-    -208
+    -150
    ]
   },
   {
@@ -344,156 +344,12 @@ export const LAYOUT: GeneratedLayout = {
    ],
    "anchor": [
     -75,
-    -208
+    -150
    ]
   },
   {
    "id": "B113",
    "code": "B113",
-   "zone": "estate-primary",
-   "region": "estate",
-   "family": "process-plant",
-   "box": {
-    "x0": -28,
-    "y0": -204,
-    "x1": 42,
-    "y1": -154
-   },
-   "front": "s",
-   "plots": [
-    {
-     "id": "B113-plot-1",
-     "slot": 0,
-     "box": {
-      "x0": -25,
-      "y0": -171,
-      "x1": 5.5,
-      "y1": -157
-     },
-     "sign": [
-      -23.5,
-      -156
-     ]
-    },
-    {
-     "id": "B113-plot-2",
-     "slot": 1,
-     "box": {
-      "x0": 8.5,
-      "y0": -171,
-      "x1": 39,
-      "y1": -157
-     },
-     "sign": [
-      10,
-      -156
-     ]
-    }
-   ],
-   "anchor": [
-    7,
-    -208
-   ]
-  },
-  {
-   "id": "B121",
-   "code": "B121",
-   "zone": "estate-primary",
-   "region": "estate",
-   "family": "process-plant",
-   "box": {
-    "x0": 54,
-    "y0": -204,
-    "x1": 124,
-    "y1": -154
-   },
-   "front": "s",
-   "plots": [
-    {
-     "id": "B121-plot-1",
-     "slot": 0,
-     "box": {
-      "x0": 57,
-      "y0": -171,
-      "x1": 87.5,
-      "y1": -157
-     },
-     "sign": [
-      58.5,
-      -156
-     ]
-    },
-    {
-     "id": "B121-plot-2",
-     "slot": 1,
-     "box": {
-      "x0": 90.5,
-      "y0": -171,
-      "x1": 121,
-      "y1": -157
-     },
-     "sign": [
-      92,
-      -156
-     ]
-    }
-   ],
-   "anchor": [
-    89,
-    -208
-   ]
-  },
-  {
-   "id": "B141",
-   "code": "B141",
-   "zone": "estate-primary",
-   "region": "estate",
-   "family": "process-plant",
-   "box": {
-    "x0": 136,
-    "y0": -204,
-    "x1": 206,
-    "y1": -154
-   },
-   "front": "s",
-   "plots": [
-    {
-     "id": "B141-plot-1",
-     "slot": 0,
-     "box": {
-      "x0": 139,
-      "y0": -171,
-      "x1": 169.5,
-      "y1": -157
-     },
-     "sign": [
-      140.5,
-      -156
-     ]
-    },
-    {
-     "id": "B141-plot-2",
-     "slot": 1,
-     "box": {
-      "x0": 172.5,
-      "y0": -171,
-      "x1": 203,
-      "y1": -157
-     },
-     "sign": [
-      174,
-      -156
-     ]
-    }
-   ],
-   "anchor": [
-    171,
-    -208
-   ]
-  },
-  {
-   "id": "B144",
-   "code": "B144",
    "zone": "estate-primary",
    "region": "estate",
    "family": "process-plant",
@@ -506,7 +362,7 @@ export const LAYOUT: GeneratedLayout = {
    "front": "s",
    "plots": [
     {
-     "id": "B144-plot-1",
+     "id": "B113-plot-1",
      "slot": 0,
      "box": {
       "x0": -271,
@@ -520,7 +376,7 @@ export const LAYOUT: GeneratedLayout = {
      ]
     },
     {
-     "id": "B144-plot-2",
+     "id": "B113-plot-2",
      "slot": 1,
      "box": {
       "x0": -237.5,
@@ -536,7 +392,151 @@ export const LAYOUT: GeneratedLayout = {
    ],
    "anchor": [
     -239,
-    -146
+    -88
+   ]
+  },
+  {
+   "id": "B121",
+   "code": "B121",
+   "zone": "estate-primary",
+   "region": "estate",
+   "family": "process-plant",
+   "box": {
+    "x0": 8,
+    "y0": -204,
+    "x1": 78,
+    "y1": -154
+   },
+   "front": "s",
+   "plots": [
+    {
+     "id": "B121-plot-1",
+     "slot": 0,
+     "box": {
+      "x0": 11,
+      "y0": -171,
+      "x1": 41.5,
+      "y1": -157
+     },
+     "sign": [
+      12.5,
+      -156
+     ]
+    },
+    {
+     "id": "B121-plot-2",
+     "slot": 1,
+     "box": {
+      "x0": 44.5,
+      "y0": -171,
+      "x1": 75,
+      "y1": -157
+     },
+     "sign": [
+      46,
+      -156
+     ]
+    }
+   ],
+   "anchor": [
+    43,
+    -150
+   ]
+  },
+  {
+   "id": "B141",
+   "code": "B141",
+   "zone": "estate-primary",
+   "region": "estate",
+   "family": "process-plant",
+   "box": {
+    "x0": 90,
+    "y0": -204,
+    "x1": 160,
+    "y1": -154
+   },
+   "front": "s",
+   "plots": [
+    {
+     "id": "B141-plot-1",
+     "slot": 0,
+     "box": {
+      "x0": 93,
+      "y0": -171,
+      "x1": 123.5,
+      "y1": -157
+     },
+     "sign": [
+      94.5,
+      -156
+     ]
+    },
+    {
+     "id": "B141-plot-2",
+     "slot": 1,
+     "box": {
+      "x0": 126.5,
+      "y0": -171,
+      "x1": 157,
+      "y1": -157
+     },
+     "sign": [
+      128,
+      -156
+     ]
+    }
+   ],
+   "anchor": [
+    125,
+    -150
+   ]
+  },
+  {
+   "id": "B144",
+   "code": "B144",
+   "zone": "estate-primary",
+   "region": "estate",
+   "family": "process-plant",
+   "box": {
+    "x0": 172,
+    "y0": -204,
+    "x1": 242,
+    "y1": -154
+   },
+   "front": "s",
+   "plots": [
+    {
+     "id": "B144-plot-1",
+     "slot": 0,
+     "box": {
+      "x0": 175,
+      "y0": -171,
+      "x1": 205.5,
+      "y1": -157
+     },
+     "sign": [
+      176.5,
+      -156
+     ]
+    },
+    {
+     "id": "B144-plot-2",
+     "slot": 1,
+     "box": {
+      "x0": 208.5,
+      "y0": -171,
+      "x1": 239,
+      "y1": -157
+     },
+     "sign": [
+      210,
+      -156
+     ]
+    }
+   ],
+   "anchor": [
+    207,
+    -150
    ]
   },
   {
@@ -546,9 +546,9 @@ export const LAYOUT: GeneratedLayout = {
    "region": "estate",
    "family": "process-plant",
    "box": {
-    "x0": -192,
+    "x0": 8,
     "y0": -142,
-    "x1": -122,
+    "x1": 78,
     "y1": -92
    },
    "front": "s",
@@ -557,13 +557,13 @@ export const LAYOUT: GeneratedLayout = {
      "id": "B152-plot-1",
      "slot": 0,
      "box": {
-      "x0": -189,
+      "x0": 11,
       "y0": -109,
-      "x1": -158.5,
+      "x1": 41.5,
       "y1": -95
      },
      "sign": [
-      -187.5,
+      12.5,
       -94
      ]
     },
@@ -571,20 +571,20 @@ export const LAYOUT: GeneratedLayout = {
      "id": "B152-plot-2",
      "slot": 1,
      "box": {
-      "x0": -155.5,
+      "x0": 44.5,
       "y0": -109,
-      "x1": -125,
+      "x1": 75,
       "y1": -95
      },
      "sign": [
-      -154,
+      46,
       -94
      ]
     }
    ],
    "anchor": [
-    -157,
-    -146
+    43,
+    -88
    ]
   },
   {
@@ -631,8 +631,8 @@ export const LAYOUT: GeneratedLayout = {
     }
    ],
    "anchor": [
-    -242,
-    -82
+    -206,
+    -53
    ]
   },
   {
@@ -679,8 +679,8 @@ export const LAYOUT: GeneratedLayout = {
     }
    ],
    "anchor": [
-    -242,
-    -20
+    -206,
+    9
    ]
   },
   {
@@ -693,7 +693,7 @@ export const LAYOUT: GeneratedLayout = {
     "x0": -274,
     "y0": 46,
     "x1": -230,
-    "y1": 86
+    "y1": 90
    },
    "front": "e",
    "plots": [
@@ -704,7 +704,7 @@ export const LAYOUT: GeneratedLayout = {
       "x0": -247,
       "y0": 49,
       "x1": -233,
-      "y1": 64.5
+      "y1": 66.5
      },
      "sign": [
       -232,
@@ -716,19 +716,19 @@ export const LAYOUT: GeneratedLayout = {
      "slot": 1,
      "box": {
       "x0": -247,
-      "y0": 67.5,
+      "y0": 69.5,
       "x1": -233,
-      "y1": 83
+      "y1": 87
      },
      "sign": [
       -232,
-      69
+      71
      ]
     }
    ],
    "anchor": [
-    -252,
-    42
+    -226,
+    68
    ]
   },
   {
@@ -738,9 +738,9 @@ export const LAYOUT: GeneratedLayout = {
    "region": "estate",
    "family": "factory",
    "box": {
-    "x0": -178,
+    "x0": -194,
     "y0": -78,
-    "x1": -134,
+    "x1": -150,
     "y1": -46
    },
    "front": "s",
@@ -749,13 +749,13 @@ export const LAYOUT: GeneratedLayout = {
      "id": "A211-plot-1",
      "slot": 0,
      "box": {
-      "x0": -175,
+      "x0": -191,
       "y0": -63,
-      "x1": -157.5,
+      "x1": -173.5,
       "y1": -49
      },
      "sign": [
-      -173.5,
+      -189.5,
       -48
      ]
     },
@@ -763,20 +763,20 @@ export const LAYOUT: GeneratedLayout = {
      "id": "A211-plot-2",
      "slot": 1,
      "box": {
-      "x0": -154.5,
+      "x0": -170.5,
       "y0": -63,
-      "x1": -137,
+      "x1": -153,
       "y1": -49
      },
      "sign": [
-      -153,
+      -169,
       -48
      ]
     }
    ],
    "anchor": [
-    -156,
-    -82
+    -172,
+    -42
    ]
   },
   {
@@ -786,9 +786,9 @@ export const LAYOUT: GeneratedLayout = {
    "region": "estate",
    "family": "packaging-plant",
    "box": {
-    "x0": -124,
+    "x0": -140,
     "y0": -78,
-    "x1": -80,
+    "x1": -96,
     "y1": -46
    },
    "front": "s",
@@ -797,13 +797,13 @@ export const LAYOUT: GeneratedLayout = {
      "id": "B131-plot-1",
      "slot": 0,
      "box": {
-      "x0": -121,
+      "x0": -137,
       "y0": -63,
-      "x1": -103.5,
+      "x1": -119.5,
       "y1": -49
      },
      "sign": [
-      -119.5,
+      -135.5,
       -48
      ]
     },
@@ -811,20 +811,20 @@ export const LAYOUT: GeneratedLayout = {
      "id": "B131-plot-2",
      "slot": 1,
      "box": {
-      "x0": -100.5,
+      "x0": -116.5,
       "y0": -63,
-      "x1": -83,
+      "x1": -99,
       "y1": -49
      },
      "sign": [
-      -99,
+      -115,
       -48
      ]
     }
    ],
    "anchor": [
-    -102,
-    -82
+    -118,
+    -42
    ]
   },
   {
@@ -834,9 +834,9 @@ export const LAYOUT: GeneratedLayout = {
    "region": "estate",
    "family": "factory",
    "box": {
-    "x0": -70,
+    "x0": -86,
     "y0": -78,
-    "x1": -26,
+    "x1": -42,
     "y1": -46
    },
    "front": "s",
@@ -845,13 +845,13 @@ export const LAYOUT: GeneratedLayout = {
      "id": "C111-plot-1",
      "slot": 0,
      "box": {
-      "x0": -67,
+      "x0": -83,
       "y0": -63,
-      "x1": -49.5,
+      "x1": -65.5,
       "y1": -49
      },
      "sign": [
-      -65.5,
+      -81.5,
       -48
      ]
     },
@@ -859,20 +859,20 @@ export const LAYOUT: GeneratedLayout = {
      "id": "C111-plot-2",
      "slot": 1,
      "box": {
-      "x0": -46.5,
+      "x0": -62.5,
       "y0": -63,
-      "x1": -29,
+      "x1": -45,
       "y1": -49
      },
      "sign": [
-      -45,
+      -61,
       -48
      ]
     }
    ],
    "anchor": [
-    -48,
-    -82
+    -64,
+    -42
    ]
   },
   {
@@ -882,9 +882,9 @@ export const LAYOUT: GeneratedLayout = {
    "region": "estate",
    "family": "factory",
    "box": {
-    "x0": -16,
+    "x0": 8,
     "y0": -78,
-    "x1": 28,
+    "x1": 52,
     "y1": -46
    },
    "front": "s",
@@ -893,13 +893,13 @@ export const LAYOUT: GeneratedLayout = {
      "id": "C121-plot-1",
      "slot": 0,
      "box": {
-      "x0": -13,
+      "x0": 11,
       "y0": -63,
-      "x1": 4.5,
+      "x1": 28.5,
       "y1": -49
      },
      "sign": [
-      -11.5,
+      12.5,
       -48
      ]
     },
@@ -907,20 +907,20 @@ export const LAYOUT: GeneratedLayout = {
      "id": "C121-plot-2",
      "slot": 1,
      "box": {
-      "x0": 7.5,
+      "x0": 31.5,
       "y0": -63,
-      "x1": 25,
+      "x1": 49,
       "y1": -49
      },
      "sign": [
-      9,
+      33,
       -48
      ]
     }
    ],
    "anchor": [
-    6,
-    -82
+    30,
+    -42
    ]
   },
   {
@@ -930,9 +930,9 @@ export const LAYOUT: GeneratedLayout = {
    "region": "estate",
    "family": "factory",
    "box": {
-    "x0": 38,
+    "x0": 62,
     "y0": -78,
-    "x1": 82,
+    "x1": 106,
     "y1": -46
    },
    "front": "s",
@@ -941,13 +941,13 @@ export const LAYOUT: GeneratedLayout = {
      "id": "C131-plot-1",
      "slot": 0,
      "box": {
-      "x0": 41,
+      "x0": 65,
       "y0": -63,
-      "x1": 58.5,
+      "x1": 82.5,
       "y1": -49
      },
      "sign": [
-      42.5,
+      66.5,
       -48
      ]
     },
@@ -955,20 +955,20 @@ export const LAYOUT: GeneratedLayout = {
      "id": "C131-plot-2",
      "slot": 1,
      "box": {
-      "x0": 61.5,
+      "x0": 85.5,
       "y0": -63,
-      "x1": 79,
+      "x1": 103,
       "y1": -49
      },
      "sign": [
-      63,
+      87,
       -48
      ]
     }
    ],
    "anchor": [
-    60,
-    -82
+    84,
+    -42
    ]
   },
   {
@@ -978,9 +978,9 @@ export const LAYOUT: GeneratedLayout = {
    "region": "estate",
    "family": "factory",
    "box": {
-    "x0": 92,
+    "x0": 116,
     "y0": -78,
-    "x1": 136,
+    "x1": 160,
     "y1": -46
    },
    "front": "s",
@@ -989,13 +989,13 @@ export const LAYOUT: GeneratedLayout = {
      "id": "C132-plot-1",
      "slot": 0,
      "box": {
-      "x0": 95,
+      "x0": 119,
       "y0": -63,
-      "x1": 112.5,
+      "x1": 136.5,
       "y1": -49
      },
      "sign": [
-      96.5,
+      120.5,
       -48
      ]
     },
@@ -1003,20 +1003,20 @@ export const LAYOUT: GeneratedLayout = {
      "id": "C132-plot-2",
      "slot": 1,
      "box": {
-      "x0": 115.5,
+      "x0": 139.5,
       "y0": -63,
-      "x1": 133,
+      "x1": 157,
       "y1": -49
      },
      "sign": [
-      117,
+      141,
       -48
      ]
     }
    ],
    "anchor": [
-    114,
-    -82
+    138,
+    -42
    ]
   },
   {
@@ -1026,9 +1026,9 @@ export const LAYOUT: GeneratedLayout = {
    "region": "estate",
    "family": "factory",
    "box": {
-    "x0": 146,
+    "x0": 170,
     "y0": -78,
-    "x1": 190,
+    "x1": 214,
     "y1": -46
    },
    "front": "s",
@@ -1037,13 +1037,13 @@ export const LAYOUT: GeneratedLayout = {
      "id": "C141-plot-1",
      "slot": 0,
      "box": {
-      "x0": 149,
+      "x0": 173,
       "y0": -63,
-      "x1": 166.5,
+      "x1": 190.5,
       "y1": -49
      },
      "sign": [
-      150.5,
+      174.5,
       -48
      ]
     },
@@ -1051,20 +1051,20 @@ export const LAYOUT: GeneratedLayout = {
      "id": "C141-plot-2",
      "slot": 1,
      "box": {
-      "x0": 169.5,
+      "x0": 193.5,
       "y0": -63,
-      "x1": 187,
+      "x1": 211,
       "y1": -49
      },
      "sign": [
-      171,
+      195,
       -48
      ]
     }
    ],
    "anchor": [
-    168,
-    -82
+    192,
+    -42
    ]
   },
   {
@@ -1074,10 +1074,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "estate",
    "family": "factory",
    "box": {
-    "x0": 200,
-    "y0": -78,
-    "x1": 244,
-    "y1": -46
+    "x0": -194,
+    "y0": -32,
+    "x1": -150,
+    "y1": 0
    },
    "front": "s",
    "plots": [
@@ -1085,34 +1085,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "C142-plot-1",
      "slot": 0,
      "box": {
-      "x0": 203,
-      "y0": -63,
-      "x1": 220.5,
-      "y1": -49
+      "x0": -191,
+      "y0": -17,
+      "x1": -173.5,
+      "y1": -3
      },
      "sign": [
-      204.5,
-      -48
+      -189.5,
+      -2
      ]
     },
     {
      "id": "C142-plot-2",
      "slot": 1,
      "box": {
-      "x0": 223.5,
-      "y0": -63,
-      "x1": 241,
-      "y1": -49
+      "x0": -170.5,
+      "y0": -17,
+      "x1": -153,
+      "y1": -3
      },
      "sign": [
-      225,
-      -48
+      -169,
+      -2
      ]
     }
    ],
    "anchor": [
-    222,
-    -82
+    -172,
+    4
    ]
   },
   {
@@ -1122,10 +1122,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "estate",
    "family": "factory",
    "box": {
-    "x0": -178,
-    "y0": -36,
-    "x1": -134,
-    "y1": -4
+    "x0": -140,
+    "y0": -32,
+    "x1": -96,
+    "y1": 0
    },
    "front": "s",
    "plots": [
@@ -1133,34 +1133,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "C143-plot-1",
      "slot": 0,
      "box": {
-      "x0": -175,
-      "y0": -21,
-      "x1": -157.5,
-      "y1": -7
+      "x0": -137,
+      "y0": -17,
+      "x1": -119.5,
+      "y1": -3
      },
      "sign": [
-      -173.5,
-      -6
+      -135.5,
+      -2
      ]
     },
     {
      "id": "C143-plot-2",
      "slot": 1,
      "box": {
-      "x0": -154.5,
-      "y0": -21,
-      "x1": -137,
-      "y1": -7
+      "x0": -116.5,
+      "y0": -17,
+      "x1": -99,
+      "y1": -3
      },
      "sign": [
-      -153,
-      -6
+      -115,
+      -2
      ]
     }
    ],
    "anchor": [
-    -156,
-    -40
+    -118,
+    4
    ]
   },
   {
@@ -1170,10 +1170,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "estate",
    "family": "factory",
    "box": {
-    "x0": -124,
-    "y0": -36,
-    "x1": -80,
-    "y1": -4
+    "x0": -86,
+    "y0": -32,
+    "x1": -42,
+    "y1": 0
    },
    "front": "s",
    "plots": [
@@ -1181,34 +1181,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "D211-plot-1",
      "slot": 0,
      "box": {
-      "x0": -121,
-      "y0": -21,
-      "x1": -103.5,
-      "y1": -7
+      "x0": -83,
+      "y0": -17,
+      "x1": -65.5,
+      "y1": -3
      },
      "sign": [
-      -119.5,
-      -6
+      -81.5,
+      -2
      ]
     },
     {
      "id": "D211-plot-2",
      "slot": 1,
      "box": {
-      "x0": -100.5,
-      "y0": -21,
-      "x1": -83,
-      "y1": -7
+      "x0": -62.5,
+      "y0": -17,
+      "x1": -45,
+      "y1": -3
      },
      "sign": [
-      -99,
-      -6
+      -61,
+      -2
      ]
     }
    ],
    "anchor": [
-    -102,
-    -40
+    -64,
+    4
    ]
   },
   {
@@ -1218,10 +1218,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "estate",
    "family": "factory",
    "box": {
-    "x0": -70,
-    "y0": -36,
-    "x1": -26,
-    "y1": -4
+    "x0": 8,
+    "y0": -32,
+    "x1": 52,
+    "y1": 0
    },
    "front": "s",
    "plots": [
@@ -1229,34 +1229,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "D212-plot-1",
      "slot": 0,
      "box": {
-      "x0": -67,
-      "y0": -21,
-      "x1": -49.5,
-      "y1": -7
+      "x0": 11,
+      "y0": -17,
+      "x1": 28.5,
+      "y1": -3
      },
      "sign": [
-      -65.5,
-      -6
+      12.5,
+      -2
      ]
     },
     {
      "id": "D212-plot-2",
      "slot": 1,
      "box": {
-      "x0": -46.5,
-      "y0": -21,
-      "x1": -29,
-      "y1": -7
+      "x0": 31.5,
+      "y0": -17,
+      "x1": 49,
+      "y1": -3
      },
      "sign": [
-      -45,
-      -6
+      33,
+      -2
      ]
     }
    ],
    "anchor": [
-    -48,
-    -40
+    30,
+    4
    ]
   },
   {
@@ -1266,10 +1266,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "estate",
    "family": "factory",
    "box": {
-    "x0": -16,
-    "y0": -36,
-    "x1": 28,
-    "y1": -4
+    "x0": 62,
+    "y0": -32,
+    "x1": 106,
+    "y1": 0
    },
    "front": "s",
    "plots": [
@@ -1277,34 +1277,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "D221-plot-1",
      "slot": 0,
      "box": {
-      "x0": -13,
-      "y0": -21,
-      "x1": 4.5,
-      "y1": -7
+      "x0": 65,
+      "y0": -17,
+      "x1": 82.5,
+      "y1": -3
      },
      "sign": [
-      -11.5,
-      -6
+      66.5,
+      -2
      ]
     },
     {
      "id": "D221-plot-2",
      "slot": 1,
      "box": {
-      "x0": 7.5,
-      "y0": -21,
-      "x1": 25,
-      "y1": -7
+      "x0": 85.5,
+      "y0": -17,
+      "x1": 103,
+      "y1": -3
      },
      "sign": [
-      9,
-      -6
+      87,
+      -2
      ]
     }
    ],
    "anchor": [
-    6,
-    -40
+    84,
+    4
    ]
   },
   {
@@ -1314,10 +1314,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "estate",
    "family": "factory",
    "box": {
-    "x0": 38,
-    "y0": -36,
-    "x1": 82,
-    "y1": -4
+    "x0": 116,
+    "y0": -32,
+    "x1": 160,
+    "y1": 0
    },
    "front": "s",
    "plots": [
@@ -1325,34 +1325,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "D222-plot-1",
      "slot": 0,
      "box": {
-      "x0": 41,
-      "y0": -21,
-      "x1": 58.5,
-      "y1": -7
+      "x0": 119,
+      "y0": -17,
+      "x1": 136.5,
+      "y1": -3
      },
      "sign": [
-      42.5,
-      -6
+      120.5,
+      -2
      ]
     },
     {
      "id": "D222-plot-2",
      "slot": 1,
      "box": {
-      "x0": 61.5,
-      "y0": -21,
-      "x1": 79,
-      "y1": -7
+      "x0": 139.5,
+      "y0": -17,
+      "x1": 157,
+      "y1": -3
      },
      "sign": [
-      63,
-      -6
+      141,
+      -2
      ]
     }
    ],
    "anchor": [
-    60,
-    -40
+    138,
+    4
    ]
   },
   {
@@ -1362,10 +1362,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "estate",
    "family": "factory",
    "box": {
-    "x0": 92,
-    "y0": -36,
-    "x1": 136,
-    "y1": -4
+    "x0": 170,
+    "y0": -32,
+    "x1": 214,
+    "y1": 0
    },
    "front": "s",
    "plots": [
@@ -1373,34 +1373,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "D311-plot-1",
      "slot": 0,
      "box": {
-      "x0": 95,
-      "y0": -21,
-      "x1": 112.5,
-      "y1": -7
+      "x0": 173,
+      "y0": -17,
+      "x1": 190.5,
+      "y1": -3
      },
      "sign": [
-      96.5,
-      -6
+      174.5,
+      -2
      ]
     },
     {
      "id": "D311-plot-2",
      "slot": 1,
      "box": {
-      "x0": 115.5,
-      "y0": -21,
-      "x1": 133,
-      "y1": -7
+      "x0": 193.5,
+      "y0": -17,
+      "x1": 211,
+      "y1": -3
      },
      "sign": [
-      117,
-      -6
+      195,
+      -2
      ]
     }
    ],
    "anchor": [
-    114,
-    -40
+    192,
+    4
    ]
   },
   {
@@ -1410,10 +1410,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "estate",
    "family": "factory",
    "box": {
-    "x0": 146,
-    "y0": -36,
-    "x1": 190,
-    "y1": -4
+    "x0": -194,
+    "y0": 14,
+    "x1": -150,
+    "y1": 46
    },
    "front": "s",
    "plots": [
@@ -1421,34 +1421,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "D411-plot-1",
      "slot": 0,
      "box": {
-      "x0": 149,
-      "y0": -21,
-      "x1": 166.5,
-      "y1": -7
+      "x0": -191,
+      "y0": 29,
+      "x1": -173.5,
+      "y1": 43
      },
      "sign": [
-      150.5,
-      -6
+      -189.5,
+      44
      ]
     },
     {
      "id": "D411-plot-2",
      "slot": 1,
      "box": {
-      "x0": 169.5,
-      "y0": -21,
-      "x1": 187,
-      "y1": -7
+      "x0": -170.5,
+      "y0": 29,
+      "x1": -153,
+      "y1": 43
      },
      "sign": [
-      171,
-      -6
+      -169,
+      44
      ]
     }
    ],
    "anchor": [
-    168,
-    -40
+    -172,
+    50
    ]
   },
   {
@@ -1458,10 +1458,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "estate",
    "family": "factory",
    "box": {
-    "x0": 200,
-    "y0": -36,
-    "x1": 244,
-    "y1": -4
+    "x0": -140,
+    "y0": 14,
+    "x1": -96,
+    "y1": 46
    },
    "front": "s",
    "plots": [
@@ -1469,34 +1469,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "D421-plot-1",
      "slot": 0,
      "box": {
-      "x0": 203,
-      "y0": -21,
-      "x1": 220.5,
-      "y1": -7
+      "x0": -137,
+      "y0": 29,
+      "x1": -119.5,
+      "y1": 43
      },
      "sign": [
-      204.5,
-      -6
+      -135.5,
+      44
      ]
     },
     {
      "id": "D421-plot-2",
      "slot": 1,
      "box": {
-      "x0": 223.5,
-      "y0": -21,
-      "x1": 241,
-      "y1": -7
+      "x0": -116.5,
+      "y0": 29,
+      "x1": -99,
+      "y1": 43
      },
      "sign": [
-      225,
-      -6
+      -115,
+      44
      ]
     }
    ],
    "anchor": [
-    222,
-    -40
+    -118,
+    50
    ]
   },
   {
@@ -1506,10 +1506,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "estate",
    "family": "factory",
    "box": {
-    "x0": -178,
-    "y0": 6,
-    "x1": -134,
-    "y1": 38
+    "x0": -86,
+    "y0": 14,
+    "x1": -42,
+    "y1": 46
    },
    "front": "s",
    "plots": [
@@ -1517,34 +1517,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "E111-plot-1",
      "slot": 0,
      "box": {
-      "x0": -175,
-      "y0": 21,
-      "x1": -157.5,
-      "y1": 35
+      "x0": -83,
+      "y0": 29,
+      "x1": -65.5,
+      "y1": 43
      },
      "sign": [
-      -173.5,
-      36
+      -81.5,
+      44
      ]
     },
     {
      "id": "E111-plot-2",
      "slot": 1,
      "box": {
-      "x0": -154.5,
-      "y0": 21,
-      "x1": -137,
-      "y1": 35
+      "x0": -62.5,
+      "y0": 29,
+      "x1": -45,
+      "y1": 43
      },
      "sign": [
-      -153,
-      36
+      -61,
+      44
      ]
     }
    ],
    "anchor": [
-    -156,
-    2
+    -64,
+    50
    ]
   },
   {
@@ -1554,10 +1554,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "estate",
    "family": "factory",
    "box": {
-    "x0": -124,
-    "y0": 6,
-    "x1": -80,
-    "y1": 38
+    "x0": 8,
+    "y0": 14,
+    "x1": 52,
+    "y1": 46
    },
    "front": "s",
    "plots": [
@@ -1565,34 +1565,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "E112-plot-1",
      "slot": 0,
      "box": {
-      "x0": -121,
-      "y0": 21,
-      "x1": -103.5,
-      "y1": 35
+      "x0": 11,
+      "y0": 29,
+      "x1": 28.5,
+      "y1": 43
      },
      "sign": [
-      -119.5,
-      36
+      12.5,
+      44
      ]
     },
     {
      "id": "E112-plot-2",
      "slot": 1,
      "box": {
-      "x0": -100.5,
-      "y0": 21,
-      "x1": -83,
-      "y1": 35
+      "x0": 31.5,
+      "y0": 29,
+      "x1": 49,
+      "y1": 43
      },
      "sign": [
-      -99,
-      36
+      33,
+      44
      ]
     }
    ],
    "anchor": [
-    -102,
-    2
+    30,
+    50
    ]
   },
   {
@@ -1602,10 +1602,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "estate",
    "family": "factory",
    "box": {
-    "x0": -70,
-    "y0": 6,
-    "x1": -26,
-    "y1": 38
+    "x0": 62,
+    "y0": 14,
+    "x1": 106,
+    "y1": 46
    },
    "front": "s",
    "plots": [
@@ -1613,34 +1613,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "E121-plot-1",
      "slot": 0,
      "box": {
-      "x0": -67,
-      "y0": 21,
-      "x1": -49.5,
-      "y1": 35
+      "x0": 65,
+      "y0": 29,
+      "x1": 82.5,
+      "y1": 43
      },
      "sign": [
-      -65.5,
-      36
+      66.5,
+      44
      ]
     },
     {
      "id": "E121-plot-2",
      "slot": 1,
      "box": {
-      "x0": -46.5,
-      "y0": 21,
-      "x1": -29,
-      "y1": 35
+      "x0": 85.5,
+      "y0": 29,
+      "x1": 103,
+      "y1": 43
      },
      "sign": [
-      -45,
-      36
+      87,
+      44
      ]
     }
    ],
    "anchor": [
-    -48,
-    2
+    84,
+    50
    ]
   },
   {
@@ -1650,10 +1650,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "estate",
    "family": "factory",
    "box": {
-    "x0": -16,
-    "y0": 6,
-    "x1": 28,
-    "y1": 38
+    "x0": 116,
+    "y0": 14,
+    "x1": 160,
+    "y1": 46
    },
    "front": "s",
    "plots": [
@@ -1661,34 +1661,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "E122-plot-1",
      "slot": 0,
      "box": {
-      "x0": -13,
-      "y0": 21,
-      "x1": 4.5,
-      "y1": 35
+      "x0": 119,
+      "y0": 29,
+      "x1": 136.5,
+      "y1": 43
      },
      "sign": [
-      -11.5,
-      36
+      120.5,
+      44
      ]
     },
     {
      "id": "E122-plot-2",
      "slot": 1,
      "box": {
-      "x0": 7.5,
-      "y0": 21,
-      "x1": 25,
-      "y1": 35
+      "x0": 139.5,
+      "y0": 29,
+      "x1": 157,
+      "y1": 43
      },
      "sign": [
-      9,
-      36
+      141,
+      44
      ]
     }
    ],
    "anchor": [
-    6,
-    2
+    138,
+    50
    ]
   },
   {
@@ -1698,10 +1698,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "estate",
    "family": "factory",
    "box": {
-    "x0": 38,
-    "y0": 6,
-    "x1": 82,
-    "y1": 38
+    "x0": 170,
+    "y0": 14,
+    "x1": 214,
+    "y1": 46
    },
    "front": "s",
    "plots": [
@@ -1709,34 +1709,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "E211-plot-1",
      "slot": 0,
      "box": {
-      "x0": 41,
-      "y0": 21,
-      "x1": 58.5,
-      "y1": 35
+      "x0": 173,
+      "y0": 29,
+      "x1": 190.5,
+      "y1": 43
      },
      "sign": [
-      42.5,
-      36
+      174.5,
+      44
      ]
     },
     {
      "id": "E211-plot-2",
      "slot": 1,
      "box": {
-      "x0": 61.5,
-      "y0": 21,
-      "x1": 79,
-      "y1": 35
+      "x0": 193.5,
+      "y0": 29,
+      "x1": 211,
+      "y1": 43
      },
      "sign": [
-      63,
-      36
+      195,
+      44
      ]
     }
    ],
    "anchor": [
-    60,
-    2
+    192,
+    50
    ]
   },
   {
@@ -1746,10 +1746,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "estate",
    "family": "factory",
    "box": {
-    "x0": 92,
-    "y0": 6,
-    "x1": 136,
-    "y1": 38
+    "x0": -194,
+    "y0": 60,
+    "x1": -150,
+    "y1": 92
    },
    "front": "s",
    "plots": [
@@ -1757,34 +1757,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "E212-plot-1",
      "slot": 0,
      "box": {
-      "x0": 95,
-      "y0": 21,
-      "x1": 112.5,
-      "y1": 35
+      "x0": -191,
+      "y0": 75,
+      "x1": -173.5,
+      "y1": 89
      },
      "sign": [
-      96.5,
-      36
+      -189.5,
+      90
      ]
     },
     {
      "id": "E212-plot-2",
      "slot": 1,
      "box": {
-      "x0": 115.5,
-      "y0": 21,
-      "x1": 133,
-      "y1": 35
+      "x0": -170.5,
+      "y0": 75,
+      "x1": -153,
+      "y1": 89
      },
      "sign": [
-      117,
-      36
+      -169,
+      90
      ]
     }
    ],
    "anchor": [
-    114,
-    2
+    -172,
+    96
    ]
   },
   {
@@ -1794,10 +1794,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "estate",
    "family": "factory",
    "box": {
-    "x0": 146,
-    "y0": 6,
-    "x1": 190,
-    "y1": 38
+    "x0": -140,
+    "y0": 60,
+    "x1": -96,
+    "y1": 92
    },
    "front": "s",
    "plots": [
@@ -1805,34 +1805,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "E213-plot-1",
      "slot": 0,
      "box": {
-      "x0": 149,
-      "y0": 21,
-      "x1": 166.5,
-      "y1": 35
+      "x0": -137,
+      "y0": 75,
+      "x1": -119.5,
+      "y1": 89
      },
      "sign": [
-      150.5,
-      36
+      -135.5,
+      90
      ]
     },
     {
      "id": "E213-plot-2",
      "slot": 1,
      "box": {
-      "x0": 169.5,
-      "y0": 21,
-      "x1": 187,
-      "y1": 35
+      "x0": -116.5,
+      "y0": 75,
+      "x1": -99,
+      "y1": 89
      },
      "sign": [
-      171,
-      36
+      -115,
+      90
      ]
     }
    ],
    "anchor": [
-    168,
-    2
+    -118,
+    96
    ]
   },
   {
@@ -1842,10 +1842,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "estate",
    "family": "factory",
    "box": {
-    "x0": 200,
-    "y0": 6,
-    "x1": 244,
-    "y1": 38
+    "x0": -86,
+    "y0": 60,
+    "x1": -42,
+    "y1": 92
    },
    "front": "s",
    "plots": [
@@ -1853,34 +1853,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "E311-plot-1",
      "slot": 0,
      "box": {
-      "x0": 203,
-      "y0": 21,
-      "x1": 220.5,
-      "y1": 35
+      "x0": -83,
+      "y0": 75,
+      "x1": -65.5,
+      "y1": 89
      },
      "sign": [
-      204.5,
-      36
+      -81.5,
+      90
      ]
     },
     {
      "id": "E311-plot-2",
      "slot": 1,
      "box": {
-      "x0": 223.5,
-      "y0": 21,
-      "x1": 241,
-      "y1": 35
+      "x0": -62.5,
+      "y0": 75,
+      "x1": -45,
+      "y1": 89
      },
      "sign": [
-      225,
-      36
+      -61,
+      90
      ]
     }
    ],
    "anchor": [
-    222,
-    2
+    -64,
+    96
    ]
   },
   {
@@ -1890,10 +1890,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "estate",
    "family": "factory",
    "box": {
-    "x0": -178,
-    "y0": 48,
-    "x1": -134,
-    "y1": 80
+    "x0": 8,
+    "y0": 60,
+    "x1": 52,
+    "y1": 92
    },
    "front": "s",
    "plots": [
@@ -1901,34 +1901,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "E321-plot-1",
      "slot": 0,
      "box": {
-      "x0": -175,
-      "y0": 63,
-      "x1": -157.5,
-      "y1": 77
+      "x0": 11,
+      "y0": 75,
+      "x1": 28.5,
+      "y1": 89
      },
      "sign": [
-      -173.5,
-      78
+      12.5,
+      90
      ]
     },
     {
      "id": "E321-plot-2",
      "slot": 1,
      "box": {
-      "x0": -154.5,
-      "y0": 63,
-      "x1": -137,
-      "y1": 77
+      "x0": 31.5,
+      "y0": 75,
+      "x1": 49,
+      "y1": 89
      },
      "sign": [
-      -153,
-      78
+      33,
+      90
      ]
     }
    ],
    "anchor": [
-    -156,
-    44
+    30,
+    96
    ]
   },
   {
@@ -1938,10 +1938,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "estate",
    "family": "factory",
    "box": {
-    "x0": -124,
-    "y0": 48,
-    "x1": -80,
-    "y1": 80
+    "x0": 62,
+    "y0": 60,
+    "x1": 106,
+    "y1": 92
    },
    "front": "s",
    "plots": [
@@ -1949,34 +1949,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "E411-plot-1",
      "slot": 0,
      "box": {
-      "x0": -121,
-      "y0": 63,
-      "x1": -103.5,
-      "y1": 77
+      "x0": 65,
+      "y0": 75,
+      "x1": 82.5,
+      "y1": 89
      },
      "sign": [
-      -119.5,
-      78
+      66.5,
+      90
      ]
     },
     {
      "id": "E411-plot-2",
      "slot": 1,
      "box": {
-      "x0": -100.5,
-      "y0": 63,
-      "x1": -83,
-      "y1": 77
+      "x0": 85.5,
+      "y0": 75,
+      "x1": 103,
+      "y1": 89
      },
      "sign": [
-      -99,
-      78
+      87,
+      90
      ]
     }
    ],
    "anchor": [
-    -102,
-    44
+    84,
+    96
    ]
   },
   {
@@ -1986,10 +1986,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "estate",
    "family": "factory",
    "box": {
-    "x0": -70,
-    "y0": 48,
-    "x1": -26,
-    "y1": 80
+    "x0": 116,
+    "y0": 60,
+    "x1": 160,
+    "y1": 92
    },
    "front": "s",
    "plots": [
@@ -1997,34 +1997,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "E412-plot-1",
      "slot": 0,
      "box": {
-      "x0": -67,
-      "y0": 63,
-      "x1": -49.5,
-      "y1": 77
+      "x0": 119,
+      "y0": 75,
+      "x1": 136.5,
+      "y1": 89
      },
      "sign": [
-      -65.5,
-      78
+      120.5,
+      90
      ]
     },
     {
      "id": "E412-plot-2",
      "slot": 1,
      "box": {
-      "x0": -46.5,
-      "y0": 63,
-      "x1": -29,
-      "y1": 77
+      "x0": 139.5,
+      "y0": 75,
+      "x1": 157,
+      "y1": 89
      },
      "sign": [
-      -45,
-      78
+      141,
+      90
      ]
     }
    ],
    "anchor": [
-    -48,
-    44
+    138,
+    96
    ]
   },
   {
@@ -2034,10 +2034,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "estate",
    "family": "factory",
    "box": {
-    "x0": -16,
-    "y0": 48,
-    "x1": 28,
-    "y1": 80
+    "x0": 170,
+    "y0": 60,
+    "x1": 214,
+    "y1": 92
    },
    "front": "s",
    "plots": [
@@ -2045,34 +2045,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "E413-plot-1",
      "slot": 0,
      "box": {
-      "x0": -13,
-      "y0": 63,
-      "x1": 4.5,
-      "y1": 77
+      "x0": 173,
+      "y0": 75,
+      "x1": 190.5,
+      "y1": 89
      },
      "sign": [
-      -11.5,
-      78
+      174.5,
+      90
      ]
     },
     {
      "id": "E413-plot-2",
      "slot": 1,
      "box": {
-      "x0": 7.5,
-      "y0": 63,
-      "x1": 25,
-      "y1": 77
+      "x0": 193.5,
+      "y0": 75,
+      "x1": 211,
+      "y1": 89
      },
      "sign": [
-      9,
-      78
+      195,
+      90
      ]
     }
    ],
    "anchor": [
-    6,
-    44
+    192,
+    96
    ]
   },
   {
@@ -2082,10 +2082,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "estate",
    "family": "factory",
    "box": {
-    "x0": 38,
-    "y0": 48,
-    "x1": 82,
-    "y1": 80
+    "x0": -194,
+    "y0": 106,
+    "x1": -150,
+    "y1": 138
    },
    "front": "s",
    "plots": [
@@ -2093,34 +2093,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "F111-plot-1",
      "slot": 0,
      "box": {
-      "x0": 41,
-      "y0": 63,
-      "x1": 58.5,
-      "y1": 77
+      "x0": -191,
+      "y0": 121,
+      "x1": -173.5,
+      "y1": 135
      },
      "sign": [
-      42.5,
-      78
+      -189.5,
+      136
      ]
     },
     {
      "id": "F111-plot-2",
      "slot": 1,
      "box": {
-      "x0": 61.5,
-      "y0": 63,
-      "x1": 79,
-      "y1": 77
+      "x0": -170.5,
+      "y0": 121,
+      "x1": -153,
+      "y1": 135
      },
      "sign": [
-      63,
-      78
+      -169,
+      136
      ]
     }
    ],
    "anchor": [
-    60,
-    44
+    -172,
+    142
    ]
   },
   {
@@ -2130,10 +2130,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "estate",
    "family": "factory",
    "box": {
-    "x0": 92,
-    "y0": 48,
-    "x1": 136,
-    "y1": 80
+    "x0": -140,
+    "y0": 106,
+    "x1": -96,
+    "y1": 138
    },
    "front": "s",
    "plots": [
@@ -2141,34 +2141,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "F211-plot-1",
      "slot": 0,
      "box": {
-      "x0": 95,
-      "y0": 63,
-      "x1": 112.5,
-      "y1": 77
+      "x0": -137,
+      "y0": 121,
+      "x1": -119.5,
+      "y1": 135
      },
      "sign": [
-      96.5,
-      78
+      -135.5,
+      136
      ]
     },
     {
      "id": "F211-plot-2",
      "slot": 1,
      "box": {
-      "x0": 115.5,
-      "y0": 63,
-      "x1": 133,
-      "y1": 77
+      "x0": -116.5,
+      "y0": 121,
+      "x1": -99,
+      "y1": 135
      },
      "sign": [
-      117,
-      78
+      -115,
+      136
      ]
     }
    ],
    "anchor": [
-    114,
-    44
+    -118,
+    142
    ]
   },
   {
@@ -2178,10 +2178,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "estate",
    "family": "factory",
    "box": {
-    "x0": 146,
-    "y0": 48,
-    "x1": 190,
-    "y1": 80
+    "x0": -86,
+    "y0": 106,
+    "x1": -42,
+    "y1": 138
    },
    "front": "s",
    "plots": [
@@ -2189,34 +2189,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "I211-plot-1",
      "slot": 0,
      "box": {
-      "x0": 149,
-      "y0": 63,
-      "x1": 166.5,
-      "y1": 77
+      "x0": -83,
+      "y0": 121,
+      "x1": -65.5,
+      "y1": 135
      },
      "sign": [
-      150.5,
-      78
+      -81.5,
+      136
      ]
     },
     {
      "id": "I211-plot-2",
      "slot": 1,
      "box": {
-      "x0": 169.5,
-      "y0": 63,
-      "x1": 187,
-      "y1": 77
+      "x0": -62.5,
+      "y0": 121,
+      "x1": -45,
+      "y1": 135
      },
      "sign": [
-      171,
-      78
+      -61,
+      136
      ]
     }
    ],
    "anchor": [
-    168,
-    44
+    -64,
+    142
    ]
   },
   {
@@ -2226,10 +2226,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "estate",
    "family": "factory",
    "box": {
-    "x0": 200,
-    "y0": 48,
-    "x1": 244,
-    "y1": 80
+    "x0": 8,
+    "y0": 106,
+    "x1": 52,
+    "y1": 138
    },
    "front": "s",
    "plots": [
@@ -2237,34 +2237,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "I221-plot-1",
      "slot": 0,
      "box": {
-      "x0": 203,
-      "y0": 63,
-      "x1": 220.5,
-      "y1": 77
+      "x0": 11,
+      "y0": 121,
+      "x1": 28.5,
+      "y1": 135
      },
      "sign": [
-      204.5,
-      78
+      12.5,
+      136
      ]
     },
     {
      "id": "I221-plot-2",
      "slot": 1,
      "box": {
-      "x0": 223.5,
-      "y0": 63,
-      "x1": 241,
-      "y1": 77
+      "x0": 31.5,
+      "y0": 121,
+      "x1": 49,
+      "y1": 135
      },
      "sign": [
-      225,
-      78
+      33,
+      136
      ]
     }
    ],
    "anchor": [
-    222,
-    44
+    30,
+    142
    ]
   },
   {
@@ -2274,10 +2274,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "estate",
    "family": "factory",
    "box": {
-    "x0": -178,
-    "y0": 90,
-    "x1": -134,
-    "y1": 122
+    "x0": 62,
+    "y0": 106,
+    "x1": 106,
+    "y1": 138
    },
    "front": "s",
    "plots": [
@@ -2285,34 +2285,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "I231-plot-1",
      "slot": 0,
      "box": {
-      "x0": -175,
-      "y0": 105,
-      "x1": -157.5,
-      "y1": 119
+      "x0": 65,
+      "y0": 121,
+      "x1": 82.5,
+      "y1": 135
      },
      "sign": [
-      -173.5,
-      120
+      66.5,
+      136
      ]
     },
     {
      "id": "I231-plot-2",
      "slot": 1,
      "box": {
-      "x0": -154.5,
-      "y0": 105,
-      "x1": -137,
-      "y1": 119
+      "x0": 85.5,
+      "y0": 121,
+      "x1": 103,
+      "y1": 135
      },
      "sign": [
-      -153,
-      120
+      87,
+      136
      ]
     }
    ],
    "anchor": [
-    -156,
-    86
+    84,
+    142
    ]
   },
   {
@@ -2322,10 +2322,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "estate",
    "family": "factory",
    "box": {
-    "x0": -124,
-    "y0": 90,
-    "x1": -80,
-    "y1": 122
+    "x0": 116,
+    "y0": 106,
+    "x1": 160,
+    "y1": 138
    },
    "front": "s",
    "plots": [
@@ -2333,34 +2333,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "I232-plot-1",
      "slot": 0,
      "box": {
-      "x0": -121,
-      "y0": 105,
-      "x1": -103.5,
-      "y1": 119
+      "x0": 119,
+      "y0": 121,
+      "x1": 136.5,
+      "y1": 135
      },
      "sign": [
-      -119.5,
-      120
+      120.5,
+      136
      ]
     },
     {
      "id": "I232-plot-2",
      "slot": 1,
      "box": {
-      "x0": -100.5,
-      "y0": 105,
-      "x1": -83,
-      "y1": 119
+      "x0": 139.5,
+      "y0": 121,
+      "x1": 157,
+      "y1": 135
      },
      "sign": [
-      -99,
-      120
+      141,
+      136
      ]
     }
    ],
    "anchor": [
-    -102,
-    86
+    138,
+    142
    ]
   },
   {
@@ -2371,9 +2371,9 @@ export const LAYOUT: GeneratedLayout = {
    "family": "operator-office",
    "box": {
     "x0": 244,
-    "y0": -12,
+    "y0": -22,
     "x1": 274,
-    "y1": 12
+    "y1": 22
    },
    "front": "e",
    "plots": [
@@ -2382,13 +2382,13 @@ export const LAYOUT: GeneratedLayout = {
      "slot": 0,
      "box": {
       "x0": 257,
-      "y0": -9,
+      "y0": -19,
       "x1": 271,
       "y1": -1.5
      },
      "sign": [
       272,
-      -7.5
+      -17.5
      ]
     },
     {
@@ -2398,7 +2398,7 @@ export const LAYOUT: GeneratedLayout = {
       "x0": 257,
       "y0": 1.5,
       "x1": 271,
-      "y1": 9
+      "y1": 19
      },
      "sign": [
       272,
@@ -2407,440 +2407,8 @@ export const LAYOUT: GeneratedLayout = {
     }
    ],
    "anchor": [
-    259,
-    -16
-   ]
-  },
-  {
-   "id": "A111",
-   "code": "A111",
-   "zone": "ring-geological",
-   "region": "ring-geological",
-   "family": "well-pad",
-   "box": {
-    "x0": -626.9086170938348,
-    "x1": -566.9086170938348,
-    "y0": -11.924748652612612,
-    "y1": 38.075251347387386
-   },
-   "front": "s",
-   "plots": [
-    {
-     "id": "A111-plot-1",
-     "slot": 0,
-     "box": {
-      "x0": -623.9086170938348,
-      "y0": 21.075251347387386,
-      "x1": -598.4086170938348,
-      "y1": 35.075251347387386
-     },
-     "sign": [
-      -622.4086170938348,
-      36.075251347387386
-     ]
-    },
-    {
-     "id": "A111-plot-2",
-     "slot": 1,
-     "box": {
-      "x0": -595.4086170938348,
-      "y0": 21.075251347387386,
-      "x1": -569.9086170938348,
-      "y1": 35.075251347387386
-     },
-     "sign": [
-      -593.9086170938348,
-      36.075251347387386
-     ]
-    }
-   ],
-   "anchor": [
-    -596.9086170938348,
-    -15.924748652612612
-   ]
-  },
-  {
-   "id": "A121",
-   "code": "A121",
-   "zone": "ring-geological",
-   "region": "ring-geological",
-   "family": "pit",
-   "box": {
-    "x0": -619.555495773441,
-    "x1": -529.555495773441,
-    "y0": -173.5859034533108,
-    "y1": -103.5859034533108
-   },
-   "front": "s",
-   "plots": [
-    {
-     "id": "A121-plot-1",
-     "slot": 0,
-     "box": {
-      "x0": -616.555495773441,
-      "y0": -120.5859034533108,
-      "x1": -576.055495773441,
-      "y1": -106.5859034533108
-     },
-     "sign": [
-      -615.055495773441,
-      -105.5859034533108
-     ]
-    },
-    {
-     "id": "A121-plot-2",
-     "slot": 1,
-     "box": {
-      "x0": -573.055495773441,
-      "y0": -120.5859034533108,
-      "x1": -532.555495773441,
-      "y1": -106.5859034533108
-     },
-     "sign": [
-      -571.555495773441,
-      -105.5859034533108
-     ]
-    }
-   ],
-   "anchor": [
-    -574.555495773441,
-    -177.5859034533108
-   ]
-  },
-  {
-   "id": "A131",
-   "code": "A131",
-   "zone": "ring-geological",
-   "region": "ring-geological",
-   "family": "well-pad",
-   "box": {
-    "x0": -547.3003804212674,
-    "x1": -487.3003804212674,
-    "y0": -295.81979895322814,
-    "y1": -245.81979895322814
-   },
-   "front": "s",
-   "plots": [
-    {
-     "id": "A131-plot-1",
-     "slot": 0,
-     "box": {
-      "x0": -544.3003804212674,
-      "y0": -262.81979895322814,
-      "x1": -518.8003804212674,
-      "y1": -248.81979895322814
-     },
-     "sign": [
-      -542.8003804212674,
-      -247.81979895322814
-     ]
-    },
-    {
-     "id": "A131-plot-2",
-     "slot": 1,
-     "box": {
-      "x0": -515.8003804212674,
-      "y0": -262.81979895322814,
-      "x1": -490.3003804212674,
-      "y1": -248.81979895322814
-     },
-     "sign": [
-      -514.3003804212674,
-      -247.81979895322814
-     ]
-    }
-   ],
-   "anchor": [
-    -517.3003804212674,
-    -299.81979895322814
-   ]
-  },
-  {
-   "id": "A132",
-   "code": "A132",
-   "zone": "ring-geological",
-   "region": "ring-geological",
-   "family": "depot",
-   "box": {
-    "x0": -431.1990160374992,
-    "x1": -381.1990160374992,
-    "y0": -399.30392484196864,
-    "y1": -363.30392484196864
-   },
-   "front": "s",
-   "plots": [
-    {
-     "id": "A132-plot-1",
-     "slot": 0,
-     "box": {
-      "x0": -428.1990160374992,
-      "y0": -380.30392484196864,
-      "x1": -407.6990160374992,
-      "y1": -366.30392484196864
-     },
-     "sign": [
-      -426.6990160374992,
-      -365.30392484196864
-     ]
-    },
-    {
-     "id": "A132-plot-2",
-     "slot": 1,
-     "box": {
-      "x0": -404.6990160374992,
-      "y0": -380.30392484196864,
-      "x1": -384.1990160374992,
-      "y1": -366.30392484196864
-     },
-     "sign": [
-      -403.1990160374992,
-      -365.30392484196864
-     ]
-    }
-   ],
-   "anchor": [
-    -406.1990160374992,
-    -403.30392484196864
-   ]
-  },
-  {
-   "id": "B142",
-   "code": "B142",
-   "zone": "ring-geological",
-   "region": "ring-geological",
-   "family": "pit",
-   "box": {
-    "x0": -319.39429984372816,
-    "x1": -229.39429984372816,
-    "y0": -502.32339257795127,
-    "y1": -432.32339257795127
-   },
-   "front": "s",
-   "plots": [
-    {
-     "id": "B142-plot-1",
-     "slot": 0,
-     "box": {
-      "x0": -316.39429984372816,
-      "y0": -449.32339257795127,
-      "x1": -275.89429984372816,
-      "y1": -435.32339257795127
-     },
-     "sign": [
-      -314.89429984372816,
-      -434.32339257795127
-     ]
-    },
-    {
-     "id": "B142-plot-2",
-     "slot": 1,
-     "box": {
-      "x0": -272.89429984372816,
-      "y0": -449.32339257795127,
-      "x1": -232.39429984372816,
-      "y1": -435.32339257795127
-     },
-     "sign": [
-      -271.39429984372816,
-      -434.32339257795127
-     ]
-    }
-   ],
-   "anchor": [
-    -274.39429984372816,
-    -506.32339257795127
-   ]
-  },
-  {
-   "id": "B143",
-   "code": "B143",
-   "zone": "ring-geological",
-   "region": "ring-geological",
-   "family": "pit",
-   "box": {
-    "x0": -159.48539722592676,
-    "x1": -69.48539722592676,
-    "y0": -550.4461353927852,
-    "y1": -480.4461353927852
-   },
-   "front": "s",
-   "plots": [
-    {
-     "id": "B143-plot-1",
-     "slot": 0,
-     "box": {
-      "x0": -156.48539722592676,
-      "y0": -497.4461353927852,
-      "x1": -115.98539722592676,
-      "y1": -483.4461353927852
-     },
-     "sign": [
-      -154.98539722592676,
-      -482.4461353927852
-     ]
-    },
-    {
-     "id": "B143-plot-2",
-     "slot": 1,
-     "box": {
-      "x0": -112.98539722592676,
-      "y0": -497.4461353927852,
-      "x1": -72.48539722592676,
-      "y1": -483.4461353927852
-     },
-     "sign": [
-      -111.48539722592676,
-      -482.4461353927852
-     ]
-    }
-   ],
-   "anchor": [
-    -114.48539722592676,
-    -554.4461353927852
-   ]
-  },
-  {
-   "id": "B145",
-   "code": "B145",
-   "zone": "ring-geological",
-   "region": "ring-geological",
-   "family": "pit",
-   "box": {
-    "x0": 3.2934456485947337,
-    "x1": 93.29344564859474,
-    "y0": -552.0212430077077,
-    "y1": -482.02124300770765
-   },
-   "front": "s",
-   "plots": [
-    {
-     "id": "B145-plot-1",
-     "slot": 0,
-     "box": {
-      "x0": 6.293445648594734,
-      "y0": -499.02124300770765,
-      "x1": 46.793445648594734,
-      "y1": -485.02124300770765
-     },
-     "sign": [
-      7.793445648594734,
-      -484.02124300770765
-     ]
-    },
-    {
-     "id": "B145-plot-2",
-     "slot": 1,
-     "box": {
-      "x0": 49.793445648594734,
-      "y0": -499.02124300770765,
-      "x1": 90.29344564859474,
-      "y1": -485.02124300770765
-     },
-     "sign": [
-      51.293445648594734,
-      -484.02124300770765
-     ]
-    }
-   ],
-   "anchor": [
-    48.29344564859474,
-    -556.0212430077077
-   ]
-  },
-  {
-   "id": "B146",
-   "code": "B146",
-   "zone": "ring-geological",
-   "region": "ring-geological",
-   "family": "pit",
-   "box": {
-    "x0": 172.02076972718024,
-    "x1": 262.0207697271802,
-    "y0": -519.4618217785448,
-    "y1": -449.46182177854485
-   },
-   "front": "s",
-   "plots": [
-    {
-     "id": "B146-plot-1",
-     "slot": 0,
-     "box": {
-      "x0": 175.02076972718024,
-      "y0": -466.46182177854485,
-      "x1": 215.5207697271802,
-      "y1": -452.46182177854485
-     },
-     "sign": [
-      176.52076972718024,
-      -451.46182177854485
-     ]
-    },
-    {
-     "id": "B146-plot-2",
-     "slot": 1,
-     "box": {
-      "x0": 218.5207697271802,
-      "y0": -466.46182177854485,
-      "x1": 259.0207697271802,
-      "y1": -452.46182177854485
-     },
-     "sign": [
-      220.0207697271802,
-      -451.46182177854485
-     ]
-    }
-   ],
-   "anchor": [
-    217.0207697271802,
-    -523.4618217785448
-   ]
-  },
-  {
-   "id": "B147",
-   "code": "B147",
-   "zone": "ring-geological",
-   "region": "ring-geological",
-   "family": "depot",
-   "box": {
-    "x0": 336.0890138912288,
-    "x1": 386.0890138912288,
-    "y0": -427.29046522459237,
-    "y1": -391.29046522459237
-   },
-   "front": "s",
-   "plots": [
-    {
-     "id": "B147-plot-1",
-     "slot": 0,
-     "box": {
-      "x0": 339.0890138912288,
-      "y0": -408.29046522459237,
-      "x1": 359.5890138912288,
-      "y1": -394.29046522459237
-     },
-     "sign": [
-      340.5890138912288,
-      -393.29046522459237
-     ]
-    },
-    {
-     "id": "B147-plot-2",
-     "slot": 1,
-     "box": {
-      "x0": 362.5890138912288,
-      "y0": -408.29046522459237,
-      "x1": 383.0890138912288,
-      "y1": -394.29046522459237
-     },
-     "sign": [
-      364.0890138912288,
-      -393.29046522459237
-     ]
-    }
-   ],
-   "anchor": [
-    361.0890138912288,
-    -431.29046522459237
+    278,
+    0
    ]
   },
   {
@@ -2850,45 +2418,45 @@ export const LAYOUT: GeneratedLayout = {
    "region": "ring-biological",
    "family": "forest-block",
    "box": {
-    "x0": -253.85440953263307,
-    "x1": -143.85440953263307,
-    "y0": 457.74720462744534,
-    "y1": 537.7472046274454
+    "x0": -470,
+    "y0": 190,
+    "x1": -360,
+    "y1": 270
    },
-   "front": "s",
+   "front": "e",
    "plots": [
     {
      "id": "B151-plot-1",
      "slot": 0,
      "box": {
-      "x0": -250.85440953263307,
-      "y0": 520.7472046274454,
-      "x1": -200.35440953263307,
-      "y1": 534.7472046274454
+      "x0": -377,
+      "y0": 193,
+      "x1": -363,
+      "y1": 228.5
      },
      "sign": [
-      -249.35440953263307,
-      535.7472046274454
+      -362,
+      194.5
      ]
     },
     {
      "id": "B151-plot-2",
      "slot": 1,
      "box": {
-      "x0": -197.35440953263307,
-      "y0": 520.7472046274454,
-      "x1": -146.85440953263307,
-      "y1": 534.7472046274454
+      "x0": -377,
+      "y0": 231.5,
+      "x1": -363,
+      "y1": 267
      },
      "sign": [
-      -195.85440953263307,
-      535.7472046274454
+      -362,
+      233
      ]
     }
    ],
    "anchor": [
-    -198.85440953263307,
-    453.74720462744534
+    -356,
+    230
    ]
   },
   {
@@ -2898,45 +2466,45 @@ export const LAYOUT: GeneratedLayout = {
    "region": "ring-biological",
    "family": "forest-block",
    "box": {
-    "x0": -443.97990333982386,
-    "x1": -333.97990333982386,
-    "y0": 367.6955402822505,
-    "y1": 447.6955402822505
+    "x0": -470,
+    "y0": 96,
+    "x1": -360,
+    "y1": 176
    },
-   "front": "s",
+   "front": "e",
    "plots": [
     {
      "id": "B153-plot-1",
      "slot": 0,
      "box": {
-      "x0": -440.97990333982386,
-      "y0": 430.6955402822505,
-      "x1": -390.47990333982386,
-      "y1": 444.6955402822505
+      "x0": -377,
+      "y0": 99,
+      "x1": -363,
+      "y1": 134.5
      },
      "sign": [
-      -439.47990333982386,
-      445.6955402822505
+      -362,
+      100.5
      ]
     },
     {
      "id": "B153-plot-2",
      "slot": 1,
      "box": {
-      "x0": -387.47990333982386,
-      "y0": 430.6955402822505,
-      "x1": -336.97990333982386,
-      "y1": 444.6955402822505
+      "x0": -377,
+      "y0": 137.5,
+      "x1": -363,
+      "y1": 173
      },
      "sign": [
-      -385.97990333982386,
-      445.6955402822505
+      -362,
+      139
      ]
     }
    ],
    "anchor": [
-    -388.97990333982386,
-    363.6955402822505
+    -356,
+    136
    ]
   },
   {
@@ -2946,45 +2514,45 @@ export const LAYOUT: GeneratedLayout = {
    "region": "ring-biological",
    "family": "pond",
    "box": {
-    "x0": -568.2679754464531,
-    "x1": -478.2679754464531,
-    "y0": 231.9984078903318,
-    "y1": 301.9984078903318
+    "x0": -450,
+    "y0": 12,
+    "x1": -360,
+    "y1": 82
    },
-   "front": "s",
+   "front": "e",
    "plots": [
     {
      "id": "D231-plot-1",
      "slot": 0,
      "box": {
-      "x0": -565.2679754464531,
-      "y0": 284.9984078903318,
-      "x1": -524.7679754464531,
-      "y1": 298.9984078903318
+      "x0": -377,
+      "y0": 15,
+      "x1": -363,
+      "y1": 45.5
      },
      "sign": [
-      -563.7679754464531,
-      299.9984078903318
+      -362,
+      16.5
      ]
     },
     {
      "id": "D231-plot-2",
      "slot": 1,
      "box": {
-      "x0": -521.7679754464531,
-      "y0": 284.9984078903318,
-      "x1": -481.2679754464531,
-      "y1": 298.9984078903318
+      "x0": -377,
+      "y0": 48.5,
+      "x1": -363,
+      "y1": 79
      },
      "sign": [
-      -520.2679754464531,
-      299.9984078903318
+      -362,
+      50
      ]
     }
    ],
    "anchor": [
-    -523.2679754464531,
-    227.9984078903318
+    -356,
+    47
    ]
   },
   {
@@ -2994,141 +2562,477 @@ export const LAYOUT: GeneratedLayout = {
    "region": "ring-biological",
    "family": "plantation-block",
    "box": {
-    "x0": -651.5002065348339,
-    "x1": -541.5002065348339,
-    "y0": 52.17202836520801,
-    "y1": 132.172028365208
+    "x0": -470,
+    "y0": -82,
+    "x1": -360,
+    "y1": -2
    },
-   "front": "s",
+   "front": "e",
    "plots": [
     {
      "id": "D232-plot-1",
      "slot": 0,
      "box": {
-      "x0": -648.5002065348339,
-      "y0": 115.172028365208,
-      "x1": -598.0002065348339,
-      "y1": 129.172028365208
+      "x0": -377,
+      "y0": -79,
+      "x1": -363,
+      "y1": -43.5
      },
      "sign": [
-      -647.0002065348339,
-      130.172028365208
+      -362,
+      -77.5
      ]
     },
     {
      "id": "D232-plot-2",
      "slot": 1,
      "box": {
-      "x0": -595.0002065348339,
-      "y0": 115.172028365208,
-      "x1": -544.5002065348339,
-      "y1": 129.172028365208
+      "x0": -377,
+      "y0": -40.5,
+      "x1": -363,
+      "y1": -5
      },
      "sign": [
-      -593.5002065348339,
-      130.172028365208
+      -362,
+      -39
      ]
     }
    ],
    "anchor": [
-    -596.5002065348339,
-    48.17202836520801
+    -356,
+    -42
    ]
   },
   {
-   "id": "J113",
-   "code": "J113",
-   "zone": "gateway",
-   "region": "gateway",
-   "family": "quay",
+   "id": "A111",
+   "code": "A111",
+   "zone": "ring-geological",
+   "region": "ring-geological",
+   "family": "well-pad",
    "box": {
-    "x0": 520,
-    "y0": 350,
-    "x1": 660,
-    "y1": 390
+    "x0": -420,
+    "y0": -146,
+    "x1": -360,
+    "y1": -96
+   },
+   "front": "e",
+   "plots": [
+    {
+     "id": "A111-plot-1",
+     "slot": 0,
+     "box": {
+      "x0": -377,
+      "y0": -143,
+      "x1": -363,
+      "y1": -122.5
+     },
+     "sign": [
+      -362,
+      -141.5
+     ]
+    },
+    {
+     "id": "A111-plot-2",
+     "slot": 1,
+     "box": {
+      "x0": -377,
+      "y0": -119.5,
+      "x1": -363,
+      "y1": -99
+     },
+     "sign": [
+      -362,
+      -118
+     ]
+    }
+   ],
+   "anchor": [
+    -356,
+    -121
+   ]
+  },
+  {
+   "id": "A121",
+   "code": "A121",
+   "zone": "ring-geological",
+   "region": "ring-geological",
+   "family": "pit",
+   "box": {
+    "x0": -450,
+    "y0": -230,
+    "x1": -360,
+    "y1": -160
+   },
+   "front": "e",
+   "plots": [
+    {
+     "id": "A121-plot-1",
+     "slot": 0,
+     "box": {
+      "x0": -377,
+      "y0": -227,
+      "x1": -363,
+      "y1": -196.5
+     },
+     "sign": [
+      -362,
+      -225.5
+     ]
+    },
+    {
+     "id": "A121-plot-2",
+     "slot": 1,
+     "box": {
+      "x0": -377,
+      "y0": -193.5,
+      "x1": -363,
+      "y1": -163
+     },
+     "sign": [
+      -362,
+      -192
+     ]
+    }
+   ],
+   "anchor": [
+    -356,
+    -195
+   ]
+  },
+  {
+   "id": "A131",
+   "code": "A131",
+   "zone": "ring-geological",
+   "region": "ring-geological",
+   "family": "well-pad",
+   "box": {
+    "x0": -436,
+    "y0": -346,
+    "x1": -376,
+    "y1": -296
    },
    "front": "s",
    "plots": [
     {
-     "id": "J113-plot-1",
+     "id": "A131-plot-1",
      "slot": 0,
      "box": {
-      "x0": 523,
-      "y0": 373,
-      "x1": 588.5,
-      "y1": 387
+      "x0": -433,
+      "y0": -313,
+      "x1": -407.5,
+      "y1": -299
      },
      "sign": [
-      524.5,
-      388
+      -431.5,
+      -298
      ]
     },
     {
-     "id": "J113-plot-2",
+     "id": "A131-plot-2",
      "slot": 1,
      "box": {
-      "x0": 591.5,
-      "y0": 373,
-      "x1": 657,
-      "y1": 387
+      "x0": -404.5,
+      "y0": -313,
+      "x1": -379,
+      "y1": -299
      },
      "sign": [
-      593,
-      388
+      -403,
+      -298
      ]
     }
    ],
    "anchor": [
-    590,
-    346
+    -406,
+    -292
    ]
   },
   {
-   "id": "K121",
-   "code": "K121",
-   "zone": "gateway",
-   "region": "gateway",
-   "family": "quay",
+   "id": "A132",
+   "code": "A132",
+   "zone": "ring-geological",
+   "region": "ring-geological",
+   "family": "depot",
    "box": {
-    "x0": 670,
-    "y0": 350,
-    "x1": 810,
-    "y1": 390
+    "x0": -364,
+    "y0": -332,
+    "x1": -314,
+    "y1": -296
    },
    "front": "s",
    "plots": [
     {
-     "id": "K121-plot-1",
+     "id": "A132-plot-1",
      "slot": 0,
      "box": {
-      "x0": 673,
-      "y0": 373,
-      "x1": 738.5,
-      "y1": 387
+      "x0": -361,
+      "y0": -313,
+      "x1": -340.5,
+      "y1": -299
      },
      "sign": [
-      674.5,
-      388
+      -359.5,
+      -298
      ]
     },
     {
-     "id": "K121-plot-2",
+     "id": "A132-plot-2",
      "slot": 1,
      "box": {
-      "x0": 741.5,
-      "y0": 373,
-      "x1": 807,
-      "y1": 387
+      "x0": -337.5,
+      "y0": -313,
+      "x1": -317,
+      "y1": -299
      },
      "sign": [
-      743,
-      388
+      -336,
+      -298
      ]
     }
    ],
    "anchor": [
-    740,
-    346
+    -339,
+    -292
+   ]
+  },
+  {
+   "id": "B142",
+   "code": "B142",
+   "zone": "ring-geological",
+   "region": "ring-geological",
+   "family": "pit",
+   "box": {
+    "x0": -302,
+    "y0": -366,
+    "x1": -212,
+    "y1": -296
+   },
+   "front": "s",
+   "plots": [
+    {
+     "id": "B142-plot-1",
+     "slot": 0,
+     "box": {
+      "x0": -299,
+      "y0": -313,
+      "x1": -258.5,
+      "y1": -299
+     },
+     "sign": [
+      -297.5,
+      -298
+     ]
+    },
+    {
+     "id": "B142-plot-2",
+     "slot": 1,
+     "box": {
+      "x0": -255.5,
+      "y0": -313,
+      "x1": -215,
+      "y1": -299
+     },
+     "sign": [
+      -254,
+      -298
+     ]
+    }
+   ],
+   "anchor": [
+    -257,
+    -292
+   ]
+  },
+  {
+   "id": "B143",
+   "code": "B143",
+   "zone": "ring-geological",
+   "region": "ring-geological",
+   "family": "pit",
+   "box": {
+    "x0": -200,
+    "y0": -366,
+    "x1": -110,
+    "y1": -296
+   },
+   "front": "s",
+   "plots": [
+    {
+     "id": "B143-plot-1",
+     "slot": 0,
+     "box": {
+      "x0": -197,
+      "y0": -313,
+      "x1": -156.5,
+      "y1": -299
+     },
+     "sign": [
+      -195.5,
+      -298
+     ]
+    },
+    {
+     "id": "B143-plot-2",
+     "slot": 1,
+     "box": {
+      "x0": -153.5,
+      "y0": -313,
+      "x1": -113,
+      "y1": -299
+     },
+     "sign": [
+      -152,
+      -298
+     ]
+    }
+   ],
+   "anchor": [
+    -155,
+    -292
+   ]
+  },
+  {
+   "id": "B145",
+   "code": "B145",
+   "zone": "ring-geological",
+   "region": "ring-geological",
+   "family": "pit",
+   "box": {
+    "x0": -98,
+    "y0": -366,
+    "x1": -8,
+    "y1": -296
+   },
+   "front": "s",
+   "plots": [
+    {
+     "id": "B145-plot-1",
+     "slot": 0,
+     "box": {
+      "x0": -95,
+      "y0": -313,
+      "x1": -54.5,
+      "y1": -299
+     },
+     "sign": [
+      -93.5,
+      -298
+     ]
+    },
+    {
+     "id": "B145-plot-2",
+     "slot": 1,
+     "box": {
+      "x0": -51.5,
+      "y0": -313,
+      "x1": -11,
+      "y1": -299
+     },
+     "sign": [
+      -50,
+      -298
+     ]
+    }
+   ],
+   "anchor": [
+    -53,
+    -292
+   ]
+  },
+  {
+   "id": "B146",
+   "code": "B146",
+   "zone": "ring-geological",
+   "region": "ring-geological",
+   "family": "pit",
+   "box": {
+    "x0": 4,
+    "y0": -366,
+    "x1": 94,
+    "y1": -296
+   },
+   "front": "s",
+   "plots": [
+    {
+     "id": "B146-plot-1",
+     "slot": 0,
+     "box": {
+      "x0": 7,
+      "y0": -313,
+      "x1": 47.5,
+      "y1": -299
+     },
+     "sign": [
+      8.5,
+      -298
+     ]
+    },
+    {
+     "id": "B146-plot-2",
+     "slot": 1,
+     "box": {
+      "x0": 50.5,
+      "y0": -313,
+      "x1": 91,
+      "y1": -299
+     },
+     "sign": [
+      52,
+      -298
+     ]
+    }
+   ],
+   "anchor": [
+    49,
+    -292
+   ]
+  },
+  {
+   "id": "B147",
+   "code": "B147",
+   "zone": "ring-geological",
+   "region": "ring-geological",
+   "family": "depot",
+   "box": {
+    "x0": 106,
+    "y0": -332,
+    "x1": 156,
+    "y1": -296
+   },
+   "front": "s",
+   "plots": [
+    {
+     "id": "B147-plot-1",
+     "slot": 0,
+     "box": {
+      "x0": 109,
+      "y0": -313,
+      "x1": 129.5,
+      "y1": -299
+     },
+     "sign": [
+      110.5,
+      -298
+     ]
+    },
+    {
+     "id": "B147-plot-2",
+     "slot": 1,
+     "box": {
+      "x0": 132.5,
+      "y0": -313,
+      "x1": 153,
+      "y1": -299
+     },
+     "sign": [
+      134,
+      -298
+     ]
+    }
+   ],
+   "anchor": [
+    131,
+    -292
    ]
   },
   {
@@ -3138,10 +3042,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "gateway",
    "family": "apron",
    "box": {
-    "x0": 520,
-    "y0": -330,
-    "x1": 640,
-    "y1": -270
+    "x0": 380,
+    "y0": -280,
+    "x1": 500,
+    "y1": -220
    },
    "front": "s",
    "plots": [
@@ -3149,34 +3053,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "J111-plot-1",
      "slot": 0,
      "box": {
-      "x0": 523,
-      "y0": -287,
-      "x1": 578.5,
-      "y1": -273
+      "x0": 383,
+      "y0": -237,
+      "x1": 438.5,
+      "y1": -223
      },
      "sign": [
-      524.5,
-      -272
+      384.5,
+      -222
      ]
     },
     {
      "id": "J111-plot-2",
      "slot": 1,
      "box": {
-      "x0": 581.5,
-      "y0": -287,
-      "x1": 637,
-      "y1": -273
+      "x0": 441.5,
+      "y0": -237,
+      "x1": 497,
+      "y1": -223
      },
      "sign": [
-      583,
-      -272
+      443,
+      -222
      ]
     }
    ],
    "anchor": [
-    580,
-    -334
+    440,
+    -216
    ]
   },
   {
@@ -3186,10 +3090,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "gateway",
    "family": "apron",
    "box": {
-    "x0": 650,
-    "y0": -330,
-    "x1": 770,
-    "y1": -270
+    "x0": 560,
+    "y0": -280,
+    "x1": 680,
+    "y1": -220
    },
    "front": "s",
    "plots": [
@@ -3197,34 +3101,130 @@ export const LAYOUT: GeneratedLayout = {
      "id": "K111-plot-1",
      "slot": 0,
      "box": {
-      "x0": 653,
-      "y0": -287,
-      "x1": 708.5,
-      "y1": -273
+      "x0": 563,
+      "y0": -237,
+      "x1": 618.5,
+      "y1": -223
      },
      "sign": [
-      654.5,
-      -272
+      564.5,
+      -222
      ]
     },
     {
      "id": "K111-plot-2",
      "slot": 1,
      "box": {
-      "x0": 711.5,
-      "y0": -287,
-      "x1": 767,
-      "y1": -273
+      "x0": 621.5,
+      "y0": -237,
+      "x1": 677,
+      "y1": -223
      },
      "sign": [
-      713,
-      -272
+      623,
+      -222
      ]
     }
    ],
    "anchor": [
-    710,
-    -334
+    620,
+    -216
+   ]
+  },
+  {
+   "id": "J113",
+   "code": "J113",
+   "zone": "gateway",
+   "region": "gateway",
+   "family": "quay",
+   "box": {
+    "x0": 380,
+    "y0": 110,
+    "x1": 520,
+    "y1": 150
+   },
+   "front": "s",
+   "plots": [
+    {
+     "id": "J113-plot-1",
+     "slot": 0,
+     "box": {
+      "x0": 383,
+      "y0": 133,
+      "x1": 448.5,
+      "y1": 147
+     },
+     "sign": [
+      384.5,
+      148
+     ]
+    },
+    {
+     "id": "J113-plot-2",
+     "slot": 1,
+     "box": {
+      "x0": 451.5,
+      "y0": 133,
+      "x1": 517,
+      "y1": 147
+     },
+     "sign": [
+      453,
+      148
+     ]
+    }
+   ],
+   "anchor": [
+    450,
+    154
+   ]
+  },
+  {
+   "id": "K121",
+   "code": "K121",
+   "zone": "gateway",
+   "region": "gateway",
+   "family": "quay",
+   "box": {
+    "x0": 540,
+    "y0": 110,
+    "x1": 680,
+    "y1": 150
+   },
+   "front": "s",
+   "plots": [
+    {
+     "id": "K121-plot-1",
+     "slot": 0,
+     "box": {
+      "x0": 543,
+      "y0": 133,
+      "x1": 608.5,
+      "y1": 147
+     },
+     "sign": [
+      544.5,
+      148
+     ]
+    },
+    {
+     "id": "K121-plot-2",
+     "slot": 1,
+     "box": {
+      "x0": 611.5,
+      "y0": 133,
+      "x1": 677,
+      "y1": 147
+     },
+     "sign": [
+      613,
+      148
+     ]
+    }
+   ],
+   "anchor": [
+    610,
+    154
    ]
   },
   {
@@ -3234,10 +3234,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "gateway",
    "family": "depot",
    "box": {
-    "x0": 520,
-    "y0": -250,
-    "x1": 570,
-    "y1": -214
+    "x0": 380,
+    "y0": -206,
+    "x1": 430,
+    "y1": -170
    },
    "front": "s",
    "plots": [
@@ -3245,34 +3245,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "A112-plot-1",
      "slot": 0,
      "box": {
-      "x0": 523,
-      "y0": -231,
-      "x1": 543.5,
-      "y1": -217
+      "x0": 383,
+      "y0": -187,
+      "x1": 403.5,
+      "y1": -173
      },
      "sign": [
-      524.5,
-      -216
+      384.5,
+      -172
      ]
     },
     {
      "id": "A112-plot-2",
      "slot": 1,
      "box": {
-      "x0": 546.5,
-      "y0": -231,
-      "x1": 567,
-      "y1": -217
+      "x0": 406.5,
+      "y0": -187,
+      "x1": 427,
+      "y1": -173
      },
      "sign": [
-      548,
-      -216
+      408,
+      -172
      ]
     }
    ],
    "anchor": [
-    545,
-    -254
+    405,
+    -166
    ]
   },
   {
@@ -3282,10 +3282,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "gateway",
    "family": "stockpile",
    "box": {
-    "x0": 584,
-    "y0": -250,
-    "x1": 644,
-    "y1": -210
+    "x0": 444,
+    "y0": -206,
+    "x1": 504,
+    "y1": -166
    },
    "front": "s",
    "plots": [
@@ -3293,34 +3293,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "A122-plot-1",
      "slot": 0,
      "box": {
-      "x0": 587,
-      "y0": -227,
-      "x1": 612.5,
-      "y1": -213
+      "x0": 447,
+      "y0": -183,
+      "x1": 472.5,
+      "y1": -169
      },
      "sign": [
-      588.5,
-      -212
+      448.5,
+      -168
      ]
     },
     {
      "id": "A122-plot-2",
      "slot": 1,
      "box": {
-      "x0": 615.5,
-      "y0": -227,
-      "x1": 641,
-      "y1": -213
+      "x0": 475.5,
+      "y0": -183,
+      "x1": 501,
+      "y1": -169
      },
      "sign": [
-      617,
-      -212
+      477,
+      -168
      ]
     }
    ],
    "anchor": [
-    614,
-    -254
+    474,
+    -162
    ]
   },
   {
@@ -3330,10 +3330,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "gateway",
    "family": "depot",
    "box": {
-    "x0": 658,
-    "y0": -250,
-    "x1": 708,
-    "y1": -214
+    "x0": 380,
+    "y0": -152,
+    "x1": 430,
+    "y1": -116
    },
    "front": "s",
    "plots": [
@@ -3341,34 +3341,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "C211-plot-1",
      "slot": 0,
      "box": {
-      "x0": 661,
-      "y0": -231,
-      "x1": 681.5,
-      "y1": -217
+      "x0": 383,
+      "y0": -133,
+      "x1": 403.5,
+      "y1": -119
      },
      "sign": [
-      662.5,
-      -216
+      384.5,
+      -118
      ]
     },
     {
      "id": "C211-plot-2",
      "slot": 1,
      "box": {
-      "x0": 684.5,
-      "y0": -231,
-      "x1": 705,
-      "y1": -217
+      "x0": 406.5,
+      "y0": -133,
+      "x1": 427,
+      "y1": -119
      },
      "sign": [
-      686,
-      -216
+      408,
+      -118
      ]
     }
    ],
    "anchor": [
-    683,
-    -254
+    405,
+    -112
    ]
   },
   {
@@ -3378,10 +3378,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "gateway",
    "family": "interchange",
    "box": {
-    "x0": 520,
-    "y0": -196,
-    "x1": 590,
-    "y1": -126
+    "x0": 546,
+    "y0": -206,
+    "x1": 616,
+    "y1": -136
    },
    "front": "s",
    "plots": [
@@ -3389,34 +3389,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "J112-plot-1",
      "slot": 0,
      "box": {
-      "x0": 523,
-      "y0": -143,
-      "x1": 553.5,
-      "y1": -129
+      "x0": 549,
+      "y0": -153,
+      "x1": 579.5,
+      "y1": -139
      },
      "sign": [
-      524.5,
-      -128
+      550.5,
+      -138
      ]
     },
     {
      "id": "J112-plot-2",
      "slot": 1,
      "box": {
-      "x0": 556.5,
-      "y0": -143,
-      "x1": 587,
-      "y1": -129
+      "x0": 582.5,
+      "y0": -153,
+      "x1": 613,
+      "y1": -139
      },
      "sign": [
-      558,
-      -128
+      584,
+      -138
      ]
     }
    ],
    "anchor": [
-    555,
-    -200
+    581,
+    -132
    ]
   },
   {
@@ -3426,10 +3426,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "gateway",
    "family": "rail-yard",
    "box": {
-    "x0": 604,
-    "y0": -196,
-    "x1": 724,
-    "y1": -152
+    "x0": 380,
+    "y0": -102,
+    "x1": 500,
+    "y1": -58
    },
    "front": "s",
    "plots": [
@@ -3437,34 +3437,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "K131-plot-1",
      "slot": 0,
      "box": {
-      "x0": 607,
-      "y0": -169,
-      "x1": 662.5,
-      "y1": -155
+      "x0": 383,
+      "y0": -75,
+      "x1": 438.5,
+      "y1": -61
      },
      "sign": [
-      608.5,
-      -154
+      384.5,
+      -60
      ]
     },
     {
      "id": "K131-plot-2",
      "slot": 1,
      "box": {
-      "x0": 665.5,
-      "y0": -169,
-      "x1": 721,
-      "y1": -155
+      "x0": 441.5,
+      "y0": -75,
+      "x1": 497,
+      "y1": -61
      },
      "sign": [
-      667,
-      -154
+      443,
+      -60
      ]
     }
    ],
    "anchor": [
-    664,
-    -200
+    440,
+    -54
    ]
   },
   {
@@ -3474,10 +3474,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "gateway",
    "family": "depot",
    "box": {
-    "x0": 520,
-    "y0": -112,
-    "x1": 570,
-    "y1": -76
+    "x0": 380,
+    "y0": -44,
+    "x1": 430,
+    "y1": -8
    },
    "front": "s",
    "plots": [
@@ -3485,34 +3485,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "K132-plot-1",
      "slot": 0,
      "box": {
-      "x0": 523,
-      "y0": -93,
-      "x1": 543.5,
-      "y1": -79
+      "x0": 383,
+      "y0": -25,
+      "x1": 403.5,
+      "y1": -11
      },
      "sign": [
-      524.5,
-      -78
+      384.5,
+      -10
      ]
     },
     {
      "id": "K132-plot-2",
      "slot": 1,
      "box": {
-      "x0": 546.5,
-      "y0": -93,
-      "x1": 567,
-      "y1": -79
+      "x0": 406.5,
+      "y0": -25,
+      "x1": 427,
+      "y1": -11
      },
      "sign": [
-      548,
-      -78
+      408,
+      -10
      ]
     }
    ],
    "anchor": [
-    545,
-    -116
+    405,
+    -4
    ]
   },
   {
@@ -3522,10 +3522,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "gateway",
    "family": "3pl-shed",
    "box": {
-    "x0": 584,
-    "y0": -112,
-    "x1": 654,
-    "y1": -72
+    "x0": 546,
+    "y0": -122,
+    "x1": 616,
+    "y1": -82
    },
    "front": "s",
    "plots": [
@@ -3533,34 +3533,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "K211-plot-1",
      "slot": 0,
      "box": {
-      "x0": 587,
-      "y0": -89,
-      "x1": 617.5,
-      "y1": -75
+      "x0": 549,
+      "y0": -99,
+      "x1": 579.5,
+      "y1": -85
      },
      "sign": [
-      588.5,
-      -74
+      550.5,
+      -84
      ]
     },
     {
      "id": "K211-plot-2",
      "slot": 1,
      "box": {
-      "x0": 620.5,
-      "y0": -89,
-      "x1": 651,
-      "y1": -75
+      "x0": 582.5,
+      "y0": -99,
+      "x1": 613,
+      "y1": -85
      },
      "sign": [
-      622,
-      -74
+      584,
+      -84
      ]
     }
    ],
    "anchor": [
-    619,
-    -116
+    581,
+    -78
    ]
   },
   {
@@ -3570,10 +3570,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "town",
    "family": "depot",
    "box": {
-    "x0": 830,
-    "y0": -170,
-    "x1": 880,
-    "y1": -134
+    "x0": 730,
+    "y0": -52,
+    "x1": 780,
+    "y1": -16
    },
    "front": "s",
    "plots": [
@@ -3581,34 +3581,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "D111-plot-1",
      "slot": 0,
      "box": {
-      "x0": 833,
-      "y0": -151,
-      "x1": 853.5,
-      "y1": -137
+      "x0": 733,
+      "y0": -33,
+      "x1": 753.5,
+      "y1": -19
      },
      "sign": [
-      834.5,
-      -136
+      734.5,
+      -18
      ]
     },
     {
      "id": "D111-plot-2",
      "slot": 1,
      "box": {
-      "x0": 856.5,
-      "y0": -151,
-      "x1": 877,
-      "y1": -137
+      "x0": 756.5,
+      "y0": -33,
+      "x1": 777,
+      "y1": -19
      },
      "sign": [
-      858,
-      -136
+      758,
+      -18
      ]
     }
    ],
    "anchor": [
-    855,
-    -174
+    755,
+    -12
    ]
   },
   {
@@ -3618,10 +3618,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "town",
    "family": "depot",
    "box": {
-    "x0": 830,
-    "y0": -122,
-    "x1": 880,
-    "y1": -86
+    "x0": 730,
+    "y0": -98,
+    "x1": 780,
+    "y1": -62
    },
    "front": "s",
    "plots": [
@@ -3629,34 +3629,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "D112-plot-1",
      "slot": 0,
      "box": {
-      "x0": 833,
-      "y0": -103,
-      "x1": 853.5,
-      "y1": -89
+      "x0": 733,
+      "y0": -79,
+      "x1": 753.5,
+      "y1": -65
      },
      "sign": [
-      834.5,
-      -88
+      734.5,
+      -64
      ]
     },
     {
      "id": "D112-plot-2",
      "slot": 1,
      "box": {
-      "x0": 856.5,
-      "y0": -103,
-      "x1": 877,
-      "y1": -89
+      "x0": 756.5,
+      "y0": -79,
+      "x1": 777,
+      "y1": -65
      },
      "sign": [
-      858,
-      -88
+      758,
+      -64
      ]
     }
    ],
    "anchor": [
-    855,
-    -126
+    755,
+    -58
    ]
   },
   {
@@ -3666,10 +3666,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "town",
    "family": "depot",
    "box": {
-    "x0": 830,
-    "y0": -74,
-    "x1": 880,
-    "y1": -38
+    "x0": 730,
+    "y0": -144,
+    "x1": 780,
+    "y1": -108
    },
    "front": "s",
    "plots": [
@@ -3677,34 +3677,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "E711-plot-1",
      "slot": 0,
      "box": {
-      "x0": 833,
-      "y0": -55,
-      "x1": 853.5,
-      "y1": -41
+      "x0": 733,
+      "y0": -125,
+      "x1": 753.5,
+      "y1": -111
      },
      "sign": [
-      834.5,
-      -40
+      734.5,
+      -110
      ]
     },
     {
      "id": "E711-plot-2",
      "slot": 1,
      "box": {
-      "x0": 856.5,
-      "y0": -55,
-      "x1": 877,
-      "y1": -41
+      "x0": 756.5,
+      "y0": -125,
+      "x1": 777,
+      "y1": -111
      },
      "sign": [
-      858,
-      -40
+      758,
+      -110
      ]
     }
    ],
    "anchor": [
-    855,
-    -78
+    755,
+    -104
    ]
   },
   {
@@ -3714,10 +3714,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "town",
    "family": "supermarket",
    "box": {
-    "x0": 916,
-    "y0": -170,
-    "x1": 952,
-    "y1": -142
+    "x0": 730,
+    "y0": -182,
+    "x1": 774,
+    "y1": -154
    },
    "front": "s",
    "plots": [
@@ -3725,34 +3725,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "D113-plot-1",
      "slot": 0,
      "box": {
-      "x0": 919,
-      "y0": -159,
-      "x1": 932.5,
-      "y1": -145
+      "x0": 733,
+      "y0": -171,
+      "x1": 750.5,
+      "y1": -157
      },
      "sign": [
-      920.5,
-      -144
+      734.5,
+      -156
      ]
     },
     {
      "id": "D113-plot-2",
      "slot": 1,
      "box": {
-      "x0": 935.5,
-      "y0": -159,
-      "x1": 949,
-      "y1": -145
+      "x0": 753.5,
+      "y0": -171,
+      "x1": 771,
+      "y1": -157
      },
      "sign": [
-      937,
-      -144
+      755,
+      -156
      ]
     }
    ],
    "anchor": [
-    934,
-    -174
+    752,
+    -150
    ]
   },
   {
@@ -3762,10 +3762,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "town",
    "family": "shop",
    "box": {
-    "x0": 964,
-    "y0": -170,
-    "x1": 988,
-    "y1": -150
+    "x0": 730,
+    "y0": -228,
+    "x1": 774,
+    "y1": -200
    },
    "front": "s",
    "plots": [
@@ -3773,34 +3773,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "E721-plot-1",
      "slot": 0,
      "box": {
-      "x0": 967,
-      "y0": -167,
-      "x1": 974.5,
-      "y1": -153
+      "x0": 733,
+      "y0": -217,
+      "x1": 750.5,
+      "y1": -203
      },
      "sign": [
-      968.5,
-      -152
+      734.5,
+      -202
      ]
     },
     {
      "id": "E721-plot-2",
      "slot": 1,
      "box": {
-      "x0": 977.5,
-      "y0": -167,
-      "x1": 985,
-      "y1": -153
+      "x0": 753.5,
+      "y0": -217,
+      "x1": 771,
+      "y1": -203
      },
      "sign": [
-      979,
-      -152
+      755,
+      -202
      ]
     }
    ],
    "anchor": [
-    976,
-    -174
+    752,
+    -196
    ]
   },
   {
@@ -3810,10 +3810,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "town",
    "family": "department-store",
    "box": {
-    "x0": 916,
-    "y0": -130,
-    "x1": 956,
-    "y1": -100
+    "x0": 730,
+    "y0": 16,
+    "x1": 774,
+    "y1": 46
    },
    "front": "s",
    "plots": [
@@ -3821,34 +3821,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "E731-plot-1",
      "slot": 0,
      "box": {
-      "x0": 919,
-      "y0": -117,
-      "x1": 934.5,
-      "y1": -103
+      "x0": 733,
+      "y0": 29,
+      "x1": 750.5,
+      "y1": 43
      },
      "sign": [
-      920.5,
-      -102
+      734.5,
+      44
      ]
     },
     {
      "id": "E731-plot-2",
      "slot": 1,
      "box": {
-      "x0": 937.5,
-      "y0": -117,
-      "x1": 953,
-      "y1": -103
+      "x0": 753.5,
+      "y0": 29,
+      "x1": 771,
+      "y1": 43
      },
      "sign": [
-      939,
-      -102
+      755,
+      44
      ]
     }
    ],
    "anchor": [
-    936,
-    -134
+    752,
+    50
    ]
   },
   {
@@ -3858,10 +3858,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "town",
    "family": "shop",
    "box": {
-    "x0": 968,
-    "y0": -130,
-    "x1": 992,
-    "y1": -110
+    "x0": 730,
+    "y0": 62,
+    "x1": 774,
+    "y1": 90
    },
    "front": "s",
    "plots": [
@@ -3869,34 +3869,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "E741-plot-1",
      "slot": 0,
      "box": {
-      "x0": 971,
-      "y0": -127,
-      "x1": 978.5,
-      "y1": -113
+      "x0": 733,
+      "y0": 73,
+      "x1": 750.5,
+      "y1": 87
      },
      "sign": [
-      972.5,
-      -112
+      734.5,
+      88
      ]
     },
     {
      "id": "E741-plot-2",
      "slot": 1,
      "box": {
-      "x0": 981.5,
-      "y0": -127,
-      "x1": 989,
-      "y1": -113
+      "x0": 753.5,
+      "y0": 73,
+      "x1": 771,
+      "y1": 87
      },
      "sign": [
-      983,
-      -112
+      755,
+      88
      ]
     }
    ],
    "anchor": [
-    980,
-    -134
+    752,
+    94
    ]
   },
   {
@@ -3906,10 +3906,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "town",
    "family": "shop",
    "box": {
-    "x0": 916,
-    "y0": -88,
-    "x1": 940,
-    "y1": -68
+    "x0": 730,
+    "y0": 108,
+    "x1": 774,
+    "y1": 136
    },
    "front": "s",
    "plots": [
@@ -3917,34 +3917,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "E742-plot-1",
      "slot": 0,
      "box": {
-      "x0": 919,
-      "y0": -85,
-      "x1": 926.5,
-      "y1": -71
+      "x0": 733,
+      "y0": 119,
+      "x1": 750.5,
+      "y1": 133
      },
      "sign": [
-      920.5,
-      -70
+      734.5,
+      134
      ]
     },
     {
      "id": "E742-plot-2",
      "slot": 1,
      "box": {
-      "x0": 929.5,
-      "y0": -85,
-      "x1": 937,
-      "y1": -71
+      "x0": 753.5,
+      "y0": 119,
+      "x1": 771,
+      "y1": 133
      },
      "sign": [
-      931,
-      -70
+      755,
+      134
      ]
     }
    ],
    "anchor": [
-    928,
-    -92
+    752,
+    140
    ]
   },
   {
@@ -3954,10 +3954,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "town",
    "family": "shop",
    "box": {
-    "x0": 952,
-    "y0": -88,
-    "x1": 976,
-    "y1": -68
+    "x0": 730,
+    "y0": 154,
+    "x1": 774,
+    "y1": 182
    },
    "front": "s",
    "plots": [
@@ -3965,34 +3965,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "E743-plot-1",
      "slot": 0,
      "box": {
-      "x0": 955,
-      "y0": -85,
-      "x1": 962.5,
-      "y1": -71
+      "x0": 733,
+      "y0": 165,
+      "x1": 750.5,
+      "y1": 179
      },
      "sign": [
-      956.5,
-      -70
+      734.5,
+      180
      ]
     },
     {
      "id": "E743-plot-2",
      "slot": 1,
      "box": {
-      "x0": 965.5,
-      "y0": -85,
-      "x1": 973,
-      "y1": -71
+      "x0": 753.5,
+      "y0": 165,
+      "x1": 771,
+      "y1": 179
      },
      "sign": [
-      967,
-      -70
+      755,
+      180
      ]
     }
    ],
    "anchor": [
-    964,
-    -92
+    752,
+    186
    ]
   },
   {
@@ -4002,10 +4002,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "town",
    "family": "shop",
    "box": {
-    "x0": 988,
-    "y0": -88,
-    "x1": 1012,
-    "y1": -68
+    "x0": 730,
+    "y0": 200,
+    "x1": 774,
+    "y1": 228
    },
    "front": "s",
    "plots": [
@@ -4013,34 +4013,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "E744-plot-1",
      "slot": 0,
      "box": {
-      "x0": 991,
-      "y0": -85,
-      "x1": 998.5,
-      "y1": -71
+      "x0": 733,
+      "y0": 211,
+      "x1": 750.5,
+      "y1": 225
      },
      "sign": [
-      992.5,
-      -70
+      734.5,
+      226
      ]
     },
     {
      "id": "E744-plot-2",
      "slot": 1,
      "box": {
-      "x0": 1001.5,
-      "y0": -85,
-      "x1": 1009,
-      "y1": -71
+      "x0": 753.5,
+      "y0": 211,
+      "x1": 771,
+      "y1": 225
      },
      "sign": [
-      1003,
-      -70
+      755,
+      226
      ]
     }
    ],
    "anchor": [
-    1000,
-    -92
+    752,
+    232
    ]
   },
   {
@@ -4050,10 +4050,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "town",
    "family": "dealership",
    "box": {
-    "x0": 916,
-    "y0": -56,
-    "x1": 952,
-    "y1": -28
+    "x0": 790,
+    "y0": -44,
+    "x1": 834,
+    "y1": -16
    },
    "front": "s",
    "plots": [
@@ -4061,34 +4061,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "E745-plot-1",
      "slot": 0,
      "box": {
-      "x0": 919,
-      "y0": -45,
-      "x1": 932.5,
-      "y1": -31
+      "x0": 793,
+      "y0": -33,
+      "x1": 810.5,
+      "y1": -19
      },
      "sign": [
-      920.5,
-      -30
+      794.5,
+      -18
      ]
     },
     {
      "id": "E745-plot-2",
      "slot": 1,
      "box": {
-      "x0": 935.5,
-      "y0": -45,
-      "x1": 949,
-      "y1": -31
+      "x0": 813.5,
+      "y0": -33,
+      "x1": 831,
+      "y1": -19
      },
      "sign": [
-      937,
-      -30
+      815,
+      -18
      ]
     }
    ],
    "anchor": [
-    934,
-    -60
+    812,
+    -12
    ]
   },
   {
@@ -4098,10 +4098,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "town",
    "family": "cinema",
    "box": {
-    "x0": 1044,
-    "y0": -170,
-    "x1": 1074,
-    "y1": -144
+    "x0": 790,
+    "y0": -90,
+    "x1": 834,
+    "y1": -62
    },
    "front": "s",
    "plots": [
@@ -4109,34 +4109,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "E511-plot-1",
      "slot": 0,
      "box": {
-      "x0": 1047,
-      "y0": -161,
-      "x1": 1057.5,
-      "y1": -147
+      "x0": 793,
+      "y0": -79,
+      "x1": 810.5,
+      "y1": -65
      },
      "sign": [
-      1048.5,
-      -146
+      794.5,
+      -64
      ]
     },
     {
      "id": "E511-plot-2",
      "slot": 1,
      "box": {
-      "x0": 1060.5,
-      "y0": -161,
-      "x1": 1071,
-      "y1": -147
+      "x0": 813.5,
+      "y0": -79,
+      "x1": 831,
+      "y1": -65
      },
      "sign": [
-      1062,
-      -146
+      815,
+      -64
      ]
     }
    ],
    "anchor": [
-    1059,
-    -174
+    812,
+    -58
    ]
   },
   {
@@ -4146,10 +4146,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "town",
    "family": "hotel",
    "box": {
-    "x0": 1086,
-    "y0": -170,
-    "x1": 1116,
-    "y1": -140
+    "x0": 790,
+    "y0": -138,
+    "x1": 834,
+    "y1": -108
    },
    "front": "s",
    "plots": [
@@ -4157,34 +4157,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "E512-plot-1",
      "slot": 0,
      "box": {
-      "x0": 1089,
-      "y0": -157,
-      "x1": 1099.5,
-      "y1": -143
+      "x0": 793,
+      "y0": -125,
+      "x1": 810.5,
+      "y1": -111
      },
      "sign": [
-      1090.5,
-      -142
+      794.5,
+      -110
      ]
     },
     {
      "id": "E512-plot-2",
      "slot": 1,
      "box": {
-      "x0": 1102.5,
-      "y0": -157,
-      "x1": 1113,
-      "y1": -143
+      "x0": 813.5,
+      "y0": -125,
+      "x1": 831,
+      "y1": -111
      },
      "sign": [
-      1104,
-      -142
+      815,
+      -110
      ]
     }
    ],
    "anchor": [
-    1101,
-    -174
+    812,
+    -104
    ]
   },
   {
@@ -4194,10 +4194,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "town",
    "family": "shop",
    "box": {
-    "x0": 1128,
-    "y0": -170,
-    "x1": 1152,
-    "y1": -150
+    "x0": 790,
+    "y0": -182,
+    "x1": 834,
+    "y1": -154
    },
    "front": "s",
    "plots": [
@@ -4205,34 +4205,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "E513-plot-1",
      "slot": 0,
      "box": {
-      "x0": 1131,
-      "y0": -167,
-      "x1": 1138.5,
-      "y1": -153
+      "x0": 793,
+      "y0": -171,
+      "x1": 810.5,
+      "y1": -157
      },
      "sign": [
-      1132.5,
-      -152
+      794.5,
+      -156
      ]
     },
     {
      "id": "E513-plot-2",
      "slot": 1,
      "box": {
-      "x0": 1141.5,
-      "y0": -167,
-      "x1": 1149,
-      "y1": -153
+      "x0": 813.5,
+      "y0": -171,
+      "x1": 831,
+      "y1": -157
      },
      "sign": [
-      1143,
-      -152
+      815,
+      -156
      ]
     }
    ],
    "anchor": [
-    1140,
-    -174
+    812,
+    -150
    ]
   },
   {
@@ -4242,10 +4242,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "town",
    "family": "cinema",
    "box": {
-    "x0": 1044,
-    "y0": -128,
-    "x1": 1074,
-    "y1": -102
+    "x0": 790,
+    "y0": -228,
+    "x1": 834,
+    "y1": -200
    },
    "front": "s",
    "plots": [
@@ -4253,34 +4253,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "E514-plot-1",
      "slot": 0,
      "box": {
-      "x0": 1047,
-      "y0": -119,
-      "x1": 1057.5,
-      "y1": -105
+      "x0": 793,
+      "y0": -217,
+      "x1": 810.5,
+      "y1": -203
      },
      "sign": [
-      1048.5,
-      -104
+      794.5,
+      -202
      ]
     },
     {
      "id": "E514-plot-2",
      "slot": 1,
      "box": {
-      "x0": 1060.5,
-      "y0": -119,
-      "x1": 1071,
-      "y1": -105
+      "x0": 813.5,
+      "y0": -217,
+      "x1": 831,
+      "y1": -203
      },
      "sign": [
-      1062,
-      -104
+      815,
+      -202
      ]
     }
    ],
    "anchor": [
-    1059,
-    -132
+    812,
+    -196
    ]
   },
   {
@@ -4290,10 +4290,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "town",
    "family": "restaurant",
    "box": {
-    "x0": 1086,
-    "y0": -128,
-    "x1": 1110,
-    "y1": -108
+    "x0": 790,
+    "y0": 16,
+    "x1": 834,
+    "y1": 44
    },
    "front": "s",
    "plots": [
@@ -4301,34 +4301,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "E515-plot-1",
      "slot": 0,
      "box": {
-      "x0": 1089,
-      "y0": -125,
-      "x1": 1096.5,
-      "y1": -111
+      "x0": 793,
+      "y0": 27,
+      "x1": 810.5,
+      "y1": 41
      },
      "sign": [
-      1090.5,
-      -110
+      794.5,
+      42
      ]
     },
     {
      "id": "E515-plot-2",
      "slot": 1,
      "box": {
-      "x0": 1099.5,
-      "y0": -125,
-      "x1": 1107,
-      "y1": -111
+      "x0": 813.5,
+      "y0": 27,
+      "x1": 831,
+      "y1": 41
      },
      "sign": [
-      1101,
-      -110
+      815,
+      42
      ]
     }
    ],
    "anchor": [
-    1098,
-    -132
+    812,
+    48
    ]
   },
   {
@@ -4338,10 +4338,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "town",
    "family": "school",
    "box": {
-    "x0": 1122,
-    "y0": -128,
-    "x1": 1158,
-    "y1": -98
+    "x0": 790,
+    "y0": 62,
+    "x1": 834,
+    "y1": 92
    },
    "front": "s",
    "plots": [
@@ -4349,34 +4349,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "E521-plot-1",
      "slot": 0,
      "box": {
-      "x0": 1125,
-      "y0": -115,
-      "x1": 1138.5,
-      "y1": -101
+      "x0": 793,
+      "y0": 75,
+      "x1": 810.5,
+      "y1": 89
      },
      "sign": [
-      1126.5,
-      -100
+      794.5,
+      90
      ]
     },
     {
      "id": "E521-plot-2",
      "slot": 1,
      "box": {
-      "x0": 1141.5,
-      "y0": -115,
-      "x1": 1155,
-      "y1": -101
+      "x0": 813.5,
+      "y0": 75,
+      "x1": 831,
+      "y1": 89
      },
      "sign": [
-      1143,
-      -100
+      815,
+      90
      ]
     }
    ],
    "anchor": [
-    1140,
-    -132
+    812,
+    96
    ]
   },
   {
@@ -4386,10 +4386,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "town",
    "family": "shop",
    "box": {
-    "x0": 1044,
-    "y0": -86,
-    "x1": 1068,
-    "y1": -66
+    "x0": 790,
+    "y0": 108,
+    "x1": 834,
+    "y1": 136
    },
    "front": "s",
    "plots": [
@@ -4397,34 +4397,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "E522-plot-1",
      "slot": 0,
      "box": {
-      "x0": 1047,
-      "y0": -83,
-      "x1": 1054.5,
-      "y1": -69
+      "x0": 793,
+      "y0": 119,
+      "x1": 810.5,
+      "y1": 133
      },
      "sign": [
-      1048.5,
-      -68
+      794.5,
+      134
      ]
     },
     {
      "id": "E522-plot-2",
      "slot": 1,
      "box": {
-      "x0": 1057.5,
-      "y0": -83,
-      "x1": 1065,
-      "y1": -69
+      "x0": 813.5,
+      "y0": 119,
+      "x1": 831,
+      "y1": 133
      },
      "sign": [
-      1059,
-      -68
+      815,
+      134
      ]
     }
    ],
    "anchor": [
-    1056,
-    -90
+    812,
+    140
    ]
   },
   {
@@ -4434,10 +4434,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "town",
    "family": "office-tower",
    "box": {
-    "x0": 1080,
-    "y0": -86,
-    "x1": 1108,
-    "y1": -58
+    "x0": 790,
+    "y0": 154,
+    "x1": 834,
+    "y1": 182
    },
    "front": "s",
    "plots": [
@@ -4445,34 +4445,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "E611-plot-1",
      "slot": 0,
      "box": {
-      "x0": 1083,
-      "y0": -75,
-      "x1": 1092.5,
-      "y1": -61
+      "x0": 793,
+      "y0": 165,
+      "x1": 810.5,
+      "y1": 179
      },
      "sign": [
-      1084.5,
-      -60
+      794.5,
+      180
      ]
     },
     {
      "id": "E611-plot-2",
      "slot": 1,
      "box": {
-      "x0": 1095.5,
-      "y0": -75,
-      "x1": 1105,
-      "y1": -61
+      "x0": 813.5,
+      "y0": 165,
+      "x1": 831,
+      "y1": 179
      },
      "sign": [
-      1097,
-      -60
+      815,
+      180
      ]
     }
    ],
    "anchor": [
-    1094,
-    -90
+    812,
+    186
    ]
   },
   {
@@ -4482,10 +4482,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "town",
    "family": "office-tower",
    "box": {
-    "x0": 1120,
-    "y0": -86,
-    "x1": 1148,
-    "y1": -58
+    "x0": 790,
+    "y0": 200,
+    "x1": 834,
+    "y1": 228
    },
    "front": "s",
    "plots": [
@@ -4493,34 +4493,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "E612-plot-1",
      "slot": 0,
      "box": {
-      "x0": 1123,
-      "y0": -75,
-      "x1": 1132.5,
-      "y1": -61
+      "x0": 793,
+      "y0": 211,
+      "x1": 810.5,
+      "y1": 225
      },
      "sign": [
-      1124.5,
-      -60
+      794.5,
+      226
      ]
     },
     {
      "id": "E612-plot-2",
      "slot": 1,
      "box": {
-      "x0": 1135.5,
-      "y0": -75,
-      "x1": 1145,
-      "y1": -61
+      "x0": 813.5,
+      "y0": 211,
+      "x1": 831,
+      "y1": 225
      },
      "sign": [
-      1137,
-      -60
+      815,
+      226
      ]
     }
    ],
    "anchor": [
-    1134,
-    -90
+    812,
+    232
    ]
   },
   {
@@ -4530,10 +4530,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "town",
    "family": "office-tower",
    "box": {
-    "x0": 1160,
-    "y0": -86,
-    "x1": 1188,
-    "y1": -58
+    "x0": 844,
+    "y0": -44,
+    "x1": 888,
+    "y1": -16
    },
    "front": "s",
    "plots": [
@@ -4541,34 +4541,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "E613-plot-1",
      "slot": 0,
      "box": {
-      "x0": 1163,
-      "y0": -75,
-      "x1": 1172.5,
-      "y1": -61
+      "x0": 847,
+      "y0": -33,
+      "x1": 864.5,
+      "y1": -19
      },
      "sign": [
-      1164.5,
-      -60
+      848.5,
+      -18
      ]
     },
     {
      "id": "E613-plot-2",
      "slot": 1,
      "box": {
-      "x0": 1175.5,
-      "y0": -75,
-      "x1": 1185,
-      "y1": -61
+      "x0": 867.5,
+      "y0": -33,
+      "x1": 885,
+      "y1": -19
      },
      "sign": [
-      1177,
-      -60
+      869,
+      -18
      ]
     }
    ],
    "anchor": [
-    1174,
-    -90
+    866,
+    -12
    ]
   },
   {
@@ -4578,10 +4578,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "town",
    "family": "office-tower",
    "box": {
-    "x0": 1044,
-    "y0": -46,
-    "x1": 1072,
-    "y1": -18
+    "x0": 844,
+    "y0": -90,
+    "x1": 888,
+    "y1": -62
    },
    "front": "s",
    "plots": [
@@ -4589,34 +4589,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "E614-plot-1",
      "slot": 0,
      "box": {
-      "x0": 1047,
-      "y0": -35,
-      "x1": 1056.5,
-      "y1": -21
+      "x0": 847,
+      "y0": -79,
+      "x1": 864.5,
+      "y1": -65
      },
      "sign": [
-      1048.5,
-      -20
+      848.5,
+      -64
      ]
     },
     {
      "id": "E614-plot-2",
      "slot": 1,
      "box": {
-      "x0": 1059.5,
-      "y0": -35,
-      "x1": 1069,
-      "y1": -21
+      "x0": 867.5,
+      "y0": -79,
+      "x1": 885,
+      "y1": -65
      },
      "sign": [
-      1061,
-      -20
+      869,
+      -64
      ]
     }
    ],
    "anchor": [
-    1058,
-    -50
+    866,
+    -58
    ]
   },
   {
@@ -4626,10 +4626,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "town",
    "family": "cinema",
    "box": {
-    "x0": 1084,
-    "y0": -46,
-    "x1": 1114,
-    "y1": -20
+    "x0": 844,
+    "y0": -136,
+    "x1": 888,
+    "y1": -108
    },
    "front": "s",
    "plots": [
@@ -4637,34 +4637,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "E621-plot-1",
      "slot": 0,
      "box": {
-      "x0": 1087,
-      "y0": -37,
-      "x1": 1097.5,
-      "y1": -23
+      "x0": 847,
+      "y0": -125,
+      "x1": 864.5,
+      "y1": -111
      },
      "sign": [
-      1088.5,
-      -22
+      848.5,
+      -110
      ]
     },
     {
      "id": "E621-plot-2",
      "slot": 1,
      "box": {
-      "x0": 1100.5,
-      "y0": -37,
-      "x1": 1111,
-      "y1": -23
+      "x0": 867.5,
+      "y0": -125,
+      "x1": 885,
+      "y1": -111
      },
      "sign": [
-      1102,
-      -22
+      869,
+      -110
      ]
     }
    ],
    "anchor": [
-    1099,
-    -50
+    866,
+    -104
    ]
   },
   {
@@ -4674,10 +4674,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "town",
    "family": "depot",
    "box": {
-    "x0": 1212,
-    "y0": -170,
-    "x1": 1262,
-    "y1": -134
+    "x0": 844,
+    "y0": -190,
+    "x1": 894,
+    "y1": -154
    },
    "front": "s",
    "plots": [
@@ -4685,34 +4685,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "F112-plot-1",
      "slot": 0,
      "box": {
-      "x0": 1215,
-      "y0": -151,
-      "x1": 1235.5,
-      "y1": -137
+      "x0": 847,
+      "y0": -171,
+      "x1": 867.5,
+      "y1": -157
      },
      "sign": [
-      1216.5,
-      -136
+      848.5,
+      -156
      ]
     },
     {
      "id": "F112-plot-2",
      "slot": 1,
      "box": {
-      "x0": 1238.5,
-      "y0": -151,
-      "x1": 1259,
-      "y1": -137
+      "x0": 870.5,
+      "y0": -171,
+      "x1": 891,
+      "y1": -157
      },
      "sign": [
-      1240,
-      -136
+      872,
+      -156
      ]
     }
    ],
    "anchor": [
-    1237,
-    -174
+    869,
+    -150
    ]
   },
   {
@@ -4722,10 +4722,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "town",
    "family": "hospital",
    "box": {
-    "x0": 1212,
-    "y0": -122,
-    "x1": 1256,
-    "y1": -88
+    "x0": 844,
+    "y0": -234,
+    "x1": 888,
+    "y1": -200
    },
    "front": "s",
    "plots": [
@@ -4733,34 +4733,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "F121-plot-1",
      "slot": 0,
      "box": {
-      "x0": 1215,
-      "y0": -105,
-      "x1": 1232.5,
-      "y1": -91
+      "x0": 847,
+      "y0": -217,
+      "x1": 864.5,
+      "y1": -203
      },
      "sign": [
-      1216.5,
-      -90
+      848.5,
+      -202
      ]
     },
     {
      "id": "F121-plot-2",
      "slot": 1,
      "box": {
-      "x0": 1235.5,
-      "y0": -105,
-      "x1": 1253,
-      "y1": -91
+      "x0": 867.5,
+      "y0": -217,
+      "x1": 885,
+      "y1": -203
      },
      "sign": [
-      1237,
-      -90
+      869,
+      -202
      ]
     }
    ],
    "anchor": [
-    1234,
-    -126
+    866,
+    -196
    ]
   },
   {
@@ -4770,10 +4770,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "town",
    "family": "lab",
    "box": {
-    "x0": 1212,
-    "y0": -76,
-    "x1": 1242,
-    "y1": -52
+    "x0": 844,
+    "y0": 16,
+    "x1": 888,
+    "y1": 44
    },
    "front": "s",
    "plots": [
@@ -4781,34 +4781,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "F221-plot-1",
      "slot": 0,
      "box": {
-      "x0": 1215,
-      "y0": -69,
-      "x1": 1225.5,
-      "y1": -55
+      "x0": 847,
+      "y0": 27,
+      "x1": 864.5,
+      "y1": 41
      },
      "sign": [
-      1216.5,
-      -54
+      848.5,
+      42
      ]
     },
     {
      "id": "F221-plot-2",
      "slot": 1,
      "box": {
-      "x0": 1228.5,
-      "y0": -69,
-      "x1": 1239,
-      "y1": -55
+      "x0": 867.5,
+      "y0": 27,
+      "x1": 885,
+      "y1": 41
      },
      "sign": [
-      1230,
-      -54
+      869,
+      42
      ]
     }
    ],
    "anchor": [
-    1227,
-    -80
+    866,
+    48
    ]
   },
   {
@@ -4818,10 +4818,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "town",
    "family": "office-tower",
    "box": {
-    "x0": 1298,
-    "y0": -170,
-    "x1": 1326,
-    "y1": -142
+    "x0": 844,
+    "y0": 62,
+    "x1": 888,
+    "y1": 90
    },
    "front": "s",
    "plots": [
@@ -4829,34 +4829,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "C221-plot-1",
      "slot": 0,
      "box": {
-      "x0": 1301,
-      "y0": -159,
-      "x1": 1310.5,
-      "y1": -145
+      "x0": 847,
+      "y0": 73,
+      "x1": 864.5,
+      "y1": 87
      },
      "sign": [
-      1302.5,
-      -144
+      848.5,
+      88
      ]
     },
     {
      "id": "C221-plot-2",
      "slot": 1,
      "box": {
-      "x0": 1313.5,
-      "y0": -159,
-      "x1": 1323,
-      "y1": -145
+      "x0": 867.5,
+      "y0": 73,
+      "x1": 885,
+      "y1": 87
      },
      "sign": [
-      1315,
-      -144
+      869,
+      88
      ]
     }
    ],
    "anchor": [
-    1312,
-    -174
+    866,
+    94
    ]
   },
   {
@@ -4866,10 +4866,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "town",
    "family": "office-tower",
    "box": {
-    "x0": 1338,
-    "y0": -170,
-    "x1": 1366,
-    "y1": -142
+    "x0": 844,
+    "y0": 108,
+    "x1": 888,
+    "y1": 136
    },
    "front": "s",
    "plots": [
@@ -4877,34 +4877,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "C223-plot-1",
      "slot": 0,
      "box": {
-      "x0": 1341,
-      "y0": -159,
-      "x1": 1350.5,
-      "y1": -145
+      "x0": 847,
+      "y0": 119,
+      "x1": 864.5,
+      "y1": 133
      },
      "sign": [
-      1342.5,
-      -144
+      848.5,
+      134
      ]
     },
     {
      "id": "C223-plot-2",
      "slot": 1,
      "box": {
-      "x0": 1353.5,
-      "y0": -159,
-      "x1": 1363,
-      "y1": -145
+      "x0": 867.5,
+      "y0": 119,
+      "x1": 885,
+      "y1": 133
      },
      "sign": [
-      1355,
-      -144
+      869,
+      134
      ]
     }
    ],
    "anchor": [
-    1352,
-    -174
+    866,
+    140
    ]
   },
   {
@@ -4914,10 +4914,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "town",
    "family": "office-tower",
    "box": {
-    "x0": 1378,
-    "y0": -170,
-    "x1": 1406,
-    "y1": -142
+    "x0": 844,
+    "y0": 154,
+    "x1": 888,
+    "y1": 182
    },
    "front": "s",
    "plots": [
@@ -4925,34 +4925,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "C224-plot-1",
      "slot": 0,
      "box": {
-      "x0": 1381,
-      "y0": -159,
-      "x1": 1390.5,
-      "y1": -145
+      "x0": 847,
+      "y0": 165,
+      "x1": 864.5,
+      "y1": 179
      },
      "sign": [
-      1382.5,
-      -144
+      848.5,
+      180
      ]
     },
     {
      "id": "C224-plot-2",
      "slot": 1,
      "box": {
-      "x0": 1393.5,
-      "y0": -159,
-      "x1": 1403,
-      "y1": -145
+      "x0": 867.5,
+      "y0": 165,
+      "x1": 885,
+      "y1": 179
      },
      "sign": [
-      1395,
-      -144
+      869,
+      180
      ]
     }
    ],
    "anchor": [
-    1392,
-    -174
+    866,
+    186
    ]
   },
   {
@@ -4962,10 +4962,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "town",
    "family": "office-tower",
    "box": {
-    "x0": 1298,
-    "y0": -130,
-    "x1": 1326,
-    "y1": -102
+    "x0": 844,
+    "y0": 200,
+    "x1": 888,
+    "y1": 228
    },
    "front": "s",
    "plots": [
@@ -4973,34 +4973,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "C231-plot-1",
      "slot": 0,
      "box": {
-      "x0": 1301,
-      "y0": -119,
-      "x1": 1310.5,
-      "y1": -105
+      "x0": 847,
+      "y0": 211,
+      "x1": 864.5,
+      "y1": 225
      },
      "sign": [
-      1302.5,
-      -104
+      848.5,
+      226
      ]
     },
     {
      "id": "C231-plot-2",
      "slot": 1,
      "box": {
-      "x0": 1313.5,
-      "y0": -119,
-      "x1": 1323,
-      "y1": -105
+      "x0": 867.5,
+      "y0": 211,
+      "x1": 885,
+      "y1": 225
      },
      "sign": [
-      1315,
-      -104
+      869,
+      226
      ]
     }
    ],
    "anchor": [
-    1312,
-    -134
+    866,
+    232
    ]
   },
   {
@@ -5010,10 +5010,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "town",
    "family": "office-tower",
    "box": {
-    "x0": 1338,
-    "y0": -130,
-    "x1": 1366,
-    "y1": -102
+    "x0": 904,
+    "y0": -44,
+    "x1": 948,
+    "y1": -16
    },
    "front": "s",
    "plots": [
@@ -5021,34 +5021,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "C232-plot-1",
      "slot": 0,
      "box": {
-      "x0": 1341,
-      "y0": -119,
-      "x1": 1350.5,
-      "y1": -105
+      "x0": 907,
+      "y0": -33,
+      "x1": 924.5,
+      "y1": -19
      },
      "sign": [
-      1342.5,
-      -104
+      908.5,
+      -18
      ]
     },
     {
      "id": "C232-plot-2",
      "slot": 1,
      "box": {
-      "x0": 1353.5,
-      "y0": -119,
-      "x1": 1363,
-      "y1": -105
+      "x0": 927.5,
+      "y0": -33,
+      "x1": 945,
+      "y1": -19
      },
      "sign": [
-      1355,
-      -104
+      929,
+      -18
      ]
     }
    ],
    "anchor": [
-    1352,
-    -134
+    926,
+    -12
    ]
   },
   {
@@ -5058,10 +5058,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "town",
    "family": "office-tower",
    "box": {
-    "x0": 1378,
-    "y0": -130,
-    "x1": 1406,
-    "y1": -102
+    "x0": 904,
+    "y0": -90,
+    "x1": 948,
+    "y1": -62
    },
    "front": "s",
    "plots": [
@@ -5069,34 +5069,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "C311-plot-1",
      "slot": 0,
      "box": {
-      "x0": 1381,
-      "y0": -119,
-      "x1": 1390.5,
-      "y1": -105
+      "x0": 907,
+      "y0": -79,
+      "x1": 924.5,
+      "y1": -65
      },
      "sign": [
-      1382.5,
-      -104
+      908.5,
+      -64
      ]
     },
     {
      "id": "C311-plot-2",
      "slot": 1,
      "box": {
-      "x0": 1393.5,
-      "y0": -119,
-      "x1": 1403,
-      "y1": -105
+      "x0": 927.5,
+      "y0": -79,
+      "x1": 945,
+      "y1": -65
      },
      "sign": [
-      1395,
-      -104
+      929,
+      -64
      ]
     }
    ],
    "anchor": [
-    1392,
-    -134
+    926,
+    -58
    ]
   },
   {
@@ -5106,10 +5106,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "town",
    "family": "office-tower",
    "box": {
-    "x0": 1298,
-    "y0": -90,
-    "x1": 1326,
-    "y1": -62
+    "x0": 904,
+    "y0": -136,
+    "x1": 948,
+    "y1": -108
    },
    "front": "s",
    "plots": [
@@ -5117,34 +5117,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "G511-plot-1",
      "slot": 0,
      "box": {
-      "x0": 1301,
-      "y0": -79,
-      "x1": 1310.5,
-      "y1": -65
+      "x0": 907,
+      "y0": -125,
+      "x1": 924.5,
+      "y1": -111
      },
      "sign": [
-      1302.5,
-      -64
+      908.5,
+      -110
      ]
     },
     {
      "id": "G511-plot-2",
      "slot": 1,
      "box": {
-      "x0": 1313.5,
-      "y0": -79,
-      "x1": 1323,
-      "y1": -65
+      "x0": 927.5,
+      "y0": -125,
+      "x1": 945,
+      "y1": -111
      },
      "sign": [
-      1315,
-      -64
+      929,
+      -110
      ]
     }
    ],
    "anchor": [
-    1312,
-    -94
+    926,
+    -104
    ]
   },
   {
@@ -5154,10 +5154,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "town",
    "family": "office-tower",
    "box": {
-    "x0": 1338,
-    "y0": -90,
-    "x1": 1366,
-    "y1": -62
+    "x0": 904,
+    "y0": -182,
+    "x1": 948,
+    "y1": -154
    },
    "front": "s",
    "plots": [
@@ -5165,34 +5165,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "G512-plot-1",
      "slot": 0,
      "box": {
-      "x0": 1341,
-      "y0": -79,
-      "x1": 1350.5,
-      "y1": -65
+      "x0": 907,
+      "y0": -171,
+      "x1": 924.5,
+      "y1": -157
      },
      "sign": [
-      1342.5,
-      -64
+      908.5,
+      -156
      ]
     },
     {
      "id": "G512-plot-2",
      "slot": 1,
      "box": {
-      "x0": 1353.5,
-      "y0": -79,
-      "x1": 1363,
-      "y1": -65
+      "x0": 927.5,
+      "y0": -171,
+      "x1": 945,
+      "y1": -157
      },
      "sign": [
-      1355,
-      -64
+      929,
+      -156
      ]
     }
    ],
    "anchor": [
-    1352,
-    -94
+    926,
+    -150
    ]
   },
   {
@@ -5202,10 +5202,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "town",
    "family": "office-tower",
    "box": {
-    "x0": 1378,
-    "y0": -90,
-    "x1": 1406,
-    "y1": -62
+    "x0": 904,
+    "y0": -228,
+    "x1": 948,
+    "y1": -200
    },
    "front": "s",
    "plots": [
@@ -5213,34 +5213,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "H112-plot-1",
      "slot": 0,
      "box": {
-      "x0": 1381,
-      "y0": -79,
-      "x1": 1390.5,
-      "y1": -65
+      "x0": 907,
+      "y0": -217,
+      "x1": 924.5,
+      "y1": -203
      },
      "sign": [
-      1382.5,
-      -64
+      908.5,
+      -202
      ]
     },
     {
      "id": "H112-plot-2",
      "slot": 1,
      "box": {
-      "x0": 1393.5,
-      "y0": -79,
-      "x1": 1403,
-      "y1": -65
+      "x0": 927.5,
+      "y0": -217,
+      "x1": 945,
+      "y1": -203
      },
      "sign": [
-      1395,
-      -64
+      929,
+      -202
      ]
     }
    ],
    "anchor": [
-    1392,
-    -94
+    926,
+    -196
    ]
   },
   {
@@ -5250,10 +5250,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "town",
    "family": "office-tower",
    "box": {
-    "x0": 1298,
-    "y0": -50,
-    "x1": 1326,
-    "y1": -22
+    "x0": 904,
+    "y0": 16,
+    "x1": 948,
+    "y1": 44
    },
    "front": "s",
    "plots": [
@@ -5261,34 +5261,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "I111-plot-1",
      "slot": 0,
      "box": {
-      "x0": 1301,
-      "y0": -39,
-      "x1": 1310.5,
-      "y1": -25
+      "x0": 907,
+      "y0": 27,
+      "x1": 924.5,
+      "y1": 41
      },
      "sign": [
-      1302.5,
-      -24
+      908.5,
+      42
      ]
     },
     {
      "id": "I111-plot-2",
      "slot": 1,
      "box": {
-      "x0": 1313.5,
-      "y0": -39,
-      "x1": 1323,
-      "y1": -25
+      "x0": 927.5,
+      "y0": 27,
+      "x1": 945,
+      "y1": 41
      },
      "sign": [
-      1315,
-      -24
+      929,
+      42
      ]
     }
    ],
    "anchor": [
-    1312,
-    -54
+    926,
+    48
    ]
   },
   {
@@ -5298,10 +5298,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "town",
    "family": "office-tower",
    "box": {
-    "x0": 1338,
-    "y0": -50,
-    "x1": 1366,
-    "y1": -22
+    "x0": 904,
+    "y0": 62,
+    "x1": 948,
+    "y1": 90
    },
    "front": "s",
    "plots": [
@@ -5309,34 +5309,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "I121-plot-1",
      "slot": 0,
      "box": {
-      "x0": 1341,
-      "y0": -39,
-      "x1": 1350.5,
-      "y1": -25
+      "x0": 907,
+      "y0": 73,
+      "x1": 924.5,
+      "y1": 87
      },
      "sign": [
-      1342.5,
-      -24
+      908.5,
+      88
      ]
     },
     {
      "id": "I121-plot-2",
      "slot": 1,
      "box": {
-      "x0": 1353.5,
-      "y0": -39,
-      "x1": 1363,
-      "y1": -25
+      "x0": 927.5,
+      "y0": 73,
+      "x1": 945,
+      "y1": 87
      },
      "sign": [
-      1355,
-      -24
+      929,
+      88
      ]
     }
    ],
    "anchor": [
-    1352,
-    -54
+    926,
+    94
    ]
   },
   {
@@ -5346,10 +5346,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "town",
    "family": "office-tower",
    "box": {
-    "x0": 1378,
-    "y0": -50,
-    "x1": 1406,
-    "y1": -22
+    "x0": 904,
+    "y0": 108,
+    "x1": 948,
+    "y1": 136
    },
    "front": "s",
    "plots": [
@@ -5357,34 +5357,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "I131-plot-1",
      "slot": 0,
      "box": {
-      "x0": 1381,
-      "y0": -39,
-      "x1": 1390.5,
-      "y1": -25
+      "x0": 907,
+      "y0": 119,
+      "x1": 924.5,
+      "y1": 133
      },
      "sign": [
-      1382.5,
-      -24
+      908.5,
+      134
      ]
     },
     {
      "id": "I131-plot-2",
      "slot": 1,
      "box": {
-      "x0": 1393.5,
-      "y0": -39,
-      "x1": 1403,
-      "y1": -25
+      "x0": 927.5,
+      "y0": 119,
+      "x1": 945,
+      "y1": 133
      },
      "sign": [
-      1395,
-      -24
+      929,
+      134
      ]
     }
    ],
    "anchor": [
-    1392,
-    -54
+    926,
+    140
    ]
   },
   {
@@ -5394,10 +5394,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "town",
    "family": "bank-tower",
    "box": {
-    "x0": 1442,
-    "y0": -170,
-    "x1": 1472,
-    "y1": -140
+    "x0": 904,
+    "y0": 154,
+    "x1": 948,
+    "y1": 184
    },
    "front": "s",
    "plots": [
@@ -5405,34 +5405,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "G111-plot-1",
      "slot": 0,
      "box": {
-      "x0": 1445,
-      "y0": -157,
-      "x1": 1455.5,
-      "y1": -143
+      "x0": 907,
+      "y0": 167,
+      "x1": 924.5,
+      "y1": 181
      },
      "sign": [
-      1446.5,
-      -142
+      908.5,
+      182
      ]
     },
     {
      "id": "G111-plot-2",
      "slot": 1,
      "box": {
-      "x0": 1458.5,
-      "y0": -157,
-      "x1": 1469,
-      "y1": -143
+      "x0": 927.5,
+      "y0": 167,
+      "x1": 945,
+      "y1": 181
      },
      "sign": [
-      1460,
-      -142
+      929,
+      182
      ]
     }
    ],
    "anchor": [
-    1457,
-    -174
+    926,
+    188
    ]
   },
   {
@@ -5442,10 +5442,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "town",
    "family": "bank-tower",
    "box": {
-    "x0": 1484,
-    "y0": -170,
-    "x1": 1514,
-    "y1": -140
+    "x0": 904,
+    "y0": 200,
+    "x1": 948,
+    "y1": 230
    },
    "front": "s",
    "plots": [
@@ -5453,34 +5453,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "G211-plot-1",
      "slot": 0,
      "box": {
-      "x0": 1487,
-      "y0": -157,
-      "x1": 1497.5,
-      "y1": -143
+      "x0": 907,
+      "y0": 213,
+      "x1": 924.5,
+      "y1": 227
      },
      "sign": [
-      1488.5,
-      -142
+      908.5,
+      228
      ]
     },
     {
      "id": "G211-plot-2",
      "slot": 1,
      "box": {
-      "x0": 1500.5,
-      "y0": -157,
-      "x1": 1511,
-      "y1": -143
+      "x0": 927.5,
+      "y0": 213,
+      "x1": 945,
+      "y1": 227
      },
      "sign": [
-      1502,
-      -142
+      929,
+      228
      ]
     }
    ],
    "anchor": [
-    1499,
-    -174
+    926,
+    234
    ]
   },
   {
@@ -5490,10 +5490,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "town",
    "family": "office-tower",
    "box": {
-    "x0": 1526,
-    "y0": -170,
-    "x1": 1554,
-    "y1": -142
+    "x0": 958,
+    "y0": -44,
+    "x1": 1002,
+    "y1": -16
    },
    "front": "s",
    "plots": [
@@ -5501,34 +5501,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "G221-plot-1",
      "slot": 0,
      "box": {
-      "x0": 1529,
-      "y0": -159,
-      "x1": 1538.5,
-      "y1": -145
+      "x0": 961,
+      "y0": -33,
+      "x1": 978.5,
+      "y1": -19
      },
      "sign": [
-      1530.5,
-      -144
+      962.5,
+      -18
      ]
     },
     {
      "id": "G221-plot-2",
      "slot": 1,
      "box": {
-      "x0": 1541.5,
-      "y0": -159,
-      "x1": 1551,
-      "y1": -145
+      "x0": 981.5,
+      "y0": -33,
+      "x1": 999,
+      "y1": -19
      },
      "sign": [
-      1543,
-      -144
+      983,
+      -18
      ]
     }
    ],
    "anchor": [
-    1540,
-    -174
+    980,
+    -12
    ]
   },
   {
@@ -5538,10 +5538,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "town",
    "family": "office-tower",
    "box": {
-    "x0": 1566,
-    "y0": -170,
-    "x1": 1594,
-    "y1": -142
+    "x0": 958,
+    "y0": -90,
+    "x1": 1002,
+    "y1": -62
    },
    "front": "s",
    "plots": [
@@ -5549,34 +5549,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "G222-plot-1",
      "slot": 0,
      "box": {
-      "x0": 1569,
-      "y0": -159,
-      "x1": 1578.5,
-      "y1": -145
+      "x0": 961,
+      "y0": -79,
+      "x1": 978.5,
+      "y1": -65
      },
      "sign": [
-      1570.5,
-      -144
+      962.5,
+      -64
      ]
     },
     {
      "id": "G222-plot-2",
      "slot": 1,
      "box": {
-      "x0": 1581.5,
-      "y0": -159,
-      "x1": 1591,
-      "y1": -145
+      "x0": 981.5,
+      "y0": -79,
+      "x1": 999,
+      "y1": -65
      },
      "sign": [
-      1583,
-      -144
+      983,
+      -64
      ]
     }
    ],
    "anchor": [
-    1580,
-    -174
+    980,
+    -58
    ]
   },
   {
@@ -5586,10 +5586,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "town",
    "family": "office-tower",
    "box": {
-    "x0": 1442,
-    "y0": -128,
-    "x1": 1470,
-    "y1": -100
+    "x0": 958,
+    "y0": -136,
+    "x1": 1002,
+    "y1": -108
    },
    "front": "s",
    "plots": [
@@ -5597,34 +5597,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "G311-plot-1",
      "slot": 0,
      "box": {
-      "x0": 1445,
-      "y0": -117,
-      "x1": 1454.5,
-      "y1": -103
+      "x0": 961,
+      "y0": -125,
+      "x1": 978.5,
+      "y1": -111
      },
      "sign": [
-      1446.5,
-      -102
+      962.5,
+      -110
      ]
     },
     {
      "id": "G311-plot-2",
      "slot": 1,
      "box": {
-      "x0": 1457.5,
-      "y0": -117,
-      "x1": 1467,
-      "y1": -103
+      "x0": 981.5,
+      "y0": -125,
+      "x1": 999,
+      "y1": -111
      },
      "sign": [
-      1459,
-      -102
+      983,
+      -110
      ]
     }
    ],
    "anchor": [
-    1456,
-    -132
+    980,
+    -104
    ]
   },
   {
@@ -5634,10 +5634,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "town",
    "family": "office-tower",
    "box": {
-    "x0": 1482,
-    "y0": -128,
-    "x1": 1510,
-    "y1": -100
+    "x0": 958,
+    "y0": -182,
+    "x1": 1002,
+    "y1": -154
    },
    "front": "s",
    "plots": [
@@ -5645,34 +5645,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "G312-plot-1",
      "slot": 0,
      "box": {
-      "x0": 1485,
-      "y0": -117,
-      "x1": 1494.5,
-      "y1": -103
+      "x0": 961,
+      "y0": -171,
+      "x1": 978.5,
+      "y1": -157
      },
      "sign": [
-      1486.5,
-      -102
+      962.5,
+      -156
      ]
     },
     {
      "id": "G312-plot-2",
      "slot": 1,
      "box": {
-      "x0": 1497.5,
-      "y0": -117,
-      "x1": 1507,
-      "y1": -103
+      "x0": 981.5,
+      "y0": -171,
+      "x1": 999,
+      "y1": -157
      },
      "sign": [
-      1499,
-      -102
+      983,
+      -156
      ]
     }
    ],
    "anchor": [
-    1496,
-    -132
+    980,
+    -150
    ]
   },
   {
@@ -5682,10 +5682,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "town",
    "family": "exchange",
    "box": {
-    "x0": 1522,
-    "y0": -128,
-    "x1": 1562,
-    "y1": -94
+    "x0": 958,
+    "y0": -234,
+    "x1": 1002,
+    "y1": -200
    },
    "front": "s",
    "plots": [
@@ -5693,34 +5693,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "G313-plot-1",
      "slot": 0,
      "box": {
-      "x0": 1525,
-      "y0": -111,
-      "x1": 1540.5,
-      "y1": -97
+      "x0": 961,
+      "y0": -217,
+      "x1": 978.5,
+      "y1": -203
      },
      "sign": [
-      1526.5,
-      -96
+      962.5,
+      -202
      ]
     },
     {
      "id": "G313-plot-2",
      "slot": 1,
      "box": {
-      "x0": 1543.5,
-      "y0": -111,
-      "x1": 1559,
-      "y1": -97
+      "x0": 981.5,
+      "y0": -217,
+      "x1": 999,
+      "y1": -203
      },
      "sign": [
-      1545,
-      -96
+      983,
+      -202
      ]
     }
    ],
    "anchor": [
-    1542,
-    -132
+    980,
+    -196
    ]
   },
   {
@@ -5730,10 +5730,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "town",
    "family": "office-tower",
    "box": {
-    "x0": 1442,
-    "y0": -82,
-    "x1": 1470,
-    "y1": -54
+    "x0": 958,
+    "y0": 16,
+    "x1": 1002,
+    "y1": 44
    },
    "front": "s",
    "plots": [
@@ -5741,34 +5741,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "G314-plot-1",
      "slot": 0,
      "box": {
-      "x0": 1445,
-      "y0": -71,
-      "x1": 1454.5,
-      "y1": -57
+      "x0": 961,
+      "y0": 27,
+      "x1": 978.5,
+      "y1": 41
      },
      "sign": [
-      1446.5,
-      -56
+      962.5,
+      42
      ]
     },
     {
      "id": "G314-plot-2",
      "slot": 1,
      "box": {
-      "x0": 1457.5,
-      "y0": -71,
-      "x1": 1467,
-      "y1": -57
+      "x0": 981.5,
+      "y0": 27,
+      "x1": 999,
+      "y1": 41
      },
      "sign": [
-      1459,
-      -56
+      983,
+      42
      ]
     }
    ],
    "anchor": [
-    1456,
-    -86
+    980,
+    48
    ]
   },
   {
@@ -5778,10 +5778,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "town",
    "family": "office-tower",
    "box": {
-    "x0": 1482,
-    "y0": -82,
-    "x1": 1510,
-    "y1": -54
+    "x0": 958,
+    "y0": 62,
+    "x1": 1002,
+    "y1": 90
    },
    "front": "s",
    "plots": [
@@ -5789,34 +5789,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "G411-plot-1",
      "slot": 0,
      "box": {
-      "x0": 1485,
-      "y0": -71,
-      "x1": 1494.5,
-      "y1": -57
+      "x0": 961,
+      "y0": 73,
+      "x1": 978.5,
+      "y1": 87
      },
      "sign": [
-      1486.5,
-      -56
+      962.5,
+      88
      ]
     },
     {
      "id": "G411-plot-2",
      "slot": 1,
      "box": {
-      "x0": 1497.5,
-      "y0": -71,
-      "x1": 1507,
-      "y1": -57
+      "x0": 981.5,
+      "y0": 73,
+      "x1": 999,
+      "y1": 87
      },
      "sign": [
-      1499,
-      -56
+      983,
+      88
      ]
     }
    ],
    "anchor": [
-    1496,
-    -86
+    980,
+    94
    ]
   },
   {
@@ -5826,10 +5826,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "town",
    "family": "office-tower",
    "box": {
-    "x0": 1522,
-    "y0": -82,
-    "x1": 1550,
-    "y1": -54
+    "x0": 958,
+    "y0": 108,
+    "x1": 1002,
+    "y1": 136
    },
    "front": "s",
    "plots": [
@@ -5837,34 +5837,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "G412-plot-1",
      "slot": 0,
      "box": {
-      "x0": 1525,
-      "y0": -71,
-      "x1": 1534.5,
-      "y1": -57
+      "x0": 961,
+      "y0": 119,
+      "x1": 978.5,
+      "y1": 133
      },
      "sign": [
-      1526.5,
-      -56
+      962.5,
+      134
      ]
     },
     {
      "id": "G412-plot-2",
      "slot": 1,
      "box": {
-      "x0": 1537.5,
-      "y0": -71,
-      "x1": 1547,
-      "y1": -57
+      "x0": 981.5,
+      "y0": 119,
+      "x1": 999,
+      "y1": 133
      },
      "sign": [
-      1539,
-      -56
+      983,
+      134
      ]
     }
    ],
    "anchor": [
-    1536,
-    -86
+    980,
+    140
    ]
   },
   {
@@ -5874,10 +5874,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "town",
    "family": "office-tower",
    "box": {
-    "x0": 1562,
-    "y0": -82,
-    "x1": 1590,
-    "y1": -54
+    "x0": 958,
+    "y0": 154,
+    "x1": 1002,
+    "y1": 182
    },
    "front": "s",
    "plots": [
@@ -5885,34 +5885,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "G413-plot-1",
      "slot": 0,
      "box": {
-      "x0": 1565,
-      "y0": -71,
-      "x1": 1574.5,
-      "y1": -57
+      "x0": 961,
+      "y0": 165,
+      "x1": 978.5,
+      "y1": 179
      },
      "sign": [
-      1566.5,
-      -56
+      962.5,
+      180
      ]
     },
     {
      "id": "G413-plot-2",
      "slot": 1,
      "box": {
-      "x0": 1577.5,
-      "y0": -71,
-      "x1": 1587,
-      "y1": -57
+      "x0": 981.5,
+      "y0": 165,
+      "x1": 999,
+      "y1": 179
      },
      "sign": [
-      1579,
-      -56
+      983,
+      180
      ]
     }
    ],
    "anchor": [
-    1576,
-    -86
+    980,
+    186
    ]
   },
   {
@@ -5922,10 +5922,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "town",
    "family": "office-tower",
    "box": {
-    "x0": 1442,
-    "y0": -42,
-    "x1": 1470,
-    "y1": -14
+    "x0": 958,
+    "y0": 200,
+    "x1": 1002,
+    "y1": 228
    },
    "front": "s",
    "plots": [
@@ -5933,34 +5933,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "G414-plot-1",
      "slot": 0,
      "box": {
-      "x0": 1445,
-      "y0": -31,
-      "x1": 1454.5,
-      "y1": -17
+      "x0": 961,
+      "y0": 211,
+      "x1": 978.5,
+      "y1": 225
      },
      "sign": [
-      1446.5,
-      -16
+      962.5,
+      226
      ]
     },
     {
      "id": "G414-plot-2",
      "slot": 1,
      "box": {
-      "x0": 1457.5,
-      "y0": -31,
-      "x1": 1467,
-      "y1": -17
+      "x0": 981.5,
+      "y0": 211,
+      "x1": 999,
+      "y1": 225
      },
      "sign": [
-      1459,
-      -16
+      983,
+      226
      ]
     }
    ],
    "anchor": [
-    1456,
-    -46
+    980,
+    232
    ]
   },
   {
@@ -5970,10 +5970,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "recovery",
    "family": "recycling-plant",
    "box": {
-    "x0": 870,
-    "y0": -540,
-    "x1": 940,
-    "y1": -490
+    "x0": 764,
+    "y0": 268,
+    "x1": 834,
+    "y1": 318
    },
    "front": "s",
    "plots": [
@@ -5981,47 +5981,47 @@ export const LAYOUT: GeneratedLayout = {
      "id": "C222-plot-1",
      "slot": 0,
      "box": {
-      "x0": 873,
-      "y0": -507,
-      "x1": 903.5,
-      "y1": -493
+      "x0": 767,
+      "y0": 301,
+      "x1": 797.5,
+      "y1": 315
      },
      "sign": [
-      874.5,
-      -492
+      768.5,
+      316
      ]
     },
     {
      "id": "C222-plot-2",
      "slot": 1,
      "box": {
-      "x0": 906.5,
-      "y0": -507,
-      "x1": 937,
-      "y1": -493
+      "x0": 800.5,
+      "y0": 301,
+      "x1": 831,
+      "y1": 315
      },
      "sign": [
-      908,
-      -492
+      802,
+      316
      ]
     }
    ],
    "anchor": [
-    905,
-    -544
+    799,
+    322
    ]
   },
   {
    "id": "J211",
    "code": "J211",
    "zone": "infrastructure",
-   "region": "estate",
+   "region": "town",
    "family": "construction-site",
    "box": {
-    "x0": 320,
-    "y0": -300,
-    "x1": 364,
-    "y1": -256
+    "x0": 952,
+    "y0": -320,
+    "x1": 996,
+    "y1": -276
    },
    "front": "s",
    "plots": [
@@ -6029,47 +6029,47 @@ export const LAYOUT: GeneratedLayout = {
      "id": "J211-plot-1",
      "slot": 0,
      "box": {
-      "x0": 323,
-      "y0": -273,
-      "x1": 340.5,
-      "y1": -259
+      "x0": 955,
+      "y0": -293,
+      "x1": 972.5,
+      "y1": -279
      },
      "sign": [
-      324.5,
-      -258
+      956.5,
+      -278
      ]
     },
     {
      "id": "J211-plot-2",
      "slot": 1,
      "box": {
-      "x0": 343.5,
-      "y0": -273,
-      "x1": 361,
-      "y1": -259
+      "x0": 975.5,
+      "y0": -293,
+      "x1": 993,
+      "y1": -279
      },
      "sign": [
-      345,
-      -258
+      977,
+      -278
      ]
     }
    ],
    "anchor": [
-    342,
-    -304
+    974,
+    -272
    ]
   },
   {
    "id": "J311",
    "code": "J311",
    "zone": "infrastructure",
-   "region": "town",
+   "region": "estate",
    "family": "telecom-tower",
    "box": {
-    "x0": -330,
-    "y0": -330,
-    "x1": -310,
-    "y1": -310
+    "x0": 196,
+    "y0": -346,
+    "x1": 240,
+    "y1": -318
    },
    "front": "s",
    "plots": [
@@ -6077,47 +6077,47 @@ export const LAYOUT: GeneratedLayout = {
      "id": "J311-plot-1",
      "slot": 0,
      "box": {
-      "x0": -327,
-      "y0": -327,
-      "x1": -321.5,
-      "y1": -313
+      "x0": 199,
+      "y0": -335,
+      "x1": 216.5,
+      "y1": -321
      },
      "sign": [
-      -325.5,
-      -312
+      200.5,
+      -320
      ]
     },
     {
      "id": "J311-plot-2",
      "slot": 1,
      "box": {
-      "x0": -318.5,
-      "y0": -327,
-      "x1": -313,
-      "y1": -313
+      "x0": 219.5,
+      "y0": -335,
+      "x1": 237,
+      "y1": -321
      },
      "sign": [
-      -317,
-      -312
+      221,
+      -320
      ]
     }
    ],
    "anchor": [
-    -320,
-    -334
+    218,
+    -314
    ]
   },
   {
    "id": "J312",
    "code": "J312",
    "zone": "infrastructure",
-   "region": "town",
+   "region": "gateway",
    "family": "telecom-tower",
    "box": {
-    "x0": 960,
-    "y0": -230,
-    "x1": 980,
-    "y1": -210
+    "x0": 384,
+    "y0": 24,
+    "x1": 428,
+    "y1": 52
    },
    "front": "s",
    "plots": [
@@ -6125,34 +6125,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "J312-plot-1",
      "slot": 0,
      "box": {
-      "x0": 963,
-      "y0": -227,
-      "x1": 968.5,
-      "y1": -213
+      "x0": 387,
+      "y0": 35,
+      "x1": 404.5,
+      "y1": 49
      },
      "sign": [
-      964.5,
-      -212
+      388.5,
+      50
      ]
     },
     {
      "id": "J312-plot-2",
      "slot": 1,
      "box": {
-      "x0": 971.5,
-      "y0": -227,
-      "x1": 977,
-      "y1": -213
+      "x0": 407.5,
+      "y0": 35,
+      "x1": 425,
+      "y1": 49
      },
      "sign": [
-      973,
-      -212
+      409,
+      50
      ]
     }
    ],
    "anchor": [
-    970,
-    -234
+    406,
+    56
    ]
   },
   {
@@ -6162,10 +6162,10 @@ export const LAYOUT: GeneratedLayout = {
    "region": "town",
    "family": "telecom-tower",
    "box": {
-    "x0": 1600,
-    "y0": 240,
-    "x1": 1620,
-    "y1": 260
+    "x0": 906,
+    "y0": 262,
+    "x1": 950,
+    "y1": 290
    },
    "front": "s",
    "plots": [
@@ -6173,34 +6173,34 @@ export const LAYOUT: GeneratedLayout = {
      "id": "J321-plot-1",
      "slot": 0,
      "box": {
-      "x0": 1603,
-      "y0": 243,
-      "x1": 1608.5,
-      "y1": 257
+      "x0": 909,
+      "y0": 273,
+      "x1": 926.5,
+      "y1": 287
      },
      "sign": [
-      1604.5,
-      258
+      910.5,
+      288
      ]
     },
     {
      "id": "J321-plot-2",
      "slot": 1,
      "box": {
-      "x0": 1611.5,
-      "y0": 243,
-      "x1": 1617,
-      "y1": 257
+      "x0": 929.5,
+      "y0": 273,
+      "x1": 947,
+      "y1": 287
      },
      "sign": [
-      1613,
-      258
+      931,
+      288
      ]
     }
    ],
    "anchor": [
-    1610,
-    236
+    928,
+    294
    ]
   }
  ],
@@ -6210,148 +6210,148 @@ export const LAYOUT: GeneratedLayout = {
    "kind": "ring",
    "points": [
     [
-     340,
-     -370
+     280,
+     -270
     ],
     [
-     361.4599354217741,
-     -367.88638084435536
+     291.7054193209677,
+     -268.84711682419385
     ],
     [
-     382.09517756015987,
-     -361.62674857624154
+     302.9610059419054,
+     -265.4327719506772
     ],
     [
-     401.11272563215624,
-     -351.46165735328
+     313.33421398117616,
+     -259.8881767381527
     ],
     [
-     417.78174593052023,
-     -337.78174593052023
+     322.42640687119285,
+     -252.42640687119285
     ],
     [
-     431.46165735328,
-     -321.11272563215624
+     329.8881767381527,
+     -243.33421398117613
     ],
     [
-     441.62674857624154,
-     -302.09517756015987
+     335.4327719506772,
+     -232.9610059419054
     ],
     [
-     447.88638084435536,
-     -281.4599354217741
-    ],
-    [
-     450,
-     -260
-    ],
-    [
-     450,
-     260
-    ],
-    [
-     447.88638084435536,
-     281.4599354217741
-    ],
-    [
-     441.62674857624154,
-     302.09517756015987
-    ],
-    [
-     431.46165735328,
-     321.11272563215624
-    ],
-    [
-     417.78174593052023,
-     337.78174593052023
-    ],
-    [
-     401.11272563215624,
-     351.46165735328
-    ],
-    [
-     382.09517756015987,
-     361.62674857624154
-    ],
-    [
-     361.4599354217741,
-     367.88638084435536
+     338.84711682419385,
+     -221.7054193209677
     ],
     [
      340,
-     370
+     -210
+    ],
+    [
+     340,
+     210
+    ],
+    [
+     338.84711682419385,
+     221.7054193209677
+    ],
+    [
+     335.4327719506772,
+     232.9610059419054
+    ],
+    [
+     329.8881767381527,
+     243.33421398117613
+    ],
+    [
+     322.42640687119285,
+     252.42640687119285
+    ],
+    [
+     313.33421398117616,
+     259.8881767381527
+    ],
+    [
+     302.9610059419054,
+     265.4327719506772
+    ],
+    [
+     291.7054193209677,
+     268.84711682419385
+    ],
+    [
+     280,
+     270
+    ],
+    [
+     -280,
+     270
+    ],
+    [
+     -291.7054193209677,
+     268.84711682419385
+    ],
+    [
+     -302.9610059419054,
+     265.4327719506772
+    ],
+    [
+     -313.3342139811761,
+     259.8881767381527
+    ],
+    [
+     -322.42640687119285,
+     252.42640687119285
+    ],
+    [
+     -329.8881767381527,
+     243.33421398117613
+    ],
+    [
+     -335.4327719506772,
+     232.9610059419054
+    ],
+    [
+     -338.84711682419385,
+     221.7054193209677
     ],
     [
      -340,
-     370
-    ],
-    [
-     -361.4599354217741,
-     367.88638084435536
-    ],
-    [
-     -382.09517756015987,
-     361.62674857624154
-    ],
-    [
-     -401.1127256321562,
-     351.46165735328
-    ],
-    [
-     -417.78174593052023,
-     337.78174593052023
-    ],
-    [
-     -431.46165735328,
-     321.11272563215624
-    ],
-    [
-     -441.62674857624154,
-     302.09517756015987
-    ],
-    [
-     -447.88638084435536,
-     281.45993542177416
-    ],
-    [
-     -450,
-     260
-    ],
-    [
-     -450,
-     -260
-    ],
-    [
-     -447.88638084435536,
-     -281.4599354217741
-    ],
-    [
-     -441.62674857624154,
-     -302.09517756015987
-    ],
-    [
-     -431.46165735328,
-     -321.1127256321562
-    ],
-    [
-     -417.78174593052023,
-     -337.78174593052023
-    ],
-    [
-     -401.11272563215624,
-     -351.46165735328
-    ],
-    [
-     -382.0951775601599,
-     -361.62674857624154
-    ],
-    [
-     -361.45993542177416,
-     -367.88638084435536
+     210
     ],
     [
      -340,
-     -370
+     -210
+    ],
+    [
+     -338.84711682419385,
+     -221.7054193209677
+    ],
+    [
+     -335.4327719506772,
+     -232.96100594190537
+    ],
+    [
+     -329.8881767381527,
+     -243.3342139811761
+    ],
+    [
+     -322.42640687119285,
+     -252.42640687119285
+    ],
+    [
+     -313.33421398117616,
+     -259.8881767381527
+    ],
+    [
+     -302.9610059419054,
+     -265.4327719506772
+    ],
+    [
+     -291.70541932096774,
+     -268.8471168241938
+    ],
+    [
+     -280,
+     -270
     ]
    ],
    "closed": true,
@@ -6364,7 +6364,7 @@ export const LAYOUT: GeneratedLayout = {
    "points": [
     [
      0,
-     -370
+     -270
     ],
     [
      0,
@@ -6381,7 +6381,7 @@ export const LAYOUT: GeneratedLayout = {
    "points": [
     [
      0,
-     370
+     270
     ],
     [
      0,
@@ -6397,7 +6397,7 @@ export const LAYOUT: GeneratedLayout = {
    "kind": "radial",
    "points": [
     [
-     -450,
+     -340,
      0
     ],
     [
@@ -6418,23 +6418,23 @@ export const LAYOUT: GeneratedLayout = {
      0
     ],
     [
-     450,
+     340,
      0
     ],
     [
-     510,
+     380,
      0
     ],
     [
-     640,
+     530,
      0
     ],
     [
-     820,
+     725,
      0
     ],
     [
-     1660,
+     1007,
      0
     ]
    ],
@@ -6447,28 +6447,24 @@ export const LAYOUT: GeneratedLayout = {
    "kind": "raw-export",
    "points": [
     [
-     -272.39429984372816,
-     -423.32339257795127
+     -206,
+     -270
     ],
     [
-     -120,
-     -460
+     -206,
+     -382
     ],
     [
-     470,
-     -460
+     702,
+     -382
     ],
     [
-     800,
-     -430
+     702,
+     100
     ],
     [
-     800,
-     340
-    ],
-    [
-     580,
-     340
+     460,
+     100
     ]
    ],
    "closed": false,
@@ -6480,20 +6476,20 @@ export const LAYOUT: GeneratedLayout = {
    "kind": "recovery",
    "points": [
     [
-     900,
-     -450
+     744,
+     240
     ],
     [
-     900,
-     -400
+     744,
+     334
     ],
     [
-     0,
-     -400
+     250,
+     334
     ],
     [
-     0,
-     -370
+     250,
+     270
     ]
    ],
    "closed": false,
@@ -6505,16 +6501,16 @@ export const LAYOUT: GeneratedLayout = {
    "kind": "haul",
    "points": [
     [
-     -600,
-     -410
+     -436,
+     -282
     ],
     [
-     -430,
-     -410
+     -280,
+     -282
     ],
     [
-     -430,
-     -370
+     -260,
+     -270
     ]
    ],
    "closed": false,
@@ -6560,12 +6556,12 @@ export const LAYOUT: GeneratedLayout = {
    "kind": "town",
    "points": [
     [
-     640,
-     -330
+     530,
+     -280
     ],
     [
-     640,
-     340
+     530,
+     100
     ]
    ],
    "closed": false,
@@ -6573,16 +6569,288 @@ export const LAYOUT: GeneratedLayout = {
    "dashed": false
   },
   {
+   "id": "estate-street-1",
+   "kind": "estate",
+   "points": [
+    [
+     -274,
+     -148
+    ],
+    [
+     274,
+     -148
+    ]
+   ],
+   "closed": false,
+   "width": 8,
+   "dashed": false
+  },
+  {
+   "id": "estate-row-1",
+   "kind": "estate",
+   "points": [
+    [
+     -202,
+     -39
+    ],
+    [
+     237,
+     -39
+    ]
+   ],
+   "closed": false,
+   "width": 8,
+   "dashed": false
+  },
+  {
+   "id": "estate-row-2",
+   "kind": "estate",
+   "points": [
+    [
+     -202,
+     7
+    ],
+    [
+     237,
+     7
+    ]
+   ],
+   "closed": false,
+   "width": 8,
+   "dashed": false
+  },
+  {
+   "id": "estate-row-3",
+   "kind": "estate",
+   "points": [
+    [
+     -202,
+     53
+    ],
+    [
+     237,
+     53
+    ]
+   ],
+   "closed": false,
+   "width": 8,
+   "dashed": false
+  },
+  {
+   "id": "estate-row-4",
+   "kind": "estate",
+   "points": [
+    [
+     -202,
+     99
+    ],
+    [
+     237,
+     99
+    ]
+   ],
+   "closed": false,
+   "width": 8,
+   "dashed": false
+  },
+  {
+   "id": "estate-row-5",
+   "kind": "estate",
+   "points": [
+    [
+     -202,
+     145
+    ],
+    [
+     237,
+     145
+    ]
+   ],
+   "closed": false,
+   "width": 8,
+   "dashed": false
+  },
+  {
+   "id": "estate-utilities",
+   "kind": "estate",
+   "points": [
+    [
+     -202,
+     -85
+    ],
+    [
+     -202,
+     145
+    ]
+   ],
+   "closed": false,
+   "width": 8,
+   "dashed": false
+  },
+  {
+   "id": "gateway-apron",
+   "kind": "town",
+   "points": [
+    [
+     380,
+     -213
+    ],
+    [
+     680,
+     -213
+    ]
+   ],
+   "closed": false,
+   "width": 7,
+   "dashed": false
+  },
+  {
+   "id": "gateway-lane-w1",
+   "kind": "town",
+   "points": [
+    [
+     380,
+     -163
+    ],
+    [
+     530,
+     -163
+    ]
+   ],
+   "closed": false,
+   "width": 7,
+   "dashed": false
+  },
+  {
+   "id": "gateway-lane-w2",
+   "kind": "town",
+   "points": [
+    [
+     380,
+     -159
+    ],
+    [
+     530,
+     -159
+    ]
+   ],
+   "closed": false,
+   "width": 7,
+   "dashed": false
+  },
+  {
+   "id": "gateway-lane-w3",
+   "kind": "town",
+   "points": [
+    [
+     380,
+     -109
+    ],
+    [
+     530,
+     -109
+    ]
+   ],
+   "closed": false,
+   "width": 7,
+   "dashed": false
+  },
+  {
+   "id": "gateway-lane-w4",
+   "kind": "town",
+   "points": [
+    [
+     380,
+     -51
+    ],
+    [
+     530,
+     -51
+    ]
+   ],
+   "closed": false,
+   "width": 7,
+   "dashed": false
+  },
+  {
+   "id": "gateway-lane-w5",
+   "kind": "town",
+   "points": [
+    [
+     380,
+     -1
+    ],
+    [
+     530,
+     -1
+    ]
+   ],
+   "closed": false,
+   "width": 7,
+   "dashed": false
+  },
+  {
+   "id": "gateway-lane-e1",
+   "kind": "town",
+   "points": [
+    [
+     530,
+     -129
+    ],
+    [
+     680,
+     -129
+    ]
+   ],
+   "closed": false,
+   "width": 7,
+   "dashed": false
+  },
+  {
+   "id": "gateway-lane-e2",
+   "kind": "town",
+   "points": [
+    [
+     530,
+     -75
+    ],
+    [
+     680,
+     -75
+    ]
+   ],
+   "closed": false,
+   "width": 7,
+   "dashed": false
+  },
+  {
+   "id": "port-lane",
+   "kind": "town",
+   "points": [
+    [
+     380,
+     100
+    ],
+    [
+     680,
+     100
+    ]
+   ],
+   "closed": false,
+   "width": 8,
+   "dashed": false
+  },
+  {
    "id": "town-street-1",
    "kind": "town",
    "points": [
     [
-     824,
-     -180
+     725,
+     -244
     ],
     [
-     824,
-     200
+     725,
+     240
     ]
    ],
    "closed": false,
@@ -6594,12 +6862,12 @@ export const LAYOUT: GeneratedLayout = {
    "kind": "town",
    "points": [
     [
-     910,
-     -180
+     785,
+     -244
     ],
     [
-     910,
-     200
+     785,
+     240
     ]
    ],
    "closed": false,
@@ -6611,12 +6879,12 @@ export const LAYOUT: GeneratedLayout = {
    "kind": "town",
    "points": [
     [
-     946,
-     -180
+     839,
+     -244
     ],
     [
-     946,
-     200
+     839,
+     240
     ]
    ],
    "closed": false,
@@ -6628,12 +6896,12 @@ export const LAYOUT: GeneratedLayout = {
    "kind": "town",
    "points": [
     [
-     958,
-     -180
+     899,
+     -244
     ],
     [
-     958,
-     200
+     899,
+     240
     ]
    ],
    "closed": false,
@@ -6645,12 +6913,12 @@ export const LAYOUT: GeneratedLayout = {
    "kind": "town",
    "points": [
     [
-     962,
-     -180
+     953,
+     -244
     ],
     [
-     962,
-     200
+     953,
+     240
     ]
    ],
    "closed": false,
@@ -6662,12 +6930,12 @@ export const LAYOUT: GeneratedLayout = {
    "kind": "town",
    "points": [
     [
-     982,
-     -180
+     1007,
+     -244
     ],
     [
-     982,
-     200
+     1007,
+     240
     ]
    ],
    "closed": false,
@@ -6679,16 +6947,16 @@ export const LAYOUT: GeneratedLayout = {
    "kind": "town",
    "points": [
     [
-     1038,
-     -180
+     725,
+     -56
     ],
     [
-     1038,
-     200
+     1007,
+     -56
     ]
    ],
    "closed": false,
-   "width": 8,
+   "width": 7,
    "dashed": false
   },
   {
@@ -6696,16 +6964,16 @@ export const LAYOUT: GeneratedLayout = {
    "kind": "town",
    "points": [
     [
-     1074,
-     -180
+     725,
+     56
     ],
     [
-     1074,
-     200
+     1007,
+     56
     ]
    ],
    "closed": false,
-   "width": 8,
+   "width": 7,
    "dashed": false
   },
   {
@@ -6713,16 +6981,16 @@ export const LAYOUT: GeneratedLayout = {
    "kind": "town",
    "points": [
     [
-     1078,
-     -180
+     725,
+     -102
     ],
     [
-     1078,
-     200
+     1007,
+     -102
     ]
    ],
    "closed": false,
-   "width": 8,
+   "width": 7,
    "dashed": false
   },
   {
@@ -6730,16 +6998,16 @@ export const LAYOUT: GeneratedLayout = {
    "kind": "town",
    "points": [
     [
-     1080,
-     -180
+     725,
+     102
     ],
     [
-     1080,
-     200
+     1007,
+     102
     ]
    ],
    "closed": false,
-   "width": 8,
+   "width": 7,
    "dashed": false
   },
   {
@@ -6747,16 +7015,16 @@ export const LAYOUT: GeneratedLayout = {
    "kind": "town",
    "points": [
     [
-     1114,
-     -180
+     725,
+     -148
     ],
     [
-     1114,
-     200
+     1007,
+     -148
     ]
    ],
    "closed": false,
-   "width": 8,
+   "width": 7,
    "dashed": false
   },
   {
@@ -6764,16 +7032,16 @@ export const LAYOUT: GeneratedLayout = {
    "kind": "town",
    "points": [
     [
-     1116,
-     -180
+     725,
+     148
     ],
     [
-     1116,
-     200
+     1007,
+     148
     ]
    ],
    "closed": false,
-   "width": 8,
+   "width": 7,
    "dashed": false
   },
   {
@@ -6781,16 +7049,16 @@ export const LAYOUT: GeneratedLayout = {
    "kind": "town",
    "points": [
     [
-     1122,
-     -180
+     725,
+     -194
     ],
     [
-     1122,
-     200
+     1007,
+     -194
     ]
    ],
    "closed": false,
-   "width": 8,
+   "width": 7,
    "dashed": false
   },
   {
@@ -6798,12 +7066,29 @@ export const LAYOUT: GeneratedLayout = {
    "kind": "town",
    "points": [
     [
-     1154,
-     -180
+     725,
+     194
     ],
     [
-     1154,
-     200
+     1007,
+     194
+    ]
+   ],
+   "closed": false,
+   "width": 7,
+   "dashed": false
+  },
+  {
+   "id": "town-cross-15",
+   "kind": "town",
+   "points": [
+    [
+     725,
+     -244
+    ],
+    [
+     1007,
+     -244
     ]
    ],
    "closed": false,
@@ -6811,220 +7096,16 @@ export const LAYOUT: GeneratedLayout = {
    "dashed": false
   },
   {
-   "id": "town-street-15",
+   "id": "town-cross-16",
    "kind": "town",
    "points": [
     [
-     1206,
-     -180
+     725,
+     240
     ],
     [
-     1206,
-     200
-    ]
-   ],
-   "closed": false,
-   "width": 8,
-   "dashed": false
-  },
-  {
-   "id": "town-street-16",
-   "kind": "town",
-   "points": [
-    [
-     1292,
-     -180
-    ],
-    [
-     1292,
-     200
-    ]
-   ],
-   "closed": false,
-   "width": 8,
-   "dashed": false
-  },
-  {
-   "id": "town-street-17",
-   "kind": "town",
-   "points": [
-    [
-     1332,
-     -180
-    ],
-    [
-     1332,
-     200
-    ]
-   ],
-   "closed": false,
-   "width": 8,
-   "dashed": false
-  },
-  {
-   "id": "town-street-18",
-   "kind": "town",
-   "points": [
-    [
-     1372,
-     -180
-    ],
-    [
-     1372,
-     200
-    ]
-   ],
-   "closed": false,
-   "width": 8,
-   "dashed": false
-  },
-  {
-   "id": "town-street-19",
-   "kind": "town",
-   "points": [
-    [
-     1436,
-     -180
-    ],
-    [
-     1436,
-     200
-    ]
-   ],
-   "closed": false,
-   "width": 8,
-   "dashed": false
-  },
-  {
-   "id": "town-street-20",
-   "kind": "town",
-   "points": [
-    [
-     1476,
-     -180
-    ],
-    [
-     1476,
-     200
-    ]
-   ],
-   "closed": false,
-   "width": 8,
-   "dashed": false
-  },
-  {
-   "id": "town-street-21",
-   "kind": "town",
-   "points": [
-    [
-     1478,
-     -180
-    ],
-    [
-     1478,
-     200
-    ]
-   ],
-   "closed": false,
-   "width": 8,
-   "dashed": false
-  },
-  {
-   "id": "town-street-22",
-   "kind": "town",
-   "points": [
-    [
-     1516,
-     -180
-    ],
-    [
-     1516,
-     200
-    ]
-   ],
-   "closed": false,
-   "width": 8,
-   "dashed": false
-  },
-  {
-   "id": "town-street-23",
-   "kind": "town",
-   "points": [
-    [
-     1520,
-     -180
-    ],
-    [
-     1520,
-     200
-    ]
-   ],
-   "closed": false,
-   "width": 8,
-   "dashed": false
-  },
-  {
-   "id": "town-street-24",
-   "kind": "town",
-   "points": [
-    [
-     1556,
-     -180
-    ],
-    [
-     1556,
-     200
-    ]
-   ],
-   "closed": false,
-   "width": 8,
-   "dashed": false
-  },
-  {
-   "id": "town-street-25",
-   "kind": "town",
-   "points": [
-    [
-     1560,
-     -180
-    ],
-    [
-     1560,
-     200
-    ]
-   ],
-   "closed": false,
-   "width": 8,
-   "dashed": false
-  },
-  {
-   "id": "town-cross-26",
-   "kind": "town",
-   "points": [
-    [
-     820,
-     -180
-    ],
-    [
-     1670,
-     -180
-    ]
-   ],
-   "closed": false,
-   "width": 8,
-   "dashed": false
-  },
-  {
-   "id": "town-cross-27",
-   "kind": "town",
-   "points": [
-    [
-     820,
-     200
-    ],
-    [
-     1670,
-     200
+     1007,
+     240
     ]
    ],
    "closed": false,
@@ -7036,16 +7117,12 @@ export const LAYOUT: GeneratedLayout = {
    "kind": "town",
    "points": [
     [
-     1560,
-     -180
+     858,
+     -244
     ],
     [
-     1560,
-     -300
-    ],
-    [
-     1420,
-     -480
+     858,
+     -322
     ]
    ],
    "closed": false,
@@ -7102,8 +7179,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "gate-port",
    "road": "gateway-spine",
    "at": [
-    640,
-    330
+    530,
+    90
    ],
    "heading": -1.5707963267948966,
    "weighbridge": true,
@@ -7115,8 +7192,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "sign-inflation",
    "jointId": "j-production-aggregation",
    "at": [
-    -60,
-    350
+    -352,
+    40
    ]
   },
   {
@@ -7139,16 +7216,16 @@ export const LAYOUT: GeneratedLayout = {
    "id": "sign-export",
    "jointId": "j-extraction-processing",
    "at": [
-    540,
-    320
+    440,
+    80
    ]
   },
   {
    "id": "sign-import",
    "jointId": "j-trader-manufacturing",
    "at": [
-    740,
-    320
+    640,
+    80
    ]
   },
   {
@@ -7163,8 +7240,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "sign-final-demand",
    "jointId": "j-retail-consumption",
    "at": [
-    1245,
-    220
+    770,
+    252
    ]
   }
  ],
@@ -7173,8 +7250,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-ring-geological",
    "text": "Geological arc",
    "at": [
-    -510,
-    -510
+    -147,
+    -394
    ],
    "level": "far"
   },
@@ -7182,8 +7259,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-ring-biological",
    "text": "Biological arc",
    "at": [
-    -510,
-    490
+    -486,
+    97
    ],
    "level": "far"
   },
@@ -7200,8 +7277,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-gateway",
    "text": "Gateway",
    "at": [
-    640,
-    -360
+    530,
+    -310
    ],
    "level": "far"
   },
@@ -7209,8 +7286,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-town",
    "text": "Town",
    "at": [
-    1245,
-    -220
+    866,
+    -268
    ],
    "level": "far"
   },
@@ -7218,8 +7295,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-recovery",
    "text": "Recovery yard",
    "at": [
-    930,
-    -580
+    822,
+    356
    ],
    "level": "far"
   },
@@ -7227,8 +7304,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-hill",
    "text": "Think tank",
    "at": [
-    1480,
-    -670
+    858,
+    -458
    ],
    "level": "far"
   },
@@ -7237,7 +7314,7 @@ export const LAYOUT: GeneratedLayout = {
    "text": "Alternative Fuels",
    "at": [
     -239,
-    -208
+    -150
    ],
    "level": "middle"
   },
@@ -7246,7 +7323,7 @@ export const LAYOUT: GeneratedLayout = {
    "text": "Basic Chemicals",
    "at": [
     -157,
-    -208
+    -150
    ],
    "level": "middle"
   },
@@ -7255,7 +7332,7 @@ export const LAYOUT: GeneratedLayout = {
    "text": "Agricultural Chemicals",
    "at": [
     -75,
-    -208
+    -150
    ],
    "level": "middle"
   },
@@ -7263,8 +7340,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-B113",
    "text": "Specialty Chemicals",
    "at": [
-    7,
-    -208
+    -239,
+    -88
    ],
    "level": "middle"
   },
@@ -7272,8 +7349,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-B121",
    "text": "Construction Materials",
    "at": [
-    89,
-    -208
+    43,
+    -150
    ],
    "level": "middle"
   },
@@ -7281,8 +7358,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-B141",
    "text": "Aluminium",
    "at": [
-    171,
-    -208
+    125,
+    -150
    ],
    "level": "middle"
   },
@@ -7290,8 +7367,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-B144",
    "text": "Iron & Steel",
    "at": [
-    -239,
-    -146
+    207,
+    -150
    ],
    "level": "middle"
   },
@@ -7299,8 +7376,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-B152",
    "text": "Paper",
    "at": [
-    -157,
-    -146
+    43,
+    -88
    ],
    "level": "middle"
   },
@@ -7308,8 +7385,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-J411",
    "text": "Electric Utilities",
    "at": [
-    -242,
-    -82
+    -206,
+    -53
    ],
    "level": "middle"
   },
@@ -7317,8 +7394,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-J421",
    "text": "Gas Utilities",
    "at": [
-    -242,
-    -20
+    -206,
+    9
    ],
    "level": "middle"
   },
@@ -7326,8 +7403,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-J431",
    "text": "Water Utilities",
    "at": [
-    -252,
-    42
+    -226,
+    68
    ],
    "level": "middle"
   },
@@ -7335,8 +7412,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-A211",
    "text": "Alternative Energy Equipment",
    "at": [
-    -156,
-    -82
+    -172,
+    -42
    ],
    "level": "middle"
   },
@@ -7344,8 +7421,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-B131",
    "text": "Containers & Packaging",
    "at": [
-    -102,
-    -82
+    -118,
+    -42
    ],
    "level": "middle"
   },
@@ -7353,8 +7430,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-C111",
    "text": "Aerospace & Defense",
    "at": [
-    -48,
-    -82
+    -64,
+    -42
    ],
    "level": "middle"
   },
@@ -7362,8 +7439,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-C121",
    "text": "Building Products & Fixtures",
    "at": [
-    6,
-    -82
+    30,
+    -42
    ],
    "level": "middle"
   },
@@ -7371,8 +7448,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-C131",
    "text": "Electrical Components & Equipment",
    "at": [
-    60,
-    -82
+    84,
+    -42
    ],
    "level": "middle"
   },
@@ -7380,8 +7457,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-C132",
    "text": "Heavy Electrical Equipment",
    "at": [
-    114,
-    -82
+    138,
+    -42
    ],
    "level": "middle"
   },
@@ -7389,8 +7466,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-C141",
    "text": "Construction Machinery & Heavy Vehicles",
    "at": [
-    168,
-    -82
+    192,
+    -42
    ],
    "level": "middle"
   },
@@ -7398,8 +7475,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-C142",
    "text": "Agricultural & Farm Machinery",
    "at": [
-    222,
-    -82
+    -172,
+    4
    ],
    "level": "middle"
   },
@@ -7407,8 +7484,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-C143",
    "text": "Industrial Machinery & Components",
    "at": [
-    -156,
-    -40
+    -118,
+    4
    ],
    "level": "middle"
   },
@@ -7416,8 +7493,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-D211",
    "text": "Liquors",
    "at": [
-    -102,
-    -40
+    -64,
+    4
    ],
    "level": "middle"
   },
@@ -7425,8 +7502,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-D212",
    "text": "Soft Drinks",
    "at": [
-    -48,
-    -40
+    30,
+    4
    ],
    "level": "middle"
   },
@@ -7434,8 +7511,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-D221",
    "text": "Dairy Products",
    "at": [
-    6,
-    -40
+    84,
+    4
    ],
    "level": "middle"
   },
@@ -7443,8 +7520,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-D222",
    "text": "Processed Foods",
    "at": [
-    60,
-    -40
+    138,
+    4
    ],
    "level": "middle"
   },
@@ -7452,8 +7529,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-D311",
    "text": "Tobacco",
    "at": [
-    114,
-    -40
+    192,
+    4
    ],
    "level": "middle"
   },
@@ -7461,8 +7538,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-D411",
    "text": "Household Products",
    "at": [
-    168,
-    -40
+    -172,
+    50
    ],
    "level": "middle"
   },
@@ -7470,8 +7547,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-D421",
    "text": "Personal Care Products",
    "at": [
-    222,
-    -40
+    -118,
+    50
    ],
    "level": "middle"
   },
@@ -7479,8 +7556,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-E111",
    "text": "Auto Parts & Equipment",
    "at": [
-    -156,
-    2
+    -64,
+    50
    ],
    "level": "middle"
   },
@@ -7488,8 +7565,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-E112",
    "text": "Tires",
    "at": [
-    -102,
-    2
+    30,
+    50
    ],
    "level": "middle"
   },
@@ -7497,8 +7574,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-E121",
    "text": "Car Manufacturers",
    "at": [
-    -48,
-    2
+    84,
+    50
    ],
    "level": "middle"
   },
@@ -7506,8 +7583,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-E122",
    "text": "Motorcycle Manufacturers",
    "at": [
-    6,
-    2
+    138,
+    50
    ],
    "level": "middle"
   },
@@ -7515,8 +7592,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-E211",
    "text": "Home Furnishings",
    "at": [
-    60,
-    2
+    192,
+    50
    ],
    "level": "middle"
   },
@@ -7524,8 +7601,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-E212",
    "text": "Household Appliances",
    "at": [
-    114,
-    2
+    -172,
+    96
    ],
    "level": "middle"
   },
@@ -7533,8 +7610,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-E213",
    "text": "Housewares & Specialties",
    "at": [
-    168,
-    2
+    -118,
+    96
    ],
    "level": "middle"
   },
@@ -7542,8 +7619,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-E311",
    "text": "Consumer Electronics",
    "at": [
-    222,
-    2
+    -64,
+    96
    ],
    "level": "middle"
   },
@@ -7551,8 +7628,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-E321",
    "text": "Sport Equipment & Hobbies Goods",
    "at": [
-    -156,
-    44
+    30,
+    96
    ],
    "level": "middle"
   },
@@ -7560,8 +7637,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-E411",
    "text": "Clothing, Accessories & Bags",
    "at": [
-    -102,
-    44
+    84,
+    96
    ],
    "level": "middle"
   },
@@ -7569,8 +7646,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-E412",
    "text": "Footwear",
    "at": [
-    -48,
-    44
+    138,
+    96
    ],
    "level": "middle"
   },
@@ -7578,8 +7655,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-E413",
    "text": "Textiles",
    "at": [
-    6,
-    44
+    192,
+    96
    ],
    "level": "middle"
   },
@@ -7587,8 +7664,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-F111",
    "text": "Healthcare Equipment",
    "at": [
-    60,
-    44
+    -172,
+    142
    ],
    "level": "middle"
   },
@@ -7596,8 +7673,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-F211",
    "text": "Pharmaceuticals",
    "at": [
-    114,
-    44
+    -118,
+    142
    ],
    "level": "middle"
   },
@@ -7605,8 +7682,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-I211",
    "text": "Networking Equipment",
    "at": [
-    168,
-    44
+    -64,
+    142
    ],
    "level": "middle"
   },
@@ -7614,8 +7691,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-I221",
    "text": "Computer Hardware",
    "at": [
-    222,
-    44
+    30,
+    142
    ],
    "level": "middle"
   },
@@ -7623,8 +7700,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-I231",
    "text": "Electronic Equipment & Instruments",
    "at": [
-    -156,
-    86
+    84,
+    142
    ],
    "level": "middle"
   },
@@ -7632,8 +7709,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-I232",
    "text": "Electronic Components & Semiconductors",
    "at": [
-    -102,
-    86
+    138,
+    142
    ],
    "level": "middle"
   },
@@ -7641,89 +7718,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-H111",
    "text": "Real Estate Development & Management",
    "at": [
-    259,
-    -16
-   ],
-   "level": "middle"
-  },
-  {
-   "id": "label-A111",
-   "text": "Oil & Gas Production & Refinery",
-   "at": [
-    -599.9086170938348,
-    -19.924748652612614
-   ],
-   "level": "middle"
-  },
-  {
-   "id": "label-A121",
-   "text": "Coal Production",
-   "at": [
-    -579.555495773441,
-    -173.5859034533108
-   ],
-   "level": "middle"
-  },
-  {
-   "id": "label-A131",
-   "text": "Oil & Gas Drilling Service",
-   "at": [
-    -514.3003804212674,
-    -296.81979895322814
-   ],
-   "level": "middle"
-  },
-  {
-   "id": "label-A132",
-   "text": "Oil, Gas & Coal Equipment & Services",
-   "at": [
-    -409.1990160374992,
-    -402.30392484196864
-   ],
-   "level": "middle"
-  },
-  {
-   "id": "label-B142",
-   "text": "Copper",
-   "at": [
-    -272.39429984372816,
-    -502.32339257795127
-   ],
-   "level": "middle"
-  },
-  {
-   "id": "label-B143",
-   "text": "Gold",
-   "at": [
-    -114.48539722592676,
-    -549.4461353927852
-   ],
-   "level": "middle"
-  },
-  {
-   "id": "label-B145",
-   "text": "Precious Metals & Minerals",
-   "at": [
-    52.29344564859474,
-    -557.0212430077077
-   ],
-   "level": "middle"
-  },
-  {
-   "id": "label-B146",
-   "text": "Diversified Metals & Minerals",
-   "at": [
-    215.0207697271802,
-    -524.4618217785448
-   ],
-   "level": "middle"
-  },
-  {
-   "id": "label-B147",
-   "text": "Mining Equipment & Services",
-   "at": [
-    361.0890138912288,
-    -437.29046522459237
+    278,
+    0
    ],
    "level": "middle"
   },
@@ -7731,8 +7727,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-B151",
    "text": "Timber",
    "at": [
-    -199.85440953263307,
-    456.74720462744534
+    -356,
+    230
    ],
    "level": "middle"
   },
@@ -7740,8 +7736,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-B153",
    "text": "Diversified Forest Products",
    "at": [
-    -386.97990333982386,
-    365.6955402822505
+    -356,
+    136
    ],
    "level": "middle"
   },
@@ -7749,8 +7745,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-D231",
    "text": "Fish, Meat & Poultry",
    "at": [
-    -526.2679754464531,
-    228.9984078903318
+    -356,
+    47
    ],
    "level": "middle"
   },
@@ -7758,26 +7754,89 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-D232",
    "text": "Plantations & Crops",
    "at": [
-    -600.5002065348339,
-    49.17202836520801
+    -356,
+    -42
    ],
    "level": "middle"
   },
   {
-   "id": "label-J113",
-   "text": "Marine Ports & Services",
+   "id": "label-A111",
+   "text": "Oil & Gas Production & Refinery",
    "at": [
-    590,
-    346
+    -356,
+    -121
    ],
    "level": "middle"
   },
   {
-   "id": "label-K121",
-   "text": "Passenger Marine Transportation",
+   "id": "label-A121",
+   "text": "Coal Production",
    "at": [
-    740,
-    346
+    -356,
+    -195
+   ],
+   "level": "middle"
+  },
+  {
+   "id": "label-A131",
+   "text": "Oil & Gas Drilling Service",
+   "at": [
+    -406,
+    -292
+   ],
+   "level": "middle"
+  },
+  {
+   "id": "label-A132",
+   "text": "Oil, Gas & Coal Equipment & Services",
+   "at": [
+    -339,
+    -292
+   ],
+   "level": "middle"
+  },
+  {
+   "id": "label-B142",
+   "text": "Copper",
+   "at": [
+    -257,
+    -292
+   ],
+   "level": "middle"
+  },
+  {
+   "id": "label-B143",
+   "text": "Gold",
+   "at": [
+    -155,
+    -292
+   ],
+   "level": "middle"
+  },
+  {
+   "id": "label-B145",
+   "text": "Precious Metals & Minerals",
+   "at": [
+    -53,
+    -292
+   ],
+   "level": "middle"
+  },
+  {
+   "id": "label-B146",
+   "text": "Diversified Metals & Minerals",
+   "at": [
+    49,
+    -292
+   ],
+   "level": "middle"
+  },
+  {
+   "id": "label-B147",
+   "text": "Mining Equipment & Services",
+   "at": [
+    131,
+    -292
    ],
    "level": "middle"
   },
@@ -7785,8 +7844,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-J111",
    "text": "Airport Operators",
    "at": [
-    580,
-    -334
+    440,
+    -216
    ],
    "level": "middle"
   },
@@ -7794,8 +7853,26 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-K111",
    "text": "Airlines",
    "at": [
-    710,
-    -334
+    620,
+    -216
+   ],
+   "level": "middle"
+  },
+  {
+   "id": "label-J113",
+   "text": "Marine Ports & Services",
+   "at": [
+    450,
+    154
+   ],
+   "level": "middle"
+  },
+  {
+   "id": "label-K121",
+   "text": "Passenger Marine Transportation",
+   "at": [
+    610,
+    154
    ],
    "level": "middle"
   },
@@ -7803,8 +7880,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-A112",
    "text": "Oil & Gas Storage & Distribution",
    "at": [
-    545,
-    -254
+    405,
+    -166
    ],
    "level": "middle"
   },
@@ -7812,8 +7889,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-A122",
    "text": "Coal Distribution",
    "at": [
-    614,
-    -254
+    474,
+    -162
    ],
    "level": "middle"
   },
@@ -7821,8 +7898,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-C211",
    "text": "Diversified Industrial Trading",
    "at": [
-    683,
-    -254
+    405,
+    -112
    ],
    "level": "middle"
   },
@@ -7830,8 +7907,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-J112",
    "text": "Highways & Railtracks",
    "at": [
-    555,
-    -200
+    581,
+    -132
    ],
    "level": "middle"
   },
@@ -7839,8 +7916,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-K131",
    "text": "Rail",
    "at": [
-    664,
-    -200
+    440,
+    -54
    ],
    "level": "middle"
   },
@@ -7848,8 +7925,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-K132",
    "text": "Road Transportation",
    "at": [
-    545,
-    -116
+    405,
+    -4
    ],
    "level": "middle"
   },
@@ -7857,8 +7934,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-K211",
    "text": "Logistics & Deliveries",
    "at": [
-    619,
-    -116
+    581,
+    -78
    ],
    "level": "middle"
   },
@@ -7866,8 +7943,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-D111",
    "text": "Drug Retail & Distributors",
    "at": [
-    855,
-    -174
+    755,
+    -12
    ],
    "level": "middle"
   },
@@ -7875,8 +7952,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-D112",
    "text": "Food Retail & Distributors",
    "at": [
-    855,
-    -126
+    755,
+    -58
    ],
    "level": "middle"
   },
@@ -7884,8 +7961,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-E711",
    "text": "Consumer Distributors",
    "at": [
-    855,
-    -78
+    755,
+    -104
    ],
    "level": "middle"
   },
@@ -7893,8 +7970,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-D113",
    "text": "Supermarkets & Convenience Stores",
    "at": [
-    934,
-    -174
+    752,
+    -150
    ],
    "level": "middle"
   },
@@ -7902,8 +7979,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-E721",
    "text": "Internet & Homeshop Retail",
    "at": [
-    976,
-    -174
+    752,
+    -196
    ],
    "level": "middle"
   },
@@ -7911,8 +7988,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-E731",
    "text": "Department Stores",
    "at": [
-    936,
-    -134
+    752,
+    50
    ],
    "level": "middle"
   },
@@ -7920,8 +7997,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-E741",
    "text": "Apparel & Textile Retail",
    "at": [
-    980,
-    -134
+    752,
+    94
    ],
    "level": "middle"
   },
@@ -7929,8 +8006,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-E742",
    "text": "Electronics Retail",
    "at": [
-    928,
-    -92
+    752,
+    140
    ],
    "level": "middle"
   },
@@ -7938,8 +8015,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-E743",
    "text": "Home Improvement Retail",
    "at": [
-    964,
-    -92
+    752,
+    186
    ],
    "level": "middle"
   },
@@ -7947,8 +8024,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-E744",
    "text": "Specialty Stores",
    "at": [
-    1000,
-    -92
+    752,
+    232
    ],
    "level": "middle"
   },
@@ -7956,8 +8033,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-E745",
    "text": "Automotive Retail",
    "at": [
-    934,
-    -60
+    812,
+    -12
    ],
    "level": "middle"
   },
@@ -7965,8 +8042,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-E511",
    "text": "Gaming Venues",
    "at": [
-    1059,
-    -174
+    812,
+    -58
    ],
    "level": "middle"
   },
@@ -7974,8 +8051,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-E512",
    "text": "Hotels, Resorts & Cruise Lines",
    "at": [
-    1101,
-    -174
+    812,
+    -104
    ],
    "level": "middle"
   },
@@ -7983,8 +8060,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-E513",
    "text": "Travel Agencies",
    "at": [
-    1140,
-    -174
+    812,
+    -150
    ],
    "level": "middle"
   },
@@ -7992,8 +8069,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-E514",
    "text": "Recreational & Sports Facilities",
    "at": [
-    1059,
-    -132
+    812,
+    -196
    ],
    "level": "middle"
   },
@@ -8001,8 +8078,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-E515",
    "text": "Restaurants",
    "at": [
-    1098,
-    -132
+    812,
+    48
    ],
    "level": "middle"
   },
@@ -8010,8 +8087,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-E521",
    "text": "Education Services",
    "at": [
-    1140,
-    -132
+    812,
+    96
    ],
    "level": "middle"
   },
@@ -8019,8 +8096,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-E522",
    "text": "Consumer Support Services",
    "at": [
-    1056,
-    -90
+    812,
+    140
    ],
    "level": "middle"
   },
@@ -8028,8 +8105,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-E611",
    "text": "Advertising",
    "at": [
-    1094,
-    -90
+    812,
+    186
    ],
    "level": "middle"
   },
@@ -8037,8 +8114,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-E612",
    "text": "Broadcasting",
    "at": [
-    1134,
-    -90
+    812,
+    232
    ],
    "level": "middle"
   },
@@ -8046,8 +8123,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-E613",
    "text": "Cable & Satellite",
    "at": [
-    1174,
-    -90
+    866,
+    -12
    ],
    "level": "middle"
   },
@@ -8055,8 +8132,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-E614",
    "text": "Consumer Publishing",
    "at": [
-    1058,
-    -50
+    866,
+    -58
    ],
    "level": "middle"
   },
@@ -8064,8 +8141,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-E621",
    "text": "Entertainment & Movie Production",
    "at": [
-    1099,
-    -50
+    866,
+    -104
    ],
    "level": "middle"
   },
@@ -8073,8 +8150,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-F112",
    "text": "Healthcare Supplies & Distributions",
    "at": [
-    1237,
-    -174
+    869,
+    -150
    ],
    "level": "middle"
   },
@@ -8082,8 +8159,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-F121",
    "text": "Healthcare Providers",
    "at": [
-    1234,
-    -126
+    866,
+    -196
    ],
    "level": "middle"
   },
@@ -8091,8 +8168,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-F221",
    "text": "Healthcare Research",
    "at": [
-    1227,
-    -80
+    866,
+    48
    ],
    "level": "middle"
   },
@@ -8100,8 +8177,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-C221",
    "text": "Commercial Printing",
    "at": [
-    1312,
-    -174
+    866,
+    94
    ],
    "level": "middle"
   },
@@ -8109,8 +8186,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-C223",
    "text": "Office Supplies",
    "at": [
-    1352,
-    -174
+    866,
+    140
    ],
    "level": "middle"
   },
@@ -8118,8 +8195,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-C224",
    "text": "Business Support Services",
    "at": [
-    1392,
-    -174
+    866,
+    186
    ],
    "level": "middle"
   },
@@ -8127,8 +8204,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-C231",
    "text": "Human Resource & Employment Services",
    "at": [
-    1312,
-    -134
+    866,
+    232
    ],
    "level": "middle"
   },
@@ -8136,8 +8213,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-C232",
    "text": "Research & Consulting Services",
    "at": [
-    1352,
-    -134
+    926,
+    -12
    ],
    "level": "middle"
   },
@@ -8145,8 +8222,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-C311",
    "text": "Multi-sector Holdings",
    "at": [
-    1392,
-    -134
+    926,
+    -58
    ],
    "level": "middle"
   },
@@ -8154,8 +8231,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-G511",
    "text": "Financial Holdings",
    "at": [
-    1312,
-    -94
+    926,
+    -104
    ],
    "level": "middle"
   },
@@ -8163,8 +8240,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-G512",
    "text": "Investment Companies",
    "at": [
-    1352,
-    -94
+    926,
+    -150
    ],
    "level": "middle"
   },
@@ -8172,8 +8249,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-H112",
    "text": "Real Estate Services",
    "at": [
-    1392,
-    -94
+    926,
+    -196
    ],
    "level": "middle"
   },
@@ -8181,8 +8258,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-I111",
    "text": "Online Applications & Services",
    "at": [
-    1312,
-    -54
+    926,
+    48
    ],
    "level": "middle"
   },
@@ -8190,8 +8267,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-I121",
    "text": "IT Services & Consulting",
    "at": [
-    1352,
-    -54
+    926,
+    94
    ],
    "level": "middle"
   },
@@ -8199,8 +8276,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-I131",
    "text": "Software",
    "at": [
-    1392,
-    -54
+    926,
+    140
    ],
    "level": "middle"
   },
@@ -8208,8 +8285,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-G111",
    "text": "Banks",
    "at": [
-    1457,
-    -174
+    926,
+    188
    ],
    "level": "middle"
   },
@@ -8217,8 +8294,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-G211",
    "text": "Consumer Financing",
    "at": [
-    1499,
-    -174
+    926,
+    234
    ],
    "level": "middle"
   },
@@ -8226,8 +8303,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-G221",
    "text": "Venture Capital",
    "at": [
-    1540,
-    -174
+    980,
+    -12
    ],
    "level": "middle"
   },
@@ -8235,8 +8312,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-G222",
    "text": "Specialized Business Financing",
    "at": [
-    1580,
-    -174
+    980,
+    -58
    ],
    "level": "middle"
   },
@@ -8244,8 +8321,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-G311",
    "text": "Investment Management",
    "at": [
-    1456,
-    -132
+    980,
+    -104
    ],
    "level": "middle"
   },
@@ -8253,8 +8330,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-G312",
    "text": "Investment Banking & Brokerage Services",
    "at": [
-    1496,
-    -132
+    980,
+    -150
    ],
    "level": "middle"
   },
@@ -8262,8 +8339,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-G313",
    "text": "Market Operators",
    "at": [
-    1542,
-    -132
+    980,
+    -196
    ],
    "level": "middle"
   },
@@ -8271,8 +8348,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-G314",
    "text": "Investment Service Support",
    "at": [
-    1456,
-    -86
+    980,
+    48
    ],
    "level": "middle"
   },
@@ -8280,8 +8357,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-G411",
    "text": "Insurance Brokers",
    "at": [
-    1496,
-    -86
+    980,
+    94
    ],
    "level": "middle"
   },
@@ -8289,8 +8366,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-G412",
    "text": "General Insurance",
    "at": [
-    1536,
-    -86
+    980,
+    140
    ],
    "level": "middle"
   },
@@ -8298,8 +8375,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-G413",
    "text": "Life Insurance",
    "at": [
-    1576,
-    -86
+    980,
+    186
    ],
    "level": "middle"
   },
@@ -8307,8 +8384,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-G414",
    "text": "Reinsurance",
    "at": [
-    1456,
-    -46
+    980,
+    232
    ],
    "level": "middle"
   },
@@ -8316,8 +8393,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-C222",
    "text": "Environmental & Facilities Services",
    "at": [
-    905,
-    -544
+    799,
+    322
    ],
    "level": "middle"
   },
@@ -8325,8 +8402,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-J211",
    "text": "Heavy Constructions & Civil Engineering",
    "at": [
-    342,
-    -304
+    974,
+    -272
    ],
    "level": "middle"
   },
@@ -8334,8 +8411,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-J311",
    "text": "Wired Telecommunication Service",
    "at": [
-    -320,
-    -334
+    218,
+    -314
    ],
    "level": "middle"
   },
@@ -8343,8 +8420,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-J312",
    "text": "Integrated Telecommunication Service",
    "at": [
-    970,
-    -234
+    406,
+    56
    ],
    "level": "middle"
   },
@@ -8352,8 +8429,8 @@ export const LAYOUT: GeneratedLayout = {
    "id": "label-J321",
    "text": "Wireless Telecommunication Services",
    "at": [
-    1610,
-    236
+    928,
+    294
    ],
    "level": "middle"
   }
@@ -8363,9 +8440,9 @@ export const LAYOUT: GeneratedLayout = {
    "id": "estate-warehouse",
    "kind": "warehouse",
    "box": {
-    "x0": -178,
+    "x0": -194,
     "y0": 164,
-    "x1": -98,
+    "x1": -114,
     "y1": 204
    },
    "region": "estate"
@@ -8374,9 +8451,9 @@ export const LAYOUT: GeneratedLayout = {
    "id": "estate-cold-store",
    "kind": "cold-store",
    "box": {
-    "x0": -84,
+    "x0": -100,
     "y0": 164,
-    "x1": -40,
+    "x1": -56,
     "y1": 204
    },
    "region": "estate"
@@ -8385,10 +8462,10 @@ export const LAYOUT: GeneratedLayout = {
    "id": "think-tank",
    "kind": "think-tank",
    "box": {
-    "x0": 1450,
-    "y0": -560,
-    "x1": 1510,
-    "y1": -520
+    "x0": 828,
+    "y0": -372,
+    "x1": 888,
+    "y1": -332
    },
    "region": "hill"
   },
@@ -8396,10 +8473,10 @@ export const LAYOUT: GeneratedLayout = {
    "id": "port-quay",
    "kind": "quay",
    "box": {
-    "x0": 500,
-    "y0": 390,
-    "x1": 780,
-    "y1": 400
+    "x0": 380,
+    "y0": 150,
+    "x1": 680,
+    "y1": 160
    },
    "region": "gateway"
   }
@@ -8407,47 +8484,47 @@ export const LAYOUT: GeneratedLayout = {
  "rail": {
   "points": [
    [
-    520,
-    -370
+    400,
+    -320
    ],
    [
-    760,
-    -370
+    660,
+    -320
    ]
   ],
   "yard": {
-   "x0": 520,
-   "y0": -390,
-   "x1": 760,
-   "y1": -346
+   "x0": 400,
+   "y0": -340,
+   "x1": 660,
+   "y1": -296
   }
  },
  "port": {
   "quay": {
-   "x0": 500,
-   "y0": 390,
-   "x1": 780,
-   "y1": 400
+   "x0": 380,
+   "y0": 150,
+   "x1": 680,
+   "y1": 160
   },
   "apron": {
-   "x0": 500,
-   "y0": 340,
-   "x1": 780,
-   "y1": 390
+   "x0": 380,
+   "y0": 100,
+   "x1": 680,
+   "y1": 150
   },
   "water": {
-   "x0": 500,
-   "x1": 780,
-   "y0": 400,
-   "y1": 720
+   "x0": 380,
+   "x1": 680,
+   "y0": 160,
+   "y1": 318
   }
  },
  "hill": {
   "centre": [
-   1480,
-   -540
+   858,
+   -352
   ],
-  "radius": 110,
+  "radius": 86,
   "height": 42
  }
 };

@@ -108,7 +108,10 @@ export function renderPoster(layout, c = POSTER_COLOURS) {
   // the frame: unchanged, so the image keeps its aspect and the stage nothing to re-lay
   const corners = [P(w.x0, w.y0, 0), P(w.x1, w.y0, 0), P(w.x1, w.y1, 0), P(w.x0, w.y1, 0), P(w.x0, w.y0, -4), P(w.x1, w.y1, -4), P(w.x1, w.y0, 60)];
   const xs = corners.map((p) => p[0]), ys = corners.map((p) => p[1]);
-  const minX = Math.min(...xs) - 20, maxX = Math.max(...xs) + 20, minY = Math.min(...ys) - 60, maxY = Math.max(...ys) + 20;
+  let minX = Math.min(...xs) - 20, maxX = Math.max(...xs) + 20, minY = Math.min(...ys) - 60, maxY = Math.max(...ys) + 20;
+  // the stage was laid out for a 1600 by 952 image: the frame keeps that aspect, the drawing centred in it
+  const ASPECT = 1600 / 952, fw = maxX - minX, fh = maxY - minY;
+  if (fw / fh < ASPECT) { const grow = (fh * ASPECT - fw) / 2; minX -= grow; maxX += grow; } else { const grow = (fw / ASPECT - fh) / 2; minY -= grow; maxY += grow; }
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${fmt(minX)} ${fmt(minY)} ${fmt(maxX - minX)} ${fmt(maxY - minY)}" role="img" aria-label="The industrial estate at the far view: the ring of primary resources, the estate at the centre, the gateway and port to the east, the town beyond, the think tank on its hill. A still of the world before it starts.">
 <style>path{vector-effect:non-scaling-stroke;stroke-linejoin:round}.t{fill:${c.background}}</style>
 <rect x="${fmt(minX)}" y="${fmt(minY)}" width="${fmt(maxX - minX)}" height="${fmt(maxY - minY)}" fill="${c.background}"/>
