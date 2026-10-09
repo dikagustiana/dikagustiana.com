@@ -15,14 +15,15 @@ import * as THREE from 'three';
 import { JOINT_BY_ID, type JointId } from '@/data/industryChain';
 import { REGISTRY, subIndustryByCode } from '@/lib/world/registry/subindustries.generated';
 import type { SubIndustry } from '@/lib/world/registry/types';
-import type { Box, Block, GeneratedLayout, Pt, Road } from '@/world/placement/types';
+import type { Box, Block, GeneratedLayout, Pt, RegionId, Road } from '@/world/placement/types';
+import type { FillKey } from '../engine/theme';
 import type { ModelStatus } from '@/world/data/types';
 import type { EngineContext } from '../engine/context';
 import { FRONT, TOP, W } from '../engine/kernel/iso';
 import { Part, pose } from '../engine/kernel/part';
 import { Path } from '../engine/kernel/path';
 import type { Entity, EntityInfo, Peek, WorldAction } from '../engine/types';
-import { dashes, pine, tree } from '../engine/world/ground';
+import { dashes, pine, shadow, tree } from '../engine/world/ground';
 import { buildCut } from '../interiors/base';
 import { INTERIORS, archetypeForZone } from '../interiors';
 import { drawWhiteboard } from '../engine/whiteboard';
@@ -32,6 +33,10 @@ import type { Archetype } from '@/lib/world/registry/types';
 import { drawFamily, drawPlot, type WindowRect } from './families';
 
 export const STATUS_WORD = { published: 'Published', none: 'No model yet', unavailable: 'Status unavailable', 'no-issuer': 'No listed issuer' } as const;
+/** Each region's ground tone (PRD v2 §3.2). */
+export const REGION_TONE: Record<RegionId, FillKey> = { 'ring-geological': 'dust', 'ring-biological': 'meadow', estate: 'pale', gateway: 'sand', town: 'deck', recovery: 'dust', hill: 'meadow' };
+/** How far one building's tone may step from its neighbour's, either way (PRD v2 §3.2). */
+const TONE_STEP = 0.025;
 export type StatusKey = keyof typeof STATUS_WORD;
 export const TRAFFIC_LINE = 'Illustrative traffic; see the model for figures';
 
@@ -90,12 +95,20 @@ function regionsPart(ctx: EngineContext, layout: GeneratedLayout): THREE.Group {
   const p = new Part(ctx), G = TOP(0, 0, 0.01), rng = ctx.rng;
   for (const r of layout.regions) {
     const pts = r.polygon.map(([x, y]) => W(x, y, 0.01));
-    if (r.id === 'estate') p.poly('glass', pts); else if (r.id === 'gateway') p.poly('sand', pts); else if (r.id === 'town' || r.id === 'recovery') p.poly('deck', pts); else if (r.id !== 'hill') p.poly('grass', pts);
+    // each region its ground's tone (PRD v2 §3.2), its edge a faint seam
+    p.poly(REGION_TONE[r.id], pts);
     for (let i = 0; i < pts.length; i++) p.seg('detail', pts[i], pts[(i + 1) % pts.length]);
     p.text(TOP(r.anchor[0], r.anchor[1], 0.05), r.label.toUpperCase(), 0, 0, 9, 'paint', 'middle', 0.05);
   }
   // the port's water and the quay's edge
-  if (layout.port) { const wb = layout.port.water; p.fill2(TOP(wb.x0, wb.y0, -0.6), 0, 0, wb.x1 - wb.x0, wb.y1 - wb.y0, 'sea', 0.02); p.extrude([[wb.x0, wb.y0, -0.6], [wb.x1, wb.y0, -0.6], [wb.x1, wb.y0, 0], [wb.x0, wb.y0, 0]], [0, 0.4, 0]); }
+  if (layout.port) {
+    // the water lies on the slab's top (a fill below it would be hidden by the slab), its edge a lighter rim where it
+    // meets the quay and the land
+    const wb = layout.port.water, RIM = 4;
+    p.fill2(TOP(wb.x0, wb.y0, 0), 0, 0, wb.x1 - wb.x0, wb.y1 - wb.y0, 'sea', 0.012);
+    p.fill2(TOP(wb.x0, wb.y0, 0), 0, 0, wb.x1 - wb.x0, RIM, 'rim', 0.016); p.fill2(TOP(wb.x0, wb.y0, 0), 0, RIM, RIM, wb.y1 - wb.y0 - RIM, 'rim', 0.016); p.fill2(TOP(wb.x1 - RIM, wb.y0, 0), 0, RIM, RIM, wb.y1 - wb.y0 - RIM, 'rim', 0.016);
+    p.extrude([[wb.x0, wb.y0, -0.6], [wb.x1, wb.y0, -0.6], [wb.x1, wb.y0, 0], [wb.x0, wb.y0, 0]], [0, 0.4, 0]);
+  }
   // the hill: three terraces rising to the think tank, pines on the lower slopes
   if (layout.hill) { const { centre: [cx, cy], radius, height } = layout.hill; for (let k = 0; k < 3; k++) { const r = radius * (1 - k * 0.28), z = (height / 3) * k, ring: [number, number, number][] = []; for (let i = 0; i < 20; i++) { const a = i / 20 * Math.PI * 2; ring.push([cx + r * Math.cos(a), cy + r * 0.8 * Math.sin(a), z]); } p.extrude(ring, [0, 0, height / 3], 'gs', { seams: false }); }
     for (let i = 0; i < 24; i++) { const a = rng.rand(0, Math.PI * 2), rr = rng.rand(radius * 0.75, radius * 0.98); pine(p, rng, cx + rr * Math.cos(a), cy + rr * 0.8 * Math.sin(a), rng.rand(0.9, 1.3), 0); } }
@@ -147,7 +160,14 @@ export function buildWorldScene(ctx: EngineContext, layout: GeneratedLayout, onA
     const p = new Part(ctx);
     const inZone = layout.blocks.filter((b) => b.zone === z);
     const drawn = new Map<string, { windows: WindowRect[]; top: number }>();
-    for (const b of inZone) { const s = subIndustryByCode(b.code)!; drawn.set(b.code, drawFamily(p, b.family, b.box, rng, s.nameEn)); }
+    for (const b of inZone) {
+      const s = subIndustryByCode(b.code)!;
+      p.tint = 1 + rng.rand(-TONE_STEP, TONE_STEP);
+      const d = drawFamily(p, b.family, b.box, rng, s.nameEn);
+      shadow(p, b.box, d.top);
+      drawn.set(b.code, d);
+    }
+    p.tint = 1;
     const g = p.build(`zone-${z}`); scene.add(g);
     for (const b of inZone) {
       const s = subIndustryByCode(b.code)!, d = drawn.get(b.code)!;

@@ -34,7 +34,8 @@ async function mount() {
   const handle = createWorld(container, { registry: REGISTRY, layout: LAYOUT, theme: { font: 'sans-serif' }, seed: 3, debug: true, createRenderer: renderer });
   mounted.push({ handle, container }); return { handle, scene: scenes[before] };
 }
-const translucent = (scene: THREE.Scene) => { let n = 0; scene.traverse((o) => { const m = (o as THREE.Mesh).material as THREE.Material | undefined; if (m && !Array.isArray(m) && m.transparent && m.opacity < 0.5) n++; }); return n; };
+// the cast shadow is translucent by design (PRD v2 §3.2), so it is not a dimmed thing
+const translucent = (scene: THREE.Scene) => { let n = 0; scene.traverse((o) => { const m = (o as THREE.Mesh).material as THREE.Material | undefined; if (m && !Array.isArray(m) && m.transparent && m.opacity < 0.5 && m.name !== 'shadow') n++; }); return n; };
 
 describe('the chain highlight', () => {
   const placed = REGISTRY.subIndustries.filter((s) => s.zone !== 'unplaced');

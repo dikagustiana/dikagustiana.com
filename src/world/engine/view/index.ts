@@ -436,7 +436,7 @@ export function createView(ctx: EngineContext, o: ViewOptions): View {
     const next = bandOf(Math.exp(cur.logZ), band);
     if (next === band) return;
     const far = next === 'district';
-    if (band === null || (band === 'district') !== far) setTextFar(ctx.texts, far);
+    if (band === null || (band === 'district') !== far) { setTextFar(ctx.texts, far); ctx.theme.setDistrict(far); }
     band = next;
     o.onDetail?.(far || o.reducedDetail, far, next);
   }
