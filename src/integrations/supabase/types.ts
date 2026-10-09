@@ -226,6 +226,7 @@ export type Database = {
           fsli_slug: string | null
           id: string
           is_selected: boolean
+          selected_rank: number | null
           layout_config: Json | null
           learning_outcomes: string[] | null
           lesson_type: Database["public"]["Enums"]["lesson_type_enum"] | null
@@ -261,6 +262,7 @@ export type Database = {
           fsli_slug?: string | null
           id?: string
           is_selected?: boolean
+          selected_rank?: number | null
           layout_config?: Json | null
           learning_outcomes?: string[] | null
           lesson_type?: Database["public"]["Enums"]["lesson_type_enum"] | null
@@ -296,6 +298,7 @@ export type Database = {
           fsli_slug?: string | null
           id?: string
           is_selected?: boolean
+          selected_rank?: number | null
           layout_config?: Json | null
           learning_outcomes?: string[] | null
           lesson_type?: Database["public"]["Enums"]["lesson_type_enum"] | null

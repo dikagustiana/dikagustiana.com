@@ -5,6 +5,79 @@ alternatives. Newest first.
 
 ---
 
+# 2026-10-09 — The homepage below the map is one row: the glimpse
+
+Branch `claude/confident-ride-d354er`, base `main` @ `1df681a`. The owner's request, verbatim: "aku
+mau section dihapus aja. terus aku mau selected analysis diganti jadi semacam glimpse gitu. terus bisa
+discroll ke kanan/kiri sampe 20 essays atau lebih. terus aku mau bisa nentuin essays mana yang aku
+tarok didepan. terus aku mau yang world masuk sini". Four readings of it were put to the owner with a
+proposal each, and the owner chose; the choices are recorded here so they are not re-read.
+
+## The Sections list is deleted — owner decision, reversing 2026-08-03
+
+The 2026-08-03 entry below kept the Sections grid against a review that recommended deleting it, and
+said the next session that wanted it gone needed a new owner decision. This is that decision: the
+owner asked for the list to go. The header's navigation names every section, so the homepage repeats
+nothing by losing it. The `#sections` anchor had no remaining link. `useSectionCounts`, written to
+count behind each door, stays: the header's navigation now reads it to collapse an empty section to a
+plain link (the remediation entry below), so the hook outlives the list it was written for. The
+2026-08-03 entry stays as history.
+
+## "Selected Analysis" becomes the glimpse
+
+- **What a glimpse is, by owner choice.** A horizontal row of starred essays, each a narrow column of
+  text: the section in small type, the title, the deck (`essays.snippet`, the deck line the writer
+  carries) clamped at five lines, and the month. No badge, no number, no author, no reading time: a
+  glimpse of the essay itself, not a card about it. The owner rejected the earlier attempt (PR #50,
+  branch `feat/home-glimpse`, closed as superseded): a row of cards with a colour badge, a `01`
+  counter, the snippet and a read-time chip. The two alternatives offered and not chosen: a tighter
+  card (title and deck only), and a "window to the world" where each column names what it lights
+  in the Kawasan world (which would be bare until `docs/world/think-tank-tags.json` is written).
+- **The heading is "Glimpse", with no sentence under it.** Approved by the owner. The old subtitle
+  ("Hand-picked across sections, newest first") named a sort order that is no longer true.
+- **The row runs to the viewport's edges,** first column aligned with the container's left edge, by
+  a CSS inset computed from percentages, not `100vw` (which counts a vertical scrollbar the page does
+  not have). Snap points, so the row never rests on a column cut in half. It holds up to 30 essays.
+- **Scrolling:** swipe or trackpad; two buttons that page by 80 % of the visible width and are hidden
+  when every column fits; the arrow keys once the row has focus (the `<ul>` is a focusable scroll
+  region, named by the heading). The buttons scroll by `scrollBehavior()` (src/lib/motion.ts), so a
+  reader who asked for reduced motion gets a jump, not a glide. Zero starred essays: the section is
+  absent, as decided on 2026-09-14.
+
+## The order is the owner's: `essays.selected_rank`
+
+- `is_selected` stays the one featuring mechanism (who is on the homepage); `selected_rank` says in
+  what order (lower first). NULL means starred but not placed, and sorts after every placed essay,
+  newest first — a new star joins the END of the row, never the front. Unstarring clears the rank in
+  the same write, so a re-starred essay does not silently reclaim an old slot.
+- **One order for the site.** About's "Selected Essays" is the first 8 of the same order; the Finance
+  landing's featured essay is the first finance essay of it. Owner decision, over keeping About
+  newest-first.
+- **Set in Admin → Content → "Homepage order":** the starred essays, drafts included (a draft holds
+  its slot and appears when published), with to-the-front / up / down. Every move writes the whole
+  order (one update per row — an upsert would need every NOT NULL column) and shows it at once; a
+  failed write restores the previous order. Audit action `reorder_selected`. Rejected: pinning only
+  a few to the front (the rest unorderable) and a slug list in the repository (no migration, but a
+  reorder is a commit).
+- **The migration is `20261009140000_essay_selected_rank.sql`,** owner-applied through
+  `apply_migration`. It seeds today's newest-first order, so applying it changes nothing a reader can
+  see until the owner reorders. **The site does not depend on it being there:** every reader of the
+  rank asks for the ranked order first and, on Postgres 42703 (undefined column), asks again newest
+  first (`isMissingColumn`, src/hooks/queries/useSelectedEssays.ts). The admin panel is read-only
+  until then and says so. The cost is one failed request per read until the migration lands; the
+  fallbacks should be deleted once it has. `src/integrations/supabase/types.ts` carries the column
+  by hand for the same reason, and should be regenerated after the migration.
+
+## The world comes onto the homepage by its flag, not by new code — owner decision
+
+"Yang world masuk sini" was read three ways: (a) turn the world on in the map's slot, (b) couple the
+world to the glimpse (essays lighting buildings), (c) a third block below the glimpse. The owner chose
+(a), which is what the PRD planned (§7.1: the world takes the map's slot on the landing page). No code
+on this branch; the step is `VITE_WORLD_KAWASAN=true` on Vercel Production and a redeploy, behind the
+owner's gate, and it also switches About's slot and opens `/finance/kawasan`. What that shows today is
+in `docs/world/run-2026-10-09.md`: every building reads "Model status unavailable" until
+`fsre_published` exists, and the think tank's tag file is empty. The glimpse sits directly under the
+world, as it sits under the map; the map stays the first thing under the header.
 # 2026-10-09 — Public-site remediation from the 9 October audit
 
 Branch `claude/blissful-fermi-q5x5iw`. Executes the code work packages of the audit (WP-2 to

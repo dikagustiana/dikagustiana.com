@@ -3,17 +3,17 @@ import { supabase } from '@/integrations/supabase/client';
 import { onlyPublished } from '@/lib/publication';
 
 /**
- * How many published essays sit behind each door on the homepage.
+ * How many published essays each section holds.
  *
- * The Sections list names five subjects and, on 14 September 2026, three of
- * them had nothing written in them at all. The list could not show that: every
- * row looked identical, so "Development Finance" and "Finance" read as equally
- * furnished rooms and a stranger found the emptiness only by walking in.
+ * Written for the homepage's Sections list, so that three empty doors
+ * stopped looking like furnished rooms; that list left the homepage on
+ * 2026-10-09 (docs/DECISIONS.md). The count stays because the header's
+ * navigation reads it (useNavSectionCollapsed): a section with nothing
+ * published collapses to a plain link instead of a menu of empty pages.
  *
  * This is a COUNT, not a description. The owner's rule against six sibling
  * sentences under six headings stands (docs/DECISIONS.md, 2026-08-03) — that
- * rule is about generated prose, and a number is not prose. What it buys is
- * that the list stops implying a body of work that is not there.
+ * rule is about generated prose, and a number is not prose.
  *
  * Counted client-side from the published rows rather than with a grouped
  * aggregate, because PostgREST has no GROUP BY and the alternative is one HEAD

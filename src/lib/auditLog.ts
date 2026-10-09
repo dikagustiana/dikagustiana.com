@@ -11,7 +11,8 @@ export type AuditAction =
   | 'feature'
   | 'unfeature'
   | 'bulk_publish'
-  | 'bulk_unpublish';
+  | 'bulk_unpublish'
+  | 'reorder_selected';
 
 export interface AuditLogInput {
   action: AuditAction;

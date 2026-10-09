@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { logAuditEvent } from '@/lib/auditLog';
+import { isMissingColumn } from '@/hooks/queries/useSelectedEssays';
 
 export type ContentType = 'essay' | 'fsli';
 
@@ -287,10 +288,17 @@ export function useToggleSelectContent() {
   return useMutation({
     mutationFn: async ({ id, currentlySelected }: { id: string; currentlySelected: boolean }) => {
       const newSelected = !currentlySelected;
-      const { error } = await supabase
+      // Unstarring gives up the place in the homepage order too, so a
+      // re-starred essay joins the end of the row instead of silently
+      // reclaiming an old slot. Until the selected_rank migration is on
+      // production the column is unknown (42703) and the flag alone is written.
+      let { error } = await supabase
         .from('essays')
-        .update({ is_selected: newSelected })
+        .update(newSelected ? { is_selected: true } : { is_selected: false, selected_rank: null })
         .eq('id', id);
+      if (error && !newSelected && isMissingColumn(error)) {
+        ({ error } = await supabase.from('essays').update({ is_selected: false }).eq('id', id));
+      }
       if (error) throw error;
 
       const { data: target } = await supabase
@@ -410,6 +418,83 @@ export function useRestoreContent() {
       queryClient.invalidateQueries({ queryKey: ['unified-content'] });
       queryClient.invalidateQueries({ queryKey: ['content-stats'] });
       queryClient.invalidateQueries({ queryKey: ['essays'] });
+    },
+  });
+}
+
+/** A starred essay as the homepage-order panel sees it: drafts included. */
+export interface SelectedOrderRow {
+  id: string;
+  title: string;
+  section: string;
+  published: boolean;
+  selected_rank: number | null;
+}
+
+export interface SelectedOrder {
+  rows: SelectedOrderRow[];
+  /** True until migration 20261009140000_essay_selected_rank is applied: the order cannot be saved yet. */
+  missingColumn: boolean;
+}
+
+/**
+ * Every starred essay in homepage order. Unlike useSelectedEssays this
+ * includes drafts, so the owner can place a piece before it goes live: it
+ * holds its slot and appears the moment it is published. Archived essays
+ * are out, as they are everywhere.
+ */
+export function useSelectedOrder() {
+  return useQuery({
+    queryKey: ['essays', 'selected-order'],
+    queryFn: async (): Promise<SelectedOrder> => {
+      const base = () => supabase.from('essays').select('id, title, section, published, selected_rank').eq('is_selected', true).neq('status', 'archived');
+
+      const ranked = await base()
+        .order('selected_rank', { ascending: true, nullsFirst: false })
+        .order('created_at', { ascending: false });
+      if (!ranked.error) {
+        return { rows: (ranked.data ?? []).map((r) => ({ ...r, published: !!r.published })), missingColumn: false };
+      }
+      if (!isMissingColumn(ranked.error)) throw ranked.error;
+
+      const { data, error } = await supabase
+        .from('essays')
+        .select('id, title, section, published')
+        .eq('is_selected', true)
+        .neq('status', 'archived')
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return { rows: (data ?? []).map((r) => ({ ...r, published: !!r.published, selected_rank: null })), missingColumn: true };
+    },
+  });
+}
+
+/**
+ * Writes the whole order: position i gets rank i + 1. One update per row;
+ * the list is at most a few dozen starred essays, and an upsert would need
+ * every NOT NULL column of the row.
+ */
+export function useSaveSelectedOrder() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (ids: string[]) => {
+      const results = await Promise.all(
+        ids.map((id, i) => supabase.from('essays').update({ selected_rank: i + 1 }).eq('id', id)),
+      );
+      const failed = results.find((r) => r.error);
+      if (failed?.error) throw failed.error;
+
+      await logAuditEvent({
+        action: 'reorder_selected',
+        table_name: 'essays',
+        record_title: `Homepage order (${ids.length})`,
+        metadata: { ids },
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['essays'] });
+      queryClient.invalidateQueries({ queryKey: ['unified-content'] });
+      queryClient.invalidateQueries({ queryKey: ['finance-featured-essay'] });
     },
   });
 }
