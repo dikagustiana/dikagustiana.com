@@ -15,7 +15,7 @@ export function NarrativeModuleHeader({ title, thesis, sortOrder }: NarrativeMod
   return (
     <div className="mb-10">
       <div className="flex items-center gap-3 mb-4">
-        <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-primary border border-primary/30 rounded px-2 py-0.5">
+        <span className="eyebrow-chip text-primary border-primary/30 px-2">
           Case Study
         </span>
         <span className="text-xs font-mono text-muted-foreground/50">

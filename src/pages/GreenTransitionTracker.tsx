@@ -31,9 +31,6 @@ export default function GreenTransitionTracker() {
       {/* 1. Page Header */}
       <div className="border-b border-border py-10">
         <div className="container max-w-4xl">
-          <p className="text-xs font-mono text-muted-foreground uppercase tracking-widest mb-3">
-            Capital–Policy Intelligence
-          </p>
           <h1 className="text-3xl font-display font-semibold text-foreground mb-3">
             Indonesia Green Transition Tracker
           </h1>
@@ -128,10 +125,10 @@ export default function GreenTransitionTracker() {
                     <p className="text-xs font-mono text-muted-foreground mb-1.5">
                       {issue.label} · Covering {issue.periodCovered}
                     </p>
-                    <h3 className="text-[16px] font-semibold text-foreground leading-snug mb-1 group-hover:text-foreground/80 transition-colors">
+                    <h3 className="text-base font-semibold text-foreground leading-snug mb-1 group-hover:text-foreground/80 transition-colors">
                       {issue.directionalReading}
                     </h3>
-                    <p className="text-[14px] text-muted-foreground leading-snug line-clamp-2">
+                    <p className="text-sm text-muted-foreground leading-snug line-clamp-2">
                       {issue.strategicImplicationPreview}
                     </p>
                   </div>

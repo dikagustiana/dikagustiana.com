@@ -23,7 +23,7 @@ export function CapitalConditionCard({ condition, onClick }: CapitalConditionCar
       <p className="text-sm text-muted-foreground leading-relaxed mb-2 max-w-xl line-clamp-2">
         {condition.tension}
       </p>
-      <span className="text-[11px] font-mono uppercase tracking-[0.08em] text-muted-foreground/70">
+      <span className="eyebrow text-muted-foreground/70">
         {getLayerLabel(condition.layer)} · Dika Gustiana
       </span>
     </button>

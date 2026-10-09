@@ -65,8 +65,8 @@ const EssayRow = React.memo(function EssayRow({
 
   const title = (
     <>
-      <p className="text-[16px] font-semibold leading-snug">{line1}</p>
-      {line2 && <p className="text-[16px] leading-snug mt-0.5">{line2}</p>}
+      <p className="text-base font-semibold leading-snug">{line1}</p>
+      {line2 && <p className="text-base leading-snug mt-0.5">{line2}</p>}
     </>
   );
 

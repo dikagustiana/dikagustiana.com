@@ -190,49 +190,6 @@
     --sidebar-border: 215 25% 25%;
     --sidebar-ring: 215 60% 32%;
   }
-
-  .dark {
-    --background: 215 28% 12%;
-    --foreground: 0 0% 98%;
-
-    --card: 215 25% 16%;
-    --card-foreground: 0 0% 98%;
-
-    --popover: 215 25% 16%;
-    --popover-foreground: 0 0% 98%;
-
-    --primary: 142 71% 45%;
-    --primary-foreground: 0 0% 100%;
-
-    --secondary: 215 20% 20%;
-    --secondary-foreground: 0 0% 90%;
-
-    --muted: 215 18% 22%;
-    --muted-foreground: 215 12% 55%;
-
-    --accent: 142 71% 45%;
-    --accent-foreground: 0 0% 100%;
-    /* On dark cards the L45 green already passes; keep it for text. */
-    --accent-text: 142 71% 45%;
-
-    --destructive: 0 62% 50%;
-    --destructive-foreground: 0 0% 100%;
-
-    --border: 215 20% 22%;
-    --input: 215 20% 22%;
-    --ring: 142 71% 45%;
-
-    --fia-sourced: 212 90% 72%;
-    --fia-assumption-bg: 145 40% 18%;
-    --fia-assumption-fg: 142 60% 78%;
-    --fia-missing: 215 10% 66%;
-    --fia-cost: 24 80% 55%;
-    --fia-unsplit: 215 10% 55%;
-    --fia-precedent: 210 45% 22%;
-    --fia-dependent: 28 55% 32%;
-    --fia-changed: 48 60% 26%;
-    --fia-edited: 142 60% 55%;
-  }
 }
 
 @layer base {
@@ -287,6 +244,18 @@
 }
 
 @layer components {
+  /* One eyebrow: the mono uppercase label above a title or on a chip. It was
+     hand-built in eight places at 10px and 11px with four letter-spacings.
+     Colour is the caller's: `eyebrow text-foreground`, `eyebrow-chip
+     text-primary border-primary/30` (utilities win over this layer). */
+  .eyebrow {
+    @apply text-[11px] font-mono uppercase tracking-[0.18em] text-muted-foreground;
+  }
+
+  .eyebrow-chip {
+    @apply text-[11px] font-mono uppercase tracking-[0.18em] border rounded px-1.5 py-0.5;
+  }
+
   .nav-link {
     @apply px-3 py-2 text-sm font-medium text-white/80 transition-colors hover:text-white rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40;
   }

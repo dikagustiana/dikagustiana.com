@@ -61,10 +61,10 @@ export default function ConsolidatedReporting() {
               >
                 <div className="flex h-5 rounded overflow-hidden border border-border">
                   <div className="bg-foreground flex items-center justify-center" style={{ width: '51%' }}>
-                    <span className="text-[10px] font-mono text-background">51%</span>
+                    <span className="text-[11px] font-mono text-background">51%</span>
                   </div>
                   <div className="bg-muted flex items-center justify-center" style={{ width: '49%' }}>
-                    <span className="text-[10px] font-mono text-muted-foreground">49%</span>
+                    <span className="text-[11px] font-mono text-muted-foreground">49%</span>
                   </div>
                 </div>
               </ConceptPanel>

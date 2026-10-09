@@ -90,7 +90,7 @@ const Index = () => {
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
               {featuredEssays.map((essay) => (
                 <EssayCardLink key={essay.id} essay={essay}>
-                  <Card className="h-full hover:shadow-lg transition-[transform,box-shadow] hover:-translate-y-1 cursor-pointer group">
+                  <Card className="h-full hover:border-primary/40 transition-colors cursor-pointer group">
                     <CardContent className="p-5">
                       <Badge variant="secondary" className="mb-3 text-xs">
                         {sectionLabel(essay.section)}

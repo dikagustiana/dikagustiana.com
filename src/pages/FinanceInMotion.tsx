@@ -47,7 +47,7 @@ export default function FinanceInMotion() {
 
         {/* Premise */}
         <div className="mb-10 pb-6 border-b border-border">
-          <span className="text-[10px] font-mono uppercase tracking-[0.12em] text-muted-foreground block mb-3">
+          <span className="eyebrow block mb-3">
             Premise
           </span>
           <div className="space-y-2.5 text-sm text-foreground leading-snug max-w-2xl">

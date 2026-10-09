@@ -488,7 +488,7 @@ function BriefCanvas({
 
       {/* Recovery banner — offered, never applied. */}
       {recovery && (
-        <div className="flex-shrink-0 border-b border-border bg-amber-50 px-4 py-3 dark:bg-amber-950/30">
+        <div className="flex-shrink-0 border-b border-border bg-amber-50 px-4 py-3">
           <Alert className="mx-auto max-w-[52rem] border-0 bg-transparent p-0">
             <History className="h-4 w-4" />
             <AlertTitle>Unsaved Brief recovered from backup</AlertTitle>

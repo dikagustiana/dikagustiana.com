@@ -18,7 +18,5 @@ Disallow: /admin/
 Disallow: /auth
 Disallow: /settings
 Disallow: /debug/
-Disallow: /personal-finance
-Disallow: /dikas-tools
 
 Sitemap: https://dikagustiana.com/sitemap.xml
