@@ -18,7 +18,7 @@ const stages = [
 export function FinanceCycleMap() {
   return (
     <div className="my-8 py-6 px-4 rounded-lg border border-border bg-muted/20">
-      <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-muted-foreground mb-4 text-center">
+      <p className="eyebrow mb-4 text-center">
         The Finance Cycle
       </p>
       <div className="flex items-center justify-center gap-1 md:gap-2 flex-wrap">
@@ -31,7 +31,7 @@ export function FinanceCycleMap() {
                 : 'border-border bg-background'
               }
             `}>
-              <span className="text-[10px] font-mono text-muted-foreground/60">{stage.section}</span>
+              <span className="text-[11px] font-mono text-muted-foreground/60">{stage.section}</span>
               <span className="text-xs font-semibold text-foreground whitespace-nowrap">{stage.label}</span>
             </div>
             {i < stages.length - 1 && (

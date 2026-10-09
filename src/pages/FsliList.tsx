@@ -4,8 +4,8 @@ import { Search } from 'lucide-react';
 import { PageLayout } from '@/components/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import { useFsliPages, FsliPage } from '@/hooks/queries/useFsliPages';
+import { sumLineItems } from '@/lib/fsliTotals';
 import { ErrorState, LoadingState } from '@/components/states';
 
 export default function FsliList() {
@@ -20,22 +20,25 @@ export default function FsliList() {
   const currentAssets = filteredItems.filter(item => item.category === 'current_assets');
   const nonCurrentAssets = filteredItems.filter(item => item.category === 'non_current_assets');
 
-  // Calculate totals
-  const parseNumber = (str: string | null) => str ? parseFloat(str.replace(/,/g, '')) || 0 : 0;
+  // Subtotals come from the whole statement, not the searched rows, so typing
+  // in the search box does not rewrite the totals. Component rows are shown
+  // but not summed (see lib/fsliTotals).
   const formatNumber = (num: number) => num.toLocaleString('en-US');
+  const allCurrentAssets = fsliPages.filter(item => item.category === 'current_assets');
+  const allNonCurrentAssets = fsliPages.filter(item => item.category === 'non_current_assets');
 
-  const totalCurrentAssets2024 = currentAssets.reduce((sum, item) => sum + parseNumber(item.dec_2024), 0);
-  const totalCurrentAssets2023 = currentAssets.reduce((sum, item) => sum + parseNumber(item.dec_2023), 0);
-  const totalNonCurrentAssets2024 = nonCurrentAssets.reduce((sum, item) => sum + parseNumber(item.dec_2024), 0);
-  const totalNonCurrentAssets2023 = nonCurrentAssets.reduce((sum, item) => sum + parseNumber(item.dec_2023), 0);
+  const totalCurrentAssets2024 = sumLineItems(allCurrentAssets, 'dec_2024');
+  const totalCurrentAssets2023 = sumLineItems(allCurrentAssets, 'dec_2023');
+  const totalNonCurrentAssets2024 = sumLineItems(allNonCurrentAssets, 'dec_2024');
+  const totalNonCurrentAssets2023 = sumLineItems(allNonCurrentAssets, 'dec_2023');
   const totalAssets2024 = totalCurrentAssets2024 + totalNonCurrentAssets2024;
   const totalAssets2023 = totalCurrentAssets2023 + totalNonCurrentAssets2023;
 
-  const renderRow = (item: FsliPage, isIndented = false) => (
+  const renderRow = (item: FsliPage) => (
     <tr key={item.slug} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
       <td className="py-3 px-4">
         <Link to={`/accounting/fsli/${item.slug}`} className="hover:text-accent transition-colors">
-          <span className={isIndented ? 'pl-4' : ''}>{item.subtitle || item.title}</span>
+          <span className={item.is_component ? 'pl-4' : ''}>{item.subtitle || item.title}</span>
         </Link>
         {item.notes_ref && (
           <div className="text-xs text-muted-foreground">{item.notes_ref}</div>
@@ -170,35 +173,9 @@ export default function FsliList() {
           </div>
         </div>
 
-        {/* Bottom Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-card rounded-lg border border-border p-6 text-center">
-            <h3 className="font-bold text-foreground mb-1">ASET TIDAK LANCAR</h3>
-            <p className="text-xs text-accent uppercase tracking-wide mb-2">NON-CURRENT ASSETS</p>
-            <p className="text-muted-foreground text-sm mb-4">{nonCurrentAssets.length}+ Items</p>
-            <Button variant="default" className="w-full bg-header hover:bg-header/90 text-header-foreground">
-              Coming Soon
-            </Button>
-          </div>
-
-          <div className="bg-card rounded-lg border border-border p-6 text-center">
-            <h3 className="font-bold text-foreground mb-1">LIABILITAS</h3>
-            <p className="text-xs text-accent uppercase tracking-wide mb-2">LIABILITIES</p>
-            <p className="text-muted-foreground text-sm mb-4">12+ Items</p>
-            <Button variant="default" className="w-full bg-header hover:bg-header/90 text-header-foreground">
-              Coming Soon
-            </Button>
-          </div>
-
-          <div className="bg-card rounded-lg border border-border p-6 text-center">
-            <h3 className="font-bold text-foreground mb-1">EKUITAS</h3>
-            <p className="text-xs text-accent uppercase tracking-wide mb-2">EQUITY</p>
-            <p className="text-muted-foreground text-sm mb-4">8+ Items</p>
-            <Button variant="default" className="w-full bg-header hover:bg-header/90 text-header-foreground">
-              Coming Soon
-            </Button>
-          </div>
-        </div>
+        <p className="text-sm text-muted-foreground">
+          Liabilities and equity line items are not yet added.
+        </p>
       </div>
     </PageLayout>
   );

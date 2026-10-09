@@ -106,8 +106,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Search, Clock, User, Calendar } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { ErrorState } from '@/components/states';
+import { canSearchFeed, canSortFeed } from '@/lib/feedControls';
 
 interface Essay {
   id: string;
@@ -240,28 +241,33 @@ function GreenTransitionPhaseFeed({ phase, getEssayUrl }: GreenTransitionPhaseFe
 
   return (
     <div className="space-y-8">
-      {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search essays..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9"
-          />
+      {/* Filters: only once the list is long enough to need them. */}
+      {(canSearchFeed(essays?.length ?? 0) || canSortFeed(essays?.length ?? 0)) && (
+        <div className="flex flex-col sm:flex-row gap-4">
+          {canSearchFeed(essays?.length ?? 0) && (
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search essays..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+          )}
+          {canSortFeed(essays?.length ?? 0) && (
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="w-[120px]">
+                <SelectValue placeholder="Sort" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="newest">Newest</SelectItem>
+                <SelectItem value="oldest">Oldest</SelectItem>
+              </SelectContent>
+            </Select>
+          )}
         </div>
-
-        <Select value={sortBy} onValueChange={setSortBy}>
-          <SelectTrigger className="w-[120px]">
-            <SelectValue placeholder="Sort" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="newest">Newest</SelectItem>
-            <SelectItem value="oldest">Oldest</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+      )}
 
       <p className="text-sm text-muted-foreground">
         {filteredEssays.length} {filteredEssays.length === 1 ? 'essay' : 'essays'}
@@ -301,26 +307,11 @@ function GreenTransitionPhaseFeed({ phase, getEssayUrl }: GreenTransitionPhaseFe
                     </p>
                   )}
 
-                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
-                    {essay.author && (
-                      <span className="flex items-center gap-1">
-                        <User className="h-3.5 w-3.5" />
-                        {essay.author}
-                      </span>
-                    )}
-                    {essay.date && (
-                      <span className="flex items-center gap-1">
-                        <Calendar className="h-3.5 w-3.5" />
-                        {formatDate(essay.date)}
-                      </span>
-                    )}
-                    {essay.read_time && (
-                      <span className="flex items-center gap-1">
-                        <Clock className="h-3.5 w-3.5" />
-                        {essay.read_time}
-                      </span>
-                    )}
-                  </div>
+                  {(essay.author || essay.read_time || essay.date) && (
+                    <p className="text-sm text-muted-foreground">
+                      {[essay.author, essay.date ? formatDate(essay.date) : null, essay.read_time].filter(Boolean).join(' · ')}
+                    </p>
+                  )}
                 </div>
               </Link>
             </article>

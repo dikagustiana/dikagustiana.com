@@ -107,7 +107,7 @@ export function Glimpse({ essays, isLoading }: GlimpseProps) {
           : essays!.map((essay) => (
               <li key={essay.id} className="glimpse__item">
                 <EssayCardLink essay={essay} className="group flex h-full flex-col">
-                  <p className="mb-3 font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
+                  <p className="eyebrow mb-3">
                     {sectionLabel(essay.section)}
                   </p>
                   <h3 className="mb-3 font-display text-lg font-semibold leading-snug text-foreground transition-colors group-hover:text-accent">

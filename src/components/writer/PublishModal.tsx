@@ -256,7 +256,7 @@ export function PublishModal({
           {validation.warnings.length > 0 && (
             <ul className="space-y-1">
               {validation.warnings.map((warning, i) => (
-                <li key={i} className="flex items-start gap-2 text-sm text-amber-700 dark:text-amber-500">
+                <li key={i} className="flex items-start gap-2 text-sm text-amber-700">
                   <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
                   {warning.message}
                 </li>

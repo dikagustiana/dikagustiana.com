@@ -67,7 +67,7 @@ export function SourceList({ sources, className }: { sources: readonly Source[];
       <p className="text-xs font-mono uppercase tracking-wider text-muted-foreground mb-2">Sources</p>
       <ul className="space-y-2.5">
         {sources.map((source) => (
-          <li key={source.url} className="text-[14px] leading-snug">
+          <li key={source.url} className="text-sm leading-snug">
             <a
               href={source.url}
               target="_blank"
@@ -100,7 +100,7 @@ export function EvidenceNote({ status, sources }: { status?: EvidenceStatus; sou
       <p className="text-xs font-mono uppercase tracking-widest text-muted-foreground">
         Evidence · {EVIDENCE_LABEL[resolved]}
       </p>
-      <p className="mt-1.5 text-[14px] leading-relaxed text-muted-foreground max-w-[620px]">
+      <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground max-w-[620px]">
         {EVIDENCE_MEANS[resolved]}
       </p>
       {sources && sources.length > 0 && <SourceList sources={sources} className="mt-4" />}

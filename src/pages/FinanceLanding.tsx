@@ -76,7 +76,7 @@ export default function FinanceLanding() {
                 to={featuredHref}
                 className="block border border-border rounded-lg p-8 mb-12 hover:border-primary/40 transition-colors group"
               >
-            <span className="text-[10px] font-mono uppercase tracking-wider text-primary border border-primary/30 rounded px-1.5 py-0.5 mb-4 inline-block">Featured</span>
+            <span className="eyebrow-chip text-primary border-primary/30 mb-4 inline-block">Featured</span>
             <h2 className="text-2xl md:text-3xl font-display font-semibold mb-3 group-hover:text-primary transition-colors">
               {featured.title}
             </h2>
@@ -121,7 +121,7 @@ export default function FinanceLanding() {
                         {domain.title}
                       </h3>
                       {domain.slug === 'fundamentals' && (
-                        <span className="text-[10px] font-mono uppercase tracking-wider text-primary border border-primary/30 rounded px-1.5 py-0.5">
+                        <span className="eyebrow-chip text-primary border-primary/30">
                           Start here
                         </span>
                       )}

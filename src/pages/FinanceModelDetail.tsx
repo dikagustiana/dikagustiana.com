@@ -87,7 +87,7 @@ export default function FinanceModelDetail() {
         ) : model ? (
           <>
             {/* Header */}
-            <span className="text-[10px] font-mono uppercase tracking-wider text-primary mb-2 inline-block">
+            <span className="eyebrow text-primary mb-2 inline-block">
               {model.number}
             </span>
             <h1 className="text-3xl md:text-4xl font-display font-bold mb-3">
@@ -100,7 +100,7 @@ export default function FinanceModelDetail() {
               <p className="text-lg text-muted-foreground mb-4">{model.description}</p>
             )}
             <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground mb-2">
-              <span className={`text-[10px] font-mono uppercase tracking-wider border rounded px-1.5 py-0.5 ${
+              <span className={`eyebrow-chip ${
                 model.depth === 'foundation' ? 'border-primary/30 text-primary' :
                 model.depth === 'executive' ? 'border-accent/30 text-accent' :
                 'border-muted-foreground/40 text-muted-foreground'

@@ -59,7 +59,7 @@ export function HomepageOrder() {
         {isLoading && <p className="text-sm text-muted-foreground">Loading…</p>}
         {error && <p className="text-sm text-destructive">The starred essays could not be loaded.</p>}
         {data?.missingColumn && (
-          <p className="mb-3 rounded-md border border-amber-500/40 bg-amber-500/5 px-3 py-2 text-sm text-amber-700 dark:text-amber-400">
+          <p className="mb-3 rounded-md border border-amber-500/40 bg-amber-500/5 px-3 py-2 text-sm text-amber-700">
             The order cannot be saved until migration 20261009140000_essay_selected_rank is applied. Until then the homepage shows newest first.
           </p>
         )}

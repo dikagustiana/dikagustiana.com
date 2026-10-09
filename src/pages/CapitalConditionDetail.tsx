@@ -1,11 +1,10 @@
 /**
  * CapitalConditionDetail — View 2: Single condition detail page.
- * Route: /finance/capital-in-motion/:conditionSlug
+ * Route: /finance/capital-allocation/:conditionSlug
  *
  * Narrative longform layout — reads as a flowing essay, not a database record.
  */
 
-import { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { PageLayout } from '@/components/layouts/PageLayout';
@@ -17,6 +16,11 @@ import {
   SHOW_CASE_COMPANIES,
 } from '@/data/capitalConditions';
 
+/** "an operational", "a balance sheet": the layer labels start with either. */
+function withArticle(word: string): string {
+  return `${/^[aeiou]/i.test(word) ? 'an' : 'a'} ${word}`;
+}
+
 export default function CapitalConditionDetail() {
   const { conditionSlug } = useParams();
   const navigate = useNavigate();
@@ -25,12 +29,9 @@ export default function CapitalConditionDetail() {
     (c) => c.id === conditionSlug || String(c.number) === conditionSlug
   );
 
-  const [showQuant, setShowQuant] = useState(false);
-  const [showModel, setShowModel] = useState(false);
-
   if (!condition) {
     return (
-      <PageLayout role="manager">
+      <PageLayout>
         <div className="container max-w-3xl py-20 text-center">
           <p className="text-muted-foreground">Condition not found.</p>
         </div>
@@ -46,17 +47,8 @@ export default function CapitalConditionDetail() {
     ? CONDITIONS.find((c) => c.number === CONDITION_ORDER[currentIdx + 1])
     : null;
 
-  const modelRows = condition.hypotheticalModel && condition.hypotheticalModel.length > 0
-    ? condition.hypotheticalModel
-    : [
-        { metric: '—', whatHappened: '—', whatShouldHaveHappened: '—' },
-        { metric: '—', whatHappened: '—', whatShouldHaveHappened: '—' },
-        { metric: 'Capital Outcome', whatHappened: '—', whatShouldHaveHappened: '—' },
-      ];
-
   return (
     <PageLayout
-      role="manager"
       breadcrumbs={[
         { label: 'Home', path: '/' },
         { label: 'Finance', path: '/finance' },
@@ -79,71 +71,42 @@ export default function CapitalConditionDetail() {
           Back to Capital in Motion
         </Link>
 
-        {/* Title */}
-        <h1 className="text-5xl font-bold leading-tight text-foreground mb-8">
+        <h1 className="text-3xl md:text-4xl font-display font-bold leading-tight text-foreground mb-8">
           {condition.title}
         </h1>
 
-        {/* Opening paragraph — the tension as narrative intro */}
-        <p className="text-lg leading-8 text-slate-800 mb-6">
+        {/* The tension, once. It used to open the page and then repeat,
+            word for word, under "The Capital Tension". */}
+        <p className="text-lg leading-8 text-foreground mb-6">
           {condition.tension}
         </p>
 
-        {/* The Situation */}
-        <h2 className="text-2xl font-semibold text-foreground mt-16 mb-6">
-          The Situation
-        </h2>
-        <p className="text-lg leading-8 text-slate-800 mb-6">
-          This is a <span className="font-medium">{getLayerLabel(condition.layer).toLowerCase()}</span> condition
-          {SHOW_CASE_COMPANIES && (
-            <>
-              {' '}observed in the case of <span className="font-medium">{condition.caseCompany}</span>
-            </>
-          )}
-          .
-        </p>
+        {/* With the case company hidden, this section was one line of
+            boilerplate ("This is a operational condition."), so it renders
+            only when there is a case to name. */}
+        {SHOW_CASE_COMPANIES && (
+          <>
+            <h2 className="text-2xl font-semibold text-foreground mt-16 mb-6">
+              The Situation
+            </h2>
+            <p className="text-lg leading-8 text-foreground mb-6">
+              This is {withArticle(getLayerLabel(condition.layer).toLowerCase())} condition
+              observed in the case of <span className="font-medium">{condition.caseCompany}</span>.
+            </p>
+          </>
+        )}
 
-        {/* The Capital Tension */}
-        <h2 className="text-2xl font-semibold text-foreground mt-16 mb-6">
-          The Capital Tension
-        </h2>
-        <p className="text-lg leading-8 text-slate-800 mb-6">
-          {condition.tension}
-        </p>
-
-        {/* Quantitative Lens — inline narrative */}
         {condition.quantitative && (
           <>
             <h2 className="text-2xl font-semibold text-foreground mt-16 mb-6">
               The Quantitative Lens
             </h2>
-            {!showQuant ? (
-              <p className="text-lg leading-8 text-slate-800 mb-6">
-                The numbers tell a sharper story.{' '}
-                <button
-                  onClick={() => setShowQuant(true)}
-                  className="text-foreground underline underline-offset-4 hover:text-slate-700 transition-colors"
-                >
-                  Read the quantitative detail →
-                </button>
-              </p>
-            ) : (
-              <>
-                <p className="text-lg leading-8 text-slate-800 mb-6 font-mono">
-                  {condition.quantitative}
-                </p>
-                <button
-                  onClick={() => setShowQuant(false)}
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors mb-6 block"
-                >
-                  Collapse ↑
-                </button>
-              </>
-            )}
+            <p className="text-lg leading-8 text-foreground mb-6 font-mono">
+              {condition.quantitative}
+            </p>
           </>
         )}
 
-        {/* The Decision Rule */}
         <h2 className="text-2xl font-semibold text-foreground mt-16 mb-6">
           The Decision Rule
         </h2>
@@ -151,56 +114,38 @@ export default function CapitalConditionDetail() {
           {condition.rule}
         </p>
 
-        {/* Hypothetical Model — narrative transition into table */}
-        <h2 className="text-2xl font-semibold text-foreground mt-16 mb-6">
-          Hypothetical Model
-        </h2>
-        {!showModel ? (
-          <p className="text-lg leading-8 text-slate-800 mb-6">
-            To make this concrete, consider a simplified model.{' '}
-            <button
-              onClick={() => setShowModel(true)}
-              className="text-foreground underline underline-offset-4 hover:text-slate-700 transition-colors"
-            >
-              Show the model →
-            </button>
-          </p>
-        ) : (
+        {/* Only a condition that has a model shows one; the fallback used to
+            be a table of dashes behind a "Show the model" link, on all 21. */}
+        {condition.hypotheticalModel && condition.hypotheticalModel.length > 0 && (
           <>
-            <p className="text-lg leading-8 text-slate-800 mb-6">
-              To make this concrete, consider the simplified model below.
-            </p>
+            <h2 className="text-2xl font-semibold text-foreground mt-16 mb-6">
+              Hypothetical Model
+            </h2>
             <div className="overflow-x-auto mb-6">
               <table className="w-full border-collapse text-sm">
                 <thead>
                   <tr>
-                    <th className="text-left px-3 py-2 border border-slate-200 font-medium text-slate-700">Metric</th>
-                    <th className="text-left px-3 py-2 border border-slate-200 font-medium text-slate-700">What Happened</th>
-                    <th className="text-left px-3 py-2 border border-slate-200 font-medium text-slate-700">What Should Have Happened</th>
+                    <th className="text-left px-3 py-2 border border-border font-medium text-foreground">Metric</th>
+                    <th className="text-left px-3 py-2 border border-border font-medium text-foreground">What Happened</th>
+                    <th className="text-left px-3 py-2 border border-border font-medium text-foreground">What Should Have Happened</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {modelRows.map((row, i) => (
+                  {condition.hypotheticalModel.map((row, i) => (
                     <tr key={i}>
-                      <td className="px-3 py-2 border border-slate-200 font-medium text-slate-900">{row.metric}</td>
-                      <td className="px-3 py-2 border border-slate-200 text-slate-600">{row.whatHappened}</td>
-                      <td className="px-3 py-2 border border-slate-200 text-slate-600">{row.whatShouldHaveHappened}</td>
+                      <td className="px-3 py-2 border border-border font-medium text-foreground">{row.metric}</td>
+                      <td className="px-3 py-2 border border-border text-muted-foreground">{row.whatHappened}</td>
+                      <td className="px-3 py-2 border border-border text-muted-foreground">{row.whatShouldHaveHappened}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-            <button
-              onClick={() => setShowModel(false)}
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors mb-6 block"
-            >
-              Collapse ↑
-            </button>
           </>
         )}
 
         {/* Prev / Next */}
-        <div className="mt-16 pt-6 border-t border-slate-200 flex items-center justify-between">
+        <div className="mt-16 pt-6 border-t border-border flex items-center justify-between">
           {prevCondition ? (
             <button
               onClick={() => navigate(`/finance/capital-allocation/${prevCondition.id}`)}

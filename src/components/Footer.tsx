@@ -39,6 +39,7 @@ export function Footer() {
               <li><Link to="/finance" className="text-muted-foreground hover:text-foreground transition-colors">Finance</Link></li>
               <li><Link to="/green-transition" className="text-muted-foreground hover:text-foreground transition-colors">Green Transition</Link></li>
               <li><Link to="/the-next-big-thing" className="text-muted-foreground hover:text-foreground transition-colors">The Next Big Thing</Link></li>
+              <li><Link to="/development-finance" className="text-muted-foreground hover:text-foreground transition-colors">Development Finance</Link></li>
             </ul>
           </div>
 
@@ -48,7 +49,7 @@ export function Footer() {
             <ul className="space-y-2 text-sm">
               <li><Link to="/english-ielts" className="text-muted-foreground hover:text-foreground transition-colors">IELTS Preparation</Link></li>
               <li><Link to="/books-academia" className="text-muted-foreground hover:text-foreground transition-colors">Books</Link></li>
-              <li><Link to="/critical-thinking-research" className="text-muted-foreground hover:text-foreground transition-colors">Learning</Link></li>
+              <li><Link to="/critical-thinking-research" className="text-muted-foreground hover:text-foreground transition-colors">Critical Thinking</Link></li>
             </ul>
           </div>
         </div>

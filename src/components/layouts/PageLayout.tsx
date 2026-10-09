@@ -3,7 +3,6 @@ import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { Breadcrumb, BreadcrumbItem } from '@/components/Breadcrumb';
 import { SectionSubNav, SubNavTab } from '@/components/SectionSubNav';
-import { SectionIntro } from '@/components/sections/SectionIntro';
 
 export type VoiceRole = 'manager' | 'economist' | 'educator' | 'coach' | 'hybrid';
 export type LayoutVariant = 'content' | 'dashboard' | 'essay' | 'tool';
@@ -11,6 +10,8 @@ export type LayoutVariant = 'content' | 'dashboard' | 'essay' | 'tool';
 interface PageLayoutProps {
   children: ReactNode;
   variant?: LayoutVariant;
+  // Accepted so existing call sites compile; nothing reads it since the
+  // manifesto banner was retired.
   role?: VoiceRole;
   title?: string;
   breadcrumbs?: BreadcrumbItem[];
@@ -18,20 +19,15 @@ interface PageLayoutProps {
     tabs: SubNavTab[];
     backLink?: { label: string; path: string };
   };
-  showManifesto?: boolean;
-  manifesto?: string;
   className?: string;
 }
 
 export function PageLayout({
   children,
   variant = 'content',
-  role = 'hybrid',
   title,
   breadcrumbs,
   subNav,
-  showManifesto = false,
-  manifesto,
   className = '',
 }: PageLayoutProps) {
   const getVariantStyles = () => {
@@ -70,10 +66,6 @@ export function PageLayout({
           tabs={subNav.tabs}
           backLink={subNav.backLink}
         />
-      )}
-
-      {showManifesto && manifesto && (
-        <SectionIntro role={role} manifesto={manifesto} />
       )}
 
       <main id="main-content" tabIndex={-1} className={`flex-1 outline-none ${className}`}>

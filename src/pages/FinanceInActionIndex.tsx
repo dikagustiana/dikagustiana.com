@@ -41,7 +41,7 @@ function ModelRow({ model }: { model: FinanceModel }) {
         )}
       </div>
       <div className="flex items-center gap-3 shrink-0">
-        <span className={`text-[10px] font-mono uppercase tracking-wider border rounded px-1.5 py-0.5 ${depthColor[model.depth]}`}>
+        <span className={`eyebrow-chip ${depthColor[model.depth]}`}>
           {depthLabel[model.depth]}
         </span>
         <span className="text-xs text-muted-foreground flex items-center gap-1">

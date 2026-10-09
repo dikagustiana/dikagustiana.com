@@ -3,6 +3,10 @@ import tailwindcssAnimate from "tailwindcss-animate";
 import typography from "@tailwindcss/typography";
 
 export default {
+  // Light only (docs/DECISIONS.md, 2026-10-09). Kept on "class" rather than
+  // removed: the default is "media", which would switch on the vendored
+  // shadcn dark: variants under an OS dark preference. No element ever
+  // carries the class.
   darkMode: ["class"],
   content: ["./pages/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./app/**/*.{ts,tsx}", "./src/**/*.{ts,tsx}"],
   prefix: "",

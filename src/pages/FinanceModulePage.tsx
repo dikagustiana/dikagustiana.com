@@ -106,7 +106,7 @@ No lessons assigned to this module yet.
                   {essay.title}
                 </h3>
                 {essay.lesson_type && essay.lesson_type !== 'concept' && (
-                  <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground border border-border rounded px-1.5 py-0.5">
+                  <span className="eyebrow-chip text-muted-foreground border-border">
                     {essay.lesson_type}
                   </span>
                 )}

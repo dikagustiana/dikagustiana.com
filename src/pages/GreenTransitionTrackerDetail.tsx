@@ -91,7 +91,7 @@ export default function GreenTransitionTrackerDetail() {
             {READING_META[issue.directionalReading].excludes}
           </p>
           {issue.readingBasis && (
-            <p className="text-[14px] leading-relaxed text-muted-foreground max-w-[640px] pt-1">
+            <p className="text-sm leading-relaxed text-muted-foreground max-w-[640px] pt-1">
               <span className="font-mono text-xs uppercase tracking-wider">Read from: </span>
               {issue.readingBasis}
             </p>

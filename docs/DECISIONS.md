@@ -18,8 +18,10 @@ proposal each, and the owner chose; the choices are recorded here so they are no
 The 2026-08-03 entry below kept the Sections grid against a review that recommended deleting it, and
 said the next session that wanted it gone needed a new owner decision. This is that decision: the
 owner asked for the list to go. The header's navigation names every section, so the homepage repeats
-nothing by losing it. `useSectionCounts`, which existed only to count behind each door, goes with it,
-and the `#sections` anchor had no remaining link. The 2026-08-03 entry stays as history.
+nothing by losing it. The `#sections` anchor had no remaining link. `useSectionCounts`, written to
+count behind each door, stays: the header's navigation now reads it to collapse an empty section to a
+plain link (the remediation entry below), so the hook outlives the list it was written for. The
+2026-08-03 entry stays as history.
 
 ## "Selected Analysis" becomes the glimpse
 
@@ -76,6 +78,55 @@ owner's gate, and it also switches About's slot and opens `/finance/kawasan`. Wh
 in `docs/world/run-2026-10-09.md`: every building reads "Model status unavailable" until
 `fsre_published` exists, and the think tank's tag file is empty. The glimpse sits directly under the
 world, as it sits under the map; the map stays the first thing under the header.
+# 2026-10-09 — Public-site remediation from the 9 October audit
+
+Branch `claude/blissful-fermi-q5x5iw`. Executes the code work packages of the audit (WP-2 to
+WP-8, WP-11); WP-0 (domain), WP-1 (essay rows), WP-9 and WP-10 wait on the owner or on access.
+
+## Light only, stated
+
+The `.dark` palette in `src/index.css` could never apply: nothing in the app sets the `dark`
+class, and it still carried the retired emerald accent. Deleted, with every `dark:` variant
+outside the vendored `src/components/ui/`. `darkMode` stays `["class"]` rather than being
+removed, because Tailwind's default (`media`) would switch on the vendored shadcn `dark:`
+variants under an OS dark preference and give a half-dark page.
+
+## The consolidation working paper was rebuilt, not patched
+
+The audit's suggested fix (post +85,000 to goodwill and NCI) would have unbalanced the sheet: the
+paper balanced only because 113,000 of related-party receivables were eliminated against 22,000
+of payables, a 91,000 gap equal to the missing NCI. The elimination column now matches intragroup
+balances on both sides, recognises NCI at 91,000 (acquisition-date fair value) and derives goodwill
+from it. Intragroup trade also reconciles by counterparty (`INTRAGROUP_TRADE`, who owes whom), not
+only in total; the first rebuild left Dummy C's related-party receivable larger than everything the
+other entities owed, which review caught. `tests/unit/consolidationWorkingPaper.test.ts` holds the
+arithmetic. Owner question Q4
+still applies if a different worked example is wanted.
+
+## Empty sections collapse in the nav (Q14 default)
+
+A dropdown whose `essays.section` has no published essay renders as a plain link to its landing
+page, which lists every phase with its count. Starts collapsed until the count loads, so the
+header does not grow and lose a chevron on every page load while the sections are empty.
+
+## Capital Allocation joins the Finance dropdown
+
+It was left out "until it has modules", but `/finance/capital-allocation` renders the 21
+conditions, not a module index, and `/finance` already listed it. Its page title is "Capital in
+Motion" while the track is "Capital Allocation"; the nav uses the track name and the page title
+is the owner's to change.
+
+## Unsourced figures removed rather than softened
+
+Climate Finance's "~$25B/year", the bps/margin/multiple/ratio/$ figures in the capital
+conditions, and the Statutory page's filings and deadlines are gone until each comes back with
+its source (Q9, Q11, Q12). Mechanisms and durations stayed.
+
+## Owner-protected surfaces left alone
+
+About's hero, ReadingPath, ChangedMind and the industry-chain map keep their arbitrary type sizes
+and eyebrows; the audit marks them as passing on their own terms, so the type-scale sweep skips
+them.
 
 ---
 

@@ -27,7 +27,7 @@ export default function BookReader() {
       role="educator"
       breadcrumbs={[
         { label: 'Home', path: '/' },
-        { label: 'Books and Academia', path: '/books-academia' },
+        { label: 'Books', path: '/books-academia' },
         { label: formatTitle(category || ''), path: `/books/${category}` },
         { label: heading },
       ]}

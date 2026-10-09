@@ -15,6 +15,13 @@ export interface CapitalCondition {
   title: string;
   caseCompany: string;
   tension: string;
+  /**
+   * The causal chain from the condition to its capital outcome. Figures
+   * (bps, margins, multiples, ratios, $ amounts) were removed on 9 October
+   * 2026 because none carried a source; one comes back only with its source
+   * named on the page (owner question Q11). Durations remain and are also
+   * unsourced.
+   */
   quantitative: string;
   rule: string;
   hypotheticalModel?: HypotheticalModelRow[];
@@ -97,7 +104,7 @@ export const CONDITIONS: CapitalCondition[] = [
     title: 'Aggressive Expansion with Assumption Distortion',
     caseCompany: 'Garuda Indonesia',
     tension: 'Fleet expansion justified by optimistic demand and load factor assumptions. Fixed obligations locked in before assumptions were stress-tested.',
-    quantitative: 'If projected utilization or yield misses by 10–15%, fixed lease obligations remain while EBITDA collapses. Interest coverage deteriorates faster than revenue recovery.',
+    quantitative: 'If projected utilization or yield falls short of plan, fixed lease obligations remain while EBITDA collapses. Interest coverage deteriorates faster than revenue recovers.',
     rule: 'Stress-test core assumptions before approving expansion.',
   },
   {
@@ -105,7 +112,7 @@ export const CONDITIONS: CapitalCondition[] = [
     title: 'Commodity Windfall',
     caseCompany: 'Adaro Energy vs Bukit Asam',
     tension: 'Coal windfall creates illusion of permanent earnings. Reinvestment into same commodity deepens stranded asset exposure as transition accelerates.',
-    quantitative: 'Windfall EBITDA margin 40–50% at cycle peak → Normalized margin 15–20% → Capex committed at peak overstates sustainable return → Stranded asset risk unpriced',
+    quantitative: 'Windfall EBITDA margin at cycle peak → Normalized margin well below it → Capex committed at peak overstates sustainable return → Stranded asset risk unpriced',
     rule: 'Redeploy windfall to reduce cyclicality and transition exposure. Price stranded asset risk before reinvestment.',
   },
   {
@@ -113,7 +120,7 @@ export const CONDITIONS: CapitalCondition[] = [
     title: 'Long-Gestation Capex-Heavy Assets',
     caseCompany: 'Pertamina Geothermal Energy',
     tension: 'Geothermal development requires 7–10 year gestation before cash flow. Commercial funding tenors mismatched. Concessional capital necessary to bridge viability gap.',
-    quantitative: 'Development capex front-loaded → Revenue generation delayed 7–10 years → IRR sensitive to discount rate → Concessional funding reduces WACC by 200–300bps → Project viability restored',
+    quantitative: 'Development capex front-loaded → Revenue generation delayed 7–10 years → IRR sensitive to discount rate → Concessional funding lowers WACC → Project viability restored',
     rule: 'Align funding duration with asset life. Structure concessional layer to absorb early-stage risk before commercial capital enters.',
   },
   {
@@ -121,7 +128,7 @@ export const CONDITIONS: CapitalCondition[] = [
     title: 'Sovereign Risk Absorption',
     caseCompany: 'Indonesia Investment Authority',
     tension: 'Private capital reprices Indonesia sovereign risk above actual project fundamentals. First-loss sovereign layer necessary to unlock institutional capital at scale.',
-    quantitative: 'Sovereign risk premium 150–250bps above project IRR → First-loss tranche covering 10–15% of capital stack → Private capital required return drops → Capital mobilization ratio 1:4 to 1:7',
+    quantitative: 'Sovereign risk premium priced above project fundamentals → First-loss tranche absorbs early losses → Private capital required return drops → More private capital mobilized per unit of public capital',
     rule: 'Transition is achieved by repricing risk through sovereign first-loss capital. Separate sovereign credit from project credit in capital stack design.',
   },
   {
@@ -153,7 +160,7 @@ export const CONDITIONS: CapitalCondition[] = [
     title: 'Strategic Downstreaming',
     caseCompany: 'Vale Indonesia',
     tension: 'Raw nickel export generates commodity-level returns. Downstream processing into battery-grade material captures transition premium. Capital required to move up value chain before global EV supply chain locks in alternative suppliers.',
-    quantitative: 'Nickel ore margin 15–20% → Battery-grade nickel margin 35–45% → Processing capex significant but IRR justified by supply chain strategic premium → Optionality value of EV supply chain positioning not captured in base IRR',
+    quantitative: 'Nickel ore margin → Higher battery-grade nickel margin → Processing capex significant but IRR justified by supply chain strategic premium → Optionality value of EV supply chain positioning not captured in base IRR',
     rule: 'Value optionality alongside IRR. Strategic positioning in critical mineral supply chain commands premium above discounted cash flow.',
   },
   {
@@ -161,7 +168,7 @@ export const CONDITIONS: CapitalCondition[] = [
     title: 'Blended Finance for Transition',
     caseCompany: 'Asian Development Bank',
     tension: 'Transition infrastructure commercially unviable at market rates. Concessional and grant capital required to create investable structure. Capital stack sequencing determines whether private capital mobilizes or stays out.',
-    quantitative: 'Grant/concessional layer 15–20% of stack → Reduces blended cost of capital by 150–200bps → Project crosses commercial viability threshold → Private capital mobilization ratio unlocked at 1:5 to 1:8',
+    quantitative: 'Grant/concessional layer at the bottom of the stack → Lowers blended cost of capital → Project crosses commercial viability threshold → Private capital mobilizes behind it',
     rule: 'Engineer the capital stack before approaching the market. Sequence grant → concessional → mezzanine → senior commercial → equity.',
   },
   {
@@ -169,7 +176,7 @@ export const CONDITIONS: CapitalCondition[] = [
     title: 'Cost of Capital Regime Shift',
     caseCompany: 'Lippo Karawaci',
     tension: 'Business model priced under low-rate assumptions. Rising rate environment reprices entire capital structure. Green/brown asset divergence accelerating ESG-linked cost of capital spread.',
-    quantitative: 'WACC shift of 150–200bps → Project NPV compression → Hurdle rate breach on existing pipeline → Capital reallocation trigger',
+    quantitative: 'WACC shift → Project NPV compression → Hurdle rate breach on existing pipeline → Capital reallocation trigger',
     rule: 'Reprice hurdle rate dynamically as macro regime shifts. Apply brown discount to legacy asset valuations.',
   },
   {
@@ -185,7 +192,7 @@ export const CONDITIONS: CapitalCondition[] = [
     title: 'Optionality vs Efficiency',
     caseCompany: 'Medco Energi Internasional',
     tension: 'Undeveloped gas block portfolio creates efficiency drag on current ROIC. Market pressure to optimize producing assets conflicts with strategic value of holding undeveloped reserves as transition optionality.',
-    quantitative: 'Undeveloped reserve carrying cost → Current ROIC drag 100–150bps → Gas optionality value unpriced in base DCF → Developed reserves command 20–30% price premium if transition accelerates',
+    quantitative: 'Undeveloped reserve carrying cost → Drag on current ROIC → Gas optionality value unpriced in base DCF → Developed reserves command a price premium if transition accelerates',
     rule: 'Price optionality explicitly before optimizing for efficiency. Undeveloped reserves in a transition context are not idle capital — they are a structural hedge.',
   },
   {
@@ -193,7 +200,7 @@ export const CONDITIONS: CapitalCondition[] = [
     title: 'Capital Recycling Discipline',
     caseCompany: 'Saratoga Investama Sedaya',
     tension: 'Capital locked in mature brown assets while transition infrastructure offers higher marginal returns. Recycling discipline absent creates portfolio drag.',
-    quantitative: 'IRR differential between mature legacy positions vs transition infrastructure 300–500bps → Opportunity cost of inaction compounds annually',
+    quantitative: 'IRR differential between mature legacy positions and transition infrastructure → Opportunity cost of inaction compounds annually',
     rule: 'Move capital to highest marginal return. Establish systematic recycling trigger from brown to transition assets.',
   },
   {
@@ -201,7 +208,7 @@ export const CONDITIONS: CapitalCondition[] = [
     title: 'Exit Multiple Dependency',
     caseCompany: 'GoTo',
     tension: 'Valuation built on exit multiple expansion rather than operational value creation. When multiple compression occurs, underlying business fundamentals insufficient to sustain capital structure.',
-    quantitative: 'Revenue multiple at peak 15–20x → Compression to 3–5x → Equity value destruction not explained by operational deterioration → Exit multiple was doing the work, not EBITDA growth',
+    quantitative: 'Revenue multiple at peak → Multiple compression → Equity value destruction not explained by operational deterioration → Exit multiple was doing the work, not EBITDA growth',
     rule: 'Separate operational value creation from multiple expansion in any valuation. Stress-test terminal value under multiple compression before capital commitment.',
   },
   {
@@ -209,7 +216,7 @@ export const CONDITIONS: CapitalCondition[] = [
     title: 'JETP Capital Architecture',
     caseCompany: 'Indonesia JETP $20B Commitment',
     tension: 'Concessional capital conditionality conflicts with sovereign policy autonomy. Grant, concessional loan, and guarantee instruments bundled without structural separation. Deployment risk high without architecture clarity.',
-    quantitative: '$20B total commitment → Grant component less than 5% → Concessional loan 40–50% → Guarantees and market instruments remainder → Effective concessionality lower than headline suggests → Deployment bottleneck at structuring layer',
+    quantitative: 'Headline commitment → Small grant component → Concessional loans a large share → Guarantees and market instruments the remainder → Effective concessionality lower than headline suggests → Deployment bottleneck at structuring layer',
     rule: 'Separate grant, concessional loan, and guarantee tranches explicitly before deployment. Conditionality must be tied to measurable transition milestones, not policy compliance alone.',
   },
   {
@@ -225,7 +232,7 @@ export const CONDITIONS: CapitalCondition[] = [
     title: 'Nature-Based Solutions Monetization',
     caseCompany: 'Indonesian Peatland and Forestry',
     tension: 'Carbon credit revenue stream dependent on verification timelines mismatched against investor liquidity expectations. Additionality risk and permanence risk unpriced.',
-    quantitative: 'Verification cycle 2–3 years → Carbon price volatility 30–50% → Permanence reversal risk unhedged → Investor liquidity expectation 12–24 months → Structural mismatch creates financing gap',
+    quantitative: 'Verification cycle 2–3 years → Carbon price volatility → Permanence reversal risk unhedged → Investor liquidity expectation 12–24 months → Structural mismatch creates financing gap',
     rule: 'Match carbon credit tenor with underlying ecosystem recovery period. Price additionality and permanence risk explicitly. Structure liquidity facility to bridge verification cycles.',
   },
   {
@@ -233,7 +240,7 @@ export const CONDITIONS: CapitalCondition[] = [
     title: 'Premature Deindustrialization Trap',
     caseCompany: 'Indonesian Manufacturing Sector',
     tension: 'Manufacturing capex generates output growth but not structural employment. Private capital follows productivity signals, not social transformation logic. The gap between where capital flows and where structural transformation requires it widens without sovereign coordination.',
-    quantitative: 'Manufacturing employment share declining despite output growth → Labor productivity gap formal vs informal 3–5x → Private capital follows ROIC signal not structural employment signal → Sovereign coordination required to bridge gap',
+    quantitative: 'Manufacturing employment share declining despite output growth → Labor productivity gap between formal and informal work → Private capital follows ROIC signal not structural employment signal → Sovereign coordination required to bridge gap',
     rule: 'Private capital will not self-correct toward structural transformation. Sovereign capital must create the conditions — de-risk the entry, set performance criteria, build coordinating institutions — that make private capital movement rational.',
   },
   {
@@ -241,7 +248,7 @@ export const CONDITIONS: CapitalCondition[] = [
     title: 'De-risking Architecture Design',
     caseCompany: 'Saratoga × Danantara Mandate',
     tension: 'Sovereign de-risking fails when designed by people who have never sat on the private capital side. Conditionality gets wrong. Monitoring is performative. First-loss sizing miscalibrated. Private capital reads the architecture and stays out.',
-    quantitative: 'First-loss layer sized incorrectly → Private capital mobilization ratio fails to reach 1:4 threshold → Sovereign capital absorbs full risk with no private leverage → De-risking instrument becomes a subsidy → Capital efficiency collapses',
+    quantitative: 'First-loss layer sized incorrectly → Private capital mobilization falls short of what investors need to commit → Sovereign capital absorbs full risk with no private leverage → De-risking instrument becomes a subsidy → Capital efficiency collapses',
     rule: 'De-risking architecture must be designed by someone who has been on the other side of the table. Embeddedness, conditionality, performance monitoring, and exit criteria are not bureaucratic requirements — they are the precise mechanisms that determine whether private capital treats sovereign involvement as a credibility signal or a warning sign.',
   },
   {

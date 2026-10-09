@@ -37,9 +37,6 @@ export default function FinanceInMotion() {
       <div className="py-10 container max-w-3xl">
         {/* Header */}
         <div className="mb-5">
-          <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-muted-foreground block mb-3">
-            Section 05
-          </span>
           <h1 className="text-2xl md:text-3xl font-display font-bold text-foreground tracking-tight leading-tight">
             Capital in Motion
           </h1>
@@ -50,7 +47,7 @@ export default function FinanceInMotion() {
 
         {/* Premise */}
         <div className="mb-10 pb-6 border-b border-border">
-          <span className="text-[10px] font-mono uppercase tracking-[0.12em] text-muted-foreground block mb-3">
+          <span className="eyebrow block mb-3">
             Premise
           </span>
           <div className="space-y-2.5 text-sm text-foreground leading-snug max-w-2xl">
