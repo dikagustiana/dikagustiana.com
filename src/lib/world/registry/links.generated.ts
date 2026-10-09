@@ -14,758 +14,1213 @@ export const LINKS: readonly Link[] = [
   {
     "from": "A121",
     "to": "B121",
+    "goods": "bulk",
     "state": "expected",
     "note": "coal burnt as kiln fuel in cement"
   },
   {
     "from": "A121",
     "to": "J411",
+    "goods": "bulk",
     "state": "expected",
     "note": "coal fired in power generation"
   },
   {
     "from": "A121",
     "to": "B144",
+    "goods": "bulk",
     "state": "expected",
     "note": "coal and coke in iron and steel making"
   },
   {
     "from": "A111",
     "to": "B111",
+    "goods": "liquid",
     "state": "expected",
     "note": "naphtha and gas as petrochemical feedstock"
   },
   {
     "from": "A111",
     "to": "A112",
+    "goods": "liquid",
     "state": "expected",
     "note": "crude and products into storage and distribution"
   },
   {
     "from": "A111",
     "to": "J421",
+    "goods": "liquid",
     "state": "expected",
     "note": "gas supplied to gas utilities"
   },
   {
     "from": "J421",
     "to": "B112",
+    "goods": "liquid",
     "state": "expected",
     "note": "gas as fertiliser feedstock (ammonia and urea)"
   },
   {
     "from": "J421",
     "to": "B111",
+    "goods": "liquid",
     "state": "expected",
     "note": "gas as a chemical feedstock and fuel"
   },
   {
     "from": "A112",
     "to": "K132",
+    "goods": "liquid",
     "state": "expected",
     "note": "fuel for road transport fleets"
   },
   {
     "from": "A112",
     "to": "K111",
+    "goods": "liquid",
     "state": "expected",
     "note": "jet fuel for airlines"
   },
   {
     "from": "B142",
     "to": "C131",
+    "goods": "boxed",
     "state": "expected",
     "note": "copper for cables and electrical components"
   },
   {
     "from": "B141",
     "to": "E111",
+    "goods": "boxed",
     "state": "expected",
     "note": "aluminium castings for auto parts"
   },
   {
     "from": "B141",
     "to": "B131",
+    "goods": "boxed",
     "state": "expected",
     "note": "aluminium for cans and foil packaging"
   },
   {
     "from": "B144",
     "to": "C141",
+    "goods": "boxed",
     "state": "expected",
     "note": "steel for construction machinery and heavy vehicles"
   },
   {
     "from": "B144",
     "to": "C143",
+    "goods": "boxed",
     "state": "expected",
     "note": "steel for industrial machinery"
   },
   {
     "from": "B144",
     "to": "E121",
+    "goods": "boxed",
     "state": "expected",
     "note": "steel for car bodies"
   },
   {
     "from": "B144",
     "to": "E122",
+    "goods": "boxed",
     "state": "expected",
     "note": "steel for motorcycle frames"
   },
   {
     "from": "B144",
     "to": "C121",
+    "goods": "boxed",
     "state": "expected",
     "note": "steel for building products"
   },
   {
     "from": "B144",
     "to": "J211",
+    "goods": "boxed",
     "state": "expected",
     "note": "steel for construction"
   },
   {
     "from": "B121",
     "to": "J211",
+    "goods": "bulk",
     "state": "expected",
     "note": "cement for construction"
   },
   {
     "from": "B121",
     "to": "C121",
+    "goods": "bulk",
     "state": "expected",
     "note": "cement for building products"
   },
   {
     "from": "B146",
     "to": "B144",
+    "goods": "bulk",
     "state": "expected",
     "note": "nickel and other ores into metal making"
   },
   {
     "from": "B143",
     "to": "G412",
+    "goods": "none",
     "state": "expected",
     "note": "gold as an insured and financed asset: a weak link, kept for review"
   },
   {
     "from": "B151",
     "to": "E211",
+    "goods": "bulk",
     "state": "expected",
     "note": "timber for furniture"
   },
   {
     "from": "B151",
     "to": "B152",
+    "goods": "bulk",
     "state": "expected",
     "note": "wood pulp for paper"
   },
   {
     "from": "B153",
     "to": "B152",
+    "goods": "bulk",
     "state": "expected",
     "note": "other forest products into pulp and paper"
   },
   {
     "from": "B152",
     "to": "B131",
+    "goods": "boxed",
     "state": "expected",
     "note": "paper and board for packaging"
   },
   {
     "from": "B152",
     "to": "E614",
+    "goods": "boxed",
     "state": "expected",
     "note": "paper for publishing"
   },
   {
     "from": "B111",
     "to": "B131",
+    "goods": "bulk",
     "state": "expected",
     "note": "polymers for plastic packaging"
   },
   {
     "from": "B111",
     "to": "E413",
+    "goods": "boxed",
     "state": "expected",
     "note": "synthetic fibres for textiles"
   },
   {
     "from": "B111",
     "to": "E112",
+    "goods": "boxed",
     "state": "expected",
     "note": "synthetic rubber and carbon black for tyres"
   },
   {
     "from": "B112",
     "to": "D232",
+    "goods": "bulk",
     "state": "expected",
     "note": "fertiliser for plantations and crops"
   },
   {
     "from": "B113",
     "to": "D421",
+    "goods": "liquid",
     "state": "expected",
     "note": "specialty chemicals for personal care products"
   },
   {
     "from": "B113",
     "to": "F211",
+    "goods": "boxed",
     "state": "expected",
     "note": "active ingredients and excipients for pharmaceuticals"
   },
   {
     "from": "B131",
     "to": "D222",
+    "goods": "boxed",
     "state": "expected",
     "note": "packaging for processed food"
   },
   {
     "from": "B131",
     "to": "D212",
+    "goods": "boxed",
     "state": "expected",
     "note": "packaging for soft drinks"
   },
   {
     "from": "B131",
     "to": "D221",
+    "goods": "boxed",
     "state": "expected",
     "note": "packaging for dairy"
   },
   {
     "from": "B131",
     "to": "D411",
+    "goods": "boxed",
     "state": "expected",
     "note": "packaging for household products"
   },
   {
     "from": "B131",
     "to": "D421",
+    "goods": "boxed",
     "state": "expected",
     "note": "packaging for personal care products"
   },
   {
     "from": "B131",
     "to": "F211",
+    "goods": "boxed",
     "state": "expected",
     "note": "packaging for pharmaceuticals"
   },
   {
     "from": "B131",
     "to": "D311",
+    "goods": "boxed",
     "state": "expected",
     "note": "packaging for tobacco products"
   },
   {
     "from": "D232",
     "to": "D222",
+    "goods": "bulk",
     "state": "expected",
     "note": "crops into processed food"
   },
   {
     "from": "D232",
     "to": "D212",
+    "goods": "bulk",
     "state": "expected",
     "note": "sugar and crops into soft drinks"
   },
   {
     "from": "D232",
     "to": "D211",
+    "goods": "bulk",
     "state": "expected",
     "note": "crops into liquor"
   },
   {
     "from": "D232",
     "to": "B111",
+    "goods": "liquid",
     "state": "expected",
     "note": "palm oil into oleochemicals"
   },
   {
     "from": "D232",
     "to": "A221",
+    "goods": "liquid",
     "state": "expected",
     "note": "palm oil into biodiesel"
   },
   {
     "from": "D231",
     "to": "D222",
+    "goods": "cold",
     "state": "expected",
     "note": "fish, meat and poultry into processed food"
   },
   {
     "from": "D231",
     "to": "D112",
+    "goods": "cold",
     "state": "expected",
     "note": "fresh produce into food retail and distribution"
   },
   {
     "from": "D222",
     "to": "D112",
+    "goods": "boxed",
     "state": "expected",
     "note": "processed food to food distributors"
   },
   {
     "from": "D222",
     "to": "E711",
+    "goods": "boxed",
     "state": "expected",
     "note": "processed food to consumer-goods distributors"
   },
   {
     "from": "D212",
     "to": "E711",
+    "goods": "boxed",
     "state": "expected",
     "note": "soft drinks to consumer-goods distributors"
   },
   {
     "from": "D221",
     "to": "D112",
+    "goods": "cold",
     "state": "expected",
     "note": "dairy to food distributors"
   },
   {
     "from": "D411",
     "to": "E711",
+    "goods": "boxed",
     "state": "expected",
     "note": "household products to consumer-goods distributors"
   },
   {
     "from": "D421",
     "to": "E711",
+    "goods": "boxed",
     "state": "expected",
     "note": "personal care products to consumer-goods distributors"
   },
   {
     "from": "D311",
     "to": "E711",
+    "goods": "boxed",
     "state": "expected",
     "note": "tobacco products to consumer-goods distributors"
   },
   {
     "from": "F211",
     "to": "F112",
+    "goods": "boxed",
     "state": "expected",
     "note": "pharmaceuticals to healthcare supplies and distribution"
   },
   {
     "from": "F211",
     "to": "D111",
+    "goods": "boxed",
     "state": "expected",
     "note": "pharmaceuticals to drug distributors and retail"
   },
   {
     "from": "F111",
     "to": "F121",
+    "goods": "boxed",
     "state": "expected",
     "note": "healthcare equipment to hospitals and clinics"
   },
   {
     "from": "F112",
     "to": "F121",
+    "goods": "parcel",
     "state": "expected",
     "note": "healthcare supplies to hospitals and clinics"
   },
   {
     "from": "D111",
     "to": "F121",
+    "goods": "parcel",
     "state": "expected",
     "note": "drug distribution to hospitals and clinics"
   },
   {
     "from": "E111",
     "to": "E121",
+    "goods": "boxed",
     "state": "expected",
     "note": "auto parts into car manufacturing"
   },
   {
     "from": "E111",
     "to": "E122",
+    "goods": "boxed",
     "state": "expected",
     "note": "auto parts into motorcycle manufacturing"
   },
   {
     "from": "E112",
     "to": "E121",
+    "goods": "boxed",
     "state": "expected",
     "note": "tyres into car manufacturing"
   },
   {
     "from": "E112",
     "to": "E122",
+    "goods": "boxed",
     "state": "expected",
     "note": "tyres into motorcycle manufacturing"
   },
   {
     "from": "E121",
     "to": "E745",
+    "goods": "boxed",
     "state": "expected",
     "note": "cars to automotive retail"
   },
   {
     "from": "E122",
     "to": "E745",
+    "goods": "boxed",
     "state": "expected",
     "note": "motorcycles to automotive retail"
   },
   {
     "from": "C131",
     "to": "C132",
+    "goods": "boxed",
     "state": "expected",
     "note": "electrical components into heavy electrical equipment"
   },
   {
     "from": "C132",
     "to": "J411",
+    "goods": "boxed",
     "state": "expected",
     "note": "heavy electrical equipment for power generation and transmission"
   },
   {
     "from": "C131",
     "to": "E212",
+    "goods": "boxed",
     "state": "expected",
     "note": "electrical components into household appliances"
   },
   {
     "from": "I232",
     "to": "E311",
+    "goods": "boxed",
     "state": "expected",
     "note": "electronic components into consumer electronics"
   },
   {
     "from": "I232",
     "to": "I221",
+    "goods": "boxed",
     "state": "expected",
     "note": "electronic components into computer hardware"
   },
   {
     "from": "I232",
     "to": "I211",
+    "goods": "boxed",
     "state": "expected",
     "note": "electronic components into networking equipment"
   },
   {
     "from": "E311",
     "to": "E742",
+    "goods": "boxed",
     "state": "expected",
     "note": "consumer electronics to electronics retail"
   },
   {
     "from": "E212",
     "to": "E742",
+    "goods": "boxed",
     "state": "expected",
     "note": "household appliances to electronics retail"
   },
   {
     "from": "E211",
     "to": "E743",
+    "goods": "boxed",
     "state": "expected",
     "note": "furniture to home-improvement retail"
   },
   {
     "from": "C121",
     "to": "E743",
+    "goods": "boxed",
     "state": "expected",
     "note": "building products to home-improvement retail"
   },
   {
     "from": "E411",
     "to": "E741",
+    "goods": "boxed",
     "state": "expected",
     "note": "apparel to apparel retail"
   },
   {
     "from": "E412",
     "to": "E741",
+    "goods": "boxed",
     "state": "expected",
     "note": "footwear to apparel retail"
   },
   {
     "from": "E413",
     "to": "E411",
+    "goods": "boxed",
     "state": "expected",
     "note": "textiles into apparel"
   },
   {
     "from": "E321",
     "to": "E744",
+    "goods": "boxed",
     "state": "expected",
     "note": "sport and hobby goods to specialty stores"
   },
   {
     "from": "E711",
     "to": "D113",
+    "goods": "boxed",
     "state": "expected",
     "note": "consumer-goods distributors supplying supermarkets and minimarkets"
   },
   {
     "from": "D112",
     "to": "D113",
+    "goods": "boxed",
     "state": "expected",
     "note": "food distributors supplying supermarkets and minimarkets"
   },
   {
     "from": "E711",
     "to": "E744",
+    "goods": "parcel",
     "state": "expected",
     "note": "consumer-goods distributors supplying specialty stores"
   },
   {
     "from": "E711",
     "to": "E721",
+    "goods": "parcel",
     "state": "expected",
     "note": "consumer-goods distributors supplying internet retail"
   },
   {
     "from": "E711",
     "to": "E731",
+    "goods": "boxed",
     "state": "expected",
     "note": "consumer-goods distributors supplying department stores"
   },
   {
     "from": "C141",
     "to": "A121",
+    "goods": "boxed",
     "state": "expected",
     "note": "construction machinery and heavy vehicles for coal mining"
   },
   {
     "from": "C141",
     "to": "B146",
+    "goods": "boxed",
     "state": "expected",
     "note": "construction machinery and heavy vehicles for metal mining"
   },
   {
     "from": "C141",
     "to": "J211",
+    "goods": "boxed",
     "state": "expected",
     "note": "construction machinery for construction"
   },
   {
     "from": "C142",
     "to": "D232",
+    "goods": "boxed",
     "state": "expected",
     "note": "agricultural machinery for plantations and crops"
   },
   {
     "from": "C143",
     "to": "B121",
+    "goods": "boxed",
     "state": "expected",
     "note": "industrial machinery for cement plants"
   },
   {
     "from": "C143",
     "to": "B144",
+    "goods": "boxed",
     "state": "expected",
     "note": "industrial machinery for steel works"
   },
   {
     "from": "B147",
     "to": "A121",
+    "goods": "boxed",
     "state": "expected",
     "note": "mining equipment and services for coal mining"
   },
   {
     "from": "B147",
     "to": "B146",
+    "goods": "boxed",
     "state": "expected",
     "note": "mining equipment and services for metal mining"
   },
   {
     "from": "A131",
     "to": "A111",
+    "goods": "boxed",
     "state": "expected",
     "note": "drilling services for oil and gas production"
   },
   {
     "from": "A132",
     "to": "A111",
+    "goods": "boxed",
     "state": "expected",
     "note": "oil and gas equipment and services for production"
   },
   {
     "from": "C211",
     "to": "C143",
+    "goods": "boxed",
     "state": "expected",
     "note": "industrial trading supplying machinery and parts"
   },
   {
     "from": "J411",
     "to": "B141",
+    "goods": "none",
     "state": "expected",
     "note": "electricity for aluminium smelting"
   },
   {
     "from": "J411",
     "to": "B144",
+    "goods": "none",
     "state": "expected",
     "note": "electricity for steel making"
   },
   {
     "from": "J411",
     "to": "B121",
+    "goods": "none",
     "state": "expected",
     "note": "electricity for cement grinding"
   },
   {
     "from": "J411",
     "to": "E121",
+    "goods": "none",
     "state": "expected",
     "note": "electricity for car assembly"
   },
   {
     "from": "J411",
     "to": "D113",
+    "goods": "none",
     "state": "expected",
     "note": "electricity for supermarkets and cold display"
   },
   {
     "from": "J411",
     "to": "J311",
+    "goods": "none",
     "state": "expected",
     "note": "electricity for telecommunication networks"
   },
   {
     "from": "K211",
     "to": "E721",
+    "goods": "parcel",
     "state": "expected",
     "note": "logistics and deliveries for internet retail"
   },
   {
     "from": "K211",
     "to": "E711",
+    "goods": "boxed",
     "state": "expected",
     "note": "logistics for consumer-goods distribution"
   },
   {
     "from": "K132",
     "to": "D112",
+    "goods": "boxed",
     "state": "expected",
     "note": "road transport for food distribution"
   },
   {
     "from": "J113",
     "to": "A122",
+    "goods": "none",
     "state": "expected",
     "note": "the port handling coal exports"
   },
   {
     "from": "J113",
     "to": "B146",
+    "goods": "none",
     "state": "expected",
     "note": "the port handling ore and metal exports"
   },
   {
     "from": "J113",
     "to": "C211",
+    "goods": "none",
     "state": "expected",
     "note": "the port handling imported industrial goods"
   },
   {
     "from": "J112",
     "to": "K132",
+    "goods": "none",
     "state": "expected",
     "note": "toll roads used by road transport"
   },
   {
     "from": "K131",
     "to": "A121",
+    "goods": "none",
     "state": "expected",
     "note": "rail haulage of coal"
   },
   {
     "from": "G111",
     "to": "E711",
+    "goods": "none",
     "state": "expected",
     "note": "bank working-capital lines to distributors"
   },
   {
     "from": "G111",
     "to": "B121",
+    "goods": "none",
     "state": "expected",
     "note": "bank term lending to cement plants"
   },
   {
     "from": "G211",
     "to": "E745",
+    "goods": "none",
     "state": "expected",
     "note": "consumer financing for car and motorcycle purchases"
   },
   {
     "from": "G412",
     "to": "K132",
+    "goods": "none",
     "state": "expected",
     "note": "general insurance for transport fleets"
   },
   {
     "from": "E611",
     "to": "D222",
+    "goods": "none",
     "state": "expected",
     "note": "advertising bought by food brands"
   },
   {
     "from": "E611",
     "to": "D421",
+    "goods": "none",
     "state": "expected",
     "note": "advertising bought by personal care brands"
   },
   {
     "from": "I111",
     "to": "E721",
+    "goods": "none",
     "state": "expected",
     "note": "internet platforms serving e-commerce retail"
   },
   {
     "from": "I131",
     "to": "G111",
+    "goods": "none",
     "state": "expected",
     "note": "software for banks"
   },
   {
     "from": "I121",
     "to": "G111",
+    "goods": "none",
     "state": "expected",
     "note": "IT services for banks"
   },
   {
     "from": "J321",
     "to": "I111",
+    "goods": "none",
     "state": "expected",
     "note": "wireless networks carrying internet applications"
   },
   {
     "from": "H111",
     "to": "B121",
+    "goods": "none",
     "state": "expected",
     "note": "the estate operator leasing land to plants"
   },
   {
     "from": "J211",
     "to": "H111",
+    "goods": "none",
     "state": "expected",
     "note": "construction building the estate"
   },
   {
     "from": "C222",
     "to": "B131",
+    "goods": "bulk",
     "state": "expected",
     "note": "recovered material back into packaging"
   },
   {
     "from": "C222",
     "to": "B111",
+    "goods": "bulk",
     "state": "expected",
     "note": "recovered plastics back into basic chemicals"
   },
   {
     "from": "C222",
     "to": "B144",
+    "goods": "bulk",
     "state": "expected",
     "note": "scrap back into steel making"
   },
   {
     "from": "C222",
     "to": "B152",
+    "goods": "bulk",
     "state": "expected",
     "note": "recovered paper back into paper making"
+  },
+  {
+    "from": "A211",
+    "to": "J411",
+    "goods": "boxed",
+    "state": "expected",
+    "note": "solar panels and power equipment for generation"
+  },
+  {
+    "from": "B145",
+    "to": "C211",
+    "goods": "boxed",
+    "state": "expected",
+    "note": "precious metals and minerals sold through industrial traders"
+  },
+  {
+    "from": "B141",
+    "to": "C111",
+    "goods": "boxed",
+    "state": "expected",
+    "note": "aluminium for aircraft parts"
+  },
+  {
+    "from": "C111",
+    "to": "K111",
+    "goods": "boxed",
+    "state": "expected",
+    "note": "aircraft parts and maintenance materials for airlines"
+  },
+  {
+    "from": "B152",
+    "to": "C221",
+    "goods": "boxed",
+    "state": "expected",
+    "note": "paper for commercial printing"
+  },
+  {
+    "from": "C221",
+    "to": "B131",
+    "goods": "boxed",
+    "state": "expected",
+    "note": "printed labels and cartons for packaging"
+  },
+  {
+    "from": "B152",
+    "to": "C223",
+    "goods": "boxed",
+    "state": "expected",
+    "note": "paper for office supplies"
+  },
+  {
+    "from": "C223",
+    "to": "C224",
+    "goods": "parcel",
+    "state": "expected",
+    "note": "office supplies for business services"
+  },
+  {
+    "from": "C224",
+    "to": "G111",
+    "goods": "people",
+    "state": "expected",
+    "note": "business support services for banks"
+  },
+  {
+    "from": "C231",
+    "to": "E711",
+    "goods": "people",
+    "state": "expected",
+    "note": "outsourced staff for distributors"
+  },
+  {
+    "from": "C231",
+    "to": "D113",
+    "goods": "people",
+    "state": "expected",
+    "note": "outsourced staff for supermarkets"
+  },
+  {
+    "from": "C232",
+    "to": "A121",
+    "goods": "people",
+    "state": "expected",
+    "note": "inspection and testing of coal shipments"
+  },
+  {
+    "from": "C311",
+    "to": "H111",
+    "goods": "none",
+    "state": "expected",
+    "note": "holding groups that own estate developers"
+  },
+  {
+    "from": "B144",
+    "to": "E213",
+    "goods": "boxed",
+    "state": "expected",
+    "note": "steel for kitchenware"
+  },
+  {
+    "from": "E213",
+    "to": "E743",
+    "goods": "boxed",
+    "state": "expected",
+    "note": "housewares to home-improvement retail"
+  },
+  {
+    "from": "E711",
+    "to": "E511",
+    "goods": "parcel",
+    "state": "expected",
+    "note": "food and drinks for gaming venues"
+  },
+  {
+    "from": "D112",
+    "to": "E512",
+    "goods": "cold",
+    "state": "expected",
+    "note": "food supplies for hotels"
+  },
+  {
+    "from": "E513",
+    "to": "E512",
+    "goods": "people",
+    "state": "expected",
+    "note": "travellers booked into hotels by travel agents"
+  },
+  {
+    "from": "K111",
+    "to": "E513",
+    "goods": "none",
+    "state": "expected",
+    "note": "airline seats sold through travel agents"
+  },
+  {
+    "from": "E321",
+    "to": "E514",
+    "goods": "boxed",
+    "state": "expected",
+    "note": "sport equipment for recreation facilities"
+  },
+  {
+    "from": "D231",
+    "to": "E515",
+    "goods": "cold",
+    "state": "expected",
+    "note": "meat, poultry and fish for restaurants"
+  },
+  {
+    "from": "D112",
+    "to": "E515",
+    "goods": "cold",
+    "state": "expected",
+    "note": "food supplies for restaurants"
+  },
+  {
+    "from": "C223",
+    "to": "E521",
+    "goods": "parcel",
+    "state": "expected",
+    "note": "office and school supplies for schools"
+  },
+  {
+    "from": "D411",
+    "to": "E522",
+    "goods": "parcel",
+    "state": "expected",
+    "note": "household products for consumer services"
+  },
+  {
+    "from": "E611",
+    "to": "E612",
+    "goods": "none",
+    "state": "expected",
+    "note": "advertising airtime bought from broadcasters"
+  },
+  {
+    "from": "E612",
+    "to": "E613",
+    "goods": "none",
+    "state": "expected",
+    "note": "channels carried on pay television"
+  },
+  {
+    "from": "E621",
+    "to": "E612",
+    "goods": "none",
+    "state": "expected",
+    "note": "programmes produced for broadcasters"
+  },
+  {
+    "from": "E621",
+    "to": "E514",
+    "goods": "none",
+    "state": "expected",
+    "note": "films shown in recreation venues"
+  },
+  {
+    "from": "F221",
+    "to": "F211",
+    "goods": "none",
+    "state": "expected",
+    "note": "research for pharmaceutical makers"
+  },
+  {
+    "from": "G221",
+    "to": "I111",
+    "goods": "none",
+    "state": "expected",
+    "note": "venture capital for internet platforms"
+  },
+  {
+    "from": "G222",
+    "to": "K132",
+    "goods": "none",
+    "state": "expected",
+    "note": "equipment financing for transport fleets"
+  },
+  {
+    "from": "G311",
+    "to": "G313",
+    "goods": "none",
+    "state": "expected",
+    "note": "fund managers trading on the exchange"
+  },
+  {
+    "from": "G312",
+    "to": "G313",
+    "goods": "none",
+    "state": "expected",
+    "note": "brokers trading on the exchange"
+  },
+  {
+    "from": "G314",
+    "to": "G312",
+    "goods": "none",
+    "state": "expected",
+    "note": "custody and settlement for brokers"
+  },
+  {
+    "from": "G411",
+    "to": "G412",
+    "goods": "none",
+    "state": "expected",
+    "note": "brokers placing risks with general insurers"
+  },
+  {
+    "from": "G413",
+    "to": "G311",
+    "goods": "none",
+    "state": "expected",
+    "note": "life insurers investing through fund managers"
+  },
+  {
+    "from": "G414",
+    "to": "G412",
+    "goods": "none",
+    "state": "expected",
+    "note": "reinsurance for general insurers"
+  },
+  {
+    "from": "G511",
+    "to": "G111",
+    "goods": "none",
+    "state": "expected",
+    "note": "holding companies that own banks"
+  },
+  {
+    "from": "G512",
+    "to": "D113",
+    "goods": "none",
+    "state": "expected",
+    "note": "investment companies that own retail chains"
+  },
+  {
+    "from": "H112",
+    "to": "H111",
+    "goods": "people",
+    "state": "expected",
+    "note": "property services for estate developers"
+  },
+  {
+    "from": "I232",
+    "to": "I231",
+    "goods": "boxed",
+    "state": "expected",
+    "note": "electronic components into instruments"
+  },
+  {
+    "from": "I231",
+    "to": "F111",
+    "goods": "boxed",
+    "state": "expected",
+    "note": "instruments for healthcare equipment"
+  },
+  {
+    "from": "J111",
+    "to": "K111",
+    "goods": "none",
+    "state": "expected",
+    "note": "airport services for airlines"
+  },
+  {
+    "from": "J312",
+    "to": "I111",
+    "goods": "none",
+    "state": "expected",
+    "note": "network capacity for internet applications"
+  },
+  {
+    "from": "J312",
+    "to": "G111",
+    "goods": "none",
+    "state": "expected",
+    "note": "telecommunication services for banks"
+  },
+  {
+    "from": "J431",
+    "to": "D212",
+    "goods": "liquid",
+    "state": "expected",
+    "note": "water for soft drinks and bottled water"
+  },
+  {
+    "from": "K121",
+    "to": "E512",
+    "goods": "people",
+    "state": "expected",
+    "note": "ferry passengers to hotels and resorts"
   }
 ];
 
