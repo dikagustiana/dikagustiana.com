@@ -27,17 +27,38 @@ export interface SelectedEssay {
   finance_modules: { slug: string; track_slug: string } | null;
 }
 
+const SELECTED_COLUMNS = `
+  id, slug, title, snippet, section, phase, author, read_time,
+  date, created_at, finance_section, fsli_slug, topic,
+  finance_modules!essays_module_id_fkey ( slug, track_slug )
+`;
+
+/**
+ * Order: the owner's `selected_rank` first (lower = further front, set in
+ * Admin → Content → Homepage order), then newest first for anything not yet
+ * placed. If the column does not exist yet (migration
+ * 20261009120000_essay_selected_rank not applied), Postgres answers 42703 and
+ * this falls back to newest-first rather than emptying the homepage.
+ */
 export const useSelectedEssays = (limit = 8) => {
   return useQuery({
     queryKey: ['essays', 'selected', limit],
     queryFn: async () => {
+      const ranked = await supabase
+        .from('essays')
+        .select(SELECTED_COLUMNS)
+        .eq('is_selected', true)
+        .eq('published', true)
+        .order('selected_rank', { ascending: true, nullsFirst: false })
+        .order('created_at', { ascending: false })
+        .limit(limit);
+
+      if (!ranked.error) return ranked.data as unknown as SelectedEssay[];
+      if (ranked.error.code !== '42703') throw ranked.error;
+
       const { data, error } = await supabase
         .from('essays')
-        .select(`
-          id, slug, title, snippet, section, phase, author, read_time,
-          date, created_at, finance_section, fsli_slug, topic,
-          finance_modules!essays_module_id_fkey ( slug, track_slug )
-        `)
+        .select(SELECTED_COLUMNS)
         .eq('is_selected', true)
         .eq('published', true)
         .order('created_at', { ascending: false })

@@ -293,6 +293,17 @@ export function useToggleSelectContent() {
         .eq('id', id);
       if (error) throw error;
 
+      // Unstarring gives up the place in the homepage order, so a re-starred
+      // essay joins the end instead of silently reclaiming an old slot.
+      // 42703 = the selected_rank migration is not applied yet; nothing to clear.
+      if (!newSelected) {
+        const { error: rankError } = await supabase
+          .from('essays')
+          .update({ selected_rank: null })
+          .eq('id', id);
+        if (rankError && rankError.code !== '42703') throw rankError;
+      }
+
       const { data: target } = await supabase
         .from('essays')
         .select('title, slug, section')
@@ -410,6 +421,76 @@ export function useRestoreContent() {
       queryClient.invalidateQueries({ queryKey: ['unified-content'] });
       queryClient.invalidateQueries({ queryKey: ['content-stats'] });
       queryClient.invalidateQueries({ queryKey: ['essays'] });
+    },
+  });
+}
+
+/** A starred essay as the homepage-order panel sees it (drafts included). */
+export interface SelectedOrderRow {
+  id: string;
+  title: string;
+  section: string;
+  published: boolean;
+  selected_rank: number | null;
+}
+
+/**
+ * Every starred essay in homepage order. Unlike useSelectedEssays this
+ * includes drafts, so the owner can place a piece before it goes live.
+ * `missingColumn` is true until the selected_rank migration is applied.
+ */
+export function useSelectedOrder() {
+  return useQuery({
+    queryKey: ['essays', 'selected-order'],
+    queryFn: async (): Promise<{ rows: SelectedOrderRow[]; missingColumn: boolean }> => {
+      const { data, error } = await supabase
+        .from('essays')
+        .select('id, title, section, published, selected_rank, created_at')
+        .eq('is_selected', true)
+        .neq('status', 'archived')
+        .order('selected_rank', { ascending: true, nullsFirst: false })
+        .order('created_at', { ascending: false });
+      if (!error) return { rows: (data ?? []) as SelectedOrderRow[], missingColumn: false };
+      if (error.code !== '42703') throw error;
+
+      const fallback = await supabase
+        .from('essays')
+        .select('id, title, section, published, created_at')
+        .eq('is_selected', true)
+        .neq('status', 'archived')
+        .order('created_at', { ascending: false });
+      if (fallback.error) throw fallback.error;
+      return {
+        rows: (fallback.data ?? []).map((r) => ({ ...r, selected_rank: null })) as SelectedOrderRow[],
+        missingColumn: true,
+      };
+    },
+  });
+}
+
+/** Writes the whole order: position i gets rank i + 1. */
+export function useSaveSelectedOrder() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (ids: string[]) => {
+      const results = await Promise.all(
+        ids.map((id, i) => supabase.from('essays').update({ selected_rank: i + 1 }).eq('id', id)),
+      );
+      const failed = results.find((r) => r.error);
+      if (failed?.error) throw failed.error;
+
+      await logAuditEvent({
+        action: 'reorder_selected',
+        table_name: 'essays',
+        record_id: null,
+        record_title: `Homepage order (${ids.length})`,
+        record_slug: null,
+        record_section: null,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['essays'] });
+      queryClient.invalidateQueries({ queryKey: ['unified-content'] });
     },
   });
 }
