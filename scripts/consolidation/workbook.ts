@@ -1,7 +1,8 @@
 /**
  * The working paper's builder (PRD site sweep 2026-10, R4.1–R4.2): reads the owner's dummy PSAK 338
  * workbook with exceljs and returns the published JSON and its build report. No file I/O here: the CLI
- * (build-workbook.ts) reads and writes.
+ * (build-workbook.ts) reads and writes, and tests/unit/workbookBuild.test.ts rebuilds through the same
+ * functions.
  *
  * Sanitising is D9 and R4.2 only: hidden sheets and sheets without a value are left out (and must be
  * exactly the three D9 names), defined names are dropped. No value is altered: a cell's value is Excel's

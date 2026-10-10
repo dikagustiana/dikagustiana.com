@@ -4,8 +4,9 @@
  *   node --experimental-strip-types scripts/consolidation/build-workbook.ts   (npm run build:workbook)
  *
  * Reads docs/consolidation/source/pt-dummy-psak-338.xlsx and writes
- * public/consolidation/pt-dummy-psak-338.workbook.json and docs/consolidation/build-report.md, both
- * committed and deterministic for the source.
+ * public/consolidation/pt-dummy-psak-338.workbook.json and docs/consolidation/build-report.md. Both are
+ * committed, and deterministic for the source: tests/unit/workbookBuild.test.ts rebuilds them and fails
+ * on a byte of difference.
  */
 import fs from 'node:fs';
 import path from 'node:path';
