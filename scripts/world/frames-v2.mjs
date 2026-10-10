@@ -25,8 +25,9 @@ const browser = await chromium.launch({ args: ['--use-angle=swiftshader', '--ena
 const log = [];
 
 /** A page on the world, every backend call answered locally (reads only; a write is refused). */
-async function world({ phone = false } = {}) {
-  const page = await browser.newPage({ viewport: phone ? { width: 390, height: 844 } : { width: 1440, height: 900 } });
+async function world({ phone = false, tall = false } = {}) {
+  // a tall page for the frames of the whole frame (header, stage, strip), so the site's sticky bar never covers them
+  const page = await browser.newPage({ viewport: phone ? { width: 390, height: 844 } : { width: 1440, height: tall ? 1500 : 900 } });
   const errors = [];
   page.on('pageerror', (e) => errors.push(String(e).slice(0, 200)));
   await page.route('**/rest/v1/**', (r) => (r.request().method() === 'GET' || r.request().method() === 'HEAD' ? r.fulfill({ status: 200, contentType: 'application/json', body: '[]' }) : r.fulfill({ status: 405, body: '' })));
@@ -141,7 +142,7 @@ async function families(page) {
 
 for (const key of Object.keys(GATES).filter((k) => k === gate || k.startsWith(`${gate}-`))) {
   if (GATES[key] === 'families') { const { page } = await world(); await families(page); await page.close(); continue; }
-  const { page, errors } = await world({ phone: key.endsWith('-phone') });
+  const { page, errors } = await world({ phone: key.endsWith('-phone'), tall: key === 'd' });
   for (const [name, note, act, target] of GATES[key]) {
     if (only && !only.includes(name)) continue;
     await act(page);
