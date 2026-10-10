@@ -5,6 +5,74 @@ alternatives. Newest first.
 
 ---
 
+# 2026-10-10 — FSLI pages: the essay is the body (site sweep, phase B)
+
+Branch `sweep/b-fsli`, base `main` @ `0487609`. Executes PRD R1 of the October 2026 site sweep under
+owner decisions D1(a) and D2(a) (PRD §1.3, copied to `docs/sweep-2026-10/DECISIONS.md` by phase 0).
+The phase report is `docs/sweep-2026-10/report-b.md`.
+
+## The essay is the page body; the outline and its table reader are deleted — owner decision D1(a)
+
+- A line item with a published essay (`essays.fsli_slug`) now shows, after its figures cards, the
+  essay's title as the first h2, its snippet as the lede, then `ArticleBody`. The fixed ten-part
+  outline (`contentSections` / `issueSections` / `exampleSections`), `FsliContentSection` and
+  `useFsliSections` are deleted, and with them every "Not written yet." line and the "Related
+  Essays" block at the bottom. "On this page" lists the essay's own h2/h3 headings; its search box
+  stays.
+- **The site no longer reads `fsli_sections`.** The table and its rows are left in place: dropping
+  it is a schema change nobody asked for. Nothing written disappears, because no row has content
+  (PRD §1.2.1, checked 2026-10-10). A line item with neither an essay nor a cover ends at its
+  figures, with no empty state: the decision's reason is that a standing outline only waits to be
+  filled with generic text.
+- **Supersedes** two entries, named by their lines at `0487609`: the whole of "2026-08-01
+  (session 7) — FSLI empty state over seeded prose" (`:2414-2430`: unwritten sections saying "Not
+  written yet.", `fsli_sections` as the single source of section prose, and the outline's
+  `issues-overdrafts` heading); and, in "FSLI prose is authored as essays, not in a second editor",
+  the sentence "Legacy `fsli_sections` content still renders read-only, so nothing written
+  disappears" (`:2615-2616`). The rest of that entry stands: FSLI prose is written in the studio as
+  accounting essays.
+
+## Heading ids are the slug of the heading's words, minted once per page (PRD R1.2)
+
+- An FSLI heading's id is the slug of its text, with `-2`, `-3`… only when the page already holds
+  that slug (`src/lib/fsliToc.ts`). The ids are minted for the whole page and passed to each
+  `ArticleBody` through a new optional `headingIds` prop, so the table and the body cannot disagree,
+  and two essays on one page (none today) cannot render the same id. `root` and `main-content`
+  are taken before any heading.
+- **The essay page keeps its positional `section-N-<slug>` ids**: it passes no `headingIds`. Its
+  anchors may already be shared, and R1 does not reach that page. Rejected: reusing the positional
+  ids on the FSLI page (the branch's first version), because N counts every heading above, so one
+  added heading moved every anchor below it; and changing both pages to the new scheme, which
+  breaks every essay-page anchor in circulation.
+- Known limits: renaming a heading changes its anchor; the index on a repeated heading follows the
+  order of the repeats. Footnote ids (`fn-1`) are still per essay, so two essays with footnotes on
+  one page would share them; recorded, not acted on, until a line item has two essays.
+
+## "Covered in …" for line items without an essay — owner decision D2(a)
+
+- `supabase/migrations/20261010100000_fsli_covered_by.sql` adds `fsli_pages.covered_by_slug` (text,
+  null, references `fsli_pages (slug)`) and maps eight pages as PRD R1.3 lists; the three
+  `other-*-assets` pages stay NULL. **Not applied; the owner applies it** through `apply_migration`.
+  The mapping disables the `updated_at` trigger around its UPDATEs, in one transaction, so the eight
+  pages keep the "Updated" date they show.
+- A page without an essay whose row names a cover shows one sentence, "Covered in <essay title>",
+  linking to the covering line item; the title falls back to the covering page's own title while it
+  has no essay. **The site does not depend on the migration:** both reads are `select *`, so before
+  it the key is absent and reads as not covered, and the eight pages end at their figures.
+  `src/integrations/supabase/types.ts` is not regenerated; the column is typed locally until the
+  owner applies the migration and regenerates.
+
+## Smaller changes in the phase
+
+- "Related line items" lists the page's own `fsli_pages.category`, itself excluded, in statement
+  order, up to eight, instead of the first eight rows of the table (PRD R1.4).
+- The header of `20261009090000_fsli_component_flag.sql` says it is applied (column verified present
+  2026-10-10), so nobody applies it twice (PRD R1.5).
+- The "On this page" highlight is measured when the page's headings arrive, not only on scroll, and
+  is not carried from one line item to the next.
+
+---
+
 # 2026-10-09 — The homepage below the map is one row: the glimpse
 
 Branch `claude/confident-ride-d354er`, base `main` @ `1df681a`. The owner's request, verbatim: "aku
