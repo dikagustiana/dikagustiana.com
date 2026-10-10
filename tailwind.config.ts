@@ -112,6 +112,13 @@ export default {
           changed: "hsl(var(--fia-changed))",
           edited: "hsl(var(--fia-edited))",
         },
+        // The consolidation working paper (PRD site sweep 2026-10, R4.5); values in src/index.css.
+        wb: {
+          red: "hsl(var(--wb-red))",
+          blue: "hsl(var(--wb-blue))",
+          "error-bg": "hsl(var(--wb-error-bg))",
+          "error-fg": "hsl(var(--wb-error-fg))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",

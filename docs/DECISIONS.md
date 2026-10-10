@@ -5,6 +5,106 @@ alternatives. Newest first.
 
 ---
 
+# 2026-10-10 — The consolidation working paper is the owner's PSAK 338 workbook, in a viewer
+
+Branch `sweep/e-workbook`, base `main` @ `0487609`. The October 2026 site sweep, phase E (PRD R4).
+The owner's decisions it applies, D8 to D11 and D15 to D17, are in `docs/sweep-2026-10/DECISIONS.md`
+(phase 0).
+
+## The viewer replaces the hand-built working paper — supersedes 2026-10-09
+
+This supersedes "The consolidation working paper was rebuilt, not patched" in the 2026-10-09
+public-site remediation entry below (line 94 at `0487609`). Section 4 of
+`/accounting/consolidated-reporting` was a four-entity table whose combined, elimination and
+consolidated figures were literals in `src/data/consolidationWorkingPaper.ts`; that file, `AccountRow`
+and `tests/unit/consolidationWorkingPaper.test.ts` are deleted, and the entry stays as history. In their
+place is the owner's dummy workbook, `docs/consolidation/source/pt-dummy-psak-338.xlsx` (PT Dummy - C
+and its subsidiaries, 2022 to 2024), built by `npm run build:workbook` into
+`public/consolidation/pt-dummy-psak-338.workbook.json` and read in `src/components/workbook/`: sheet
+tabs, the name box and formula bar, a grid that renders only what is in view, an inspector with
+precedents, dependents and cross-sheet jumps with Back, and the place in the URL (`?sheet=&cell=`).
+Nothing is edited and nothing recalculated; every figure is Excel's cached value, and the Method
+panel says so in R4.3's words. The committed workbook is the cleaned copy (D15, D16): no number,
+formula or cached value differs from the owner's file.
+
+## D8 to D11 as built
+
+- **D8, the 49 error cells,** show as Excel shows them (43 `#REF!`, 6 `#VALUE!`) on an error fill,
+  are said in words in the inspector, and are listed by sheet in the Method panel. The list lives in
+  `src/lib/workbook/method.ts`, so the panel stands when the JSON does not load;
+  `tests/unit/workbookViewer.test.tsx` holds it to the JSON.
+- **D9:** `Adjustment Consolaa` (hidden), `Face Report` and `WP Consol` (empty) are not published,
+  and the build fails unless its rule drops exactly those three. A formula that reads one names it
+  and says it is not published.
+- **D10:** the red type (an adjustment or a reviewer's flag) and the blue (a manual input) are kept,
+  and the legend says what each means. The file writes red and blue two ways each, so the viewer has
+  1,532 red and 32 blue cells, not the PRD's 969 and 30, which counted one way only
+  (`docs/consolidation/build-report.md`, with ten of each for the owner to check the meaning).
+  Open for the owner: a figure typed into the workbook is drawn in Finance in Action's sourced blue
+  (R4.5 and R4.9: the PTBA reference's and Finance in Action's legend), so D10's blue, a different
+  but close blue, is hard to tell from it in the grid; of its 32 cells, 8 are formula figures that
+  read as typed ones. Either typed figures go to ink, which parts the viewer's legend from Finance in
+  Action's, or D10's colours take a second mark beside the colour. Nothing is changed until the
+  owner chooses.
+- **D11:** Download .xlsx saves the committed workbook itself, as
+  `pt-dummy-psak-338-working-paper.xlsx`. The build emits it as a hashed asset; nothing is generated
+  in the browser.
+
+## D15 to D17: what the repository holds
+
+The owner decided D15 to D17 on 10 October, after the first build reported what the attached files
+carried. The workbook was cleaned by `npm run sanitize:workbook`
+(`scripts/consolidation/sanitize-workbook.ts`), which takes its cells by address, so no name it
+removes is written anywhere in the repository: 26 cell values deleted and 5 labels shortened (D15),
+and the file's metadata gone (D16: author fields, the OneDrive path, every comment and its authors,
+73,336 legacy defined names; the four print ranges stay). A cell-by-cell comparison with openpyxl
+over 31,869 cells differed at exactly the 31 edited cells, LibreOffice opens all 33 sheets, and the
+branch's history was rewritten before its first push, so the one xlsx blob in it is the cleaned file.
+The PTBA page in `docs/consolidation/reference/` is committed with its DATA block emptied (D17), as
+a visual reference only. The three-letter codes in the workbook (STL, PSD, KLI, SLL, SLB, ALI) are
+not names and stay unless the owner asks.
+
+## The page around the viewer
+
+Two sentences of the page's opening paragraph described the deleted table ("This working paper
+shows how that is done, step by step, on an illustrative four-entity group under PSAK 110. The
+figures are round numbers, not a company's accounts.") and are removed, with nothing in their place.
+The Accounting landing's Consolidated Reporting row now describes the workbook, drawn from R4.6's
+heading and default lede and marked OWNER-REPLACEABLE. R4.9's shared primitives were not extracted:
+nothing is shared with `ModelGrid` without refactoring it, which R4.9 rules out, so the viewer uses
+Finance in Action's lens roles, `--fia-*` tokens and number formatter directly.
+
+## The PRD's cell count does not reconcile with the file
+
+R4.8 asks the build test to hold the workbook's sheet, cell and formula counts to the profile in
+PRD §1.2.4. Sheets (33) and formulas (15,485) match. The PRD's "~17 ribu sel" does not: the file
+has 31,843 cells with a value before sanitising (15,485 formulas and 16,358 constants), 31,789 on
+the published sheets. exceljs and, independently, openpyxl count the same; 119 of the cells hold an
+empty text. The ~17,000 is close to the constants alone, which may be what was counted.
+`tests/unit/workbookBuild.test.ts` holds the measured counts, and checks that every cell with a value
+or a formula on a published sheet reaches the JSON with its formula;
+`docs/consolidation/build-report.md` sets the two figures side by side.
+
+## Light only
+
+The viewer follows the site's tokens, and the site is light only (2026-10-09, "Light only,
+stated"). Its four new tokens (`--wb-red`, `--wb-blue`, `--wb-error-bg`, `--wb-error-fg`) have no
+dark values, and its precedent and dependent fills are Finance in Action's. R4.5's dark mode "from
+the site's tokens" is therefore no dark mode, and phase E has no dark-mode screenshot.
+
+## The JSON is fetched, never bundled
+
+One file of 1,701,069 bytes (309 kB gzipped), under R4.7's 4 MB, so not split per sheet. It is
+fetched with the viewer's own chunk when the section comes within 600 px of the viewport, or at
+once when the URL names a sheet or a cell, and such a link opens the page at the viewer. If either
+fails, the section says so, and the Method panel and the download, which need neither, stay.
+`tests/e2e/workbook.spec.ts` measures a click on a cell (R4.7: under 50 ms): in the runs of 10
+October, 5 to 24 ms to the formula bar, and at most 46 ms to the next frame, which also waits on the
+browser's frame clock and so on the machine's load. The test holds every click to the formula bar,
+and the median to the next frame, under 50 ms.
+
+---
+
 # 2026-10-10 — Finance in Action is card 06 on /finance, and goes live now (site sweep, phase F)
 
 Branch `sweep/f-fia`, base `main` @ `0487609`. Executes PRD R5 of the October 2026 site sweep under

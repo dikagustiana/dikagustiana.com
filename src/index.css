@@ -180,6 +180,16 @@
     --fia-changed: 48 100% 88%;          /* changed by an edit */
     --fia-edited: 145 70% 24%;           /* edited cell outline, 2px */
 
+    /* ── The consolidation working paper (PRD site sweep 2026-10, R4.5).
+       The workbook's own red and blue type (D10) and Excel's error cells
+       (D8). Its precedent and dependent fills are --fia-precedent and
+       --fia-dependent, shared with Finance in Action (R4.9). Measured
+       with the same formula. */
+    --wb-red: 0 72% 42%;                 /* red type, 6,48:1 on white, 4,87:1 on --fia-dependent */
+    --wb-blue: 236 90% 42%;              /* blue type, 10,46:1 on white, 7,87:1 on --fia-dependent */
+    --wb-error-bg: 0 85% 95%;            /* error cell fill */
+    --wb-error-fg: 0 70% 33%;            /* error cell text, 7,65:1 on its fill */
+
     /* Sidebar */
     --sidebar-background: 215 28% 17%;
     --sidebar-foreground: 0 0% 95%;
@@ -575,6 +585,18 @@
     transparent 2px 7px
   );
   border: 2px dashed hsl(var(--fia-unsplit));
+}
+
+/* ── The consolidation working paper (PRD site sweep 2026-10, R4) ───────
+   The header of a column or row the workbook hides is hatched: the viewer
+   lays out every cell a formula can read and still says which ones Excel
+   hides. */
+.wb-hidden {
+  background-image: repeating-linear-gradient(
+    135deg,
+    hsl(var(--muted-foreground) / 0.35) 0 1px,
+    transparent 1px 5px
+  );
 }
 
 /* The only animation in the section (§5.6): a changed item flashes once. It
