@@ -40,6 +40,12 @@ formula or cached value differs from the owner's file.
   and the legend says what each means. The file writes red and blue two ways each, so the viewer has
   1,532 red and 32 blue cells, not the PRD's 969 and 30, which counted one way only
   (`docs/consolidation/build-report.md`, with ten of each for the owner to check the meaning).
+  Open for the owner: a figure typed into the workbook is drawn in Finance in Action's sourced blue
+  (R4.5 and R4.9: the PTBA reference's and Finance in Action's legend), so D10's blue, a different
+  but close blue, is hard to tell from it in the grid; of its 32 cells, 8 are formula figures that
+  read as typed ones. Either typed figures go to ink, which parts the viewer's legend from Finance in
+  Action's, or D10's colours take a second mark beside the colour. Nothing is changed until the
+  owner chooses.
 - **D11:** Download .xlsx saves the committed workbook itself, as
   `pt-dummy-psak-338-working-paper.xlsx`. The build emits it as a hashed asset; nothing is generated
   in the browser.
