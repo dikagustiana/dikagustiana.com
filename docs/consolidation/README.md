@@ -14,6 +14,23 @@ the owner attached it on 10 October 2026, renamed from `DGI - PT Dummy and Its s
 - Corrections to the workbook (its 49 error cells, its work notes) are made by the owner in Excel and
   committed as a new version of this file; the site never edits it (PRD R4.2, D8).
 
+## The published workbook
+
+`npm run build:workbook` (`scripts/consolidation/build-workbook.ts`) reads the xlsx with exceljs and writes
+`public/consolidation/pt-dummy-psak-338.workbook.json`, the file the viewer fetches. Its shape is
+`src/lib/workbook/types.ts`:
+
+- per sheet: name, position in the source, dimension, column widths, row heights, hidden rows and columns,
+  merged ranges and frozen panes;
+- per cell: address, Excel's cached value (a date as ISO 8601, an error as its code), the formula without
+  its `=` (a shared formula written out as the cell's own), number format, bold, alignment, top and bottom
+  borders, and the font colour when it is red or blue (D10). Styles sit in one table the cells index into.
+
+Sanitising (D9, R4.2): sheets that are hidden or hold no value are left out, which is exactly
+`Face Report`, `WP Consol` and `Adjustment Consolaa`; the build fails if the rule ever drops anything
+else. Defined names are dropped. No value is changed. The output is deterministic and records the
+source's sha256, so a new workbook means: replace the xlsx, run the build, commit both.
+
 ## `reference/Company_models__PTBA.html` — not committed
 
 The PRD (Part 3, Phase E step 1) asks for the PTBA company-model page to be committed here as the visual

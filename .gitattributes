@@ -4,3 +4,5 @@ scripts/og-fonts/*.txt text eol=lf
 scripts/og-fonts/*.ttf binary
 # The working paper's source workbook: the published JSON pins its sha256.
 docs/consolidation/source/*.xlsx binary
+# Rebuilt byte for byte from that workbook by npm run build:workbook.
+public/consolidation/*.json text eol=lf
