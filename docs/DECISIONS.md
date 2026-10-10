@@ -194,12 +194,17 @@ the order stays the owner's through Admin, and a new essay reaches the homepage 
   every other published essay newest first, and returns the first in front of the second, cut to
   `limit` (30 on the homepage, `GLIMPSE_LIMIT` in src/pages/Index.tsx). An essay starred between
   the two reads comes back from both and is shown once. The hook keeps its name and signature, so
-  no caller changed.
+  no caller changed. *(Superseded 2026-10-10, after review of PR #63: one read. Two reads were two
+  snapshots, so an essay starred or unstarred between them could come back from neither. The hook
+  now reads the published essays once, the database sorting the starred first in the owner's order,
+  puts the rest back in date order itself and stops the read at twice `limit`; its header says why.
+  `selectedOrder.test.tsx` stars an essay between two reads of the emulated table.)*
 - **The star decides who leads, not who is in.** `is_selected` is still the one featuring flag and
   `selected_rank` still the order, both set as before in Admin → Content → "Homepage order"; the
   panel's comments now say the unstarred follow newest first.
 - **The 42703 fallback stays on the starred read,** the only one that names the rank. The other
-  read never names it and needs none.
+  read never names it and needs none. *(Superseded 2026-10-10 with the two reads: the one read
+  falls back, without the rank.)*
 - **The Finance landing is not widened.** `useFeaturedFinanceEssay` still takes the first finance
   essay of the starred order (PRD R2.2); only the homepage row reads unstarred essays.
 - **Nothing published: the section is absent,** as it was with nothing starred.
