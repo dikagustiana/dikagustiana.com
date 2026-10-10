@@ -163,4 +163,4 @@ Every hop is a link of the register; the goods are the link's (an upstream story
 
 ## 6. The pull request
 
-PR_LINK
+https://github.com/dikagustiana/dikagustiana.com/pull/57
