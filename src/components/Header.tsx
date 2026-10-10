@@ -6,8 +6,9 @@ import { MobileNav } from './header/MobileNav';
  * DESKTOP CAPACITY. The header row and the navigation inside it both wrap.
  *
  * The row is sized in rem, so it grows with a reader's default font — and the
- * navigation labels (seven then, eight now) grow with it, in a flex row that did not wrap.
- * Measured on /about at a 24px root font: the navigation ran to 1,394px inside
+ * navigation labels (seven then, eight with About, seven again since) grow with
+ * it, in a flex row that did not wrap.
+ * Measured on the About page at a 24px root font: the navigation ran to 1,394px inside
  * a 1,348px page and gave the whole document a horizontal scrollbar; at 28px it
  * ran to 1,591px at every width tested, up to 1,440. A reader who has asked for
  * larger text is the last reader who should have to scroll sideways to find the
