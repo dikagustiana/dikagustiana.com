@@ -190,12 +190,16 @@ export default function WorkbookViewer({ book }: { book: PublishedWorkbook }) {
     if (s && s.name !== sheet.name) show({ sheet: s.name, cell: lastCell.current.get(s.name) ?? firstCell(s, modelOf(s)) });
   };
 
-  /** A jump the viewer's Back returns from. */
+  /**
+   * A jump the viewer's Back returns from. The grid takes the focus, as after Back: the chip or button that
+   * asked for the jump leaves with the inspector's old cell, and the keys must still move the selection.
+   */
   const jump = (name: string, to: Cell) => {
     const s = findSheet(name);
     if (!s) return;
     setBack((b) => [...b.slice(1 - BACK_MAX), { sheet: sheet.name, cell: selected }]);
     show({ sheet: s.name, cell: snap(modelOf(s), to) });
+    grid.current?.focus();
   };
 
   const goBack = () => {

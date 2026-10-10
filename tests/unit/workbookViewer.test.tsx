@@ -169,6 +169,11 @@ describe('the workbook viewer', () => {
     await userEvent.click(within(inspector()).getByRole('button', { name: COPY.goTo("'Detail Sheet'!B2") }));
     expect(screen.getAllByRole('tab')[1]).toHaveAttribute('aria-selected', 'true');
     expect(nameBox().value).toBe('B2');
+    // The button left with the old cell; the grid has the focus, so the keys go on moving the selection.
+    expect(grid()).toHaveFocus();
+    fireEvent.keyDown(document.activeElement!, { key: 'ArrowDown' });
+    expect(nameBox().value).toBe('B3');
+    fireEvent.keyDown(document.activeElement!, { key: 'ArrowUp' });
     expect(place(router)).toBe('Detail Sheet!B2');
     // The dependent on another sheet is not listed with this sheet's.
     expect(within(inspector()).getByText(COPY.noDependents)).toBeInTheDocument();
@@ -190,6 +195,13 @@ describe('the workbook viewer', () => {
     await userEvent.click(cellAt('B4')!);
     await userEvent.click(within(inspector()).getByRole('button', { name: /B2:B3/ }));
     expect(nameBox().value).toBe('B2');
+    expect(grid()).toHaveFocus();
+    // And a dependent's chip.
+    await userEvent.click(within(inspector()).getByRole('button', { name: /B3/ }));
+    expect(nameBox().value).toBe('B3');
+    expect(grid()).toHaveFocus();
+    fireEvent.keyDown(document.activeElement!, { key: 'Escape' });
+    expect(inspector()).not.toBeVisible();
   });
 
   it('moves with the arrows, Home and End, Ctrl+Home and Page Down; Enter opens the inspector and Esc closes it', () => {
