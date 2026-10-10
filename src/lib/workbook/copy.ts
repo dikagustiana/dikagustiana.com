@@ -19,8 +19,6 @@ export const WORKBOOK_COPY = {
 
   // Toolbar (PRD R4.3: 'Toolbar (Full screen, Download sesuai D11, "Copy cell address")').
   fullScreen: 'Full screen',
-  /** OWNER-REPLACEABLE: the Full screen button while the viewer fills the screen. */
-  exitFullScreen: 'Exit full screen',
   /** As Finance in Action's model page words it (src/lib/finance-in-action/copy.ts). */
   download: 'Download .xlsx',
   /** D11: the file a visitor saves. */
@@ -70,11 +68,12 @@ export const WORKBOOK_COPY = {
   closeInspector: 'Close the inspector',
   /** OWNER-REPLACEABLE: the button that opens the inspector on a narrow screen. */
   openInspector: 'Open the inspector',
+  /** PRD R4.3 names these: 'nilai terformat, nilai mentah, formula, daftar precedent'. */
   value: 'Value',
   rawValue: 'Raw value',
   formula: 'Formula',
   precedents: 'Precedents',
-  /** PRD R4.4: dependents are listed for the same sheet. */
+  /** OWNER-REPLACEABLE: PRD R4.4, 'Dependents (sel yang memakai sel ini) ditampilkan di inspector untuk sheet yang sama'. */
   dependents: 'Dependents on this sheet',
   /** OWNER-REPLACEABLE: a cell with nothing in it. */
   emptyCell: 'Empty in the workbook.',
@@ -97,7 +96,7 @@ export const WORKBOOK_COPY = {
   /** OWNER-REPLACEABLE: the workbook's font colour on the cell (D10). */
   fontRed: "Red type in the workbook: an adjustment or a reviewer's flag.",
   fontBlue: 'Blue type in the workbook: a manual input.',
-  /** For a screen reader, in a cell's name. */
+  /** OWNER-REPLACEABLE: for a screen reader, in an empty cell's name. */
   empty: 'empty',
 
   // Loading and failure (R4.7: 'Halaman tanpa viewer (JS gagal) tetap menampilkan Method dan tautan unduh').
