@@ -370,6 +370,8 @@ describe('the working paper section', () => {
       const { container } = renderSection('/accounting/consolidated-reporting?sheet=Summary&cell=B4');
       expect(scrolled).toHaveBeenCalledTimes(1);
       expect(scrolled.mock.contexts[0]).toBe(container.querySelector('[data-workbook-viewer]'));
+      // A jump, not the page's smooth glide.
+      expect(scrolled).toHaveBeenCalledWith({ block: 'start', behavior: 'instant' });
     } finally {
       delete (Element.prototype as Partial<Element>).scrollIntoView;
     }

@@ -67,9 +67,11 @@ export function WorkingPaperSection() {
   }, [near]);
 
   // Arriving by a link, the page opens at the viewer; only then, not at each move the URL records. The
-  // viewer's top is where the placeholder's is, so it can be scrolled to before the viewer arrives.
+  // viewer's top is where the placeholder's is, so it can be scrolled to before the viewer arrives. A jump,
+  // as a link to a place on a page lands: html's smooth scrolling (src/index.css) would glide the length of
+  // the page, and the reader's first click on the way would stop it short.
   useEffect(() => {
-    if (linked) anchor.current?.scrollIntoView?.({ block: 'start' });
+    if (linked) anchor.current?.scrollIntoView?.({ block: 'start', behavior: 'instant' });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
