@@ -65,6 +65,21 @@ its last item). `MIN_TESTS` 1148 → 1162.
 
 ---
 
+# 2026-10-10 — The October 2026 site sweep: decisions are read from a file
+
+Branch `sweep/0-bootstrap`, base `main` @ `0487609`. The owner's review of 10 October 2026 named ten
+findings; the PRD that answers them (`PRD-PLAN-PROMPT-site-sweep.md`, attached to the session, not
+committed) is executed one phase per branch and per draft pull request. The owner's answers to its
+fourteen questions (D1–D14) are copied verbatim into `docs/sweep-2026-10/DECISIONS.md`, and each phase
+reads them from there, not from a conversation. Two answers can only come from the owner and are
+still open: D7 (the Capital in Motion premise; until it is written the block is removed) and D14 (the
+Factory Yard author's written permission; until it is recorded in `NOTICE.md`, the world phases do not
+start). Phase reports, in Indonesian like the PRD, are `docs/sweep-2026-10/report-<phase>.md`. Phase 0
+changes no code: the database matched the PRD (21 published essays, 3 starred, 5 finance sections, no
+FSLI section text), and `fsre_published.model_packages` answers the anonymous role with `200 []`.
+
+---
+
 # 2026-10-09 — The homepage below the map is one row: the glimpse
 
 Branch `claude/confident-ride-d354er`, base `main` @ `1df681a`. The owner's request, verbatim: "aku
