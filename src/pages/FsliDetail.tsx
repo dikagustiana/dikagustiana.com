@@ -8,6 +8,7 @@ import { FsliMobileSidebar } from '@/components/fsli/FsliMobileSidebar';
 import { FsliCoveredBy } from '@/components/fsli/FsliCoveredBy';
 import { useFsliPage } from '@/hooks/queries/useFsliPages';
 import { useFsliEssayBodies } from '@/hooks/queries/useEssays';
+import { useFragmentOnArrival } from '@/hooks/useFragmentOnArrival';
 import { useAuth } from '@/contexts/AuthContext';
 import NotFound from './NotFound';
 import { ArticleBody } from '@/components/editorial/ArticleBody';
@@ -65,6 +66,9 @@ export default function FsliDetail() {
   // the whole page, and handed to each ArticleBody so the body renders them.
   const toc = useMemo(() => buildFsliToc(essays.map((essay) => essay.content)), [essays]);
   const tocIds = useMemo(() => fsliTocIds(toc.entries), [toc]);
+  // A link to one of those headings (/accounting/fsli/cash#measurement) names
+  // one the essay read has not drawn when the browser looks for it.
+  useFragmentOnArrival();
 
   // Track the active heading on scroll — rAF-coalesced so the
   // getBoundingClientRect reads happen once per frame, not once per event.

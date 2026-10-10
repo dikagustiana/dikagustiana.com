@@ -9,7 +9,7 @@
  * dummies, not any issuer's.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { act, fireEvent, render, screen, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { HelmetProvider } from 'react-helmet-async';
@@ -305,6 +305,26 @@ describe('On this page search', () => {
       'Placements',
       'Where it is presented',
     ]);
+  });
+});
+
+describe('Arriving at one of the essay\'s headings', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('goes to the heading the address names once the essay has drawn it', async () => {
+    // jsdom lays nothing out: the named heading is put 1,200px down.
+    vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(function (this: Element) {
+      const top = this.id === 'where-it-is-presented' ? 1200 : 0;
+      return { top, bottom: top + 40, left: 0, right: 0, width: 0, height: 40, x: 0, y: top, toJSON: () => ({}) } as DOMRect;
+    });
+    const scrollTo = vi.spyOn(window, 'scrollTo').mockImplementation(() => {});
+
+    renderAt('cash#where-it-is-presented');
+    await screen.findByRole('heading', { level: 2, name: 'What Cash Is' });
+    await waitFor(() => expect(scrollTo).toHaveBeenCalledTimes(1));
+    expect(scrollTo.mock.calls[0][0]).toMatchObject({ top: 1200 });
   });
 });
 
