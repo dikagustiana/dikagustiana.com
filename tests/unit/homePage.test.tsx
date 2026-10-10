@@ -7,7 +7,7 @@
  * it is the real thing.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { configure, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
@@ -32,6 +32,11 @@ import Index from '@/pages/Index';
 import { ARGUMENT, READING_PATH } from '@/data/readingPath';
 import { CHANGED_MIND } from '@/data/changedMind';
 import { essayRow, essaysTable } from './helpers/essaysTable';
+
+// Generous waits: the full suite runs the world suites beside this one on four
+// cores, and a starved worker once took 7.8 s to settle the same query in
+// selectedOrder.test.tsx.
+configure({ asyncUtilTimeout: 5000 });
 
 const mount = () =>
   render(

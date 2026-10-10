@@ -10,7 +10,7 @@
  * write, and falls back to the flag alone.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { renderHook, waitFor } from '@testing-library/react';
+import { configure, renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 
@@ -24,6 +24,10 @@ import { useSelectedEssays } from '@/hooks/queries/useSelectedEssays';
 import { useSelectedOrder, useToggleSelectContent } from '@/hooks/queries/useUnifiedContent';
 import { useFeaturedFinanceEssay } from '@/hooks/queries/useFinance';
 import { essayRow, essaysTable, type EssayRow } from './helpers/essaysTable';
+
+// Generous waits: the full suite runs the world suites beside this one on four
+// cores, and a starved worker once took 7.8 s to settle a query here.
+configure({ asyncUtilTimeout: 5000 });
 
 const MISSING = { code: '42703', message: 'column essays.selected_rank does not exist' };
 

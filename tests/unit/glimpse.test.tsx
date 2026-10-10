@@ -9,7 +9,7 @@
  * starred ones leading (owner decision D3(a), 2026-10-10).
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { configure, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -22,6 +22,11 @@ vi.mock('@/integrations/supabase/client', () => ({
 import { Glimpse } from '@/components/home/Glimpse';
 import { useSelectedEssays, type SelectedEssay } from '@/hooks/queries/useSelectedEssays';
 import { essayRow, essaysTable } from './helpers/essaysTable';
+
+// Generous waits: the full suite runs the world suites beside this one on four
+// cores, and a starved worker once took 7.8 s to settle the same query in
+// selectedOrder.test.tsx.
+configure({ asyncUtilTimeout: 5000 });
 
 function essay(i: number, over: Partial<SelectedEssay> = {}): SelectedEssay {
   return {
