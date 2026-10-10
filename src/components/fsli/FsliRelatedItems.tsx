@@ -5,9 +5,13 @@ export function FsliRelatedItems() {
   const { slug } = useParams();
   const { data: fsliPages = [] } = useFsliPages();
 
-  // Show a curated list of related items - first 8 items that aren't the current one
+  // The line items in the same statement category as this one (current or
+  // non-current assets), in statement order, itself excluded, at most 8. It
+  // used to be the first 8 rows of the whole table, so every non-current page
+  // listed current assets.
+  const category = fsliPages.find(item => item.slug === slug)?.category;
   const relatedItems = fsliPages
-    .filter(item => item.slug !== slug)
+    .filter(item => item.category === category && item.slug !== slug)
     .slice(0, 8);
 
   return (

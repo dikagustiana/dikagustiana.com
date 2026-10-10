@@ -105,6 +105,369 @@ and the median to the next frame, under 50 ms.
 
 ---
 
+# 2026-10-10 — Finance in Action is card 06 on /finance, and goes live now (site sweep, phase F)
+
+Branch `sweep/f-fia`, base `main` @ `0487609`. Executes PRD R5 of the October 2026 site sweep under
+owner decision D12(a) (PRD §1.3, copied to `docs/sweep-2026-10/DECISIONS.md` by phase 0). The phase
+report is `docs/sweep-2026-10/report-f.md`.
+
+## Card 06 is a finance_sections row (PRD R5.1)
+
+- `supabase/migrations/20261010110000_finance_section_06.sql` inserts `finance-in-action`, "Finance
+  in Action", sort_order 6, icon `Table`, on conflict (slug) do nothing. Its description is
+  `COPY.seoDescription` (`src/lib/finance-in-action/copy.ts`), OWNER-REPLACEABLE and editable in
+  place from the Finance Workspace. **Not applied; the owner applies it**, after the flag deploy
+  below.
+- The landing links every row to `/finance/<slug>`. `App.tsx` declares `/finance/finance-in-action`
+  ahead of `/finance/:track`, and the router ranks a static segment first anyway, so the card opens
+  the Finance in Action index, never a track index. The landing's header comment no longer says
+  "four equal domain entry points".
+- `tests/unit/financeLandingSection06.test.tsx` draws the sixth card from the migration file's own
+  VALUES tuple, and tells the index from a track index by more than its h1: a track index at that
+  address draws the same h1, from the row's title.
+- **No entry in this file is superseded.** "Numbering was rejected, deliberately" (line 1357 at
+  `0487609`, in the 2026-08-03 entry "The Sections list: kept by owner decision, reshaped by
+  subtraction", line 1337) reads the landing's numbers as a learning order. That holds for 01–04
+  only, as it has since capital-allocation became 05, and its decision (no numbers on the homepage)
+  stands. 06 is the section's own name (`COPY.section`, "Section 06"), not a later step of the
+  syllabus.
+
+## The live flag goes on in Production now — owner decision D12(a)
+
+- `VITE_FIA_LIVE=true` on Vercel Production, `VITE_FIA_PREVIEW` unset, redeploy. Until the first
+  package is approved in Personal OS 4F, the index lists the slate as "Planned; no model yet.", with
+  no figure; `assert-no-synthetic` keeps the fixtures out of that build. The owner's reason: a slate
+  without numbers is more honest than the legacy "0 of 0 models available" page.
+- The live path needed no change first (PRD R5.2). Phase 0 read it as anon on 2026-10-10
+  (`docs/sweep-2026-10/report-0.md` §2): `rest/v1/model_packages?select=package` with
+  `Accept-Profile: fsre_published` answers `200 []`, and `scripts/world/check-published.ts` reads 0
+  packages. Not `PGRST106`: the schema is exposed, and nothing waits on the Data API settings.
+- **Supersedes** the FSRE publish path's O3, which is not an entry here: it is recorded in
+  `docs/company-models/report-fsre-publish-path.md:4` and `:87` at `0487609` ("after the first real
+  package is approved"), and both places now carry a note. `src/lib/finance-in-action/flag.ts` and
+  `.env.example` say D12(a).
+- **Order: the flag deploy first, then the migration**, or both in one sitting. The card appears the
+  moment the row exists, with no deploy, and on a build without the flag it opens the legacy page
+  D12 rejects. PRD §2.3 lists the migrations (step 3) before the Vercel flag (step 4); for this phase
+  the order is the other way round, for that reason. The migration's header says so.
+
+## With nothing published, production shows the slate and no PublishedNote
+
+- PRD R5.3 expects production to show "the slate and `PublishedNote`". With production's answer
+  today, `200 []`, it cannot: `PublishedNote` speaks only when the read fails (`not-available`,
+  `refused`, `failed`; FSRE publish path G8), and `tests/unit/fiaLive.test.tsx` pins that an empty,
+  successful read draws no status note. The code is kept: an empty read is not a failure, and a
+  sentence for it would be new copy in the owner's voice.
+- The phase F screenshot `fia-live-published-note-not-available-*.png` is a mocked `PGRST106`, not
+  what production will show; `fia-live-nothing-published-*.png` is. The production check after the
+  redeploy is: the slate is listed, no `SYNTHETIC` anywhere, no `[data-published-failure]` element,
+  and the `assert-no-synthetic` line in the Vercel build log.
+
+## The first real package is read, not accommodated (PRD R5.4, R5.5, R5.7)
+
+- When the owner approves the first package (PTBA) in Personal OS 4F, it is read as anon and checked
+  against `src/lib/finance-in-action/contract/model-package.schema.json`. If `live.ts` refuses it
+  (FSRE's `fsre-workbook` snapshot is not the site's `proposal-v3.1`), the answer is a field-by-field
+  diff in `docs/company-models/contract-diff-2026-10.md` for `fsre-skills` (P-2): the site's
+  contract does not bend to fit, and nothing is written to an `fsre*` schema.
+- `src/data/finance-in-action/sub-industries.json` already carries the slate's two sub-industries,
+  A121 (PTBA, ITMG) and B121 (INTP, SMGR). Nothing added, and no ticker added to the slate.
+- The legacy pages (`FinanceInActionIndex.tsx`, `FinanceModelDetail.tsx`, `ModelAdminPanel.tsx`,
+  `useFinanceModels.ts`, bucket `finance-models`) stay in place (PRD R5.7); they are cleanup
+  candidates for a separate decision.
+
+---
+
+# 2026-10-10 — The glimpse holds every published essay; the star decides who leads
+
+Branch `sweep/c-home`, base `main` @ `0487609` (October 2026 site sweep, phase C, PRD R2). Owner
+decision D3(a) (`docs/sweep-2026-10/DECISIONS.md`, added in the sweep's phase 0): "semua essay
+terbit; yang dibintangi tampil dulu urut `selected_rank`, sisanya `created_at desc`; batas 30".
+The reason given with it: 21 essays were published and 3 were starred, so the homepage showed 3;
+the order stays the owner's through Admin, and a new essay reaches the homepage without a star.
+
+## The rule
+
+- **Two reads in one hook, joined.** `useSelectedEssays(limit)`
+  (src/hooks/queries/useSelectedEssays.ts) reads the starred published essays in the owner's order
+  (`selected_rank` ascending, an unplaced star after every placed one, then newest first), then
+  every other published essay newest first, and returns the first in front of the second, cut to
+  `limit` (30 on the homepage, `GLIMPSE_LIMIT` in src/pages/Index.tsx). An essay starred between
+  the two reads comes back from both and is shown once. The hook keeps its name and signature, so
+  no caller changed.
+- **The star decides who leads, not who is in.** `is_selected` is still the one featuring flag and
+  `selected_rank` still the order, both set as before in Admin → Content → "Homepage order"; the
+  panel's comments now say the unstarred follow newest first.
+- **The 42703 fallback stays on the starred read,** the only one that names the rank. The other
+  read never names it and needs none.
+- **The Finance landing is not widened.** `useFeaturedFinanceEssay` still takes the first finance
+  essay of the starred order (PRD R2.2); only the homepage row reads unstarred essays.
+- **Nothing published: the section is absent,** as it was with nothing starred.
+
+Tests: `tests/unit/selectedOrder.test.tsx` runs the hook against an emulated essays table
+(`tests/unit/helpers/essaysTable.ts`: starred by rank then the rest newest first, nothing starred,
+the limit, the 42703 fallback, an essay returned by both reads); `tests/unit/glimpse.test.tsx`
+feeds the row from the homepage's own query (3 starred + 18 others); `tests/e2e/glimpse.spec.ts`
+seeds the production shape (3 starred, 18 not, a starred draft) through the production bundle and
+asserts all 21 columns in order, the draft nowhere.
+
+Supersedes three passages of the 2026-10-09 entry "The homepage below the map is one row: the
+glimpse", each marked in place (line numbers at `0487609`, where the sweep's PRD counts them): "A
+horizontal row of starred essays" (line 28), "Zero starred essays: the section is absent" (lines
+44–45), and `is_selected` as "who is on the homepage" (lines 49–52).
+
+---
+
+# 2026-10-10 — About is removed; the argument and Changed my mind move to the homepage
+
+Branch `sweep/c-home`, base `main` @ `0487609` (October 2026 site sweep, phase C, PRD R8). Owner
+decisions D4(a): "The argument" and "Changed my mind" "pindah ke Home di bawah Glimpse, copy tidak
+diubah", because they are the site's core argument and `#the-argument` and `#changed-my-mind` are
+linked from essays and tests; and D5(a): "On the shelf" is dropped, a static reading list with no
+link into the site.
+
+## What moved and what went
+
+- **Moved as they were.** `ReadingPath` (the full form, `#the-argument`) and `ChangedMind`
+  (`#changed-my-mind`) mount in src/pages/Index.tsx directly under the glimpse, as the same
+  components, so the ids, the markup and the copy are About's. About's chain section
+  (`IndustryChainSection`) is not repeated: the homepage opens on the same map. It stays exported,
+  mounted nowhere, because the world shell's suite renders it.
+- **Gone with the page:** `src/pages/About.tsx`, its hero, its "Selected Essays"
+  (`useSelectedEssays(8)`; the hook stays for the homepage) and "On the shelf". The About door is
+  gone from the header row (`MainNav.tsx`), from `navConfig.ts` (so from the phone's drawer, which
+  reads it) and from the footer's Sections list; the header row is seven labels again.
+- **`/about` forwards to `/`, client-side** (`AboutRedirect`, src/App.tsx, `Navigate` with
+  `replace`). `vercel.json` manages rewrites and headers but no redirects, so there is no 301, and
+  `/about` was never in the sitemap. The redirect keeps the query and the fragment: the map's
+  address (`?lens=&distance=&node=`, `useChainUrl.ts`) is a published contract the homepage's map
+  reads too, and `#the-argument` / `#changed-my-mind` name the same sections on `/`. The PRD's
+  line is a bare `<Navigate to="/" replace />`; keeping the address is the one addition, so an
+  essay's link into the map or into Changed my mind still lands where it pointed.
+- **The homepage goes to a fragment itself.** The two sections sit far down and draw after the
+  browser has looked for the fragment, so a fresh load of `/#changed-my-mind` stayed at the top.
+  Home now makes the jump once, when nothing is fetching any more, clear of the sticky header, and
+  not if the reader has already scrolled; a fragment that comes later (the skip link) is the
+  browser's, and a fragment that is not valid percent-encoding is looked up as typed.
+- **Links into the map point at `/`:** Finance in Action's "on the chain map" links
+  (`chainMapHref`, src/lib/finance-in-action/chain.ts) and the address examples in
+  `useChainUrl.ts` and `docs/response-2026-09-14-v5/linking-into-the-map.md`. The compact
+  `ReadingPath`'s pointer to "the About page" is removed, not reworded: nothing mounts the compact
+  form, and a new sentence there would be one the owner did not write.
+- `docs/INVENTORY.md` and `docs/ROUTE_VERIFICATION.md` record the homepage and the redirect. Older
+  reports that name `/about` (`docs/review/`, `docs/response-2026-09-14*/`, `GATE_LEDGER.md`,
+  `SESSION_LOG.md`) stay as history.
+
+Tests: a homepage suite (`tests/unit/homePage.test.tsx`: the argument and Changed my mind under
+the glimpse with the map first, the argument in full, the fragment jump and its two edges, the
+argument kept with nothing published); the header row and footer without About
+(`siteChrome.test.tsx`) and no About door (`navConfig.test.ts`); e2e, an old About link landing on
+the homepage with its address and fragment (`tests/e2e/journeys.spec.ts`), the three-minute
+journey on Home, and `/about` in the smoke list as a redirect. The chain suites that opened
+`/about` open `/`. `MIN_TESTS` rises from 1148 to 1162 (actual 1166); none fell.
+
+Supersedes, each marked in place (line numbers at `0487609`): in the 2026-10-09 glimpse entry,
+"One order for the site" (line 53, About's half) and "The world comes onto the homepage by its
+flag" (lines 71–79, the About slot); in the 2026-10-09 remediation entry, "Owner-protected surfaces
+left alone" (lines 125–129, About's hero).
+
+---
+
+# 2026-10-10 — FSLI pages: the essay is the body (site sweep, phase B)
+
+Branch `sweep/b-fsli`, base `main` @ `0487609`. Executes PRD R1 of the October 2026 site sweep under
+owner decisions D1(a) and D2(a) (PRD §1.3, copied to `docs/sweep-2026-10/DECISIONS.md` by phase 0).
+The phase report is `docs/sweep-2026-10/report-b.md`.
+
+## The essay is the page body; the outline and its table reader are deleted — owner decision D1(a)
+
+- A line item with a published essay (`essays.fsli_slug`) now shows, after its figures cards, the
+  essay's title as the first h2, its snippet as the lede, then `ArticleBody`. The fixed ten-part
+  outline (`contentSections` / `issueSections` / `exampleSections`), `FsliContentSection` and
+  `useFsliSections` are deleted, and with them every "Not written yet." line and the "Related
+  Essays" block at the bottom. "On this page" lists the essay's own h2/h3 headings; its search box
+  stays.
+- **The site no longer reads `fsli_sections`.** The table and its rows are left in place: dropping
+  it is a schema change nobody asked for. Nothing written disappears, because no row has content
+  (PRD §1.2.1, checked 2026-10-10). A line item with neither an essay nor a cover ends at its
+  figures, with no empty state: the decision's reason is that a standing outline only waits to be
+  filled with generic text.
+- **Supersedes** two entries, named by their lines at `0487609`: the whole of "2026-08-01
+  (session 7) — FSLI empty state over seeded prose" (`:2414-2430`: unwritten sections saying "Not
+  written yet.", `fsli_sections` as the single source of section prose, and the outline's
+  `issues-overdrafts` heading); and, in "FSLI prose is authored as essays, not in a second editor",
+  the sentence "Legacy `fsli_sections` content still renders read-only, so nothing written
+  disappears" (`:2615-2616`). The rest of that entry stands: FSLI prose is written in the studio as
+  accounting essays. Both passages keep their text and carry a "(Superseded 2026-10-10 …)" note in
+  place, pointing here.
+
+## Heading ids are the slug of the heading's words, minted once per page (PRD R1.2)
+
+- An FSLI heading's id is the slug of its text, with `-2`, `-3`… only when the page already holds
+  that slug (`src/lib/fsliToc.ts`). The ids are minted for the whole page and passed to each
+  `ArticleBody` through a new optional `headingIds` prop, so the table and the body cannot disagree,
+  and two essays on one page (none today) cannot render the same id. `root` and `main-content`
+  are taken before any heading.
+- **The essay page keeps its positional `section-N-<slug>` ids**: it passes no `headingIds`. Its
+  anchors may already be shared, and R1 does not reach that page. Rejected: reusing the positional
+  ids on the FSLI page (the branch's first version), because N counts every heading above, so one
+  added heading moved every anchor below it; and changing both pages to the new scheme, which
+  breaks every essay-page anchor in circulation.
+- Known limits: renaming a heading changes its anchor; the index on a repeated heading follows the
+  order of the repeats. Footnote ids (`fn-1`) are still per essay, so two essays with footnotes on
+  one page would share them; recorded, not acted on, until a line item has two essays.
+
+## "Covered in …" for line items without an essay — owner decision D2(a)
+
+- `supabase/migrations/20261010100000_fsli_covered_by.sql` adds `fsli_pages.covered_by_slug` (text,
+  null, references `fsli_pages (slug)`) and maps eight pages as PRD R1.3 lists; the three
+  `other-*-assets` pages stay NULL. **Not applied; the owner applies it** through `apply_migration`.
+  The mapping disables the `updated_at` trigger around its UPDATEs, in one transaction, so the eight
+  pages keep the "Updated" date they show.
+- A page without an essay whose row names a cover shows one sentence, "Covered in <essay title>",
+  linking to the covering line item; the title falls back to the covering page's own title while it
+  has no essay. **The site does not depend on the migration:** both reads are `select *`, so before
+  it the key is absent and reads as not covered, and the eight pages end at their figures.
+  `src/integrations/supabase/types.ts` is not regenerated; the column is typed locally until the
+  owner applies the migration and regenerates.
+
+## Smaller changes in the phase
+
+- "Related line items" lists the page's own `fsli_pages.category`, itself excluded, in statement
+  order, up to eight, instead of the first eight rows of the table (PRD R1.4).
+- The header of `20261009090000_fsli_component_flag.sql` says it is applied (column verified present
+  2026-10-10), so nobody applies it twice (PRD R1.5).
+- The "On this page" highlight is measured when the page's headings arrive, not only on scroll, and
+  is not carried from one line item to the next.
+
+---
+
+# 2026-10-10 — Capital in Motion: one name, no premise, no author on the cards
+
+Branch `sweep/d-capital`, base `main` @ `0487609`. Phase D of the October 2026 sweep (PRD R6). It
+implements the owner's decisions D6(a) and D7 (`docs/sweep-2026-10/DECISIONS.md`) and the owner's
+instruction of 10 October 2026 that opens the page to change (R6.5). It supersedes two 2026-10-09
+entries, each marked in place with a dated note and neither deleted: "Capital Allocation joins the
+Finance dropdown" (line 163) in its naming, and "Owner-protected surfaces left alone" (line 182) for
+Capital in Motion only.
+
+## One name, "Capital in Motion", at the old address (D6(a))
+
+- The page already called itself Capital in Motion in its h1, SEO title and breadcrumb; the Finance
+  menu and the `/finance` card (`finance_sections.title`) called it Capital Allocation, the slug's
+  name. The 2026-10-09 entry left the choice to the owner, and the owner chose the page's name.
+- **The menu label** changed in `src/config/navConfig.ts`. A test reads the `<SEO title>` from
+  `FinanceInMotion.tsx` and requires the label to equal it, so the two cannot drift apart again.
+- **The card** changes when the owner applies `20261010120000_capital_in_motion_title.sql` through
+  `apply_migration`. It updates one row's title and then asserts that the row carries it, so a
+  mistyped slug fails the migration instead of updating nothing. No schema change, so `types.ts`
+  is not regenerated. Until it lands, the card is the one place still saying Capital Allocation.
+- **Not changed:** the slug and the address `/finance/capital-allocation`, with its legacy
+  redirects, so nothing a search engine or an old link holds moves; the card's description (R6.4).
+
+## The premise is deleted, not rewritten (D7)
+
+D7 is still open, and its reason is the rule: nobody writes on the owner's behalf. The 2026-10-09
+pass kept the block verbatim while the question was open (`07adda2`); it is now gone. The page reads
+the h1, the existing subtitle, then the 21 conditions; the closing line under the list stays. The
+deleted text lives in history and is quoted neither here nor in the code ("Comments may not quote
+deleted copy", line 1441). If the owner writes a premise, it arrives as
+`docs/sweep-2026-10/copy/capital-in-motion-premise.md` and is mounted as one prose block in one
+colour and one size (R6.2), not as the old block's short lines in alternating colours.
+
+## The cards name their layer, not their author (R6.3)
+
+Each of the 21 cards ended its meta line with the author's name, so the index printed it 21 times.
+The meta line is now the layer label alone. The page has no byline component, so none was added:
+R6.3 keeps the name once in a page header only where a byline already exists. This is the
+"separate decision" the 2026-08-02 entry "The hero drops its third paragraph, and with it the only
+byline" (line 1456) left open for the two rendered bylines; its table row for
+`CapitalConditionCard.tsx:27` ("kept, but see below", line 1500) no longer describes the code. The
+essay byline (`ArticleHeader.tsx`) is untouched. A unit test walks all 21 cards for the name.
+
+## What a future session must not undo by accident
+
+- Renaming the slug to match the name. The address is what search engines and old links hold.
+- Writing a premise to fill the space. The space is the owner's to fill (D7).
+- Putting the author's name back on the cards' meta line. The owner took it off.
+
+---
+
+# 2026-10-10 — The header's dropdowns stay open on the way to an item
+
+Branch `sweep/a-nav`, base `main` @ `0487609`; phase A of the October 2026 site sweep, PRD R7 (the
+owner's finding 7: the dropdown vanished as the pointer moved down to it). None of the owner's answers
+D1–D14 (`docs/sweep-2026-10/DECISIONS.md`) is about the header, so this entry implements no D-number:
+R7 is the whole brief. It supersedes no earlier entry, because none recorded how the dropdown behaves
+under a pointer. "Empty sections collapse in the nav" (2026-10-09, line 106 at `0487609`) still holds:
+the four dropdowns tested here name no `essaySection` and never collapse.
+
+## The gap was a margin outside every hit area; it is now padding
+
+The panel was drawn `mt-1` below the label. The wrapper that carried `onMouseLeave` already held both
+the label and the panel, so R7.2's wrapper was in place; the fault was those 4px, which belonged to
+neither. A pointer crossing them left the wrapper and the menu closed under it. The panel now sits in
+an absolute wrapper with a transparent `pt-1`, so the 4px are part of the hover area, and the panel
+looks and sits exactly where it did. The PRD offered a pseudo-element bridge as the other way; the
+padding was chosen because it leaves the panel's own box as it was.
+
+## A 150 ms close that coming back cancels, and one menu open at a time
+
+- Leaving starts a close of `NAV_DROPDOWN_CLOSE_DELAY_MS` (150); re-entering cancels it, and the timer
+  is cleared on unmount. The delay is a timer, not motion, so it holds under `prefers-reduced-motion`
+  too; nothing new animates (R7.4). **The delay alone does not fix the seam:** a quick pointer crosses
+  4px inside 150 ms, a slow one rests there. A variant with the delay and the margin kept passed every
+  straight-line test and failed only the one that rests the pointer in the seam, which is why that test
+  exists.
+- The delay had a cost that review caught: the menu just left stayed drawn for 150 ms over its
+  neighbour (later in the document, same z-index), and a pointer moving into the overlap re-entered it
+  and closed the menu it was heading for. Opening a menu now closes the open one at once, through one
+  module-level handle (`closeOpenMenu`) rather than shared state: the header holds four instances of
+  one component, and only the close needs to pass between them.
+
+## Focus moves into the menu only on a keyboard open
+
+Every open used to focus the first item, a hover included, which pulled keyboard focus into the menu
+unasked. Now only ArrowDown, or Enter/Space on a menu button, does. Enter and Space are recognised by
+the click they produce having `detail === 0` (a keyboard's or a screen reader's activation; a pointer's
+click counts from 1), not by keydown handlers, because cancelling Space's own activation on keydown is
+unreliable across browsers. Escape still closes and returns focus to the chevron, but only when focus
+was inside the menu: a menu the pointer opened leaves focus where it was. Outside click and item click
+close as before. Learning's label is itself the menu button (it has no landing page), so it opens from
+the keyboard like the chevrons; R7.3 names only the chevron, and without this the Learning menu's
+keyboard users would have lost the first-item focus they had.
+
+## Learning's panel lines up with its label's right edge
+
+Found while taking this phase's screenshots, and older than it: Learning's `w-48` panel, lined up from
+the last label's left edge, ran past the right of the page (right edge 1344 at a 1280px viewport) and
+gave the open menu a sideways scrollbar. `NavDropdown` takes `align` (`'start'` by default, or
+`'end'`), and `MainNav.tsx` sets `align="end"` on Learning. That one line is outside `NavDropdown.tsx`,
+the only file the PRD's phase prompt names; the phase report records it. An e2e test holds every panel
+inside the viewport at 1280 and 1440px.
+
+Not changed: `MobileNav` (its own drawer), the panel's look, no portal, no Radix. Tests:
+`tests/unit/navDropdown.test.tsx` (14) and `tests/e2e/nav.spec.ts` (7; a real pointer moved in a
+straight line, two pixels a step, from each of Accounting, Finance, The Next Big Thing and Learning to
+its last item). `MIN_TESTS` 1148 → 1162.
+
+---
+
+# 2026-10-10 — The October 2026 site sweep: decisions are read from a file
+
+Branch `sweep/0-bootstrap`, base `main` @ `0487609`. The owner's review of 10 October 2026 named ten
+findings; the PRD that answers them (`PRD-PLAN-PROMPT-site-sweep.md`, attached to the session, not
+committed) is executed one phase per branch and per draft pull request. The owner's answers to its
+fourteen questions (D1–D14) are copied verbatim into `docs/sweep-2026-10/DECISIONS.md`, and each phase
+reads them from there, not from a conversation. Two answers can only come from the owner and are
+still open: D7 (the Capital in Motion premise; until it is written the block is removed) and D14 (the
+Factory Yard author's written permission; until it is recorded in `NOTICE.md`, the world phases do not
+start). Phase reports, in Indonesian like the PRD, are `docs/sweep-2026-10/report-<phase>.md`. Phase 0
+changes no code: the database matched the PRD (21 published essays, 3 starred, 5 finance sections, no
+FSLI section text), and `fsre_published.model_packages` answers the anonymous role with `200 []`.
+
+---
+
 # 2026-10-09 — The homepage below the map is one row: the glimpse
 
 Branch `claude/confident-ride-d354er`, base `main` @ `1df681a`. The owner's request, verbatim: "aku
@@ -133,6 +496,8 @@ plain link (the remediation entry below), so the hook outlives the list it was w
   counter, the snippet and a read-time chip. The two alternatives offered and not chosen: a tighter
   card (title and deck only), and a "window to the world" where each column names what it lights
   in the Kawasan world (which would be bare until `docs/world/think-tank-tags.json` is written).
+  *(Superseded 2026-10-10 in one respect: the row holds every published essay, the starred first;
+  see the 2026-10-10 glimpse entry.)*
 - **The heading is "Glimpse", with no sentence under it.** Approved by the owner. The old subtitle
   ("Hand-picked across sections, newest first") named a sort order that is no longer true.
 - **The row runs to the viewport's edges,** first column aligned with the container's left edge, by
@@ -142,17 +507,20 @@ plain link (the remediation entry below), so the hook outlives the list it was w
   when every column fits; the arrow keys once the row has focus (the `<ul>` is a focusable scroll
   region, named by the heading). The buttons scroll by `scrollBehavior()` (src/lib/motion.ts), so a
   reader who asked for reduced motion gets a jump, not a glide. Zero starred essays: the section is
-  absent, as decided on 2026-09-14.
+  absent, as decided on 2026-09-14. *(Superseded 2026-10-10: absent only with nothing published.)*
 
 ## The order is the owner's: `essays.selected_rank`
 
 - `is_selected` stays the one featuring mechanism (who is on the homepage); `selected_rank` says in
   what order (lower first). NULL means starred but not placed, and sorts after every placed essay,
   newest first — a new star joins the END of the row, never the front. Unstarring clears the rank in
-  the same write, so a re-starred essay does not silently reclaim an old slot.
+  the same write, so a re-starred essay does not silently reclaim an old slot. *(Superseded
+  2026-10-10 in one respect: the star decides who leads the row, not who is on it; every published
+  essay is.)*
 - **One order for the site.** About's "Selected Essays" is the first 8 of the same order; the Finance
   landing's featured essay is the first finance essay of it. Owner decision, over keeping About
-  newest-first.
+  newest-first. *(Superseded 2026-10-10 for About, which is removed; the Finance landing's reading
+  stands.)*
 - **Set in Admin → Content → "Homepage order":** the starred essays, drafts included (a draft holds
   its slot and appears when published), with to-the-front / up / down. Every move writes the whole
   order (one update per row — an upsert would need every NOT NULL column) and shows it at once; a
@@ -177,7 +545,9 @@ on this branch; the step is `VITE_WORLD_KAWASAN=true` on Vercel Production and a
 owner's gate, and it also switches About's slot and opens `/finance/kawasan`. What that shows today is
 in `docs/world/run-2026-10-09.md`: every building reads "Model status unavailable" until
 `fsre_published` exists, and the think tank's tag file is empty. The glimpse sits directly under the
-world, as it sits under the map; the map stays the first thing under the header.
+world, as it sits under the map; the map stays the first thing under the header. *(Superseded
+2026-10-10 in one respect: About is removed, so the flag switches the homepage's slot only; see the
+2026-10-10 About entry.)*
 # 2026-10-09 — Public-site remediation from the 9 October audit
 
 Branch `claude/blissful-fermi-q5x5iw`. Executes the code work packages of the audit (WP-2 to
@@ -216,6 +586,12 @@ conditions, not a module index, and `/finance` already listed it. Its page title
 Motion" while the track is "Capital Allocation"; the nav uses the track name and the page title
 is the owner's to change.
 
+*[SUPERSEDED 2026-10-10 in its naming, by owner decision (October 2026 sweep, D6(a)): the page has
+one name, "Capital in Motion", in the nav, the breadcrumb, the h1 and the SEO title, and on the
+`/finance` card once the owner applies `20261010120000_capital_in_motion_title.sql`. The address
+stays `/finance/capital-allocation` and the item stays in the dropdown. See the 2026-10-10 entry
+on Capital in Motion.]*
+
 ## Unsourced figures removed rather than softened
 
 Climate Finance's "~$25B/year", the bps/margin/multiple/ratio/$ figures in the capital
@@ -226,7 +602,15 @@ its source (Q9, Q11, Q12). Mechanisms and durations stayed.
 
 About's hero, ReadingPath, ChangedMind and the industry-chain map keep their arbitrary type sizes
 and eyebrows; the audit marks them as passing on their own terms, so the type-scale sweep skips
-them.
+them. *(Superseded 2026-10-10 for About's hero, which went with About. ReadingPath and ChangedMind
+now sit on the homepage, their copy unchanged by owner decision D4(a); the map is unchanged.)*
+
+*[SUPERSEDED 2026-10-10 for Capital in Motion, on the owner's instruction (October 2026 sweep, R6):
+the page is no longer left alone. This entry names only About's surfaces, but the same pass kept
+Capital in Motion's premise verbatim for the owner (`07adda2`), and the sweep's PRD counts the page
+among the owner-protected ones. The owner opened it: the premise block is deleted, with no
+replacement until the owner writes one (D7), and the condition cards no longer carry the author's
+name. This note covers Capital in Motion only. See the 2026-10-10 entry on Capital in Motion.]*
 
 ---
 
@@ -2529,6 +2913,10 @@ headings — "Bank Overdrafts Treatment" (true only for cash) became
 "Classification Boundary Cases"; the `section_key` stays `issues-overdrafts`
 so any rows written later still bind.
 
+*(Superseded 2026-10-10: the outline, its "Not written yet." lines and the
+site's read of `fsli_sections` are deleted; a line item's body is its linked
+essay. See "2026-10-10 — FSLI pages: the essay is the body".)*
+
 ## 2026-08-02 (Substack replication) — The toolbar reversal
 
 The owner reversed a verified decision, and this entry is the record the
@@ -2714,6 +3102,9 @@ page's "Write in Studio" link), which inherits the entire finance flow for
 free — the alternative was building draft/revision machinery a second time,
 the duplication this project has paid for repeatedly. Legacy `fsli_sections`
 content still renders read-only, so nothing written disappears.
+*(Superseded 2026-10-10, this last sentence only: the site no longer reads
+`fsli_sections`, which held no written row. See "2026-10-10 — FSLI pages: the
+essay is the body".)*
 
 ### Font subsets dropped, and the one kept
 Removed all FIVE latin-ext files (the brief counted four: 4 Spectral +

@@ -32,7 +32,9 @@ export const accountingItems: NavItem[] = [
  * left out "until it has modules", but its route is not a module index: it
  * renders the 21 capital conditions (FinanceInMotion), which /finance already
  * lists as the fifth track. Added 9 October 2026 so nav and landing agree.
- * These used to say
+ * Its label is the page's name, "Capital in Motion", not the slug's (owner
+ * decision D6(a), 10 October 2026); the path keeps the slug, so the address
+ * does not move. These used to say
  * `/finance/planning-forecasting` and `/finance/financial-analytics`: readable
  * labels, nonexistent tracks, and the two menu items rendered empty indexes
  * while the route sweep stayed green — it opened canonical URLs directly and
@@ -43,7 +45,7 @@ export const financeItems: NavItem[] = [
   { label: 'Strategic Finance', path: '/finance/strategic-finance' },
   { label: 'Planning & Forecasting', path: '/finance/planning' },
   { label: 'Financial Analytics', path: '/finance/analytics' },
-  { label: 'Capital Allocation', path: '/finance/capital-allocation' },
+  { label: 'Capital in Motion', path: '/finance/capital-allocation' },
   { label: 'Finance in Action', path: '/finance/finance-in-action' },
 ];
 
@@ -77,18 +79,14 @@ export const nextBigThingItems: NavItem[] = NEXT_BIG_THING_THEMES.map(({ id, lab
 }));
 
 export const navSections: NavSection[] = [
-  { label: 'Home', path: '/' },
   /**
-   * About is a TOP-LEVEL door, not a footer link.
-   *
-   * It carries the argument in full — the case, the comparison, the strongest
-   * objection, the limits, the revision of judgment — and it was reachable
-   * only from the footer, which meant the one page that says whether to trust
-   * the work was the hardest page to find. It sits second because a stranger
-   * who wants to know who is writing looks next to Home, not at the end of a
-   * row of subjects.
+   * Home carries the argument in full — the case, the comparison, the
+   * strongest objection, the limits, the revision of judgment — under the
+   * glimpse. It used to be About's, the second door in this row; the owner
+   * removed About on 10 October 2026 (decision D4(a)) and the argument moved
+   * to the page every reader already lands on, so there is no About door.
    */
-  { label: 'About', path: '/about' },
+  { label: 'Home', path: '/' },
   {
     label: 'Accounting',
     basePath: '/accounting',

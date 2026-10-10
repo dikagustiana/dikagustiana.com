@@ -1,18 +1,20 @@
 /**
  * The glimpse: the homepage's one row of essays.
  *
- * Starred essays (essays.is_selected) in the owner's order
- * (essays.selected_rank, Admin → Content → Homepage order), each a narrow
- * column of text: the section, the title, the deck, the month. No badge, no
- * number, no author, no reading time: a glimpse of the essay itself, not a
- * card about it. It replaced "Selected Analysis" (a four-card grid, newest
- * first) and the Sections list (docs/DECISIONS.md, 2026-10-09).
+ * Every published essay: the starred ones (essays.is_selected) first in the
+ * owner's order (essays.selected_rank, Admin → Content → Homepage order),
+ * then the rest newest first (useSelectedEssays; owner decision D3(a),
+ * 2026-10-10). Each is a narrow column of text: the section, the title, the
+ * deck, the month. No badge, no number, no author, no reading time: a
+ * glimpse of the essay itself, not a card about it. It replaced "Selected
+ * Analysis" (a four-card grid, newest first) and the Sections list
+ * (docs/DECISIONS.md, 2026-10-09).
  *
  * The row runs to the viewport's edges and scrolls sideways: by swipe or
  * trackpad, by the two buttons, or by the arrow keys once the row has focus.
  * The buttons page by most of the visible width and follow the reader's
  * motion preference (scrollBehavior); CSS snapping does the rest. With
- * nothing starred the section is absent, not empty.
+ * nothing published the section is absent, not empty.
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';

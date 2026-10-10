@@ -25,56 +25,65 @@ async function open(page: Page, path: string) {
 const scrollWidth = (page: Page) => page.evaluate(() => document.documentElement.scrollWidth);
 const word = (page: Page, name: string) => page.getByRole('button', { name, exact: true });
 
-for (const path of ['/', '/about']) {
-  test(`${path} at 360px never scrolls sideways — with the full chain, both toggles, a shift and a reading open`, async ({ page }) => {
-    await page.setViewportSize(PHONE);
-    await open(page, path);
+/**
+ * The homepage is the one page that carries the map since About was removed
+ * (owner decision D4(a), 2026-10-10). The phone run that used to repeat this
+ * on About's full plate is the same walk after "Show the detail".
+ */
+test('/ at 360px never scrolls sideways — with the full chain, both toggles, a shift and a reading open', async ({ page }) => {
+  await page.setViewportSize(PHONE);
+  await open(page, '/');
 
-    if (path === '/') {
-      await expect(page.locator('.cp-column[data-level="overview"]')).toHaveCount(1);
-      // The swimlane on its side: seven layer bars beside the five groups, no catalogue after the chain.
-      await expect(page.locator('.cp-column .cp-bar')).toHaveCount(7);
-      await expect(page.getByRole('heading', { name: 'Enabling layers' })).toHaveCount(0);
-      const bar = await page.getByRole('button', { name: 'Energy', exact: true }).boundingBox();
-      expect(bar!.width, 'a bar is a target').toBeGreaterThanOrEqual(20);
-      expect(bar!.height, 'a bar spans the chain').toBeGreaterThan(400);
-      expect(await scrollWidth(page)).toBeLessThanOrEqual(PHONE.width);
-      await page.getByRole('button', { name: 'Show the detail' }).first().click();
-    }
-    await expect(page.locator('.cp-column[data-level="detail"]')).toHaveCount(1);
-    await expect(page.locator('svg.cp-svg')).toHaveCount(0);
-    // No legend, no reference, no hint under the column.
-    await expect(page.getByRole('button', { name: 'How to read the map' })).toHaveCount(0);
+  await expect(page.locator('.cp-column[data-level="overview"]')).toHaveCount(1);
+  // The swimlane on its side: seven layer bars beside the five groups, no catalogue after the chain.
+  await expect(page.locator('.cp-column .cp-bar')).toHaveCount(7);
+  await expect(page.getByRole('heading', { name: 'Enabling layers' })).toHaveCount(0);
+  const bar = await page.getByRole('button', { name: 'Energy', exact: true }).boundingBox();
+  expect(bar!.width, 'a bar is a target').toBeGreaterThanOrEqual(20);
+  expect(bar!.height, 'a bar spans the chain').toBeGreaterThan(400);
+  expect(await scrollWidth(page)).toBeLessThanOrEqual(PHONE.width);
+  await page.getByRole('button', { name: 'Show the detail' }).first().click();
 
-    // Every door is at least a finger wide.
-    for (const name of ['Production → aggregation', 'Consumption → recovery']) {
-      const box = await page.getByRole('button', { name }).boundingBox();
-      expect(box, name).not.toBeNull();
-      expect(box!.height, name).toBeGreaterThanOrEqual(24);
-    }
+  await expect(page.locator('.cp-column[data-level="detail"]')).toHaveCount(1);
+  await expect(page.locator('svg.cp-svg')).toHaveCount(0);
+  // No legend, no reference, no hint under the column.
+  await expect(page.getByRole('button', { name: 'How to read the map' })).toHaveCount(0);
 
-    await page.getByRole('button', { name: 'Return flows' }).click();
-    await page.getByRole('button', { name: 'Money and information' }).click();
-    await word(page, 'finance').click();
-    await word(page, 'green transition').click();
-    await expect(page.locator('[data-lit-note="band-logistics"]')).toBeVisible();
-    expect(await scrollWidth(page)).toBeLessThanOrEqual(PHONE.width);
+  // Every door is at least a finger wide.
+  for (const name of ['Production → aggregation', 'Consumption → recovery']) {
+    const box = await page.getByRole('button', { name }).boundingBox();
+    expect(box, name).not.toBeNull();
+    expect(box!.height, name).toBeGreaterThanOrEqual(24);
+  }
 
-    // A reading opens as a bottom sheet, in one voice.
-    await page.getByRole('button', { name: 'Trader / importer → manufacturing' }).click();
-    const sheet = page.locator('[data-chain-sheet]');
-    await expect(sheet).toBeVisible();
-    await expect(sheet.getByRole('region', { name: 'Trader / importer → manufacturing' })).toBeVisible();
-    await expect(sheet.locator('[data-voice="finance"]')).toHaveCount(1);
-    expect(await scrollWidth(page)).toBeLessThanOrEqual(PHONE.width);
-    await page.keyboard.press('Escape');
-    await expect(sheet).toHaveCount(0);
-  });
+  await page.getByRole('button', { name: 'Return flows' }).click();
+  await page.getByRole('button', { name: 'Money and information' }).click();
+  await word(page, 'finance').click();
+  await word(page, 'green transition').click();
+  await expect(page.locator('[data-lit-note="band-logistics"]')).toBeVisible();
+  expect(await scrollWidth(page)).toBeLessThanOrEqual(PHONE.width);
+
+  // A reading opens as a bottom sheet, in one voice.
+  await page.getByRole('button', { name: 'Trader / importer → manufacturing' }).click();
+  const sheet = page.locator('[data-chain-sheet]');
+  await expect(sheet).toBeVisible();
+  await expect(sheet.getByRole('region', { name: 'Trader / importer → manufacturing' })).toBeVisible();
+  await expect(sheet.locator('[data-voice="finance"]')).toHaveCount(1);
+  expect(await scrollWidth(page)).toBeLessThanOrEqual(PHONE.width);
+  await page.keyboard.press('Escape');
+  await expect(sheet).toHaveCount(0);
+});
+
+/** The homepage's map opened to the detail: the wide plate About used to open on. */
+async function openDetail(page: Page, path = '/') {
+  await open(page, path);
+  await page.getByRole('button', { name: 'Show the detail' }).first().click();
+  await expect(page.locator('.chain-plate')).toHaveAttribute('data-level', 'detail');
 }
 
-test('/about at 1280px draws one wide plate whose names are readable, with every joint reachable and one reading beside it', async ({ page }) => {
+test('/ at 1280px, opened to the detail, draws one wide plate whose names are readable, with every joint reachable and one reading beside it', async ({ page }) => {
   await page.setViewportSize(LAPTOP);
-  await open(page, '/about');
+  await openDetail(page);
 
   await expect(page.locator('svg.cp-svg--wide')).toHaveCount(1);
   await expect(page.locator('.cp-column')).toHaveCount(0);
@@ -83,14 +92,15 @@ test('/about at 1280px draws one wide plate whose names are readable, with every
   // rather than drawn as a legend — a reader without a pointer to sweep with
   // cannot discover them by moving one around.
   await expect(page.locator('[data-chain-doors]')).toContainText('Two things open');
-  // Under the plate: the one-line scope caveat last, and before it — only
-  // while the detail is wider than its window — the line saying the detail
-  // scrolls sideways inside the map. V5 asserted that nothing but the scope
-  // line followed the figure; the V5.1 decision to let the detail scroll
-  // locally rather than shrink supersedes that, and the note is the reader's
-  // orientation.
+  // Under the plate: the one-line scope caveat, then the homepage's second
+  // way back to the overview, and before them — only while the detail is
+  // wider than its window — the line saying the detail scrolls sideways
+  // inside the map. V5 asserted that nothing but the scope line followed the
+  // figure; the V5.1 decision to let the detail scroll locally rather than
+  // shrink supersedes that, and the note is the reader's orientation.
   const under = page.locator('.chain-plate > figure ~ *');
-  await expect(under.last()).toHaveAttribute('data-chain-scope');
+  await expect(under.last()).toHaveText('Back to the overview');
+  await expect(under.nth(-2)).toHaveAttribute('data-chain-scope');
   await expect(page.locator('[data-chain-scrolls]')).toBeVisible();
   const scroller = page.locator('[data-chain-scroll]');
   const box = await scroller.evaluate((el) => ({ sw: el.scrollWidth, cw: el.clientWidth }));
@@ -166,9 +176,9 @@ test('/about at 1280px draws one wide plate whose names are readable, with every
  * gap out from under the band beneath it — overlapping an adjacent action to
  * fix a target that is already easy to hit.
  */
-test('/about at 1280px: every door on the plate is big enough to aim at, and no two of them overlap', async ({ page }) => {
+test('/ at 1280px, opened to the detail: every door on the plate is big enough to aim at, and no two of them overlap', async ({ page }) => {
   await page.setViewportSize(LAPTOP);
-  await open(page, '/about?lens=green');
+  await openDetail(page, '/?lens=green');
 
   const measured = await page.evaluate(() => {
     const kinds: Array<[string, string]> = [
@@ -228,9 +238,9 @@ test('/about at 1280px: every door on the plate is big enough to aim at, and no 
   expect(measured.overlapping, measured.overlapping.join('; ')).toEqual([]);
 });
 
-test('/about at 1280px: the distance re-reads every chip, a shift draws one overlay at a time, and finance isolates an open joint', async ({ page }) => {
+test('/ at 1280px, opened to the detail: the distance re-reads every chip, a shift draws one overlay at a time, and finance isolates an open joint', async ({ page }) => {
   await page.setViewportSize(LAPTOP);
-  await open(page, '/about');
+  await openDetail(page);
 
   await word(page, 'finance').click();
   await expect(page.locator('.cp-joint-chip[data-for="j-processing-trader"] text')).toHaveText('Refines the input');
@@ -302,9 +312,9 @@ test('/about at 1280px: the distance re-reads every chip, a shift draws one over
   await expect(notice).toHaveCount(0);
 });
 
-test('/about at 1280px: the marks are an index onto the overlay, the label pins beside the pointer without covering a box, and the reading opens beside its mark', async ({ page }) => {
+test('/ at 1280px, opened to the detail: the marks are an index onto the overlay, the label pins beside the pointer without covering a box, and the reading opens beside its mark', async ({ page }) => {
   await page.setViewportSize(LAPTOP);
-  await open(page, '/about');
+  await openDetail(page);
 
   await expect(page.locator('.cp-mark:visible')).toHaveCount(0);
 
@@ -362,9 +372,9 @@ test('/about at 1280px: the marks are an index onto the overlay, the label pins 
   expect(near.gap).toBeLessThan(40);
 });
 
-test('/about?lens=green&distance=finance&node=energy opens the overlay and the reading on the first paint', async ({ page }) => {
+test('/?lens=green&distance=finance&node=energy opens the overlay and the reading on the first paint', async ({ page }) => {
   await page.setViewportSize(LAPTOP);
-  await open(page, '/about?lens=green&distance=finance&node=energy');
+  await open(page, '/?lens=green&distance=finance&node=energy');
 
   await expect(page.locator('.chain-plate')).toHaveAttribute('data-shift', 'green');
   await expect(page.locator('.chain-plate')).toHaveAttribute('data-lens', 'finance');
@@ -390,8 +400,8 @@ test('/ at 1280px opens at the overview, with the map first on the page and the 
   // NOTHING PRECEDES THE MAP. The hero, its artwork, the argument block and
   // the reading path are gone from the entrance by owner decision, so the
   // map's own title is the page's main heading and the first heading in the
-  // document. What was there is not deleted, only moved: About still carries
-  // the argument and the reading path.
+  // document. What was there is not deleted, only moved: the argument and the
+  // reading path sit under the glimpse, below the map.
   const title = page.getByRole('heading', { name: TITLE, exact: true });
   await expect(title).toHaveRole('heading');
   expect(await title.evaluate((el) => el.tagName)).toBe('H1');
@@ -531,7 +541,7 @@ for (const width of [1280, 1440]) {
 
 /**
  * U05, in a real browser and across a real page load: version 2 wrote the
- * address from the landing page and read it back only on /about, so the link a
+ * address from the landing page and read it back only on About, so the link a
  * reader copied opened Economy, No shift, short — every parameter intact and
  * the reading gone.
  */
@@ -588,7 +598,7 @@ test('an address explored on / restores the same reading in a fresh page load', 
  */
 test('a long reading keeps its title and Close clear of the sticky header at every scroll position', async ({ page }) => {
   await page.setViewportSize({ width: 1348, height: 936 });
-  await open(page, '/about?lens=green&distance=finance&node=energy');
+  await open(page, '/?lens=green&distance=finance&node=energy');
   const popover = page.locator('[data-chain-popover]');
   await expect(popover).toBeVisible();
 
@@ -660,7 +670,7 @@ test('the narrow sheet switches distance without losing the target', async ({ pa
   // sheet takes the page behind it out of the accessibility tree — so the
   // headline that helper waits for is legitimately not there.
   await mockSupabase(page);
-  await page.goto('/about?lens=green&node=energy');
+  await page.goto('/?lens=green&node=energy');
 
   const sheet = page.locator('[data-chain-sheet]');
   await expect(sheet).toBeVisible();

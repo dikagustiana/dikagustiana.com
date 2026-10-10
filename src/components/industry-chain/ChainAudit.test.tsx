@@ -17,7 +17,7 @@ const render = (ui: ReactElement) =>
   );
 
 // The map keeps its state in the address; one test's map must not seed the next.
-beforeEach(() => window.history.replaceState({}, '', '/about'));
+beforeEach(() => window.history.replaceState({}, '', '/'));
 
 describe('audit corrections', () => {
   it.each(['reindustrialisation', 'green transition'])('resets %s without losing the selected joint or distance', async (shift) => {

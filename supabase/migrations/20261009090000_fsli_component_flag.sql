@@ -1,10 +1,9 @@
 -- FSLI: mark sub-lines so the statement subtotals stop double-counting them,
 -- and correct the Indonesian captions that were mistyped in the seed.
 --
--- NOT APPLIED TO PRODUCTION. The owner applies it through the apply_migration
--- tooling (README, "Database & migrations"). The page treats a missing flag as
--- "not a component", so it renders either side of this migration; the totals
--- are only right once it is applied.
+-- Applied to production (date unknown; column verified present 2026-10-10).
+-- The page treats a missing flag as "not a component", so it renders either
+-- side of this migration; the totals are only right once it is applied.
 --
 -- is_component: true for a row that breaks down another row. In the seed that
 -- is third-parties and related-parties, which sit under trade-receivables-net.

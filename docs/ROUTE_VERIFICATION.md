@@ -82,7 +82,7 @@ Converted to `.maybeSingle()` across seven query modules.
 |---|---|---|---|---|---|---|---|---|
 | `/` | Index | essays | public | OK (1934) | OK (1941) | OK (1974) | ok | OK |
 | `/index` | Navigate | — | public | OK (1934) | OK (1941) | OK (1974) | ok | OK |
-| `/about` | About | — | public | OK (2033) | OK (2040) | OK (2073) | ok | OK |
+| `/about` | Navigate → `/` (query and fragment kept) | — | public | redirect | redirect | redirect | — | Redirect since 2026-10-10 (About removed, owner decision D4(a)); the row's 2026 sweep figures were About's and are retired. Verified by the mocked e2e (`tests/e2e/journeys.spec.ts`, `smoke.spec.ts`), not by a new live sweep |
 | `/auth` | Auth | — | public (anon) | OK (507) | OK (1941) | OK (1974) | ok | OK |
 | `/accounting` | Accounting | — | public | OK (3089) | OK (3096) | OK (3129) | ok | OK |
 | `/accounting/fsli` | FsliList | fsli_* | public | OK (3053) | OK (3060) | OK (3093) | ok | OK |

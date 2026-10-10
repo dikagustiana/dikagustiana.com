@@ -14,9 +14,30 @@ interface NavDropdownProps {
   width?: string;
   /** When set, clicking the label navigates here. */
   basePath?: string;
+  /**
+   * Which edge of the label the panel lines up with. The last menu in the row
+   * takes 'end': its panel is wider than its label, and lined up from the
+   * left it ran past the right edge of the page.
+   */
+  align?: 'start' | 'end';
 }
 
-export function NavDropdown({ label, items, width = 'w-56', basePath }: NavDropdownProps) {
+/**
+ * How long the menu waits after the pointer leaves before it closes. A pointer
+ * travelling from the label to an item can graze the edge of the hit area on
+ * the way; re-entering within this window cancels the close.
+ */
+export const NAV_DROPDOWN_CLOSE_DELAY_MS = 150;
+
+/**
+ * The close of whichever menu is open, so the next one to open can close it at
+ * once. Left to its delay, a menu the pointer has just left stays drawn over
+ * its neighbour (later in the document, same z-index), and a pointer moving
+ * into the overlap re-entered it and closed the menu it was heading for.
+ */
+let closeOpenMenu: (() => void) | null = null;
+
+export function NavDropdown({ label, items, width = 'w-56', basePath, align = 'start' }: NavDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -24,6 +45,9 @@ export function NavDropdown({ label, items, width = 'w-56', basePath }: NavDropd
   const triggerRef = useRef<HTMLDivElement>(null);
   const chevronRef = useRef<HTMLButtonElement>(null);
   const itemRefs = useRef<(HTMLAnchorElement | null)[]>([]);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Set only by a keyboard open; hover and pointer clicks never move focus.
+  const focusFirstOnOpen = useRef(false);
 
   const isActive = basePath
     ? location.pathname.startsWith(basePath)
@@ -32,41 +56,100 @@ export function NavDropdown({ label, items, width = 'w-56', basePath }: NavDropd
         return location.pathname.startsWith(itemPath);
       });
 
-  const close = useCallback(() => {
-    setIsOpen(false);
+  const cancelClose = useCallback(() => {
+    if (closeTimer.current !== null) {
+      clearTimeout(closeTimer.current);
+      closeTimer.current = null;
+    }
   }, []);
+
+  const close = useCallback(() => {
+    cancelClose();
+    setIsOpen(false);
+  }, [cancelClose]);
+
+  const openFromKeyboard = useCallback(() => {
+    cancelClose();
+    focusFirstOnOpen.current = true;
+    setIsOpen(true);
+  }, [cancelClose]);
+
+  // A timer left running after unmount would set state on nothing.
+  useEffect(() => cancelClose, [cancelClose]);
+
+  // One menu open at a time: opening this one closes the last without delay.
+  useEffect(() => {
+    if (!isOpen) return;
+    if (closeOpenMenu !== close) closeOpenMenu?.();
+    closeOpenMenu = close;
+    return () => {
+      if (closeOpenMenu === close) closeOpenMenu = null;
+    };
+  }, [isOpen, close]);
+
+  const handlePointerEnter = () => {
+    cancelClose();
+    setIsOpen(true);
+  };
+
+  const handlePointerLeave = () => {
+    cancelClose();
+    closeTimer.current = setTimeout(() => {
+      closeTimer.current = null;
+      setIsOpen(false);
+    }, NAV_DROPDOWN_CLOSE_DELAY_MS);
+  };
+
+  // The menu buttons toggle. A click with detail 0 is a keyboard activation
+  // (Enter or Space) or an assistive technology's, and that open moves focus
+  // into the menu; a pointer's click counts from 1 and leaves focus alone.
+  const handleToggleClick = (e: React.MouseEvent) => {
+    if (isOpen) {
+      close();
+    } else if (e.detail === 0) {
+      openFromKeyboard();
+    } else {
+      setIsOpen(true);
+    }
+  };
 
   // Close on outside click
   useEffect(() => {
     if (!isOpen) return;
     function handleClick(e: MouseEvent) {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setIsOpen(false);
+        close();
       }
     }
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
-  }, [isOpen]);
+  }, [isOpen, close]);
 
   // Close on Escape — and RESTORE FOCUS to the trigger. Closing used to
   // strand keyboard focus on an unmounted menu item, dropping the user back
-  // to the top of the tab order.
+  // to the top of the tab order. Only focus that was in the menu is moved: a
+  // menu the pointer opened leaves focus where it was, and Escape must not
+  // pull it out of the page onto a chevron nobody focused.
   useEffect(() => {
     if (!isOpen) return;
     function handleKey(e: KeyboardEvent) {
       if (e.key === 'Escape') {
+        const focusInMenu = menuRef.current?.contains(document.activeElement) ?? false;
         close();
-        chevronRef.current?.focus();
+        if (focusInMenu) chevronRef.current?.focus();
       }
     }
     document.addEventListener('keydown', handleKey);
     return () => document.removeEventListener('keydown', handleKey);
   }, [isOpen, close]);
 
-  // Focus first item when menu opens via keyboard
+  // Focus the first item when the menu opens via the keyboard, and only then:
+  // this used to run on every open, so a pointer passing over the label pulled
+  // keyboard focus into the menu without being asked.
   useEffect(() => {
-    if (isOpen && itemRefs.current[0]) {
-      itemRefs.current[0].focus();
+    if (isOpen && focusFirstOnOpen.current) {
+      focusFirstOnOpen.current = false;
+      itemRefs.current[0]?.focus();
     }
   }, [isOpen]);
 
@@ -74,7 +157,7 @@ export function NavDropdown({ label, items, width = 'w-56', basePath }: NavDropd
     if (e.key === 'ArrowDown') {
       e.preventDefault();
       if (!isOpen) {
-        setIsOpen(true);
+        openFromKeyboard();
       } else {
         const current = document.activeElement as HTMLElement;
         const idx = itemRefs.current.indexOf(current as HTMLAnchorElement);
@@ -104,11 +187,13 @@ export function NavDropdown({ label, items, width = 'w-56', basePath }: NavDropd
   };
 
   return (
+    // The hover area is this wrapper, which holds both the trigger and the
+    // panel, so moving from one to the other never leaves it.
     <div
       ref={containerRef}
       className="relative"
-      onMouseEnter={() => setIsOpen(true)}
-      onMouseLeave={() => setIsOpen(false)}
+      onMouseEnter={handlePointerEnter}
+      onMouseLeave={handlePointerLeave}
       onKeyDown={handleKeyDown}
     >
       {/* Split trigger: clickable label + dropdown chevron */}
@@ -123,14 +208,14 @@ export function NavDropdown({ label, items, width = 'w-56', basePath }: NavDropd
           <Link
             to={basePath}
             className="hover:text-header-foreground transition-colors"
-            onClick={() => setIsOpen(false)}
+            onClick={close}
           >
             {label}
           </Link>
         ) : (
           // No landing page (Learning): the label only opens the menu, and says so.
           <button
-            onClick={() => setIsOpen((prev) => !prev)}
+            onClick={handleToggleClick}
             aria-expanded={isOpen}
             aria-haspopup="true"
             className="hover:text-header-foreground transition-colors"
@@ -140,7 +225,7 @@ export function NavDropdown({ label, items, width = 'w-56', basePath }: NavDropd
         )}
         <button
           ref={chevronRef}
-          onClick={() => setIsOpen((prev) => !prev)}
+          onClick={handleToggleClick}
           aria-expanded={isOpen}
           aria-haspopup="true"
           aria-label={`${label} submenu`}
@@ -158,32 +243,37 @@ export function NavDropdown({ label, items, width = 'w-56', basePath }: NavDropd
       </div>
 
       {isOpen && (
-        <div
-          ref={menuRef}
-          role="menu"
-          className={cn(
-            'absolute top-full left-0 mt-1 bg-header border border-header/50 rounded-lg shadow-xl z-50 py-2',
-            width
-          )}
-        >
-          {items.map((item, i) => (
-            <Link
-              key={item.path}
-              ref={(el) => {
-                itemRefs.current[i] = el;
-              }}
-              to={item.path}
-              role="menuitem"
-              tabIndex={-1}
-              onClick={() => setIsOpen(false)}
-              className={cn(
-                'block px-4 py-2 text-sm text-header-foreground/90 hover:bg-white/10 hover:text-header-foreground transition-colors focus:bg-white/10 focus:text-header-foreground focus:outline-none',
-                isItemActive(item.path) && 'bg-white/10 text-header-foreground'
-              )}
-            >
-              {item.label}
-            </Link>
-          ))}
+        // The 4px between trigger and panel is this wrapper's transparent
+        // padding, not a margin: a margin there was outside every hit area, so
+        // a pointer crossing it on the way to an item closed the menu.
+        <div className={cn('absolute top-full z-50 pt-1', align === 'end' ? 'right-0' : 'left-0')}>
+          <div
+            ref={menuRef}
+            role="menu"
+            className={cn(
+              'bg-header border border-header/50 rounded-lg shadow-xl py-2',
+              width
+            )}
+          >
+            {items.map((item, i) => (
+              <Link
+                key={item.path}
+                ref={(el) => {
+                  itemRefs.current[i] = el;
+                }}
+                to={item.path}
+                role="menuitem"
+                tabIndex={-1}
+                onClick={close}
+                className={cn(
+                  'block px-4 py-2 text-sm text-header-foreground/90 hover:bg-white/10 hover:text-header-foreground transition-colors focus:bg-white/10 focus:text-header-foreground focus:outline-none',
+                  isItemActive(item.path) && 'bg-white/10 text-header-foreground'
+                )}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </div>
         </div>
       )}
     </div>

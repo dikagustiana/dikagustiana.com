@@ -313,7 +313,8 @@ export default function AdminContent() {
         <BriefQueue enabled={!authLoading && isAdmin} />
 
         {/* The homepage order: the starred essays, in the order the glimpse
-            shows them. The star below decides who is in; this decides where. */}
+            shows them. The star below decides who leads; this decides in
+            what order. Every other published essay follows, newest first. */}
         {!authLoading && isAdmin && <HomepageOrder />}
 
         {/* Filters bar */}

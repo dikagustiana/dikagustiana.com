@@ -96,8 +96,8 @@ export default function FinanceWorkspace() {
               <CardDescription>
                 Configure the tagline shown on /finance. Featuring an essay
                 moved to Admin → Content — the star toggle sets
-                `is_selected`, which drives the homepage, About and the
-                Finance landing alike.
+                `is_selected`, which drives the homepage and the Finance
+                landing alike.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">

@@ -92,6 +92,11 @@ describe('navConfig', () => {
     expect(labels).not.toContain('The Green Transition');
   });
 
+  it('has no About door: the argument it carried is on Home (owner decision D4(a), 2026-10-10)', () => {
+    expect(navSections.map(s => s.label)).not.toContain('About');
+    expect(navSections[0]).toEqual({ label: 'Home', path: '/' });
+  });
+
   it('collapses only dropdowns that have a landing page to collapse to', () => {
     for (const section of navSections.filter(s => s.essaySection)) {
       expect(section.basePath, `${section.label} has essaySection but no basePath`).toBeTruthy();
@@ -106,5 +111,15 @@ describe('navConfig', () => {
     // absent until 9 October 2026; its route renders the capital conditions,
     // not an empty module index, and /finance already listed it.
     expect(trackPaths).toEqual(['fundamentals', 'strategic-finance', 'planning', 'analytics', 'capital-allocation']);
+  });
+
+  it('calls the capital-allocation track by its page name, Capital in Motion', () => {
+    // Owner decision D6(a), 10 October 2026: one name. The page's SEO title is
+    // read from its source, so nav and page move together; the path keeps the
+    // slug, so the address does not change.
+    const page = readFileSync(join(__dirname, '../../src/pages/FinanceInMotion.tsx'), 'utf8');
+    const pageTitle = page.match(/<SEO\s+title="([^"]+)"/)?.[1];
+    expect(pageTitle).toBe('Capital in Motion');
+    expect(financeItems.find(i => i.path === '/finance/capital-allocation')?.label).toBe(pageTitle);
   });
 });
