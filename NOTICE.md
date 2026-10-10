@@ -41,15 +41,32 @@ Factory Yard code left to merge (below).
   checks and one more: it fails if any file under `src/` carries Factory
   Yard's adaptation header or a link to its repository. A unit test
   (`tests/unit/worldEngineRules.test.ts`) holds the same rule.
-- Comments in `src/world/interiors/base.ts`, `src/world/sim/traffic.ts`
-  and `src/world/engine/types.ts` still name Factory Yard as the source of
-  an idea ("after …", "… kept"); those files were not among the files taken
-  and are unchanged here.
+- Comments in `src/world/interiors/base.ts` and `src/world/engine/types.ts`
+  still name Factory Yard as the source of an idea ("after …", "… kept");
+  those files were not among the files taken. (`src/world/sim/traffic.ts`,
+  which did too, was removed in Kawasan v2 phase B, replaced by
+  `src/world/sim/flows.ts` and `roads.ts`, written fresh.)
 - With this branch merged, rule 10 of
   `docs/world/MEGA-PROMPT-kawasan-industri.md` no longer depends on the
   author's answer: the world ships without Factory Yard code. If a licence
   or the author's written permission arrives, record it here with its date
   and channel.
+
+## Kawasan v2 (October 2026)
+
+- Nothing new was taken from a third party in Kawasan v2 (phases A to E,
+  `docs/world/v2/`). The road graph and its routing (`sim/roads.ts`), the
+  flows (`sim/flows.ts`), the vehicles (`sim/vehicles.ts`), the activity and
+  the lamps (`sim/activity.ts`), the chain on the roads (`engine/chain.ts`)
+  and Follow (`engine/follow.ts`) are original to this repository. The
+  travelling dashes use three.js's own `LineMaterial` (`dashOffset`), under
+  the three.js licence below.
+- ai-iso-skill's ideas were not used again beyond what is recorded below:
+  the new models are drawn through the existing `Part` kernel, whose face
+  plane is the one ai-iso-skill describes.
+- Lighthouse (`lighthouse@13.5.0`, Apache-2.0) is run through `npx` by
+  `scripts/world/lighthouse.mjs` to measure the page; it is not a dependency
+  and nothing of it ships.
 
 ## ai-iso-skill
 
