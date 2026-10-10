@@ -119,3 +119,20 @@ describe('Follow (PRD v2 §3.10, D4)', () => {
     expect(window.world!.follow()).toMatchObject({ mode: 'ride', vehicle: other.id });
   });
 });
+
+describe('Follow a vehicle on its way back (PRD v2 §3.10)', () => {
+  beforeEach(installWorldStubs);
+  afterEach(disposeWorlds);
+
+  it('rides an empty vehicle home to its supplier’s lot', async () => {
+    let sel: Selection | null = null;
+    const { handle } = await mountWorld({ onSelect: (s) => { sel = s; } });
+    let v = window.world!.all().find((e) => e.kind === 'vehicle' && e.facts?.leg === 'back' && String(e.facts.link).includes('>'));
+    for (let k = 0; k < 60 && !v; k++) { handle.step(1); v = window.world!.all().find((e) => e.kind === 'vehicle' && e.facts?.leg === 'back' && String(e.facts.link).includes('>')); }
+    handle.follow(v!.id);
+    expect(window.world!.follow()).toMatchObject({ mode: 'ride', vehicle: v!.id });
+    const { log } = ride(120);
+    expect(log[log.length - 1]!.mode).toBe('end');
+    expect(sel!.id).toBe(v!.facts!.from);
+  });
+});

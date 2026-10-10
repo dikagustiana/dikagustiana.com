@@ -74,6 +74,8 @@ interface Hop { a: string; b: string; key: string; up: boolean; ride: boolean }
 export function createFollow(d: FollowDeps): Follow {
   let story: ChainStory | null = null, hops: Hop[] = [];
   let mode: FollowMode | null = null, hop = 0, elapsed = 0, timer = 0, rate = 1, ridden = 0, fit = 1.3, stuck = 0, lastS = 0;
+  /** A single vehicle followed on its way back empty: its ride ends at its supplier's lot. */
+  let homeward = false;
   let vehicle: Rideable | null = null, lot: string | null = null, from: string | null = null;
   /** A glide along a polyline; `rest` when it carries on a ride whose vehicle could not, from `base` of the hop. */
   let glide: { pts: readonly Pt[]; cum: number[]; len: number; s: number; end: string; rest?: boolean; base?: number } | null = null;
@@ -123,7 +125,6 @@ export function createFollow(d: FollowDeps): Follow {
     const h = hops[i];
     for (let j = i; j < hops.length; j++) estimates[j] = estimate(j);
     const v = h.ride ? d.send(h.key, from) : null;
-    d.select(null);
     if (v) {
       mode = 'ride'; vehicle = v; lastS = v.s;
       d.camera(() => { const x = vehicle ? d.vehicle(vehicle.id) : null; return x ? [x.x, x.y] : null; }, FOLLOW_ZOOM);
@@ -133,7 +134,9 @@ export function createFollow(d: FollowDeps): Follow {
       mode = 'glide'; glide = { ...r, s: 0 };
       d.camera(() => (glide ? at(glide, glide.s) : null), FOLLOW_ZOOM);
     }
+    // the reading first, so whoever listens knows the ride is on before the last stop's card closes
     emit(true);
+    d.select(null);
   }
   /** At a lot: its card for four seconds, then on (or the end). */
   function arrive(at: string) {
@@ -169,7 +172,7 @@ export function createFollow(d: FollowDeps): Follow {
         return true;
       }
       const v = d.vehicle(t.vehicle); if (!v) return false;
-      story = null; hops = []; elapsed = 0; lastEmit = -1; hop = 0;
+      story = null; hops = []; elapsed = 0; lastEmit = -1; hop = 0; homeward = v.leg === 'back';
       mode = 'ride'; vehicle = v; rate = 1; ridden = 0; stuck = 0; lastS = v.s;
       d.camera(() => { const x = vehicle ? d.vehicle(vehicle.id) : null; return x ? [x.x, x.y] : null; }, FOLLOW_ZOOM);
       emit(true);
@@ -177,7 +180,7 @@ export function createFollow(d: FollowDeps): Follow {
     },
     stop() {
       const was = mode !== null;
-      mode = null; story = null; hops = []; vehicle = null; glide = null; lot = null; rate = 1;
+      mode = null; story = null; hops = []; vehicle = null; glide = null; lot = null; rate = 1; homeward = false;
       if (was) { d.camera(null); d.emit(null); }
     },
     next() { if (mode === 'stop') timer = 0; },
@@ -188,10 +191,11 @@ export function createFollow(d: FollowDeps): Follow {
       if (mode === 'ride' && vehicle) {
         ridden += dt * rate;
         const v = d.vehicle(vehicle.id);
-        // at the customer's bay (unloading, or already turned back), or gone: the stop
-        const there = !v || v.state === 'unloading' || v.leg === 'back';
-        const to = String(v?.facts?.().to ?? vehicle.facts?.().to ?? '');
-        if (there) { if (to) arrive(to); else finish(); return; }
+        // at the customer's bay (unloading, or already turned back), or gone: the stop; one followed home stops at its supplier
+        const there = homeward ? !v || v.s >= v.trip.length - 1 : !v || v.state === 'unloading' || v.leg === 'back';
+        const facts = v?.facts?.() ?? vehicle.facts?.();
+        const to = String((homeward ? facts?.from : facts?.to) ?? '');
+        if (there || !v) { if (to) arrive(to); else finish(); return; }
         stuck = v.s - lastS > 0.2 ? 0 : stuck + dt; lastS = v.s;
         const path = stuck > STUCK ? v.route?.()?.path : null;
         if (path && to) {

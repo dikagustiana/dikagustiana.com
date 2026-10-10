@@ -30,7 +30,9 @@ import './world.css';
 
 const Board = lazy(() => import('./Board'));
 
-/** What the strip says Follow is doing (PRD v2 §3.10); in words, never a number but the hop's place. */
+/** What the strip says Follow is doing (PRD v2 §3.10). */
+/** A hop's place in words (counts are words where a visitor reads them); a story has seven hops at most. */
+const HOP_WORD = ['none', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten'];
 const FOLLOW_WORD: Record<FollowReading['mode'], string> = { ride: 'Riding a vehicle', glide: 'Along the route (nothing drives it)', stop: 'At the bay', end: 'The ride has ended' };
 const ThinkTank = lazy(() => import('./ThinkTank'));
 
@@ -113,7 +115,8 @@ export default function WorldFrame({ variant, heading, boardTicker = null, onBoa
         debug: typeof location !== 'undefined' && new URLSearchParams(location.search).has('debug'),
         onSelect: (sel) => { if (sel?.kind === 'whiteboard') { const t = sel.info.rows.find(([k]) => k === 'Ticker')?.[1]; if (t) act({ type: 'open-board', ticker: t }); return; } if (sel?.kind === 'mark') { const id = sel.info.rows.find(([k]) => k === 'Target')?.[1]; setSelection(null); setMark(id && shiftRef.current ? { shift: shiftRef.current, targetId: id } : null); return; } setSelection(sel); if (sel) setMark(null); if (sel?.kind === 'route') return; const f = followingRef.current; if (f && f.mode !== 'end') return; if (sel && storyRef.current && ['building', 'company', 'vehicle'].includes(sel.kind)) setStory(null); handle.current?.highlightChain(sel && (sel.kind === 'building' || sel.kind === 'company' || sel.kind === 'vehicle') ? sel.id : null, sel?.kind === 'vehicle' ? 1 : fullChainRef.current ? 'all' : 1); },
         onHover: setHovered,
-        onFollow: (f) => { setFollowing(f); if (f?.story && f.story !== storyRef.current) setStory(f.story); },
+        // the ref at once: the engine reports a ride before it closes the last stop's card, and that selection must keep the story lit
+        onFollow: (f) => { followingRef.current = f; setFollowing(f); if (f?.story && f.story !== storyRef.current) setStory(f.story); },
         onAction: act,
         onReady: () => setReady(true),
       });
@@ -261,7 +264,7 @@ export default function WorldFrame({ variant, heading, boardTicker = null, onBoa
           </ol>
           <div className="world-frame__follow">
             {following?.story === story && following.mode !== 'end'
-              ? <><progress max={1} value={following.progress} aria-label="How far the ride has come" /><span role="status">{FOLLOW_WORD[following.mode]} · hop {following.hop + 1} of {following.hops}{following.mode === 'stop' ? ' · Space goes on' : ''}</span><button type="button" className="world-btn" onClick={() => act({ type: 'follow', id: null })}>Stop following</button></>
+              ? <><progress max={1} value={following.progress} aria-label="How far the ride has come" /><span role="status">{FOLLOW_WORD[following.mode]} · hop {HOP_WORD[following.hop + 1] ?? 'next'} of {HOP_WORD[following.hops] ?? 'many'}{following.mode === 'stop' ? ' · Space goes on' : ''}</span><button type="button" className="world-btn" onClick={() => act({ type: 'follow', id: null })}>Stop following</button></>
               : <button type="button" className="world-btn" onClick={() => act({ type: 'follow', id: `story:${story}` })}>{following?.story === story ? 'Follow again' : 'Follow'}</button>}
           </div>
         </div>
