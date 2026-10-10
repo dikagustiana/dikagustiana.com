@@ -127,6 +127,19 @@ describe('Capital in Motion at /finance/capital-allocation', () => {
   });
 });
 
+describe('the top of the index (owner instruction, 10 October 2026)', () => {
+  it('goes from the h1 and its subtitle straight to the conditions: no premise block', async () => {
+    renderAt(INDEX);
+    const header = (await h1('Capital in Motion')).parentElement!;
+    expect(header.querySelector('p')?.textContent).toBe('Twenty-one conditions I wish I understood earlier.');
+
+    // The block after the header is the list itself, opening on the first
+    // condition; nothing is mounted between them until the owner writes it.
+    expect(header.nextElementSibling?.querySelector('button h3')?.textContent).toBe(ORDERED[0].title);
+    expect(within(screen.getByRole('main')).queryByText(/^premise$/i)).not.toBeInTheDocument();
+  });
+});
+
 describe('legacy URLs still arrive', () => {
   it('/finance/finance-in-motion redirects to the index', async () => {
     renderAt('/finance/finance-in-motion');
