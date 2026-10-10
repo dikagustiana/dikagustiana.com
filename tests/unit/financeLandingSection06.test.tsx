@@ -7,8 +7,8 @@
  * on are the ones a reader gets.
  *
  * Supabase is mocked at the client module: nothing in this file can reach a
- * network. The rows are the five tracks' titles and the 06 row the migration
- * inserts; no figure of any kind.
+ * network. The rows are the five tracks' titles and the 06 row, read from the
+ * migration file itself; no figure of any kind.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, within } from '@testing-library/react';
@@ -50,6 +50,22 @@ const row = (sort_order: number, slug: string, title: string, description: strin
   updated_at: '2026-07-31T00:00:00Z',
 });
 
+/**
+ * The row 20261010110000_finance_section_06.sql inserts, parsed from the file
+ * with its comments stripped, as the route tests below parse App.tsx: the
+ * sixth card is drawn from what the owner applies, so a typo there fails here.
+ */
+function insertedRow() {
+  const sql = readFileSync(join(__dirname, '../../supabase/migrations/20261010110000_finance_section_06.sql'), 'utf8').replace(/--.*$/gm, '');
+  const m = sql.match(/INSERT INTO public\.finance_sections \(([^)]+)\)\s*VALUES \(([\s\S]+?)\)\s*ON CONFLICT \(slug\) DO NOTHING;/);
+  if (!m) throw new Error('the migration no longer reads as one finance_sections INSERT … ON CONFLICT (slug) DO NOTHING');
+  const columns = m[1].split(',').map((c) => c.trim());
+  const values = [...m[2].matchAll(/'((?:[^']|'')*)'|(\d+)/g)].map(([, s, n]) => (s !== undefined ? s.replace(/''/g, "'") : Number(n)));
+  if (values.length !== columns.length) throw new Error(`the migration names ${columns.length} columns and ${values.length} values`);
+  return Object.fromEntries(columns.map((c, i) => [c, values[i]])) as { slug: string; title: string; description: string; icon: string; sort_order: number };
+}
+const INSERTED = insertedRow();
+
 /** The five rows production holds, then the row the migration inserts. */
 const SECTIONS = [
   row(1, 'fundamentals', 'Fundamentals', 'Core concepts every finance professional must master.', 'Landmark'),
@@ -57,7 +73,7 @@ const SECTIONS = [
   row(3, 'planning', 'Planning & Forecasting', 'Translating strategy into numbers. Assumptions, scenarios, and action triggers.', 'BarChart3'),
   row(4, 'analytics', 'Financial Analytics', 'Turning data into insight. Variance analysis, trend identification, and performance diagnosis.', 'TrendingUp'),
   row(5, 'capital-allocation', 'Capital Allocation', 'Twenty-one structural capital conditions observed in Indonesian markets. Institutional framework for allocators.', 'Layers'),
-  row(6, 'finance-in-action', 'Finance in Action', COPY.seoDescription, 'Table'),
+  row(INSERTED.sort_order, INSERTED.slug, INSERTED.title, INSERTED.description, INSERTED.icon),
 ];
 
 /**
@@ -96,6 +112,18 @@ async function cards() {
 beforeEach(() => {
   fromMock.mockReset();
   fromMock.mockImplementation((table: string) => rows(table === 'finance_sections' ? SECTIONS : []));
+});
+
+describe('the row the migration inserts', () => {
+  it('is finance-in-action, titled Finance in Action, sort_order 6, described by COPY.seoDescription', () => {
+    expect(INSERTED).toStrictEqual({
+      slug: 'finance-in-action',
+      title: 'Finance in Action',
+      description: COPY.seoDescription,
+      icon: 'Table',
+      sort_order: 6,
+    });
+  });
 });
 
 describe('section 06 on /finance', () => {
