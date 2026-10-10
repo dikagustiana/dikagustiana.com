@@ -308,8 +308,8 @@ test.describe('the working paper viewer at 1440', () => {
 test.describe('the working paper viewer with the browser throttling history updates', () => {
   // Playwright starts Chromium with IPC flooding protection off. A visitor's Chromium has it on, and drops
   // history updates past about 200 in 10 s; Safari throws past 100.
-  test('a held arrow key moves the selection 260 rows, and the URL follows', async ({ browserType, baseURL }) => {
-    const browser = await browserType.launch({ ignoreDefaultArgs: ['--disable-ipc-flooding-protection'] });
+  test('a held arrow key moves the selection 260 rows, and the URL follows', async ({ playwright, baseURL }) => {
+    const browser = await playwright.chromium.launch({ ignoreDefaultArgs: ['--disable-ipc-flooding-protection'] });
     try {
       const context = await browser.newContext({ baseURL, viewport: { width: 1440, height: 900 } });
       const page = await context.newPage();
