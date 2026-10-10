@@ -2,8 +2,8 @@
  * The header's dropdown (src/components/header/NavDropdown.tsx) under a
  * pointer and under a keyboard. The pointer: the menu opens on hover, stays
  * open while the pointer travels from the label to an item, and closes 150 ms
- * after the pointer leaves unless it comes back first; a hover never moves
- * focus. The keyboard: Enter, Space or ArrowDown on the chevron opens it with
+ * after the pointer leaves unless it comes back first; neither a hover nor a
+ * click moves focus into it. The keyboard: Enter, Space or ArrowDown on the chevron opens it with
  * focus on the first item. Escape, an outside click and an item click close it
  * as before. jsdom lays nothing out, so the seam between the label and the
  * panel is crossed for real in tests/e2e/nav.spec.ts.
@@ -128,6 +128,22 @@ describe('NavDropdown under a pointer', () => {
 
     unmount();
     expect(vi.getTimerCount()).toBe(others);
+  });
+});
+
+// Real timers: user-event's pointer waits on timers that fake ones never run.
+describe("NavDropdown under a pointer's click", () => {
+  it('does not move focus into the menu when a click opens it', async () => {
+    const user = userEvent.setup();
+    mount();
+    // Reaching the chevron opens the menu by hover and the first click closes
+    // it; the second click is the one that opens it. The click itself focuses
+    // the chevron, as a browser's does, and focus goes no further.
+    await user.click(chevron());
+    expect(menu()).not.toBeInTheDocument();
+    await user.click(chevron());
+    expect(menu()).toBeInTheDocument();
+    expect(chevron()).toHaveFocus();
   });
 });
 
