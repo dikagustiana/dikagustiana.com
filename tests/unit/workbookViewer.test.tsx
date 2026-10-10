@@ -359,7 +359,7 @@ describe('the working paper section', () => {
     expect(await screen.findByRole('grid', {}, { timeout: 5000 })).toBeInTheDocument();
   });
 
-  it('opens the page at the section when a link names a place in the workbook, and nowhere else', () => {
+  it('opens the page at the viewer when a link names a place in the workbook, and nowhere else', () => {
     fetchMock.mockReturnValue(new Promise(() => undefined));
     // jsdom has no scrollIntoView.
     const scrolled = vi.fn();
@@ -367,9 +367,9 @@ describe('the working paper section', () => {
     try {
       renderSection().unmount();
       expect(scrolled).not.toHaveBeenCalled();
-      renderSection('/accounting/consolidated-reporting?sheet=Summary&cell=B4');
+      const { container } = renderSection('/accounting/consolidated-reporting?sheet=Summary&cell=B4');
       expect(scrolled).toHaveBeenCalledTimes(1);
-      expect(scrolled.mock.contexts[0]).toBe(screen.getByRole('region', { name: COPY.heading }));
+      expect(scrolled.mock.contexts[0]).toBe(container.querySelector('[data-workbook-viewer]'));
     } finally {
       delete (Element.prototype as Partial<Element>).scrollIntoView;
     }

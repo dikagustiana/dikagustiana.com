@@ -187,11 +187,11 @@ test.describe('the working paper viewer at 1440', () => {
     expect(errors).toEqual([]);
   });
 
-  test('a link brings the viewer into view without a scroll', async ({ page }) => {
+  test('a link opens the page at the viewer, the cell it names on screen', async ({ page }) => {
     await page.goto(`${PAGE}?sheet=${encodeURIComponent(SOFP)}&cell=D9`);
     const grid = page.locator('[data-workbook-viewer] [role="grid"]');
     await expect(cellIn(grid, 'D9')).toBeInViewport({ timeout: 15_000 });
-    await expect(page.getByRole('heading', { name: /^Working paper:/ })).toBeInViewport();
+    await expect(formulaBar(page)).toBeInViewport();
   });
 
   test('an error cell shows its error, in colour and in words', async ({ page }) => {
@@ -241,6 +241,14 @@ test.describe('the working paper viewer at 1440', () => {
 
 test.describe('the working paper viewer at 390', () => {
   test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+
+  test('a link opens the page at the viewer, the cell it names on screen below the frozen rows', async ({ page }) => {
+    await page.goto(`${PAGE}?sheet=${encodeURIComponent(SOFP)}&cell=AF26`);
+    const grid = page.locator('[data-workbook-viewer] [role="grid"]');
+    await expect(cellIn(grid, 'AF26')).toBeInViewport({ ratio: 1, timeout: 15_000 });
+    await expect(formulaBar(page)).toBeInViewport();
+    await expect(formulaBar(page)).toHaveText(`='${ELIM}'!G82`);
+  });
 
   test('the inspector is a bottom sheet and the tabs scroll', async ({ page }) => {
     const { grid, errors } = await openViewer(page, `?sheet=${encodeURIComponent(SOFP)}&cell=D9`);

@@ -4,9 +4,9 @@
  *
  * Nothing of the viewer loads with the page. When the section comes within a screen of the viewport, its code
  * (its own chunk) and the workbook JSON (a file in public/, never in a bundle) are fetched together; a link
- * that names a sheet or a cell loads them at once, and opens the page at the section, so the cell it names is
- * on screen. If either fails, the section says so, and the Method panel and the .xlsx download, which depend
- * on neither, are there as always.
+ * that names a sheet or a cell loads them at once, and opens the page at the viewer, not at the heading,
+ * which on a phone would push the cell the link names below the fold. If either fails, the section says so,
+ * and the Method panel and the .xlsx download, which depend on neither, are there as always.
  */
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
@@ -44,7 +44,6 @@ function Failed() {
 export function WorkingPaperSection() {
   const [params] = useSearchParams();
   const linked = params.has('sheet') || params.has('cell');
-  const section = useRef<HTMLElement>(null);
   const anchor = useRef<HTMLDivElement>(null);
   const [near, setNear] = useState(linked);
   const [book, setBook] = useState<PublishedWorkbook | null>(null);
@@ -67,9 +66,10 @@ export function WorkingPaperSection() {
     return () => io.disconnect();
   }, [near]);
 
-  // Arriving by a link, the page opens at the section; only then, not at each move the URL records.
+  // Arriving by a link, the page opens at the viewer; only then, not at each move the URL records. The
+  // viewer's top is where the placeholder's is, so it can be scrolled to before the viewer arrives.
   useEffect(() => {
-    if (linked) section.current?.scrollIntoView?.({ block: 'start' });
+    if (linked) anchor.current?.scrollIntoView?.({ block: 'start' });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -85,13 +85,13 @@ export function WorkingPaperSection() {
   }, [near]);
 
   return (
-    // scroll-mt-20: the site's fixed header is 64px.
-    <section ref={section} className="mb-14 scroll-mt-20" aria-labelledby="working-paper">
+    <section className="mb-14" aria-labelledby="working-paper">
       <h2 id="working-paper" className="mb-1 text-2xl font-bold text-foreground">
         {COPY.heading}
       </h2>
       <p className="mb-6 max-w-3xl text-sm text-muted-foreground">{COPY.lede}</p>
-      <div ref={anchor} data-workbook-viewer>
+      {/* scroll-mt-20: the site's fixed header is 64px. */}
+      <div ref={anchor} data-workbook-viewer className="scroll-mt-20">
         {failed ? (
           <Failed />
         ) : book ? (
