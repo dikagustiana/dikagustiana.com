@@ -1221,6 +1221,20 @@ export const LINKS: readonly Link[] = [
     "goods": "people",
     "state": "expected",
     "note": "ferry passengers to hotels and resorts"
+  },
+  {
+    "from": "D113",
+    "to": "C222",
+    "goods": "bulk",
+    "state": "expected",
+    "note": "packaging and waste from the shops collected for recovery"
+  },
+  {
+    "from": "B144",
+    "to": "J113",
+    "goods": "bulk",
+    "state": "expected",
+    "note": "smelted metal shipped out through the port"
   }
 ];
 

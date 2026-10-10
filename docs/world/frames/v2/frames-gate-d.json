@@ -1,0 +1,71 @@
+{
+  "ranAt": "2026-10-10T00:43:21.541Z",
+  "base": "http://127.0.0.1:4410",
+  "gate": "d",
+  "frames": [
+    {
+      "frame": "gate-d-chain.png",
+      "note": "Cement selected: its links’ routes on the roads with travelling dashes, the linked lots outlined, the rest dimmed; the card’s one note",
+      "zoom": 1.6,
+      "band": "district",
+      "drawCalls": 235,
+      "selected": "B121"
+    },
+    {
+      "frame": "gate-d-route-hover.png",
+      "note": "a lit route under the pointer: its link’s note as the hover label",
+      "zoom": 3,
+      "band": "district",
+      "drawCalls": 130,
+      "selected": "B121"
+    },
+    {
+      "frame": "gate-d-story.png",
+      "note": "the story \"From well to shelf\" lit end to end, framed; the strip lists its hops with their goods and the joints they cross; the story’s card",
+      "zoom": 0.88,
+      "band": "district",
+      "drawCalls": 317,
+      "selected": null
+    },
+    {
+      "frame": "gate-d-pulses.png",
+      "note": "the whole map with the governance (accent, up every route) and regulation (dark, down every route) layers on",
+      "zoom": 1.6,
+      "band": "district",
+      "drawCalls": 184,
+      "selected": null
+    },
+    {
+      "frame": "gate-d-follow-ride.png",
+      "note": "Follow on the story \"Palm\": the camera rides the first hop’s truck, the strip shows the ride’s progress",
+      "zoom": 3,
+      "band": "district",
+      "drawCalls": 139,
+      "selected": null
+    },
+    {
+      "frame": "gate-d-follow-stop.png",
+      "note": "Follow at a bay: the ride stopped with the customer lot’s card open (four seconds, or Space)",
+      "zoom": 3,
+      "band": "district",
+      "drawCalls": 166,
+      "selected": "MYOR"
+    },
+    {
+      "frame": "gate-d-follow-end.png",
+      "note": "Follow at the story’s last lot: the ride has ended, the story’s card with its standfirst",
+      "zoom": 3,
+      "band": "district",
+      "drawCalls": 160,
+      "selected": null
+    },
+    {
+      "frame": "gate-d-search.png",
+      "note": "search by load: \"coal\" finds the coal story, the coal sub-industry and the loads that carry coal",
+      "zoom": 3,
+      "band": "district",
+      "drawCalls": 160,
+      "selected": null
+    }
+  ]
+}

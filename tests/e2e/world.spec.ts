@@ -7,12 +7,13 @@ import { readFileSync } from 'node:fs';
  * console errors after 600 simulated seconds; every place button; [ and ]
  * cycle through every building without error; expose and close a company;
  * open and close the board; toggle every layer; each overlay; the energy
- * drill-down and back; the keyboard path; the phone layout at 390 px with
+ * drill-down and back; the keyboard path; a story lit, and Follow ridden to
+ * its end with a card at each stop; the phone layout at 390 px with
  * the world started by hand; frame times sampled and reported; the canvas
  * description and the card's and board's focus. The published index is one
  * mock package (the SYNTHETIC cement fixture re-labelled, never shipped).
  */
-declare global { interface Window { world: { step(s: number): void; pause(on: boolean): void; skip(hours: number): void; activity(): { counts: Record<string, number>; hour: number; night: number; litBlocks: number }; all(): { id: string; kind: string; status: string; facts?: Record<string, string | number> }[]; select(id: string | null): void; selected(): string | null; view(name: string): void; drawCalls(): number; distance(): number; zoom(): number; band(): string; chain(): string[]; exposed(): unknown; expose(t: string): void; screenOf(id: string): [number, number] | null; centre(id: string, zoom: number): void; hovered(): { id: string; kind: string; label: string } | null } } }
+declare global { interface Window { world: { step(s: number): void; pause(on: boolean): void; skip(hours: number): void; activity(): { counts: Record<string, number>; hour: number; night: number; litBlocks: number }; all(): { id: string; kind: string; status: string; facts?: Record<string, string | number> }[]; select(id: string | null): void; selected(): string | null; view(name: string): void; drawCalls(): number; distance(): number; zoom(): number; band(): string; chain(): string[]; exposed(): unknown; expose(t: string): void; screenOf(id: string): [number, number] | null; centre(id: string, zoom: number): void; hovered(): { id: string; kind: string; label: string } | null; tick(dt: number, render?: boolean): void; follow(): { mode: string; story: string | null; hop: number; hops: number; lot: string | null; progress: number; elapsed: number } | null } } }
 
 const fixture = JSON.parse(readFileSync('src/data/finance-in-action/fixtures/XCEM.SYNTHETIC.json', 'utf8'));
 const MOCK = { ...fixture, meta: { ...fixture.meta, ticker: 'INTP', name: 'INTP (SYNTHETIC mock, never ships)', status: 'published', pair: ['SMGR', 'SMCB'] } };
@@ -162,6 +163,63 @@ test('a click on a vehicle opens its card: its load, its ends, its link’s stat
   await card.getByRole('button', { name: 'Open the supplier' }).click();
   await expect.poll(() => page.evaluate(() => window.world.all().find((e) => e.id === window.world.selected())?.kind)).toBe('company');
   await page.evaluate(() => window.world.pause(false));
+  expect(errors).toEqual([]);
+});
+
+test('a story lights end to end: the strip lists its hops with their goods and joints, the card tells the story, S lights the next (PRD v2 D2, §3.10)', async ({ page }) => {
+  test.setTimeout(180_000);
+  const errors = await open(page);
+  await ready(page);
+  await page.locator('[aria-label="Stories"]').getByRole('button', { name: 'Palm', exact: true }).click();
+  const strip = page.getByRole('list', { name: 'Story: Palm, its hops in order' });
+  await expect(strip.getByRole('listitem')).toHaveCount(3);
+  await expect(strip).toContainText('Plantations & Crops → Processed Foods · bulk');
+  await expect(strip).toContainText(/crosses/);
+  const card = page.locator('.world-card[data-story="palm"]');
+  await expect(card).toContainText('Crops leave the plantation for the food factory');
+  await expect(card.getByRole('button', { name: 'Follow' })).toBeVisible();
+  expect(await page.evaluate(() => window.world.chain())).toEqual(expect.arrayContaining(['D232', 'D222', 'E711', 'D113']));
+  // a hop's button frames it; S on the stage lights the next story
+  await strip.getByRole('button').nth(1).click();
+  await page.locator('.world-frame__canvas-host canvas').focus();
+  await page.keyboard.press('s');
+  await expect(page.getByRole('list', { name: 'Story: Nickel, its hops in order' })).toBeVisible();
+  await page.locator('.world-card[data-story="nickel"]').getByRole('button', { name: 'Clear', exact: true }).click();
+  await expect(page.locator('.world-frame__story')).toHaveCount(0);
+  expect(await page.evaluate(() => window.world.chain())).toEqual([]);
+  expect(errors).toEqual([]);
+});
+
+test('Follow rides a story from its first lot to its last: the lot’s card at each stop, the story’s card at the end, in 60 to 90 seconds (PRD v2 D3)', async ({ page }) => {
+  test.setTimeout(300_000);
+  const errors = await open(page);
+  await ready(page);
+  await page.locator('[aria-label="Stories"]').getByRole('button', { name: 'Cement', exact: true }).click();
+  await page.locator('.world-frame__follow').getByRole('button', { name: 'Follow' }).click();
+  await expect(page.locator('.world-frame__follow progress')).toBeVisible();
+  // the frames run by hand, undrawn, a quarter of a second each, until the ride stops at a bay or ends
+  const run = () => page.evaluate(() => { for (let k = 0; k < 600; k++) { window.world.tick(0.25, false); const f = window.world.follow(); if (!f || f.mode === 'stop' || f.mode === 'end') return f; } return window.world.follow(); });
+  const cards: string[] = [];
+  let end = null as Awaited<ReturnType<typeof run>>;
+  for (let i = 0; i < 10 && !end; i++) {
+    const r = await run();
+    expect(r).not.toBeNull();
+    if (r!.mode === 'end') { end = r; break; }
+    // the story stays lit while the ride stops and goes on
+    expect(await page.evaluate(() => window.world.chain())).toEqual(expect.arrayContaining(['B121', 'J211', 'H111']));
+    // at a bay: the lot's card is open, not the story's
+    const card = page.locator('.world-card');
+    await expect(card).toHaveAttribute('aria-label', 'Selection details');
+    cards.push(await card.locator('.world-card__title').innerText());
+    await page.evaluate(() => { for (let k = 0; k < 40; k++) { window.world.tick(0.25, false); const f = window.world.follow(); if (!f || f.mode !== 'stop') return; } });
+  }
+  expect(end).not.toBeNull();
+  expect(cards.length).toBe(2);
+  expect(end!.elapsed).toBeGreaterThanOrEqual(60);
+  expect(end!.elapsed).toBeLessThanOrEqual(90);
+  const story = page.locator('.world-card[data-story="cement"]');
+  await expect(story).toContainText('the builders put up the estate the plants stand on');
+  await expect(story).toContainText('The ride has ended');
   expect(errors).toEqual([]);
 });
 

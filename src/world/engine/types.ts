@@ -3,7 +3,7 @@
  * clickable thing in the world honours (Factory Yard's, kept).
  */
 import type * as THREE from 'three';
-import type { Registry } from '@/lib/world/registry/types';
+import type { Goods, Registry, Story } from '@/lib/world/registry/types';
 import type { GeneratedLayout } from '@/world/placement/types';
 import type { FlowWeight, ModelStatus, StationBinding, WhiteboardContent } from '@/world/data/types';
 
@@ -146,6 +146,25 @@ export interface RendererLike {
   capabilities: { getMaxAnisotropy(): number };
 }
 
+/** Follow's state (PRD v2 §3.10): riding a vehicle, gliding a hop no vehicle carries, stopped at a lot, or ended. */
+export interface FollowReading {
+  mode: 'ride' | 'glide' | 'stop' | 'end';
+  /** The story ridden, or null for a single vehicle. */
+  story: string | null;
+  hop: number;
+  hops: number;
+  vehicle: string | null;
+  /** The lot the camera stands at (a stop, the end). */
+  lot: string | null;
+  /** How far through the ride, 0 to 1. */
+  progress: number;
+  /** Seconds of the frame's clock since the ride began. */
+  elapsed: number;
+}
+
+/** A lit story's hop (PRD v2 §3.10): its ends in reading order, its goods, the joints its routes cross, whether measured. */
+export interface LitHop { from: string; to: string; goods: Goods; joints: string[]; measured: boolean }
+
 /** What a card's action asks the shell to do. */
 export type WorldAction =
   | { type: 'open-board'; ticker: string }
@@ -169,6 +188,8 @@ export interface WorldOptions {
   /** The thing under the pointer changed: its label for the shell's readout (PRD v2 §3.4). */
   onHover?: (h: Hover | null) => void;
   onAction?: (action: WorldAction) => void;
+  /** Follow began, moved on, stopped at a lot, ended (a reading) or let go (null) (PRD v2 §3.10). */
+  onFollow?: (f: FollowReading | null) => void;
   onReady?: () => void;
   /** Tests pass a fake renderer; the default creates a WebGLRenderer on the engine's canvas. */
   createRenderer?: (canvas: HTMLCanvasElement) => RendererLike;
@@ -189,12 +210,23 @@ export interface WorldHandle {
   setFlowWeights(flows: FlowWeight[]): void;
   /** Light the chain of a building or company (PRD §7.9): one level, or the whole connected chain; null clears. */
   highlightChain(id: string | null, depth: 1 | 'all'): void;
+  /** Light a story end to end and frame it (PRD v2 §3.10): every hop's routes, every lot outlined, the rest dimmed; null clears it. */
+  lightStory(story: Story | null): LitHop[];
+  /** Frame one hop of the lit story (the strip's hop buttons). */
+  frameHop(i: number): void;
+  /** The lit story's hops as drawn now: a measured class that arrives later marks its hop. */
+  storyHops(): LitHop[];
   /** Light the entities whose id, code or chain id is named (a think-tank piece's tags); an empty list clears. */
   setHighlight(ids: readonly string[]): void;
   /** Open a company's plot as a section and mark its bound stations with the cost lines' labels (PRD §7.8). */
   exposeCompany(ticker: string, stations: readonly StationBinding[], whiteboard?: WhiteboardContent | null): void;
   /** Light the marker of one cost line while the board hovers or focuses it; null lights none. */
   lightStation(lineId: string | null): void;
+  /** Ride along (PRD v2 §3.10): 'story:<id>' rides a story from its first lot, a vehicle's id rides that vehicle; null lets go. */
+  follow(id: string | null): void;
+  following(): FollowReading | null;
+  /** A vehicle carrying a link's load ('from>to'): one on the road, laden if any is, else one sent now; null when the link moves nothing (search by load, PRD v2 §3.13). */
+  vehicleOn(key: string): string | null;
   pause(on: boolean): void;
   /** Per-frame readings for the shell's clock and readout; returns the unsubscribe. */
   subscribe(fn: (r: FrameReading) => void): () => void;

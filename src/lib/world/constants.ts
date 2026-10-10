@@ -9,6 +9,8 @@ import type { Goods } from '@/lib/world/registry/types';
 
 /** What a link carries (PRD v2 Appendix A): the registry's list, read here by the shell. */
 export { GOODS, type Goods } from '@/lib/world/registry/types';
+/** The six stories (PRD v2 §3.10, Appendix B), the owner's, from docs/world/sources/stories.tsv. */
+export { STORIES, storyById } from '@/lib/world/registry/stories.generated';
 
 /** How a card names a link's goods class next to a supplier or a customer (PRD v2 §3.11). */
 export const GOODS_WORD: Record<Goods, string> = {
@@ -68,7 +70,7 @@ export const coverageLine = (state: 'loading' | 'ok' | 'outage', covered: number
   state === 'loading' ? 'Reading the published models…' : state === 'outage' ? 'Model status unavailable' : `${covered} of ${TOTAL_PLACED} sub-industries have a published model`;
 /** The one line above the schematic when the reader's system asks for reduced motion. */
 export const REDUCED_NOTE = 'A living version of this map exists; it is not shown while your system asks for reduced motion.';
-export const CANVAS_DESCRIPTION = 'An isometric industrial estate, live. Primary resources ring it, processing and manufacturing stand in the estate at the centre, a gateway with a port leads east to a town of distributors, shops, services and banks, and a think tank stands on the hill. Every company is a building of its own with its ticker on a sign; marks on the kerb say which sub-industries have a published model. Drag to pan, scroll or pinch to zoom, point at anything for its name, click it for its card. Keys: H returns to the opening view, 1 to 5 jump to the ring, estate, gateway, town and hill, 0 shows the whole map, [ and ] step through the companies, Shift with [ and ] through the sub-industries, Enter opens the card, Escape closes it, + and − zoom, the arrows pan, F follows a selected vehicle.';
+export const CANVAS_DESCRIPTION = 'An isometric industrial estate, live. Primary resources ring it, processing and manufacturing stand in the estate at the centre, a gateway with a port leads east to a town of distributors, shops, services and banks, and a think tank stands on the hill. Every company is a building of its own with its ticker on a sign; marks on the kerb say which sub-industries have a published model. Drag to pan, scroll or pinch to zoom, point at anything for its name, click it for its card. Keys: H returns to the opening view, 1 to 5 jump to the ring, estate, gateway, town and hill, 0 shows the whole map, [ and ] step through the companies, Shift with [ and ] through the sub-industries, Enter opens the card, Escape closes it, + and − zoom, the arrows pan, S lights the stories in turn, F follows a selected vehicle; while following, Space moves on from a stop and Escape lets go.';
 
 /** The full board's eight sections, in the PRD's order (PRD Appendix B). */
 export const SECTION_ORDER = ['Header', 'Main drivers', 'Unit economics', 'Performance vs peer', 'What the model contains', 'Limits of the filing', 'Chain', 'Related analyses'] as const;

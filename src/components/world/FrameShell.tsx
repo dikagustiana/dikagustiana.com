@@ -22,6 +22,8 @@ export interface FrameControls {
   dragging(on: boolean): void;
   overlay(overlay: OverlayName): void;
   layer(layer: LayerName): void;
+  /** Light a story, or none (PRD v2 §3.10). */
+  story(id: string | null): void;
   skema(): void;
 }
 
@@ -35,11 +37,14 @@ export interface FrameHeaderProps {
   distance: number;
   overlay: OverlayName;
   layers: Readonly<Record<LayerName, boolean>>;
+  /** The stories' ids and titles (the caller passes them: this module reads no registry), and the lit one. */
+  stories: readonly { id: string; title: string }[];
+  story: string | null;
   search: ReactNode;
   on: FrameControls;
 }
 
-export function FrameHeader({ heading, variant, phone, coverage, view, ready, distance, overlay, layers, search, on }: FrameHeaderProps) {
+export function FrameHeader({ heading, variant, phone, coverage, view, ready, distance, overlay, layers, stories, story, search, on }: FrameHeaderProps) {
   const H = heading;
   const Sub = heading === 'h1' ? 'h2' : 'h3';
   const places: ReactNode = PLACES.map((p) => <button key={p.view} type="button" className="world-btn" aria-current={view === p.view} title={`${p.label} (${p.key})`} onClick={() => on.place(p.view)}>{p.label}</button>);
@@ -56,6 +61,10 @@ export function FrameHeader({ heading, variant, phone, coverage, view, ready, di
         <label className="world-distance"><span className="text-muted-foreground">Economy</span><input type="range" min={0} max={1} step={0.01} value={distance} aria-label="Distance: economy to finance" onChange={(e) => on.distance(Number(e.target.value))} onPointerDown={() => on.dragging(true)} onPointerUp={() => on.dragging(false)} onPointerCancel={() => on.dragging(false)} /><span className="text-muted-foreground">Finance</span></label>
         <div className="world-frame__group" role="radiogroup" aria-label="Shift overlay"><span>Shift</span>{OVERLAYS.map((o) => <button key={o.overlay} type="button" role="radio" className="world-btn" aria-checked={overlay === o.overlay} onClick={() => on.overlay(o.overlay)}>{o.label}</button>)}</div>
         <div className="world-frame__group" aria-label="Layers"><span>Layers</span>{LAYERS.map((l) => <button key={l.layer} type="button" className="world-btn" aria-pressed={layers[l.layer]} onClick={() => on.layer(l.layer)}>{l.label}</button>)}</div>
+        {/* the stories: buttons on a wide screen, a select on a phone (PRD v2 §3.10) */}
+        {phone
+          ? <label className="world-frame__group"><span>Stories</span><select className="world-btn" aria-label="Stories" value={story ?? ''} onChange={(e) => on.story(e.target.value || null)}><option value="">None</option>{stories.map((s) => <option key={s.id} value={s.id}>{s.title}</option>)}</select></label>
+          : <div className="world-frame__group" aria-label="Stories"><span>Stories</span>{stories.map((s) => <button key={s.id} type="button" className="world-btn" aria-pressed={story === s.id} onClick={() => on.story(story === s.id ? null : s.id)}>{s.title}</button>)}</div>}
         {search}
         <button type="button" className="world-btn" aria-pressed={false} onClick={() => on.skema()}>Skema</button>
         {variant === 'preview' && <a className="world-btn" href={WORLD_PATH}>Open the world</a>}

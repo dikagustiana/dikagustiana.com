@@ -13,6 +13,10 @@
 .world-frame__strip button { display: inline-flex; align-items: center; gap: 0.375rem; min-height: 2.25rem; padding: 0.125rem 0.625rem; border: 1px solid hsl(var(--border)); border-radius: 999px; background: hsl(var(--background)); color: hsl(var(--foreground)); font: inherit; cursor: pointer; }
 .world-frame__strip button[aria-pressed="true"] { border-color: hsl(var(--accent)); }
 .world-frame__strip button:focus-visible { outline: 2px solid hsl(var(--ring)); outline-offset: 2px; }
+.world-frame__strip button[aria-current="step"] { border-color: hsl(var(--accent)); font-weight: 600; }
+/* a story's strip, and Follow's button or progress under it (PRD v2 §3.10) */
+.world-frame__follow { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; padding: 0.375rem 0.75rem 0.5rem; font-size: 0.8125rem; background: hsl(var(--card)); }
+.world-frame__follow progress { width: 8rem; height: 0.375rem; accent-color: hsl(var(--accent)); }
 .world-card { position: absolute; top: 0.75rem; right: 0.75rem; width: min(22rem, calc(100% - 1.5rem)); max-height: calc(100% - 1.5rem); overflow: auto; background: hsl(var(--popover)); color: hsl(var(--popover-foreground)); border: 1px solid hsl(var(--border)); border-radius: var(--radius); padding: 0.75rem 1rem 1rem; display: grid; gap: 0.5rem; font-size: 0.875rem; }
 .world-card__kind { display: flex; justify-content: space-between; align-items: center; font-size: 0.6875rem; letter-spacing: 0.12em; text-transform: uppercase; color: hsl(var(--muted-foreground)); }
 .world-card__title { font-family: var(--font-display); font-size: 1.25rem; line-height: 1.15; font-weight: 600; }

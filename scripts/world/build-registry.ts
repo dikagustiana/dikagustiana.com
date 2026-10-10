@@ -4,9 +4,9 @@
  *   node --experimental-strip-types scripts/world/build-registry.ts   (npm run build:registry)
  *
  * Reads docs/world/sources/{idx-ic-classification.tsv, idx-ic-sectors.tsv,
- * idx-ic-subsektor.tsv, placement.tsv, companies.tsv, links.tsv,
+ * idx-ic-subsektor.tsv, placement.tsv, companies.tsv, links.tsv, stories.tsv,
  * issuers-snapshot.json, citation.json}; writes
- * src/lib/world/registry/subindustries.generated.ts, links.generated.ts,
+ * src/lib/world/registry/subindustries.generated.ts, links.generated.ts, stories.generated.ts,
  * docs/world/review-registry.md and docs/world/v2/review-does.md. Deterministic and idempotent: running it
  * twice changes nothing. Fails on a missing citation, a changed source, or
  * counts other than 35 / 69 / 130 / 125 (src/lib/world/registry/generate.ts).
@@ -28,12 +28,14 @@ try {
     placement: read('placement.tsv'),
     companies: read('companies.tsv'),
     links: read('links.tsv'),
+    stories: read('stories.tsv'),
     issuersJson: read('issuers-snapshot.json'),
     citation: JSON.parse(read('citation.json')),
   });
   const targets: [string, string][] = [
     ['src/lib/world/registry/subindustries.generated.ts', out.files.subIndustriesTs],
     ['src/lib/world/registry/links.generated.ts', out.files.linksTs],
+    ['src/lib/world/registry/stories.generated.ts', out.files.storiesTs],
     ['docs/world/review-registry.md', out.files.reviewMd],
     ['docs/world/v2/review-does.md', out.files.reviewDoesMd],
   ];
@@ -44,7 +46,7 @@ try {
     fs.writeFileSync(p, content); changed++;
   }
   const c = out.counts;
-  console.log(`build-registry: ${c.subSectors} / ${c.industries} / ${c.subIndustries} / ${c.placed} · ${c.links} links · ${c.proposedPlacements} placements proposed · ${c.proposedCompanies} companies proposed · ${c.emptySlots} slots empty · ${changed} file(s) written`);
+  console.log(`build-registry: ${c.subSectors} / ${c.industries} / ${c.subIndustries} / ${c.placed} · ${c.links} links · ${out.stories.length} stories · ${c.proposedPlacements} placements proposed · ${c.proposedCompanies} companies proposed · ${c.emptySlots} slots empty · ${changed} file(s) written`);
 } catch (e) {
   if (e instanceof RegistryError) { console.error(`build-registry: ${e.message}`); process.exit(1); }
   throw e;

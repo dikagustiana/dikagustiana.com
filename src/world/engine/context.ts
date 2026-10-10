@@ -59,6 +59,8 @@ export interface EngineContext {
   peeks: [THREE.Group, Entity][];
   /** Which flows cross a gate, in words, for its card (PRD v2 §3.11); set by the flows once they exist. */
   flowsAt?: (gateId: string) => string;
+  /** Ride along with a vehicle or a story (PRD v2 §3.10): the engine installs it, a vehicle's card calls it. */
+  follow?: (id: string) => void;
 }
 
 export function idleHooks(): Hooks {

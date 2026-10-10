@@ -25,8 +25,9 @@ const browser = await chromium.launch({ args: ['--use-angle=swiftshader', '--ena
 const log = [];
 
 /** A page on the world, every backend call answered locally (reads only; a write is refused). */
-async function world({ phone = false } = {}) {
-  const page = await browser.newPage({ viewport: phone ? { width: 390, height: 844 } : { width: 1440, height: 900 } });
+async function world({ phone = false, tall = false } = {}) {
+  // a tall page for the frames of the whole frame (header, stage, strip), so the site's sticky bar never covers them
+  const page = await browser.newPage({ viewport: phone ? { width: 390, height: 844 } : { width: 1440, height: tall ? 1500 : 900 } });
   const errors = [];
   page.on('pageerror', (e) => errors.push(String(e).slice(0, 200)));
   await page.route('**/rest/v1/**', (r) => (r.request().method() === 'GET' || r.request().method() === 'HEAD' ? r.fulfill({ status: 200, contentType: 'application/json', body: '[]' }) : r.fulfill({ status: 405, body: '' })));
@@ -86,6 +87,41 @@ const GATES = {
     ['gate-c-day-street.png', 'the street band by day over INTP: stack smoke, forklifts at the docks, conveyors, walkers at the doors', async (page) => { await page.evaluate(() => { window.world.skip(14); window.world.centre('INTP', 5); }); await settle(page, 4000); }],
   ],
   'c-families': 'families',
+  d: [
+    ['gate-d-chain.png', 'Cement selected: its links’ routes on the roads with travelling dashes, the linked lots outlined, the rest dimmed; the card’s one note', async (page) => { await page.evaluate(() => { window.world.view('estate'); window.world.select('B121'); }); await settle(page, 3500); }],
+    ['gate-d-route-hover.png', 'a lit route under the pointer: its link’s note as the hover label', async (page) => {
+      await page.evaluate(() => { window.world.pause(true); const r = window.world.all().find((e) => e.kind === 'route'); if (r) window.world.centre(r.id, 3); }); await settle(page, 2500);
+      const box = await page.locator('.world-frame__canvas-host canvas').boundingBox();
+      const id = await page.evaluate(() => window.world.all().find((e) => e.kind === 'route')?.id);
+      const [x, y] = await page.evaluate((r) => window.world.screenOf(r), id);
+      await page.mouse.move(box.x + x, box.y + y); await settle(page, 1500);
+      await page.evaluate(() => window.world.pause(false));
+    }],
+    ['gate-d-story.png', 'the story "From well to shelf" lit end to end, framed; the strip lists its hops with their goods and the joints they cross; the story’s card', async (page) => {
+      await page.keyboard.press('Escape');
+      await page.locator('[aria-label="Stories"]').getByRole('button', { name: 'From well to shelf', exact: true }).click(); await settle(page, 4000);
+    }, '.world-frame'],
+    ['gate-d-pulses.png', 'the whole map with the governance (accent, up every route) and regulation (dark, down every route) layers on', async (page) => {
+      await page.locator('.world-card[data-story]').getByRole('button', { name: 'Clear', exact: true }).click();
+      for (const name of ['Contract governance', 'Regulation']) await page.locator('[aria-label="Layers"]').getByRole('button', { name, exact: true }).click();
+      await page.evaluate(() => window.world.view('estate')); await settle(page, 4000);
+      for (const name of ['Contract governance', 'Regulation']) await page.locator('[aria-label="Layers"]').getByRole('button', { name, exact: true }).click();
+    }],
+    ['gate-d-follow-ride.png', 'Follow on the story "Palm": the camera rides the first hop’s truck, the strip shows the ride’s progress', async (page) => {
+      await page.locator('[aria-label="Stories"]').getByRole('button', { name: 'Palm', exact: true }).click(); await settle(page, 1500);
+      await page.locator('.world-frame__follow').getByRole('button', { name: 'Follow' }).click();
+      await page.evaluate(() => { for (let k = 0; k < 60; k++) window.world.tick(0.25, false); }); await settle(page, 2500);
+    }, '.world-frame'],
+    ['gate-d-follow-stop.png', 'Follow at a bay: the ride stopped with the customer lot’s card open (four seconds, or Space)', async (page) => {
+      await page.evaluate(() => { for (let k = 0; k < 600; k++) { window.world.tick(0.25, false); if (window.world.follow()?.mode === 'stop') break; } }); await settle(page, 1200);
+    }, '.world-frame'],
+    ['gate-d-follow-end.png', 'Follow at the story’s last lot: the ride has ended, the story’s card with its standfirst', async (page) => {
+      await page.evaluate(() => { for (let k = 0; k < 1200; k++) { window.world.tick(0.25, false); if (window.world.follow()?.mode === 'end') break; } }); await settle(page, 2000);
+    }, '.world-frame'],
+    ['gate-d-search.png', 'search by load: "coal" finds the coal story, the coal sub-industry and the loads that carry coal', async (page) => {
+      await page.getByRole('searchbox').fill('coal'); await settle(page, 800);
+    }, '.world-frame'],
+  ],
   'a-phone': [
     ['gate-a-phone.png', 'a phone at 390 px after "Start the world": the hero at 1 px/m', async (page) => { await settle(page, 1000); }],
   ],
@@ -106,11 +142,11 @@ async function families(page) {
 
 for (const key of Object.keys(GATES).filter((k) => k === gate || k.startsWith(`${gate}-`))) {
   if (GATES[key] === 'families') { const { page } = await world(); await families(page); await page.close(); continue; }
-  const { page, errors } = await world({ phone: key.endsWith('-phone') });
-  for (const [name, note, act] of GATES[key]) {
+  const { page, errors } = await world({ phone: key.endsWith('-phone'), tall: key === 'd' });
+  for (const [name, note, act, target] of GATES[key]) {
     if (only && !only.includes(name)) continue;
     await act(page);
-    await shot(page, name, note, key.endsWith('-phone') ? '.world-frame__stage' : '.world-frame__stage');
+    await shot(page, name, note, target ?? '.world-frame__stage');
   }
   if (errors.length) { console.log('page errors:', errors); log.push({ pageErrors: errors }); }
   await page.close();

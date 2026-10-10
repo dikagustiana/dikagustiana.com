@@ -1,0 +1,7 @@
+id	title	standfirst	hops	goods	lens	direction	with
+coal	Coal	Coal leaves the pit for the power plant; its electricity grinds the cement, and the cement goes to the builders.	A121 > J411 > B121 > J211	bulk > none > bulk	economy	downstream	
+cement	Cement	Cement leaves the kiln for the builders, and the builders put up the estate the plants stand on.	B121 > J211 > H111	bulk > none	economy	downstream	
+well-to-shelf	From well to shelf	Gas from the well becomes polymer, packaging, packed food, a distributor's load and a shelf; the packaging comes back through recovery as feedstock.	A111 > B111 > B131 > D222 > E711 > D113 > C222 > B111	liquid > bulk > boxed > boxed > boxed > bulk > bulk	economy	downstream	
+palm	Palm	Crops leave the plantation for the food factory; the packed food goes through the distributor to the shelf.	D232 > D222 > E711 > D113	bulk > boxed > boxed	economy	downstream	
+nickel	Nickel	Ore leaves the pit for the smelter and the metal leaves by ship; beside it the raw-export road carries ore out unprocessed.	B146 > B144 > J113	bulk > bulk	economy	downstream	
+rupiah-upstream	The rupiah upstream	A shopper's rupiah goes back up the chain: the shelf pays the distributor, the distributor the food factory, the factory the plantation, and the banks lend at each step.	D113 > E711 > D222 > D232	none > none > none	finance	upstream	G111

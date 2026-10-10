@@ -15,14 +15,17 @@ import { createContext, type EngineContext } from './context';
 import { createClock, STEP, WARMUP_SECONDS } from './sim/clock';
 import { buildSlab } from './world/ground';
 import { createView, type View } from './view';
-import { VIEW_NAMES, type Entity, type FrameReading, type LayerName, type OverlayName, type RendererLike, type ViewName, type WorldHandle, type WorldOptions } from './types';
+import { VIEW_NAMES, type Entity, type FollowReading, type FrameReading, type LayerName, type LitHop, type OverlayName, type RendererLike, type ViewName, type WorldHandle, type WorldOptions } from './types';
 import type { FlowWeight, ModelStatus, StationBinding, WhiteboardContent } from '@/world/data/types';
 import { buildWorldScene, type WorldScene } from '@/world/world/build';
 import { countInWords, createFlows, type FlowSystem } from '@/world/sim/flows';
 import { createActivity, type Activity } from '@/world/sim/activity';
 import { createMarks, type Marks } from './marks';
-import { createChain, type Chain } from './chain';
+import { createChain, type Chain, type StoryHop } from './chain';
 import { createStations, type Stations } from './stations';
+import { createFollow, type Follow } from './follow';
+import { storyById } from '@/lib/world/registry/stories.generated';
+import type { Box } from '@/world/placement/types';
 
 export { WARMUP_SECONDS };
 
@@ -66,12 +69,20 @@ interface DebugApi {
   textMeshes(): number;
   /** Whether an entity's first group is rendered: it and every ancestor visible (the LOD and the layers hide whole groups). */
   visible(id: string): boolean;
-  /** One frame of the view by hand (the camera easing, the LOD switch, the peeks), dt in seconds; tests drive it where no animation frame runs. */
-  tick(dt: number): void;
+  /** One frame of the view by hand (the camera easing, the LOD switch, the peeks), dt in seconds; tests drive it where no animation frame runs. render false skips the draw (a long ride in a test). */
+  tick(dt: number, render?: boolean): void;
+  /** Follow's state (PRD v2 §3.10), or null when nothing is followed. */
+  follow(): FollowReading | null;
+  /** Space at a Follow's stop. */
+  followNext(): void;
+  /** A link's routes, supplier lot to customer lot, and the gates each crosses. */
+  routes(from: string, to: string): { from: string; to: string; gates: string[] }[];
+  /** The governance or regulation layer's pulses: how many, and where the first few stand along their links (0 supplier, 1 customer). */
+  pulses(layer: 'governance' | 'regulation'): { count: number; along: number[] };
   statuses(): Record<string, ModelStatus>;
   /** Codes in the lit chain, the selected one first. */
   chain(): string[];
-  chainDrawn(): { measured: number; expected: number; dimmed: number };
+  chainDrawn(): { measured: number; expected: number; routes: number; outlined: number; dimmed: number; offset: number };
   expose(ticker: string, bindings?: StationBinding[], whiteboard?: WhiteboardContent | null): void;
   exposed(): { ticker: string; placed: Record<string, string>; lit: string | null } | null;
   dispose(): void;
@@ -125,8 +136,9 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
 
   // ---- the simulation step ----
   const systems: { update(dt: number): void }[] = [flows, activity];
-  const stepOnce = (dt: number) => {
-    clock.t += dt;
+  // a step of the world; while Follow rides, the world runs faster than the clock (its day keeps its own pace)
+  const stepOnce = (dt: number, clockShare = 1) => {
+    clock.t += dt * clockShare;
     for (const s of systems) s.update(dt);
     for (const e of ctx.entities) e.update?.(dt);
   };
@@ -139,11 +151,41 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
     onSelect: options.onSelect,
     onHover: options.onHover,
     onDetail: (tiny, far) => { world.nearGroup.visible = !far; flows.setDetail(tiny, far); activity.setDetail(tiny, far); },
+    // a drag or the arrows let go of a Follow; Escape ends it, Space moves it on from a stop, F follows the selected vehicle
+    onDrag: () => { if (follow.active()) follow.stop(); },
+    onKey: (e) => {
+      if (e.key === 'Escape' && follow.reading()) { const was = follow.active(); follow.stop(); return was; }
+      if (e.key === ' ' && follow.reading()?.mode === 'stop') { follow.next(); return true; }
+      if (e.key === 'f' || e.key === 'F') { const s = view.selected(); if (s?.kind === 'vehicle') { follow.start({ vehicle: s.id }); return true; } }
+      return false;
+    },
   });
   if (options.initialView && options.initialView !== 'hero') view.lookAt(options.initialView);
   const marks: Marks = createMarks(ctx, (a) => options.onAction?.(a));
-  const chain: Chain = createChain(ctx, options.registry.links);
+  // the chain lights the roads its links' goods take (PRD v2 §3.9): the flows know the lots and the routes
+  const chain: Chain = createChain(ctx, options.registry.links, { routesOf: (a, b) => flows.routesOf(a, b), lotsOf: (c) => flows.lotsOf(c) });
+  // the lit story's hops (PRD v2 §3.10); the joint a hop crosses is its gates' (the layout says which joint each gate carries)
+  let story: StoryHop[] | null = null;
+  const jointOf = new Map(options.layout.gates.map((g) => [g.id, g.jointId]));
+  const litHops = (hs: StoryHop[]): LitHop[] => hs.map((h) => ({ from: h.from, to: h.to, goods: h.goods, measured: h.measured, joints: [...new Set(h.gates.map((g) => jointOf.get(g)).filter((j): j is string => !!j))] }));
   const stations: Stations = createStations(ctx);
+  // Follow (PRD v2 §3.10): rides a story's vehicles hop by hop, or one vehicle to its bay
+  const follow: Follow = createFollow({
+    send: (key, from) => flows.send(key, from),
+    vehicle: (id) => flows.vehicles().find((v) => v.id === id) ?? null,
+    routesOf: (a, b) => flows.routesOf(a, b),
+    centreOf: (id) => { const e = find(id) as (Entity & { box?: Box; block?: { box: Box } }) | null; const b = e?.box ?? e?.block?.box; return b ? [(b.x0 + b.x1) / 2, (b.y0 + b.y1) / 2] : null; },
+    select: (id) => view.select(find(id)),
+    camera: (target, zoom) => view.follow(target, zoom),
+    emit: (r) => options.onFollow?.(r),
+  });
+  const followStory = (id: string) => {
+    const s = storyById(id); if (!s) return;
+    // the story is lit for the ride, if it is not already
+    if (!story) { story = chain.story(s); }
+    follow.start({ story: s });
+  };
+  ctx.follow = (id) => handle.follow(id);
 
   // ---- state the shell sets through the handle; Phase E–G give them their effects ----
   let overlay: OverlayName = 'none';
@@ -167,13 +209,13 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
     advance(dt);
   }
   /** One frame of dt seconds: the world's steps, the camera, the marks; the debug API's tick runs it with an exact dt. */
-  function advance(dt: number) {
-    if (!paused) { acc += dt; while (acc >= STEP) { stepOnce(STEP); acc -= STEP; } }
+  function advance(dt: number, render = true) {
+    if (!paused) { const k = follow.scale(); acc += dt * k; while (acc >= STEP) { stepOnce(STEP, 1 / k); acc -= STEP; } follow.update(dt); }
     if (clock.shift.h < clock.shift.goal) clock.shift.h = Math.min(clock.shift.goal, clock.shift.h + dt * (reduced ? 60 : 5));
     activity.draw();
-    view.tick(dt, paused);
+    view.tick(dt, paused, render);
     marks.update(view.camera.zoom);
-    chain.update(view.camera.zoom);
+    chain.update(view.camera.zoom, paused ? 0 : dt);
     stations.update(view.camera.zoom);
     if (exposed && view.selected()?.id !== exposed.ticker) { exposed = null; stations.clear(); }
     if (subscribers.size) { const r = reading(); for (const fn of subscribers) fn(r); }
@@ -189,8 +231,22 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
     setMarks: (list) => marks.set(list),
     setLayer: (name, on) => { layers.set(name, on); flows.setLayer(name, on); activity.setLayer(name, on); },
     setModelStatus: (s) => { statuses = s; world.setStatuses(s); },
-    setFlowWeights: (weights: FlowWeight[]) => { flows.setFlows(weights); chain.setFlows(weights); },
-    highlightChain: (id, depth) => chain.set(id, depth),
+    setFlowWeights: (weights: FlowWeight[]) => { flows.setFlows(weights); chain.setFlows(weights); if (story) story = chain.hops(); },
+    highlightChain: (id, depth) => {
+      story = null;
+      chain.set(id, depth);
+      // the full chain refits the camera to what is lit, at the district band (PRD v2 §3.9)
+      const b = depth === 'all' && id ? chain.bounds() : null;
+      if (b) view.frame(b);
+    },
+    lightStory: (s): LitHop[] => {
+      if (!s) { if (story) { chain.story(null); story = null; } return []; }
+      story = chain.story(s);
+      const b = chain.bounds(); if (b) view.frame(b);
+      return litHops(story);
+    },
+    storyHops: () => (story ? litHops(story) : []),
+    frameHop: (i) => { const b = story?.[i]?.box; if (b) view.frame(b); },
     setHighlight: (ids) => view.setHighlight(ids),
     exposeCompany: (ticker, bindings, whiteboard = null) => {
       const plot = world.lots.get(ticker.toUpperCase()), arch = world.archetypeOf(ticker);
@@ -202,6 +258,12 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
       stations.expose(arch, plot.box, bindings);
     },
     lightStation: (lineId) => stations.light(lineId),
+    follow: (id) => { if (!id) follow.stop(); else if (id.startsWith('story:')) followStory(id.slice(6)); else follow.start({ vehicle: id }); },
+    following: () => follow.reading(),
+    vehicleOn: (key) => {
+      const on = flows.vehicles().filter((v) => v.flow.key === key);
+      return (on.find((v) => v.laden) ?? on[0] ?? flows.send(key))?.id ?? null;
+    },
     pause: (on) => { paused = on; },
     subscribe: (fn) => { subscribers.add(fn); return () => { subscribers.delete(fn); }; },
     step: (seconds) => { for (let t = 0; t < seconds; t += STEP) stepOnce(STEP); },
@@ -213,6 +275,7 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
     disposed = true;
     if (raf !== null) { cancelAnimationFrame(raf); raf = null; }
     subscribers.clear();
+    follow.stop();
     marks.dispose();
     chain.dispose();
     view.dispose();
@@ -251,10 +314,14 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
       zoom: () => view.camera.zoom,
       visible: (id) => { const e = find(id); const g = e?.groups[0]; if (!g) return false; for (let o: THREE.Object3D | null = g; o; o = o.parent) if (!o.visible) return false; return true; },
       // an exact dt, not one read back from the clock: a seed and a number of frames always give the same world
-      tick: (dt) => { last += dt * 1000; advance(Math.max(0, Math.min(FRAME_MAX, dt))); },
+      tick: (dt, render = true) => { last += dt * 1000; advance(Math.max(0, Math.min(FRAME_MAX, dt)), render); },
+      follow: () => follow.reading(),
+      followNext: () => follow.next(),
+      routes: (a, b) => flows.routesOf(a, b).map((r) => ({ from: r.from, to: r.to, gates: [...r.gates] })),
+      pulses: (layer) => flows.pulses(layer),
       statuses: () => Object.fromEntries(statuses),
       chain: () => chain.codes(),
-      chainDrawn: () => ({ ...chain.drawn(), dimmed: chain.dimmed() }),
+      chainDrawn: () => ({ ...chain.drawn(), dimmed: chain.dimmed(), offset: chain.offset() }),
       expose: (ticker, bindings = [], whiteboard = null) => handle.exposeCompany(ticker, bindings, whiteboard),
       exposed: () => (exposed ? { ticker: exposed.ticker, placed: Object.fromEntries(stations.placed()), lit: stations.lit() } : null),
       dispose,
