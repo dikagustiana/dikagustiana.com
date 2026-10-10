@@ -173,7 +173,8 @@ masih free plan (tanpa backup otomatis), jadi workflow ini satu-satunya backup.
    relevan) secara lokal dan menempel output aslinya di laporan fase.
 2. **Nama branch.** Sesi ini dibuka dengan branch kerja `claude/opus-site-sweep-d68k41`; prompt meminta satu
    branch per fase dengan nama PRD §2.1 (`sweep/0-bootstrap`, `sweep/a-nav`, …). Saya mengikuti nama PRD untuk
-   PR fase. Kalau push ke `sweep/*` ditolak, saya laporkan dan memakai branch sesi.
+   PR fase; push ke `sweep/0-bootstrap` diterima (`* [new branch] sweep/0-bootstrap -> sweep/0-bootstrap`).
+   Branch sesi tidak dipakai untuk PR.
 3. **Bukti izin Factory Yard (D14) tidak terlampir.** Lampiran sesi hanya tiga: PRD, `Company_models__PTBA.html`,
    dan `DGI - PT Dummy and Its subsidiaries PSAK 338.xlsx`. Jadi D14 tetap BELUM: `NOTICE.md` tidak diubah, tidak
    ada file Factory Yard yang dibaca, disalin, atau diport.
