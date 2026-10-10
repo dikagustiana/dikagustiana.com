@@ -3,7 +3,8 @@
 Sepuluh temuan tinjauan Dika (10 Oktober 2026), dikerjakan per fase, satu branch dan satu draft PR per fase.
 Spesifikasi lengkap: `PRD-PLAN-PROMPT-site-sweep.md` (lampiran sesi; Bagian 1 PRD, Bagian 2 Plan, Bagian 3
 Prompt). Keputusan Dika: [`DECISIONS.md`](DECISIONS.md). Teks yang ditulis Dika untuk situs: [`copy/`](copy/).
-Laporan per fase: `report-<fase>.md`. Screenshot: `screenshots/<fase>/`.
+Laporan per fase: `report-<fase>.md`. Screenshot: `screenshots/<fase>/`. Keadaan saat sesi dijeda:
+[`HANDOFF.md`](HANDOFF.md).
 
 Referensi: `main` @ `0487609` (merge PR #58 `world-v2/e-quality`, 10 Okt 2026).
 
