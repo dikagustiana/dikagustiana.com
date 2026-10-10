@@ -5,8 +5,9 @@
  * after the pointer leaves unless it comes back first; neither a hover nor a
  * click moves focus into it. The keyboard: Enter, Space or ArrowDown on the chevron opens it with
  * focus on the first item. Escape, an outside click and an item click close it
- * as before. jsdom lays nothing out, so the seam between the label and the
- * panel is crossed for real in tests/e2e/nav.spec.ts.
+ * as before; Escape, or a hover opening the next menu, puts focus that was in
+ * it back on the chevron. jsdom lays nothing out, so the seam between the
+ * label and the panel is crossed for real in tests/e2e/nav.spec.ts.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, act, fireEvent } from '@testing-library/react';
@@ -191,6 +192,27 @@ describe('NavDropdown under a keyboard', () => {
     await user.keyboard('{Escape}');
     expect(menu()).not.toBeInTheDocument();
     expect(elsewhere).toHaveFocus();
+  });
+
+  it('returns focus to the chevron when a hover over the next menu closes this one', async () => {
+    const user = userEvent.setup();
+    mount(
+      <>
+        <NavDropdown label="Accounting" items={accountingItems} width="w-56" basePath="/accounting" />
+        <NavDropdown label="The Next Big Thing" items={nextBigThingItems} width="w-44" basePath="/the-next-big-thing" />
+      </>,
+    );
+    const accountingChevron = screen.getByRole('button', { name: 'Accounting submenu' });
+    accountingChevron.focus();
+    await user.keyboard('{Enter}');
+    expect(item('FSLI Detail')).toHaveFocus();
+
+    // The hover opens The Next Big Thing without focusing it, and unmounts
+    // the item that had focus.
+    move(null, label());
+    expect(item('Technology')).toBeInTheDocument();
+    expect(screen.queryByRole('menuitem', { name: 'FSLI Detail' })).not.toBeInTheDocument();
+    expect(accountingChevron).toHaveFocus();
   });
 
   it('keeps the outside click and the item click closing it', async () => {
