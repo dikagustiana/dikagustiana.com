@@ -32,8 +32,8 @@ import FsliDetail from '@/pages/FsliDetail';
 
 type Row = Record<string, unknown>;
 
-/** A query builder that answers from `tables`, filtering on eq() like PostgREST. */
-function builderFor(rows: Row[]) {
+/** A query builder that answers from `tables`, filtering on eq() like PostgREST, or fails with `error`. */
+function builderFor(rows: Row[], error: unknown = null) {
   let result = rows;
   let single = false;
   const builder: Record<string, unknown> = {};
@@ -47,7 +47,10 @@ function builderFor(rows: Row[]) {
     return builder;
   };
   builder.then = (resolve: (v: unknown) => unknown, reject?: (e: unknown) => unknown) =>
-    Promise.resolve({ data: single ? (result[0] ?? null) : result, error: null }).then(resolve, reject);
+    Promise.resolve(error ? { data: null, error } : { data: single ? (result[0] ?? null) : result, error: null }).then(
+      resolve,
+      reject,
+    );
   return builder;
 }
 
@@ -109,11 +112,16 @@ const NON_CURRENT = [
 ];
 
 let tables: Record<string, Row[]>;
+/** Tables whose reads fail, as a read does during an outage once its retries are spent. */
+let failing: Set<string>;
 
 beforeEach(() => {
   tables = { fsli_pages: [...CURRENT, ...NON_CURRENT], essays: [ESSAY] };
+  failing = new Set();
   fromMock.mockReset();
-  fromMock.mockImplementation((table: string) => builderFor(tables[table] ?? []));
+  fromMock.mockImplementation((table: string) =>
+    builderFor(tables[table] ?? [], failing.has(table) ? { message: 'fetch failed' } : null),
+  );
 });
 
 function renderAt(slug: string) {
@@ -295,6 +303,27 @@ describe('FSLI page without an essay', () => {
       expect(screen.queryByRole('navigation', { name: 'On this page' })).toBeNull();
       unmount();
     }
+  });
+});
+
+describe('FSLI page whose essay read fails', () => {
+  it('says so and offers a retry, instead of reading as a page without an essay', async () => {
+    failing = new Set(['essays']);
+    renderAt('cash');
+    await screen.findByText('Something went wrong');
+    expect(main()).not.toHaveTextContent('What Cash Is');
+
+    failing = new Set();
+    fireEvent.click(screen.getByRole('button', { name: /Try again/ }));
+    await screen.findByRole('heading', { level: 2, name: 'What Cash Is' });
+    expect(screen.queryByText('Something went wrong')).toBeNull();
+  });
+
+  it('does not offer the covering line item as though this one had no essay', async () => {
+    failing = new Set(['essays']);
+    renderAt('cash-non-current');
+    await screen.findByText('Something went wrong');
+    expect(main()).not.toHaveTextContent('Covered in');
   });
 });
 
