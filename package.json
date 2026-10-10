@@ -22,6 +22,7 @@
     "build:registry": "node --experimental-strip-types scripts/world/build-registry.ts",
     "build:layout": "node --experimental-strip-types scripts/world/build-layout.ts",
     "build:workbook": "node --experimental-strip-types scripts/consolidation/build-workbook.ts",
+    "sanitize:workbook": "node --experimental-strip-types scripts/consolidation/sanitize-workbook.ts",
     "build:poster": "node --experimental-strip-types scripts/world/render-poster.mjs",
     "test:e2e:world": "playwright test -c playwright.world.config.ts"
   },
