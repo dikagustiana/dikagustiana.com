@@ -17,6 +17,7 @@ import { matchRoutes } from 'react-router-dom';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { makeQueryResult } from './helpers/renderWithProviders';
+import { renderFiaPage } from './helpers/renderFiaPage';
 
 const { fromMock } = vi.hoisted(() => ({ fromMock: vi.fn() }));
 vi.mock('@/integrations/supabase/client', () => ({
@@ -32,7 +33,9 @@ vi.mock('@/integrations/supabase/client', () => ({
 vi.mock('@vercel/analytics/react', () => ({ Analytics: () => null }));
 
 import App from '@/App';
+import FinanceTrackIndex from '@/pages/FinanceTrackIndex';
 import { COPY } from '@/lib/finance-in-action/copy';
+import { CURRICULUM_CONTRACT } from '@/data/curriculumContract';
 
 const FIA = '/finance/finance-in-action';
 
@@ -57,11 +60,23 @@ const SECTIONS = [
   row(6, 'finance-in-action', 'Finance in Action', COPY.seoDescription, 'Table'),
 ];
 
-/** A list read answers rows; a single-row read (the featured essay) answers its first row or null. */
-function rows(data: unknown[]) {
+/**
+ * A read over `data` that honours .eq(): a list read answers the matching
+ * rows, a single-row read the first match or null. FinanceTrackIndex reads
+ * its row by slug, so a fall-through to /finance/:track draws the 06 row's
+ * own title, as it would in production, not the first row's.
+ */
+function rows(data: Record<string, unknown>[]) {
+  const where: Record<string, unknown> = {};
+  const hits = () => data.filter((r) => Object.entries(where).every(([k, v]) => r[k] === v));
   const b = makeQueryResult(data) as Record<string, unknown>;
-  b.maybeSingle = () => makeQueryResult(data[0] ?? null);
-  b.single = () => makeQueryResult(data[0] ?? null);
+  b.eq = (column: string, value: unknown) => {
+    where[column] = value;
+    return b;
+  };
+  b.then = (ok: (v: unknown) => unknown, no?: (e: unknown) => unknown) => Promise.resolve({ data: hits(), error: null }).then(ok, no);
+  b.maybeSingle = () => makeQueryResult(hits()[0] ?? null);
+  b.single = () => makeQueryResult(hits()[0] ?? null);
   return b;
 }
 
@@ -105,6 +120,20 @@ describe('section 06 on /finance', () => {
     await userEvent.click(card);
     expect(await screen.findByRole('heading', { level: 1, name: 'Finance in Action' })).toBeInTheDocument();
     expect(window.location.pathname).toBe(FIA);
+    // The h1 alone cannot tell the pages apart (the control below). Tests
+    // build with both Finance in Action flags off, so App picks the legacy
+    // index: its models line is drawn, the track index's curriculum note is
+    // not. The live index (__FIA_LIVE__) is fiaLive.test's, and the phase F
+    // screenshots show App choosing it in a VITE_FIA_LIVE=true build.
+    expect(screen.getByText(/models available/)).toBeInTheDocument();
+    expect(screen.queryByText(CURRICULUM_CONTRACT.note)).not.toBeInTheDocument();
+  });
+
+  it('control: a track index at the same address draws the same h1, with the curriculum note and no models line', async () => {
+    renderFiaPage(<FinanceTrackIndex />, { path: '/finance/:track', url: FIA });
+    expect(await screen.findByRole('heading', { level: 1, name: 'Finance in Action' })).toBeInTheDocument();
+    expect(screen.getByText(CURRICULUM_CONTRACT.note)).toBeInTheDocument();
+    expect(screen.queryByText(/models available/)).not.toBeInTheDocument();
   });
 });
 
