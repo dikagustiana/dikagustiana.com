@@ -30,7 +30,8 @@ The phase report is `docs/sweep-2026-10/report-b.md`.
   `issues-overdrafts` heading); and, in "FSLI prose is authored as essays, not in a second editor",
   the sentence "Legacy `fsli_sections` content still renders read-only, so nothing written
   disappears" (`:2615-2616`). The rest of that entry stands: FSLI prose is written in the studio as
-  accounting essays.
+  accounting essays. Both passages keep their text and carry a "(Superseded 2026-10-10 …)" note in
+  place, pointing here.
 
 ## Heading ids are the slug of the heading's words, minted once per page (PRD R1.2)
 
@@ -2497,6 +2498,10 @@ headings — "Bank Overdrafts Treatment" (true only for cash) became
 "Classification Boundary Cases"; the `section_key` stays `issues-overdrafts`
 so any rows written later still bind.
 
+*(Superseded 2026-10-10: the outline, its "Not written yet." lines and the
+site's read of `fsli_sections` are deleted; a line item's body is its linked
+essay. See "2026-10-10 — FSLI pages: the essay is the body".)*
+
 ## 2026-08-02 (Substack replication) — The toolbar reversal
 
 The owner reversed a verified decision, and this entry is the record the
@@ -2682,6 +2687,9 @@ page's "Write in Studio" link), which inherits the entire finance flow for
 free — the alternative was building draft/revision machinery a second time,
 the duplication this project has paid for repeatedly. Legacy `fsli_sections`
 content still renders read-only, so nothing written disappears.
+*(Superseded 2026-10-10, this last sentence only: the site no longer reads
+`fsli_sections`, which held no written row. See "2026-10-10 — FSLI pages: the
+essay is the body".)*
 
 ### Font subsets dropped, and the one kept
 Removed all FIVE latin-ext files (the brief counted four: 4 Spectral +
