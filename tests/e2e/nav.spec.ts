@@ -123,3 +123,30 @@ test('moving from one menu to the next closes the first at once, so its panel ca
   await expect(menu).toHaveCount(1);
   await expect(menu.getByRole('menuitem').first()).toHaveText('FSLI Detail');
 });
+
+test('each panel opens inside the viewport, at the narrowest desktop width too', async ({ page }) => {
+  const nav = await open(page);
+  // 1280px is Tailwind's xl, where the desktop row first shows (MainNav.tsx).
+  for (const width of [1280, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    for (const d of DROPDOWNS) {
+      await nav.getByRole(d.trigger, { name: d.label, exact: true }).hover();
+      const menu = nav.getByRole('menu');
+      await expect(menu).toBeVisible();
+
+      const panel = await menu.boundingBox();
+      if (!panel) throw new Error(`no layout for ${d.label}`);
+      const doc = await page.evaluate(() => ({
+        scrollWidth: document.documentElement.scrollWidth,
+        clientWidth: document.documentElement.clientWidth,
+      }));
+      expect(panel.x + panel.width, `${d.label} at ${width}px: the panel's right edge`).toBeLessThanOrEqual(
+        doc.clientWidth,
+      );
+      expect(doc.scrollWidth, `${d.label} at ${width}px: no sideways scroll`).toBe(doc.clientWidth);
+
+      await page.mouse.move(10, 700, { steps: 4 });
+      await expect(menu).toBeHidden();
+    }
+  }
+});

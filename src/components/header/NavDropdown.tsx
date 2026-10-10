@@ -14,6 +14,12 @@ interface NavDropdownProps {
   width?: string;
   /** When set, clicking the label navigates here. */
   basePath?: string;
+  /**
+   * Which edge of the label the panel lines up with. The last menu in the row
+   * takes 'end': its panel is wider than its label, and lined up from the
+   * left it ran past the right edge of the page.
+   */
+  align?: 'start' | 'end';
 }
 
 /**
@@ -31,7 +37,7 @@ export const NAV_DROPDOWN_CLOSE_DELAY_MS = 150;
  */
 let closeOpenMenu: (() => void) | null = null;
 
-export function NavDropdown({ label, items, width = 'w-56', basePath }: NavDropdownProps) {
+export function NavDropdown({ label, items, width = 'w-56', basePath, align = 'start' }: NavDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -240,7 +246,7 @@ export function NavDropdown({ label, items, width = 'w-56', basePath }: NavDropd
         // The 4px between trigger and panel is this wrapper's transparent
         // padding, not a margin: a margin there was outside every hit area, so
         // a pointer crossing it on the way to an item closed the menu.
-        <div className="absolute top-full left-0 z-50 pt-1">
+        <div className={cn('absolute top-full z-50 pt-1', align === 'end' ? 'right-0' : 'left-0')}>
           <div
             ref={menuRef}
             role="menu"
