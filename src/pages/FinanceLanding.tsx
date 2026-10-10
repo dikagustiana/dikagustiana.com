@@ -3,7 +3,9 @@
  *
  * Structure:
  *   1. Featured Essay (essays.is_selected — the ONE featuring mechanism)
- *   2. Four equal domain entry points (DB-driven via finance_sections)
+ *   2. One numbered card per finance_sections row, in sort_order: the four
+ *      curriculum tracks (01-04), capital-allocation (05) and
+ *      finance-in-action (06, migration 20261010110000_finance_section_06)
  *
  * All content is DB-backed and admin-editable.
  */
@@ -19,7 +21,10 @@ import { useFeaturedFinanceEssay, useFinanceSections } from '@/hooks/queries/use
 import { essayUrl, essayUrlInputFromRow, universalEssayUrl } from '@/lib/essayUrl';
 
 /**
- * Map section slug → route path.
+ * Map section slug → route path. capital-allocation and finance-in-action
+ * have pages of their own: App.tsx declares their paths ahead of
+ * /finance/:track, so the same /finance/<slug> opens those pages, not a
+ * track index.
  */
 function sectionHref(slug: string): string {
   return `/finance/${slug}`;
