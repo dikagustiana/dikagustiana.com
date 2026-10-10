@@ -359,6 +359,22 @@ describe('the working paper section', () => {
     expect(await screen.findByRole('grid', {}, { timeout: 5000 })).toBeInTheDocument();
   });
 
+  it('opens the page at the section when a link names a place in the workbook, and nowhere else', () => {
+    fetchMock.mockReturnValue(new Promise(() => undefined));
+    // jsdom has no scrollIntoView.
+    const scrolled = vi.fn();
+    Element.prototype.scrollIntoView = scrolled;
+    try {
+      renderSection().unmount();
+      expect(scrolled).not.toHaveBeenCalled();
+      renderSection('/accounting/consolidated-reporting?sheet=Summary&cell=B4');
+      expect(scrolled).toHaveBeenCalledTimes(1);
+      expect(scrolled.mock.contexts[0]).toBe(screen.getByRole('region', { name: COPY.heading }));
+    } finally {
+      delete (Element.prototype as Partial<Element>).scrollIntoView;
+    }
+  });
+
   it('keeps the Method panel and the download when the workbook does not load, and says the viewer did not', async () => {
     fetchMock.mockResolvedValue(new Response('', { status: 500 }));
     renderSection('/accounting/consolidated-reporting?sheet=Summary');
