@@ -4,9 +4,8 @@ import { PageLayout } from '@/components/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
 import { FsliRelatedItems } from '@/components/fsli/FsliRelatedItems';
 import { FsliOnThisPage } from '@/components/fsli/FsliOnThisPage';
-import { FsliContentSection } from '@/components/fsli/FsliContentSection';
 import { FsliMobileSidebar } from '@/components/fsli/FsliMobileSidebar';
-import { useFsliPage, useFsliSections } from '@/hooks/queries/useFsliPages';
+import { useFsliPage } from '@/hooks/queries/useFsliPages';
 import { useFsliEssayBodies } from '@/hooks/queries/useEssays';
 import { useAuth } from '@/contexts/AuthContext';
 import NotFound from './NotFound';
@@ -14,55 +13,15 @@ import { ArticleBody } from '@/components/editorial/ArticleBody';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { LoadingState } from '@/components/states';
+import { buildFsliToc, fsliTocIds } from '@/lib/fsliToc';
 import { RefreshCw, ChevronRight, Pencil } from 'lucide-react';
 
-// The page's fixed outline. Section PROSE lives in fsli_sections and is
-// empty until written — there is deliberately no placeholder text here.
-// All 24 line items used to render the same cash-equivalents boilerplate
-// as if it were their own content.
-const contentSections = [
-  {
-    key: 'definition',
-    title: 'Definition',
-    subtitle: 'Understanding the fundamental concepts and requirements for classification.',
-  },
-  { key: 'recognition', title: 'Recognition Criteria' },
-  { key: 'measurement', title: 'Measurement Principles' },
-  { key: 'presentation', title: 'Presentation and Disclosure' },
-];
-
-// Issues subsections
-const issueSections = [
-  { key: 'issues-common', title: 'Common Implementation Issues' },
-  { key: 'issues-overdrafts', title: 'Classification Boundary Cases' },
-  { key: 'issues-currency', title: 'Foreign Currency Considerations' },
-];
-
-// Example subsections
-const exampleSections = [
-  { key: 'examples-practical', title: 'Practical Examples' },
-  { key: 'examples-journal', title: 'Journal Entry Examples' },
-  { key: 'examples-implementation', title: 'Implementation Steps' },
-];
-
-// Build TOC structure for right sidebar
-const buildTocSections = () => [
-  {
-    id: 'fundamentals',
-    title: 'Fundamentals',
-    children: contentSections.map(s => ({ id: s.key, title: s.title }))
-  },
-  {
-    id: 'issues',
-    title: 'Issues',
-    children: issueSections.map(s => ({ id: s.key, title: s.title }))
-  },
-  {
-    id: 'examples',
-    title: 'Examples',
-    children: exampleSections.map(s => ({ id: s.key, title: s.title }))
-  },
-];
+// There is no fixed outline any more. The page used to lay out ten
+// subsections (Definition … Implementation Steps) whose prose lived in
+// fsli_sections, which holds no written row, so every line item showed ten
+// "Not written yet." lines before the essay that does exist. The essay
+// linked to the line item is now the page body, and "On this page" lists
+// its own headings (owner decision D1(a), October 2026 site sweep).
 
 function formatDate(dateStr: string) {
   try {
@@ -78,41 +37,36 @@ function formatDate(dateStr: string) {
 
 export default function FsliDetail() {
   const { slug } = useParams<{ slug: string }>();
-  const [activeSection, setActiveSection] = useState<string>('definition');
+  const [activeSection, setActiveSection] = useState<string>('');
   const { isAdmin, isLoading: authLoading } = useAuth();
   const { data: item, isLoading, error } = useFsliPage(slug || '');
   // Published essays linked to this line item, bodies included — the read
   // side of the FSLI authoring path (written in the studio, published here).
-  const { data: linkedEssays } = useFsliEssayBodies(slug || '');
+  // They ARE the page body.
+  const { data: linkedEssays, isLoading: essaysLoading } = useFsliEssayBodies(slug || '');
+  const essays = useMemo(() => linkedEssays ?? [], [linkedEssays]);
 
-  // ONE query for all section prose. FsliContentSection used to fetch its own
-  // row, costing ten single-row requests per page view.
-  const { data: sectionRows, isLoading: sectionsLoading } = useFsliSections(slug || '');
-  const contentByKey = useMemo(() => {
-    const map: Record<string, string> = {};
-    for (const row of sectionRows ?? []) {
-      if (row.content) map[row.section_key] = row.content;
-    }
-    return map;
-  }, [sectionRows]);
+  // "On this page": the essay's h2/h3 headings, with the ids ArticleBody
+  // gives them.
+  const tocSections = useMemo(() => buildFsliToc(essays.map((essay) => essay.content)), [essays]);
+  const tocIds = useMemo(() => fsliTocIds(tocSections), [tocSections]);
 
-  // Track active section on scroll — rAF-coalesced so the ten
+  // Track the active heading on scroll — rAF-coalesced so the
   // getBoundingClientRect reads happen once per frame, not once per event.
+  // Active is the last heading that has passed the line under the header: a
+  // heading is one line tall, so the old "the line falls inside it" test,
+  // written for whole sections, would almost never hold.
   useEffect(() => {
+    if (tocIds.length === 0) return;
     let raf = 0;
     const measure = () => {
       raf = 0;
-      const sections = [...contentSections, ...issueSections, ...exampleSections];
-      for (const section of sections) {
-        const element = document.getElementById(section.key);
-        if (element) {
-          const rect = element.getBoundingClientRect();
-          if (rect.top <= 150 && rect.bottom >= 150) {
-            setActiveSection(section.key);
-            break;
-          }
-        }
+      let current = '';
+      for (const id of tocIds) {
+        const element = document.getElementById(id);
+        if (element && element.getBoundingClientRect().top <= 150) current = id;
       }
+      setActiveSection(current);
     };
     const handleScroll = () => {
       if (!raf) raf = requestAnimationFrame(measure);
@@ -123,7 +77,7 @@ export default function FsliDetail() {
       window.removeEventListener('scroll', handleScroll);
       if (raf) cancelAnimationFrame(raf);
     };
-  }, []);
+  }, [tocIds]);
 
   if (isLoading) {
     return (
@@ -141,8 +95,6 @@ export default function FsliDetail() {
   if (!item || error) {
     return <NotFound />;
   }
-
-  const tocSections = buildTocSections();
 
   // The real, per-item facts this page actually has today: the reported
   // figures and notes reference from the statement it was seeded from.
@@ -235,71 +187,34 @@ export default function FsliDetail() {
                 </p>
               )}
 
-              {/* Divider */}
-              <hr className="border-border my-8" />
+              {/* Divider — only above something. */}
+              {(essaysLoading || essays.length > 0) && <hr className="border-border my-8" />}
 
-              {/* Content Sections - Fundamentals */}
-              {contentSections.map((section) => (
-                <FsliContentSection
-                  key={section.key}
-                  id={section.key}
-                  title={section.title}
-                  subtitle={section.subtitle}
-                  content={contentByKey[section.key] ?? ''}
-                  loading={sectionsLoading}
-                />
-              ))}
-
-              {/* Issues Section Header */}
-              <div className="pt-8 pb-4">
-                <h2 className="text-lg font-semibold text-foreground">Issues</h2>
-              </div>
-
-              {/* Issue Sections */}
-              {issueSections.map((section) => (
-                <FsliContentSection
-                  key={section.key}
-                  id={section.key}
-                  title={section.title}
-                  content={contentByKey[section.key] ?? ''}
-                  loading={sectionsLoading}
-                />
-              ))}
-
-              {/* Examples Section Header */}
-              <div className="pt-8 pb-4">
-                <h2 className="text-lg font-semibold text-foreground">Examples</h2>
-              </div>
-
-              {/* Example Sections */}
-              {exampleSections.map((section) => (
-                <FsliContentSection
-                  key={section.key}
-                  id={section.key}
-                  title={section.title}
-                  content={contentByKey[section.key] ?? ''}
-                  loading={sectionsLoading}
-                />
-              ))}
-
-              {/* Linked Essays */}
-              {linkedEssays && linkedEssays.length > 0 && (
-                <>
-                  <div className="pt-8 pb-4" id="linked-essays">
-                    <h2 className="text-lg font-semibold text-foreground">Related Essays</h2>
-                  </div>
-                  {linkedEssays.map((essay) => (
-                    <div key={essay.id} className="mb-8">
-                      <h3 className="text-base font-semibold text-foreground mb-2">{essay.title}</h3>
+              {/* The page body: the essay linked to this line item, its title
+                  as the first h2, its snippet as the lede, then the essay
+                  itself. It used to sit at the very bottom under a "Related
+                  Essays" heading, below ten empty subsections. Two linked
+                  essays (none today) follow each other in the studio's order. */}
+              {essaysLoading ? (
+                // Skeleton shaped like a short paragraph, not a spinner.
+                <div className="space-y-2" aria-hidden>
+                  <div className="h-4 w-full rounded bg-muted animate-pulse" />
+                  <div className="h-4 w-2/3 rounded bg-muted animate-pulse" />
+                </div>
+              ) : (
+                essays.map((essay) => (
+                  <section key={essay.id} className="mb-12 last:mb-0" data-fsli-essay={essay.slug}>
+                    {/* The body's own measure, so title, lede and prose share
+                        one left edge. */}
+                    <div className="mx-auto w-[728px] max-w-full">
+                      <h2 className="editorial-title mb-3 text-[26px] leading-8">{essay.title}</h2>
                       {essay.snippet && (
-                        <p className="text-sm text-muted-foreground mb-4">{essay.snippet}</p>
-                      )}
-                      {essay.content && (
-                        <ArticleBody content={essay.content} />
+                        <p className="editorial-subtitle mb-8">{essay.snippet}</p>
                       )}
                     </div>
-                  ))}
-                </>
+                    {essay.content && <ArticleBody content={essay.content} />}
+                  </section>
+                ))
               )}
             </div>
 

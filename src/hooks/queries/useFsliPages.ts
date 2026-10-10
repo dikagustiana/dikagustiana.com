@@ -51,19 +51,6 @@ export function useFsliPage(slug: string) {
   });
 }
 
-export function useFsliSections(pageSlug: string) {
-  return useQuery({
-    queryKey: ['fsli-sections', pageSlug],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('fsli_sections')
-        .select('*')
-        .eq('page_slug', pageSlug)
-        .order('sort_order', { ascending: true });
-
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!pageSlug,
-  });
-}
+// useFsliSections is deleted with the fixed outline it filled: fsli_sections
+// holds no written row, and the FSLI page's body is the linked essay
+// (FsliDetail). The table and its rows are left in place.
