@@ -19,10 +19,13 @@ import { supabase } from '@/integrations/supabase/client';
  * order and the hook keeps them as they come; the rest it puts back in date
  * order, so a rank an unstarred essay still holds (an order saved from a
  * panel opened before the unstar) moves nothing. The read stops at twice
- * `limit`, 60 on the homepage against 21 published essays today: the row is
- * the first `limit` rows of the read, and the second `limit` is room for
- * unstarred essays that still hold a rank, which the database sorts ahead of
- * their date.
+ * `limit`, 60 on the homepage against 21 published essays today. With no
+ * rank left on an unstarred essay the row is the read's first `limit` rows;
+ * the database sorts an unstarred essay that keeps one ahead of the newer
+ * unstarred, which pushes them down the read, and the second `limit` is the
+ * room for that. So the row is exact while no more than `limit` published
+ * unstarred essays hold a rank. Only that stale save leaves one, and it
+ * writes no more than the starred its panel listed.
  *
  * `essays.is_selected` is still THE featuring flag. The Finance landing reads
  * it on its own (useFeaturedFinanceEssay) and is not widened by this rule.
