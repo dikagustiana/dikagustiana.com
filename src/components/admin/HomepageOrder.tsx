@@ -1,7 +1,8 @@
 /**
  * The homepage order: the starred essays, in the order the glimpse shows
- * them. The star in the content list decides WHO is on the homepage
- * (essays.is_selected); this panel decides WHERE (essays.selected_rank).
+ * them. Every published essay is on the homepage; the star in the content
+ * list decides WHO leads it (essays.is_selected), this panel decides in
+ * what order (essays.selected_rank), and the unstarred follow newest first.
  * Position 1 is the first column a reader sees. Drafts are listed too, so
  * a piece can be placed before it goes live: it holds its slot and appears
  * the moment it is published.

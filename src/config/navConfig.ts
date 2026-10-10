@@ -79,18 +79,14 @@ export const nextBigThingItems: NavItem[] = NEXT_BIG_THING_THEMES.map(({ id, lab
 }));
 
 export const navSections: NavSection[] = [
-  { label: 'Home', path: '/' },
   /**
-   * About is a TOP-LEVEL door, not a footer link.
-   *
-   * It carries the argument in full — the case, the comparison, the strongest
-   * objection, the limits, the revision of judgment — and it was reachable
-   * only from the footer, which meant the one page that says whether to trust
-   * the work was the hardest page to find. It sits second because a stranger
-   * who wants to know who is writing looks next to Home, not at the end of a
-   * row of subjects.
+   * Home carries the argument in full — the case, the comparison, the
+   * strongest objection, the limits, the revision of judgment — under the
+   * glimpse. It used to be About's, the second door in this row; the owner
+   * removed About on 10 October 2026 (decision D4(a)) and the argument moved
+   * to the page every reader already lands on, so there is no About door.
    */
-  { label: 'About', path: '/about' },
+  { label: 'Home', path: '/' },
   {
     label: 'Accounting',
     basePath: '/accounting',

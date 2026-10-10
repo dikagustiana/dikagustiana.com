@@ -42,7 +42,7 @@ const marks = () =>
   Array.from(document.querySelectorAll<SVGGElement>('.cp-marks--green .cp-mark, .cp-marks--reindustrialisation .cp-mark'));
 const hoverLabel = () => document.querySelector('[data-chain-hover]');
 
-beforeEach(() => window.history.replaceState({}, '', '/about'));
+beforeEach(() => window.history.replaceState({}, '', '/'));
 
 describe('the reading order of a shift', () => {
   it('numbers from one, contiguously, in the order the generator laid the marks out — not the order of the data file', () => {
@@ -367,7 +367,7 @@ describe('the map in the address bar', () => {
   });
 
   it('opens an overlay and a reading straight from the address, on the first paint', async () => {
-    window.history.replaceState({}, '', '/about?lens=green&distance=finance&node=energy');
+    window.history.replaceState({}, '', '/?lens=green&distance=finance&node=energy');
     mount(<ChainPlate links={[]} />);
     const plate = document.querySelector('.chain-plate') as HTMLElement;
     expect(plate.dataset.shift).toBe('green');
@@ -378,7 +378,7 @@ describe('the map in the address bar', () => {
   });
 
   it('leaves a plain visit alone, and carries the state from the first change onwards', async () => {
-    window.history.replaceState({}, '', '/about');
+    window.history.replaceState({}, '', '/');
     mount(<ChainPlate links={[]} />);
     expect(window.location.search).toBe('');
 
@@ -391,7 +391,7 @@ describe('the map in the address bar', () => {
   });
 
   it('refuses an address that names an element the overlay does not mark, and cleans the parameter away', () => {
-    window.history.replaceState({}, '', '/about?lens=reindustrialisation&node=recovery');
+    window.history.replaceState({}, '', '/?lens=reindustrialisation&node=recovery');
     mount(<ChainPlate links={[]} />);
     expect((document.querySelector('.chain-plate') as HTMLElement).dataset.shift).toBe('reindustrialisation');
     expect(screen.queryByRole('region', { name: 'Recovery' })).not.toBeInTheDocument();
@@ -399,14 +399,14 @@ describe('the map in the address bar', () => {
   });
 
   it('refuses a marked element named with no overlay on at all', () => {
-    window.history.replaceState({}, '', '/about?node=aggregation');
+    window.history.replaceState({}, '', '/?node=aggregation');
     mount(<ChainPlate links={[]} />);
     expect(screen.queryByRole('region', { name: 'Aggregation' })).not.toBeInTheDocument();
     expect(window.location.search).toBe('');
   });
 
   it('still opens a joint or a layer named with no overlay, because those are doors at all times', () => {
-    window.history.replaceState({}, '', '/about?node=credit');
+    window.history.replaceState({}, '', '/?node=credit');
     mount(<ChainPlate links={[]} />);
     expect(screen.getByRole('region', { name: 'Working capital and trade credit' })).toBeInTheDocument();
     expect(window.location.search).toBe('?node=credit');

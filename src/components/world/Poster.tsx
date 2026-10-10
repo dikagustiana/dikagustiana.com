@@ -1,5 +1,6 @@
 /**
- * The world's slot on the landing and About pages, and its first paint
+ * The world's slot on the landing page (and on About, until the owner
+ * removed it on 2026-10-10), and its first paint
  * (gate 4, O8). Only ever rendered with the flag on; with it off the chain
  * wrappers never reach this module and Rollup drops it.
  *

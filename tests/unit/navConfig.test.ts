@@ -92,6 +92,11 @@ describe('navConfig', () => {
     expect(labels).not.toContain('The Green Transition');
   });
 
+  it('has no About door: the argument it carried is on Home (owner decision D4(a), 2026-10-10)', () => {
+    expect(navSections.map(s => s.label)).not.toContain('About');
+    expect(navSections[0]).toEqual({ label: 'Home', path: '/' });
+  });
+
   it('collapses only dropdowns that have a landing page to collapse to', () => {
     for (const section of navSections.filter(s => s.essaySection)) {
       expect(section.basePath, `${section.label} has essaySection but no basePath`).toBeTruthy();

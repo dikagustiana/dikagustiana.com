@@ -138,12 +138,12 @@ test.beforeEach(async ({ page }) => seed(page));
 /**
  * Thirty seconds, after the owner deleted the entrance that used to run them.
  *
- * The hero, its artwork, the argument block and the reading path are gone from
- * the landing page; the map is the first thing under the header, and the
- * reader goes deeper into a relation through the essays. So the thirty-second
+ * The hero, its artwork and the argument block are gone from the top of the
+ * landing page; the map is the first thing under the header, and the reader
+ * goes deeper into a relation through the essays. So the thirty-second
  * journey is: meet the structure, pick something, land on a written piece.
- * The argument is not deleted — About still carries it, which the next test
- * checks — it is no longer the door.
+ * The argument is not deleted — it sits under the glimpse, which the next
+ * test checks (owner decision D4(a), 2026-10-10) — it is no longer the door.
  */
 test('thirty seconds: the map is the entrance, and a completed piece is one click away', async ({ page }) => {
   await page.goto('/');
@@ -151,9 +151,15 @@ test('thirty seconds: the map is the entrance, and a completed piece is one clic
   // Nothing precedes the map, and no call to action stands in front of it.
   await expect(page.getByRole('heading', { name: 'The industry chain', exact: true })).toBeVisible();
   await expect(page.getByRole('link', { name: /Start with the argument/i })).toHaveCount(0);
-  await expect(page.locator('#the-argument')).toHaveCount(0);
   const first = page.locator('main :is(h1, h2, h3)').first();
   expect(await first.textContent()).toBe('The industry chain');
+  // The argument is on the page, but after the map and the glimpse, not before.
+  const argumentFollowsMap = await page.evaluate(() => {
+    const map = document.querySelector('#industry-chain');
+    const argument = document.querySelector('#the-argument');
+    return !!map && !!argument && !!(map.compareDocumentPosition(argument) & Node.DOCUMENT_POSITION_FOLLOWING);
+  });
+  expect(argumentFollowsMap).toBe(true);
 
   const flagship = page
     .getByRole('link', { name: /Indonesia.s Reindustrialization Bet/i })
@@ -165,7 +171,7 @@ test('thirty seconds: the map is the entrance, and a completed piece is one clic
 });
 
 test('three minutes: the scope, the comparison, the objection and the limits are all on the page', async ({ page }) => {
-  await page.goto('/about');
+  await page.goto('/');
   const argument = page.locator('#the-argument');
   for (const heading of [
     'The case it is made on',
@@ -185,6 +191,36 @@ test('three minutes: the scope, the comparison, the objection and the limits are
   await expect(page.locator('#changed-my-mind')).toBeVisible();
 });
 
+/**
+ * About was removed by owner decision on 10 October 2026 and its argument
+ * moved to the homepage. A link written before that still lands: on Home,
+ * with the map's address and the fragment it carried.
+ */
+test('an old About link lands on the homepage, with the address and the fragment it carried', async ({ page }) => {
+  await page.goto('/about');
+  await expect.poll(() => new URL(page.url()).pathname).toBe('/');
+  await expect(page.getByRole('heading', { name: 'The industry chain', exact: true })).toBeVisible();
+  await expect(page.locator('#the-argument')).toBeVisible();
+  await expect(page.locator('#changed-my-mind')).toBeVisible();
+
+  await page.goto('/about?lens=green&distance=finance&node=energy');
+  await expect.poll(() => new URL(page.url()).pathname).toBe('/');
+  expect(Object.fromEntries(new URL(page.url()).searchParams)).toEqual({ lens: 'green', distance: 'finance', node: 'energy' });
+  await expect(page.getByRole('region', { name: 'Energy' })).toBeVisible();
+  await expect(page.locator('.chain-plate')).toHaveAttribute('data-shift', 'green');
+
+  // The fragment is kept, and the page goes to it once it has drawn, clear
+  // of the sticky header: the section is thousands of pixels down on Home.
+  await page.goto('/about#changed-my-mind');
+  await expect.poll(() => new URL(page.url()).pathname).toBe('/');
+  expect(new URL(page.url()).hash).toBe('#changed-my-mind');
+  const heading = page.locator('#changed-my-mind h2');
+  await expect(heading).toBeInViewport();
+  await expect
+    .poll(() => page.evaluate(() => document.querySelector('#changed-my-mind h2')!.getBoundingClientRect().top - document.querySelector('header')!.getBoundingClientRect().bottom))
+    .toBeGreaterThanOrEqual(0);
+});
+
 test('one substantial reading: the completed argument carries its own objection', async ({ page }) => {
   await page.goto('/the-next-big-thing/economy/indonesias-reindustrialization-bet');
   const main = page.locator('main');
@@ -195,7 +231,7 @@ test('one substantial reading: the completed argument carries its own objection'
 
 test('map reading: the basis is declared, distance changes the work, and the state can be sent', async ({ page, context }) => {
   await page.setViewportSize({ width: 1280, height: 1000 });
-  await page.goto('/about');
+  await page.goto('/');
   await page.getByRole('button', { name: 'green transition', exact: true }).click();
   await page.getByRole('button', { name: /Green transition · Energy · Moving$/ }).first().click();
 

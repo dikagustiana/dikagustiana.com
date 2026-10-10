@@ -14,10 +14,10 @@ test.beforeEach(async ({ page }) => {
 });
 
 test('homepage renders featured essays returned by the backend', async ({ page }) => {
-  // The homepage's essay strip is the SELECTED mechanism (essays.is_selected,
-  // published only — see useSelectedEssays). This test predated it and
-  // asserted the old recency-based "Recent Analysis" heading; the seeded row
-  // now carries the featuring fields the real query filters on.
+  // The homepage's essay strip is every published essay, the starred ones
+  // (essays.is_selected) first — see useSelectedEssays. This test predated
+  // it and asserted the old recency-based "Recent Analysis" heading; the
+  // seeded row carries the fields the real queries filter on.
   const seededTitle = 'Seeded Featured Essay For E2E';
   await mockSupabase(page, {
     tables: {

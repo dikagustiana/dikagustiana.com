@@ -11,7 +11,7 @@ import { mockSupabase } from './mockSupabase';
 // (no seed data) to prove the page degrades gracefully instead of crashing.
 const PUBLIC_ROUTES: { path: string; name: string }[] = [
   { path: '/', name: 'Home' },
-  { path: '/about', name: 'About' },
+  { path: '/about', name: 'About (redirects to /)' },
   { path: '/auth', name: 'Auth' },
   { path: '/accounting', name: 'Accounting' },
   { path: '/accounting/fsli', name: 'FSLI list' },
@@ -77,7 +77,8 @@ for (const route of PUBLIC_ROUTES) {
 /**
  * HEADER CAPACITY. The header row is sized in rem and its seven labels grow
  * with the reader's default font, in a flex row that used not to wrap. Two
- * defects, both measured on /about on 14 September 2026:
+ * defects, both measured on the About page on 14 September 2026 (the row is
+ * checked on Home since the owner removed About on 10 October 2026):
  *
  *   at 1024px and the default font, the row could not hold seven labels and
  *   flexbox compressed them — "The Green Transition" ran to three lines inside
@@ -95,7 +96,7 @@ test.describe('the header holds its navigation', () => {
     for (const width of [1024, 1280, 1348, 1440]) {
       test(`no sideways scroll at ${width}px with a ${font}px root font`, async ({ page }) => {
         await page.setViewportSize({ width, height: 900 });
-        await page.goto('/about');
+        await page.goto('/');
         if (font !== 16) await page.addStyleTag({ content: `html{font-size:${font}px}` });
         await page.waitForTimeout(500);
 

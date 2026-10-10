@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate, useParams } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useParams } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { RequireAdmin } from "@/components/auth/RequireAdmin";
@@ -14,7 +14,6 @@ import { Analytics } from "@vercel/analytics/react";
 // Pages — lazy-loaded so each route ships its own chunk and heavy libraries
 // (editor, charts, math) only download when a route that needs them is visited.
 const Index = lazy(() => import("./pages/Index"));
-const About = lazy(() => import("./pages/About"));
 const Auth = lazy(() => import("./pages/Auth"));
 const Accounting = lazy(() => import("./pages/Accounting"));
 const GreenTransition = lazy(() => import("./pages/GreenTransition"));
@@ -133,6 +132,17 @@ const CapitalConditionLegacyRedirect = () => {
   );
 };
 
+// About was removed by owner decision on 10 October 2026; its argument and
+// its revision of judgment now sit on the homepage under the glimpse. An old
+// link keeps what it carried: the map's address (?lens=&distance=&node=, the
+// contract in useChainUrl.ts, which the homepage's map reads too) and a
+// #the-argument or #changed-my-mind fragment, both of which mean the same
+// thing on /.
+const AboutRedirect = () => {
+  const { search, hash } = useLocation();
+  return <Navigate to={{ pathname: '/', search, hash }} replace />;
+};
+
 const RouteFallback = () => (
   <div className="flex items-center justify-center min-h-screen">
     <LoadingState />
@@ -154,7 +164,7 @@ const App = () => (
             {/* Core */}
             <Route path="/" element={<Index />} />
             <Route path="/index" element={<Navigate to="/" replace />} />
-            <Route path="/about" element={<About />} />
+            <Route path="/about" element={<AboutRedirect />} />
             <Route path="/auth" element={<Auth />} />
 
             {/* Accounting */}
