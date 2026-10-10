@@ -6,6 +6,13 @@
 -- rows it lists today; FinanceLanding draws whatever finance_sections holds,
 -- so either side of this migration renders.
 --
+-- ORDER: apply it only once the Production deploy built with
+-- VITE_FIA_LIVE=true (VITE_FIA_PREVIEW unset) is live and
+-- /finance/finance-in-action shows the slate, or in the same sitting as that
+-- redeploy. The card appears the moment the row exists, with no deploy; on a
+-- build without the flag it opens the legacy FinanceInActionIndex, "0 of 0
+-- models available", the page D12 rejects.
+--
 -- The card opens /finance/finance-in-action: the landing links every row to
 -- /finance/<slug>, and App.tsx declares /finance/finance-in-action ahead of
 -- /finance/:track, so the card reaches the Finance in Action index and never
