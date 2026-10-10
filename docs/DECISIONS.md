@@ -5,6 +5,63 @@ alternatives. Newest first.
 
 ---
 
+# 2026-10-10 — The consolidation working paper is the owner's PSAK 338 workbook, in a viewer
+
+Branch `sweep/e-workbook`, base `main` @ `0487609`. The October 2026 site sweep, phase E (PRD R4).
+The owner's decisions it applies, D8 to D11 and D15 to D17, are in `docs/sweep-2026-10/DECISIONS.md`
+(phase 0).
+
+## The viewer replaces the hand-built working paper — supersedes 2026-10-09
+
+This supersedes "The consolidation working paper was rebuilt, not patched" in the 2026-10-09
+public-site remediation entry below. Section 4 of `/accounting/consolidated-reporting` was a
+four-entity table whose combined, elimination and consolidated figures were literals in
+`src/data/consolidationWorkingPaper.ts`; that file, `AccountRow` and
+`tests/unit/consolidationWorkingPaper.test.ts` are deleted, and the entry stays as history. In their
+place is the owner's dummy workbook, `docs/consolidation/source/pt-dummy-psak-338.xlsx` (PT Dummy - C
+and its subsidiaries, 2022 to 2024), built by `npm run build:workbook` into
+`public/consolidation/pt-dummy-psak-338.workbook.json` and read in `src/components/workbook/`: sheet
+tabs, the name box and formula bar, a grid that renders only what is in view, an inspector with
+precedents, dependents and cross-sheet jumps with Back, and the place in the URL (`?sheet=&cell=`).
+Nothing is edited and nothing recalculated; every figure is Excel's cached value, and the Method
+panel says so in R4.3's words. The committed workbook is the cleaned copy (D15, D16): no number,
+formula or cached value differs from the owner's file.
+
+## D8 to D11 as built
+
+- **D8, the 49 error cells,** show as Excel shows them (43 `#REF!`, 6 `#VALUE!`) on an error fill,
+  are said in words in the inspector, and are listed by sheet in the Method panel. The list lives in
+  `src/lib/workbook/method.ts`, so the panel stands when the JSON does not load;
+  `tests/unit/workbookViewer.test.tsx` holds it to the JSON.
+- **D9:** `Adjustment Consolaa` (hidden), `Face Report` and `WP Consol` (empty) are not published,
+  and the build fails unless its rule drops exactly those three. A formula that reads one names it
+  and says it is not published.
+- **D10:** the red type (an adjustment or a reviewer's flag) and the blue (a manual input) are kept,
+  and the legend says what each means. The file writes red and blue two ways each, so the viewer has
+  1,532 red and 32 blue cells, not the PRD's 969 and 30, which counted one way only
+  (`docs/consolidation/build-report.md`, with ten of each for the owner to check the meaning).
+- **D11:** Download .xlsx saves the committed workbook itself, as
+  `pt-dummy-psak-338-working-paper.xlsx`. The build emits it as a hashed asset; nothing is generated
+  in the browser.
+
+## Light only
+
+The viewer follows the site's tokens, and the site is light only (2026-10-09, "Light only,
+stated"). Its four new tokens (`--wb-red`, `--wb-blue`, `--wb-error-bg`, `--wb-error-fg`) have no
+dark values, and its precedent and dependent fills are Finance in Action's. R4.5's dark mode "from
+the site's tokens" is therefore no dark mode, and phase E has no dark-mode screenshot.
+
+## The JSON is fetched, never bundled
+
+One file of 1,701,069 bytes (309 kB gzipped), under R4.7's 4 MB, so not split per sheet. It is
+fetched with the viewer's own chunk when the section comes within 600 px of the viewport, or at
+once when the URL names a sheet or a cell, and such a link opens the page at the viewer. If either
+fails, the section says so, and the Method panel and the download, which need neither, stay.
+`tests/e2e/workbook.spec.ts` measures a click on a cell at 7 to 14 ms to the formula bar and under
+21 ms to the next frame (R4.7 asks for under 50 ms).
+
+---
+
 # 2026-10-09 — The homepage below the map is one row: the glimpse
 
 Branch `claude/confident-ride-d354er`, base `main` @ `1df681a`. The owner's request, verbatim: "aku
