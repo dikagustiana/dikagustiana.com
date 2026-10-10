@@ -44,6 +44,17 @@ formula or cached value differs from the owner's file.
   `pt-dummy-psak-338-working-paper.xlsx`. The build emits it as a hashed asset; nothing is generated
   in the browser.
 
+## The PRD's cell count does not reconcile with the file
+
+R4.8 asks the build test to hold the workbook's sheet, cell and formula counts to the profile in
+PRD §1.2.4. Sheets (33) and formulas (15,485) match. The PRD's "~17 ribu sel" does not: the file
+has 31,843 cells with a value before sanitising (15,485 formulas and 16,358 constants), 31,789 on
+the published sheets. exceljs and, independently, openpyxl count the same; 119 of the cells hold an
+empty text. The ~17,000 is close to the constants alone, which may be what was counted. `tests/unit/workbookBuild.test.ts`
+holds the measured counts, and checks that every cell with a value or a formula on a published sheet
+reaches the JSON with its formula; `docs/consolidation/build-report.md` sets the two figures side
+by side.
+
 ## Light only
 
 The viewer follows the site's tokens, and the site is light only (2026-10-09, "Light only,

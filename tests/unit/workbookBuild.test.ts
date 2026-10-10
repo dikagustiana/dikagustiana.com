@@ -2,7 +2,8 @@
 /**
  * The working paper's data (PRD site sweep 2026-10, R4.1, R4.2, R4.8): the committed JSON and build
  * report are what the builder makes of the committed xlsx, byte for byte; the JSON's cached values are
- * the ones Excel stored; and the sanitising is D9's, no more. The xlsx is parsed once for the file.
+ * the ones Excel stored, and every cell with a value reaches it; and the sanitising is D9's, no more.
+ * The xlsx is parsed once for the file.
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -72,18 +73,50 @@ describe('the working paper build', () => {
     }
   });
 
-  it('counts 33 sheets and 15,485 formulas before sanitising, as the PRD profiles the workbook', () => {
+  it('counts 33 sheets, 31,843 cells with a value and 15,485 formulas before sanitising', () => {
     expect(loaded.workbook.worksheets).toHaveLength(33);
     expect(committed.sourceSheets).toBe(33);
     let formulas = 0;
+    let cells = 0;
     for (const ws of loaded.workbook.worksheets) {
-      ws.eachRow((row) => row.eachCell((c) => void (c.type === ExcelJS.ValueType.Formula && formulas++)));
+      ws.eachRow((row) =>
+        row.eachCell((c) => {
+          // A merged range's other cells repeat its top-left: one cell, as Excel counts it.
+          if (c.type === ExcelJS.ValueType.Merge) return;
+          cells++;
+          if (c.type === ExcelJS.ValueType.Formula) formulas++;
+        }),
+      );
     }
     expect(formulas).toBe(15485);
-    // The hidden sheet's 9 formulas are the difference.
+    // The PRD's profile (§1.2.4) reads "~17 ribu sel"; the file has 31,843, as the build report records.
+    expect(cells).toBe(31843);
+    expect(built.report).toContain('| Cells | ~17,000 | 31,843 | differs');
+    // The hidden sheet's 54 cells and 9 formulas are the difference.
     const published = committed.sheets.reduce((n, s) => n + s.cells.filter((c) => c.f !== undefined).length, 0);
     expect(published).toBe(committed.counts.formulas);
     expect(published).toBe(15476);
+    expect(committed.sheets.reduce((n, s) => n + s.cells.filter((c) => c.v !== undefined || c.f !== undefined).length, 0)).toBe(committed.counts.cells);
+    expect(committed.counts.cells).toBe(31789);
+  });
+
+  it('publishes every cell exceljs reads with a value or a formula on a published sheet, with that formula, and no other', () => {
+    for (const sheet of committed.sheets) {
+      const json = new Map(sheet.cells.filter((c) => c.v !== undefined || c.f !== undefined).map((c) => [c.a, c]));
+      const read = new Set<string>();
+      loaded.workbook.getWorksheet(sheet.name)!.eachRow((row) =>
+        row.eachCell((c) => {
+          if (c.type === ExcelJS.ValueType.Merge) return;
+          const where = `${sheet.name}!${c.address}`;
+          read.add(c.address);
+          const cell = json.get(c.address);
+          expect(cell, where).toBeDefined();
+          expect(cell!.f, where).toBe(c.type === ExcelJS.ValueType.Formula ? c.formula : undefined);
+          if (c.type === ExcelJS.ValueType.Number || c.type === ExcelJS.ValueType.String) expect(cell!.v, where).toBe(c.value);
+        }),
+      );
+      expect([...json.keys()].filter((a) => !read.has(a)), sheet.name).toEqual([]);
+    }
   });
 
   it("reads where a sheet's view starts, and names the one sheet frozen while scrolled as a known difference", () => {
