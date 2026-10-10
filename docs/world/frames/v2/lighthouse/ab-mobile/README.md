@@ -4,4 +4,4 @@
 
 The script names its two pages `off` and `on`; here both have the world flag on: **`off` is v1** (`main` at `edc944a`)
 and **`on` is v2** (phase D's head). Five rounds, each measuring both once, so the machine's drift falls on both alike.
-See `docs/world/report-v2.md` §4.
+See `docs/world/report-v2.md` §5.
