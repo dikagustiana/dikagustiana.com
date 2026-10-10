@@ -105,6 +105,8 @@ After sanitising: 30 sheets. ␠ marks a trailing space that is part of the shee
 | 32 | Equity & Adjustment Consol | A1:T50 | 330 | 211 | 0 | — |
 | 33 | WP Investment | C2:BK48 | 498 | 259 | 0 | — |
 
+A known difference, CF 23 as Restated: Excel freezes 8 rows and 5 columns with the view starting at A5, so its frozen rows are 5 to 12, rows 1 to 4 are out of view, and its scrolling part starts at row 13. The viewer shows every row and counts the split from A1: it freezes rows 1 to 8 and columns A to E, and scrolls from row 9.
+
 ## Error cells (D8): 49
 
 Shown in the viewer as error cells and listed in its Method panel. Correcting them is the owner's work in Excel.

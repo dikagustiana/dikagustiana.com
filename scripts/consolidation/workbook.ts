@@ -14,6 +14,7 @@
 import ExcelJS from 'exceljs';
 import type { Cell, Workbook, Worksheet } from 'exceljs';
 import type { PublishedWorkbook, WorkbookCell, WorkbookColumn, WorkbookRow, WorkbookSheet, WorkbookStyle } from '../../src/lib/workbook/types.ts';
+import { readZip } from './sanitize-workbook.ts';
 
 export const SOURCE_PATH = 'docs/consolidation/source/pt-dummy-psak-338.xlsx';
 export const OUTPUT_PATH = 'public/consolidation/pt-dummy-psak-338.workbook.json';
@@ -44,6 +45,8 @@ export interface Loaded {
   workbook: Workbook;
   /** Defined names in the source, all dropped (R4.2). */
   definedNames: number;
+  /** By sheet name, where the sheet's view starts when it starts past A1 (see viewStarts). */
+  viewStarts: Map<string, string>;
 }
 
 export async function loadSource(bytes: Buffer): Promise<Loaded> {
@@ -59,7 +62,37 @@ export async function loadSource(bytes: Buffer): Promise<Loaded> {
     },
   });
   await workbook.xlsx.load(bytes);
-  return { workbook, definedNames };
+  return { workbook, definedNames, viewStarts: viewStarts(bytes) };
+}
+
+const unescapeXml = (s: string): string =>
+  s.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&amp;/g, '&');
+
+/**
+ * Where each sheet's view starts, by sheet name, when it starts past A1: the `topLeftCell` of the sheet's
+ * first `<sheetView>`, which exceljs does not read (its `topLeftCell` is the frozen pane's scroll position).
+ * A sheet frozen with its view scrolled keeps the rows and columns above and left of that cell out of view,
+ * and its frozen rows start there, not at row 1.
+ */
+function viewStarts(bytes: Buffer): Map<string, string> {
+  const parts = new Map(readZip(bytes).map((e) => [e.name, e.data]));
+  const text = (name: string): string => parts.get(name)?.toString('utf8') ?? '';
+  const targets = new Map<string, string>();
+  for (const [rel] of text('xl/_rels/workbook.xml.rels').matchAll(/<Relationship\b[^>]*>/g)) {
+    const id = /\bId="([^"]+)"/.exec(rel)?.[1];
+    const target = /\bTarget="([^"]+)"/.exec(rel)?.[1];
+    if (id && target) targets.set(id, target.replace(/^\/?(xl\/)?/, 'xl/'));
+  }
+  const starts = new Map<string, string>();
+  for (const [sheet] of text('xl/workbook.xml').matchAll(/<sheet\b[^>]*>/g)) {
+    const name = /\bname="([^"]*)"/.exec(sheet)?.[1];
+    const part = targets.get(/\br:id="([^"]+)"/.exec(sheet)?.[1] ?? '');
+    if (name === undefined || !part) continue;
+    const view = /<sheetView\b[^>]*>/.exec(text(part))?.[0] ?? '';
+    const start = /\btopLeftCell="([A-Z]+\d+)"/.exec(view)?.[1];
+    if (start && start !== 'A1') starts.set(unescapeXml(name), start);
+  }
+  return starts;
 }
 
 /* ── Font colour (D10) ── */
@@ -220,6 +253,13 @@ interface SheetProfile {
   excluded: 'hidden' | 'empty' | null;
 }
 
+/** A sheet frozen with its view scrolled past A1: where the view starts, and Excel's split. */
+interface ScrolledFreeze {
+  sheet: string;
+  start: string;
+  freeze: { rows: number; cols: number };
+}
+
 interface CellNote {
   ref: string;
   value: string;
@@ -235,7 +275,7 @@ export interface Built {
   book: PublishedWorkbook;
 }
 
-export function buildWorkbook({ workbook, definedNames }: Loaded, meta: SourceMeta): Built {
+export function buildWorkbook({ workbook, definedNames, viewStarts }: Loaded, meta: SourceMeta): Built {
   const theme = themeColors((workbook as unknown as { _themes?: Record<string, string> })._themes?.theme1);
   const styles: WorkbookStyle[] = [];
   const styleIndex = new Map<string, number>();
@@ -260,6 +300,7 @@ export function buildWorkbook({ workbook, definedNames }: Loaded, meta: SourceMe
   const names = new Map<string, { first: string; count: number }>();
   let comments = 0;
   const sheets: WorkbookSheet[] = [];
+  const scrolled: ScrolledFreeze[] = [];
 
   workbook.worksheets.forEach((ws: Worksheet, i: number) => {
     const order = i + 1;
@@ -374,6 +415,12 @@ export function buildWorkbook({ workbook, definedNames }: Loaded, meta: SourceMe
       if (entry.height !== undefined || entry.hidden) rows.push(entry);
     }
     const view = ws.views?.[0] as { state?: string; xSplit?: number; ySplit?: number } | undefined;
+    const freeze = view?.state === 'frozen' ? { rows: view.ySplit ?? 0, cols: view.xSplit ?? 0 } : null;
+    // A view frozen while scrolled (CF 23 as Restated starts at A5 with 8 rows frozen) keeps Excel's frozen
+    // rows from its start, and the rows above out of view. The JSON keeps Excel's split; the report names
+    // the sheet, since the viewer, which shows every row, freezes from A1.
+    const start = viewStarts.get(ws.name);
+    if (freeze && start) scrolled.push({ sheet: ws.name, start, freeze });
 
     sheets.push({
       name: ws.name,
@@ -385,7 +432,7 @@ export function buildWorkbook({ workbook, definedNames }: Loaded, meta: SourceMe
       columns,
       rows,
       merges,
-      freeze: view?.state === 'frozen' ? { rows: view.ySplit ?? 0, cols: view.xSplit ?? 0 } : null,
+      freeze,
       cells,
     });
   });
@@ -418,7 +465,7 @@ export function buildWorkbook({ workbook, definedNames }: Loaded, meta: SourceMe
   if (Buffer.byteLength(json) > MAX_BYTES) {
     throw new Error(`build-workbook: ${Buffer.byteLength(json)} bytes is over ${MAX_BYTES}; split it per sheet (R4.7) before publishing.`);
   }
-  const report = buildReport({ meta, definedNames, profile, functions, colours, errorCells, red, blue, workNotes, names, comments, book, bytes: Buffer.byteLength(json) });
+  const report = buildReport({ meta, definedNames, profile, functions, colours, errorCells, red, blue, workNotes, names, comments, scrolled, book, bytes: Buffer.byteLength(json) });
   return { json, report, book };
 }
 
@@ -477,6 +524,7 @@ interface ReportInput {
   workNotes: CellNote[];
   names: Map<string, { first: string; count: number }>;
   comments: number;
+  scrolled: ScrolledFreeze[];
   book: PublishedWorkbook;
   bytes: number;
 }
@@ -540,6 +588,14 @@ function buildReport(r: ReportInput): string {
     L.push(`| ${s.order} | ${s.name.replace(/ $/, '␠')} | ${s.dimension} | ${n(p.cells)} | ${n(p.formulas)} | ${s.merges.length} | ${s.freeze ? `${s.freeze.rows} rows, ${s.freeze.cols} columns` : '—'} |`);
   }
   L.push('');
+  for (const f of r.scrolled.filter((x) => !r.book.excluded.some((e) => e.name === x.sheet))) {
+    const at = decode(f.start);
+    const { rows, cols } = f.freeze;
+    L.push(
+      `A known difference, ${f.sheet}: Excel freezes ${rows} rows and ${cols} columns with the view starting at ${f.start}, so its frozen rows are ${at.row} to ${at.row + rows - 1}${at.row > 1 ? `, rows 1 to ${at.row - 1} are out of view,` : ''} and its scrolling part starts at row ${at.row + rows}. The viewer shows every row and counts the split from A1: it freezes rows 1 to ${rows} and columns A to ${colName(cols)}, and scrolls from row ${rows + 1}.`,
+      '',
+    );
+  }
 
   L.push(`## Error cells (D8): ${r.errorCells.length}`, '');
   L.push('Shown in the viewer as error cells and listed in its Method panel. Correcting them is the owner\'s work in Excel.', '');

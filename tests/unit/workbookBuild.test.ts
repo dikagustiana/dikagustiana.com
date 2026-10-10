@@ -86,6 +86,28 @@ describe('the working paper build', () => {
     expect(published).toBe(15476);
   });
 
+  it("reads where a sheet's view starts, and names the one sheet frozen while scrolled as a known difference", () => {
+    // exceljs reads the frozen pane's scroll position, not the sheet view's own start.
+    expect([...loaded.viewStarts]).toEqual([
+      ['CF 23 as Restated', 'A5'],
+      ['Supplementary CF 24', 'B33'],
+      ['Supplementary CF 23', 'B24'],
+      ['Elimination 2024', 'F35'],
+      ['WP Investment', 'D18'],
+    ]);
+    // Of those, only CF 23 as Restated is frozen: Excel's split is kept, and the report says where it starts.
+    const frozen = committed.sheets.filter((s) => s.freeze).map((s) => [s.name, s.freeze]);
+    expect(frozen).toEqual([
+      ['SOCE', { rows: 7, cols: 3 }],
+      ['CF 24', { rows: 9, cols: 5 }],
+      ['CF 23 as Restated', { rows: 8, cols: 5 }],
+      ['Consol SoFP 24', { rows: 11, cols: 3 }],
+      ['Proforma Adjustment', { rows: 8, cols: 2 }],
+    ]);
+    expect(built.report).toContain('A known difference, CF 23 as Restated: Excel freezes 8 rows and 5 columns with the view starting at A5');
+    expect(built.report.match(/A known difference/g)).toHaveLength(1);
+  });
+
   it('leaves out exactly the hidden sheet and the two empty ones D9 names', () => {
     const names = committed.sheets.map((s) => s.name);
     for (const name of D9_EXCLUDED) expect(names).not.toContain(name);

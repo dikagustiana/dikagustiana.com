@@ -78,7 +78,11 @@ export interface WorkbookSheet {
   rows: WorkbookRow[];
   /** Merged ranges, e.g. `B3:D3`, top-left first. */
   merges: string[];
-  /** The frozen panes: rows above and columns left of the split. Null when nothing is frozen. */
+  /**
+   * The frozen panes: the rows above and the columns left of the split. Null when nothing is frozen. Excel
+   * counts them from where the sheet's view starts, the viewer from A1; the two differ only on a sheet frozen
+   * with its view scrolled, which docs/consolidation/build-report.md names.
+   */
   freeze: { rows: number; cols: number } | null;
   /** Row by row, left to right. */
   cells: WorkbookCell[];
