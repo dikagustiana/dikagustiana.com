@@ -18,11 +18,13 @@ export const WORKBOOK_COPY = {
   lede: 'The full consolidation workbook, sheet by sheet. Click a cell to see its formula and follow where it comes from.',
 
   // Toolbar (PRD R4.3: 'Toolbar (Full screen, Download sesuai D11, "Copy cell address")').
+  /** PRD R4.3, verbatim. */
   fullScreen: 'Full screen',
   /** As Finance in Action's model page words it (src/lib/finance-in-action/copy.ts). */
   download: 'Download .xlsx',
   /** D11: the file a visitor saves. */
   downloadName: 'pt-dummy-psak-338-working-paper.xlsx',
+  /** PRD R4.3, verbatim. */
   copyAddress: 'Copy cell address',
   /** As the share button words it (src/components/editorial/ShareButton.tsx). */
   copied: 'Copied',
@@ -42,12 +44,15 @@ export const WORKBOOK_COPY = {
   legendBlue: 'blue type: a manual input',
   /** OWNER-REPLACEABLE: the viewer shows the rows and columns the workbook hides, their headers hatched. */
   legendHidden: 'hidden in the workbook',
+  /** As Finance in Action's legend is named (src/components/finance-in-action/viewer/model/ModelGrid.tsx). */
   legendLabel: 'Cell legend',
 
   // Sheet tabs, name box and formula bar.
+  /** As Finance in Action's sheet tabs are named (src/components/finance-in-action/viewer/model/ModelGrid.tsx). */
   sheets: 'Sheets',
-  /** PRD R4.3 and R4.4 name these controls. */
+  /** PRD R4.3: 'NameBox + FormulaBar'. */
   nameBox: 'Name box',
+  /** PRD R4.3: 'NameBox + FormulaBar'. */
   formulaBar: 'Formula bar',
   /** PRD R4.4: 'tombol "Back" (riwayat navigasi)'. */
   back: 'Back',
@@ -65,13 +70,17 @@ export const WORKBOOK_COPY = {
   // Inspector (PRD R4.3: 'alamat, nilai terformat, nilai mentah, formula, daftar precedent …, status error').
   /** As Finance in Action names its panel (src/components/finance-in-action/viewer/model/Inspector.tsx). */
   inspector: 'Inspector',
+  /** As Finance in Action's inspector words its close button (same file). */
   closeInspector: 'Close the inspector',
   /** OWNER-REPLACEABLE: the button that opens the inspector on a narrow screen. */
   openInspector: 'Open the inspector',
-  /** PRD R4.3 names these: 'nilai terformat, nilai mentah, formula, daftar precedent'. */
+  /** PRD R4.3: 'nilai terformat' (the formatted value). */
   value: 'Value',
+  /** PRD R4.3: 'nilai mentah' (the raw value). */
   rawValue: 'Raw value',
+  /** PRD R4.3: 'formula'. */
   formula: 'Formula',
+  /** PRD R4.3: 'daftar precedent' (the list of precedents). */
   precedents: 'Precedents',
   /** OWNER-REPLACEABLE: PRD R4.4, 'Dependents (sel yang memakai sel ini) ditampilkan di inspector untuk sheet yang sama'. */
   dependents: 'Dependents on this sheet',
@@ -93,8 +102,9 @@ export const WORKBOOK_COPY = {
   more: (n: number) => `and ${n} more`,
   /** OWNER-REPLACEABLE: a jump button's name for a screen reader. */
   goTo: (address: string) => `Go to ${address}`,
-  /** OWNER-REPLACEABLE: the workbook's font colour on the cell (D10). */
+  /** OWNER-REPLACEABLE: D10, "merah = penyesuaian/perhatian reviewer", said of a red cell in the inspector. */
   fontRed: "Red type in the workbook: an adjustment or a reviewer's flag.",
+  /** OWNER-REPLACEABLE: D10, "biru = input manual", said of a blue cell in the inspector. */
   fontBlue: 'Blue type in the workbook: a manual input.',
   /** OWNER-REPLACEABLE: for a screen reader, in an empty cell's name. */
   empty: 'empty',
@@ -104,9 +114,11 @@ export const WORKBOOK_COPY = {
   loading: 'Loading the workbook…',
   /** OWNER-REPLACEABLE: the viewer's code or the workbook JSON did not load. */
   failedTitle: 'The workbook viewer did not load',
+  /** OWNER-REPLACEABLE: R4.7, what stays when the viewer fails: the Method panel and the download. */
   failedMessage: 'The method below and the .xlsx download do not depend on it.',
 
   // Method panel (PRD R4.6: 'panel Method (sumber …; tahun; sheet yang dikecualikan; 49 sel error sesuai D8; nilai cache)').
+  /** PRD R4.6: 'panel Method'. */
   method: 'Method',
   /** OWNER-REPLACEABLE: the source line; the file is the owner's dummy workbook (docs/consolidation/README.md). */
   methodSource:
@@ -117,6 +129,7 @@ export const WORKBOOK_COPY = {
   methodCached: "Figures are Excel's own calculated values; the viewer does not recalculate.",
   /** OWNER-REPLACEABLE: D9, the sheets left out, listed after it. */
   methodExcluded: 'Sheets left out because the workbook hides them or they hold nothing:',
+  /** D9: 'sheet hidden dan kosong' (hidden and empty sheets), the reason after each sheet's name. */
   excludedReason: { hidden: 'hidden', empty: 'empty' } as const,
   /** OWNER-REPLACEABLE: D8, the error cells, listed after it by sheet. */
   methodErrors: (n: number) => `${n} cells show an Excel error, kept as the workbook has them:`,
