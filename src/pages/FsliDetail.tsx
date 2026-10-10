@@ -52,7 +52,6 @@ export default function FsliDetail() {
   // They ARE the page body.
   const {
     data: linkedEssays,
-    isLoading: essaysLoading,
     isError: essaysError,
     refetch: refetchEssays,
   } = useFsliEssayBodies(slug || '');
@@ -60,6 +59,11 @@ export default function FsliDetail() {
   // body and could put the covered-by sentence in its place. Rows from an
   // earlier read, if there are any, still stand.
   const essaysFailed = essaysError && !linkedEssays;
+  // Nor is a read still waiting for its rows. isLoading is false for one the
+  // query has paused because the browser is offline ("Try again" pressed
+  // offline, or a retry the connection dropped under), so only rows count as
+  // an answer.
+  const essaysLoading = !linkedEssays && !essaysFailed;
   const essays = useMemo(() => linkedEssays ?? [], [linkedEssays]);
 
   // "On this page": the essay's h2/h3 headings. The ids are minted here, for

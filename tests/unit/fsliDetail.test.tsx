@@ -11,7 +11,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider, onlineManager } from '@tanstack/react-query';
 import { HelmetProvider } from 'react-helmet-async';
 import type { ReactNode } from 'react';
 
@@ -379,6 +379,30 @@ describe('FSLI page whose essay read fails', () => {
     renderAt('cash-non-current');
     await screen.findByText('Something went wrong');
     expect(main()).not.toHaveTextContent('Covered in');
+  });
+
+  describe('retried while the browser is offline', () => {
+    // The query pauses the retry until the connection is back: no rows, no
+    // error, and not "loading" by isLoading's account either.
+    afterEach(() => {
+      act(() => onlineManager.setOnline(true));
+    });
+
+    it('keeps the body\'s place until the essay arrives', async () => {
+      failing = new Set(['essays']);
+      renderAt('cash');
+      await screen.findByText('Something went wrong');
+      act(() => onlineManager.setOnline(false));
+      failing = new Set();
+      fireEvent.click(screen.getByRole('button', { name: /Try again/ }));
+      await waitFor(() => expect(screen.queryByText('Something went wrong')).toBeNull());
+      expect(main().querySelector('.animate-pulse')).not.toBeNull();
+      expect(main().querySelector('hr')).not.toBeNull();
+
+      act(() => onlineManager.setOnline(true));
+      await screen.findByRole('heading', { level: 2, name: 'What Cash Is' });
+      expect(main().querySelector('.animate-pulse')).toBeNull();
+    });
   });
 });
 
