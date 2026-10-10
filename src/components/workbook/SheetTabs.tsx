@@ -67,7 +67,7 @@ export function SheetTabs({ id, sheets, active, controls, onSelect }: SheetTabsP
               'min-h-9 flex-none whitespace-pre rounded-t-md border border-b-0 border-border px-3 text-[13px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring [@media(pointer:coarse)]:min-h-11',
               selected
                 ? 'bg-popover font-semibold text-foreground shadow-[inset_0_2px_0_hsl(var(--accent))]'
-                : 'bg-secondary font-medium text-muted-foreground hover:text-foreground',
+                : 'bg-background font-medium text-muted-foreground hover:text-foreground',
             )}
           >
             {name}

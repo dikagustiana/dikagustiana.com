@@ -19,7 +19,7 @@ const ITEMS: { chip: string; className: string; label: string }[] = [
   { chip: SAMPLE, className: LOOK.blue, label: COPY.legendBlue },
   { chip: `${LOOK.precedent.glyph} D9`, className: cn(LOOK.precedent.className, LOOK.precedentOutline), label: LOOK.precedent.label },
   { chip: `${LOOK.dependent.glyph} D9`, className: LOOK.dependent.className, label: LOOK.dependent.label },
-  { chip: 'C', className: 'wb-hidden bg-secondary italic text-muted-foreground', label: COPY.legendHidden },
+  { chip: 'C', className: 'wb-hidden bg-background italic text-muted-foreground', label: COPY.legendHidden },
 ];
 
 export function Legend({ className }: { className?: string }) {

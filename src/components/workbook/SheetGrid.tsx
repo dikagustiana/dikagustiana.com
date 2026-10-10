@@ -383,7 +383,7 @@ export function SheetGrid({ id, model, styles, selected, marks, onSelect, onActi
           title={hidden ? COPY.hiddenHeader(name) : undefined}
           className={cn(
             'absolute top-0 flex h-full items-center justify-center border-b border-r border-border text-[11px]',
-            c === selected.col ? 'bg-border font-semibold text-foreground' : 'bg-secondary text-muted-foreground',
+            c === selected.col ? 'bg-border font-semibold text-foreground' : 'bg-background text-muted-foreground',
             hidden && 'wb-hidden italic',
           )}
           style={{ left: colLeft[c] - x0, width: colLeft[c + 1] - colLeft[c] }}
@@ -404,7 +404,7 @@ export function SheetGrid({ id, model, styles, selected, marks, onSelect, onActi
           title={hidden ? COPY.hiddenHeader(String(r)) : undefined}
           className={cn(
             'absolute left-0 flex w-full items-center justify-center border-b border-r border-border text-[11px]',
-            r === selected.row ? 'bg-border font-semibold text-foreground' : 'bg-secondary text-muted-foreground',
+            r === selected.row ? 'bg-border font-semibold text-foreground' : 'bg-background text-muted-foreground',
             hidden && 'wb-hidden italic',
           )}
           style={{ top: rowTop[r] - y0, height: rowTop[r + 1] - rowTop[r] }}
@@ -444,7 +444,7 @@ export function SheetGrid({ id, model, styles, selected, marks, onSelect, onActi
       <div className="relative" style={{ width: rowHeadW + sheetW, height: HEAD_H + sheetH }}>
         {/* The column letters */}
         <div aria-hidden="true" className="sticky top-0 z-[6] flex" style={{ height: HEAD_H }}>
-          <div className="sticky left-0 z-[2] flex-none border-b border-r border-border bg-secondary" style={{ width: rowHeadW }} />
+          <div className="sticky left-0 z-[2] flex-none border-b border-r border-border bg-background" style={{ width: rowHeadW }} />
           <div className="sticky z-[1] flex-none" style={{ left: rowHeadW, width: frozenW }}>
             {letters(frozenCols, 0)}
           </div>
