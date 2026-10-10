@@ -1,0 +1,43 @@
+{
+  "ranAt": "2026-10-10T00:44:57.400Z",
+  "lighthouse": "13.5.0",
+  "rounds": 5,
+  "runs": {
+    "off-mobile": {
+      "performance": 80,
+      "accessibility": 98,
+      "bestPractices": 96,
+      "lcpMs": 4244,
+      "cls": 0,
+      "tbtMs": 88,
+      "fcpMs": 2837,
+      "transferKb": 490,
+      "lcpElement": "<img class=\"world-frame__poster\" src=\"/world/poster-far.svg\" alt=\"\" width=\"1600\" height=\"952\" decoding=\"async\" fetchprio",
+      "lcpMsRuns": [
+        4243,
+        4426,
+        4244,
+        4239,
+        4316
+      ]
+    },
+    "on-mobile": {
+      "performance": 81,
+      "accessibility": 99,
+      "bestPractices": 96,
+      "lcpMs": 4224,
+      "cls": 0,
+      "tbtMs": 75,
+      "fcpMs": 2781,
+      "transferKb": 498,
+      "lcpElement": "<img class=\"world-frame__poster\" src=\"/world/poster-far.svg\" alt=\"\" width=\"1600\" height=\"952\" decoding=\"async\" fetchprio",
+      "lcpMsRuns": [
+        4217,
+        4224,
+        4248,
+        4297,
+        4180
+      ]
+    }
+  }
+}

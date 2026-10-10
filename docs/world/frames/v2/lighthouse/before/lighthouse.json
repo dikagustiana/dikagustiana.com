@@ -1,0 +1,71 @@
+{
+  "ranAt": "2026-10-10T00:21:19.465Z",
+  "lighthouse": "13.5.0",
+  "rounds": 3,
+  "runs": {
+    "off-mobile": {
+      "performance": 79,
+      "accessibility": 98,
+      "bestPractices": 96,
+      "lcpMs": 4321,
+      "cls": 0.011,
+      "tbtMs": 116,
+      "fcpMs": 2955,
+      "transferKb": 433,
+      "lcpElement": "<p class=\"mt-2 text-sm leading-relaxed text-muted-foreground md:text-base\" data-chain-shift-lead=\"true\">",
+      "lcpMsRuns": [
+        4297,
+        4339,
+        4321
+      ]
+    },
+    "off-desktop": {
+      "performance": 98,
+      "accessibility": 98,
+      "bestPractices": 96,
+      "lcpMs": 884,
+      "cls": 0.001,
+      "tbtMs": 0,
+      "fcpMs": 647,
+      "transferKb": 433,
+      "lcpElement": "<p class=\"mt-3 text-sm leading-relaxed text-muted-foreground\" data-chain-doors=\"true\">",
+      "lcpMsRuns": [
+        883,
+        900,
+        884
+      ]
+    },
+    "on-mobile": {
+      "performance": 81,
+      "accessibility": 98,
+      "bestPractices": 96,
+      "lcpMs": 4233,
+      "cls": 0,
+      "tbtMs": 59,
+      "fcpMs": 2786,
+      "transferKb": 490,
+      "lcpElement": "<img class=\"world-frame__poster\" src=\"/world/poster-far.svg\" alt=\"\" width=\"1600\" height=\"952\" decoding=\"async\" fetchprio",
+      "lcpMsRuns": [
+        4201,
+        4233,
+        4315
+      ]
+    },
+    "on-desktop": {
+      "performance": 80,
+      "accessibility": 98,
+      "bestPractices": 96,
+      "lcpMs": 938,
+      "cls": 0,
+      "tbtMs": 383,
+      "fcpMs": 638,
+      "transferKb": 674,
+      "lcpElement": null,
+      "lcpMsRuns": [
+        949,
+        936,
+        938
+      ]
+    }
+  }
+}
