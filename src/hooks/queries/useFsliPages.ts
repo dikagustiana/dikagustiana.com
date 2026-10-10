@@ -10,7 +10,9 @@ export interface FsliPage {
   dec_2024: string | null;
   dec_2023: string | null;
   category: string | null;
-  // Added by 20261009090000_fsli_component_flag.sql; absent until it is applied.
+  // Added by 20261009090000_fsli_component_flag.sql, applied in production
+  // (column verified present 2026-10-10). Optional only because this
+  // hand-written type predates it; the generated types carry it.
   is_component?: boolean | null;
   // Added by 20261010100000_fsli_covered_by.sql, not yet in the generated
   // types: the line item whose essay covers this one. Both reads below are
