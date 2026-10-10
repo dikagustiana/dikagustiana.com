@@ -13,6 +13,10 @@ import { mockSupabase } from './mockSupabase';
  * delay. The delay alone would hide the seam from a quick pointer and close
  * the menu under a slow one; only a hit area with no gap keeps it open.
  *
+ * The last two need real layout as well: a panel still closing must not take
+ * the pointer from the one opening beside it, and no panel may run past the
+ * right edge of the page (Learning's did, lined up from its label's left).
+ *
  * Accounting, Finance, The Next Big Thing and Learning name no essaySection
  * in navConfig, so they are dropdowns whatever the essay counts say (the two
  * that can collapse to a plain link are Green Transition and Development
