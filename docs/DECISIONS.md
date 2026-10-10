@@ -214,7 +214,11 @@ Tests: `tests/unit/selectedOrder.test.tsx` runs the hook against an emulated ess
 the limit, the 42703 fallback, an essay returned by both reads); `tests/unit/glimpse.test.tsx`
 feeds the row from the homepage's own query (3 starred + 18 others); `tests/e2e/glimpse.spec.ts`
 seeds the production shape (3 starred, 18 not, a starred draft) through the production bundle and
-asserts all 21 columns in order, the draft nowhere.
+asserts all 21 columns in order, the draft nowhere. *(Superseded 2026-10-10 with the two reads: the
+test of an essay returned by both reads went with the duplicate filter. `selectedOrder.test.tsx` now
+also stars an essay between two reads of the emulated table, keeps the rest newest first when an
+unstarred essay still holds a rank, and cuts only what the row would not show when the read stops at
+twice the limit.)*
 
 Supersedes three passages of the 2026-10-09 entry "The homepage below the map is one row: the
 glimpse", each marked in place (line numbers at `0487609`, where the sweep's PRD counts them): "A
