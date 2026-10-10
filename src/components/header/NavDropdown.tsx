@@ -32,6 +32,8 @@ export function NavDropdown({ label, items, width = 'w-56', basePath }: NavDropd
   const chevronRef = useRef<HTMLButtonElement>(null);
   const itemRefs = useRef<(HTMLAnchorElement | null)[]>([]);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Set only by a keyboard open; hover and pointer clicks never move focus.
+  const focusFirstOnOpen = useRef(false);
 
   const isActive = basePath
     ? location.pathname.startsWith(basePath)
@@ -52,6 +54,12 @@ export function NavDropdown({ label, items, width = 'w-56', basePath }: NavDropd
     setIsOpen(false);
   }, [cancelClose]);
 
+  const openFromKeyboard = useCallback(() => {
+    cancelClose();
+    focusFirstOnOpen.current = true;
+    setIsOpen(true);
+  }, [cancelClose]);
+
   // A timer left running after unmount would set state on nothing.
   useEffect(() => cancelClose, [cancelClose]);
 
@@ -66,6 +74,19 @@ export function NavDropdown({ label, items, width = 'w-56', basePath }: NavDropd
       closeTimer.current = null;
       setIsOpen(false);
     }, NAV_DROPDOWN_CLOSE_DELAY_MS);
+  };
+
+  // The menu buttons toggle. A click with detail 0 is a keyboard activation
+  // (Enter or Space) or an assistive technology's, and that open moves focus
+  // into the menu; a pointer's click counts from 1 and leaves focus alone.
+  const handleToggleClick = (e: React.MouseEvent) => {
+    if (isOpen) {
+      close();
+    } else if (e.detail === 0) {
+      openFromKeyboard();
+    } else {
+      setIsOpen(true);
+    }
   };
 
   // Close on outside click
@@ -95,10 +116,13 @@ export function NavDropdown({ label, items, width = 'w-56', basePath }: NavDropd
     return () => document.removeEventListener('keydown', handleKey);
   }, [isOpen, close]);
 
-  // Focus first item when menu opens via keyboard
+  // Focus the first item when the menu opens via the keyboard, and only then:
+  // this used to run on every open, so a pointer passing over the label pulled
+  // keyboard focus into the menu without being asked.
   useEffect(() => {
-    if (isOpen && itemRefs.current[0]) {
-      itemRefs.current[0].focus();
+    if (isOpen && focusFirstOnOpen.current) {
+      focusFirstOnOpen.current = false;
+      itemRefs.current[0]?.focus();
     }
   }, [isOpen]);
 
@@ -106,7 +130,7 @@ export function NavDropdown({ label, items, width = 'w-56', basePath }: NavDropd
     if (e.key === 'ArrowDown') {
       e.preventDefault();
       if (!isOpen) {
-        setIsOpen(true);
+        openFromKeyboard();
       } else {
         const current = document.activeElement as HTMLElement;
         const idx = itemRefs.current.indexOf(current as HTMLAnchorElement);
@@ -164,7 +188,7 @@ export function NavDropdown({ label, items, width = 'w-56', basePath }: NavDropd
         ) : (
           // No landing page (Learning): the label only opens the menu, and says so.
           <button
-            onClick={() => setIsOpen((prev) => !prev)}
+            onClick={handleToggleClick}
             aria-expanded={isOpen}
             aria-haspopup="true"
             className="hover:text-header-foreground transition-colors"
@@ -174,7 +198,7 @@ export function NavDropdown({ label, items, width = 'w-56', basePath }: NavDropd
         )}
         <button
           ref={chevronRef}
-          onClick={() => setIsOpen((prev) => !prev)}
+          onClick={handleToggleClick}
           aria-expanded={isOpen}
           aria-haspopup="true"
           aria-label={`${label} submenu`}

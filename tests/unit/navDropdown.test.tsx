@@ -1,15 +1,19 @@
 /**
  * The header's dropdown (src/components/header/NavDropdown.tsx) under a
- * pointer: the menu opens on hover, stays open while the pointer travels from
- * the label to an item, and closes 150 ms after the pointer leaves unless it
- * comes back first. jsdom lays nothing out, so the seam between the label and
- * the panel is crossed for real in tests/e2e/nav.spec.ts.
+ * pointer and under a keyboard. The pointer: the menu opens on hover, stays
+ * open while the pointer travels from the label to an item, and closes 150 ms
+ * after the pointer leaves unless it comes back first; a hover never moves
+ * focus. The keyboard: Enter, Space or ArrowDown on the chevron opens it with
+ * focus on the first item. Escape, an outside click and an item click close it
+ * as before. jsdom lays nothing out, so the seam between the label and the
+ * panel is crossed for real in tests/e2e/nav.spec.ts.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, act, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { MemoryRouter, useLocation } from 'react-router-dom';
 import { NavDropdown, NAV_DROPDOWN_CLOSE_DELAY_MS } from '@/components/header/NavDropdown';
-import { nextBigThingItems } from '@/config/navConfig';
+import { learningItems, nextBigThingItems } from '@/config/navConfig';
 
 function Where() {
   const { pathname, search } = useLocation();
@@ -34,6 +38,7 @@ function mount(
 
 const menu = () => screen.queryByRole('menu');
 const label = () => screen.getByRole('link', { name: 'The Next Big Thing' });
+const chevron = () => screen.getByRole('button', { name: 'The Next Big Thing submenu' });
 const item = (name: string) => screen.getByRole('menuitem', { name });
 
 /**
@@ -86,6 +91,17 @@ describe('NavDropdown under a pointer', () => {
     expect(menu()).toBeInTheDocument();
   });
 
+  it('does not move focus when the pointer opens it', () => {
+    const { elsewhere } = mount();
+    elsewhere.focus();
+    move(elsewhere, label());
+    expect(menu()).toBeInTheDocument();
+    expect(elsewhere).toHaveFocus();
+
+    move(label(), item('Growth'));
+    expect(elsewhere).toHaveFocus();
+  });
+
   it('clears a pending close when it unmounts', () => {
     const { elsewhere, unmount } = mount();
     move(null, label());
@@ -95,5 +111,55 @@ describe('NavDropdown under a pointer', () => {
 
     unmount();
     expect(vi.getTimerCount()).toBe(others);
+  });
+});
+
+describe('NavDropdown under a keyboard', () => {
+  it.each([
+    ['Enter', '{Enter}'],
+    ['Space', ' '],
+    ['ArrowDown', '{ArrowDown}'],
+  ])('opens from the keyboard (%s on the chevron) with focus on the first item', async (_name, key) => {
+    const user = userEvent.setup();
+    mount();
+    chevron().focus();
+    await user.keyboard(key);
+    expect(menu()).toBeInTheDocument();
+    expect(item('Technology')).toHaveFocus();
+  });
+
+  it('opens the same way from a label that is itself the menu button (Learning)', async () => {
+    const user = userEvent.setup();
+    mount(<NavDropdown label="Learning" items={learningItems} width="w-48" />);
+    screen.getByRole('button', { name: 'Learning' }).focus();
+    await user.keyboard('{Enter}');
+    expect(item('Critical Thinking')).toHaveFocus();
+  });
+
+  it('keeps Escape: closes and returns focus to the chevron', async () => {
+    const user = userEvent.setup();
+    mount();
+    chevron().focus();
+    await user.keyboard('{Enter}');
+    expect(item('Technology')).toHaveFocus();
+
+    await user.keyboard('{Escape}');
+    expect(menu()).not.toBeInTheDocument();
+    expect(chevron()).toHaveFocus();
+  });
+
+  it('keeps the outside click and the item click closing it', async () => {
+    const user = userEvent.setup();
+    const { elsewhere } = mount();
+    chevron().focus();
+    await user.keyboard('{Enter}');
+    await user.click(elsewhere);
+    expect(menu()).not.toBeInTheDocument();
+
+    chevron().focus();
+    await user.keyboard('{Enter}');
+    await user.click(item('Growth'));
+    expect(menu()).not.toBeInTheDocument();
+    expect(screen.getByRole('status', { name: 'Location' })).toHaveTextContent('/the-next-big-thing?theme=growth');
   });
 });
