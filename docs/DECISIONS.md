@@ -14,10 +14,10 @@ The owner's decisions it applies, D8 to D11 and D15 to D17, are in `docs/sweep-2
 ## The viewer replaces the hand-built working paper — supersedes 2026-10-09
 
 This supersedes "The consolidation working paper was rebuilt, not patched" in the 2026-10-09
-public-site remediation entry below. Section 4 of `/accounting/consolidated-reporting` was a
-four-entity table whose combined, elimination and consolidated figures were literals in
-`src/data/consolidationWorkingPaper.ts`; that file, `AccountRow` and
-`tests/unit/consolidationWorkingPaper.test.ts` are deleted, and the entry stays as history. In their
+public-site remediation entry below (line 94 at `0487609`). Section 4 of
+`/accounting/consolidated-reporting` was a four-entity table whose combined, elimination and
+consolidated figures were literals in `src/data/consolidationWorkingPaper.ts`; that file, `AccountRow`
+and `tests/unit/consolidationWorkingPaper.test.ts` are deleted, and the entry stays as history. In their
 place is the owner's dummy workbook, `docs/consolidation/source/pt-dummy-psak-338.xlsx` (PT Dummy - C
 and its subsidiaries, 2022 to 2024), built by `npm run build:workbook` into
 `public/consolidation/pt-dummy-psak-338.workbook.json` and read in `src/components/workbook/`: sheet
@@ -50,16 +50,40 @@ formula or cached value differs from the owner's file.
   `pt-dummy-psak-338-working-paper.xlsx`. The build emits it as a hashed asset; nothing is generated
   in the browser.
 
+## D15 to D17: what the repository holds
+
+The owner decided D15 to D17 on 10 October, after the first build reported what the attached files
+carried. The workbook was cleaned by `npm run sanitize:workbook`
+(`scripts/consolidation/sanitize-workbook.ts`), which takes its cells by address, so no name it
+removes is written anywhere in the repository: 26 cell values deleted and 5 labels shortened (D15),
+and the file's metadata gone (D16: author fields, the OneDrive path, every comment and its authors,
+73,336 legacy defined names; the four print ranges stay). A cell-by-cell comparison with openpyxl
+over 31,869 cells differed at exactly the 31 edited cells, LibreOffice opens all 33 sheets, and the
+branch's history was rewritten before its first push, so the one xlsx blob in it is the cleaned file.
+The PTBA page in `docs/consolidation/reference/` is committed with its DATA block emptied (D17), as
+a visual reference only. The three-letter codes in the workbook (STL, PSD, KLI, SLL, SLB, ALI) are
+not names and stay unless the owner asks.
+
+## The page around the viewer
+
+Two sentences of the page's opening paragraph described the deleted table ("This working paper
+shows how that is done, step by step, on an illustrative four-entity group under PSAK 110. The
+figures are round numbers, not a company's accounts.") and are removed, with nothing in their place.
+The Accounting landing's Consolidated Reporting row now describes the workbook, drawn from R4.6's
+heading and default lede and marked OWNER-REPLACEABLE. R4.9's shared primitives were not extracted:
+nothing is shared with `ModelGrid` without refactoring it, which R4.9 rules out, so the viewer uses
+Finance in Action's lens roles, `--fia-*` tokens and number formatter directly.
+
 ## The PRD's cell count does not reconcile with the file
 
 R4.8 asks the build test to hold the workbook's sheet, cell and formula counts to the profile in
 PRD §1.2.4. Sheets (33) and formulas (15,485) match. The PRD's "~17 ribu sel" does not: the file
 has 31,843 cells with a value before sanitising (15,485 formulas and 16,358 constants), 31,789 on
 the published sheets. exceljs and, independently, openpyxl count the same; 119 of the cells hold an
-empty text. The ~17,000 is close to the constants alone, which may be what was counted. `tests/unit/workbookBuild.test.ts`
-holds the measured counts, and checks that every cell with a value or a formula on a published sheet
-reaches the JSON with its formula; `docs/consolidation/build-report.md` sets the two figures side
-by side.
+empty text. The ~17,000 is close to the constants alone, which may be what was counted.
+`tests/unit/workbookBuild.test.ts` holds the measured counts, and checks that every cell with a value
+or a formula on a published sheet reaches the JSON with its formula;
+`docs/consolidation/build-report.md` sets the two figures side by side.
 
 ## Light only
 
@@ -75,8 +99,9 @@ fetched with the viewer's own chunk when the section comes within 600 px of the 
 once when the URL names a sheet or a cell, and such a link opens the page at the viewer. If either
 fails, the section says so, and the Method panel and the download, which need neither, stay.
 `tests/e2e/workbook.spec.ts` measures a click on a cell (R4.7: under 50 ms): in the runs of 10
-October, 5 to 24 ms to the formula bar, and at most 41 ms to the next frame, which also waits on the
-browser's frame clock and so on the machine's load.
+October, 5 to 24 ms to the formula bar, and at most 46 ms to the next frame, which also waits on the
+browser's frame clock and so on the machine's load. The test holds every click to the formula bar,
+and the median to the next frame, under 50 ms.
 
 ---
 
