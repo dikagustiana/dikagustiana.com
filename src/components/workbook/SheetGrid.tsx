@@ -305,7 +305,11 @@ export function SheetGrid({ id, model, styles, selected, marks, onSelect, onActi
         {text &&
           (spillTo ? (
             // A label running on hides the gridlines it crosses, as Excel's does; it does not shrink to its cell.
-            <span className="relative z-[1] flex-none overflow-hidden whitespace-nowrap bg-popover pr-1" style={{ maxWidth: colLeft[spillTo + 1] - colLeft[c] - 4 - indent }}>
+            // A click on it beyond its own cell reaches the cell under the pointer, as in Excel.
+            <span
+              className="pointer-events-none relative z-[1] flex-none overflow-hidden whitespace-nowrap bg-popover pr-1"
+              style={{ maxWidth: colLeft[spillTo + 1] - colLeft[c] - 4 - indent }}
+            >
               {text}
             </span>
           ) : (

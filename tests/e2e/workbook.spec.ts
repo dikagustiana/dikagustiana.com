@@ -182,6 +182,24 @@ test.describe('the working paper viewer at 1440', () => {
     expect(errors).toEqual([]);
   });
 
+  test('a click on an empty cell a label runs on into selects that cell, as in Excel', async ({ page }) => {
+    const { grid, errors } = await openViewer(page, `?sheet=${encodeURIComponent(SOFP)}&cell=D9`);
+    await expect(cellIn(grid, 'B15')).toHaveText('Cash and cash equivalents');
+    const c15 = (await cellIn(grid, 'C15').boundingBox())!;
+    const label = (await cellIn(grid, 'B15').locator('span').boundingBox())!;
+    // The label runs on over the left of C15, which is empty.
+    expect(label.x + label.width).toBeGreaterThan(c15.x + 20);
+    await expect(cellIn(grid, 'C15')).toHaveText('');
+    await page.mouse.click(c15.x + 20, c15.y + c15.height / 2);
+    await expect(nameBox(page)).toHaveValue('C15');
+    await expect(cellIn(grid, 'C15')).toHaveAttribute('aria-selected', 'true');
+    // A click on the label within its own cell selects the label's cell.
+    const b15 = (await cellIn(grid, 'B15').boundingBox())!;
+    await page.mouse.click(b15.x + 10, b15.y + b15.height / 2);
+    await expect(nameBox(page)).toHaveValue('B15');
+    expect(errors).toEqual([]);
+  });
+
   test('a click on a cell reaches the formula bar in under 50 ms', async ({ page }) => {
     const { grid } = await openViewer(page);
     await tab(page, SOFP).click();
