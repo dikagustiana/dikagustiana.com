@@ -138,12 +138,12 @@ test.beforeEach(async ({ page }) => seed(page));
 /**
  * Thirty seconds, after the owner deleted the entrance that used to run them.
  *
- * The hero, its artwork, the argument block and the reading path are gone from
- * the landing page; the map is the first thing under the header, and the
- * reader goes deeper into a relation through the essays. So the thirty-second
+ * The hero, its artwork and the argument block are gone from the top of the
+ * landing page; the map is the first thing under the header, and the reader
+ * goes deeper into a relation through the essays. So the thirty-second
  * journey is: meet the structure, pick something, land on a written piece.
- * The argument is not deleted — About still carries it, which the next test
- * checks — it is no longer the door.
+ * The argument is not deleted — it sits under the glimpse, which the next
+ * test checks (owner decision D4(a), 2026-10-10) — it is no longer the door.
  */
 test('thirty seconds: the map is the entrance, and a completed piece is one click away', async ({ page }) => {
   await page.goto('/');
@@ -151,9 +151,15 @@ test('thirty seconds: the map is the entrance, and a completed piece is one clic
   // Nothing precedes the map, and no call to action stands in front of it.
   await expect(page.getByRole('heading', { name: 'The industry chain', exact: true })).toBeVisible();
   await expect(page.getByRole('link', { name: /Start with the argument/i })).toHaveCount(0);
-  await expect(page.locator('#the-argument')).toHaveCount(0);
   const first = page.locator('main :is(h1, h2, h3)').first();
   expect(await first.textContent()).toBe('The industry chain');
+  // The argument is on the page, but after the map and the glimpse, not before.
+  const argumentFollowsMap = await page.evaluate(() => {
+    const map = document.querySelector('#industry-chain');
+    const argument = document.querySelector('#the-argument');
+    return !!map && !!argument && !!(map.compareDocumentPosition(argument) & Node.DOCUMENT_POSITION_FOLLOWING);
+  });
+  expect(argumentFollowsMap).toBe(true);
 
   const flagship = page
     .getByRole('link', { name: /Indonesia.s Reindustrialization Bet/i })

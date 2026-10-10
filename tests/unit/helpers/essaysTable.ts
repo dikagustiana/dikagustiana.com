@@ -1,9 +1,9 @@
 /**
- * The essays table as PostgREST answers the chains the homepage row builds:
- * `eq` filters, `order` (with `nullsFirst`, defaulting the way PostgREST does:
- * ascending puts NULL last, descending first) and `limit`, applied when the
- * query is awaited. With `rankColumn: false` a query that names
- * `selected_rank` fails with 42703, as production did before migration
+ * The essays table as PostgREST answers the chains the homepage builds:
+ * `eq` and `in` filters, `order` (with `nullsFirst`, defaulting the way
+ * PostgREST does: ascending puts NULL last, descending first) and `limit`,
+ * applied when the query is awaited. With `rankColumn: false` a query that
+ * names `selected_rank` fails with 42703, as production did before migration
  * 20261009140000_essay_selected_rank. Plug it into a mocked `supabase.from`.
  */
 export interface EssayRow {
@@ -29,8 +29,13 @@ export function essaysTable(rows: EssayRow[], { rankColumn = true }: { rankColum
     const orders = calls.filter((c) => c.method === 'order');
     if (!rankColumn && orders.some((c) => c.args[0] === 'selected_rank')) return { data: null, error: MISSING_RANK };
 
-    const filters = calls.filter((c) => c.method === 'eq');
-    const matched = rows.filter((row) => filters.every((c) => row[c.args[0] as string] === c.args[1]));
+    const matched = rows.filter((row) =>
+      calls.every(({ method, args: [column, value] }) => {
+        if (method === 'eq') return row[column as string] === value;
+        if (method === 'in') return (value as unknown[]).includes(row[column as string]);
+        return true;
+      }),
+    );
     const sorted = [...matched].sort((a, b) => {
       for (const { args } of orders) {
         const [column, opts = {}] = args as [string, { ascending?: boolean; nullsFirst?: boolean }?];
@@ -53,7 +58,7 @@ export function essaysTable(rows: EssayRow[], { rankColumn = true }: { rankColum
     const calls: Call[] = [];
     chains.push(calls);
     const builder: Record<string, unknown> = {};
-    for (const m of ['select', 'eq', 'order', 'limit']) {
+    for (const m of ['select', 'eq', 'in', 'order', 'limit']) {
       builder[m] = (...args: unknown[]) => {
         calls.push({ method: m, args });
         return builder;

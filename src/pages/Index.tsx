@@ -3,6 +3,8 @@ import { SEO } from '@/components/SEO';
 import { useSelectedEssays } from '@/hooks/queries/useSelectedEssays';
 import { IndustryChainPreview } from '@/components/industry-chain';
 import { Glimpse } from '@/components/home/Glimpse';
+import { ReadingPath } from '@/components/argument/ReadingPath';
+import { ChangedMind } from '@/components/argument/ChangedMind';
 
 /**
  * How many essays the glimpse carries, starred and unstarred together. The
@@ -32,8 +34,7 @@ const Index = () => {
           Kawasan Industri world; the page around it does not move.
 
           What was here before is not deleted, only moved off the entrance:
-          the argument and the reading path still exist and About still
-          carries them. */}
+          the argument and the reading path sit under the glimpse. */}
       <IndustryChainPreview />
 
       {/* The glimpse: every published essay, the starred ones first in the
@@ -41,6 +42,17 @@ const Index = () => {
           follow it was removed by owner decision on 2026-10-09
           (docs/DECISIONS.md); the header's navigation names every section. */}
       <Glimpse essays={selectedEssays} isLoading={isLoading} />
+
+      {/* The argument in full — the case, the comparison, the objection, the
+          limits and the ordered path through what exists — then the revision
+          of judgment. Both came here from About when the owner removed that
+          page (decision D4(a), 2026-10-10), as the same sections with the
+          same ids, so a link to #the-argument or #changed-my-mind still
+          lands; their copy is unchanged. About's own chain section is not
+          repeated: the map at the top of this page is the same map. */}
+      <ReadingPath />
+
+      <ChangedMind />
     </PageLayout>
   );
 };
