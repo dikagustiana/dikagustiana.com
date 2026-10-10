@@ -116,6 +116,11 @@ conditions, not a module index, and `/finance` already listed it. Its page title
 Motion" while the track is "Capital Allocation"; the nav uses the track name and the page title
 is the owner's to change.
 
+*[SUPERSEDED 2026-10-10 in its naming, by owner decision (October 2026 sweep, D6(a)): the page has
+one name, "Capital in Motion", in the nav, the breadcrumb, the h1 and the SEO title, and on the
+`/finance` card once the owner applies `20261010120000_capital_in_motion_title.sql`. The address
+stays `/finance/capital-allocation` and the item stays in the dropdown. See the 2026-10-10 entry.]*
+
 ## Unsourced figures removed rather than softened
 
 Climate Finance's "~$25B/year", the bps/margin/multiple/ratio/$ figures in the capital
@@ -127,6 +132,13 @@ its source (Q9, Q11, Q12). Mechanisms and durations stayed.
 About's hero, ReadingPath, ChangedMind and the industry-chain map keep their arbitrary type sizes
 and eyebrows; the audit marks them as passing on their own terms, so the type-scale sweep skips
 them.
+
+*[SUPERSEDED 2026-10-10 for Capital in Motion, on the owner's instruction (October 2026 sweep, R6):
+the page is no longer left alone. This entry names only About's surfaces, but the same pass kept
+Capital in Motion's premise verbatim for the owner (`07adda2`), and the sweep's PRD counts the page
+among the owner-protected ones. The owner opened it: the premise block is deleted, with no
+replacement until the owner writes one (D7), and the condition cards no longer carry the author's
+name. This note covers Capital in Motion only. See the 2026-10-10 entry.]*
 
 ---
 
