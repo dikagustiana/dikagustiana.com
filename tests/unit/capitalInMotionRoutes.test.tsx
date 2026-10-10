@@ -37,7 +37,7 @@ vi.mock('@/integrations/supabase/client', () => ({
 vi.mock('@vercel/analytics/react', () => ({ Analytics: () => null }));
 
 import App from '@/App';
-import { CONDITIONS, CONDITION_ORDER, SHOW_CASE_COMPANIES } from '@/data/capitalConditions';
+import { CONDITIONS, CONDITION_ORDER, SHOW_CASE_COMPANIES, getLayerLabel } from '@/data/capitalConditions';
 
 const INDEX = '/finance/capital-allocation';
 const detail = (id: string) => `${INDEX}/${id}`;
@@ -124,6 +124,31 @@ describe('Capital in Motion at /finance/capital-allocation', () => {
   it('an unknown slug says so instead of rendering a track page', async () => {
     renderAt(detail('no-such-condition'));
     expect(await screen.findByText('Condition not found.')).toBeInTheDocument();
+  });
+});
+
+describe('the index as the owner set it on 10 October 2026', () => {
+  it('goes from the h1 and its subtitle straight to the conditions: no premise block', async () => {
+    renderAt(INDEX);
+    const header = (await h1('Capital in Motion')).parentElement!;
+    expect(header.querySelector('p')?.textContent).toBe('Twenty-one conditions I wish I understood earlier.');
+
+    // The block after the header is the list itself, opening on the first
+    // condition; nothing is mounted between them until the owner writes it.
+    expect(header.nextElementSibling?.querySelector('button h3')?.textContent).toBe(ORDERED[0].title);
+    expect(within(screen.getByRole('main')).queryByText(/^premise$/i)).not.toBeInTheDocument();
+  });
+
+  it('no condition card carries the author\'s name: its meta line is the layer label alone', async () => {
+    renderAt(INDEX);
+    await h1('Capital in Motion');
+
+    const cards = [...screen.getByRole('main').querySelectorAll('button')].filter((b) => b.querySelector('h3'));
+    expect(cards).toHaveLength(21);
+    cards.forEach((card, i) => {
+      expect(card.textContent).not.toContain('Dika Gustiana');
+      expect(card.querySelector('span')?.textContent).toBe(getLayerLabel(ORDERED[i].layer));
+    });
   });
 });
 
