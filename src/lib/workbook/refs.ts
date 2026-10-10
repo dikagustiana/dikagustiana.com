@@ -9,7 +9,8 @@
  * not reused: it throws on `#REF!`, does not read doubled quotes, and expands every range into its cells.
  *
  * The graph is built once per load. A formula's precedents stay ranges; only the dependents map expands
- * them, cell by cell, inside the used part of the sheet they read.
+ * them, cell by cell, inside the used part of the sheet they read. That part reaches past the cells with a
+ * value to every cell a formula names, so a jump to a precedent lands on it, filled or not.
  */
 import { colIndex, colLetter } from '@/lib/finance-in-action/engine/address';
 import type { PublishedWorkbook } from './types';
@@ -187,9 +188,15 @@ export interface RefGraph {
   precedents: Map<string, Map<string, Precedent[]>>;
   /**
    * Per sheet, per cell: the formula cells that read it, on any sheet, in workbook order. A range counts
-   * for every cell it covers inside its sheet's used part (A1 to the dimension's bottom-right), filled or not.
+   * for every cell it covers inside its sheet's used part, filled or not.
    */
   dependents: Map<string, Map<string, CellAt[]>>;
+  /**
+   * Per published sheet, its used part: from A1 to the dimension's bottom-right, grown to take in the
+   * top-left of every reference a formula makes to the sheet (a whole column's first cell, a whole row's).
+   * The viewer lays the sheet out this far.
+   */
+  used: Map<string, Area>;
   /** A sheet named in a formula: its name in the workbook and whether the viewer has it. */
   resolveSheet(name: string): { name: string; status: SheetStatus };
 }
@@ -214,30 +221,45 @@ export function buildRefGraph(book: PublishedWorkbook): RefGraph {
     dependents.set(s.name, new Map());
   }
 
+  // Every formula read once: its precedents, and the used part of each sheet it names grown to the
+  // reference's top-left.
   for (const s of book.sheets) {
     const own = precedents.get(s.name)!;
     for (const cell of s.cells) {
       if (cell.f === undefined) continue;
-      const dependent: CellAt = { sheet: s.name, a: cell.a };
       const read: Precedent[] = [];
       for (const r of parseRefs(cell.f)) {
         const { name, status } = r.sheet === null ? { name: s.name, status: 'published' as const } : resolveSheet(r.sheet);
         if (read.some((p) => p.sheet === name && p.ref === r.ref)) continue;
         read.push({ sheet: name, status, local: name === s.name, ref: r.ref, top: r.top, left: r.left, bottom: r.bottom, right: r.right });
-        const into = dependents.get(name);
-        const within = used.get(name);
-        if (!into || !within) continue;
-        for (const a of cellsIn(r, within)) {
-          const list = into.get(a);
-          // One formula reads a cell once, however many of its ranges cover it.
-          if (!list) into.set(a, [dependent]);
-          else if (list[list.length - 1] !== dependent) list.push(dependent);
+        const area = used.get(name);
+        if (area) {
+          area.bottom = Math.max(area.bottom, r.top);
+          area.right = Math.max(area.right, r.left);
         }
       }
       own.set(cell.a, read);
     }
   }
-  return { precedents, dependents, resolveSheet };
+
+  // Then the dependents, inside the used parts.
+  for (const s of book.sheets) {
+    for (const [a, read] of precedents.get(s.name)!) {
+      const dependent: CellAt = { sheet: s.name, a };
+      for (const p of read) {
+        const into = dependents.get(p.sheet);
+        const within = used.get(p.sheet);
+        if (!into || !within) continue;
+        for (const at of cellsIn(p, within)) {
+          const list = into.get(at);
+          // One formula reads a cell once, however many of its ranges cover it.
+          if (!list) into.set(at, [dependent]);
+          else if (list[list.length - 1] !== dependent) list.push(dependent);
+        }
+      }
+    }
+  }
+  return { precedents, dependents, used, resolveSheet };
 }
 
 export const precedentsOf = (graph: RefGraph, sheet: string, a: string): Precedent[] => graph.precedents.get(sheet)?.get(a) ?? [];

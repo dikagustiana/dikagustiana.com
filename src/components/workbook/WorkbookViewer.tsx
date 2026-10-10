@@ -71,12 +71,12 @@ export default function WorkbookViewer({ book }: { book: PublishedWorkbook }) {
     (s: WorkbookSheet): SheetModel => {
       let m = models.get(s.name);
       if (!m) {
-        m = buildSheetModel(s, book.styles);
+        m = buildSheetModel(s, book.styles, graph.used.get(s.name));
         models.set(s.name, m);
       }
       return m;
     },
-    [models, book.styles],
+    [models, book.styles, graph],
   );
   const findSheet = useCallback((name: string | null) => (name === null ? undefined : byName.get(name.toUpperCase())), [byName]);
 

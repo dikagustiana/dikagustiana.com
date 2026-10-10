@@ -3,7 +3,8 @@
  * The working paper's references (PRD site sweep 2026-10, R4.4, R4.8): the scanner reads what a regular
  * expression written apart from it reads, in 50 real formulas drawn from the committed JSON with a fixed
  * seed and in every other formula of the file; the sheet names that need quoting, `$` anchors, ranges and
- * literals by hand; and the graph's precedents and dependents, Consol SoFP 24!D9 (=D114+D53) first.
+ * literals by hand; and the graph's precedents and dependents, Consol SoFP 24!D9 (=D114+D53) first, and
+ * each sheet's used part, which takes in every cell a formula names.
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -16,11 +17,13 @@ import {
   contains,
   decodeA1,
   dependentsOf,
+  encodeA1,
   parseRefs,
   precedentsOf,
   qualifiedRef,
   type CellAt,
 } from '@/lib/workbook/refs';
+import { buildSheetModel, snap } from '@/lib/workbook/sheet';
 import type { PublishedWorkbook, WorkbookCell } from '@/lib/workbook/types';
 import { seeded } from './helpers/seeded';
 
@@ -209,9 +212,44 @@ describe("the workbook's graph", () => {
   it("keeps a range as one precedent, and gives its cells a dependent only inside the sheet's used part", () => {
     expect(precedentsOf(graph, 'Adjustment Consol', 'I2').map((p) => p.ref)).toEqual(['I5:I1010', 'D5:D1010']);
     expect(book.sheets.find((s) => s.name === 'Adjustment Consol')!.dimension).toBe('A2:L96');
+    // Formulas on other sheets name its cells down to row 177, so its used part runs there.
+    expect(graph.used.get('Adjustment Consol')).toEqual({ top: 1, left: 1, bottom: 177, right: 12 });
     expect(dependentsOf(graph, 'Adjustment Consol', 'I50')).toContainEqual({ sheet: 'Adjustment Consol', a: 'I2' });
-    expect(dependentsOf(graph, 'Adjustment Consol', 'I96')).toContainEqual({ sheet: 'Adjustment Consol', a: 'I2' });
-    expect(dependentsOf(graph, 'Adjustment Consol', 'I97')).toEqual([]);
+    expect(dependentsOf(graph, 'Adjustment Consol', 'I177')).toContainEqual({ sheet: 'Adjustment Consol', a: 'I2' });
+    expect(dependentsOf(graph, 'Adjustment Consol', 'I178')).toEqual([]);
+  });
+
+  it('grows a sheet past its cells with a value to every cell a formula names, so a jump lands on that cell', () => {
+    // The four sheets a formula reads past their dimension, and how far.
+    const grown = book.sheets.flatMap((s) => {
+      const u = graph.used.get(s.name)!;
+      const end = encodeA1(u.right, u.bottom);
+      return s.dimension.endsWith(`:${end}`) ? [] : [`${s.name}: ${s.dimension} to ${end}`];
+    });
+    expect(grown).toEqual([
+      'Consol SoFP 24: B3:AJ120 to AM120',
+      'Consol SoFP 23 & 22: B3:BH120 to IY165',
+      'Consol SoPL-OCI 23 & 22: A3:BF105 to CD109',
+      'Adjustment Consol: A2:L96 to L177',
+    ]);
+    // Capital Proforma Control!D82 reads 'Consol SoFP 23 & 22'!K131, an empty cell past row 120.
+    expect(precedentsOf(graph, 'Capital Proforma Control', 'D82')).toMatchObject([{ sheet: 'Consol SoFP 23 & 22', ref: 'K131' }]);
+    const sheet = book.sheets.find((s) => s.name === 'Consol SoFP 23 & 22')!;
+    expect(sheet.cells.some((c) => c.a === 'K131')).toBe(false);
+    const model = buildSheetModel(sheet, book.styles, graph.used.get(sheet.name));
+    expect(snap(model, { col: 11, row: 131 })).toEqual({ col: 11, row: 131 });
+    expect(dependentsOf(graph, 'Consol SoFP 23 & 22', 'K131')).toEqual([{ sheet: 'Capital Proforma Control', a: 'D82' }]);
+    // Without the used part, the grid would end at row 120 and the jump land on K120.
+    expect(snap(buildSheetModel(sheet, book.styles), { col: 11, row: 131 })).toEqual({ col: 11, row: 120 });
+    // Every cell a formula names on a published sheet is inside its grid.
+    for (const s of book.sheets) {
+      for (const [, read] of graph.precedents.get(s.name)!) {
+        for (const p of read) {
+          const u = graph.used.get(p.sheet);
+          if (u) expect(contains(u, p.left, p.top), `${p.sheet}!${p.ref}`).toBe(true);
+        }
+      }
+    }
   });
 
   it('lists the same dependents as a plain walk over the file, for every filled cell of three sheets', () => {

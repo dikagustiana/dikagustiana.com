@@ -32,7 +32,10 @@ export interface Cell {
 
 export interface SheetModel {
   name: string;
-  /** The grid runs from A1 to the dimension's bottom-right, as Excel shows it. */
+  /**
+   * The grid runs from A1 to the dimension's bottom-right, as Excel shows it, or further when a formula
+   * names a cell beyond it (the graph's used part), so a jump lands on that cell.
+   */
   lastCol: number;
   lastRow: number;
   /** colLeft[c] is column c's left edge (1-based); colLeft[lastCol + 1] is the sheet's width. */
@@ -64,9 +67,10 @@ export function decodeArea(range: string): Area | null {
 const runsOn = (cell: WorkbookCell, style: WorkbookStyle | undefined): boolean =>
   typeof cell.v === 'string' && cell.t === undefined && !style?.align?.wrap && (style?.align?.horizontal ?? 'left') === 'left';
 
-export function buildSheetModel(sheet: WorkbookSheet, styles: WorkbookStyle[]): SheetModel {
+export function buildSheetModel(sheet: WorkbookSheet, styles: WorkbookStyle[], used?: Area): SheetModel {
   const end = decodeA1(sheet.dimension.split(':').pop() ?? '') ?? { col: 1, row: 1 };
-  const { col: lastCol, row: lastRow } = end;
+  const lastCol = Math.max(end.col, used?.right ?? 0);
+  const lastRow = Math.max(end.row, used?.bottom ?? 0);
 
   const widths = new Map<number, number>();
   const hiddenCols = new Set<number>();

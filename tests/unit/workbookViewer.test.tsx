@@ -54,6 +54,8 @@ const BOOK: PublishedWorkbook = {
         { a: 'B5', v: 50, f: "'Detail Sheet'!B2", s: 1 },
         { a: 'B6', v: '#REF!', t: 'e', f: '#REF!+B2' },
         { a: 'B7', v: 'Check', s: 3 },
+        // An empty cell past the detail sheet's last row.
+        { a: 'C7', v: 0, f: "'Detail Sheet'!C9" },
         { a: 'D8', v: 1 },
       ],
     },
@@ -202,6 +204,17 @@ describe('the workbook viewer', () => {
     expect(grid()).toHaveFocus();
     fireEvent.keyDown(document.activeElement!, { key: 'Escape' });
     expect(inspector()).not.toBeVisible();
+  });
+
+  it('jumps to a precedent past the last row with a value onto that cell, not the last row', async () => {
+    const { router } = renderViewer('/wp?sheet=Summary&cell=C7');
+    fireEvent.keyDown(grid(), { key: 'Enter' });
+    await userEvent.click(within(inspector()).getByRole('button', { name: COPY.goTo("'Detail Sheet'!C9") }));
+    expect(nameBox().value).toBe('C9');
+    expect(cellAt('C9')).toHaveAttribute('aria-selected', 'true');
+    expect(within(inspector()).getByText(COPY.emptyCell)).toBeInTheDocument();
+    expect(grid()).toHaveAttribute('aria-rowcount', '9');
+    expect(place(router)).toBe('Detail Sheet!C9');
   });
 
   it('moves with the arrows, Home and End, Ctrl+Home and Page Down; Enter opens the inspector and Esc closes it', () => {
