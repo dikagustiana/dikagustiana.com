@@ -5,6 +5,57 @@ alternatives. Newest first.
 
 ---
 
+# 2026-10-10 — Capital in Motion: one name, no premise, no author on the cards
+
+Branch `sweep/d-capital`, base `main` @ `0487609`. Phase D of the October 2026 sweep (PRD R6). It
+implements the owner's decisions D6(a) and D7 (`docs/sweep-2026-10/DECISIONS.md`) and the owner's
+instruction of 10 October 2026 that opens the page to change (R6.5). It supersedes two 2026-10-09
+entries, each marked in place with a dated note and neither deleted: "Capital Allocation joins the
+Finance dropdown" (line 163) in its naming, and "Owner-protected surfaces left alone" (line 182) for
+Capital in Motion only.
+
+## One name, "Capital in Motion", at the old address (D6(a))
+
+- The page already called itself Capital in Motion in its h1, SEO title and breadcrumb; the Finance
+  menu and the `/finance` card (`finance_sections.title`) called it Capital Allocation, the slug's
+  name. The 2026-10-09 entry left the choice to the owner, and the owner chose the page's name.
+- **The menu label** changed in `src/config/navConfig.ts`. A test reads the `<SEO title>` from
+  `FinanceInMotion.tsx` and requires the label to equal it, so the two cannot drift apart again.
+- **The card** changes when the owner applies `20261010120000_capital_in_motion_title.sql` through
+  `apply_migration`. It updates one row's title and then asserts that the row carries it, so a
+  mistyped slug fails the migration instead of updating nothing. No schema change, so `types.ts`
+  is not regenerated. Until it lands, the card is the one place still saying Capital Allocation.
+- **Not changed:** the slug and the address `/finance/capital-allocation`, with its legacy
+  redirects, so nothing a search engine or an old link holds moves; the card's description (R6.4).
+
+## The premise is deleted, not rewritten (D7)
+
+D7 is still open, and its reason is the rule: nobody writes on the owner's behalf. The 2026-10-09
+pass kept the block verbatim while the question was open (`07adda2`); it is now gone. The page reads
+the h1, the existing subtitle, then the 21 conditions; the closing line under the list stays. The
+deleted text lives in history and is quoted neither here nor in the code ("Comments may not quote
+deleted copy", line 1441). If the owner writes a premise, it arrives as
+`docs/sweep-2026-10/copy/capital-in-motion-premise.md` and is mounted as one prose block in one
+colour and one size (R6.2), not as the old block's short lines in alternating colours.
+
+## The cards name their layer, not their author (R6.3)
+
+Each of the 21 cards ended its meta line with the author's name, so the index printed it 21 times.
+The meta line is now the layer label alone. The page has no byline component, so none was added:
+R6.3 keeps the name once in a page header only where a byline already exists. This is the
+"separate decision" the 2026-08-02 entry "The hero drops its third paragraph, and with it the only
+byline" (line 1456) left open for the two rendered bylines; its table row for
+`CapitalConditionCard.tsx:27` ("kept, but see below", line 1500) no longer describes the code. The
+essay byline (`ArticleHeader.tsx`) is untouched. A unit test walks all 21 cards for the name.
+
+## What a future session must not undo by accident
+
+- Renaming the slug to match the name. The address is what search engines and old links hold.
+- Writing a premise to fill the space. The space is the owner's to fill (D7).
+- Putting the author's name back on the cards' meta line. The owner took it off.
+
+---
+
 # 2026-10-09 — The homepage below the map is one row: the glimpse
 
 Branch `claude/confident-ride-d354er`, base `main` @ `1df681a`. The owner's request, verbatim: "aku
