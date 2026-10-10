@@ -32,8 +32,11 @@ export const positionOf = (id: string): ChainPosition | undefined => CHAIN_POSIT
 
 /**
  * The element on the chain map, read at the finance distance. The map lives
- * on the homepage since About was removed (owner decision, 2026-10-10); an
- * address that names an element the overview folds away opens the detail.
+ * on the homepage since About was removed (owner decision, 2026-10-10). A
+ * spanning layer is a door, so its reading opens. A stage is not a door
+ * unless an overlay marks it, and this address names no overlay, so the map
+ * drops the stage (ChainPlate's canOpen) and opens at the finance distance
+ * with nothing selected, as it did on About.
  */
 export function chainMapHref(positionId?: string): string {
   const params = new URLSearchParams();
