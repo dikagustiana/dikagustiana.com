@@ -5,6 +5,101 @@ alternatives. Newest first.
 
 ---
 
+# 2026-10-10 — The glimpse holds every published essay; the star decides who leads
+
+Branch `sweep/c-home`, base `main` @ `0487609` (October 2026 site sweep, phase C, PRD R2). Owner
+decision D3(a) (`docs/sweep-2026-10/DECISIONS.md`, added in the sweep's phase 0): "semua essay
+terbit; yang dibintangi tampil dulu urut `selected_rank`, sisanya `created_at desc`; batas 30".
+The reason given with it: 21 essays were published and 3 were starred, so the homepage showed 3;
+the order stays the owner's through Admin, and a new essay reaches the homepage without a star.
+
+## The rule
+
+- **Two reads in one hook, joined.** `useSelectedEssays(limit)`
+  (src/hooks/queries/useSelectedEssays.ts) reads the starred published essays in the owner's order
+  (`selected_rank` ascending, an unplaced star after every placed one, then newest first), then
+  every other published essay newest first, and returns the first in front of the second, cut to
+  `limit` (30 on the homepage, `GLIMPSE_LIMIT` in src/pages/Index.tsx). An essay starred between
+  the two reads comes back from both and is shown once. The hook keeps its name and signature, so
+  no caller changed.
+- **The star decides who leads, not who is in.** `is_selected` is still the one featuring flag and
+  `selected_rank` still the order, both set as before in Admin → Content → "Homepage order"; the
+  panel's comments now say the unstarred follow newest first.
+- **The 42703 fallback stays on the starred read,** the only one that names the rank. The other
+  read never names it and needs none.
+- **The Finance landing is not widened.** `useFeaturedFinanceEssay` still takes the first finance
+  essay of the starred order (PRD R2.2); only the homepage row reads unstarred essays.
+- **Nothing published: the section is absent,** as it was with nothing starred.
+
+Tests: `tests/unit/selectedOrder.test.tsx` runs the hook against an emulated essays table
+(`tests/unit/helpers/essaysTable.ts`: starred by rank then the rest newest first, nothing starred,
+the limit, the 42703 fallback, an essay returned by both reads); `tests/unit/glimpse.test.tsx`
+feeds the row from the homepage's own query (3 starred + 18 others); `tests/e2e/glimpse.spec.ts`
+seeds the production shape (3 starred, 18 not, a starred draft) through the production bundle and
+asserts all 21 columns in order, the draft nowhere.
+
+Supersedes three passages of the 2026-10-09 entry "The homepage below the map is one row: the
+glimpse", each marked in place (line numbers at `0487609`, where the sweep's PRD counts them): "A
+horizontal row of starred essays" (line 28), "Zero starred essays: the section is absent" (lines
+44–45), and `is_selected` as "who is on the homepage" (lines 49–52).
+
+---
+
+# 2026-10-10 — About is removed; the argument and Changed my mind move to the homepage
+
+Branch `sweep/c-home`, base `main` @ `0487609` (October 2026 site sweep, phase C, PRD R8). Owner
+decisions D4(a): "The argument" and "Changed my mind" "pindah ke Home di bawah Glimpse, copy tidak
+diubah", because they are the site's core argument and `#the-argument` and `#changed-my-mind` are
+linked from essays and tests; and D5(a): "On the shelf" is dropped, a static reading list with no
+link into the site.
+
+## What moved and what went
+
+- **Moved as they were.** `ReadingPath` (the full form, `#the-argument`) and `ChangedMind`
+  (`#changed-my-mind`) mount in src/pages/Index.tsx directly under the glimpse, as the same
+  components, so the ids, the markup and the copy are About's. About's chain section
+  (`IndustryChainSection`) is not repeated: the homepage opens on the same map. It stays exported,
+  mounted nowhere, because the world shell's suite renders it.
+- **Gone with the page:** `src/pages/About.tsx`, its hero, its "Selected Essays"
+  (`useSelectedEssays(8)`; the hook stays for the homepage) and "On the shelf". The About door is
+  gone from the header row (`MainNav.tsx`), from `navConfig.ts` (so from the phone's drawer, which
+  reads it) and from the footer's Sections list; the header row is seven labels again.
+- **`/about` forwards to `/`, client-side** (`AboutRedirect`, src/App.tsx, `Navigate` with
+  `replace`). `vercel.json` manages rewrites and headers but no redirects, so there is no 301, and
+  `/about` was never in the sitemap. The redirect keeps the query and the fragment: the map's
+  address (`?lens=&distance=&node=`, `useChainUrl.ts`) is a published contract the homepage's map
+  reads too, and `#the-argument` / `#changed-my-mind` name the same sections on `/`. The PRD's
+  line is a bare `<Navigate to="/" replace />`; keeping the address is the one addition, so an
+  essay's link into the map or into Changed my mind still lands where it pointed.
+- **The homepage goes to a fragment itself.** The two sections sit far down and draw after the
+  browser has looked for the fragment, so a fresh load of `/#changed-my-mind` stayed at the top.
+  Home now makes the jump once, when nothing is fetching any more, clear of the sticky header, and
+  not if the reader has already scrolled; a fragment that comes later (the skip link) is the
+  browser's, and a fragment that is not valid percent-encoding is looked up as typed.
+- **Links into the map point at `/`:** Finance in Action's "on the chain map" links
+  (`chainMapHref`, src/lib/finance-in-action/chain.ts) and the address examples in
+  `useChainUrl.ts` and `docs/response-2026-09-14-v5/linking-into-the-map.md`. The compact
+  `ReadingPath`'s pointer to "the About page" is removed, not reworded: nothing mounts the compact
+  form, and a new sentence there would be one the owner did not write.
+- `docs/INVENTORY.md` and `docs/ROUTE_VERIFICATION.md` record the homepage and the redirect. Older
+  reports that name `/about` (`docs/review/`, `docs/response-2026-09-14*/`, `GATE_LEDGER.md`,
+  `SESSION_LOG.md`) stay as history.
+
+Tests: a homepage suite (`tests/unit/homePage.test.tsx`: the argument and Changed my mind under
+the glimpse with the map first, the argument in full, the fragment jump and its two edges, the
+argument kept with nothing published); the header row and footer without About
+(`siteChrome.test.tsx`) and no About door (`navConfig.test.ts`); e2e, an old About link landing on
+the homepage with its address and fragment (`tests/e2e/journeys.spec.ts`), the three-minute
+journey on Home, and `/about` in the smoke list as a redirect. The chain suites that opened
+`/about` open `/`. `MIN_TESTS` rises from 1148 to 1162 (actual 1166); none fell.
+
+Supersedes, each marked in place (line numbers at `0487609`): in the 2026-10-09 glimpse entry,
+"One order for the site" (line 53, About's half) and "The world comes onto the homepage by its
+flag" (lines 71–79, the About slot); in the 2026-10-09 remediation entry, "Owner-protected surfaces
+left alone" (lines 125–129, About's hero).
+
+---
+
 # 2026-10-09 — The homepage below the map is one row: the glimpse
 
 Branch `claude/confident-ride-d354er`, base `main` @ `1df681a`. The owner's request, verbatim: "aku
@@ -33,6 +128,8 @@ plain link (the remediation entry below), so the hook outlives the list it was w
   counter, the snippet and a read-time chip. The two alternatives offered and not chosen: a tighter
   card (title and deck only), and a "window to the world" where each column names what it lights
   in the Kawasan world (which would be bare until `docs/world/think-tank-tags.json` is written).
+  *(Superseded 2026-10-10 in one respect: the row holds every published essay, the starred first;
+  see the 2026-10-10 glimpse entry.)*
 - **The heading is "Glimpse", with no sentence under it.** Approved by the owner. The old subtitle
   ("Hand-picked across sections, newest first") named a sort order that is no longer true.
 - **The row runs to the viewport's edges,** first column aligned with the container's left edge, by
@@ -42,17 +139,20 @@ plain link (the remediation entry below), so the hook outlives the list it was w
   when every column fits; the arrow keys once the row has focus (the `<ul>` is a focusable scroll
   region, named by the heading). The buttons scroll by `scrollBehavior()` (src/lib/motion.ts), so a
   reader who asked for reduced motion gets a jump, not a glide. Zero starred essays: the section is
-  absent, as decided on 2026-09-14.
+  absent, as decided on 2026-09-14. *(Superseded 2026-10-10: absent only with nothing published.)*
 
 ## The order is the owner's: `essays.selected_rank`
 
 - `is_selected` stays the one featuring mechanism (who is on the homepage); `selected_rank` says in
   what order (lower first). NULL means starred but not placed, and sorts after every placed essay,
   newest first — a new star joins the END of the row, never the front. Unstarring clears the rank in
-  the same write, so a re-starred essay does not silently reclaim an old slot.
+  the same write, so a re-starred essay does not silently reclaim an old slot. *(Superseded
+  2026-10-10 in one respect: the star decides who leads the row, not who is on it; every published
+  essay is.)*
 - **One order for the site.** About's "Selected Essays" is the first 8 of the same order; the Finance
   landing's featured essay is the first finance essay of it. Owner decision, over keeping About
-  newest-first.
+  newest-first. *(Superseded 2026-10-10 for About, which is removed; the Finance landing's reading
+  stands.)*
 - **Set in Admin → Content → "Homepage order":** the starred essays, drafts included (a draft holds
   its slot and appears when published), with to-the-front / up / down. Every move writes the whole
   order (one update per row — an upsert would need every NOT NULL column) and shows it at once; a
@@ -77,7 +177,9 @@ on this branch; the step is `VITE_WORLD_KAWASAN=true` on Vercel Production and a
 owner's gate, and it also switches About's slot and opens `/finance/kawasan`. What that shows today is
 in `docs/world/run-2026-10-09.md`: every building reads "Model status unavailable" until
 `fsre_published` exists, and the think tank's tag file is empty. The glimpse sits directly under the
-world, as it sits under the map; the map stays the first thing under the header.
+world, as it sits under the map; the map stays the first thing under the header. *(Superseded
+2026-10-10 in one respect: About is removed, so the flag switches the homepage's slot only; see the
+2026-10-10 About entry.)*
 # 2026-10-09 — Public-site remediation from the 9 October audit
 
 Branch `claude/blissful-fermi-q5x5iw`. Executes the code work packages of the audit (WP-2 to
@@ -126,7 +228,8 @@ its source (Q9, Q11, Q12). Mechanisms and durations stayed.
 
 About's hero, ReadingPath, ChangedMind and the industry-chain map keep their arbitrary type sizes
 and eyebrows; the audit marks them as passing on their own terms, so the type-scale sweep skips
-them.
+them. *(Superseded 2026-10-10 for About's hero, which went with About. ReadingPath and ChangedMind
+now sit on the homepage, their copy unchanged by owner decision D4(a); the map is unchanged.)*
 
 ---
 
