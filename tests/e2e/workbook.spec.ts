@@ -88,6 +88,12 @@ function offCentre(grid: HTMLElement, a: string): number[] | null {
   return [r.left + r.width / 2 - (g.left + g.width / 2), r.top + r.height / 2 - (g.top + g.height / 2)];
 }
 
+/** A cell in the frozen rows and one below them, in the same column, share their left edge. */
+async function expectColumnAligned(grid: Locator, frozen: string, below: string) {
+  const [a, b] = [await cellIn(grid, frozen).boundingBox(), await cellIn(grid, below).boundingBox()];
+  expect(a && b && Math.abs(a.x - b.x), `${frozen} and ${below} share their left edge`).toBeLessThan(0.5);
+}
+
 /**
  * The grid renders only the cells in view; this scrolls it, a half view at a time, until cell `a` is
  * rendered, then brings it to the grid's centre, out from under the headers and frozen panes. The page
@@ -120,6 +126,7 @@ test.describe('the working paper viewer at 1440', () => {
     await expect(nameBox(page)).toHaveValue('D9');
     await expect(formulaBar(page)).toHaveText('=D114+D53');
     await expect(cellIn(grid, 'D9')).toHaveAttribute('aria-selected', 'true');
+    await expectColumnAligned(grid, 'D5', 'D20');
     // The inspector lists the two, in the formula's order.
     const inspector = page.getByRole('complementary', { name: 'Inspector' });
     await expect(inspector.locator('[data-inspector-formula]')).toHaveText('=D114+D53');
@@ -330,6 +337,7 @@ test.describe('the working paper viewer at 390', () => {
     expect(box.height).toBeLessThanOrEqual(844 * 0.55 + 1);
     await expect(inspector.locator('[data-inspector-formula]')).toHaveText('=D114+D53');
     await inspector.getByRole('button', { name: 'Close the inspector' }).click();
+    await expectColumnAligned(grid, 'D5', 'D20');
     await expect(inspector).toBeHidden();
 
     // The tabs: wider than the strip, scrolled to show the open one, and scrollable.

@@ -458,7 +458,8 @@ export function SheetGrid({ id, model, styles, selected, marks, onSelect, onActi
             <div aria-hidden="true" className="sticky left-0 z-[2] flex-none" style={{ width: rowHeadW }}>
               {numbers(frozenRows, 0)}
             </div>
-            {block(panes.corner, 'sticky z-[1] bg-popover border-b-2 border-r-2 border-border', { left: rowHeadW, height: frozenH })}
+            {/* Without frozen columns there is no corner: its 2 px rule would push the frozen rows off their columns. */}
+            {fc > 0 && block(panes.corner, 'sticky z-[1] bg-popover border-b-2 border-r-2 border-border', { left: rowHeadW, height: frozenH })}
             {block(panes.top, 'bg-popover border-b-2 border-border', { height: frozenH })}
           </div>
         )}
