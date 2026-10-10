@@ -57,8 +57,9 @@ One file of 1,701,069 bytes (309 kB gzipped), under R4.7's 4 MB, so not split pe
 fetched with the viewer's own chunk when the section comes within 600 px of the viewport, or at
 once when the URL names a sheet or a cell, and such a link opens the page at the viewer. If either
 fails, the section says so, and the Method panel and the download, which need neither, stay.
-`tests/e2e/workbook.spec.ts` measures a click on a cell at 7 to 14 ms to the formula bar and under
-21 ms to the next frame (R4.7 asks for under 50 ms).
+`tests/e2e/workbook.spec.ts` measures a click on a cell (R4.7: under 50 ms): in the runs of 10
+October, 5 to 24 ms to the formula bar, and at most 41 ms to the next frame, which also waits on the
+browser's frame clock and so on the machine's load.
 
 ---
 
