@@ -21,10 +21,14 @@ const PAGE = '/accounting/consolidated-reporting';
 const SOFP = 'Consol SoFP 24';
 const ELIM = 'Elimination 2024';
 
-test.beforeEach(async ({ page }) => {
+async function stubNetwork(page: Page) {
   await mockSupabase(page);
   await page.route('**/fonts.googleapis.com/**', (r) => r.fulfill({ status: 200, body: '' }));
   await page.route('**/fonts.gstatic.com/**', (r) => r.abort());
+}
+
+test.beforeEach(async ({ page }) => {
+  await stubNetwork(page);
 });
 
 /**
@@ -273,6 +277,30 @@ test.describe('the working paper viewer at 1440', () => {
     await expect(nameBox(page)).toHaveValue('E13');
     await page.keyboard.press('Control+Home');
     await expect(nameBox(page)).toHaveValue('D12');
+  });
+});
+
+test.describe('the working paper viewer with the browser throttling history updates', () => {
+  // Playwright starts Chromium with IPC flooding protection off. A visitor's Chromium has it on, and drops
+  // history updates past about 200 in 10 s; Safari throws past 100.
+  test('a held arrow key moves the selection 260 rows, and the URL follows', async ({ browserType, baseURL }) => {
+    const browser = await browserType.launch({ ignoreDefaultArgs: ['--disable-ipc-flooding-protection'] });
+    try {
+      const context = await browser.newContext({ baseURL, viewport: { width: 1440, height: 900 } });
+      const page = await context.newPage();
+      await stubNetwork(page);
+      const sheet = '-BS-RP Disclosure 2023';
+      const { grid, errors } = await openViewer(page, `?sheet=${encodeURIComponent(sheet)}&cell=E1`);
+      await expect(nameBox(page)).toHaveValue('E1');
+      await grid.focus();
+      for (let i = 0; i < 260; i++) await page.keyboard.press('ArrowDown');
+      await expect(nameBox(page)).toHaveValue('E261');
+      await expect(cellIn(grid, 'E261')).toHaveAttribute('aria-selected', 'true');
+      await expect(page).toHaveURL(/[?&]cell=E261$/);
+      expect(errors).toEqual([]);
+    } finally {
+      await browser.close();
+    }
   });
 });
 

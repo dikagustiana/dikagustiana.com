@@ -3,10 +3,13 @@
  * the formula bar with its name box, the grid and the inspector, over the published JSON. Nothing is edited
  * and nothing recalculated; every figure is Excel's cached value.
  *
- * Where the reader is lives in the URL, `?sheet=Consol%20SoFP%2024&cell=D9`, so a cell can be linked to. A
- * move within a sheet replaces the entry; opening another sheet adds one, so the browser's Back returns to
- * the sheet before. The viewer's own Back returns from a jump: a precedent or dependent chip, a cross-sheet
- * button, a Go To from the name box.
+ * Where the reader is shows in the URL, `?sheet=Consol%20SoFP%2024&cell=D9`, so a cell can be linked to. The
+ * viewer holds the place itself: it reads the URL when it opens and whenever the URL changes under it (the
+ * browser's Back and Forward, a link), and writes it back at most every URL_EVERY_MS, because browsers
+ * throttle history updates and a held arrow key would outrun them. A move within a sheet replaces the
+ * entry; opening another sheet adds one, so the browser's Back returns to the sheet before. The viewer's
+ * own Back returns from a jump: a precedent or dependent chip, a cross-sheet button, a Go To from the name
+ * box.
  *
  * Keys, with the focus anywhere in the viewer: Ctrl+G goes to the name box; Esc closes the inspector, or
  * leaves full screen where the browser's own full screen was not available. The grid's keys are its own
@@ -33,11 +36,19 @@ import { Toolbar } from './Toolbar';
 const WIDE = '(min-width: 1024px)';
 /** How far the viewer's Back can go. */
 const BACK_MAX = 50;
+/**
+ * The URL is written at most this often. Chrome drops history updates past about 200 in 10 s, and Safari
+ * throws past 100; a held arrow key moves about 30 times a second.
+ */
+const URL_EVERY_MS = 300;
 
 interface Place {
   sheet: string;
   cell: Cell;
 }
+
+/** A place as the URL spells it, to tell the viewer's own writes from a change made elsewhere. */
+const urlKey = (sheet: string | null, cell: string | null): string => `${sheet ?? ''}!${cell ?? ''}`;
 
 type FullScreen = 'off' | 'browser' | 'page';
 
@@ -69,15 +80,21 @@ export default function WorkbookViewer({ book }: { book: PublishedWorkbook }) {
   );
   const findSheet = useCallback((name: string | null) => (name === null ? undefined : byName.get(name.toUpperCase())), [byName]);
 
-  // Where the reader is: read from the URL, every render.
+  // Where the reader is: the URL's place when the viewer opens, then the viewer's own.
   const [params, setParams] = useSearchParams();
-  const sheet = findSheet(params.get('sheet')) ?? book.sheets[0];
+  const placeIn = useCallback(
+    (p: URLSearchParams): Place => {
+      const s = findSheet(p.get('sheet')) ?? book.sheets[0];
+      const m = modelOf(s);
+      const at = decodeA1(p.get('cell') ?? '');
+      return { sheet: s.name, cell: at ? snap(m, at) : firstCell(s, m) };
+    },
+    [findSheet, modelOf, book.sheets],
+  );
+  const [place, setPlace] = useState(() => placeIn(params));
+  const sheet = findSheet(place.sheet) ?? book.sheets[0];
   const model = modelOf(sheet);
-  const asked = params.get('cell');
-  const selected = useMemo(() => {
-    const at = decodeA1(asked ?? '');
-    return at ? snap(model, at) : firstCell(sheet, model);
-  }, [model, sheet, asked]);
+  const selected = snap(model, place.cell);
   const address = encodeA1(selected.col, selected.row);
   const cell = model.cells.get(address);
   const style = cell?.s === undefined ? undefined : book.styles[cell.s];
@@ -95,21 +112,76 @@ export default function WorkbookViewer({ book }: { book: PublishedWorkbook }) {
   const nameBox = useRef<HTMLInputElement>(null);
   const inspector = useRef<HTMLElement>(null);
 
-  /** A move within the sheet replaces the URL's entry; another sheet adds one. */
-  const show = useCallback(
-    (to: Place) => {
-      setParams(
+  // The URL's place as the viewer last read or wrote it, as the URL spells it, and its sheet; the place
+  // waiting to be written, and when the URL was last written.
+  const inUrl = useRef({ key: urlKey(params.get('sheet'), params.get('cell')), sheet: place.sheet });
+  const pending = useRef<Place | null>(null);
+  const timer = useRef<ReturnType<typeof setTimeout>>();
+  const lastWrite = useRef(-Infinity);
+  const latestSetParams = useRef(setParams);
+  useEffect(() => {
+    latestSetParams.current = setParams;
+  }, [setParams]);
+
+  const writeUrl = useCallback(() => {
+    timer.current = undefined;
+    const to = pending.current;
+    pending.current = null;
+    if (!to) return;
+    const cell = encodeA1(to.cell.col, to.cell.row);
+    const key = urlKey(to.sheet, cell);
+    if (key === inUrl.current.key) return;
+    lastWrite.current = performance.now();
+    // A move within the sheet replaces the URL's entry; another sheet adds one.
+    const was = inUrl.current;
+    const replace = to.sheet === was.sheet;
+    inUrl.current = { key, sheet: to.sheet };
+    try {
+      latestSetParams.current(
         (prev) => {
           const next = new URLSearchParams(prev);
           next.set('sheet', to.sheet);
-          next.set('cell', encodeA1(to.cell.col, to.cell.row));
+          next.set('cell', cell);
           return next;
         },
-        { replace: to.sheet === sheet.name },
+        { replace },
       );
+    } catch {
+      // The browser refused the update: the place stays the viewer's, and the URL catches up at the next move.
+      inUrl.current = was;
+    }
+  }, []);
+
+  /** Selects a place at once, and writes it to the URL now or, within URL_EVERY_MS of the last write, then. */
+  const show = useCallback(
+    (to: Place) => {
+      setPlace(to);
+      pending.current = to;
+      if (timer.current !== undefined) return;
+      const wait = lastWrite.current + URL_EVERY_MS - performance.now();
+      if (wait <= 0) writeUrl();
+      else timer.current = setTimeout(writeUrl, wait);
     },
-    [setParams, sheet.name],
+    [writeUrl],
   );
+
+  // The URL changed under the viewer (the browser's Back or Forward, a link): it wins over a write still
+  // waiting.
+  useEffect(() => {
+    const key = urlKey(params.get('sheet'), params.get('cell'));
+    if (key === inUrl.current.key) return;
+    clearTimeout(timer.current);
+    timer.current = undefined;
+    pending.current = null;
+    const to = placeIn(params);
+    inUrl.current = { key, sheet: to.sheet };
+    setPlace(to);
+  }, [params, placeIn]);
+
+  useEffect(() => {
+    const waiting = timer;
+    return () => clearTimeout(waiting.current);
+  }, []);
 
   const select = useCallback((to: Cell) => show({ sheet: sheet.name, cell: to }), [show, sheet.name]);
 

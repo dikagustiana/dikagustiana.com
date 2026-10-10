@@ -126,9 +126,10 @@ describe('the workbook viewer', () => {
     expect(place(router)).toBe('Detail Sheet!A1');
     expect(cellAt('B3')).toHaveAttribute('aria-label', expect.stringContaining('300'));
 
-    // Arrow keys move between the tabs and open them.
+    // Arrow keys move between the tabs and open them. The URL follows within URL_EVERY_MS of its last write.
     fireEvent.keyDown(screen.getAllByRole('tab')[1], { key: 'ArrowRight' });
-    expect(place(router)).toBe('Big!A1');
+    expect(screen.getAllByRole('tab')[2]).toHaveAttribute('aria-selected', 'true');
+    await waitFor(() => expect(place(router)).toBe('Big!A1'));
   });
 
   it('selects a cell on a click: the name box gives its address and the formula bar its formula with "="', async () => {
@@ -173,7 +174,8 @@ describe('the workbook viewer', () => {
     expect(within(inspector()).getByText(COPY.noDependents)).toBeInTheDocument();
 
     await userEvent.click(formulaBar().getByRole('button', { name: COPY.backTo('Summary!B5') }));
-    expect(place(router)).toBe('Summary!B5');
+    expect(nameBox().value).toBe('B5');
+    await waitFor(() => expect(place(router)).toBe('Summary!B5'));
     expect(formulaBar().queryByRole('button', { name: /Back/ })).toBeNull();
 
     // A precedent on a sheet D9 leaves out is named and said to be unpublished, not a button.
@@ -220,6 +222,47 @@ describe('the workbook viewer', () => {
     expect(inspector()).not.toBeVisible();
   });
 
+  it('keeps up with a held arrow key, writing the URL at most every 300 ms, and moves on when the browser refuses a write', async () => {
+    const { router } = renderViewer('/wp?sheet=Big&cell=A1');
+    const navigate = vi.spyOn(router, 'navigate');
+    // A key held down: about 30 presses a second, 150 of them here at once.
+    for (let i = 0; i < 150; i++) fireEvent.keyDown(grid(), { key: 'ArrowDown' });
+    expect(nameBox().value).toBe('A151');
+    expect(cellAt('A151')).toHaveAttribute('aria-selected', 'true');
+    expect(navigate.mock.calls.length).toBeLessThanOrEqual(1);
+    await waitFor(() => expect(place(router)).toBe('Big!A151'));
+    expect(navigate).toHaveBeenCalledTimes(2);
+    expect(router.state.historyAction).toBe('REPLACE');
+
+    // Safari throws past its limit on history updates; the selection does not wait for the URL.
+    navigate.mockImplementation(() => {
+      throw new DOMException('history.replaceState() more than 100 times per 10 seconds', 'SecurityError');
+    });
+    for (let i = 0; i < 20; i++) fireEvent.keyDown(grid(), { key: 'ArrowDown' });
+    expect(nameBox().value).toBe('A171');
+    await waitFor(() => expect(navigate).toHaveBeenCalledTimes(3));
+    expect(place(router)).toBe('Big!A151');
+    fireEvent.keyDown(grid(), { key: 'ArrowRight' });
+    expect(nameBox().value).toBe('B171');
+
+    // The URL catches up once the browser takes writes again.
+    navigate.mockRestore();
+    fireEvent.keyDown(grid(), { key: 'ArrowRight' });
+    await waitFor(() => expect(place(router)).toBe('Big!C171'));
+  });
+
+  it("follows the URL when it changes under the viewer, as the browser's Back changes it", async () => {
+    const { router } = renderViewer('/wp?sheet=Summary&cell=B4');
+    await userEvent.click(screen.getAllByRole('tab')[1]);
+    expect(place(router)).toBe('Detail Sheet!A1');
+    await act(() => router.navigate(-1));
+    expect(screen.getAllByRole('tab')[0]).toHaveAttribute('aria-selected', 'true');
+    expect(nameBox().value).toBe('B4');
+    await act(() => router.navigate('/wp?sheet=Detail%20Sheet&cell=B3'));
+    expect(nameBox().value).toBe('B3');
+    expect(barText()).toBe('=Summary!B4');
+  });
+
   it('goes to a typed address with Ctrl+G, on this sheet or another, and says when there is no such cell', async () => {
     const { router } = renderViewer();
     fireEvent.keyDown(grid(), { key: 'g', ctrlKey: true });
@@ -234,7 +277,8 @@ describe('the workbook viewer', () => {
     fireEvent.keyDown(grid(), { key: 'G', ctrlKey: true });
     await userEvent.clear(nameBox());
     await userEvent.type(nameBox(), "'summary'!$b$4{Enter}");
-    expect(place(router)).toBe('Summary!B4');
+    expect(barText()).toBe('=SUM(B2:B3)');
+    await waitFor(() => expect(place(router)).toBe('Summary!B4'));
 
     fireEvent.keyDown(grid(), { key: 'g', ctrlKey: true });
     await userEvent.clear(nameBox());
