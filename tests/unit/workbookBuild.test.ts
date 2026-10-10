@@ -22,6 +22,7 @@ import {
   type Loaded,
 } from '../../scripts/consolidation/workbook';
 import type { PublishedWorkbook } from '@/lib/workbook/types';
+import { seeded } from './helpers/seeded';
 
 const ROOT = path.resolve(__dirname, '../..');
 const source = fs.readFileSync(path.join(ROOT, SOURCE_PATH));
@@ -34,17 +35,6 @@ beforeAll(async () => {
   loaded = await loadSource(source);
   built = buildWorkbook(loaded, { sha256: createHash('sha256').update(source).digest('hex'), bytes: source.length });
 }, 60_000);
-
-/** mulberry32: a fixed seed picks the same cells on every run. */
-function seeded(seed: number): () => number {
-  let a = seed;
-  return () => {
-    a = (a + 0x6d2b79f5) | 0;
-    let t = Math.imul(a ^ (a >>> 15), 1 | a);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
 
 describe('the working paper build', () => {
   it('rebuilds the committed JSON and build report byte for byte', () => {
