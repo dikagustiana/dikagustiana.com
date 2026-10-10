@@ -254,3 +254,15 @@ Screenshot dari Vercel Preview (data production, baca saja) untuk R1.7 ditambahk
 ## Text awaiting the owner
 
 Tidak ada. Fase ini tidak menambah konstanta OWNER-REPLACEABLE. Satu-satunya kalimat baru yang dibaca pengunjung adalah "Covered in <judul essay>" (`src/components/fsli/FsliCoveredBy.tsx`), yang berasal dari keputusan D2(a) (PRD §1.3: kolom `fsli_pages.covered_by_slug` + kalimat "Covered in …") dan Bagian 3 Phase B langkah 3 ("shows one sentence "Covered in <essay title>""). Label `aria-label="On this page"` pada navigasi TOC memakai ulang heading "On this page" yang sudah ada.
+
+## Tambahan orkestrator: screenshot dengan data production (build lokal, baca saja)
+
+Vercel Preview untuk branch ini ada di balik Vercel Authentication (SSO), dan konektor Vercel sesi ini tidak punya akses ke project `dikagustiana-com` (laporan fase 0 §6.6). Sebagai gantinya, orkestrator membangun branch ini secara lokal sebagai build production (`npx vite build`, semua flag world/FIA tidak diset kecuali disebut), dengan `VITE_SUPABASE_URL` production (`asypkbkiebjvvpimewfp`) dan kunci anon publik. Browser Playwright hanya bicara dengan `vite preview` lokal; setiap request ke `*.supabase.co` diteruskan lewat Node, dan **hanya GET/HEAD** yang diteruskan (selain itu dibatalkan), jadi production hanya dibaca. Kode yang dibangun sama dengan HEAD PR: `git diff <commit build>..HEAD -- src public scripts supabase tests` kosong. Build dari `0cd5dec`.
+
+| Path | Isi | Hasil yang diperiksa di halaman (dari `page.evaluate`) |
+|---|---|---|
+| `screenshots/b/production-data/cash-and-cash-equivalents-1440-production-data.png` | 1440 px: header line item, kartu angka, lalu judul essay sebagai h2, lede, awal body; TOC "On this page" dari heading essay | h2 pertama = judul essay; tidak ada "Not written yet"; tidak ada "Related Essays"; 2 request Supabase, semuanya 200 |
+| `screenshots/b/production-data/cash-and-cash-equivalents-390-production-data.png`, `…-390-production-data-essay.png` | 390 px: bagian atas, lalu awal body essay | sama |
+| `screenshots/b/production-data/trade-receivables-net-1440-production-data.png` | 1440 px, sama seperti di atas untuk `trade-receivables-net` | h2 pertama = judul essay; tanpa "Not written yet" dan "Related Essays" |
+| `screenshots/b/production-data/trade-receivables-net-390-production-data.png`, `…-390-production-data-essay.png` | 390 px | sama |
+| `screenshots/b/production-data/restricted-cash-non-current-1440-production-data.png`, `…-390-…` | Halaman tanpa essay: header dan kartu angka saja | Tidak ada kalimat "Covered in …" **karena migrasi `20261010100000_fsli_covered_by.sql` belum diterapkan**: kolom tidak ada, halaman membacanya sebagai null (pola 42703), tanpa error. Kalimat itu muncul setelah Dika menerapkan migrasi. |
