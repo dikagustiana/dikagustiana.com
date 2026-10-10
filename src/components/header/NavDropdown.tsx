@@ -23,6 +23,14 @@ interface NavDropdownProps {
  */
 export const NAV_DROPDOWN_CLOSE_DELAY_MS = 150;
 
+/**
+ * The close of whichever menu is open, so the next one to open can close it at
+ * once. Left to its delay, a menu the pointer has just left stays drawn over
+ * its neighbour (later in the document, same z-index), and a pointer moving
+ * into the overlap re-entered it and closed the menu it was heading for.
+ */
+let closeOpenMenu: (() => void) | null = null;
+
 export function NavDropdown({ label, items, width = 'w-56', basePath }: NavDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
@@ -62,6 +70,16 @@ export function NavDropdown({ label, items, width = 'w-56', basePath }: NavDropd
 
   // A timer left running after unmount would set state on nothing.
   useEffect(() => cancelClose, [cancelClose]);
+
+  // One menu open at a time: opening this one closes the last without delay.
+  useEffect(() => {
+    if (!isOpen) return;
+    if (closeOpenMenu !== close) closeOpenMenu?.();
+    closeOpenMenu = close;
+    return () => {
+      if (closeOpenMenu === close) closeOpenMenu = null;
+    };
+  }, [isOpen, close]);
 
   const handlePointerEnter = () => {
     cancelClose();

@@ -13,7 +13,7 @@ import { render, screen, act, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, useLocation } from 'react-router-dom';
 import { NavDropdown, NAV_DROPDOWN_CLOSE_DELAY_MS } from '@/components/header/NavDropdown';
-import { learningItems, nextBigThingItems } from '@/config/navConfig';
+import { accountingItems, learningItems, nextBigThingItems } from '@/config/navConfig';
 
 function Where() {
   const { pathname, search } = useLocation();
@@ -100,6 +100,23 @@ describe('NavDropdown under a pointer', () => {
 
     move(label(), item('Growth'));
     expect(elsewhere).toHaveFocus();
+  });
+
+  it('closes the menu the pointer left at once when it opens the next', () => {
+    mount(
+      <>
+        <NavDropdown label="Accounting" items={accountingItems} width="w-56" basePath="/accounting" />
+        <NavDropdown label="The Next Big Thing" items={nextBigThingItems} width="w-44" basePath="/the-next-big-thing" />
+      </>,
+    );
+    const accounting = screen.getByRole('link', { name: 'Accounting' });
+    move(null, accounting);
+    expect(item('FSLI Detail')).toBeInTheDocument();
+
+    // No wait: a panel left up for its close delay could lie over this one.
+    move(accounting, label());
+    expect(screen.getAllByRole('menu')).toHaveLength(1);
+    expect(item('Technology')).toBeInTheDocument();
   });
 
   it('clears a pending close when it unmounts', () => {

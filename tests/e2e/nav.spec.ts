@@ -88,3 +88,38 @@ test('a pointer resting in the seam between label and panel keeps each menu open
     await expect(menu).toBeHidden();
   }
 });
+
+test('moving from one menu to the next closes the first at once, so its panel cannot take the pointer', async ({
+  page,
+}) => {
+  const nav = await open(page);
+  const accounting = nav.getByRole('link', { name: 'Accounting', exact: true });
+  const finance = nav.getByRole('link', { name: 'Finance', exact: true });
+  const menu = nav.getByRole('menu');
+
+  // Where each panel is drawn, one at a time.
+  const panelOf = async (trigger: typeof accounting) => {
+    await trigger.hover();
+    const box = await menu.boundingBox();
+    await page.mouse.move(10, 700, { steps: 4 });
+    await expect(menu).toBeHidden();
+    if (!box) throw new Error('no panel');
+    return box;
+  };
+  const accountingPanel = await panelOf(accounting);
+  const financePanel = await panelOf(finance);
+
+  // A point inside Accounting's panel that Finance's panel, later in the
+  // document, would cover if it were still up.
+  const target = { x: accountingPanel.x + accountingPanel.width - 12, y: accountingPanel.y + 20 };
+  expect(target.x).toBeGreaterThan(financePanel.x);
+
+  await finance.hover();
+  await expect(menu).toBeVisible();
+  await accounting.hover();
+  await page.mouse.move(target.x, target.y, { steps: 5 });
+  await page.waitForTimeout(CLOSE_DELAY_MS * 2);
+
+  await expect(menu).toHaveCount(1);
+  await expect(menu.getByRole('menuitem').first()).toHaveText('FSLI Detail');
+});
