@@ -198,7 +198,10 @@ the order stays the owner's through Admin, and a new essay reaches the homepage 
   snapshots, so an essay starred or unstarred between them could come back from neither. The hook
   now reads the published essays once, the database sorting the starred first in the owner's order,
   puts the rest back in date order itself and stops the read at twice `limit`; its header says why.
-  `selectedOrder.test.tsx` stars an essay between two reads of the emulated table.)*
+  `selectedOrder.test.tsx` stars an essay between two reads of the emulated table. After review of
+  PR #66, saving the homepage order ranks only rows still starred (`useSaveSelectedOrder`), so a
+  panel opened before an unstar cannot leave a rank on an unstarred essay, which would sort it ahead
+  of newer ones in the read; production held no such rank on 10 October 2026.)*
 - **The star decides who leads, not who is in.** `is_selected` is still the one featuring flag and
   `selected_rank` still the order, both set as before in Admin → Content → "Homepage order"; the
   panel's comments now say the unstarred follow newest first.

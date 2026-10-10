@@ -10,7 +10,7 @@
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { MemoryRouter, Route, Routes, useNavigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider, onlineManager } from '@tanstack/react-query';
 import { HelmetProvider } from 'react-helmet-async';
 import type { ReactNode } from 'react';
@@ -313,15 +313,65 @@ describe('Arriving at one of the essay\'s headings', () => {
     vi.restoreAllMocks();
   });
 
-  it('goes to the heading the address names once the essay has drawn it', async () => {
-    // jsdom lays nothing out: the named heading is put 1,200px down.
+  /** jsdom lays nothing out: the named heading is put 1,200px down. */
+  const placeHeading = () =>
     vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(function (this: Element) {
       const top = this.id === 'where-it-is-presented' ? 1200 : 0;
       return { top, bottom: top + 40, left: 0, right: 0, width: 0, height: 40, x: 0, y: top, toJSON: () => ({}) } as DOMRect;
     });
+
+  it('goes to the heading the address names once the essay has drawn it', async () => {
+    placeHeading();
     const scrollTo = vi.spyOn(window, 'scrollTo').mockImplementation(() => {});
 
     renderAt('cash#where-it-is-presented');
+    await screen.findByRole('heading', { level: 2, name: 'What Cash Is' });
+    await waitFor(() => expect(scrollTo).toHaveBeenCalledTimes(1));
+    expect(scrollTo.mock.calls[0][0]).toMatchObject({ top: 1200 });
+  });
+
+  it('goes to the heading a link to the next line item names: the page stays mounted, the arrival is new', async () => {
+    placeHeading();
+    const scrollTo = vi.spyOn(window, 'scrollTo').mockImplementation(() => {});
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    let go: (to: string) => void = () => {};
+    const Navigator = () => {
+      go = useNavigate();
+      return null;
+    };
+    render(
+      <HelmetProvider>
+        <MemoryRouter initialEntries={['/accounting/fsli/current-1']}>
+          <QueryClientProvider client={client}>
+            <Navigator />
+            <Routes>
+              <Route path="/accounting/fsli/:slug" element={<FsliDetail />} />
+            </Routes>
+          </QueryClientProvider>
+        </MemoryRouter>
+      </HelmetProvider>,
+    );
+    await screen.findByRole('heading', { level: 1, name: 'Current item 1' });
+    await waitFor(() => expect(client.isFetching()).toBe(0));
+    await new Promise((r) => requestAnimationFrame(r));
+
+    act(() => go('/accounting/fsli/cash#where-it-is-presented'));
+    await screen.findByRole('heading', { level: 2, name: 'What Cash Is' });
+    await waitFor(() => expect(scrollTo).toHaveBeenCalledTimes(1));
+    expect(scrollTo.mock.calls[0][0]).toMatchObject({ top: 1200 });
+  });
+
+  it('goes to the heading once a retry draws it, after the first read failed', async () => {
+    placeHeading();
+    const scrollTo = vi.spyOn(window, 'scrollTo').mockImplementation(() => {});
+    failing = new Set(['essays']);
+    renderAt('cash#where-it-is-presented');
+    await screen.findByText('Something went wrong');
+    await new Promise((r) => requestAnimationFrame(r));
+    expect(scrollTo).not.toHaveBeenCalled();
+
+    failing = new Set();
+    fireEvent.click(screen.getByRole('button', { name: /Try again/ }));
     await screen.findByRole('heading', { level: 2, name: 'What Cash Is' });
     await waitFor(() => expect(scrollTo).toHaveBeenCalledTimes(1));
     expect(scrollTo.mock.calls[0][0]).toMatchObject({ top: 1200 });

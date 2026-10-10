@@ -472,14 +472,18 @@ export function useSelectedOrder() {
 /**
  * Writes the whole order: position i gets rank i + 1. One update per row;
  * the list is at most a few dozen starred essays, and an upsert would need
- * every NOT NULL column of the row.
+ * every NOT NULL column of the row. Only a row still starred takes its rank:
+ * a panel opened before an essay was unstarred still lists it, and a rank
+ * written back onto an unstarred essay would sort it ahead of newer ones in
+ * the homepage read (useSelectedEssays). Unstarring clears the rank, so no
+ * unstarred essay holds one.
  */
 export function useSaveSelectedOrder() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (ids: string[]) => {
       const results = await Promise.all(
-        ids.map((id, i) => supabase.from('essays').update({ selected_rank: i + 1 }).eq('id', id)),
+        ids.map((id, i) => supabase.from('essays').update({ selected_rank: i + 1 }).eq('id', id).eq('is_selected', true)),
       );
       const failed = results.find((r) => r.error);
       if (failed?.error) throw failed.error;

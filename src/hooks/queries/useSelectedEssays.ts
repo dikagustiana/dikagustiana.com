@@ -17,15 +17,16 @@ import { supabase } from '@/integrations/supabase/client';
  * essay starred or unstarred between them could be on neither side (review
  * of PR #63). The database sorts the starred to the front in the owner's
  * order and the hook keeps them as they come; the rest it puts back in date
- * order, so a rank an unstarred essay still holds (an order saved from a
- * panel opened before the unstar) moves nothing. The read stops at twice
- * `limit`, 60 on the homepage against 21 published essays today. With no
- * rank left on an unstarred essay the row is the read's first `limit` rows;
- * the database sorts an unstarred essay that keeps one ahead of the newer
- * unstarred, which pushes them down the read, and the second `limit` is the
- * room for that. So the row is exact while no more than `limit` published
- * unstarred essays hold a rank. Only that stale save leaves one, and it
- * writes no more than the starred its panel listed.
+ * order, so a rank an unstarred essay still holds moves nothing. The read
+ * stops at twice `limit`, 60 on the homepage against 21 published essays
+ * today. With no rank left on an unstarred essay the row is the read's first
+ * `limit` rows; the database sorts an unstarred essay that keeps one ahead of
+ * the newer unstarred, which pushes them down the read, and the second
+ * `limit` is the room for that. So the row is exact while no more than
+ * `limit` published unstarred essays hold a rank. Nothing in the app leaves
+ * one: unstarring clears the rank, and saving the order ranks only rows still
+ * starred (useSaveSelectedOrder). Production had none on 10 October 2026;
+ * only a hand edit in the database could add one.
  *
  * `essays.is_selected` is still THE featuring flag. The Finance landing reads
  * it on its own (useFeaturedFinanceEssay) and is not widened by this rule.
