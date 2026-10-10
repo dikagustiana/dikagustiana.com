@@ -25,14 +25,19 @@ test.beforeEach(async ({ page }) => {
   await page.route('**/fonts.gstatic.com/**', (r) => r.abort());
 });
 
-/** Opens the page, scrolls the working paper into view and waits for its grid. */
+/**
+ * Opens the page, scrolls the working paper into view and waits for its grid, then sets the viewer at the top
+ * of the window, where all of it fits at 1440 × 900: the same place on every run, whatever scrolled it there.
+ */
 async function openViewer(page: Page, query = '') {
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(e.message));
   await page.goto(PAGE + query);
-  await page.locator('[data-workbook-viewer]').scrollIntoViewIfNeeded();
-  const grid = page.locator('[data-workbook-viewer] [role="grid"]');
+  const viewer = page.locator('[data-workbook-viewer]');
+  await viewer.scrollIntoViewIfNeeded();
+  const grid = viewer.locator('[role="grid"]');
   await expect(grid).toBeVisible({ timeout: 15_000 });
+  await viewer.evaluate((e) => e.scrollIntoView({ block: 'start' }));
   return { grid, errors };
 }
 
@@ -42,25 +47,36 @@ const formulaBar = (page: Page) => page.locator('[data-formula-bar]');
 const cellIn = (grid: Locator, a: string) => grid.locator(`[role="gridcell"][data-a="${a}"]`);
 
 /**
- * The grid renders only the cells in view; this scrolls it, a half view at a time, until something matching
- * `selector` is rendered.
+ * In the page: whether cell `a` is on screen in the grid, not scrolled away nor under a header or a frozen
+ * pane. The grid must be in the window.
  */
-async function reveal(grid: Locator, selector: string): Promise<Locator> {
-  const found = await grid.evaluate(async (el, sel) => {
-    const frames = () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(() => requestAnimationFrame(r))));
-    for (let left = 0; left <= el.scrollWidth; left += el.clientWidth / 2) {
-      for (let top = 0; top <= el.scrollHeight; top += el.clientHeight / 2) {
-        el.scrollTo(left, top);
-        await frames();
-        if (el.querySelector(sel)) return true;
-      }
+function shownIn(grid: HTMLElement, a: string): boolean {
+  const cell = grid.querySelector(`[role="gridcell"][data-a="${a}"]`);
+  if (!cell) return false;
+  const r = cell.getBoundingClientRect();
+  const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+  return !!hit && (hit === cell || cell.contains(hit));
+}
+
+/** In the page: scrolls the grid, and waits the frames that render the window it then shows. */
+async function scrollGrid(grid: HTMLElement, [left, top]: number[]): Promise<void> {
+  grid.scrollTo(left, top);
+  await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(() => requestAnimationFrame(r))));
+}
+
+/**
+ * The grid renders only the cells in view; this scrolls it, a half view at a time, until cell `a` is on
+ * screen. The page itself is not scrolled.
+ */
+async function reveal(grid: Locator, a: string): Promise<Locator> {
+  const size = await grid.evaluate((el) => ({ w: el.scrollWidth, h: el.scrollHeight, cw: el.clientWidth, ch: el.clientHeight }));
+  for (let left = 0; left <= size.w; left += size.cw / 2) {
+    for (let top = 0; top <= size.h; top += size.ch / 2) {
+      await grid.evaluate(scrollGrid, [left, top]);
+      if (await grid.evaluate(shownIn, a)) return cellIn(grid, a);
     }
-    return false;
-  }, selector);
-  expect(found, `${selector} is rendered somewhere on the sheet`).toBe(true);
-  const target = grid.locator(selector);
-  await target.first().scrollIntoViewIfNeeded();
-  return target;
+  }
+  throw new Error(`${a} is not shown anywhere on the sheet`);
 }
 
 test.describe('the working paper viewer at 1440', () => {
@@ -82,33 +98,30 @@ test.describe('the working paper viewer at 1440', () => {
     expect(await inspector.locator('[data-chip]').evaluateAll((els) => els.map((e) => e.getAttribute('data-chip')))).toEqual(['D114', 'D53']);
 
     for (const a of ['D53', 'D114']) {
-      const outline = await reveal(grid, `[data-precedent="${a}"]`);
+      const cell = await reveal(grid, a);
+      const outline = grid.locator(`[data-precedent="${a}"]`);
       await expect(outline).toHaveCount(1);
       await expect(outline).toBeVisible();
       expect(await outline.evaluate((e) => getComputedStyle(e).outlineStyle)).toBe('dashed');
       // It lies over the precedent itself.
-      const [box, cell] = [await outline.boundingBox(), await cellIn(grid, a).boundingBox()];
-      expect(box && cell && Math.abs(box.x - cell.x) < 1 && Math.abs(box.y - cell.y) < 1).toBe(true);
+      const [over, under] = [await outline.boundingBox(), await cell.boundingBox()];
+      expect(over && under && Math.abs(over.x - under.x) < 1 && Math.abs(over.y - under.y) < 1).toBe(true);
     }
     // Nothing else on the sheet is outlined: every outline from top to bottom, the precedents' column in view.
-    const outlined = await grid.evaluate(async (el) => {
-      const seen = new Set<string>();
-      const frames = () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(() => requestAnimationFrame(r))));
-      for (let top = 0; top <= el.scrollHeight; top += el.clientHeight / 2) {
-        el.scrollTo(0, top);
-        await frames();
-        el.querySelectorAll('[data-precedent]').forEach((p) => seen.add(p.getAttribute('data-precedent')!));
-      }
-      return [...seen].sort();
-    });
-    expect(outlined).toEqual(['D114', 'D53']);
+    const seen = new Set<string>();
+    const { h, ch } = await grid.evaluate((el) => ({ h: el.scrollHeight, ch: el.clientHeight }));
+    for (let top = 0; top <= h; top += ch / 2) {
+      await grid.evaluate(scrollGrid, [0, top]);
+      for (const p of await grid.locator('[data-precedent]').evaluateAll((els) => els.map((e) => e.getAttribute('data-precedent')!))) seen.add(p);
+    }
+    expect([...seen].sort()).toEqual(['D114', 'D53']);
     expect(errors).toEqual([]);
   });
 
   test(`a reference to '${ELIM}' jumps there and Back returns`, async ({ page }) => {
     const { grid, errors } = await openViewer(page);
     await tab(page, SOFP).click();
-    const af26 = await reveal(grid, '[role="gridcell"][data-a="AF26"]');
+    const af26 = await reveal(grid, 'AF26');
     await af26.click();
     await expect(nameBox(page)).toHaveValue('AF26');
     await expect(formulaBar(page)).toHaveText(`='${ELIM}'!G82`);
@@ -120,14 +133,14 @@ test.describe('the working paper viewer at 1440', () => {
     await expect(formulaBar(page)).toHaveText("=-'Detail Elimination BS'!L12");
     await expect(page).toHaveURL(/[?&]sheet=Elimination\+2024&cell=G82$/);
     await expect(cellIn(grid, 'G82')).toHaveAttribute('aria-selected', 'true');
-    await expect(cellIn(grid, 'G82')).toBeInViewport();
+    await expect.poll(() => grid.evaluate(shownIn, 'G82'), { message: 'G82 is on screen in the grid' }).toBe(true);
     await expect(grid.locator('[data-selected="G82"]')).toBeVisible();
 
     await page.getByRole('button', { name: `Back to '${SOFP}'!AF26` }).click();
     await expect(tab(page, SOFP)).toHaveAttribute('aria-selected', 'true');
     await expect(nameBox(page)).toHaveValue('AF26');
     await expect(formulaBar(page)).toHaveText(`='${ELIM}'!G82`);
-    await expect(cellIn(grid, 'AF26')).toBeInViewport();
+    await expect.poll(() => grid.evaluate(shownIn, 'AF26'), { message: 'AF26 is on screen in the grid' }).toBe(true);
     // Nothing further back.
     await expect(page.getByRole('button', { name: /^Back to / })).toHaveCount(0);
     expect(errors).toEqual([]);
