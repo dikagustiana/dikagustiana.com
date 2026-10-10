@@ -120,9 +120,12 @@ export const WORKBOOK_COPY = {
   // Method panel (PRD R4.6: 'panel Method (sumber …; tahun; sheet yang dikecualikan; 49 sel error sesuai D8; nilai cache)').
   /** PRD R4.6: 'panel Method'. */
   method: 'Method',
-  /** OWNER-REPLACEABLE: the source line; the file is the owner's dummy workbook (docs/consolidation/README.md). */
+  /**
+   * OWNER-REPLACEABLE: PRD R4.6, 'sumber: workbook dummy buatan Dika' (the source: a dummy workbook Dika
+   * made), with the group named as the heading names it.
+   */
   methodSource:
-    "Source: a dummy PSAK 338 consolidation workbook of PT Dummy - C and its subsidiaries. Its figures are dummy: they are not any company's data.",
+    "Source: Dika Gustiana's dummy PSAK 338 consolidation workbook for PT Dummy C and its subsidiaries. Its figures are dummy: they are not any company's data.",
   /** OWNER-REPLACEABLE: the years its statements cover. */
   methodYears: 'Years: 2022, 2023 and 2024.',
   /** PRD R4.3, verbatim. */
