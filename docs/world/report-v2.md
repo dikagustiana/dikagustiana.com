@@ -11,7 +11,7 @@ byte-identical to `main` at every gate; production is untouched.
 | B | flows on a road graph: every goods vehicle from a supplier's lot to a customer's, gates and weighbridges, the port, the returns, coins | [#55](https://github.com/dikagustiana/dikagustiana.com/pull/55) | `gates/gate-b.md` |
 | C | every family's activity, night for every building, the energy and cold-chain layers | [#56](https://github.com/dikagustiana/dikagustiana.com/pull/56) | `gates/gate-c.md` |
 | D | the chain on the roads, six stories, Follow, the governance and regulation pulses, search by story and load | [#57](https://github.com/dikagustiana/dikagustiana.com/pull/57) | `gates/gate-d.md` |
-| E | quality: the browser suite's budgets and keyboard path, Lighthouse, this report | PR_E | `gates/gate-e.md` |
+| E | quality: the browser suite's budgets and keyboard path, Lighthouse, this report | [#58](https://github.com/dikagustiana/dikagustiana.com/pull/58) | `gates/gate-e.md` |
 
 ## 1. Architecture as built
 

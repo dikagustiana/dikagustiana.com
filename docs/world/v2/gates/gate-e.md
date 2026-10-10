@@ -116,4 +116,4 @@ Nothing new: O-V2-1…11 are collected in `docs/world/report-v2.md` §8.
 
 ## 6. The pull request
 
-PR_LINK
+https://github.com/dikagustiana/dikagustiana.com/pull/58
