@@ -38,10 +38,7 @@ export function Toolbar({ address, fullScreen, onFullScreen, className }: Toolba
   };
 
   return (
-    <div className={cn('flex flex-wrap items-center gap-2', className)}>
-      <span role="status" className="text-[13px] text-muted-foreground">
-        {copied === 'copied' ? COPY.copied : copied === 'failed' ? COPY.copyFailed : ''}
-      </span>
+    <div className={cn('relative flex flex-wrap items-center gap-2', className)}>
       <button type="button" onClick={copy} className={cn(BUTTON, QUIET)}>
         {copied === 'copied' ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}
         {COPY.copyAddress}
@@ -54,6 +51,10 @@ export function Toolbar({ address, fullScreen, onFullScreen, className }: Toolba
         <Download aria-hidden="true" />
         {COPY.download}
       </a>
+      {/* Under the buttons, out of the row, so that while it is empty it moves nothing. */}
+      <span role="status" className="absolute right-0 top-full mt-1 text-xs text-muted-foreground">
+        {copied === 'copied' ? COPY.copied : copied === 'failed' ? COPY.copyFailed : ''}
+      </span>
     </div>
   );
 }
