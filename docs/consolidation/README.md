@@ -31,6 +31,13 @@ Sanitising (D9, R4.2): sheets that are hidden or hold no value are left out, whi
 else. Defined names are dropped. No value is changed. The output is deterministic and records the
 source's sha256, so a new workbook means: replace the xlsx, run the build, commit both.
 
+## `build-report.md`
+
+Written by the same build, for the owner's review: the sheets before and after sanitising, the counts
+set against the PRD's profile (§1.2.4), the error cells (D8), every font colour with ten red and ten blue
+examples (D10), the work notes (R4.2), and text naming a `PT` that is not a Dummy. The build reports;
+it changes nothing in the workbook.
+
 ## `reference/Company_models__PTBA.html` — not committed
 
 The PRD (Part 3, Phase E step 1) asks for the PTBA company-model page to be committed here as the visual

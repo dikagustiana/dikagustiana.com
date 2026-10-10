@@ -6,3 +6,4 @@ scripts/og-fonts/*.ttf binary
 docs/consolidation/source/*.xlsx binary
 # Rebuilt byte for byte from that workbook by npm run build:workbook.
 public/consolidation/*.json text eol=lf
+docs/consolidation/build-report.md text eol=lf
