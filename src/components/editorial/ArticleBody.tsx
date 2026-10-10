@@ -33,6 +33,13 @@ interface ArticleBodyProps {
   content: string;
   fontSizeClass?: string;
   className?: string;
+  /**
+   * Ids for the body's h1–h6, in document order, in place of the positional
+   * `section-N-<slug>` ones. The FSLI page passes them (src/lib/fsliToc.ts):
+   * its anchors follow a heading's words and stay unique across two essays
+   * on one page. A heading past the end of the list keeps its positional id.
+   */
+  headingIds?: readonly string[];
 }
 
 /** Rendering pass state: heading ids, footnote numbering, collected notes. */
@@ -40,6 +47,7 @@ interface RenderCtx {
   heading: number;
   footnote: number;
   notes: string[];
+  headingIds?: readonly string[];
 }
 
 // ---------------------------------------------------------------------------
@@ -258,7 +266,7 @@ function renderJsonNode(
       const level = Math.min(Math.max(Number(node.attrs?.level ?? 2), 1), 6);
       const text = extractPlainText(node);
       ctx.heading++;
-      const id = `section-${ctx.heading}-${text
+      const id = ctx.headingIds?.[ctx.heading - 1] ?? `section-${ctx.heading}-${text
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, '-')
         .slice(0, 50)}`;
@@ -442,7 +450,9 @@ function renderLegacyHtml(htmlContent: string, ctx: RenderCtx): ReactNode {
     if (/^h[1-6]$/.test(tagName)) {
       ctx.heading++;
       const text = element.textContent || '';
-      const id = `section-${ctx.heading}-${text.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 50)}`;
+      const id =
+        ctx.headingIds?.[ctx.heading - 1] ??
+        `section-${ctx.heading}-${text.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 50)}`;
       return (
         <LinkableHeading
           key={key}
@@ -632,11 +642,11 @@ function renderLegacyHtml(htmlContent: string, ctx: RenderCtx): ReactNode {
 // Main component
 // ---------------------------------------------------------------------------
 
-export function ArticleBody({ content, fontSizeClass, className }: ArticleBodyProps) {
+export function ArticleBody({ content, fontSizeClass, className, headingIds }: ArticleBodyProps) {
   const rendered = useMemo(() => {
     if (!content) return null;
 
-    const ctx: RenderCtx = { heading: 0, footnote: 0, notes: [] };
+    const ctx: RenderCtx = { heading: 0, footnote: 0, notes: [], headingIds };
 
     // Prefer direct JSON rendering (no DOMParser, no HTML intermediate)
     const json = parseTiptapJson(content);
@@ -650,7 +660,7 @@ export function ArticleBody({ content, fontSizeClass, className }: ArticleBodyPr
     }
 
     return null;
-  }, [content]);
+  }, [content, headingIds]);
 
   if (!rendered) {
     return <article className={cn('prose-editorial', fontSizeClass, className)} />;

@@ -100,6 +100,201 @@ left alone" (lines 125–129, About's hero).
 
 ---
 
+# 2026-10-10 — FSLI pages: the essay is the body (site sweep, phase B)
+
+Branch `sweep/b-fsli`, base `main` @ `0487609`. Executes PRD R1 of the October 2026 site sweep under
+owner decisions D1(a) and D2(a) (PRD §1.3, copied to `docs/sweep-2026-10/DECISIONS.md` by phase 0).
+The phase report is `docs/sweep-2026-10/report-b.md`.
+
+## The essay is the page body; the outline and its table reader are deleted — owner decision D1(a)
+
+- A line item with a published essay (`essays.fsli_slug`) now shows, after its figures cards, the
+  essay's title as the first h2, its snippet as the lede, then `ArticleBody`. The fixed ten-part
+  outline (`contentSections` / `issueSections` / `exampleSections`), `FsliContentSection` and
+  `useFsliSections` are deleted, and with them every "Not written yet." line and the "Related
+  Essays" block at the bottom. "On this page" lists the essay's own h2/h3 headings; its search box
+  stays.
+- **The site no longer reads `fsli_sections`.** The table and its rows are left in place: dropping
+  it is a schema change nobody asked for. Nothing written disappears, because no row has content
+  (PRD §1.2.1, checked 2026-10-10). A line item with neither an essay nor a cover ends at its
+  figures, with no empty state: the decision's reason is that a standing outline only waits to be
+  filled with generic text.
+- **Supersedes** two entries, named by their lines at `0487609`: the whole of "2026-08-01
+  (session 7) — FSLI empty state over seeded prose" (`:2414-2430`: unwritten sections saying "Not
+  written yet.", `fsli_sections` as the single source of section prose, and the outline's
+  `issues-overdrafts` heading); and, in "FSLI prose is authored as essays, not in a second editor",
+  the sentence "Legacy `fsli_sections` content still renders read-only, so nothing written
+  disappears" (`:2615-2616`). The rest of that entry stands: FSLI prose is written in the studio as
+  accounting essays. Both passages keep their text and carry a "(Superseded 2026-10-10 …)" note in
+  place, pointing here.
+
+## Heading ids are the slug of the heading's words, minted once per page (PRD R1.2)
+
+- An FSLI heading's id is the slug of its text, with `-2`, `-3`… only when the page already holds
+  that slug (`src/lib/fsliToc.ts`). The ids are minted for the whole page and passed to each
+  `ArticleBody` through a new optional `headingIds` prop, so the table and the body cannot disagree,
+  and two essays on one page (none today) cannot render the same id. `root` and `main-content`
+  are taken before any heading.
+- **The essay page keeps its positional `section-N-<slug>` ids**: it passes no `headingIds`. Its
+  anchors may already be shared, and R1 does not reach that page. Rejected: reusing the positional
+  ids on the FSLI page (the branch's first version), because N counts every heading above, so one
+  added heading moved every anchor below it; and changing both pages to the new scheme, which
+  breaks every essay-page anchor in circulation.
+- Known limits: renaming a heading changes its anchor; the index on a repeated heading follows the
+  order of the repeats. Footnote ids (`fn-1`) are still per essay, so two essays with footnotes on
+  one page would share them; recorded, not acted on, until a line item has two essays.
+
+## "Covered in …" for line items without an essay — owner decision D2(a)
+
+- `supabase/migrations/20261010100000_fsli_covered_by.sql` adds `fsli_pages.covered_by_slug` (text,
+  null, references `fsli_pages (slug)`) and maps eight pages as PRD R1.3 lists; the three
+  `other-*-assets` pages stay NULL. **Not applied; the owner applies it** through `apply_migration`.
+  The mapping disables the `updated_at` trigger around its UPDATEs, in one transaction, so the eight
+  pages keep the "Updated" date they show.
+- A page without an essay whose row names a cover shows one sentence, "Covered in <essay title>",
+  linking to the covering line item; the title falls back to the covering page's own title while it
+  has no essay. **The site does not depend on the migration:** both reads are `select *`, so before
+  it the key is absent and reads as not covered, and the eight pages end at their figures.
+  `src/integrations/supabase/types.ts` is not regenerated; the column is typed locally until the
+  owner applies the migration and regenerates.
+
+## Smaller changes in the phase
+
+- "Related line items" lists the page's own `fsli_pages.category`, itself excluded, in statement
+  order, up to eight, instead of the first eight rows of the table (PRD R1.4).
+- The header of `20261009090000_fsli_component_flag.sql` says it is applied (column verified present
+  2026-10-10), so nobody applies it twice (PRD R1.5).
+- The "On this page" highlight is measured when the page's headings arrive, not only on scroll, and
+  is not carried from one line item to the next.
+
+---
+
+# 2026-10-10 — Capital in Motion: one name, no premise, no author on the cards
+
+Branch `sweep/d-capital`, base `main` @ `0487609`. Phase D of the October 2026 sweep (PRD R6). It
+implements the owner's decisions D6(a) and D7 (`docs/sweep-2026-10/DECISIONS.md`) and the owner's
+instruction of 10 October 2026 that opens the page to change (R6.5). It supersedes two 2026-10-09
+entries, each marked in place with a dated note and neither deleted: "Capital Allocation joins the
+Finance dropdown" (line 163) in its naming, and "Owner-protected surfaces left alone" (line 182) for
+Capital in Motion only.
+
+## One name, "Capital in Motion", at the old address (D6(a))
+
+- The page already called itself Capital in Motion in its h1, SEO title and breadcrumb; the Finance
+  menu and the `/finance` card (`finance_sections.title`) called it Capital Allocation, the slug's
+  name. The 2026-10-09 entry left the choice to the owner, and the owner chose the page's name.
+- **The menu label** changed in `src/config/navConfig.ts`. A test reads the `<SEO title>` from
+  `FinanceInMotion.tsx` and requires the label to equal it, so the two cannot drift apart again.
+- **The card** changes when the owner applies `20261010120000_capital_in_motion_title.sql` through
+  `apply_migration`. It updates one row's title and then asserts that the row carries it, so a
+  mistyped slug fails the migration instead of updating nothing. No schema change, so `types.ts`
+  is not regenerated. Until it lands, the card is the one place still saying Capital Allocation.
+- **Not changed:** the slug and the address `/finance/capital-allocation`, with its legacy
+  redirects, so nothing a search engine or an old link holds moves; the card's description (R6.4).
+
+## The premise is deleted, not rewritten (D7)
+
+D7 is still open, and its reason is the rule: nobody writes on the owner's behalf. The 2026-10-09
+pass kept the block verbatim while the question was open (`07adda2`); it is now gone. The page reads
+the h1, the existing subtitle, then the 21 conditions; the closing line under the list stays. The
+deleted text lives in history and is quoted neither here nor in the code ("Comments may not quote
+deleted copy", line 1441). If the owner writes a premise, it arrives as
+`docs/sweep-2026-10/copy/capital-in-motion-premise.md` and is mounted as one prose block in one
+colour and one size (R6.2), not as the old block's short lines in alternating colours.
+
+## The cards name their layer, not their author (R6.3)
+
+Each of the 21 cards ended its meta line with the author's name, so the index printed it 21 times.
+The meta line is now the layer label alone. The page has no byline component, so none was added:
+R6.3 keeps the name once in a page header only where a byline already exists. This is the
+"separate decision" the 2026-08-02 entry "The hero drops its third paragraph, and with it the only
+byline" (line 1456) left open for the two rendered bylines; its table row for
+`CapitalConditionCard.tsx:27` ("kept, but see below", line 1500) no longer describes the code. The
+essay byline (`ArticleHeader.tsx`) is untouched. A unit test walks all 21 cards for the name.
+
+## What a future session must not undo by accident
+
+- Renaming the slug to match the name. The address is what search engines and old links hold.
+- Writing a premise to fill the space. The space is the owner's to fill (D7).
+- Putting the author's name back on the cards' meta line. The owner took it off.
+
+---
+
+# 2026-10-10 — The header's dropdowns stay open on the way to an item
+
+Branch `sweep/a-nav`, base `main` @ `0487609`; phase A of the October 2026 site sweep, PRD R7 (the
+owner's finding 7: the dropdown vanished as the pointer moved down to it). None of the owner's answers
+D1–D14 (`docs/sweep-2026-10/DECISIONS.md`) is about the header, so this entry implements no D-number:
+R7 is the whole brief. It supersedes no earlier entry, because none recorded how the dropdown behaves
+under a pointer. "Empty sections collapse in the nav" (2026-10-09, line 106 at `0487609`) still holds:
+the four dropdowns tested here name no `essaySection` and never collapse.
+
+## The gap was a margin outside every hit area; it is now padding
+
+The panel was drawn `mt-1` below the label. The wrapper that carried `onMouseLeave` already held both
+the label and the panel, so R7.2's wrapper was in place; the fault was those 4px, which belonged to
+neither. A pointer crossing them left the wrapper and the menu closed under it. The panel now sits in
+an absolute wrapper with a transparent `pt-1`, so the 4px are part of the hover area, and the panel
+looks and sits exactly where it did. The PRD offered a pseudo-element bridge as the other way; the
+padding was chosen because it leaves the panel's own box as it was.
+
+## A 150 ms close that coming back cancels, and one menu open at a time
+
+- Leaving starts a close of `NAV_DROPDOWN_CLOSE_DELAY_MS` (150); re-entering cancels it, and the timer
+  is cleared on unmount. The delay is a timer, not motion, so it holds under `prefers-reduced-motion`
+  too; nothing new animates (R7.4). **The delay alone does not fix the seam:** a quick pointer crosses
+  4px inside 150 ms, a slow one rests there. A variant with the delay and the margin kept passed every
+  straight-line test and failed only the one that rests the pointer in the seam, which is why that test
+  exists.
+- The delay had a cost that review caught: the menu just left stayed drawn for 150 ms over its
+  neighbour (later in the document, same z-index), and a pointer moving into the overlap re-entered it
+  and closed the menu it was heading for. Opening a menu now closes the open one at once, through one
+  module-level handle (`closeOpenMenu`) rather than shared state: the header holds four instances of
+  one component, and only the close needs to pass between them.
+
+## Focus moves into the menu only on a keyboard open
+
+Every open used to focus the first item, a hover included, which pulled keyboard focus into the menu
+unasked. Now only ArrowDown, or Enter/Space on a menu button, does. Enter and Space are recognised by
+the click they produce having `detail === 0` (a keyboard's or a screen reader's activation; a pointer's
+click counts from 1), not by keydown handlers, because cancelling Space's own activation on keydown is
+unreliable across browsers. Escape still closes and returns focus to the chevron, but only when focus
+was inside the menu: a menu the pointer opened leaves focus where it was. Outside click and item click
+close as before. Learning's label is itself the menu button (it has no landing page), so it opens from
+the keyboard like the chevrons; R7.3 names only the chevron, and without this the Learning menu's
+keyboard users would have lost the first-item focus they had.
+
+## Learning's panel lines up with its label's right edge
+
+Found while taking this phase's screenshots, and older than it: Learning's `w-48` panel, lined up from
+the last label's left edge, ran past the right of the page (right edge 1344 at a 1280px viewport) and
+gave the open menu a sideways scrollbar. `NavDropdown` takes `align` (`'start'` by default, or
+`'end'`), and `MainNav.tsx` sets `align="end"` on Learning. That one line is outside `NavDropdown.tsx`,
+the only file the PRD's phase prompt names; the phase report records it. An e2e test holds every panel
+inside the viewport at 1280 and 1440px.
+
+Not changed: `MobileNav` (its own drawer), the panel's look, no portal, no Radix. Tests:
+`tests/unit/navDropdown.test.tsx` (14) and `tests/e2e/nav.spec.ts` (7; a real pointer moved in a
+straight line, two pixels a step, from each of Accounting, Finance, The Next Big Thing and Learning to
+its last item). `MIN_TESTS` 1148 → 1162.
+
+---
+
+# 2026-10-10 — The October 2026 site sweep: decisions are read from a file
+
+Branch `sweep/0-bootstrap`, base `main` @ `0487609`. The owner's review of 10 October 2026 named ten
+findings; the PRD that answers them (`PRD-PLAN-PROMPT-site-sweep.md`, attached to the session, not
+committed) is executed one phase per branch and per draft pull request. The owner's answers to its
+fourteen questions (D1–D14) are copied verbatim into `docs/sweep-2026-10/DECISIONS.md`, and each phase
+reads them from there, not from a conversation. Two answers can only come from the owner and are
+still open: D7 (the Capital in Motion premise; until it is written the block is removed) and D14 (the
+Factory Yard author's written permission; until it is recorded in `NOTICE.md`, the world phases do not
+start). Phase reports, in Indonesian like the PRD, are `docs/sweep-2026-10/report-<phase>.md`. Phase 0
+changes no code: the database matched the PRD (21 published essays, 3 starred, 5 finance sections, no
+FSLI section text), and `fsre_published.model_packages` answers the anonymous role with `200 []`.
+
+---
+
 # 2026-10-09 — The homepage below the map is one row: the glimpse
 
 Branch `claude/confident-ride-d354er`, base `main` @ `1df681a`. The owner's request, verbatim: "aku
@@ -218,6 +413,12 @@ conditions, not a module index, and `/finance` already listed it. Its page title
 Motion" while the track is "Capital Allocation"; the nav uses the track name and the page title
 is the owner's to change.
 
+*[SUPERSEDED 2026-10-10 in its naming, by owner decision (October 2026 sweep, D6(a)): the page has
+one name, "Capital in Motion", in the nav, the breadcrumb, the h1 and the SEO title, and on the
+`/finance` card once the owner applies `20261010120000_capital_in_motion_title.sql`. The address
+stays `/finance/capital-allocation` and the item stays in the dropdown. See the 2026-10-10 entry
+on Capital in Motion.]*
+
 ## Unsourced figures removed rather than softened
 
 Climate Finance's "~$25B/year", the bps/margin/multiple/ratio/$ figures in the capital
@@ -230,6 +431,13 @@ About's hero, ReadingPath, ChangedMind and the industry-chain map keep their arb
 and eyebrows; the audit marks them as passing on their own terms, so the type-scale sweep skips
 them. *(Superseded 2026-10-10 for About's hero, which went with About. ReadingPath and ChangedMind
 now sit on the homepage, their copy unchanged by owner decision D4(a); the map is unchanged.)*
+
+*[SUPERSEDED 2026-10-10 for Capital in Motion, on the owner's instruction (October 2026 sweep, R6):
+the page is no longer left alone. This entry names only About's surfaces, but the same pass kept
+Capital in Motion's premise verbatim for the owner (`07adda2`), and the sweep's PRD counts the page
+among the owner-protected ones. The owner opened it: the premise block is deleted, with no
+replacement until the owner writes one (D7), and the condition cards no longer carry the author's
+name. This note covers Capital in Motion only. See the 2026-10-10 entry on Capital in Motion.]*
 
 ---
 
@@ -2532,6 +2740,10 @@ headings — "Bank Overdrafts Treatment" (true only for cash) became
 "Classification Boundary Cases"; the `section_key` stays `issues-overdrafts`
 so any rows written later still bind.
 
+*(Superseded 2026-10-10: the outline, its "Not written yet." lines and the
+site's read of `fsli_sections` are deleted; a line item's body is its linked
+essay. See "2026-10-10 — FSLI pages: the essay is the body".)*
+
 ## 2026-08-02 (Substack replication) — The toolbar reversal
 
 The owner reversed a verified decision, and this entry is the record the
@@ -2717,6 +2929,9 @@ page's "Write in Studio" link), which inherits the entire finance flow for
 free — the alternative was building draft/revision machinery a second time,
 the duplication this project has paid for repeatedly. Legacy `fsli_sections`
 content still renders read-only, so nothing written disappears.
+*(Superseded 2026-10-10, this last sentence only: the site no longer reads
+`fsli_sections`, which held no written row. See "2026-10-10 — FSLI pages: the
+essay is the body".)*
 
 ### Font subsets dropped, and the one kept
 Removed all FIVE latin-ext files (the brief counted four: 4 Spectral +

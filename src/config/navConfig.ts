@@ -32,7 +32,9 @@ export const accountingItems: NavItem[] = [
  * left out "until it has modules", but its route is not a module index: it
  * renders the 21 capital conditions (FinanceInMotion), which /finance already
  * lists as the fifth track. Added 9 October 2026 so nav and landing agree.
- * These used to say
+ * Its label is the page's name, "Capital in Motion", not the slug's (owner
+ * decision D6(a), 10 October 2026); the path keeps the slug, so the address
+ * does not move. These used to say
  * `/finance/planning-forecasting` and `/finance/financial-analytics`: readable
  * labels, nonexistent tracks, and the two menu items rendered empty indexes
  * while the route sweep stayed green — it opened canonical URLs directly and
@@ -43,7 +45,7 @@ export const financeItems: NavItem[] = [
   { label: 'Strategic Finance', path: '/finance/strategic-finance' },
   { label: 'Planning & Forecasting', path: '/finance/planning' },
   { label: 'Financial Analytics', path: '/finance/analytics' },
-  { label: 'Capital Allocation', path: '/finance/capital-allocation' },
+  { label: 'Capital in Motion', path: '/finance/capital-allocation' },
   { label: 'Finance in Action', path: '/finance/finance-in-action' },
 ];
 
