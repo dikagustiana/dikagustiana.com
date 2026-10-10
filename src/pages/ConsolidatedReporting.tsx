@@ -2,9 +2,8 @@ import { PageLayout } from '@/components/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
 import { ConceptPanel } from '@/components/consolidation/ConceptPanel';
 import { ConsolidationProcessStep } from '@/components/consolidation/ConsolidationProcessStep';
-import { AccountRow } from '@/components/consolidation/AccountRow';
 import { Link } from 'react-router-dom';
-import { ENTITY_NAMES, WORKING_PAPER_ROWS } from '@/data/consolidationWorkingPaper';
+import { WorkingPaperSection } from '@/components/workbook/WorkingPaperSection';
 import { CONSOLIDATION_TOPICS } from '@/config/consolidationTopics';
 import { useTopicCounts } from '@/hooks/queries/useTopicCounts';
 import { sectionStanding } from '@/lib/sectionStanding';
@@ -40,9 +39,7 @@ export default function ConsolidatedReporting() {
             </h1>
             <p className="text-muted-foreground text-base leading-relaxed max-w-3xl">
               When a group has multiple legal entities, you need one set of financials that shows
-              the whole picture — as if it were a single economic entity. This working paper shows
-              how that is done, step by step, on an illustrative four-entity group under PSAK 110.
-              The figures are round numbers, not a company's accounts.
+              the whole picture — as if it were a single economic entity.
             </p>
             <div className="w-full h-px bg-border mt-6" />
           </section>
@@ -99,78 +96,8 @@ export default function ConsolidatedReporting() {
             </div>
           </section>
 
-          {/* ── SECTION 4 — Working Paper ── */}
-          <section className="mb-14">
-            <h2 className="text-2xl font-bold text-foreground mb-1">Working Paper Simulation</h2>
-            <p className="text-sm text-muted-foreground mb-6">
-              PT Dummy C and Subsidiaries — Consolidated Statement of Financial Position — December 31, 2024
-            </p>
-            <div className="bg-card border border-border overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full text-xs border-collapse min-w-[900px]">
-                  <thead>
-                    <tr className="border-b border-border bg-muted/50">
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-foreground uppercase tracking-wider w-[220px]">
-                        Account
-                      </th>
-                      <th colSpan={4} className="px-3 py-3 text-center text-xs font-semibold text-foreground uppercase tracking-wider border-l border-border">
-                        Individual Entities
-                      </th>
-                      <th className="px-3 py-3 text-center text-xs font-semibold text-foreground uppercase tracking-wider border-l border-border bg-muted/30">
-                        Combined
-                      </th>
-                      <th className="px-3 py-3 text-center text-xs font-semibold text-foreground uppercase tracking-wider border-l border-border bg-amber-50/30">
-                        Eliminations
-                      </th>
-                      <th className="px-3 py-3 text-center text-xs font-semibold text-foreground uppercase tracking-wider border-l border-border bg-accent/[0.07]">
-                        Consolidated
-                      </th>
-                    </tr>
-                    <tr className="border-b border-border bg-card">
-                      <th className="px-4 py-2" />
-                      {ENTITY_NAMES.map((name) => (
-                        <th key={name} className="px-3 py-2 text-right text-[11px] font-medium text-muted-foreground border-l border-border/50">
-                          {name}
-                        </th>
-                      ))}
-                      <th className="px-3 py-2 text-right text-[11px] font-medium text-muted-foreground border-l border-border bg-muted/30">
-                        Total
-                      </th>
-                      <th className="px-3 py-2 text-right text-[11px] font-medium text-muted-foreground border-l border-border bg-amber-50/30">
-                        Adj.
-                      </th>
-                      <th className="px-3 py-2 text-right text-[11px] font-medium text-muted-foreground border-l border-border bg-accent/[0.07]">
-                        Final
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {WORKING_PAPER_ROWS.map((row, i) => (
-                      <AccountRow
-                        key={`${row.label}-${i}`}
-                        label={row.label}
-                        values={row.values || []}
-                        combined={row.combined}
-                        elimination={row.elimination}
-                        consolidated={row.consolidated}
-                        isHeader={row.isHeader}
-                        isSubtotal={row.isSubtotal}
-                        indent={row.indent}
-                      />
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-            <p className="mt-4 max-w-3xl text-sm text-muted-foreground leading-relaxed">
-              Intragroup balances come out on both sides: 113,000 of related-party receivables, loans
-              and other receivables against 113,000 of payables and borrowings. The 250,000
-              investment is set against 256,000 of subsidiary net assets at acquisition (170,000
-              share capital and 86,000 retained earnings). Goodwill is the difference once NCI is
-              counted: 250,000 + 91,000 − 256,000 = 85,000. NCI is shown at its acquisition-date
-              value; its share of earnings since is not allocated in this example.
-            </p>
-          </section>
+          {/* ── SECTION 4 — Working Paper: the owner's PSAK 338 workbook, sheet by sheet ── */}
+          <WorkingPaperSection />
 
           {/* The nine topic pages essays are placed on. They were reachable
               only by typing the URL; listed here with what each holds. */}
