@@ -156,10 +156,36 @@ describe('FSLI page with a published essay', () => {
     const toc = screen.getByRole('navigation', { name: 'On this page' });
     const entries = within(toc).getAllByRole('button').map((b) => b.textContent);
     expect(entries).toEqual(['What counts as cash', 'Placements', 'Where it is presented']);
-    for (const id of ['section-1-what-counts-as-cash', 'section-2-placements', 'section-3-where-it-is-presented']) {
+    for (const id of ['what-counts-as-cash', 'placements', 'where-it-is-presented']) {
       expect(document.getElementById(id)).not.toBeNull();
     }
     expect(screen.getByPlaceholderText('Find in page...')).toBeInTheDocument();
+  });
+
+  it('gives two linked essays one set of ids, so every heading is listed and none is repeated', async () => {
+    const SECOND = {
+      ...ESSAY,
+      id: 'e-cash-2',
+      slug: 'cash-again',
+      title: 'Cash Again',
+      sort_order: 2,
+      content: JSON.stringify({ type: 'doc', content: [heading(2, 'What counts as cash'), heading(2, 'Restrictions')] }),
+    };
+    tables.essays = [ESSAY, SECOND];
+    renderAt('cash');
+    await screen.findByRole('heading', { level: 2, name: 'Cash Again' });
+
+    const toc = screen.getByRole('navigation', { name: 'On this page' });
+    expect(within(toc).getAllByRole('button').map((b) => b.textContent)).toEqual([
+      'What counts as cash',
+      'Placements',
+      'Where it is presented',
+      'What counts as cash',
+      'Restrictions',
+    ]);
+    const ids = Array.from(main().querySelectorAll('[id]')).map((el) => el.id);
+    expect(new Set(ids).size).toBe(ids.length);
+    expect(document.getElementById('what-counts-as-cash-2')).toHaveTextContent('What counts as cash');
   });
 
   it('shows no covered-by sentence even when the row names a cover', async () => {

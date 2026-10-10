@@ -47,10 +47,10 @@ export default function FsliDetail() {
   const { data: linkedEssays, isLoading: essaysLoading } = useFsliEssayBodies(slug || '');
   const essays = useMemo(() => linkedEssays ?? [], [linkedEssays]);
 
-  // "On this page": the essay's h2/h3 headings, with the ids ArticleBody
-  // gives them.
-  const tocSections = useMemo(() => buildFsliToc(essays.map((essay) => essay.content)), [essays]);
-  const tocIds = useMemo(() => fsliTocIds(tocSections), [tocSections]);
+  // "On this page": the essay's h2/h3 headings. The ids are minted here, for
+  // the whole page, and handed to each ArticleBody so the body renders them.
+  const toc = useMemo(() => buildFsliToc(essays.map((essay) => essay.content)), [essays]);
+  const tocIds = useMemo(() => fsliTocIds(toc.entries), [toc]);
 
   // Track the active heading on scroll — rAF-coalesced so the
   // getBoundingClientRect reads happen once per frame, not once per event.
@@ -210,7 +210,7 @@ export default function FsliDetail() {
                   <div className="h-4 w-2/3 rounded bg-muted animate-pulse" />
                 </div>
               ) : (
-                essays.map((essay) => (
+                essays.map((essay, index) => (
                   <section key={essay.id} className="mb-12 last:mb-0" data-fsli-essay={essay.slug}>
                     {/* The body's own measure, so title, lede and prose share
                         one left edge; the essay page's title and deck classes,
@@ -221,7 +221,9 @@ export default function FsliDetail() {
                         <p className="editorial-subtitle mb-8">{essay.snippet}</p>
                       )}
                     </div>
-                    {essay.content && <ArticleBody content={essay.content} />}
+                    {essay.content && (
+                      <ArticleBody content={essay.content} headingIds={toc.headingIds[index]} />
+                    )}
                   </section>
                 ))
               )}
@@ -229,7 +231,7 @@ export default function FsliDetail() {
 
             {/* Right Sidebar - On This Page */}
             <FsliOnThisPage
-              sections={tocSections}
+              sections={toc.entries}
               activeSection={activeSection}
             />
           </div>

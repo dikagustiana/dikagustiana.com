@@ -140,7 +140,7 @@ test('a line item with a published essay shows the essay as its body', async ({ 
   // "On this page" lists the essay's headings, and each one is on the page.
   const toc = p.getByRole('navigation', { name: 'On this page' });
   await expect(toc.getByRole('button')).toHaveText(['Test heading one', 'Test subheading', 'Test heading two']);
-  await expect(p.locator('#section-3-test-heading-two')).toHaveText('Test heading two');
+  await expect(p.locator('#test-heading-two')).toHaveText('Test heading two');
   await expect(p.getByPlaceholder('Find in page...')).toBeVisible();
 
   // The search box narrows the list.
