@@ -16,6 +16,13 @@ interface NavDropdownProps {
   basePath?: string;
 }
 
+/**
+ * How long the menu waits after the pointer leaves before it closes. A pointer
+ * travelling from the label to an item can graze the edge of the hit area on
+ * the way; re-entering within this window cancels the close.
+ */
+export const NAV_DROPDOWN_CLOSE_DELAY_MS = 150;
+
 export function NavDropdown({ label, items, width = 'w-56', basePath }: NavDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
@@ -24,6 +31,7 @@ export function NavDropdown({ label, items, width = 'w-56', basePath }: NavDropd
   const triggerRef = useRef<HTMLDivElement>(null);
   const chevronRef = useRef<HTMLButtonElement>(null);
   const itemRefs = useRef<(HTMLAnchorElement | null)[]>([]);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const isActive = basePath
     ? location.pathname.startsWith(basePath)
@@ -32,21 +40,45 @@ export function NavDropdown({ label, items, width = 'w-56', basePath }: NavDropd
         return location.pathname.startsWith(itemPath);
       });
 
-  const close = useCallback(() => {
-    setIsOpen(false);
+  const cancelClose = useCallback(() => {
+    if (closeTimer.current !== null) {
+      clearTimeout(closeTimer.current);
+      closeTimer.current = null;
+    }
   }, []);
+
+  const close = useCallback(() => {
+    cancelClose();
+    setIsOpen(false);
+  }, [cancelClose]);
+
+  // A timer left running after unmount would set state on nothing.
+  useEffect(() => cancelClose, [cancelClose]);
+
+  const handlePointerEnter = () => {
+    cancelClose();
+    setIsOpen(true);
+  };
+
+  const handlePointerLeave = () => {
+    cancelClose();
+    closeTimer.current = setTimeout(() => {
+      closeTimer.current = null;
+      setIsOpen(false);
+    }, NAV_DROPDOWN_CLOSE_DELAY_MS);
+  };
 
   // Close on outside click
   useEffect(() => {
     if (!isOpen) return;
     function handleClick(e: MouseEvent) {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setIsOpen(false);
+        close();
       }
     }
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
-  }, [isOpen]);
+  }, [isOpen, close]);
 
   // Close on Escape — and RESTORE FOCUS to the trigger. Closing used to
   // strand keyboard focus on an unmounted menu item, dropping the user back
@@ -104,11 +136,13 @@ export function NavDropdown({ label, items, width = 'w-56', basePath }: NavDropd
   };
 
   return (
+    // The hover area is this wrapper, which holds both the trigger and the
+    // panel, so moving from one to the other never leaves it.
     <div
       ref={containerRef}
       className="relative"
-      onMouseEnter={() => setIsOpen(true)}
-      onMouseLeave={() => setIsOpen(false)}
+      onMouseEnter={handlePointerEnter}
+      onMouseLeave={handlePointerLeave}
       onKeyDown={handleKeyDown}
     >
       {/* Split trigger: clickable label + dropdown chevron */}
@@ -123,7 +157,7 @@ export function NavDropdown({ label, items, width = 'w-56', basePath }: NavDropd
           <Link
             to={basePath}
             className="hover:text-header-foreground transition-colors"
-            onClick={() => setIsOpen(false)}
+            onClick={close}
           >
             {label}
           </Link>
@@ -158,32 +192,37 @@ export function NavDropdown({ label, items, width = 'w-56', basePath }: NavDropd
       </div>
 
       {isOpen && (
-        <div
-          ref={menuRef}
-          role="menu"
-          className={cn(
-            'absolute top-full left-0 mt-1 bg-header border border-header/50 rounded-lg shadow-xl z-50 py-2',
-            width
-          )}
-        >
-          {items.map((item, i) => (
-            <Link
-              key={item.path}
-              ref={(el) => {
-                itemRefs.current[i] = el;
-              }}
-              to={item.path}
-              role="menuitem"
-              tabIndex={-1}
-              onClick={() => setIsOpen(false)}
-              className={cn(
-                'block px-4 py-2 text-sm text-header-foreground/90 hover:bg-white/10 hover:text-header-foreground transition-colors focus:bg-white/10 focus:text-header-foreground focus:outline-none',
-                isItemActive(item.path) && 'bg-white/10 text-header-foreground'
-              )}
-            >
-              {item.label}
-            </Link>
-          ))}
+        // The 4px between trigger and panel is this wrapper's transparent
+        // padding, not a margin: a margin there was outside every hit area, so
+        // a pointer crossing it on the way to an item closed the menu.
+        <div className="absolute top-full left-0 z-50 pt-1">
+          <div
+            ref={menuRef}
+            role="menu"
+            className={cn(
+              'bg-header border border-header/50 rounded-lg shadow-xl py-2',
+              width
+            )}
+          >
+            {items.map((item, i) => (
+              <Link
+                key={item.path}
+                ref={(el) => {
+                  itemRefs.current[i] = el;
+                }}
+                to={item.path}
+                role="menuitem"
+                tabIndex={-1}
+                onClick={close}
+                className={cn(
+                  'block px-4 py-2 text-sm text-header-foreground/90 hover:bg-white/10 hover:text-header-foreground transition-colors focus:bg-white/10 focus:text-header-foreground focus:outline-none',
+                  isItemActive(item.path) && 'bg-white/10 text-header-foreground'
+                )}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </div>
         </div>
       )}
     </div>
