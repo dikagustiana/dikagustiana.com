@@ -5,6 +5,7 @@ import { SEO } from '@/components/SEO';
 import { FsliRelatedItems } from '@/components/fsli/FsliRelatedItems';
 import { FsliOnThisPage } from '@/components/fsli/FsliOnThisPage';
 import { FsliMobileSidebar } from '@/components/fsli/FsliMobileSidebar';
+import { FsliCoveredBy } from '@/components/fsli/FsliCoveredBy';
 import { useFsliPage } from '@/hooks/queries/useFsliPages';
 import { useFsliEssayBodies } from '@/hooks/queries/useEssays';
 import { useAuth } from '@/contexts/AuthContext';
@@ -104,6 +105,11 @@ export default function FsliDetail() {
     { label: 'Notes ref.', value: item.notes_ref },
   ].filter((f) => f.value);
 
+  // No essay of its own: the page names the line item whose essay covers it,
+  // if any (fsli_pages.covered_by_slug; absent before its migration). With
+  // neither, the page ends at its figures — no outline, no empty state.
+  const coveredBy = !essaysLoading && essays.length === 0 ? item.covered_by_slug ?? null : null;
+
   return (
     <PageLayout variant="content" role="manager">
       <SEO title={item.title} description={item.subtitle || `${item.title} — financial statement line item detail.`} />
@@ -188,7 +194,9 @@ export default function FsliDetail() {
               )}
 
               {/* Divider — only above something. */}
-              {(essaysLoading || essays.length > 0) && <hr className="border-border my-8" />}
+              {(essaysLoading || essays.length > 0 || coveredBy) && <hr className="border-border my-8" />}
+
+              {coveredBy && <FsliCoveredBy slug={coveredBy} />}
 
               {/* The page body: the essay linked to this line item, its title
                   as the first h2, its snippet as the lede, then the essay

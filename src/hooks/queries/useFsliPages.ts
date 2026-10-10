@@ -12,6 +12,11 @@ export interface FsliPage {
   category: string | null;
   // Added by 20261009090000_fsli_component_flag.sql; absent until it is applied.
   is_component?: boolean | null;
+  // Added by 20261010100000_fsli_covered_by.sql, not yet in the generated
+  // types: the line item whose essay covers this one. Both reads below are
+  // select *, which never names it, so before the migration the key is just
+  // absent (no 42703 to catch) and reads as "not covered".
+  covered_by_slug?: string | null;
   sort_order: number | null;
   created_at: string;
   updated_at: string;
