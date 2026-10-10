@@ -24,6 +24,14 @@
 -- or function. Re-running is harmless: the column add is IF NOT EXISTS, and
 -- each UPDATE touches only rows still NULL, so a pointer the owner changed
 -- afterwards is kept.
+--
+-- The mapping is not an edit to those eight pages. fsli_pages stamps
+-- updated_at on every UPDATE (trigger update_fsli_pages_updated_at), and the
+-- page prints that column as "Updated <date>", so the trigger is disabled
+-- around the UPDATEs and their pages keep the date they had. Everything runs
+-- in one transaction, so a failure part-way cannot leave the trigger off.
+
+BEGIN;
 
 ALTER TABLE public.fsli_pages
   ADD COLUMN IF NOT EXISTS covered_by_slug text
@@ -31,6 +39,8 @@ ALTER TABLE public.fsli_pages
 
 COMMENT ON COLUMN public.fsli_pages.covered_by_slug IS
   'Slug of the line item whose essay covers this one; the page links there. NULL when not covered.';
+
+ALTER TABLE public.fsli_pages DISABLE TRIGGER update_fsli_pages_updated_at;
 
 UPDATE public.fsli_pages SET covered_by_slug = 'restricted-cash'
  WHERE slug = 'restricted-cash-non-current'
@@ -51,3 +61,7 @@ UPDATE public.fsli_pages SET covered_by_slug = 'corporate-dividend-taxes-receiva
 UPDATE public.fsli_pages SET covered_by_slug = 'advances-prepayments-current'
  WHERE slug = 'advances-prepayments-non-current'
    AND covered_by_slug IS NULL;
+
+ALTER TABLE public.fsli_pages ENABLE TRIGGER update_fsli_pages_updated_at;
+
+COMMIT;
