@@ -141,3 +141,19 @@ export function formatCell(cell: Pick<WorkbookCell, 'v' | 't'>, numFmt?: string)
       return formatGeneral(v);
   }
 }
+
+/**
+ * A cell's value as the file holds it, for the formula bar and the inspector's raw value: a number in full
+ * (a decimal point, a minus, no grouping), a date as its ISO day, text as typed, an error as its code.
+ */
+export function rawValue(cell: Pick<WorkbookCell, 'v' | 't'>): string {
+  const { v, t } = cell;
+  if (v === undefined) return '';
+  if (t === 'd') return String(v).slice(0, 10);
+  if (typeof v === 'boolean') return v ? 'TRUE' : 'FALSE';
+  return String(v);
+}
+
+/** What the formula bar shows for a cell: its formula with the leading "=", as Excel shows it, or its raw value. */
+export const formulaBarText = (cell: Pick<WorkbookCell, 'v' | 't' | 'f'> | undefined): string =>
+  cell?.f !== undefined ? `=${cell.f}` : cell ? rawValue(cell) : '';
