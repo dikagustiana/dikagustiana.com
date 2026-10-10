@@ -38,7 +38,12 @@ function formatDate(dateStr: string) {
 
 export default function FsliDetail() {
   const { slug } = useParams<{ slug: string }>();
-  const [activeSection, setActiveSection] = useState<string>('');
+  // The heading the scroll-spy last found active, and the line item it found
+  // it on. FsliDetail stays mounted from one /accounting/fsli/:slug to the
+  // next, so a highlight from the previous page must not land on a heading
+  // here that shares its id (two essays that both open with "Overview").
+  const [spied, setSpied] = useState<{ slug?: string; id: string }>({ id: '' });
+  const activeSection = spied.slug === slug ? spied.id : '';
   const { isAdmin, isLoading: authLoading } = useAuth();
   const { data: item, isLoading, error } = useFsliPage(slug || '');
   // Published essays linked to this line item, bodies included — the read
@@ -67,18 +72,21 @@ export default function FsliDetail() {
         const element = document.getElementById(id);
         if (element && element.getBoundingClientRect().top <= 150) current = id;
       }
-      setActiveSection(current);
+      setSpied((prev) => (prev.slug === slug && prev.id === current ? prev : { slug, id: current }));
     };
     const handleScroll = () => {
       if (!raf) raf = requestAnimationFrame(measure);
     };
 
+    // Once now as well: the page can open part-way down (a #heading link, a
+    // restored scroll position), and nothing scrolls to say so.
+    handleScroll();
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => {
       window.removeEventListener('scroll', handleScroll);
       if (raf) cancelAnimationFrame(raf);
     };
-  }, [tocIds]);
+  }, [tocIds, slug]);
 
   if (isLoading) {
     return (

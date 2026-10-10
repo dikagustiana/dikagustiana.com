@@ -8,8 +8,8 @@
  * eq() the way PostgREST does; nothing here can reach a network. Figures are
  * dummies, not any issuer's.
  */
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, within } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { HelmetProvider } from 'react-helmet-async';
@@ -193,6 +193,75 @@ describe('FSLI page with a published essay', () => {
     renderAt('cash-non-current');
     await screen.findByRole('heading', { level: 2, name: 'What Cash Is' });
     expect(main()).not.toHaveTextContent('Covered in');
+  });
+});
+
+describe('On this page highlight', () => {
+  // jsdom lays nothing out, so every heading would sit at top 0, above the
+  // line under the header: each test says which headings have passed it.
+  // Animation frames run only when a test flushes them, so a highlight left
+  // over from before a measurement is visible to the test.
+  let passed: Set<string>;
+  let frames: Map<number, FrameRequestCallback>;
+  beforeEach(() => {
+    passed = new Set();
+    frames = new Map();
+    let lastFrame = 0;
+    vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(function (this: Element) {
+      const top = passed.has(this.id) ? 100 : 900;
+      return { top, bottom: top + 40, left: 0, right: 0, width: 0, height: 40, x: 0, y: top, toJSON: () => ({}) } as DOMRect;
+    });
+    vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
+      frames.set(++lastFrame, callback);
+      return lastFrame;
+    });
+    vi.spyOn(window, 'cancelAnimationFrame').mockImplementation((handle) => {
+      frames.delete(handle);
+    });
+  });
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  const flushFrames = () =>
+    act(() => {
+      const due = [...frames.values()];
+      frames.clear();
+      due.forEach((callback) => callback(0));
+    });
+  const entry = (name: string) =>
+    within(screen.getByRole('navigation', { name: 'On this page' })).getByRole('button', { name });
+  const isActive = (name: string) => entry(name).classList.contains('font-medium');
+
+  it('marks the heading the page opens on, before any scroll', async () => {
+    passed = new Set(['what-counts-as-cash']);
+    renderAt('cash');
+    await screen.findByRole('heading', { level: 2, name: 'What Cash Is' });
+    flushFrames();
+    expect(isActive('What counts as cash')).toBe(true);
+    expect(isActive('Where it is presented')).toBe(false);
+  });
+
+  it('does not carry the previous line item\'s highlight to the next one', async () => {
+    tables.essays = [
+      ESSAY,
+      { ...ESSAY, id: 'e-restricted', slug: 'on-restriction', title: 'The Restricted Essay', fsli_slug: 'restricted' },
+    ];
+    passed = new Set(['what-counts-as-cash']);
+    renderAt('cash');
+    await screen.findByRole('heading', { level: 2, name: 'What Cash Is' });
+    flushFrames();
+    expect(isActive('What counts as cash')).toBe(true);
+
+    // The next line item opens at its top, where no heading has passed the
+    // line; its essay opens with a heading of the same words, so the same id.
+    passed = new Set();
+    const related = (await screen.findByText('Related line items')).closest('div')!;
+    fireEvent.click(within(related).getByRole('link', { name: 'Restricted' }));
+    await screen.findByRole('heading', { level: 2, name: 'The Restricted Essay' });
+    expect(isActive('What counts as cash')).toBe(false);
+    flushFrames();
+    expect(isActive('What counts as cash')).toBe(false);
   });
 });
 
