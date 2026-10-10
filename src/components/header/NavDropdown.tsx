@@ -103,13 +103,16 @@ export function NavDropdown({ label, items, width = 'w-56', basePath }: NavDropd
 
   // Close on Escape — and RESTORE FOCUS to the trigger. Closing used to
   // strand keyboard focus on an unmounted menu item, dropping the user back
-  // to the top of the tab order.
+  // to the top of the tab order. Only focus that was in the menu is moved: a
+  // menu the pointer opened leaves focus where it was, and Escape must not
+  // pull it out of the page onto a chevron nobody focused.
   useEffect(() => {
     if (!isOpen) return;
     function handleKey(e: KeyboardEvent) {
       if (e.key === 'Escape') {
+        const focusInMenu = menuRef.current?.contains(document.activeElement) ?? false;
         close();
-        chevronRef.current?.focus();
+        if (focusInMenu) chevronRef.current?.focus();
       }
     }
     document.addEventListener('keydown', handleKey);

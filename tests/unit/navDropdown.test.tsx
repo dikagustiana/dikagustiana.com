@@ -148,6 +148,18 @@ describe('NavDropdown under a keyboard', () => {
     expect(chevron()).toHaveFocus();
   });
 
+  it('closes a menu the pointer opened on Escape and leaves focus where it was', async () => {
+    const user = userEvent.setup();
+    const { elsewhere } = mount();
+    elsewhere.focus();
+    move(elsewhere, label());
+    expect(menu()).toBeInTheDocument();
+
+    await user.keyboard('{Escape}');
+    expect(menu()).not.toBeInTheDocument();
+    expect(elsewhere).toHaveFocus();
+  });
+
   it('keeps the outside click and the item click closing it', async () => {
     const user = userEvent.setup();
     const { elsewhere } = mount();
