@@ -107,4 +107,14 @@ describe('navConfig', () => {
     // not an empty module index, and /finance already listed it.
     expect(trackPaths).toEqual(['fundamentals', 'strategic-finance', 'planning', 'analytics', 'capital-allocation']);
   });
+
+  it('calls the capital-allocation track by its page name, Capital in Motion', () => {
+    // Owner decision D6(a), 10 October 2026: one name. The page's SEO title is
+    // read from its source, so nav and page move together; the path keeps the
+    // slug, so the address does not change.
+    const page = readFileSync(join(__dirname, '../../src/pages/FinanceInMotion.tsx'), 'utf8');
+    const pageTitle = page.match(/<SEO\s+title="([^"]+)"/)?.[1];
+    expect(pageTitle).toBe('Capital in Motion');
+    expect(financeItems.find(i => i.path === '/finance/capital-allocation')?.label).toBe(pageTitle);
+  });
 });
