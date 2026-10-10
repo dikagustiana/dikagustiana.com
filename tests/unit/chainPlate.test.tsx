@@ -50,7 +50,7 @@ const voice = (panel: HTMLElement) => panel.querySelector('[data-voice]')!.getAt
 
 beforeEach(() => {
   fromMock.mockReset();
-  window.history.replaceState({}, '', '/about');
+  window.history.replaceState({}, '', '/');
 });
 
 describe('ChainPlate at rest', () => {
@@ -155,7 +155,7 @@ describe('a page frame that opens the map with a shift on', () => {
   });
 
   it('yields to the address when the address names an overlay', () => {
-    window.history.replaceState({}, '', '/about?lens=reindustrialisation');
+    window.history.replaceState({}, '', '/?lens=reindustrialisation');
     mount(<ChainPlate links={[]} initialShift="green" />);
     expect(plate().dataset.shift).toBe('reindustrialisation');
   });

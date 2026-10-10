@@ -201,7 +201,7 @@ test('one substantial reading: the completed argument carries its own objection'
 
 test('map reading: the basis is declared, distance changes the work, and the state can be sent', async ({ page, context }) => {
   await page.setViewportSize({ width: 1280, height: 1000 });
-  await page.goto('/about');
+  await page.goto('/');
   await page.getByRole('button', { name: 'green transition', exact: true }).click();
   await page.getByRole('button', { name: /Green transition · Energy · Moving$/ }).first().click();
 

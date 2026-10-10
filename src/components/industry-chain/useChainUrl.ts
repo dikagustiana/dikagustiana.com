@@ -6,7 +6,7 @@
  * so an essay can link straight into the reading it is arguing from, and so a
  * reader can send someone else exactly what they are looking at.
  *
- *     /about?lens=green&distance=finance&node=energy
+ *     /?lens=green&distance=finance&node=energy
  *
  * The parameter names are the owner's, and they do NOT match the code's:
  * `lens` is the SHIFT overlay and `distance` is what the code calls the lens.

@@ -30,12 +30,16 @@ export const CHAIN_POSITIONS: ChainPosition[] = [...CHAIN_STAGES, ...SPANNING_LA
 
 export const positionOf = (id: string): ChainPosition | undefined => CHAIN_POSITIONS.find((p) => p.id === id);
 
-/** The element on the chain map, read at the finance distance. */
+/**
+ * The element on the chain map, read at the finance distance. The map lives
+ * on the homepage since About was removed (owner decision, 2026-10-10); an
+ * address that names an element the overview folds away opens the detail.
+ */
 export function chainMapHref(positionId?: string): string {
   const params = new URLSearchParams();
   params.set(CHAIN_PARAM.lens, 'finance');
   if (positionId) params.set(CHAIN_PARAM.node, slugOf(positionId));
-  return `/about?${params.toString()}`;
+  return `/?${params.toString()}`;
 }
 
 /** The index anchor of a chain position, and of a sub-industry. */

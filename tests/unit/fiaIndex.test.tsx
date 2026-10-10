@@ -83,7 +83,7 @@ describe('the preview index, lens off', () => {
     const toggle = await screen.findByRole('switch');
     expect(toggle).toHaveAttribute('aria-checked', 'false');
     expect(screen.getByText(COPY.connectionsOff)).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: COPY.openChainMap })).toHaveAttribute('href', '/about?distance=finance');
+    expect(screen.getByRole('link', { name: COPY.openChainMap })).toHaveAttribute('href', '/?distance=finance');
     const legend = screen.getByRole('group', { name: COPY.statusLegend });
     for (const s of STATUSES) expect(within(legend).getByText(s.label)).toBeInTheDocument();
     expect(legend.querySelectorAll('svg')).toHaveLength(STATUSES.length);

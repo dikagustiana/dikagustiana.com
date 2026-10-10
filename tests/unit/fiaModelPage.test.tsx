@@ -122,7 +122,7 @@ describe('Why this link matters', () => {
     expect(within(section).getByRole('link', { name: `Capital in Motion 03: ${condition.title}` })).toHaveAttribute('href', `/finance/capital-allocation/${condition.id}`);
     expect(section).toHaveTextContent(condition.rule);
     expect(section).toHaveTextContent('This model supplies the per-tonne economics');
-    expect(within(section).getByRole('link', { name: /Show coal on the chain map/ })).toHaveAttribute('href', '/about?distance=finance&node=extraction');
+    expect(within(section).getByRole('link', { name: /Show coal on the chain map/ })).toHaveAttribute('href', '/?distance=finance&node=extraction');
   });
 });
 
