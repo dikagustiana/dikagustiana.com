@@ -25,6 +25,8 @@ export const LOOK = {
   red: 'text-wb-red',
   blue: 'text-wb-blue',
   precedent: byId(LENS_ROLES, 'precedent')!,
+  /** The reference's dashed outline round a precedent, in the site's accent, over the lens fill. */
+  precedentOutline: 'outline-dashed outline-[1.5px] -outline-offset-2 outline-accent',
   dependent: byId(LENS_ROLES, 'dependent')!,
   selected: byId(LENS_ROLES, 'selected')!,
 } as const;

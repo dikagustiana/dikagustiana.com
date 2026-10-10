@@ -56,10 +56,14 @@ interface SheetGridProps {
 
 const MOVES = new Set(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Home', 'End', 'PageUp', 'PageDown']);
 
-export const cellDomId = (gridId: string, a: string): string => `${gridId}-${a}`;
+const cellDomId = (gridId: string, a: string): string => `${gridId}-${a}`;
+
+/** The scroll position is kept in steps this size, so a scroll inside one step re-renders nothing. */
+const SCROLL_STEP = OVERSCAN / 2;
+const stepped = (px: number): number => Math.floor(px / SCROLL_STEP) * SCROLL_STEP;
 
 /** The first and last index whose spans meet [from, to], within [first, last]. */
-function window(edges: number[], first: number, last: number, from: number, to: number): [number, number] {
+function span(edges: number[], first: number, last: number, from: number, to: number): [number, number] {
   if (first > last) return [first, first - 1];
   return [Math.max(first, indexAt(edges, from)), Math.min(last, indexAt(edges, to))];
 }
@@ -80,6 +84,10 @@ export function SheetGrid({ id, model, styles, selected, marks, onSelect, onActi
   const scroller = useRef<HTMLDivElement | null>(null);
   const [view, setView] = useState(FALLBACK_VIEW);
   const [scroll, setScroll] = useState({ left: 0, top: 0 });
+  const follow = useCallback((left: number, top: number) => {
+    const next = { left: stepped(left), top: stepped(top) };
+    setScroll((was) => (was.left === next.left && was.top === next.top ? was : next));
+  }, []);
   const { colLeft, rowTop, lastCol, lastRow } = model;
 
   const setRefs = useCallback(
@@ -104,20 +112,21 @@ export function SheetGrid({ id, model, styles, selected, marks, onSelect, onActi
   }, []);
 
   const rowHeadW = Math.max(36, String(lastRow).length * 8 + 16);
-  const frozenW0 = colLeft[model.freeze.cols + 1];
-  const frozenH0 = rowTop[model.freeze.rows + 1];
-  // Frozen panes that would leave too little to scroll are let go.
-  const fc = rowHeadW + frozenW0 <= view.w * 0.6 ? model.freeze.cols : 0;
-  const fr = HEAD_H + frozenH0 <= view.h * 0.5 ? model.freeze.rows : 0;
-  const frozenW = colLeft[fc + 1];
-  const frozenH = rowTop[fr + 1];
+  /** The panes in a view of w × h: the frozen columns and rows kept, and the size left to scroll. */
+  const frame = (w: number, h: number) => {
+    // Frozen panes that would leave too little to scroll are let go.
+    const fc = rowHeadW + colLeft[model.freeze.cols + 1] <= w * 0.6 ? model.freeze.cols : 0;
+    const fr = HEAD_H + rowTop[model.freeze.rows + 1] <= h * 0.5 ? model.freeze.rows : 0;
+    const frozenW = colLeft[fc + 1];
+    const frozenH = rowTop[fr + 1];
+    return { fc, fr, frozenW, frozenH, mainW: Math.max(0, w - rowHeadW - frozenW), mainH: Math.max(0, h - HEAD_H - frozenH) };
+  };
+  const { fc, fr, frozenW, frozenH, mainW, mainH } = frame(view.w, view.h);
   const sheetW = colLeft[lastCol + 1];
   const sheetH = rowTop[lastRow + 1];
-  const mainW = Math.max(0, view.w - rowHeadW - frozenW);
-  const mainH = Math.max(0, view.h - HEAD_H - frozenH);
 
-  const cols = window(colLeft, fc + 1, lastCol, frozenW + scroll.left - OVERSCAN, frozenW + scroll.left + mainW + OVERSCAN);
-  const rows = window(rowTop, fr + 1, lastRow, frozenH + scroll.top - OVERSCAN, frozenH + scroll.top + mainH + OVERSCAN);
+  const cols = span(colLeft, fc + 1, lastCol, frozenW + scroll.left - OVERSCAN, frozenW + scroll.left + mainW + OVERSCAN);
+  const rows = span(rowTop, fr + 1, lastRow, frozenH + scroll.top - OVERSCAN, frozenH + scroll.top + mainH + OVERSCAN);
   const frozenCols: [number, number] = [1, fc];
   const frozenRows: [number, number] = [1, fr];
 
@@ -127,31 +136,36 @@ export function SheetGrid({ id, model, styles, selected, marks, onSelect, onActi
     if (!el) return;
     el.scrollLeft = 0;
     el.scrollTop = 0;
-    setScroll({ left: 0, top: 0 });
-  }, [model]);
+    follow(0, 0);
+  }, [model, follow]);
 
-  // The selection is scrolled into view, past the frozen panes.
+  // The selection is scrolled into view, past the frozen panes: just into view after a key, as Excel
+  // scrolls; to the middle of the view after a jump from elsewhere (a link, a chip, Go To, Back), so the
+  // cells around it show.
+  const keyed = useRef(false);
   useLayoutEffect(() => {
     const el = scroller.current;
+    const centre = !keyed.current;
+    keyed.current = false;
     if (!el) return;
     const box = model.mergeOf.get(encodeA1(selected.col, selected.row)) ?? { top: selected.row, left: selected.col, bottom: selected.row, right: selected.col };
+    // Measured now: on the first render the view is still the fallback.
+    const { fc, fr, frozenW, frozenH, mainW, mainH } = frame(el.clientWidth || view.w, el.clientHeight || view.h);
     let { scrollLeft: left, scrollTop: top } = el;
     if (box.left > fc) {
       const x0 = colLeft[box.left] - frozenW;
       const x1 = colLeft[box.right + 1] - frozenW;
-      if (x0 < left) left = x0;
-      else if (x1 > left + mainW) left = Math.min(x0, x1 - mainW);
+      if (x0 < left || x1 > left + mainW) left = centre ? Math.max(0, x0 - Math.max(0, mainW - (x1 - x0)) / 2) : x0 < left ? x0 : Math.min(x0, x1 - mainW);
     }
     if (box.top > fr) {
       const y0 = rowTop[box.top] - frozenH;
       const y1 = rowTop[box.bottom + 1] - frozenH;
-      if (y0 < top) top = y0;
-      else if (y1 > top + mainH) top = Math.min(y0, y1 - mainH);
+      if (y0 < top || y1 > top + mainH) top = centre ? Math.max(0, y0 - Math.max(0, mainH - (y1 - y0)) / 2) : y0 < top ? y0 : Math.min(y0, y1 - mainH);
     }
     if (left !== el.scrollLeft || top !== el.scrollTop) {
       el.scrollLeft = left;
       el.scrollTop = top;
-      setScroll({ left, top });
+      follow(el.scrollLeft, el.scrollTop);
     }
     // Only a new selection scrolls; the view's size changing does not pull it back.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -159,7 +173,7 @@ export function SheetGrid({ id, model, styles, selected, marks, onSelect, onActi
 
   const onScroll = () => {
     const el = scroller.current;
-    if (el) setScroll({ left: el.scrollLeft, top: el.scrollTop });
+    if (el) follow(el.scrollLeft, el.scrollTop);
   };
 
   const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
@@ -170,7 +184,10 @@ export function SheetGrid({ id, model, styles, selected, marks, onSelect, onActi
     else if (!ctrl && !e.altKey && MOVES.has(e.key)) key = e.key as MoveKey;
     if (key) {
       e.preventDefault();
-      onSelect(moveFrom(model, selected, key, Math.max(1, Math.floor(mainH / 22))));
+      const to = moveFrom(model, selected, key, Math.max(1, Math.floor(mainH / 22)));
+      if (to.col === selected.col && to.row === selected.row) return;
+      keyed.current = true;
+      onSelect(to);
     } else if (e.key === 'Enter') {
       e.preventDefault();
       onActivate();
@@ -261,7 +278,10 @@ export function SheetGrid({ id, model, styles, selected, marks, onSelect, onActi
     };
     if (style?.border?.top) box.borderTop = borderCss(style.border.top);
     if (style?.border?.bottom) box.borderBottom = borderCss(style.border.bottom);
-    const label = `${a}, ${text || COPY.empty}${kind === 'formula' ? `, ${COPY.legendFormula}` : ''}`;
+    // A screen reader hears what the colours say: the cell's kind and the workbook's own red or blue type.
+    const kindWord = kind === 'formula' ? COPY.legendFormula : kind === 'error' ? COPY.legendError : kind === 'constant' && typeof cell?.v === 'number' ? COPY.legendConstant : null;
+    const colourWord = kind === 'error' ? null : style?.color === 'red' ? COPY.legendRed : style?.color === 'blue' ? COPY.legendBlue : null;
+    const label = [a, text || COPY.empty, kindWord, colourWord].filter(Boolean).join(', ');
     return (
       <div
         key={a}
@@ -284,8 +304,8 @@ export function SheetGrid({ id, model, styles, selected, marks, onSelect, onActi
       >
         {text &&
           (spillTo ? (
-            // A label running on hides the gridlines it crosses, as Excel's does.
-            <span className="relative z-[1] overflow-hidden whitespace-nowrap bg-popover pr-1" style={{ maxWidth: colLeft[spillTo + 1] - colLeft[c] - 4 - indent }}>
+            // A label running on hides the gridlines it crosses, as Excel's does; it does not shrink to its cell.
+            <span className="relative z-[1] flex-none overflow-hidden whitespace-nowrap bg-popover pr-1" style={{ maxWidth: colLeft[spillTo + 1] - colLeft[c] - 4 - indent }}>
               {text}
             </span>
           ) : (
@@ -312,8 +332,9 @@ export function SheetGrid({ id, model, styles, selected, marks, onSelect, onActi
         out.push(
           <div
             key={`p${i}`}
+            aria-hidden="true"
             data-precedent={encodeA1(area.left, area.top) + (area.bottom > area.top || area.right > area.left ? `:${encodeA1(area.right, area.bottom)}` : '')}
-            className={cn('pointer-events-none absolute z-[2] mix-blend-multiply outline-dashed outline-[1.5px] -outline-offset-2 outline-accent', LOOK.precedent.className)}
+            className={cn('pointer-events-none absolute z-[2] mix-blend-multiply', LOOK.precedent.className, LOOK.precedentOutline)}
             style={at}
           />,
         );
@@ -321,12 +342,12 @@ export function SheetGrid({ id, model, styles, selected, marks, onSelect, onActi
     for (const a of dependents) {
       const at = decodeA1(a);
       const style = at && clip({ top: at.row, left: at.col, bottom: at.row, right: at.col });
-      if (style) out.push(<div key={`d${a}`} data-dependent={a} className={cn('pointer-events-none absolute z-[2] mix-blend-multiply', LOOK.dependent.className)} style={style} />);
+      if (style) out.push(<div key={`d${a}`} aria-hidden="true" data-dependent={a} className={cn('pointer-events-none absolute z-[2] mix-blend-multiply', LOOK.dependent.className)} style={style} />);
     }
     const sel = model.mergeOf.get(selectedA) ?? { top: selected.row, left: selected.col, bottom: selected.row, right: selected.col };
     if (inPane(p, sel.top, sel.left)) {
       const style = clip(sel);
-      if (style) out.push(<div key="sel" data-selected={selectedA} className="pointer-events-none absolute z-[3] outline outline-2 -outline-offset-2 outline-foreground" style={style} />);
+      if (style) out.push(<div key="sel" aria-hidden="true" data-selected={selectedA} className="pointer-events-none absolute z-[3] outline outline-2 -outline-offset-2 outline-foreground" style={style} />);
     }
     return out;
   }
