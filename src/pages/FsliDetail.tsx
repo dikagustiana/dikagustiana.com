@@ -213,9 +213,10 @@ export default function FsliDetail() {
                 essays.map((essay) => (
                   <section key={essay.id} className="mb-12 last:mb-0" data-fsli-essay={essay.slug}>
                     {/* The body's own measure, so title, lede and prose share
-                        one left edge. */}
+                        one left edge; the essay page's title and deck classes,
+                        so the title still reads above the body's own h2s. */}
                     <div className="mx-auto w-[728px] max-w-full">
-                      <h2 className="editorial-title mb-3 text-[26px] leading-8">{essay.title}</h2>
+                      <h2 className="editorial-title mb-4">{essay.title}</h2>
                       {essay.snippet && (
                         <p className="editorial-subtitle mb-8">{essay.snippet}</p>
                       )}
