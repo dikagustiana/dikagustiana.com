@@ -294,3 +294,21 @@ repo sebelum fase ini akan **pertama kali tampil di production** begitu D12(a) d
 |---|---|---|
 | `src/lib/finance-in-action/copy.ts:9-10` | "The chain, read one company at a time" | h1 halaman Finance in Action; "draft H1 from brief §5.1". |
 | `src/lib/finance-in-action/copy.ts:11-13` | "Each model rebuilds a listed company's operation from its own filings: volumes, capacity, cost per unit. Two companies per sub-industry, ordered along the chain from extraction to end users, so a weak link can be compared with its neighbours rather than guessed at." | Subjudul halaman yang sama; "draft subhead from brief §5.1". |
+
+## Tambahan orkestrator: screenshot dengan data production (build lokal, baca saja)
+
+Vercel Preview untuk branch ini ada di balik Vercel Authentication (SSO), dan konektor Vercel sesi ini tidak punya akses ke project `dikagustiana-com` (laporan fase 0 §6.6). Sebagai gantinya, orkestrator membangun branch ini secara lokal sebagai build production (`npx vite build`, semua flag world/FIA tidak diset kecuali disebut), dengan `VITE_SUPABASE_URL` production (`asypkbkiebjvvpimewfp`) dan kunci anon publik. Browser Playwright hanya bicara dengan `vite preview` lokal; setiap request ke `*.supabase.co` diteruskan lewat Node, dan **hanya GET/HEAD** yang diteruskan (selain itu dibatalkan), jadi production hanya dibaca. Kode yang dibangun sama dengan HEAD PR: `git diff <commit build>..HEAD -- src public scripts supabase tests` kosong. Dua build dari `bd4e59f`: flag mati (seperti production hari ini) dan `VITE_FIA_LIVE=true` (seperti production setelah langkah D12(a)), keduanya tanpa `VITE_FIA_PREVIEW`.
+
+```
+$ VITE_FIA_LIVE=true node scripts/assert-no-synthetic.mjs      # dist = build live
+assert-no-synthetic: live build; none of 11 fixture values and no preview page chunk in dist/.
+live exit=0
+$ node scripts/assert-no-synthetic.mjs                         # dist = build flag mati
+assert-no-synthetic: no "SYNTHETIC" in dist/ (preview flag off).
+off exit=0
+```
+
+| Path | Isi | Hasil yang diperiksa |
+|---|---|---|
+| `screenshots/f/production-data/finance-landing-1440-production-data.png`, `…-390-…` | `/finance` dengan data production | **5 kartu** (fundamentals, strategic-finance, planning, analytics, capital-allocation): kartu 06 belum ada karena migrasi `20261010110000_finance_section_06.sql` belum diterapkan. Muncul setelah Dika menerapkannya. |
+| `screenshots/f/production-data/fia-live-1440-production-data.png`, `…-390-…` | `/finance/finance-in-action`, build `VITE_FIA_LIVE=true` | h1 "The chain, read one company at a time"; slate PTBA, ITMG, INTP, SMGR, masing-masing "Planned; no model yet" (4×); tanpa teks sintetis; `GET …/rest/v1/model_packages` → 200 (`Accept-Profile: fsre_published`), 0 paket |
