@@ -5,6 +5,66 @@ alternatives. Newest first.
 
 ---
 
+# 2026-10-10 — The header's dropdowns stay open on the way to an item
+
+Branch `sweep/a-nav`, base `main` @ `0487609`; phase A of the October 2026 site sweep, PRD R7 (the
+owner's finding 7: the dropdown vanished as the pointer moved down to it). None of the owner's answers
+D1–D14 (`docs/sweep-2026-10/DECISIONS.md`) is about the header, so this entry implements no D-number:
+R7 is the whole brief. It supersedes no earlier entry, because none recorded how the dropdown behaves
+under a pointer. "Empty sections collapse in the nav" (2026-10-09, line 106 at `0487609`) still holds:
+the four dropdowns tested here name no `essaySection` and never collapse.
+
+## The gap was a margin outside every hit area; it is now padding
+
+The panel was drawn `mt-1` below the label. The wrapper that carried `onMouseLeave` already held both
+the label and the panel, so R7.2's wrapper was in place; the fault was those 4px, which belonged to
+neither. A pointer crossing them left the wrapper and the menu closed under it. The panel now sits in
+an absolute wrapper with a transparent `pt-1`, so the 4px are part of the hover area, and the panel
+looks and sits exactly where it did. The PRD offered a pseudo-element bridge as the other way; the
+padding was chosen because it leaves the panel's own box as it was.
+
+## A 150 ms close that coming back cancels, and one menu open at a time
+
+- Leaving starts a close of `NAV_DROPDOWN_CLOSE_DELAY_MS` (150); re-entering cancels it, and the timer
+  is cleared on unmount. The delay is a timer, not motion, so it holds under `prefers-reduced-motion`
+  too; nothing new animates (R7.4). **The delay alone does not fix the seam:** a quick pointer crosses
+  4px inside 150 ms, a slow one rests there. A variant with the delay and the margin kept passed every
+  straight-line test and failed only the one that rests the pointer in the seam, which is why that test
+  exists.
+- The delay had a cost that review caught: the menu just left stayed drawn for 150 ms over its
+  neighbour (later in the document, same z-index), and a pointer moving into the overlap re-entered it
+  and closed the menu it was heading for. Opening a menu now closes the open one at once, through one
+  module-level handle (`closeOpenMenu`) rather than shared state: the header holds four instances of
+  one component, and only the close needs to pass between them.
+
+## Focus moves into the menu only on a keyboard open
+
+Every open used to focus the first item, a hover included, which pulled keyboard focus into the menu
+unasked. Now only ArrowDown, or Enter/Space on a menu button, does. Enter and Space are recognised by
+the click they produce having `detail === 0` (a keyboard's or a screen reader's activation; a pointer's
+click counts from 1), not by keydown handlers, because cancelling Space's own activation on keydown is
+unreliable across browsers. Escape still closes and returns focus to the chevron, but only when focus
+was inside the menu: a menu the pointer opened leaves focus where it was. Outside click and item click
+close as before. Learning's label is itself the menu button (it has no landing page), so it opens from
+the keyboard like the chevrons; R7.3 names only the chevron, and without this the Learning menu's
+keyboard users would have lost the first-item focus they had.
+
+## Learning's panel lines up with its label's right edge
+
+Found while taking this phase's screenshots, and older than it: Learning's `w-48` panel, lined up from
+the last label's left edge, ran past the right of the page (right edge 1344 at a 1280px viewport) and
+gave the open menu a sideways scrollbar. `NavDropdown` takes `align` (`'start'` by default, or
+`'end'`), and `MainNav.tsx` sets `align="end"` on Learning. That one line is outside `NavDropdown.tsx`,
+the only file the PRD's phase prompt names; the phase report records it. An e2e test holds every panel
+inside the viewport at 1280 and 1440px.
+
+Not changed: `MobileNav` (its own drawer), the panel's look, no portal, no Radix. Tests:
+`tests/unit/navDropdown.test.tsx` (14) and `tests/e2e/nav.spec.ts` (7; a real pointer moved in a
+straight line, two pixels a step, from each of Accounting, Finance, The Next Big Thing and Learning to
+its last item). `MIN_TESTS` 1148 → 1162.
+
+---
+
 # 2026-10-09 — The homepage below the map is one row: the glimpse
 
 Branch `claude/confident-ride-d354er`, base `main` @ `1df681a`. The owner's request, verbatim: "aku
