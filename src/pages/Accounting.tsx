@@ -3,6 +3,15 @@ import { PageLayout } from '@/components/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
 import { useFsliPages } from '@/hooks/queries/useFsliPages';
 
+/**
+ * OWNER-REPLACEABLE: the Consolidated Reporting row, after its section 4 became the PSAK 338 workbook
+ * viewer (site sweep 2026-10, R4.6). Drawn from that section's PRD heading, "Working paper: PT Dummy C and
+ * its subsidiaries, PSAK 338", and its default lede, "The full consolidation workbook, sheet by sheet.
+ * Click a cell to see its formula and follow where it comes from."
+ */
+const CONSOLIDATED_REPORTING_ROW =
+  'The PSAK 338 working paper of PT Dummy C and its subsidiaries, sheet by sheet: click a cell to see its formula and follow where it comes from.';
+
 export default function Accounting() {
   const { data: fsliPages, isSuccess } = useFsliPages();
 
@@ -16,7 +25,8 @@ export default function Accounting() {
     {
       title: 'Consolidated Reporting',
       path: '/accounting/consolidated-reporting',
-      description: 'A four-entity working paper: intragroup eliminations, goodwill and non-controlling interest under PSAK 110.',
+      description: CONSOLIDATED_REPORTING_ROW,
+      // Still one: the workbook is the page's one worked example.
       standing: '1 worked example',
     },
     {
