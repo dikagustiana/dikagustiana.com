@@ -7,7 +7,7 @@
  * and a glyph beside the word on every status the shell shows.
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactElement } from 'react';
@@ -17,7 +17,7 @@ import * as THREE from 'three';
 import type { RendererLike, WorldHandle } from '@/world/engine/types';
 import { LAYOUT } from '@/world/placement/layout.generated';
 import { REGISTRY } from '@/lib/world/registry/subindustries.generated';
-import { STATUS_VOCAB } from '@/lib/world/constants';
+import { STATUS_VOCAB, STORIES } from '@/lib/world/constants';
 
 const { reduced, phone } = vi.hoisted(() => ({ reduced: { value: false }, phone: { value: false } }));
 vi.mock('@/lib/motion', async (orig) => ({ ...(await orig<object>()), prefersReducedMotion: () => reduced.value }));
@@ -117,6 +117,17 @@ describe('the first paint (gate 4, O8)', () => {
       expect(poster.frame).toBe(frame.frame);
     });
   }
+
+  it('names the header’s control groups for a screen reader, the Stories with its six stories; a phone has a Stories select (PRD v2 §3.10, §3.15)', () => {
+    const { unmount } = mount(<WorldFrame variant="preview" heading="h1" />);
+    for (const name of ['Places', 'Zoom', 'Layers', 'Stories']) expect(screen.getByRole('group', { name })).toBeTruthy();
+    expect(within(screen.getByRole('group', { name: 'Stories' })).getAllByRole('button').map((b) => b.textContent)).toEqual(STORIES.map((x) => x.title));
+    unmount();
+    phone.value = true;
+    mount(<WorldFrame variant="preview" heading="h1" />);
+    const select = screen.getByRole('combobox', { name: 'Stories' });
+    expect(within(select).getAllByRole('option').map((o) => o.textContent)).toEqual(['None', ...STORIES.map((x) => x.title)]);
+  });
 
   it('fetches the frame on the first touch of the poster, before any paint is reported', () => {
     const wake = vi.fn();

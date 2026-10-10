@@ -1,0 +1,71 @@
+{
+  "ranAt": "2026-10-10T00:24:45.907Z",
+  "lighthouse": "13.5.0",
+  "rounds": 3,
+  "runs": {
+    "off-mobile": {
+      "performance": 81,
+      "accessibility": 98,
+      "bestPractices": 96,
+      "lcpMs": 4213,
+      "cls": 0.007,
+      "tbtMs": 86,
+      "fcpMs": 2871,
+      "transferKb": 433,
+      "lcpElement": "<p class=\"mt-2 text-sm leading-relaxed text-muted-foreground md:text-base\" data-chain-shift-lead=\"true\">",
+      "lcpMsRuns": [
+        4224,
+        4213,
+        4211
+      ]
+    },
+    "off-desktop": {
+      "performance": 98,
+      "accessibility": 98,
+      "bestPractices": 96,
+      "lcpMs": 897,
+      "cls": 0.001,
+      "tbtMs": 0,
+      "fcpMs": 630,
+      "transferKb": 433,
+      "lcpElement": "<p class=\"mt-3 text-sm leading-relaxed text-muted-foreground\" data-chain-doors=\"true\">",
+      "lcpMsRuns": [
+        897,
+        903,
+        890
+      ]
+    },
+    "on-mobile": {
+      "performance": 80,
+      "accessibility": 99,
+      "bestPractices": 96,
+      "lcpMs": 4276,
+      "cls": 0,
+      "tbtMs": 87,
+      "fcpMs": 2805,
+      "transferKb": 498,
+      "lcpElement": null,
+      "lcpMsRuns": [
+        4276,
+        4403,
+        4273
+      ]
+    },
+    "on-desktop": {
+      "performance": 83,
+      "accessibility": 98,
+      "bestPractices": 96,
+      "lcpMs": 922,
+      "cls": 0,
+      "tbtMs": 323,
+      "fcpMs": 617,
+      "transferKb": 731,
+      "lcpElement": null,
+      "lcpMsRuns": [
+        914,
+        922,
+        938
+      ]
+    }
+  }
+}

@@ -7,13 +7,14 @@ import { readFileSync } from 'node:fs';
  * console errors after 600 simulated seconds; every place button; [ and ]
  * cycle through every building without error; expose and close a company;
  * open and close the board; toggle every layer; each overlay; the energy
- * drill-down and back; the keyboard path; a story lit, and Follow ridden to
- * its end with a card at each stop; the phone layout at 390 px with
+ * drill-down and back; the keyboard path, the stories' and Follow's
+ * included; a story lit, and Follow ridden to its end with a card at each
+ * stop; the draw-call budgets of PRD v2 §6; the phone layout at 390 px with
  * the world started by hand; frame times sampled and reported; the canvas
  * description and the card's and board's focus. The published index is one
  * mock package (the SYNTHETIC cement fixture re-labelled, never shipped).
  */
-declare global { interface Window { world: { step(s: number): void; pause(on: boolean): void; skip(hours: number): void; activity(): { counts: Record<string, number>; hour: number; night: number; litBlocks: number }; all(): { id: string; kind: string; status: string; facts?: Record<string, string | number> }[]; select(id: string | null): void; selected(): string | null; view(name: string): void; drawCalls(): number; distance(): number; zoom(): number; band(): string; chain(): string[]; exposed(): unknown; expose(t: string): void; screenOf(id: string): [number, number] | null; centre(id: string, zoom: number): void; hovered(): { id: string; kind: string; label: string } | null; tick(dt: number, render?: boolean): void; follow(): { mode: string; story: string | null; hop: number; hops: number; lot: string | null; progress: number; elapsed: number } | null } } }
+declare global { interface Window { world: { step(s: number): void; pause(on: boolean): void; skip(hours: number): void; activity(): { counts: Record<string, number>; hour: number; night: number; litBlocks: number }; all(): { id: string; kind: string; status: string; facts?: Record<string, string | number> }[]; select(id: string | null): void; selected(): string | null; view(name: string): void; drawCalls(): number; distance(): number; zoom(): number; band(): string; chain(): string[]; exposed(): unknown; expose(t: string): void; screenOf(id: string): [number, number] | null; centre(id: string, zoom: number): void; hovered(): { id: string; kind: string; label: string } | null; tick(dt: number, render?: boolean): void; flows(): { live: number; cap: number }; follow(): { mode: string; story: string | null; hop: number; hops: number; lot: string | null; progress: number; elapsed: number } | null } } }
 
 const fixture = JSON.parse(readFileSync('src/data/finance-in-action/fixtures/XCEM.SYNTHETIC.json', 'utf8'));
 const MOCK = { ...fixture, meta: { ...fixture.meta, ticker: 'INTP', name: 'INTP (SYNTHETIC mock, never ships)', status: 'published', pair: ['SMGR', 'SMCB'] } };
@@ -39,9 +40,23 @@ test('starts without a console error, runs 600 simulated seconds clean, and keep
   expect((await canvas.getAttribute('aria-label'))!.length).toBeGreaterThan(100);
   await settle(page, 600);
   expect(errors).toEqual([]);
+  // PRD v2 §6's budgets with the fleet at work: home ≤ 900; the district band ≤ 1,300 (the map held to v1's 1,200);
+  // the street band ≤ 1,600; the near view as v1 held it
+  const live = await page.evaluate(() => window.world.flows().live);
+  test.info().annotations.push({ type: 'live-vehicles', description: `${live} live after 600 simulated seconds (cap 300)` });
+  expect(live).toBeGreaterThan(200);
+  await page.evaluate(() => window.world.view('hero')); await page.waitForTimeout(2500); await settle(page);
+  await expect.poll(() => page.evaluate(() => window.world.band()), { timeout: 20_000 }).toBe('district');
+  expect(await page.evaluate(() => window.world.drawCalls())).toBeLessThanOrEqual(900);
   await page.evaluate(() => window.world.view('whole')); await settle(page);
   expect(await page.evaluate(() => window.world.drawCalls())).toBeLessThanOrEqual(1200);
   await page.evaluate(() => window.world.view('estate')); await page.waitForTimeout(2500); await settle(page);
+  await expect.poll(() => page.evaluate(() => window.world.band()), { timeout: 20_000 }).toBe('district');
+  expect(await page.evaluate(() => window.world.drawCalls())).toBeLessThanOrEqual(1300);
+  await page.evaluate(() => window.world.centre('INTP', 6)); await settle(page);
+  // the band switches on the next drawn frame
+  await expect.poll(() => page.evaluate(() => window.world.band()), { timeout: 20_000 }).toBe('street');
+  await page.waitForTimeout(1000);
   expect(await page.evaluate(() => window.world.drawCalls())).toBeLessThanOrEqual(1600);
   await page.evaluate(() => window.world.select('B121')); await page.locator('input[aria-label^="Distance"]').fill('1'); await page.waitForTimeout(2500); await settle(page);
   expect(await page.evaluate(() => window.world.drawCalls())).toBeLessThanOrEqual(1900);
@@ -220,6 +235,45 @@ test('Follow rides a story from its first lot to its last: the lot’s card at e
   const story = page.locator('.world-card[data-story="cement"]');
   await expect(story).toContainText('the builders put up the estate the plants stand on');
   await expect(story).toContainText('The ride has ended');
+  expect(errors).toEqual([]);
+});
+
+test('the keyboard reaches the stories and Follow: a story button, its numbered strip, the card’s Follow and Clear in order; Escape lets a ride go (PRD v2 §3.15, E4)', async ({ page }) => {
+  test.setTimeout(180_000);
+  const errors = await open(page);
+  await ready(page);
+  // the canvas description names the new keys
+  const label = (await page.locator('.world-frame__canvas-host canvas').getAttribute('aria-label'))!;
+  expect(label).toContain('S lights the stories in turn');
+  expect(label).toContain('F follows a selected vehicle');
+  const palm = page.locator('[aria-label="Stories"]').getByRole('button', { name: 'Palm', exact: true });
+  await palm.focus();
+  await page.keyboard.press('Enter');
+  await expect(palm).toHaveAttribute('aria-pressed', 'true');
+  // the strip is a numbered list of the hops; the card's hops are one too
+  const strip = page.getByRole('list', { name: 'Story: Palm, its hops in order' });
+  expect(await strip.evaluate((el) => el.tagName)).toBe('OL');
+  await expect(strip.getByRole('listitem')).toHaveCount(3);
+  const card = page.locator('.world-card[data-story="palm"]');
+  expect(await card.locator('ol').count()).toBe(1);
+  // Tab walks the card's buttons in order: the hops' ends, then Follow, then Clear
+  await card.locator('.world-card__title').focus();
+  const seen: string[] = [];
+  for (let i = 0; i < 12; i++) {
+    await page.keyboard.press('Tab');
+    const t = await page.evaluate(() => (document.activeElement?.closest('.world-card') ? (document.activeElement as HTMLElement).innerText.trim() : null));
+    if (!t) break;
+    seen.push(t);
+    if (t === 'Clear') break;
+  }
+  expect(seen.slice(-2)).toEqual(['Follow', 'Clear']);
+  expect(seen.slice(0, 2)).toEqual(['Plantations & Crops', 'Processed Foods']);
+  await card.getByRole('button', { name: 'Follow', exact: true }).press('Enter');
+  await expect.poll(() => page.evaluate(() => window.world.follow()?.mode ?? null)).toBe('ride');
+  // Follow hands the keyboard to the stage, where Escape lets the ride go
+  await page.keyboard.press('Escape');
+  await expect.poll(() => page.evaluate(() => window.world.follow())).toBeNull();
+  await expect(page.locator('[data-world-readout]')).toHaveCount(1);
   expect(errors).toEqual([]);
 });
 

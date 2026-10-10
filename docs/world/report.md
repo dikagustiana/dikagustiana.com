@@ -167,6 +167,10 @@ viewer only with `VITE_FIA_PREVIEW=true` as well (discovery item K).
 
 ## 6. What remains for the owner
 
+**v2 is done (10 October 2026):** `report-v2.md` has the architecture as built, the probe from v1 to v2, the chunks,
+budgets and Lighthouse, every deviation, the decision log D-V2-1…12 and the owner's items O-V2-1…11; the gate notes are
+in `v2/gates/`. What follows is v1's list, still open where it says so.
+
 **v2 (9 October 2026):** the owner found the world dead; the measured diagnosis, the plan, the
 PRD and the execution prompt are in `v2/PLAN.md`, `v2/PRD-kawasan-v2.md` and
 `v2/MEGA-PROMPT-kawasan-v2.md`; the baseline probe is `frames/v1-probe/`.
