@@ -28,3 +28,16 @@ Status: **diisi 10 Oktober 2026** (Dika menyerahkan pengisian; default dipilih k
 Dua pertanyaan lama yang ikut ditutup di sweep ini:
 - **O-V2-1 … O-V2-11** (`docs/world/report-v2.md` §8): O-V2-5 (timbang hanya laden), O-V2-6 (hold 10 %), O-V2-7 (van ≥ 18 px), O-V2-11 (Follow time-lapse tetap) diputuskan oleh R9.7. Sisanya **pakai default yang diusulkan laporan v2**, dengan satu catatan: O-V2-9 (tujuh family yang tidak dipakai blok mana pun) → **retire** di W3, karena W3 menaikkan detail per family dan family tak terpakai hanya menambah beban.
 - **`docs/world/review-registry.md`** (130 penempatan, 0 dikonfirmasi): **tetap "proposed" sampai W1 selesai.** Layout audit W1 adalah momen reviewnya; setelah Dika menyetujui daftar audit, Opus menandai `placedBy = owner` untuk semua penempatan yang tidak diubah audit, dan `proposed` untuk yang diubah sampai W3 selesai. Ini lebih jujur daripada konfirmasi massal sebelum ada yang melihat.
+
+## Keputusan tambahan — 10 Oktober 2026 (fase E)
+
+Diambil Dika di sesi sweep setelah langkah E1 melaporkan isi file sumber. Kata-kata Dika, apa adanya:
+"kosongkan DATA block PTBA, sisanya lanjut aja. company namesnya hapus. metadatanya ilangin".
+
+| ID | Pertanyaan | Keputusan | Pelaksanaan |
+|---|---|---|---|
+| D15 | Workbook: nama perusahaan nyata (bukan "Dummy") di sel teks | **Dihapus** | Sel ditunjuk lewat alamat, bukan lewat namanya, sehingga nama itu tidak pernah tertulis di repo: 26 sel dikosongkan nilainya (format tetap), 5 label dipotong bagian namanya (mis. "Account Receivable - …" → "Account Receivable"). Tidak ada angka, formula, atau nilai cache yang berubah. Kode tiga huruf (STL, PSD, KLI, SLL, SLB, ALI) dibiarkan karena bukan nama; Dika bisa minta dihapus juga. |
+| D16 | Workbook: metadata file yang ikut terunduh (D11) | **Dihilangkan** | Nama penulis di properti dokumen, path OneDrive dan revision pointer, semua komentar sel dan komentar berutas beserta daftar penulisnya, dan 73.336 defined name warisan (sebagian memuat path file orang lain). Empat print range milik sheet sendiri dipertahankan. |
+| D17 | Referensi visual `Company_models__PTBA.html` | **Di-commit dengan DATA block dikosongkan** | Semua angka laporan (`rep`) dan register sumber (`docs`) dikosongkan; kunci struktur tanpa angka (identitas, satuan, periode, label kelas aset dan komponen biaya) dipertahankan supaya referensi tetap tampil (semua input OPEN). Contoh angka di legenda, yang berasal dari laporan PTBA, diganti `1.234`. |
+
+File asli workbook (sebelum D15–D16) tetap di tangan Dika dan tidak masuk repo atau riwayat git yang di-push.

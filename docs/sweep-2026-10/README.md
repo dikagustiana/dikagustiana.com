@@ -15,12 +15,12 @@ Kolom **Status** diperbarui di setiap PR fase. Nilai: `belum mulai`, `dikerjakan
 | Fase | Isi | Branch | Bergantung pada | Ukuran | Gate Dika | Status |
 |---|---|---|---|---|---|---|
 | 0 | Bootstrap: `docs/sweep-2026-10/` (DECISIONS.md dari §1.3, README fase), cek HEAD, cek DB, cek `fsre_published` exposure | `sweep/0-bootstrap` | — | kecil | tidak (laporan saja) | draft PR |
-| A | R7 nav dropdown | `sweep/a-nav` | — | kecil | merge | belum mulai |
-| B | R1 FSLI | `sweep/b-fsli` | D1, D2 | sedang | migrasi D2(a), merge | belum mulai |
-| C | R2 Glimpse + R8 About | `sweep/c-home` | D3, D4, D5 | sedang | merge | belum mulai |
-| D | R6 Capital in Motion | `sweep/d-capital` | D6, D7 | kecil | migrasi D6(a), merge | belum mulai |
-| E | R4 Workbook viewer | `sweep/e-workbook` | D8–D11, file xlsx + html | besar | merge | belum mulai |
-| F | R5 Section 06 | `sweep/f-fia` | D12, DB exposure | sedang | migrasi, env Vercel, approve PTBA di 4F, merge | belum mulai |
+| A | R7 nav dropdown | `sweep/a-nav` | — | kecil | merge | dikerjakan |
+| B | R1 FSLI | `sweep/b-fsli` | D1, D2 | sedang | migrasi D2(a), merge | dikerjakan |
+| C | R2 Glimpse + R8 About | `sweep/c-home` | D3, D4, D5 | sedang | merge | dikerjakan |
+| D | R6 Capital in Motion | `sweep/d-capital` | D6, D7 | kecil | migrasi D6(a), merge | dikerjakan |
+| E | R4 Workbook viewer | `sweep/e-workbook` | D8–D11, D15–D17, file xlsx + html | besar | merge | dikerjakan |
+| F | R5 Section 06 | `sweep/f-fia` | D12, DB exposure | sedang | migrasi, env Vercel, approve PTBA di 4F, merge | dikerjakan |
 | W1 | R10.1 izin + rule 10, R10.2 fidelity audit, R10.3 layout audit (tanpa mengubah world) | `world-v3/a-audit` | D14, FY lokal | sedang | NOTICE, setujui daftar audit | diblokir (D14 kosong; A–D belum merge) |
 | W2 | R9 kendaraan | `world-v3/b-vehicles` | W1 | besar | merge | diblokir (W1) |
 | W3 | R10.4–R10.6 detail dan layout | `world-v3/c-fidelity` | W1, W2 | sangat besar | side-by-side akhir | diblokir (W1, W2) |
