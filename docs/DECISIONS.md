@@ -5,6 +5,59 @@ alternatives. Newest first.
 
 ---
 
+# 2026-10-10 — Finance in Action is card 06 on /finance, and goes live now (site sweep, phase F)
+
+Branch `sweep/f-fia`, base `main` @ `0487609`. Executes PRD R5 of the October 2026 site sweep under
+owner decision D12(a) (PRD §1.3, copied to `docs/sweep-2026-10/DECISIONS.md` by phase 0). The phase
+report is `docs/sweep-2026-10/report-f.md`.
+
+## Card 06 is a finance_sections row (PRD R5.1)
+
+- `supabase/migrations/20261010110000_finance_section_06.sql` inserts `finance-in-action`, "Finance
+  in Action", sort_order 6, icon `Table`, on conflict (slug) do nothing. Its description is
+  `COPY.seoDescription` (`src/lib/finance-in-action/copy.ts`), OWNER-REPLACEABLE and editable in
+  place from the Finance Workspace. **Not applied; the owner applies it**, after the flag deploy
+  below.
+- The landing links every row to `/finance/<slug>`. `App.tsx` declares `/finance/finance-in-action`
+  ahead of `/finance/:track`, and the router ranks a static segment first anyway, so the card opens
+  the Finance in Action index, never a track index. The landing's header comment no longer says
+  "four equal domain entry points".
+- `tests/unit/financeLandingSection06.test.tsx` draws the sixth card from the migration file's own
+  VALUES tuple, and tells the index from a track index by more than its h1: a track index at that
+  address draws the same h1, from the row's title.
+
+## The live flag goes on in Production now — owner decision D12(a)
+
+- `VITE_FIA_LIVE=true` on Vercel Production, `VITE_FIA_PREVIEW` unset, redeploy. Until the first
+  package is approved in Personal OS 4F, the index lists the slate as "Planned; no model yet.", with
+  no figure; `assert-no-synthetic` keeps the fixtures out of that build. The owner's reason: a slate
+  without numbers is more honest than the legacy "0 of 0 models available" page.
+- **Supersedes** the FSRE publish path's O3, which is not an entry here: it is recorded in
+  `docs/company-models/report-fsre-publish-path.md:4` and `:87` at `0487609` ("after the first real
+  package is approved"), and both places now carry a note. `src/lib/finance-in-action/flag.ts` and
+  `.env.example` say D12(a).
+- **Order: the flag deploy first, then the migration**, or both in one sitting. The card appears the
+  moment the row exists, with no deploy, and on a build without the flag it opens the legacy page
+  D12 rejects. PRD §2.3 lists the migrations (step 3) before the Vercel flag (step 4); for this phase
+  the order is the other way round, for that reason. The migration's header says so.
+
+## With nothing published, production shows the slate and no PublishedNote
+
+- PRD R5.3 expects production to show "the slate and `PublishedNote`". With production's answer
+  today, `200 []`, it cannot: `PublishedNote` speaks only when the read fails (`not-available`,
+  `refused`, `failed`; FSRE publish path G8), and `tests/unit/fiaLive.test.tsx` pins that an empty,
+  successful read draws no status note. The code is kept: an empty read is not a failure, and a
+  sentence for it would be new copy in the owner's voice.
+- The phase F screenshot `fia-live-published-note-not-available-*.png` is a mocked `PGRST106`, not
+  what production will show; `fia-live-nothing-published-*.png` is. The production check after the
+  redeploy is: the slate is listed, no `SYNTHETIC` anywhere, no `[data-published-failure]` element,
+  and the `assert-no-synthetic` line in the Vercel build log.
+- The legacy pages (`FinanceInActionIndex.tsx`, `FinanceModelDetail.tsx`, `ModelAdminPanel.tsx`,
+  `useFinanceModels.ts`, bucket `finance-models`) stay in place (PRD R5.7); they are cleanup
+  candidates for a separate decision.
+
+---
+
 # 2026-10-09 — The homepage below the map is one row: the glimpse
 
 Branch `claude/confident-ride-d354er`, base `main` @ `1df681a`. The owner's request, verbatim: "aku
