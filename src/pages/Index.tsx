@@ -5,14 +5,15 @@ import { IndustryChainPreview } from '@/components/industry-chain';
 import { Glimpse } from '@/components/home/Glimpse';
 
 /**
- * How many starred essays the glimpse carries. The row scrolls, so this is
- * a ceiling on the query, not a layout constraint.
+ * How many essays the glimpse carries, starred and unstarred together. The
+ * row scrolls, so this is a ceiling on the query, not a layout constraint.
  */
 const GLIMPSE_LIMIT = 30;
 
 const Index = () => {
-  // Manual curation, not recency — recency is what put a database-rebuild
-  // notice on the homepage. Zero selected essays hides the glimpse entirely.
+  // Every published essay, the starred ones first in the owner's order and
+  // the rest newest first (useSelectedEssays). Zero published essays hides
+  // the glimpse entirely.
   const { data: selectedEssays, isLoading } = useSelectedEssays(GLIMPSE_LIMIT);
 
   return (
@@ -35,9 +36,9 @@ const Index = () => {
           carries them. */}
       <IndustryChainPreview />
 
-      {/* The glimpse: starred essays in the owner's order, one scrolling
-          row. It is the whole of the page below the map. The Sections list
-          that used to follow it was removed by owner decision on 2026-10-09
+      {/* The glimpse: every published essay, the starred ones first in the
+          owner's order, one scrolling row. The Sections list that used to
+          follow it was removed by owner decision on 2026-10-09
           (docs/DECISIONS.md); the header's navigation names every section. */}
       <Glimpse essays={selectedEssays} isLoading={isLoading} />
     </PageLayout>
