@@ -52,7 +52,7 @@ and the two new links add two flows; the hero's reading is up.
 
 ```
 $ TZ=America/Chicago npx vitest run --reporter=json --outputFile=vitest.json && node scripts/assert-test-count.mjs vitest.json
-assert-test-count: 1148 tests, 0 failed, 0 failed suite(s) (floor 1144)    # before: 1133; floor was 1129
+assert-test-count: 1151 tests, 0 failed, 0 failed suite(s) (floor 1147)    # before: 1133; floor was 1129
 $ npx eslint . --max-warnings=35
 ✖ 22 problems (0 errors, 22 warnings)
 $ npm run check:world
@@ -64,11 +64,11 @@ $ npm run test:e2e:world
 13 passed                    # 11 before; new: a story lit end to end, Follow ridden to the end
 ```
 
-New unit tests (15): the chain on the roads (one level with travelling dashes, outlines, the rest dimmed, no label;
-a hovered route's note; a vehicle's own route and its two lots; a measured link's long dashes and the full chain
+New unit tests (18): the chain on the roads (one level with travelling dashes, outlines, the rest dimmed, no label;
+every supplier lot to every customer lot, as the vehicles drive them; redrawn when a class arrives; a hovered route's note; a vehicle's own route and its two lots; a measured link's long dashes and the full chain
 framed at the district band); the six stories resolve to placed codes and links, and a bad story is refused (a hop
 that is no link, goods not the link's, a figure, an unplaced code); the six stories lit end to end, the rupiah
-upstream with the banks and a measured hop, a selection's chain over a story; Follow (a story ridden end to end in
+upstream with the banks and a measured hop, a story redrawn when a class arrives, a selection's chain over a story; Follow (a story ridden end to end in
 60–90 s with the lot's card at each bay; a glided hop and the clock's own pace; Space, Escape, the arrows and
 follow(null); F and the card's Follow; a vehicle ridden home); the governance and regulation pulses; search by
 story and by load, and the engine's vehicle for a load.
@@ -88,8 +88,8 @@ $ node scripts/world/assert-world-flag.mjs
 assert-world-flag: no world code in dist/ (flag off).
 ```
 
-Flag-on chunks (bytes, gzip −9), C → D: `world-scene` 126,835 / 48,502 → 139,810 / 53,755 (budget 120 kB gzipped);
-`WorldFrame` 266,501 / 44,118 → 272,312 / 45,646.
+Flag-on chunks (bytes, gzip −9), C → D: `world-scene` 126,835 / 48,502 → 140,132 / 53,885 (budget 120 kB gzipped);
+`WorldFrame` 266,501 / 44,118 → 272,397 / 45,665.
 
 ## 3. Frames
 
@@ -123,8 +123,8 @@ Every hop is a link of the register; the goods are the link's (an upstream story
 
 ### 4.2 Made by the agent
 
-1. **Routes from the flows' road graph**: a link's routes run from each supplier lot to a customer lot in turn (the
-   flows' own pairing), along the lanes the vehicles drive; a link that moves nothing (electricity, a service) is
+1. **Routes from the flows' road graph**: a link's routes run from every supplier lot to every customer lot (the
+   pairs its vehicles drive), along their lanes; a link that moves nothing (electricity, a service) is
    drawn on the same roads.
 2. **Two dash patterns** in the live tone, long for a measured link and short for an expected one, travelling at
    9 m/s of the frame's clock towards the customer (against the goods in an upstream story), paused with the world.
@@ -139,7 +139,10 @@ Every hop is a link of the register; the goods are the link's (an upstream story
    most of a minute). The camera rides at 3 px/m.
 6. **S** lights the stories in turn, then none. The strip names the joints a hop's routes cross (the gates' joints)
    and says the hop's place in words.
-7. **Search**: a load is a link whose goods move in vehicles; its result selects a vehicle on the road, else sends
+7. **Review fixes** (Codex, on the pull request): a link's routes are every supplier lot to every customer lot, as
+   the vehicles drive them (they were one pair per supplier lot); flow classes that arrive after something is lit
+   redraw it, a story's hops included.
+8. **Search**: a load is a link whose goods move in vehicles; its result selects a vehicle on the road, else sends
    one. **Pulses**: one every 120 m of every link's first route, built when the layer is first shown.
 
 ### 4.3 Needed from the owner
