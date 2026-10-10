@@ -23,10 +23,11 @@ import { cn } from '@/lib/utils';
  * `compact` was the landing-page form while the full form was the About
  * page's. The owner removed About on 10 October 2026 (decision D4(a)) and the
  * homepage now carries the FULL form, under the glimpse; nothing mounts
- * compact at present, and its pointer to the full form names the homepage's
- * #the-argument. The full form adds the scope, the comparative test, the
- * strongest objection and the limits, which is what someone deciding whether
- * to trust the argument actually needs and what a card grid cannot carry.
+ * compact at present, and it no longer points to the full form, since the
+ * page it was written for now carries that form. The full form adds the
+ * scope, the comparative test, the strongest objection and the limits, which
+ * is what someone deciding whether to trust the argument actually needs and
+ * what a card grid cannot carry.
  *
  * WHAT COMPACT NOW WEIGHS. The first compact form kept all five rows at their
  * full length — three essays with their reasoning and what each establishes,
@@ -462,10 +463,7 @@ export function ReadingPath({ compact = false }: { compact?: boolean }) {
           This framing was last reviewed on {fullDate(ARGUMENT.asOf)}.{' '}
           {compact && (
             <>
-              <Link to="/#the-argument" className="text-primary underline underline-offset-2">
-                The scope, the objection and the limits
-              </Link>{' '}
-              are on the homepage. The same claim is on the map below:{' '}
+              The same claim is on the map below:{' '}
               {/* A plain anchor, not a router Link: this is a move within the
                   page, and the reader's reduced-motion setting is honoured by
                   the CSS gate in src/index.css rather than by a handler here. */}
