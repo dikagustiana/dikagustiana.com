@@ -111,7 +111,7 @@ export function MainNav() {
         />
       )}
 
-      <NavDropdown label="Learning" items={learningItems} width="w-48" />
+      <NavDropdown label="Learning" items={learningItems} width="w-48" align="end" />
 
       {isAdmin && (
         <Link
