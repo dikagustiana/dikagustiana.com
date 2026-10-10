@@ -248,8 +248,11 @@ export default function FsliDetail() {
               )}
             </div>
 
-            {/* Right Sidebar - On This Page */}
+            {/* Right Sidebar - On This Page. Keyed by line item: this page
+                stays mounted from one item to the next, and a search typed
+                on the last one must not filter this one's headings. */}
             <FsliOnThisPage
+              key={slug}
               sections={toc.entries}
               activeSection={activeSection}
             />

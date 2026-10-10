@@ -273,6 +273,41 @@ describe('On this page highlight', () => {
   });
 });
 
+describe('On this page search', () => {
+  it('starts empty on the next line item, one already read included', async () => {
+    tables.essays = [
+      ESSAY,
+      {
+        ...ESSAY,
+        id: 'e-restricted',
+        slug: 'on-restriction',
+        title: 'The Restricted Essay',
+        fsli_slug: 'restricted',
+        content: JSON.stringify({ type: 'doc', content: [heading(2, 'Restrictions')] }),
+      },
+    ];
+    renderAt('cash');
+    await screen.findByRole('heading', { level: 2, name: 'What Cash Is' });
+    const related = () => screen.getByText('Related line items').closest('div')!;
+    await within(related()).findByRole('link', { name: 'Restricted' });
+    fireEvent.click(within(related()).getByRole('link', { name: 'Restricted' }));
+    await screen.findByRole('heading', { level: 2, name: 'The Restricted Essay' });
+    fireEvent.change(screen.getByPlaceholderText('Find in page...'), { target: { value: 'restrictions' } });
+
+    // Back to a line item already read: its page and essay come from the
+    // cache, so the page never passes through its loading state.
+    fireEvent.click(within(related()).getByRole('link', { name: 'Cash' }));
+    await screen.findByRole('heading', { level: 2, name: 'What Cash Is' });
+    expect(screen.getByPlaceholderText('Find in page...')).toHaveValue('');
+    const toc = screen.getByRole('navigation', { name: 'On this page' });
+    expect(within(toc).getAllByRole('button').map((b) => b.textContent)).toEqual([
+      'What counts as cash',
+      'Placements',
+      'Where it is presented',
+    ]);
+  });
+});
+
 describe('FSLI page without an essay', () => {
   it('says which essay covers it, linking to the covering line item', async () => {
     tables.essays = [{ ...ESSAY, fsli_slug: 'restricted', title: 'The Restricted Essay' }];
