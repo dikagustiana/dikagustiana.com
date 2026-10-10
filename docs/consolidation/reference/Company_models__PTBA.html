@@ -1,0 +1,1408 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Company models: PTBA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#16213A; --ink-2:#56617A; --ink-3:#7D879B;
+  --line:#E1E5EC; --line-2:#C7CFDB;
+  --paper:#FFFFFF; --wash:#F5F6F9;
+  --navy:#1C2F57; --on-navy:#FFFFFF;
+  --report:#1F4FD6;
+  --assume-bg:#E2F2E7; --assume-ink:#0B6636;
+  --fy-bg:#F0F2F6;
+  --prec:#B45309;
+  --flash:#D5DFF8;
+  --chip-bg:#16213A; --chip-ink:#FFFFFF;
+  --ui:"IBM Plex Sans","Segoe UI",system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif;
+  --gridf:"IBM Plex Sans Condensed","Arial Narrow","Roboto Condensed","IBM Plex Sans","Segoe UI",system-ui,sans-serif;
+  --rh:22px; --numw:40px; --labw:272px; --unitw:76px; --colw:76px;
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ink:#E6EAF2; --ink-2:#A9B2C5; --ink-3:#838DA2;
+    --line:#273247; --line-2:#3A4760;
+    --paper:#0F1624; --wash:#141D2E;
+    --navy:#2B4478; --on-navy:#FFFFFF;
+    --report:#8DB0FF;
+    --assume-bg:#133423; --assume-ink:#8FE0AE;
+    --fy-bg:#151F31;
+    --prec:#F5A524;
+    --flash:#2A3957;
+    --chip-bg:#E6EAF2; --chip-ink:#0F1624;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --ink:#E6EAF2; --ink-2:#A9B2C5; --ink-3:#838DA2;
+  --line:#273247; --line-2:#3A4760;
+  --paper:#0F1624; --wash:#141D2E;
+  --navy:#2B4478; --on-navy:#FFFFFF;
+  --report:#8DB0FF;
+  --assume-bg:#133423; --assume-ink:#8FE0AE;
+  --fy-bg:#151F31;
+  --prec:#F5A524;
+  --flash:#2A3957;
+  --chip-bg:#E6EAF2; --chip-ink:#0F1624;
+  color-scheme:dark;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--ui);font-size:14px;line-height:1.45;-webkit-text-size-adjust:100%}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--report);outline-offset:2px}
+
+.page{padding:32px 32px 48px}
+header.top{max-width:1180px}
+h1{font-size:32px;line-height:1.1;font-weight:700;letter-spacing:-.01em;margin:0 0 8px}
+.lede{font-size:16px;color:var(--ink-2);margin:0;max-width:68ch}
+.proto{margin:12px 0 0;padding-left:12px;border-left:3px solid var(--navy);font-size:13px;color:var(--ink-2);max-width:96ch}
+
+.tabs,.pills{display:flex;gap:8px;overflow-x:auto;scrollbar-width:thin;padding-bottom:4px}
+.tabs{margin-top:24px;padding-top:16px;border-top:1px solid var(--line)}
+.pills{margin-top:8px}
+.tab,.pill{flex:0 0 auto;min-height:36px;padding:0 12px;border:1px solid var(--line-2);border-radius:8px;background:var(--paper);cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.tab .n{color:var(--ink-3);font-variant-numeric:tabular-nums}
+.tab[aria-pressed="true"]{background:var(--navy);border-color:var(--navy);color:var(--on-navy)}
+.tab[aria-pressed="true"] .n{color:rgba(255,255,255,.72)}
+.pill{min-height:44px;padding:0 14px}
+.pill b{font-weight:600}
+.pill span{color:var(--ink-2)}
+.pill[aria-pressed="true"]{background:var(--wash);border-color:var(--navy);box-shadow:inset 0 0 0 1px var(--navy)}
+.pill.off span{color:var(--ink-3)}
+
+.kpis{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-top:16px}
+.kpi{background:var(--paper);padding:12px 16px 14px;min-width:0}
+.kpi .l{font-size:13px;color:var(--ink-2)}
+.kpi .v{font-size:24px;font-weight:600;line-height:1.25;margin-top:4px;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kpi .s{font-size:12.5px;color:var(--ink-2);margin-top:2px}
+.kpi.gap .v{font-size:16px;font-weight:500;color:var(--ink-3);line-height:1.9}
+
+.model{margin-top:16px}
+.toolbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px;margin-bottom:12px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;font-size:13px;color:var(--ink-2)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.chip{font-family:var(--gridf);font-variant-numeric:tabular-nums;font-size:12.5px;padding:1px 6px;border:1px solid var(--line);border-radius:4px;color:var(--ink)}
+.chip.rep{color:var(--report)}
+.chip.asm{background:var(--assume-bg);color:var(--assume-ink);border-color:transparent;font-weight:500}
+.actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.status{font-size:13px;color:var(--ink-2)}
+.status:empty{display:none}
+.btn{min-height:36px;padding:0 12px;border:1px solid var(--line-2);border-radius:8px;background:var(--paper);font-weight:500;cursor:pointer}
+.btn:hover{background:var(--wash)}
+.btn.primary{background:var(--navy);border-color:var(--navy);color:var(--on-navy)}
+.btn.primary:hover{filter:brightness(1.12)}
+.btn[hidden]{display:none}
+
+.sheetbar{display:flex;align-items:flex-end;gap:4px 12px;flex-wrap:wrap}
+.sheets{display:flex;gap:4px;align-items:flex-end;overflow-x:auto;scrollbar-width:none;max-width:100%}
+.sheet{flex:0 0 auto;min-height:36px;padding:0 14px;border:1px solid var(--line);border-bottom:0;border-radius:8px 8px 0 0;background:var(--wash);color:var(--ink-2);font-weight:500;cursor:pointer;white-space:nowrap}
+.sheet:hover{color:var(--ink)}
+.sheet[aria-selected="true"]{background:var(--paper);color:var(--ink);font-weight:600;box-shadow:inset 0 2px 0 var(--navy)}
+.sheetnote{flex:1 1 320px;font-size:12.5px;color:var(--ink-2);padding:0 2px 8px;min-width:0}
+
+.fbar{border:1px solid var(--line);border-bottom:0;border-radius:0 10px 0 0;font-family:var(--gridf);font-size:13px;background:var(--paper)}
+.fbar-top{display:flex;align-items:stretch;min-height:32px}
+.addr{flex:0 0 72px;display:flex;align-items:center;padding:0 10px;font-weight:600;border-right:1px solid var(--line)}
+.fx{flex:0 0 auto;display:flex;align-items:center;padding:0 10px;color:var(--ink-3);font-style:italic;border-right:1px solid var(--line)}
+.fval{flex:1;display:flex;align-items:center;padding:4px 10px;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.fmeta{border-top:1px solid var(--line);padding:5px 10px 6px;font-family:var(--ui);font-size:12.5px;color:var(--ink-2);min-height:30px;display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px}
+.fmeta b{font-weight:600;color:var(--ink)}
+.jump{font-family:var(--gridf);font-size:12.5px;border:1px solid var(--line-2);background:var(--wash);border-radius:6px;padding:1px 8px;min-height:24px;cursor:pointer;color:var(--ink)}
+.jump:hover{border-color:var(--navy)}
+
+.gridwrap{border:1px solid var(--line);border-radius:0 0 10px 10px;overflow:auto;max-height:min(70vh,1080px);background:var(--paper);position:relative;overscroll-behavior:contain}
+.gridwrap:focus-visible{outline-offset:-2px}
+table.grid{border-collapse:separate;border-spacing:0;table-layout:fixed;width:calc(var(--numw) + var(--labw) + var(--unitw) + var(--colw) * 25);font-family:var(--gridf);font-size:12.5px;font-variant-numeric:tabular-nums;user-select:none;-webkit-user-select:none}
+table.grid[hidden]{display:none}
+.grid col.c-rn{width:var(--numw)} .grid col.c-lab{width:var(--labw)} .grid col.c-unit{width:var(--unitw)} .grid col.c-d{width:var(--colw)}
+.grid th,.grid td{height:var(--rh);line-height:calc(var(--rh) - 1px);padding:0 6px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:right;background:var(--paper);cursor:default}
+.grid thead th{position:sticky;top:0;z-index:4;background:var(--wash);color:var(--ink-3);font-weight:500;text-align:center}
+.grid thead th.corner{left:0;z-index:8}
+.grid thead th.colh-a{left:var(--numw);z-index:8}
+.grid td.rn{position:sticky;left:0;z-index:2;background:var(--wash);color:var(--ink-3);text-align:center;padding:0}
+.grid td.lab{position:sticky;left:var(--numw);z-index:2;text-align:left}
+.grid td.unit{text-align:left;color:var(--ink-3);border-right:2px solid var(--line-2)}
+.grid thead th.colh-b{border-right:2px solid var(--line-2)}
+@media (min-width:721px){
+  .grid td.unit{position:sticky;left:calc(var(--numw) + var(--labw));z-index:2}
+  .grid thead th.colh-b{left:calc(var(--numw) + var(--labw));z-index:8}
+  .grid tr.hdr td.unit{z-index:6}
+}
+@media (max-width:720px){.grid td.lab,.grid thead th.colh-a{border-right:2px solid var(--line-2)}}
+.grid tr.hdr td{position:sticky;z-index:3}
+.grid tr.hdr td.rn,.grid tr.hdr td.lab{z-index:6}
+.grid tr.h1 td{top:var(--rh)} .grid tr.h2 td{top:calc(var(--rh)*2)} .grid tr.h3 td{top:calc(var(--rh)*3)} .grid tr.h4 td{top:calc(var(--rh)*4)}
+.grid tr.h4 td{border-bottom-color:var(--line-2)}
+.grid tr.h1 td,.grid tr.h2 td{font-weight:600}
+.grid td.fy{background:var(--fy-bg)}
+.grid tr.h2 td.fy{background:var(--chip-bg);color:var(--chip-ink)}
+.grid tr.h2 td.fc:not(.fy){font-style:italic}
+.grid tr.hdr td.lab{font-weight:600}
+.grid tr.h3 td:not(.lab),.grid tr.h4 td:not(.lab){color:var(--ink-2);font-weight:400}
+.grid tr.h1.tag td:not(.lab){color:var(--ink-2);font-weight:500}
+.grid tr.sec td:not(.rn){background:var(--navy);color:var(--on-navy);font-weight:600}
+.grid tr.bold td:not(.rn):not(.unit){font-weight:600}
+.grid tr.sub td.lab{font-weight:600}
+.grid tr.ratio td:not(.rn){font-style:italic;color:var(--ink-2)}
+.grid tr.ratio td.lab{padding-left:18px}
+.grid td.k-in,.grid tr.ratio td.k-in{color:var(--report)}
+.grid td.k-t{color:var(--ink-3)}
+.grid td.k-as,.grid tr.ratio td.k-as{background:var(--assume-bg);color:var(--assume-ink);font-weight:500;cursor:text}
+.grid .fc-first{box-shadow:inset 2px 0 0 var(--navy)}
+.grid tr.total td:not(.rn):not(.lab):not(.unit){box-shadow:inset 0 1px 0 var(--ink-2)}
+.grid tr.total td.fc-first{box-shadow:inset 2px 0 0 var(--navy),inset 0 1px 0 var(--ink-2)}
+.grid td.k-as.edited{box-shadow:inset 0 -2px 0 var(--assume-ink)}
+.grid td.k-as.edited.fc-first{box-shadow:inset 2px 0 0 var(--navy),inset 0 -2px 0 var(--assume-ink)}
+.grid td.rn.hl,.grid th.hl{background:var(--line);color:var(--ink)}
+.grid td.prec{outline:1.5px dashed var(--prec);outline-offset:-3px}
+.grid td.sel{outline:2px solid var(--ink);outline-offset:-2px}
+.grid td.editing{padding:0;outline:2px solid var(--assume-ink);outline-offset:-2px}
+.grid input.cellin{display:block;width:100%;height:calc(var(--rh) - 1px);border:0;margin:0;padding:0 6px;font:inherit;font-style:normal;text-align:right;background:var(--paper);color:var(--ink);outline:none}
+.grid td.flash{animation:flash 1s ease-out}
+@keyframes flash{from{background-color:var(--flash)}}
+@media (prefers-reduced-motion: reduce){.grid td.flash{animation:none}}
+
+.hint{font-size:13px;color:var(--ink-2);margin:8px 0 0;max-width:96ch}
+
+.model.fs{position:fixed;inset:0;z-index:50;background:var(--paper);margin:0;display:flex;flex-direction:column;padding:calc(env(safe-area-inset-top,0px) + 12px) 12px calc(env(safe-area-inset-bottom,0px) + 12px)}
+.model.fs .gridwrap{flex:1;max-height:none}
+.model.fs .hint{display:none}
+
+.empty{margin-top:16px;border:1px dashed var(--line-2);border-radius:10px;padding:32px 24px}
+.empty h2{font-size:18px;margin:0 0 6px}
+.empty p{margin:0 0 16px;color:var(--ink-2);max-width:64ch}
+
+.notes{margin-top:40px;max-width:1180px}
+.notes h2{font-size:16px;font-weight:600;margin:0 0 8px}
+.notes p{color:var(--ink-2);max-width:88ch;margin:0 0 12px}
+.srcwrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px}
+table.src{border-collapse:collapse;width:100%;min-width:720px;font-size:13.5px}
+table.src th,table.src td{text-align:left;vertical-align:top;padding:10px 12px;border-bottom:1px solid var(--line)}
+table.src tr:last-child td{border-bottom:0}
+table.src th{font-weight:600;background:var(--wash)}
+table.src td:last-child{color:var(--ink-2)}
+.gaps{margin:16px 0 0;padding-left:18px;color:var(--ink-2);max-width:88ch}
+.gaps li{margin:4px 0}
+
+@media (max-width:1180px){.kpis{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:720px){
+  .page{padding:20px 16px 40px}
+  h1{font-size:26px}
+  .lede{font-size:15px}
+  :root{--labw:160px;--unitw:64px;--colw:70px}
+  .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .kpi .v{font-size:20px}
+  .sheet{padding:0 10px;font-size:13px}
+  .sheetnote{padding-top:6px}
+}
+@media (pointer:coarse){.tab,.btn,.sheet{min-height:44px}}
+
+.grid td.k-in.open,.grid tr.ratio td.k-in.open{color:#B91C1C;font-weight:500}
+.grid td.k-f.open{color:#B91C1C}
+.grid tr.check td.ok:not(.rn):not(.lab):not(.unit){color:var(--assume-ink)}
+.grid tr.check td.bad:not(.rn):not(.lab):not(.unit){color:#B91C1C;font-weight:600}
+.grid tr.check td.lab{padding-left:10px}
+.kpi .v.badge{display:inline-block;padding:0 10px;border-radius:6px;font-size:18px;line-height:1.7}
+.kpi .v.badge.pass{background:var(--assume-bg);color:var(--assume-ink)}
+.kpi .v.badge.fail{background:#FDE2E2;color:#B91C1C}
+.kpi .v.badge.open{background:#FFF1D6;color:#9A5B00}
+.chip.open{color:#B91C1C}
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="top">
+    <h1>Company models</h1>
+    <p class="lede">Quarterly three-statement models of IDX companies. Every figure is sourced to a published document, calculated, or an assumption you can change, and each one shows where it came from.</p>
+    <p class="proto"><b id="coName"></b>. Stage 1 structure: P&amp;L, balance sheet and indirect cash flow (Q1 23 to 1H26 actual, FY totals), roll-forward schedules, Drivers, Checks and Reported. Historical inputs are transcribed only from the company's own IDX filings (financial statements, annual report, public expose); cells not yet transcribed are flagged OPEN in red and every control that depends on them reads OPEN rather than 0. Forecast columns (Stage 2) and WACC/DCF (Stage 3) follow.</p>
+  </header>
+
+  <nav class="tabs" id="sectors" aria-label="Sectors"></nav>
+  <div class="pills" id="companies" aria-label="Companies"></div>
+
+  <div id="view">
+    <div class="kpis" id="kpis" aria-live="polite">
+      <div class="kpi"><div class="l" id="k1l"></div><div class="v" id="k1v"></div><div class="s" id="k1s"></div></div>
+      <div class="kpi"><div class="l" id="k2l"></div><div class="v" id="k2v"></div><div class="s" id="k2s"></div></div>
+      <div class="kpi"><div class="l" id="k3l"></div><div class="v" id="k3v"></div><div class="s" id="k3s"></div></div>
+      <div class="kpi"><div class="l" id="k4l"></div><div class="v" id="k4v"></div><div class="s" id="k4s"></div></div>
+      <div class="kpi"><div class="l">Controls (Checks sheet)</div><div class="v badge" id="k5v"></div><div class="s" id="k5s"></div></div>
+      <div class="kpi"><div class="l">Inputs transcribed</div><div class="v" id="k6v"></div><div class="s" id="k6s"></div></div>
+    </div>
+
+    <section class="model" id="model" aria-label="Model">
+      <div class="toolbar">
+        <div class="legend">
+          <span><span class="chip rep">1.234</span>from a published document</span>
+          <span><span class="chip">1.234</span>formula</span>
+          <span><span class="chip asm">8,0%</span>assumption, edit it</span>
+          <span><span class="chip open">OPEN</span>input still to transcribe</span>
+        </div>
+        <div class="actions">
+          <span class="status" id="status" role="status"></span>
+          <button class="btn" id="btnTpl" type="button">Copy input template</button>
+          <button class="btn" id="btnReset" type="button">Reset assumptions</button>
+          <button class="btn" id="btnFs" type="button" aria-pressed="false">Full screen</button>
+          <button class="btn primary" id="btnXlsx" type="button">Download .xlsx</button>
+        </div>
+      </div>
+      <div class="sheetbar">
+        <div class="sheets" id="sheets" role="tablist" aria-label="Sheets"></div>
+        <div class="sheetnote" id="sheetnote"></div>
+      </div>
+      <div class="fbar" role="group" aria-label="Formula bar">
+        <div class="fbar-top"><span class="addr" id="addr">A1</span><span class="fx" aria-hidden="true">fx</span><span class="fval" id="fval"></span></div>
+        <div class="fmeta" id="fmeta"></div>
+      </div>
+      <div class="gridwrap" id="gridwrap" tabindex="0" aria-label="Model sheet. Use arrow keys to move, type to edit green cells."></div>
+      <p class="hint">Click any cell to see its formula or source. Cells a formula uses on the same sheet are outlined; references to other sheets appear as buttons that take you there. Green cells are assumptions: type a new value, press Enter to confirm or Esc to cancel. The navy rule marks where reported periods end. Flows on Reported are year to date as published.</p>
+    </section>
+  </div>
+
+  <div class="empty" id="empty" hidden>
+    <h2 id="emptyTitle"></h2>
+    <p id="emptyText"></p>
+    <button class="btn primary" id="btnOpenModel" type="button">Open the model</button>
+  </div>
+
+  <section class="notes" id="notes" aria-labelledby="srcTitle">
+    <h2 id="srcTitle">Sources</h2>
+    <p>Every blue cell on the Reported sheet names its document and page; the register below lists the documents. Only the company's own published documents are accepted as sources for historical figures. Press reports and screenshots are not.</p>
+    <div class="srcwrap">
+      <table class="src">
+        <thead><tr><th scope="col">Key</th><th scope="col">Document</th><th scope="col">Period</th><th scope="col">Where</th></tr></thead>
+        <tbody id="docs"></tbody>
+      </table>
+    </div>
+    <h2 style="margin-top:24px">Transcription coverage</h2>
+    <ul class="gaps" id="coverage"></ul>
+    <h2 style="margin-top:24px">Method</h2>
+    <ul class="gaps">
+      <li>Reported sheet: balances at period end, flows year to date as published. Discrete quarters are derived by subtraction on the statement sheets; FY columns sum the quarters.</li>
+      <li>Cash flow is indirect, derived from balance-sheet movements plus sourced note movements (capex, depreciation, borrowings, leases, dividends, OCI). The FX effect on cash is embedded in the movements, not plugged. K01 ties closing cash to the balance sheet.</li>
+      <li>Checks: every row must be 0 within the stated tolerance (±1 Rp mn, the rounding of the published statements). A row that depends on an untranscribed input reads OPEN and is counted as open, never as a pass.</li>
+      <li>Engine and data are separate: the formula engine and sheet definitions are generic; the DATA block holds the company's reported figures, document register, fixed-asset classes and cost components.</li>
+    </ul>
+  </section>
+</div>
+
+<script>
+/*ENGINE-START*/
+"use strict";
+/* =====================================================================
+   DATA BLOCK — the only company-specific part of the engine.
+   To model another coal company: replace everything between
+   DATA-START and DATA-END. No company names appear below DATA-END.
+   Units: Rp million as printed in the statements, Mt for volumes.
+   Reported inputs: rep[periodKey][code] = [value, "Document, page/note"].
+   A missing code, or a null value, is shown as OPEN.
+   Period keys: 'FY2022' (opening balance sheet), '2023-1' … '2026-2'.
+   Flow codes are entered YEAR TO DATE as published; the model derives
+   discrete quarters by subtraction. Balance codes are period-end.
+   ===================================================================== */
+/*DATA-START*/
+// Emptied on the site owner's instruction of 10 October 2026 (dikagustiana.com,
+// docs/sweep-2026-10/DECISIONS.md D17): no reported figure and no source register is kept
+// in this copy; it is a visual reference only. Every input reads OPEN.
+const DATA={
+  company:{ticker:'PTBA',name:'Bukit Asam',legal:'PT Bukit Asam (Persero) Tbk',sector:'Energy',fyEnd:'31 December'},
+  unit:'Rp mn',
+  periods:{firstYear:2023,lastActual:'2026-2',lastQuarterYear:2027,lastYear:2031},
+  scenario:'Base',
+  // Document register: every source cited in rep[] must appear here.
+  docs:{},
+  // Fixed-asset classes as the company presents them (schedule and capex drivers follow this list).
+  faClasses:[
+    {k:'land',label:'Land & land rights'},
+    {k:'bldg',label:'Buildings & infrastructure'},
+    {k:'mach',label:'Machinery & equipment'},
+    {k:'veh',label:'Vehicles & heavy equipment'},
+    {k:'rail',label:'Railway & port facilities'},
+    {k:'off',label:'Office & other equipment'},
+    {k:'rou',label:'Right-of-use assets',rou:true},
+    {k:'cip',label:'Construction in progress'}
+  ],
+  // Cost-of-revenue components as presented in the cost of revenue note.
+  cogsItems:[
+    {k:'contr',label:'Mining services (contractor)'},
+    {k:'rail',label:'Rail haulage'},
+    {k:'roy',label:'Royalty & PNBP'},
+    {k:'fuel',label:'Fuel'},
+    {k:'dep',label:'Depreciation & amortisation in COGS'},
+    {k:'oth',label:'Other cost of revenue'}
+  ],
+  rep:{'FY2022':{},'2023-1':{},'2023-2':{},'2023-3':{},'2023-4':{},'2024-1':{},'2024-2':{},'2024-3':{},'2024-4':{},'2025-1':{},'2025-2':{},'2025-3':{},'2025-4':{},'2026-1':{},'2026-2':{}},
+  // Forecast drivers (Stage 2): code → {pk: value}. Empty in Stage 1.
+  drivers:{}
+};
+/*DATA-END*/
+
+/* =====================================================================
+   GENERIC ENGINE — formula evaluator, column model, sheet definitions.
+   ===================================================================== */
+function colLetter(n){let s='';while(n>0){const m=(n-1)%26;s=String.fromCharCode(65+m)+s;n=Math.floor((n-1)/26);}return s;}
+function colIndex(l){let n=0;for(const ch of l)n=n*26+(ch.charCodeAt(0)-64);return n;}
+const ERR=e=>({err:e});
+const OPEN=ERR('OPEN');
+const isErr=v=>!!v&&typeof v==='object'&&'err' in v;
+const isOpen=v=>isErr(v)&&v.err==='OPEN';
+const isNum=v=>typeof v==='number'&&isFinite(v);
+
+/* ---------- formula engine (sheet-qualified references) ---------- */
+function tokenize(s,ctx){
+  const toks=[];let i=0;
+  while(i<s.length){
+    const ch=s[i];
+    if(ch===' '){i++;continue;}
+    if(ch==='"'){let j=i+1;while(j<s.length&&s[j]!=='"')j++;toks.push({t:'str',v:s.slice(i+1,j)});i=j+1;continue;}
+    const rest=s.slice(i);let m;
+    if((m=/^\d+(\.\d+)?/.exec(rest))){toks.push({t:'num',v:parseFloat(m[0])});i+=m[0].length;continue;}
+    if((m=/^(?:'([^']+)'|([A-Za-z_][A-Za-z0-9_]*))!\$?([A-Z]{1,3})\$?(\d+)/.exec(rest))){const sh=m[1]||m[2];toks.push({t:'ref',sheet:sh,q:true,col:m[3],row:+m[4],key:sh+'!'+m[3]+m[4]});i+=m[0].length;continue;}
+    if((m=/^[A-Z]+(?=\()/.exec(rest))){toks.push({t:'fn',v:m[0]});i+=m[0].length;continue;}
+    if((m=/^\$?([A-Z]{1,3})\$?(\d+)/.exec(rest))){toks.push({t:'ref',sheet:ctx,q:false,col:m[1],row:+m[2],key:ctx+'!'+m[1]+m[2]});i+=m[0].length;continue;}
+    if((m=/^(<=|>=|<>|[+\-*/^(),:=<>])/.exec(rest))){toks.push({t:'op',v:m[0]});i+=m[0].length;continue;}
+    throw new Error('Bad character '+ch);
+  }
+  return toks;
+}
+function parse(src,ctx){
+  const toks=tokenize(src,ctx);let p=0;
+  const peek=()=>toks[p];const next=()=>toks[p++];
+  const isOp=v=>peek()&&peek().t==='op'&&peek().v===v;
+  const inOps=a=>peek()&&peek().t==='op'&&a.includes(peek().v);
+  function expr(){return cmp();}
+  function cmp(){let l=add();while(inOps(['=','<>','<','>','<=','>='])){const op=next().v;l={t:'bin',op,l,r:add()};}return l;}
+  function add(){let l=mul();while(inOps(['+','-'])){const op=next().v;l={t:'bin',op,l,r:mul()};}return l;}
+  function mul(){let l=pw();while(inOps(['*','/'])){const op=next().v;l={t:'bin',op,l,r:pw()};}return l;}
+  function pw(){let l=un();while(isOp('^')){next();l={t:'bin',op:'^',l,r:un()};}return l;}
+  function un(){if(isOp('-')){next();return{t:'neg',e:un()};}if(isOp('+')){next();return un();}return prim();}
+  function prim(){
+    const tk=next();if(!tk)throw new Error('Unexpected end');
+    if(tk.t==='num')return{t:'num',v:tk.v};
+    if(tk.t==='str')return{t:'str',v:tk.v};
+    if(tk.t==='ref'){
+      if(isOp(':')){next();const b=next();if(!b||b.t!=='ref')throw new Error('Bad range');if(!b.q){b.sheet=tk.sheet;b.key=tk.sheet+'!'+b.col+b.row;}return{t:'range',a:tk,b};}
+      return{t:'ref',key:tk.key};
+    }
+    if(tk.t==='fn'){next();const args=[];if(!isOp(')')){args.push(expr());while(isOp(',')){next();args.push(expr());}}if(!isOp(')'))throw new Error('Missing )');next();return{t:'fn',name:tk.v,args};}
+    if(tk.t==='op'&&tk.v==='('){const e=expr();if(!isOp(')'))throw new Error('Missing )');next();return e;}
+    throw new Error('Unexpected '+(tk.v||tk.t));
+  }
+  const ast=expr();if(p<toks.length)throw new Error('Trailing input');return ast;
+}
+function rangeKeys(a,b){
+  const c1=colIndex(a.col),c2=colIndex(b.col),out=[];
+  for(let c=Math.min(c1,c2);c<=Math.max(c1,c2);c++)for(let r=Math.min(a.row,b.row);r<=Math.max(a.row,b.row);r++)out.push(a.sheet+'!'+colLetter(c)+r);
+  return out;
+}
+function refsOf(ast,out=[]){
+  if(!ast)return out;
+  switch(ast.t){
+    case 'ref':out.push(ast.key);break;
+    case 'range':out.push(...rangeKeys(ast.a,ast.b));break;
+    case 'bin':refsOf(ast.l,out);refsOf(ast.r,out);break;
+    case 'neg':refsOf(ast.e,out);break;
+    case 'fn':ast.args.forEach(a=>refsOf(a,out));break;
+  }
+  return out;
+}
+class Engine{
+  constructor(cells){this.cells=cells;this.memo=new Map();this.stack=new Set();}
+  get(key){
+    if(this.memo.has(key))return this.memo.get(key);
+    const cell=this.cells.get(key);if(!cell)return null;
+    if(this.stack.has(key))return ERR('#CIRC!');
+    let v=null;
+    if(cell.kind==='f'){this.stack.add(key);try{v=this.ev(cell.ast);}catch(e){v=ERR('#ERR!');}this.stack.delete(key);if(typeof v==='number'&&!isFinite(v))v=ERR('#NUM!');}
+    else if(cell.kind==='in'||cell.kind==='as')v=(cell.v===null||cell.v===undefined)?OPEN:cell.v;
+    else v=cell.v;
+    this.memo.set(key,v);return v;
+  }
+  num(v){if(v===null||v===undefined)return 0;if(typeof v==='boolean')return v?1:0;if(typeof v==='number')return v;if(isErr(v))return v;return ERR('#VALUE!');}
+  ev(n){
+    switch(n.t){
+      case 'num':return n.v;
+      case 'str':return n.v;
+      case 'ref':return this.get(n.key);
+      case 'range':return ERR('#VALUE!');
+      case 'neg':{const x=this.num(this.ev(n.e));return isErr(x)?x:-x;}
+      case 'bin':{
+        if(['=','<>','<','>','<=','>='].includes(n.op)){
+          let a=this.ev(n.l),b=this.ev(n.r);if(isErr(a))return a;if(isErr(b))return b;
+          if(a===null)a=0;if(b===null)b=0;
+          switch(n.op){case '=':return a===b;case '<>':return a!==b;case '<':return a<b;case '>':return a>b;case '<=':return a<=b;case '>=':return a>=b;}
+        }
+        const a=this.num(this.ev(n.l));if(isErr(a))return a;
+        const b=this.num(this.ev(n.r));if(isErr(b))return b;
+        switch(n.op){case '+':return a+b;case '-':return a-b;case '*':return a*b;case '/':return b===0?ERR('#DIV/0!'):a/b;case '^':return Math.pow(a,b);}
+        return ERR('#ERR!');
+      }
+      case 'fn':return this.fn(n.name,n.args);
+    }
+    return ERR('#ERR!');
+  }
+  flat(args){const vals=[];for(const a of args){if(a.t==='range'){for(const k of rangeKeys(a.a,a.b))vals.push({v:this.get(k),r:true});}else vals.push({v:this.ev(a),r:false});}return vals;}
+  fn(name,args){
+    if(name==='IF'){const c=this.ev(args[0]);if(isErr(c))return c;const t=c===true||(typeof c==='number'&&c!==0);const a=t?args[1]:args[2];return a?this.ev(a):false;}
+    if(name==='IFERROR'){const v=this.ev(args[0]);return isErr(v)?this.ev(args[1]):v;}
+    if(name==='ABS'){const x=this.num(this.ev(args[0]));return isErr(x)?x:Math.abs(x);}
+    if(name==='ROUND'){const x=this.num(this.ev(args[0]));const d=this.num(this.ev(args[1]||{t:'num',v:0}));if(isErr(x))return x;if(isErr(d))return d;const p=Math.pow(10,d);return Math.round(x*p)/p;}
+    if(name==='CHOOSE'){const i=this.num(this.ev(args[0]));if(isErr(i))return i;const a=args[Math.round(i)];return a?this.ev(a):ERR('#VALUE!');}
+    if(['SUM','AVERAGE','MIN','MAX'].includes(name)){
+      const nums=[];
+      for(const {v,r} of this.flat(args)){if(isErr(v))return v;if(typeof v==='number')nums.push(v);else if(!r&&v!==null&&typeof v!=='string')nums.push(this.num(v));}
+      if(name==='SUM')return nums.reduce((s,x)=>s+x,0);
+      if(!nums.length)return name==='AVERAGE'?ERR('#DIV/0!'):0;
+      if(name==='AVERAGE')return nums.reduce((s,x)=>s+x,0)/nums.length;
+      return name==='MIN'?Math.min(...nums):Math.max(...nums);
+    }
+    return ERR('#NAME?');
+  }
+  recalc(){this.memo=new Map();this.stack=new Set();for(const k of this.cells.keys())this.get(k);return this.memo;}
+}
+
+/* ---------- columns: A label, B unit, C.. periods ---------- */
+const COLS=[];
+(function(){
+  const P=DATA.periods;let i=0;
+  const [lay,laq]=P.lastActual.split('-').map(Number);
+  const op={i:i++,op:true,fy:false,fc:false,q:0,y:P.firstYear-1,label:'Dec '+String(P.firstYear-1).slice(2),pk:'FY'+(P.firstYear-1)};COLS.push(op);
+  for(let y=P.firstYear;y<=P.lastQuarterYear;y++){
+    const qs=[];
+    for(let q=1;q<=4;q++){const fc=y>lay||(y===lay&&q>laq);const c={i:i++,y,q,fy:false,fc,label:'Q'+q+' '+String(y).slice(2)+(fc?'E':''),pk:y+'-'+q};COLS.push(c);qs.push(c);}
+    const fc=y>lay||(y===lay&&laq<4);
+    COLS.push({i:i++,y,q:0,fy:true,fc,part:y===lay&&laq<4,quarters:qs,label:'FY'+String(y).slice(2)+(fc?'E':''),pk:'FY'+y});
+  }
+  for(let y=P.lastQuarterYear+1;y<=P.lastYear;y++)COLS.push({i:i++,y,q:0,fy:true,fc:true,annual:true,label:'FY'+String(y).slice(2)+'E',pk:'FY'+y});
+  COLS.forEach(c=>{
+    c.L=colLetter(c.i+3);
+    if(c.op)return;
+    if(!c.fy){c.prevQ=c.q>1?COLS[c.i-1]:null;c.prev=c.q>1?COLS[c.i-1]:(c.y===P.firstYear?op:COLS[c.i-2]);c.yoy=COLS.find(x=>!x.fy&&!x.op&&x.y===c.y-1&&x.q===c.q)||null;}
+    else{c.prev=COLS.find(x=>x.pk==='FY'+(c.y-1))||null;c.yoy=c.prev;}
+  });
+})();
+const FC_FIRST=COLS.find(c=>c.fc).i;
+const LATEST=COLS.filter(c=>!c.fy&&!c.op&&!c.fc).pop();
+const LATEST_FY=COLS.filter(c=>c.fy&&!c.fc).pop();
+const END={1:'31/03',2:'30/06',3:'30/09',4:'31/12'};
+const leap=y=>y%4===0;
+function daysOf(c){if(c.fy||c.op)return leap(c.y)?366:365;return c.q===1?(leap(c.y)?91:90):c.q===2?91:92;}
+const hq=c=>!c.fy&&!c.op&&!c.fc;            // historical quarter
+const hb=c=>hq(c)||c.op;                     // historical balance-sheet point
+const hfy=c=>c.fy&&!c.fc;                    // historical full year
+const hist=c=>hq(c)||hfy(c);                 // any historical flow column
+
+/* ---------- input code registry (generic coal-company chart) ----------
+   kind: bal = period-end balance; ytd = year-to-date flow as published;
+         lvl = period figure that is not cumulative (EPS, shares, rates). */
+const B=(k,label,fmt)=>({k,label,kind:'bal',fmt:fmt||'mn'});
+const Y=(k,label,fmt)=>({k,label,kind:'ytd',fmt:fmt||'mn'});
+const V=(k,label,fmt)=>({k,label,kind:'lvl',fmt:fmt||'mn'});
+const CODES=[
+  {sec:'Balance sheet, period end (statement face)'},
+  B('cash','Cash and cash equivalents'),B('td','Time deposits'),B('rec_tot','Trade receivables, face'),B('rec_oth','Other receivables'),B('debt_inst','Investment in debt instruments'),B('inv','Inventories'),B('pp_oth_c','Prepaid other taxes, current'),B('pp_corp_c','Prepaid corporate income tax, current'),B('oca','Other current assets'),B('tca_rep','Total current assets, reported'),
+  B('inv_assoc','Investments in associates and JVs'),B('mp','Mining properties'),B('fa_net','Fixed assets, net'),B('pp_corp_nc','Prepaid corporate income tax, non-current'),B('pp_oth_nc','Prepaid other taxes, non-current'),B('dta','Deferred tax assets'),B('goodwill','Goodwill'),B('onca','Other non-current assets'),B('tnca_rep','Total non-current assets, reported'),B('ta_rep','Total assets, reported'),
+  B('tp','Trade payables'),B('accr','Accrued expenses'),B('emp_st','Short-term employee benefits liability'),B('tax_corp','Corporate income tax payable'),B('tax_oth','Other taxes payable'),B('bank_st','Short-term bank borrowings'),B('bank_cm','Bank borrowings, current maturity'),B('lease_cm','Lease liabilities, current'),B('prov_cm','Reclamation & mine-closure provision, current'),B('emp_cm','Employee benefits liability, current'),B('ocl','Other current liabilities'),B('tcl_rep','Total current liabilities, reported'),
+  B('lease_nc','Lease liabilities, non-current'),B('bank_lt','Bank borrowings, non-current'),B('prov_nc','Reclamation & mine-closure provision, non-current'),B('emp_nc','Employee benefits liability, non-current'),B('dtl','Deferred tax liabilities'),B('oncl','Other non-current liabilities'),B('tncl_rep','Total non-current liabilities, reported'),B('tl_rep','Total liabilities, reported'),
+  B('sc','Share capital'),B('apic','Additional paid-in capital'),B('tsy','Treasury shares'),B('oci_fv_r','Fair-value reserve, debt instruments'),B('oci_tr_r','Translation reserve'),B('re_app','Retained earnings, appropriated'),B('re_un','Retained earnings, unappropriated'),B('eqp_rep','Equity to owners of the parent, reported'),B('nci','Non-controlling interests'),B('te_rep','Total equity, reported'),B('tle_rep','Total liabilities and equity, reported'),
+  {sec:'Balance sheet detail (notes)'},
+  B('rec_third','Trade receivables, third parties (net)'),B('rec_rel','Trade receivables, related parties (net)'),B('inv_coal','Inventories: coal'),B('inv_spare','Inventories: spare parts & materials'),B('pp_vat','Prepaid VAT (within prepaid other taxes)'),B('tax_vat','VAT payable (within other taxes payable)'),B('tax_wht','Withholding taxes payable (within other taxes payable)'),
+  ...DATA.faClasses.flatMap(x=>[B('fa_cost_'+x.k,'FA cost, closing: '+x.label),B('fa_acc_'+x.k,'FA accumulated depreciation, closing: '+x.label)]),
+  {sec:'Income statement, year to date (statement face)'},
+  Y('rev_coal_dom','Coal revenue, domestic'),Y('rev_coal_exp','Coal revenue, export'),Y('rev_oth','Other revenue'),Y('rev_tot','Revenue, reported total'),
+  Y('cogs_tot','Cost of revenue, reported total'),Y('gp_rep','Gross profit, reported'),Y('ga','General & administrative expenses'),Y('sell','Selling & marketing expenses'),Y('oinc','Other income (expense), net'),Y('ebit_rep','Operating profit, reported'),
+  Y('fin_inc','Finance income'),Y('fin_cost','Finance costs'),Y('assoc','Share of profit of associates & JVs'),Y('pbt_rep','Profit before tax, reported'),Y('tax_cur','Income tax: current'),Y('tax_def','Income tax: deferred'),Y('tax_tot','Income tax expense, total'),Y('np_rep','Profit for the period, reported'),Y('np_own','Profit to owners of the parent'),Y('np_nci','Profit to non-controlling interests'),
+  Y('oci_rem_g','OCI: remeasurement of employee benefits, gross'),Y('oci_rem_t','OCI: tax on remeasurement'),Y('oci_tr','OCI: translation differences'),Y('oci_fv','OCI: fair value of debt instruments'),Y('tci_rep','Total comprehensive income, reported'),V('eps_rep','EPS basic, reported','rp'),V('sh_wavg','Weighted average shares','mnsh'),
+  {sec:'Income statement detail (notes)'},
+  ...DATA.cogsItems.map(x=>Y('cogs_'+x.k,'COGS: '+x.label)),
+  Y('dep_cogs','Depreciation & amortisation charged to COGS'),Y('dep_ga','Depreciation charged to G&A'),Y('dep_cap','Depreciation capitalised / in other lines'),Y('amort_mp','Amortisation of mining properties'),
+  Y('seg_coal','Segment revenue: coal'),Y('seg_oth','Segment revenue: others'),Y('seg_elim','Segment revenue: eliminations'),Y('segp_coal','Segment profit: coal'),Y('segp_oth','Segment profit: others'),
+  {sec:'Roll-forward movements, year to date (notes)'},
+  ...DATA.faClasses.flatMap(x=>[Y('fa_add_'+x.k,'FA additions: '+x.label),Y('fa_dep_'+x.k,'FA depreciation: '+x.label),Y('fa_oth_'+x.k,'FA disposals, reclass & other (NBV): '+x.label)]),
+  Y('fa_add_tot','FA additions, note total'),Y('fa_dep_tot','FA depreciation, note total'),
+  Y('mp_add','Mining properties: additions'),Y('mp_oth','Mining properties: other movements'),
+  Y('bor_draw','Bank borrowings: drawdowns'),Y('bor_rep','Bank borrowings: repayments'),Y('bor_oth','Bank borrowings: fees, FX & other'),
+  Y('lease_add','Leases: additions (non-cash)'),Y('lease_int','Leases: interest accretion'),Y('lease_pay','Leases: payments'),Y('lease_oth','Leases: other movements'),
+  Y('div_par','Dividends to owners of the parent'),Y('div_nci','Dividends to non-controlling interests'),Y('eq_oth','Other parent equity movements (treasury shares etc.)'),Y('nci_oth','Other NCI movements'),
+  {sec:'Cash flow statement, year to date (memo, direct method as published)'},
+  Y('cfo_rep','Operating cash flow, reported'),Y('cfi_rep','Investing cash flow, reported'),Y('cff_rep','Financing cash flow, reported'),Y('fx_cash_rep','FX effect on cash, reported'),Y('capex_cash_rep','Purchase of fixed assets, reported'),Y('int_paid','Interest paid'),Y('tax_paid','Income tax paid'),Y('roy_paid','Royalties paid'),
+  {sec:'Operating data, year to date (annual report / public expose)'},
+  Y('op_prod','Coal production','d2'),Y('op_sales_dom','Coal sales, domestic','d2'),Y('op_sales_exp','Coal sales, export','d2'),V('op_sr','Stripping ratio, year to date','x2'),V('fx_usd','USD/IDR, period end','rp')
+];
+const CODE={};CODES.filter(x=>x.k).forEach(x=>{CODE[x.k]=x;});
+const UNIT={mn:DATA.unit,rp:'Rp',mnsh:'mn shares',d2:'Mt',x2:'x'};
+function repInput(code,c){
+  const per=DATA.rep[c.pk]||{};const e=per[code];
+  if(e===undefined||e===null)return{in:null,src:'OPEN: not yet transcribed from a published document'};
+  const[v,s]=e;if(v===null||v===undefined)return{in:null,src:'OPEN: '+(s||'not found in the document')};
+  return{in:v,src:s};
+}
+
+/* ---------- sheets ---------- */
+const SH={sum:'Summary',pl:'P&L',bs:'Balance sheet',cf:'Cash flow',sch:'Schedules',dr:'Drivers',chk:'Checks',rep:'Reported'};
+const ORDER=['sum','pl','bs','cf','sch','dr','chk','rep'];
+const RN={};ORDER.forEach(s=>RN[s]={});
+let CUR='sum';
+const X=(s,k,c)=>(s===CUR?'':"'"+SH[s]+"'!")+c.L+RN[s][k];
+const at=(k,c)=>X(CUR,k,c);
+const R=(code,c)=>X('rep',code,c);
+const NA={t:'n.a.'};
+const sumQ=(k,c)=>({f:'SUM('+c.quarters[0].L+RN[CUR][k]+':'+c.quarters[3].L+RN[CUR][k]+')'});
+const yoyF=(k,c)=>c.yoy?{f:'IFERROR('+at(k,c)+'/'+at(k,c.yoy)+'-1,"n.a.")'}:NA;
+const TAG=c=>c.op?'Opening':c.fc?(c.part?'Actual + forecast':'Forecast · '+DATA.scenario):'Actual';
+const HDR=title=>[
+  {k:'hdr1',label:title,cls:'tag',cell:c=>({h:TAG(c)})},
+  {k:'hdr2',label:'Fiscal year ended '+DATA.company.fyEnd,cell:c=>({h:c.label})},
+  {k:'hdr3',label:'Period ending',cell:c=>({h:END[c.q||4]+'/'+String(c.y).slice(2)})},
+  {k:'hdr4',label:'Days in period',fmt:'int',cell:c=>c.op?null:({h:daysOf(c)})}
+];
+/* discrete flow from year-to-date reported inputs; FY = sum of quarters */
+const disc=(code,k)=>c=>{
+  if(c.fy)return hfy(c)?sumQ(k||code,c):null;
+  if(!hq(c))return null;
+  return c.q===1?{f:R(code,c)}:{f:R(code,c)+'-'+R(code,c.prevQ)};
+};
+const negDisc=(code,k)=>c=>{
+  if(c.fy)return hfy(c)?sumQ(k||code,c):null;
+  if(!hq(c))return null;
+  return c.q===1?{f:'-'+R(code,c)}:{f:'-('+R(code,c)+'-'+R(code,c.prevQ)+')'};
+};
+const discK=(k,code)=>c=>{if(c.fy)return hfy(c)?sumQ(k,c):null;if(!hq(c))return null;return c.q===1?{f:R(code,c)}:{f:R(code,c)+'-'+R(code,c.prevQ)};};
+/* balance from reported inputs; FY = Q4 */
+const bal=(code)=>c=>{if(c.fy)return c.fc?null:{f:at(code,c.quarters[3])};if(hb(c))return{f:R(code,c)};return null;};
+const balK=(k,code)=>c=>{if(c.fy)return c.fc?null:{f:at(k,c.quarters[3])};if(hb(c))return{f:R(code,c)};return null;};
+/* sum of same-sheet rows */
+const plus=(ks,c)=>ks.map(k=>at(k,c)).join('+');
+const sumRows=(ks)=>c=>(c.op||hist(c))?{f:plus(ks,c)}:null;
+const flowOnly=f=>c=>hist(c)?f(c):null;
+const bsOnly=f=>c=>(c.op||hist(c))?f(c):null;
+/* movement on the balance sheet: this period less previous */
+const dBS=(k,c)=>X('bs',k,c)+'-'+X('bs',k,c.prev);
+
+/* ===== Reported ===== */
+const ROWS_REP=[...HDR('Reported figures, as published')];
+for(const x of CODES){
+  if(x.sec){ROWS_REP.push({k:'sec_'+ROWS_REP.length,label:x.sec,cls:'sec'});continue;}
+  ROWS_REP.push({k:x.k,code:x.k,label:x.label,unit:UNIT[x.fmt]+(x.kind==='ytd'?' YTD':''),fmt:x.fmt,cell:c=>{
+    if(c.fc)return null;
+    if(c.fy)return{f:at(x.k,c.quarters[3])};
+    if(c.op)return x.kind==='bal'?repInput(x.k,c):null;
+    return repInput(x.k,c);
+  }});
+}
+
+/* ===== P&L (discrete quarters) ===== */
+const cogsKeys=DATA.cogsItems.map(x=>'cogs_'+x.k);
+const ROWS_PL=[
+  ...HDR('Income statement, discrete periods'),
+  {k:'s1',label:'Revenue',cls:'sec'},
+  {k:'rev_coal_dom',label:'Coal revenue, domestic',unit:DATA.unit,cell:disc('rev_coal_dom')},
+  {k:'rev_coal_exp',label:'Coal revenue, export',unit:DATA.unit,cell:disc('rev_coal_exp')},
+  {k:'rev_coal',label:'Coal revenue',unit:DATA.unit,cls:'total',cell:sumRows(['rev_coal_dom','rev_coal_exp'])},
+  {k:'rev_oth',label:'Other revenue',unit:DATA.unit,cell:disc('rev_oth')},
+  {k:'rev',label:'Revenue',unit:DATA.unit,cls:'bold total',cell:sumRows(['rev_coal','rev_oth'])},
+  {k:'revYoy',label:'% yoy',cls:'ratio',fmt:'pct',cell:flowOnly(c=>yoyF('rev',c))},
+  {k:'rev_rep',label:'Revenue, reported total (memo)',unit:DATA.unit,cls:'ratio',cell:disc('rev_tot','rev_rep')},
+  {k:'b1',cls:'blank'},
+  {k:'s2',label:'Cost of revenue',cls:'sec'},
+  ...DATA.cogsItems.map(x=>({k:'cogs_'+x.k,label:x.label,unit:DATA.unit,cell:disc('cogs_'+x.k)})),
+  {k:'cogs',label:'Cost of revenue',unit:DATA.unit,cls:'bold total',cell:sumRows(cogsKeys)},
+  {k:'cogs_rep',label:'Cost of revenue, reported total (memo)',unit:DATA.unit,cls:'ratio',cell:disc('cogs_tot','cogs_rep')},
+  {k:'gp',label:'Gross profit',unit:DATA.unit,cls:'bold total',cell:sumRows(['rev','cogs'])},
+  {k:'gm',label:'% margin',cls:'ratio',fmt:'pct',cell:flowOnly(c=>({f:at('gp',c)+'/'+at('rev',c)}))},
+  {k:'b2',cls:'blank'},
+  {k:'s3',label:'Operating expenses',cls:'sec'},
+  {k:'ga',label:'General & administrative',unit:DATA.unit,cell:disc('ga')},
+  {k:'sell',label:'Selling & marketing',unit:DATA.unit,cell:disc('sell')},
+  {k:'oinc',label:'Other income (expense), net',unit:DATA.unit,cell:disc('oinc')},
+  {k:'ebit',label:'Operating profit (EBIT)',unit:DATA.unit,cls:'bold total',cell:sumRows(['gp','ga','sell','oinc'])},
+  {k:'ebitM',label:'% margin',cls:'ratio',fmt:'pct',cell:flowOnly(c=>({f:at('ebit',c)+'/'+at('rev',c)}))},
+  {k:'dep_cogs',label:'  D&A charged to cost of revenue (memo, from note)',unit:DATA.unit,cls:'ratio',cell:disc('dep_cogs')},
+  {k:'dep_ga',label:'  depreciation charged to G&A (memo, from note)',unit:DATA.unit,cls:'ratio',cell:disc('dep_ga')},
+  {k:'dep_cap',label:'  depreciation capitalised / in other lines (memo, from note)',unit:DATA.unit,cls:'ratio',cell:disc('dep_cap')},
+  {k:'amort_mp',label:'  amortisation of mining properties (memo, from note)',unit:DATA.unit,cls:'ratio',cell:disc('amort_mp')},
+  {k:'da',label:'Depreciation & amortisation (COGS + G&A + mining properties)',unit:DATA.unit,cell:flowOnly(c=>({f:plus(['dep_cogs','dep_ga','amort_mp'],c)}))},
+  {k:'ebitda',label:'EBITDA',unit:DATA.unit,cls:'bold',cell:flowOnly(c=>({f:at('ebit',c)+'+'+at('da',c)}))},
+  {k:'ebitdaM',label:'% margin',cls:'ratio',fmt:'pct',cell:flowOnly(c=>({f:at('ebitda',c)+'/'+at('rev',c)}))},
+  {k:'b3',cls:'blank'},
+  {k:'s4',label:'Below operating profit',cls:'sec'},
+  {k:'fin_inc',label:'Finance income',unit:DATA.unit,cell:disc('fin_inc')},
+  {k:'fin_cost',label:'Finance costs',unit:DATA.unit,cell:disc('fin_cost')},
+  {k:'assoc',label:'Share of profit of associates & JVs',unit:DATA.unit,cell:disc('assoc')},
+  {k:'pbt',label:'Profit before tax',unit:DATA.unit,cls:'bold total',cell:sumRows(['ebit','fin_inc','fin_cost','assoc'])},
+  {k:'tax_cur',label:'Income tax: current',unit:DATA.unit,cell:disc('tax_cur')},
+  {k:'tax_def',label:'Income tax: deferred',unit:DATA.unit,cell:disc('tax_def')},
+  {k:'tax',label:'Income tax expense',unit:DATA.unit,cls:'total',cell:sumRows(['tax_cur','tax_def'])},
+  {k:'etr',label:'Effective tax rate',cls:'ratio',fmt:'pct',cell:flowOnly(c=>({f:'-'+at('tax',c)+'/'+at('pbt',c)}))},
+  {k:'np',label:'Profit for the period',unit:DATA.unit,cls:'bold total',cell:sumRows(['pbt','tax'])},
+  {k:'np_nci',label:'Attributable to non-controlling interests',unit:DATA.unit,cell:disc('np_nci')},
+  {k:'np_own',label:'Attributable to owners of the parent',unit:DATA.unit,cls:'bold total',cell:flowOnly(c=>({f:at('np',c)+'-'+at('np_nci',c)}))},
+  {k:'ownYoy',label:'% yoy',cls:'ratio',fmt:'pct',cell:flowOnly(c=>yoyF('np_own',c))},
+  {k:'sh',label:'Weighted average shares',unit:'mn shares',fmt:'mnsh',cell:c=>{if(c.fy)return hfy(c)?{f:R('sh_wavg',c.quarters[3])}:null;return hq(c)?{f:R('sh_wavg',c)}:null;}},
+  {k:'eps',label:'EPS, model',unit:'Rp',fmt:'rp',cls:'bold',cell:flowOnly(c=>({f:at('np_own',c)+'/'+at('sh',c)}))},
+  {k:'b4',cls:'blank'},
+  {k:'s5',label:'Other comprehensive income',cls:'sec'},
+  {k:'oci_rem',label:'Remeasurement of employee benefits, net of tax',unit:DATA.unit,cell:flowOnly(c=>c.fy?sumQ('oci_rem',c):{f:'('+(c.q===1?R('oci_rem_g',c)+'+'+R('oci_rem_t',c):R('oci_rem_g',c)+'+'+R('oci_rem_t',c)+'-'+R('oci_rem_g',c.prevQ)+'-'+R('oci_rem_t',c.prevQ))+')'})},
+  {k:'oci_tr',label:'Translation differences',unit:DATA.unit,cell:disc('oci_tr')},
+  {k:'oci_fv',label:'Fair value of debt instruments',unit:DATA.unit,cell:disc('oci_fv')},
+  {k:'oci',label:'Other comprehensive income',unit:DATA.unit,cls:'total',cell:sumRows(['oci_rem','oci_tr','oci_fv'])},
+  {k:'tci',label:'Total comprehensive income',unit:DATA.unit,cls:'bold total',cell:sumRows(['np','oci'])}
+];
+
+/* ===== Balance sheet ===== */
+const CA=['cash','td','rec_tot','rec_oth','debt_inst','inv','pp_oth_c','pp_corp_c','oca'];
+const NCA=['inv_assoc','mp','fa_net','pp_corp_nc','pp_oth_nc','dta','goodwill','onca'];
+const CL=['tp','accr','emp_st','tax_corp','tax_oth','bank_st','bank_cm','lease_cm','prov_cm','emp_cm','ocl'];
+const NCL=['lease_nc','bank_lt','prov_nc','emp_nc','dtl','oncl'];
+const EQ=['sc','apic','tsy','oci_fv_r','oci_tr_r','re_app','re_un'];
+const WC_A=['rec_tot','rec_oth','inv','pp_oth_c','pp_corp_c','oca','pp_corp_nc','pp_oth_nc'];
+const WC_L=['tp','accr','emp_st','tax_corp','tax_oth','ocl'];
+const ROWS_BS=[
+  ...HDR('Balance sheet, period end'),
+  {k:'s1',label:'Current assets',cls:'sec'},
+  ...CA.map(k=>({k,label:CODE[k].label,unit:DATA.unit,cell:bal(k)})),
+  {k:'tca',label:'Total current assets',unit:DATA.unit,cls:'bold total',cell:sumRows(CA)},
+  {k:'rec_third',label:'  of which trade receivables, third parties',unit:DATA.unit,cls:'ratio',cell:bal('rec_third')},
+  {k:'rec_rel',label:'  of which trade receivables, related parties',unit:DATA.unit,cls:'ratio',cell:bal('rec_rel')},
+  {k:'inv_coal',label:'  of which inventories: coal',unit:DATA.unit,cls:'ratio',cell:bal('inv_coal')},
+  {k:'inv_spare',label:'  of which inventories: spare parts & materials',unit:DATA.unit,cls:'ratio',cell:bal('inv_spare')},
+  {k:'b1',cls:'blank'},
+  {k:'s2',label:'Non-current assets',cls:'sec'},
+  ...NCA.map(k=>({k,label:CODE[k].label,unit:DATA.unit,cell:bal(k)})),
+  {k:'tnca',label:'Total non-current assets',unit:DATA.unit,cls:'bold total',cell:sumRows(NCA)},
+  {k:'ta',label:'Total assets',unit:DATA.unit,cls:'bold total',cell:sumRows(['tca','tnca'])},
+  {k:'b2',cls:'blank'},
+  {k:'s3',label:'Current liabilities',cls:'sec'},
+  ...CL.map(k=>({k,label:CODE[k].label,unit:DATA.unit,cell:bal(k)})),
+  {k:'tcl',label:'Total current liabilities',unit:DATA.unit,cls:'bold total',cell:sumRows(CL)},
+  {k:'tax_vat',label:'  of which VAT payable',unit:DATA.unit,cls:'ratio',cell:bal('tax_vat')},
+  {k:'tax_wht',label:'  of which withholding taxes payable',unit:DATA.unit,cls:'ratio',cell:bal('tax_wht')},
+  {k:'b3',cls:'blank'},
+  {k:'s4',label:'Non-current liabilities',cls:'sec'},
+  ...NCL.map(k=>({k,label:CODE[k].label,unit:DATA.unit,cell:bal(k)})),
+  {k:'tncl',label:'Total non-current liabilities',unit:DATA.unit,cls:'bold total',cell:sumRows(NCL)},
+  {k:'tl',label:'Total liabilities',unit:DATA.unit,cls:'bold total',cell:sumRows(['tcl','tncl'])},
+  {k:'b4',cls:'blank'},
+  {k:'s5',label:'Equity',cls:'sec'},
+  ...EQ.map(k=>({k,label:CODE[k].label,unit:DATA.unit,cell:bal(k)})),
+  {k:'eqp',label:'Equity attributable to owners of the parent',unit:DATA.unit,cls:'bold total',cell:sumRows(EQ)},
+  {k:'nci',label:'Non-controlling interests',unit:DATA.unit,cell:bal('nci')},
+  {k:'te',label:'Total equity',unit:DATA.unit,cls:'bold total',cell:sumRows(['eqp','nci'])},
+  {k:'tle',label:'Total liabilities and equity',unit:DATA.unit,cls:'bold total',cell:sumRows(['tl','te'])},
+  {k:'b5',cls:'blank'},
+  {k:'s6',label:'Memo',cls:'sec'},
+  {k:'debt',label:'Bank borrowings',unit:DATA.unit,cell:sumRows(['bank_st','bank_cm','bank_lt'])},
+  {k:'leases',label:'Lease liabilities',unit:DATA.unit,cell:sumRows(['lease_cm','lease_nc'])},
+  {k:'netdebt',label:'Net debt (cash) incl. leases, less time deposits',unit:DATA.unit,cls:'bold',cell:bsOnly(c=>({f:at('debt',c)+'+'+at('leases',c)+'-'+at('cash',c)+'-'+at('td',c)}))},
+  {k:'prov',label:'Reclamation & mine-closure provisions',unit:DATA.unit,cell:sumRows(['prov_cm','prov_nc'])},
+  {k:'emp',label:'Employee benefits liability (long-term)',unit:DATA.unit,cell:sumRows(['emp_cm','emp_nc'])},
+  {k:'wca',label:'Operating working-capital assets',unit:DATA.unit,cell:sumRows(WC_A)},
+  {k:'wcl',label:'Operating working-capital liabilities',unit:DATA.unit,cell:sumRows(WC_L)},
+  {k:'nwc',label:'Net operating working capital',unit:DATA.unit,cls:'bold',cell:bsOnly(c=>({f:at('wca',c)+'-'+at('wcl',c)}))}
+];
+
+/* ===== Schedules (roll-forwards) ===== */
+const schRows=[...HDR('Roll-forward schedules')];
+schRows.push({k:'sA',label:'A  Fixed assets by class: opening + additions − depreciation − disposals/other = closing (net book value)',cls:'sec'});
+for(const x of DATA.faClasses){
+  const k=x.k;
+  schRows.push({k:'fa_nbv_'+k,label:x.label+': closing NBV (cost less accumulated depreciation)',unit:DATA.unit,cls:'sub',cell:c=>{if(c.fy)return c.fc?null:{f:at('fa_nbv_'+k,c.quarters[3])};if(hb(c))return{f:R('fa_cost_'+k,c)+'-'+R('fa_acc_'+k,c)};return null;}});
+  schRows.push({k:'fa_open_'+k,label:'  opening NBV',unit:DATA.unit,cls:'ratio',cell:c=>{if(c.fy)return hfy(c)?{f:at('fa_nbv_'+k,c.prev)}:null;return hq(c)?{f:at('fa_nbv_'+k,c.prev)}:null;}});
+  schRows.push({k:'fa_add_'+k,label:'  additions (capex)',unit:DATA.unit,cls:'ratio',cell:disc('fa_add_'+k)});
+  schRows.push({k:'fa_dep_'+k,label:'  depreciation',unit:DATA.unit,cls:'ratio',cell:disc('fa_dep_'+k)});
+  schRows.push({k:'fa_oth_'+k,label:'  disposals, reclassification & other (NBV)',unit:DATA.unit,cls:'ratio',cell:disc('fa_oth_'+k)});
+  schRows.push({k:'fa_roll_'+k,label:'  closing NBV per roll-forward',unit:DATA.unit,cls:'ratio',cell:flowOnly(c=>({f:at('fa_open_'+k,c)+'+'+at('fa_add_'+k,c)+'-'+at('fa_dep_'+k,c)+'-'+at('fa_oth_'+k,c)}))});
+}
+const faK=s=>DATA.faClasses.map(x=>s+x.k);
+schRows.push({k:'fa_nbv',label:'Fixed assets, closing NBV (sum of classes)',unit:DATA.unit,cls:'bold total',cell:bsOnly(c=>({f:plus(faK('fa_nbv_'),c)}))});
+schRows.push({k:'fa_add',label:'Fixed asset additions (sum of classes)',unit:DATA.unit,cls:'bold',cell:flowOnly(c=>({f:plus(faK('fa_add_'),c)}))});
+const rouK=DATA.faClasses.filter(x=>x.rou).map(x=>'fa_add_'+x.k);
+schRows.push({k:'fa_rou',label:'  of which right-of-use additions (non-cash)',unit:DATA.unit,cls:'ratio',cell:flowOnly(c=>({f:rouK.length?plus(rouK,c):'0'}))});
+schRows.push({k:'fa_capex',label:'Cash capex on fixed assets (additions excl. right-of-use)',unit:DATA.unit,cls:'bold',cell:flowOnly(c=>({f:at('fa_add',c)+'-'+at('fa_rou',c)}))});
+schRows.push({k:'fa_dep',label:'Depreciation (sum of classes)',unit:DATA.unit,cls:'bold',cell:flowOnly(c=>({f:plus(faK('fa_dep_'),c)}))});
+schRows.push({k:'fa_oth',label:'Disposals, reclassification & other (sum of classes)',unit:DATA.unit,cell:flowOnly(c=>({f:plus(faK('fa_oth_'),c)}))});
+schRows.push({k:'fa_roll',label:'Closing NBV per roll-forward (sum of classes)',unit:DATA.unit,cls:'bold total',cell:flowOnly(c=>({f:plus(faK('fa_roll_'),c)}))});
+schRows.push({k:'b1',cls:'blank'});
+schRows.push({k:'sB',label:'B  Mining properties: opening + additions − amortisation − other = closing',cls:'sec'});
+schRows.push({k:'mp_open',label:'Opening',unit:DATA.unit,cell:flowOnly(c=>({f:X('bs','mp',c.prev)}))});
+schRows.push({k:'mp_add',label:'Additions (capitalised development & stripping)',unit:DATA.unit,cell:disc('mp_add')});
+schRows.push({k:'mp_amort',label:'Amortisation',unit:DATA.unit,cell:disc('amort_mp','mp_amort')});
+schRows.push({k:'mp_oth',label:'Other movements',unit:DATA.unit,cell:disc('mp_oth')});
+schRows.push({k:'mp_roll',label:'Closing per roll-forward',unit:DATA.unit,cls:'bold total',cell:flowOnly(c=>({f:at('mp_open',c)+'+'+at('mp_add',c)+'-'+at('mp_amort',c)+'-'+at('mp_oth',c)}))});
+schRows.push({k:'mp_bs',label:'Closing per balance sheet',unit:DATA.unit,cls:'ratio',cell:flowOnly(c=>({f:X('bs','mp',c)}))});
+schRows.push({k:'b2',cls:'blank'});
+schRows.push({k:'sC',label:'C  Bank borrowings: opening + drawdown − repayment ± other = closing; interest = rate × average balance',cls:'sec'});
+schRows.push({k:'bor_open',label:'Opening',unit:DATA.unit,cell:flowOnly(c=>({f:X('bs','debt',c.prev)}))});
+schRows.push({k:'bor_draw',label:'Drawdowns',unit:DATA.unit,cell:disc('bor_draw')});
+schRows.push({k:'bor_rep',label:'Repayments',unit:DATA.unit,cell:disc('bor_rep')});
+schRows.push({k:'bor_oth',label:'Fees, FX & other',unit:DATA.unit,cell:disc('bor_oth')});
+schRows.push({k:'bor_roll',label:'Closing per roll-forward',unit:DATA.unit,cls:'bold total',cell:flowOnly(c=>({f:plus(['bor_open','bor_draw','bor_rep','bor_oth'],c)}))});
+schRows.push({k:'bor_bs',label:'Closing per balance sheet',unit:DATA.unit,cls:'ratio',cell:flowOnly(c=>({f:X('bs','debt',c)}))});
+schRows.push({k:'bor_avg',label:'Average balance',unit:DATA.unit,cls:'ratio',cell:flowOnly(c=>({f:'('+at('bor_open',c)+'+'+at('bor_bs',c)+')/2'}))});
+schRows.push({k:'bor_rate',label:'Implied all-in finance cost on average borrowings + leases, annualised',unit:'% p.a.',fmt:'pct',cls:'ratio',cell:flowOnly(c=>({f:'IFERROR(-'+X('pl','fin_cost',c)+'*365/'+daysOf(c)+'/(('+at('bor_open',c)+'+'+at('bor_bs',c)+'+'+at('ls_open',c)+'+'+at('ls_bs',c)+')/2),"n.a.")'}))});
+schRows.push({k:'b3',cls:'blank'});
+schRows.push({k:'sD',label:'D  Lease liabilities: opening + additions + interest − payments ± other = closing',cls:'sec'});
+schRows.push({k:'ls_open',label:'Opening',unit:DATA.unit,cell:flowOnly(c=>({f:X('bs','leases',c.prev)}))});
+schRows.push({k:'ls_add',label:'Additions (non-cash)',unit:DATA.unit,cell:disc('lease_add','ls_add')});
+schRows.push({k:'ls_int',label:'Interest accretion',unit:DATA.unit,cell:disc('lease_int','ls_int')});
+schRows.push({k:'ls_pay',label:'Payments',unit:DATA.unit,cell:disc('lease_pay','ls_pay')});
+schRows.push({k:'ls_oth',label:'Other movements',unit:DATA.unit,cell:disc('lease_oth','ls_oth')});
+schRows.push({k:'ls_roll',label:'Closing per roll-forward',unit:DATA.unit,cls:'bold total',cell:flowOnly(c=>({f:plus(['ls_open','ls_add','ls_int','ls_pay','ls_oth'],c)}))});
+schRows.push({k:'ls_bs',label:'Closing per balance sheet',unit:DATA.unit,cls:'ratio',cell:flowOnly(c=>({f:X('bs','leases',c)}))});
+schRows.push({k:'b4',cls:'blank'});
+schRows.push({k:'sE',label:'E  Equity: opening + profit − dividends ± OCI ± other = closing',cls:'sec'});
+schRows.push({k:'eq_open',label:'Parent equity, opening',unit:DATA.unit,cell:flowOnly(c=>({f:X('bs','eqp',c.prev)}))});
+schRows.push({k:'eq_np',label:'Profit to owners',unit:DATA.unit,cell:flowOnly(c=>({f:X('pl','np_own',c)}))});
+schRows.push({k:'eq_oci',label:'Other comprehensive income',unit:DATA.unit,cell:flowOnly(c=>({f:X('pl','oci',c)}))});
+schRows.push({k:'eq_div',label:'Dividends to owners',unit:DATA.unit,cell:negDisc('div_par','eq_div')});
+schRows.push({k:'eq_oth',label:'Other movements (treasury shares, etc.)',unit:DATA.unit,cell:disc('eq_oth')});
+schRows.push({k:'eq_roll',label:'Parent equity, closing per roll-forward',unit:DATA.unit,cls:'bold total',cell:flowOnly(c=>({f:plus(['eq_open','eq_np','eq_oci','eq_div','eq_oth'],c)}))});
+schRows.push({k:'eq_bs',label:'Parent equity, closing per balance sheet',unit:DATA.unit,cls:'ratio',cell:flowOnly(c=>({f:X('bs','eqp',c)}))});
+schRows.push({k:'nci_open',label:'NCI, opening',unit:DATA.unit,cell:flowOnly(c=>({f:X('bs','nci',c.prev)}))});
+schRows.push({k:'nci_np',label:'Profit to NCI',unit:DATA.unit,cell:flowOnly(c=>({f:X('pl','np_nci',c)}))});
+schRows.push({k:'nci_div',label:'Dividends to NCI',unit:DATA.unit,cell:negDisc('div_nci','nci_div')});
+schRows.push({k:'nci_oth',label:'Other NCI movements',unit:DATA.unit,cell:disc('nci_oth')});
+schRows.push({k:'nci_roll',label:'NCI, closing per roll-forward',unit:DATA.unit,cls:'bold total',cell:flowOnly(c=>({f:plus(['nci_open','nci_np','nci_div','nci_oth'],c)}))});
+schRows.push({k:'nci_bs',label:'NCI, closing per balance sheet',unit:DATA.unit,cls:'ratio',cell:flowOnly(c=>({f:X('bs','nci',c)}))});
+const ROWS_SCH=schRows;
+
+/* ===== Cash flow (indirect, derived from balance-sheet movements) ===== */
+const d=(k,c)=>'('+dBS(k,c)+')';
+const cfLine=(k,label,fn,cls)=>({k,label,unit:DATA.unit,cls,cell:c=>{if(c.fy)return hfy(c)?sumQ(k,c):null;return hq(c)?{f:fn(c)}:null;}});
+const ROWS_CF=[
+  ...HDR('Cash flow, indirect method, derived from balance-sheet movements'),
+  {k:'s1',label:'Operating activities',cls:'sec'},
+  cfLine('np','Profit for the period',c=>X('pl','np',c)),
+  cfLine('da','Depreciation & amortisation',c=>X('pl','da',c)),
+  cfLine('assoc','Share of profit of associates & JVs (non-cash)',c=>'-'+X('pl','assoc',c)),
+  cfLine('prov','Movement in reclamation & mine-closure provisions',c=>d('prov',c)),
+  cfLine('emp','Movement in long-term employee benefits liability',c=>d('emp',c)),
+  cfLine('dtax','Movement in deferred tax (liability less asset)',c=>d('dtl',c)+'-'+d('dta',c)),
+  cfLine('oci','Other comprehensive income (non-cash; offsets in equity-side balances)',c=>X('pl','oci',c)),
+  {k:'s1b',label:'Working capital',cls:'sub'},
+  cfLine('wc_rec','Trade receivables',c=>'-'+d('rec_tot',c)),
+  cfLine('wc_recoth','Other receivables',c=>'-'+d('rec_oth',c)),
+  cfLine('wc_inv','Inventories',c=>'-'+d('inv',c)),
+  cfLine('wc_pp','Prepaid taxes (current and non-current)',c=>'-('+dBS('pp_oth_c',c)+'+'+dBS('pp_corp_c',c)+'+'+dBS('pp_corp_nc',c)+'+'+dBS('pp_oth_nc',c)+')'),
+  cfLine('wc_oca','Other current assets',c=>'-'+d('oca',c)),
+  cfLine('wc_tp','Trade payables',c=>d('tp',c)),
+  cfLine('wc_accr','Accrued expenses',c=>d('accr',c)),
+  cfLine('wc_emp','Short-term employee benefits',c=>d('emp_st',c)),
+  cfLine('wc_tax','Taxes payable',c=>d('tax_corp',c)+'+'+d('tax_oth',c)),
+  cfLine('wc_ocl','Other current liabilities',c=>d('ocl',c)),
+  {k:'wc',label:'Change in working capital',unit:DATA.unit,cls:'total',cell:flowOnly(c=>({f:plus(['wc_rec','wc_recoth','wc_inv','wc_pp','wc_oca','wc_tp','wc_accr','wc_emp','wc_tax','wc_ocl'],c)}))},
+  {k:'cfo',label:'Operating cash flow',unit:DATA.unit,cls:'bold total',cell:flowOnly(c=>({f:plus(['np','da','assoc','prov','emp','dtax','oci','wc'],c)}))},
+  {k:'cfo_rep',label:'Operating cash flow, reported (direct method, memo)',unit:DATA.unit,cls:'ratio',cell:disc('cfo_rep')},
+  {k:'b1',cls:'blank'},
+  {k:'s2',label:'Investing activities',cls:'sec'},
+  cfLine('capex','Capital expenditure on fixed assets (excl. right-of-use)',c=>'-'+X('sch','fa_capex',c)),
+  cfLine('capex_mp','Capitalised mining properties',c=>'-'+X('sch','mp_add',c)),
+  cfLine('fa_oth','Non-cash fixed-asset items: disposals/reclass/other, depreciation capitalised, less right-of-use additions (from notes)',c=>X('sch','fa_dep',c)+'-'+X('pl','dep_cogs',c)+'-'+X('pl','dep_ga',c)+'+'+X('sch','fa_oth',c)+'-'+X('sch','fa_rou',c)+'+'+X('sch','mp_oth',c)),
+  cfLine('inv_assoc','Associates & JVs: dividends received less investments (incl. FX)',c=>'-'+d('inv_assoc',c)+'+'+X('pl','assoc',c)),
+  cfLine('td','Time deposits',c=>'-'+d('td',c)),
+  cfLine('debt_inst','Investment in debt instruments',c=>'-'+d('debt_inst',c)),
+  cfLine('onca','Other non-current assets & goodwill',c=>'-'+d('onca',c)+'-'+d('goodwill',c)),
+  {k:'cfi',label:'Investing cash flow',unit:DATA.unit,cls:'bold total',cell:flowOnly(c=>({f:plus(['capex','capex_mp','fa_oth','inv_assoc','td','debt_inst','onca'],c)}))},
+  {k:'cfi_rep',label:'Investing cash flow, reported (memo)',unit:DATA.unit,cls:'ratio',cell:disc('cfi_rep')},
+  {k:'b2',cls:'blank'},
+  {k:'s3',label:'Financing activities',cls:'sec'},
+  cfLine('bor_draw','Bank borrowings: drawdowns',c=>X('sch','bor_draw',c)),
+  cfLine('bor_rep','Bank borrowings: repayments',c=>X('sch','bor_rep',c)),
+  cfLine('bor_oth','Bank borrowings: fees, FX & other (from note)',c=>X('sch','bor_oth',c)),
+  cfLine('ls_pay','Lease payments',c=>X('sch','ls_pay',c)),
+  cfLine('ls_oth','Lease additions, interest accretion & other (non-cash, from note)',c=>X('sch','ls_add',c)+'+'+X('sch','ls_int',c)+'+'+X('sch','ls_oth',c)),
+  cfLine('div','Dividends to owners of the parent',c=>X('sch','eq_div',c)),
+  cfLine('div_nci','Dividends to non-controlling interests',c=>X('sch','nci_div',c)),
+  cfLine('eq_oth','Other equity movements (treasury shares, NCI; from statement of changes in equity)',c=>X('sch','eq_oth',c)+'+'+X('sch','nci_oth',c)),
+  cfLine('oncl','Other non-current liabilities',c=>d('oncl',c)),
+  {k:'cff',label:'Financing cash flow',unit:DATA.unit,cls:'bold total',cell:flowOnly(c=>({f:plus(['bor_draw','bor_rep','bor_oth','ls_pay','ls_oth','div','div_nci','eq_oth','oncl'],c)}))},
+  {k:'cff_rep',label:'Financing cash flow, reported (memo)',unit:DATA.unit,cls:'ratio',cell:disc('cff_rep')},
+  {k:'b3',cls:'blank'},
+  {k:'s4',label:'Cash',cls:'sec'},
+  {k:'net',label:'Net change in cash (FX effect embedded)',unit:DATA.unit,cls:'bold',cell:flowOnly(c=>({f:plus(['cfo','cfi','cff'],c)}))},
+  {k:'open',label:'Cash at beginning of period',unit:DATA.unit,cell:flowOnly(c=>({f:X('bs','cash',c.prev)}))},
+  {k:'close',label:'Cash at end of period',unit:DATA.unit,cls:'bold total',cell:flowOnly(c=>({f:at('open',c)+'+'+at('net',c)}))},
+  {k:'close_bs',label:'Cash per balance sheet',unit:DATA.unit,cls:'ratio',cell:flowOnly(c=>({f:X('bs','cash',c)}))},
+  {k:'b4',cls:'blank'},
+  {k:'s5',label:'Memo',cls:'sec'},
+  {k:'fcf',label:'Free cash flow (operating cash flow + capex incl. mining properties)',unit:DATA.unit,cls:'bold',cell:flowOnly(c=>({f:plus(['cfo','capex','capex_mp'],c)}))}
+];
+
+/* ===== Drivers ===== */
+const perT=(num,c)=>'IFERROR('+num+'/('+X('dr','v_sales',c)+')/1000,"n.a.")';
+const days=(numK,denK,c)=>'IFERROR('+X('bs',numK,c)+'/'+(denK==='rev'?X('pl','rev',c):'-'+X('pl','cogs',c))+'*'+daysOf(c)+',"n.a.")';
+const drv=(k,code,label,unit,fmt,basis,fn)=>({k,code,label:code+'  '+label,unit,fmt,basis,cell:c=>{if(c.op)return null;if(c.fc)return null;return fn(c);}});
+const ROWS_DR=[
+  ...HDR('Drivers: realised in historical periods, assumptions (green) in forecast periods'),
+  {k:'s1',label:'Volume',cls:'sec'},
+  drv('v_prod','V01','Coal production','Mt','d2','Historical: annual report / public expose, year to date, quarters by subtraction. Forecast: company guidance.',discK('v_prod','op_prod')),
+  drv('v_dom','V02','Coal sales, domestic','Mt','d2','Historical: annual report / public expose. Forecast: guidance split by DMO share.',discK('v_dom','op_sales_dom')),
+  drv('v_exp','V03','Coal sales, export','Mt','d2','Historical: annual report / public expose. Forecast: guidance less domestic.',discK('v_exp','op_sales_exp')),
+  drv('v_sales','V04','Coal sales, total','Mt','d2','Sum of V02 and V03.',c=>hist(c)?{f:at('v_dom',c)+'+'+at('v_exp',c)}:null),
+  drv('v_sr','V05','Stripping ratio, year to date','x','x2','Historical: as published (bcm/t). Forecast: mine plan guidance.',c=>{if(c.fy)return hfy(c)?{f:R('op_sr',c.quarters[3])}:null;return hq(c)?{f:R('op_sr',c)}:null;}),
+  {k:'b1',cls:'blank'},
+  {k:'s2',label:'Price',cls:'sec'},
+  drv('p_dom','P01','ASP, domestic',"Rp '000/t",'int','Historical: domestic coal revenue ÷ domestic tonnes. Forecast: HBA-linked / DMO price per regulation.',c=>hist(c)?{f:'IFERROR('+X('pl','rev_coal_dom',c)+'/'+at('v_dom',c)+'/1000,"n.a.")'}:null),
+  drv('p_exp','P02','ASP, export',"Rp '000/t",'int','Historical: export coal revenue ÷ export tonnes. Forecast: benchmark × realised discount × USD/IDR (Price deck).',c=>hist(c)?{f:'IFERROR('+X('pl','rev_coal_exp',c)+'/'+at('v_exp',c)+'/1000,"n.a.")'}:null),
+  drv('p_blend','P03','ASP, blended',"Rp '000/t",'int','Coal revenue ÷ total tonnes.',c=>hist(c)?{f:perT(X('pl','rev_coal',c),c)}:null),
+  drv('p_oth','P04','Other revenue','% of coal revenue','pct','Historical ratio. Forecast: held at trailing average.',c=>hist(c)?{f:'IFERROR('+X('pl','rev_oth',c)+'/'+X('pl','rev_coal',c)+',"n.a.")'}:null),
+  {k:'b2',cls:'blank'},
+  {k:'s3',label:'Cash cost per tonne sold',cls:'sec'},
+  ...DATA.cogsItems.map((x,i)=>drv('c_'+x.k,'C0'+(i+1),x.label,"Rp '000/t",'int',x.k==='dep'?'Non-cash: depreciation in COGS ÷ tonnes sold; forecast comes from the fixed-asset schedule.':x.k==='roy'?'Royalty ÷ tonnes sold. Forecast: royalty rate per the regulation in force × ASP.':'Cost component ÷ tonnes sold. Forecast: escalated with inflation / fuel drivers.',c=>hist(c)?{f:perT('-'+X('pl','cogs_'+x.k,c),c)}:null)),
+  drv('c_tot','C07','Cost of revenue per tonne, total',"Rp '000/t",'int','Sum of components.',c=>hist(c)?{f:perT('-'+X('pl','cogs',c),c)}:null),
+  drv('c_ga','C08','G&A + selling','% of revenue','pct','Historical ratio.',c=>hist(c)?{f:'IFERROR(-('+X('pl','ga',c)+'+'+X('pl','sell',c)+')/'+X('pl','rev',c)+',"n.a.")'}:null),
+  {k:'b3',cls:'blank'},
+  {k:'s4',label:'Working capital (days)',cls:'sec'},
+  drv('w_dso','W01','DSO: trade receivables','days of revenue','d1','Trade receivables (face) ÷ revenue × days in period.',c=>hist(c)?{f:days('rec_tot','rev',c)}:null),
+  drv('w_dio','W02','DIO: inventories','days of COGS','d1','Inventories ÷ cost of revenue × days.',c=>hist(c)?{f:days('inv','cogs',c)}:null),
+  drv('w_dpo','W03','DPO: trade payables','days of COGS','d1','Trade payables ÷ cost of revenue × days.',c=>hist(c)?{f:days('tp','cogs',c)}:null),
+  drv('w_accr','W04','Accrued expenses','days of COGS','d1','Accrued expenses ÷ cost of revenue × days.',c=>hist(c)?{f:days('accr','cogs',c)}:null),
+  drv('w_pptax','W05','Prepaid taxes (all)','days of revenue','d1','Prepaid taxes current + non-current ÷ revenue × days.',c=>hist(c)?{f:'IFERROR(('+X('bs','pp_oth_c',c)+'+'+X('bs','pp_corp_c',c)+'+'+X('bs','pp_corp_nc',c)+'+'+X('bs','pp_oth_nc',c)+')/'+X('pl','rev',c)+'*'+daysOf(c)+',"n.a.")'}:null),
+  drv('w_tax','W06','Taxes payable (all)','days of COGS','d1','Taxes payable ÷ cost of revenue × days.',c=>hist(c)?{f:'IFERROR(('+X('bs','tax_corp',c)+'+'+X('bs','tax_oth',c)+')/-'+X('pl','cogs',c)+'*'+daysOf(c)+',"n.a.")'}:null),
+  drv('w_oca','W07','Other current assets & other receivables','days of revenue','d1','(Other current assets + other receivables) ÷ revenue × days.',c=>hist(c)?{f:'IFERROR(('+X('bs','oca',c)+'+'+X('bs','rec_oth',c)+')/'+X('pl','rev',c)+'*'+daysOf(c)+',"n.a.")'}:null),
+  drv('w_ocl','W08','Other current liabilities & ST employee benefits','days of COGS','d1','(Other current liabilities + short-term employee benefits) ÷ cost of revenue × days.',c=>hist(c)?{f:'IFERROR(('+X('bs','ocl',c)+'+'+X('bs','emp_st',c)+')/-'+X('pl','cogs',c)+'*'+daysOf(c)+',"n.a.")'}:null),
+  {k:'b4',cls:'blank'},
+  {k:'s5',label:'Capex and depreciation by class',cls:'sec'},
+  ...DATA.faClasses.map((x,i)=>drv('k_'+x.k,'K'+String(i+1).padStart(2,'0'),'Capex: '+x.label,DATA.unit,'mn','Historical: additions per fixed-asset note. Forecast: company capex guidance by class; maintenance floor as % of depreciation.',c=>hist(c)?{f:X('sch','fa_add_'+x.k,c)}:null)),
+  drv('k_mp','K09','Capitalised mining properties',DATA.unit,'mn','Historical: additions per mining-properties note.',c=>hist(c)?{f:X('sch','mp_add',c)}:null),
+  ...DATA.faClasses.map((x,i)=>drv('d_'+x.k,'D'+String(i+1).padStart(2,'0'),'Depreciation rate: '+x.label,'% of opening cost p.a.','pct','Depreciation ÷ opening gross cost, annualised. Forecast: held at trailing average.',c=>hist(c)?{f:'IFERROR('+X('sch','fa_dep_'+x.k,c)+'*365/'+daysOf(c)+'/'+R('fa_cost_'+x.k,c.prev)+',"n.a.")'}:null)),
+  {k:'b5',cls:'blank'},
+  {k:'s6',label:'Financing, tax and distribution',cls:'sec'},
+  drv('f_payout','F01','Dividend payout','% of prior-year profit to owners','pct','Dividends paid in the year ÷ prior-year profit to owners (declared at the AGM).',c=>hfy(c)&&c.prev&&!c.prev.op?{f:'IFERROR(-'+X('sch','eq_div',c)+'/'+X('pl','np_own',c.prev)+',"n.a.")'}:(c.fy?null:null)),
+  drv('f_etr','F02','Effective tax rate','% of PBT','pct','Income tax expense ÷ profit before tax. Forecast: statutory 22% on taxable profit.',c=>hist(c)?{f:X('pl','etr',c)}:null),
+  drv('f_kd','F03','Finance cost rate on borrowings + leases','% p.a.','pct','Finance costs annualised ÷ average (borrowings + leases).',c=>hist(c)?{f:X('sch','bor_rate',c)}:null),
+  drv('f_fin','F04','Finance income rate on cash + deposits','% p.a.','pct','Finance income annualised ÷ average (cash + time deposits + debt instruments).',c=>hist(c)?{f:'IFERROR('+X('pl','fin_inc',c)+'*365/'+daysOf(c)+'/(('+X('bs','cash',c)+'+'+X('bs','td',c)+'+'+X('bs','debt_inst',c)+'+'+X('bs','cash',c.prev)+'+'+X('bs','td',c.prev)+'+'+X('bs','debt_inst',c.prev)+')/2),"n.a.")'}:null),
+  drv('f_nci','F05','NCI share of profit','% of profit','pct','Profit to NCI ÷ profit for the period.',c=>hist(c)?{f:'IFERROR('+X('pl','np_nci',c)+'/'+X('pl','np',c)+',"n.a.")'}:null),
+  drv('f_fx','F06','USD/IDR, period end','Rp','rp','Historical: JISDOR per the FS. Forecast: Price deck.',c=>{if(c.fy)return hfy(c)?{f:R('fx_usd',c.quarters[3])}:null;return hq(c)?{f:R('fx_usd',c)}:null;})
+];
+
+/* ===== Checks: every row must equal 0 (tolerance ±1 Rp mn = statement rounding) ===== */
+const TOL=1;
+const chk=(k,label,fn,scope)=>({k,label,unit:DATA.unit+', ±'+TOL,cls:'check',cell:c=>{if(c.op||c.fc)return null;if(scope==='fy'&&!c.fy)return null;return{f:fn(c)};}});
+const ROWS_CHK=[
+  ...HDR('Controls: every row must be 0'),
+  {k:'s1',label:'Statement integrity',cls:'sec'},
+  chk('k01','K01  CF closing cash − BS cash',c=>X('cf','close',c)+'-'+X('bs','cash',c)),
+  chk('k02','K02  Total assets − (liabilities + equity), from components',c=>X('bs','ta',c)+'-'+X('bs','tle',c)),
+  chk('k03','K03  CF working-capital change − BS working-capital movement (from reported totals)',c=>X('cf','wc',c)+(c.fy?'+SUM('+c.quarters.map(q=>'('+R('tca_rep',q)+'-'+R('cash',q)+'-'+R('td',q)+'-'+R('debt_inst',q)+'-'+R('tcl_rep',q)+'+'+R('bank_st',q)+'+'+R('bank_cm',q)+'+'+R('lease_cm',q)+'+'+R('prov_cm',q)+'+'+R('emp_cm',q)+'+'+R('pp_corp_nc',q)+'+'+R('pp_oth_nc',q)+')-('+R('tca_rep',q.prev)+'-'+R('cash',q.prev)+'-'+R('td',q.prev)+'-'+R('debt_inst',q.prev)+'-'+R('tcl_rep',q.prev)+'+'+R('bank_st',q.prev)+'+'+R('bank_cm',q.prev)+'+'+R('lease_cm',q.prev)+'+'+R('prov_cm',q.prev)+'+'+R('emp_cm',q.prev)+'+'+R('pp_corp_nc',q.prev)+'+'+R('pp_oth_nc',q.prev)+')').join(',')+')'
+    :'+('+R('tca_rep',c)+'-'+R('cash',c)+'-'+R('td',c)+'-'+R('debt_inst',c)+'-'+R('tcl_rep',c)+'+'+R('bank_st',c)+'+'+R('bank_cm',c)+'+'+R('lease_cm',c)+'+'+R('prov_cm',c)+'+'+R('emp_cm',c)+'+'+R('pp_corp_nc',c)+'+'+R('pp_oth_nc',c)+')-('+R('tca_rep',c.prev)+'-'+R('cash',c.prev)+'-'+R('td',c.prev)+'-'+R('debt_inst',c.prev)+'-'+R('tcl_rep',c.prev)+'+'+R('bank_st',c.prev)+'+'+R('bank_cm',c.prev)+'+'+R('lease_cm',c.prev)+'+'+R('prov_cm',c.prev)+'+'+R('emp_cm',c.prev)+'+'+R('pp_corp_nc',c.prev)+'+'+R('pp_oth_nc',c.prev)+')')),
+  {k:'s2',label:'Schedules vs statements',cls:'sec'},
+  chk('k04','K04  Capex in roll-forward (classes, excl. ROU, + mining properties) + investing CF capex',c=>X('sch','fa_capex',c)+'+'+X('sch','mp_add',c)+'+'+X('cf','capex',c)+'+'+X('cf','capex_mp',c)),
+  chk('k04b','K04b Fixed-asset additions: sum of classes − note total',c=>X('sch','fa_add',c)+'-('+(c.fy?'SUM('+c.quarters.map(q=>q.q===1?R('fa_add_tot',q):R('fa_add_tot',q)+'-'+R('fa_add_tot',q.prevQ)).join(',')+')':(c.q===1?R('fa_add_tot',c):R('fa_add_tot',c)+'-'+R('fa_add_tot',c.prevQ)))+')'),
+  chk('k05','K05  Depreciation in roll-forward (classes) − P&L depreciation (COGS + G&A + capitalised)',c=>X('sch','fa_dep',c)+'-('+X('pl','dep_cogs',c)+'+'+X('pl','dep_ga',c)+'+'+X('pl','dep_cap',c)+')'),
+  chk('k05b','K05b Fixed-asset roll-forward closing NBV − BS fixed assets',c=>X('sch','fa_roll',c)+'-'+X('bs','fa_net',c)),
+  chk('k05c','K05c Fixed-asset classes closing NBV (cost − acc. dep.) − BS fixed assets',c=>X('sch','fa_nbv',c)+'-'+X('bs','fa_net',c)),
+  chk('k05d','K05d Mining-properties roll-forward − BS',c=>X('sch','mp_roll',c)+'-'+X('bs','mp',c)),
+  chk('k06','K06  Borrowings: drawdowns + repayments + other (note) − BS movement; i.e. roll-forward − BS',c=>X('sch','bor_roll',c)+'-'+X('sch','bor_bs',c)),
+  chk('k06b','K06b Leases: roll-forward − BS',c=>X('sch','ls_roll',c)+'-'+X('sch','ls_bs',c)),
+  chk('k06c','K06c Debt & lease repayments in schedules − financing CF (repayments + lease payments)',c=>X('sch','bor_rep',c)+'+'+X('sch','ls_pay',c)+'-'+X('cf','bor_rep',c)+'-'+X('cf','ls_pay',c)),
+  chk('k06d','K06d Parent equity roll-forward − BS',c=>X('sch','eq_roll',c)+'-'+X('sch','eq_bs',c)),
+  chk('k06e','K06e NCI roll-forward − BS',c=>X('sch','nci_roll',c)+'-'+X('sch','nci_bs',c)),
+  {k:'s3',label:'Segments',cls:'sec'},
+  chk('k07','K07  Segment revenue (coal + others + eliminations) − consolidated revenue',c=>'('+(c.fy?'SUM('+c.quarters.map(q=>q.q===1?R('seg_coal',q)+'+'+R('seg_oth',q)+'+'+R('seg_elim',q):'('+R('seg_coal',q)+'+'+R('seg_oth',q)+'+'+R('seg_elim',q)+')-('+R('seg_coal',q.prevQ)+'+'+R('seg_oth',q.prevQ)+'+'+R('seg_elim',q.prevQ)+')').join(',')+')':(c.q===1?R('seg_coal',c)+'+'+R('seg_oth',c)+'+'+R('seg_elim',c):'('+R('seg_coal',c)+'+'+R('seg_oth',c)+'+'+R('seg_elim',c)+')-('+R('seg_coal',c.prevQ)+'+'+R('seg_oth',c.prevQ)+'+'+R('seg_elim',c.prevQ)+')'))+')-'+X('pl','rev',c)),
+  {k:'s4',label:'Model vs reported (components rebuilt vs statement totals)',cls:'sec'},
+  chk('k08a','K08a Revenue: components − reported',c=>X('pl','rev',c)+'-'+X('pl','rev_rep',c)),
+  chk('k08b','K08b Cost of revenue: components − reported',c=>X('pl','cogs',c)+'-'+X('pl','cogs_rep',c)),
+  chk('k08c','K08c Gross profit: model − reported',c=>X('pl','gp',c)+'-'+(c.fy?'SUM('+c.quarters.map(q=>q.q===1?R('gp_rep',q):R('gp_rep',q)+'-'+R('gp_rep',q.prevQ)).join(',')+')':'('+(c.q===1?R('gp_rep',c):R('gp_rep',c)+'-'+R('gp_rep',c.prevQ))+')')),
+  chk('k08d','K08d EBIT: model − reported',c=>X('pl','ebit',c)+'-'+(c.fy?'SUM('+c.quarters.map(q=>q.q===1?R('ebit_rep',q):R('ebit_rep',q)+'-'+R('ebit_rep',q.prevQ)).join(',')+')':'('+(c.q===1?R('ebit_rep',c):R('ebit_rep',c)+'-'+R('ebit_rep',c.prevQ))+')')),
+  chk('k08e','K08e Profit before tax: model − reported',c=>X('pl','pbt',c)+'-'+(c.fy?'SUM('+c.quarters.map(q=>q.q===1?R('pbt_rep',q):R('pbt_rep',q)+'-'+R('pbt_rep',q.prevQ)).join(',')+')':'('+(c.q===1?R('pbt_rep',c):R('pbt_rep',c)+'-'+R('pbt_rep',c.prevQ))+')')),
+  chk('k08f','K08f Profit for the period: model − reported',c=>X('pl','np',c)+'-'+(c.fy?'SUM('+c.quarters.map(q=>q.q===1?R('np_rep',q):R('np_rep',q)+'-'+R('np_rep',q.prevQ)).join(',')+')':'('+(c.q===1?R('np_rep',c):R('np_rep',c)+'-'+R('np_rep',c.prevQ))+')')),
+  chk('k08g','K08g Profit to owners: model − reported',c=>X('pl','np_own',c)+'-'+(c.fy?'SUM('+c.quarters.map(q=>q.q===1?R('np_own',q):R('np_own',q)+'-'+R('np_own',q.prevQ)).join(',')+')':'('+(c.q===1?R('np_own',c):R('np_own',c)+'-'+R('np_own',c.prevQ))+')')),
+  chk('k08h','K08h Total assets: components − reported',c=>X('bs','ta',c)+'-'+R('ta_rep',c.fy?c.quarters[3]:c)),
+  chk('k08i','K08i Total liabilities: components − reported',c=>X('bs','tl',c)+'-'+R('tl_rep',c.fy?c.quarters[3]:c)),
+  chk('k08j','K08j Parent equity: components − reported',c=>X('bs','eqp',c)+'-'+R('eqp_rep',c.fy?c.quarters[3]:c)),
+  chk('k08k','K08k Cash: CF closing − reported (same as K01, stated for completeness)',c=>X('cf','close',c)+'-'+R('cash',c.fy?c.quarters[3]:c)),
+  chk('k08l','K08l Total comprehensive income: model − reported',c=>X('pl','tci',c)+'-'+(c.fy?'SUM('+c.quarters.map(q=>q.q===1?R('tci_rep',q):R('tci_rep',q)+'-'+R('tci_rep',q.prevQ)).join(',')+')':'('+(c.q===1?R('tci_rep',c):R('tci_rep',c)+'-'+R('tci_rep',c.prevQ))+')')),
+  chk('k08m','K08m Receivables split (third + related) − face',c=>X('bs','rec_third',c)+'+'+X('bs','rec_rel',c)+'-'+X('bs','rec_tot',c)),
+  chk('k08n','K08n Inventories split (coal + spares) − face',c=>X('bs','inv_coal',c)+'+'+X('bs','inv_spare',c)+'-'+X('bs','inv',c)),
+  chk('k08o','K08o EPS: model − reported (Rp, tolerance 1)',c=>'ROUND('+X('pl','eps',c)+'-('+(c.fy?R('eps_rep',c.quarters[3]):(c.q===1?R('eps_rep',c):R('eps_rep',c)+'-'+R('eps_rep',c.prevQ)))+'),0)')
+];
+
+/* ===== Summary ===== */
+const L_=(s,k)=>c=>(c.fc||c.op)?null:({f:X(s,k,c)});
+const ROWS_SUM=[
+  ...HDR('Summary'),
+  {k:'s1',label:'Operations',cls:'sec'},
+  {k:'vol',label:'Coal sales volume',unit:'Mt',fmt:'d2',cell:L_('dr','v_sales')},
+  {k:'prod',label:'Coal production',unit:'Mt',fmt:'d2',cell:L_('dr','v_prod')},
+  {k:'asp',label:'ASP, blended',unit:"Rp '000/t",fmt:'int',cell:L_('dr','p_blend')},
+  {k:'cpt',label:'Cost of revenue per tonne',unit:"Rp '000/t",fmt:'int',cell:L_('dr','c_tot')},
+  {k:'b1',cls:'blank'},
+  {k:'s2',label:'Income statement',cls:'sec'},
+  {k:'rev',label:'Revenue',unit:DATA.unit,cls:'bold',cell:L_('pl','rev')},
+  {k:'revYoy',label:'% yoy',cls:'ratio',fmt:'pct',cell:L_('pl','revYoy')},
+  {k:'ebitda',label:'EBITDA',unit:DATA.unit,cell:L_('pl','ebitda')},
+  {k:'ebitdaM',label:'% margin',cls:'ratio',fmt:'pct',cell:L_('pl','ebitdaM')},
+  {k:'ebit',label:'Operating profit (EBIT)',unit:DATA.unit,cell:L_('pl','ebit')},
+  {k:'np_own',label:'Profit to owners of the parent',unit:DATA.unit,cls:'bold',cell:L_('pl','np_own')},
+  {k:'ownYoy',label:'% yoy',cls:'ratio',fmt:'pct',cell:L_('pl','ownYoy')},
+  {k:'eps',label:'EPS',unit:'Rp',fmt:'rp',cls:'bold',cell:L_('pl','eps')},
+  {k:'b2',cls:'blank'},
+  {k:'s3',label:'Cash flow and balance sheet',cls:'sec'},
+  {k:'cfo',label:'Operating cash flow',unit:DATA.unit,cell:L_('cf','cfo')},
+  {k:'capex',label:'Capex (fixed assets + mining properties)',unit:DATA.unit,cell:c=>(c.fc||c.op)?null:{f:X('cf','capex',c)+'+'+X('cf','capex_mp',c)}},
+  {k:'fcf',label:'Free cash flow',unit:DATA.unit,cls:'bold',cell:L_('cf','fcf')},
+  {k:'cash',label:'Cash and cash equivalents',unit:DATA.unit,cell:c=>c.fc?null:{f:X('bs','cash',c)}},
+  {k:'netdebt',label:'Net debt (cash)',unit:DATA.unit,cls:'bold',cell:c=>c.fc?null:{f:X('bs','netdebt',c)}},
+  {k:'te',label:'Total equity',unit:DATA.unit,cell:c=>c.fc?null:{f:X('bs','te',c)}},
+  {k:'roe',label:'Return on average equity, annualised',cls:'ratio',fmt:'pct',cell:c=>(c.fc||c.op)?null:{f:'IFERROR('+X('pl','np_own',c)+'*365/'+daysOf(c)+'/(('+X('bs','eqp',c)+'+'+X('bs','eqp',c.prev)+')/2),"n.a.")'}},
+  {k:'b3',cls:'blank'},
+  {k:'s4',label:'Controls (see Checks sheet)',cls:'sec'},
+  {k:'k01',label:'K01  CF closing cash − BS cash',unit:DATA.unit,cls:'check',cell:c=>(c.fc||c.op)?null:{f:X('chk','k01',c)}},
+  {k:'k02',label:'K02  Assets − (liabilities + equity)',unit:DATA.unit,cls:'check',cell:c=>(c.fc||c.op)?null:{f:X('chk','k02',c)}},
+  {k:'k08g',label:'K08g Profit to owners: model − reported',unit:DATA.unit,cls:'check',cell:c=>(c.fc||c.op)?null:{f:X('chk','k08g',c)}}
+];
+
+const ROWS={sum:ROWS_SUM,pl:ROWS_PL,bs:ROWS_BS,cf:ROWS_CF,sch:ROWS_SCH,dr:ROWS_DR,chk:ROWS_CHK,rep:ROWS_REP};
+for(const s of ORDER)ROWS[s].forEach((r,i)=>{RN[s][r.k]=i+1;});
+
+function buildModel(){
+  const cells=new Map();
+  for(const s of ORDER){
+    CUR=s;
+    ROWS[s].forEach((row,idx)=>{
+      if(!row.cell)return;
+      for(const c of COLS){
+        const spec=row.cell(c);if(!spec)continue;
+        const key=SH[s]+'!'+c.L+(idx+1);
+        const cell={key,s,r:idx+1,row,col:c,fmt:spec.fmt||row.fmt||'mn'};
+        if('in' in spec){cell.kind='in';cell.v=spec.in;cell.src=spec.src;}
+        else if('f' in spec){cell.kind='f';cell.f=spec.f;cell.ast=parse(spec.f,SH[s]);}
+        else if('as' in spec){cell.kind='as';cell.v=spec.as;cell.def=spec.as;cell.basis=spec.basis;}
+        else if('t' in spec){cell.kind='t';cell.v=spec.t;}
+        else if('h' in spec){cell.kind='h';cell.v=spec.h;}
+        cells.set(key,cell);
+      }
+    });
+  }
+  CUR='sum';
+  return{cells};
+}
+const M=buildModel();
+const E=new Engine(M.cells);
+const K=(s,k,c)=>SH[s]+'!'+c.L+RN[s][k];
+
+/* ---------- control summary ---------- */
+function checkStatus(vals){
+  const out={pass:0,fail:0,open:0,fails:[],opens:[]};
+  for(const [key,cell] of M.cells){
+    if(cell.s!=='chk'||cell.kind!=='f')continue;
+    const v=vals.get(key);
+    if(isOpen(v)){out.open++;out.opens.push(key);}
+    else if(isErr(v)||typeof v!=='number'){out.fail++;out.fails.push(key);}
+    else if(Math.abs(v)<=TOL)out.pass++;
+    else{out.fail++;out.fails.push(key);}
+  }
+  return out;
+}
+function inputStatus(){
+  const out={filled:0,open:0,byPeriod:{}};
+  for(const cell of M.cells.values()){
+    if(cell.kind!=='in')continue;
+    const pk=cell.col.pk;const b=out.byPeriod[pk]||(out.byPeriod[pk]={filled:0,open:0});
+    if(cell.v===null||cell.v===undefined){out.open++;b.open++;}else{out.filled++;b.filled++;}
+  }
+  return out;
+}
+/* JSON template of every expected input, for transcription */
+function inputTemplate(){
+  const t={};
+  for(const c of COLS){if(c.fc||c.fy)continue;
+    const per={};for(const x of CODES){if(!x.k)continue;if(c.op&&x.kind!=='bal')continue;const e=(DATA.rep[c.pk]||{})[x.k];per[x.k]=e?e:[null,''];}
+    t[c.pk]=per;}
+  return t;
+}
+
+/* ---------- number format: period thousands, comma decimals ---------- */
+function fmtN(x,dp,suf){
+  const p=Math.pow(10,dp);const r=Math.round(Math.abs(x)*p)/p;const neg=x<0&&r!==0;
+  let s=r.toFixed(dp);let[a,b]=s.split('.');a=a.replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+  s=(b?a+','+b:a)+(suf||'');return neg?'('+s+')':s;
+}
+function show(v,fmt){
+  if(v===null||v===undefined)return '';
+  if(isErr(v))return v.err;
+  if(typeof v==='string')return v;
+  if(typeof v==='boolean')return v?'TRUE':'FALSE';
+  switch(fmt){
+    case 'pct':return fmtN(v*100,1,'%');
+    case 'x':return fmtN(v,1,'×');
+    case 'x2':return fmtN(v,2,'×');
+    case 'd1':return fmtN(v,1,'');
+    case 'd2':return fmtN(v,2,'');
+    case 'mnsh':return fmtN(v,1,'');
+    default:return fmtN(v,0,'');
+  }
+}
+/*ENGINE-END*/
+
+/* ---------- UI ---------- */
+const $=id=>document.getElementById(id);
+const TD=new Map(),TABLES={},SEL={},POS={},SEEN={};
+ORDER.forEach(s=>SEL[s]={r:1,c:0});
+let cur='sum',editing=null,precKeys=[],downloadsApi=null;
+const NOTE={
+  sum:'Output only. Every figure links to the statement sheets; the control rows at the bottom repeat the headline checks.',
+  pl:'Discrete quarters derived from year-to-date reported figures (Reported sheet); FY columns sum the quarters. Components are rebuilt from the notes and checked against the statement totals on Checks.',
+  bs:'Period-end balances at the granularity the company publishes. Subtotals are rebuilt from components and checked against reported totals.',
+  cf:'Indirect cash flow derived from balance-sheet movements and sourced note movements. Closing cash must equal the balance sheet (K01). The FX effect on cash is embedded, not plugged.',
+  sch:'Roll-forwards: fixed assets by class, mining properties, borrowings, leases, equity and NCI. Each closes to the balance sheet on Checks.',
+  dr:'One row per driver with its code, unit and basis (shown in the formula bar). Historical periods show the realised value; forecast periods will hold the green assumptions (Stage 2).',
+  chk:'Every row must be 0 within the stated tolerance. OPEN means an input the row depends on has not been transcribed yet.',
+  rep:'Every sourced figure, as published: balances at period end, flows year to date. Blue = transcribed from a published document; OPEN (red) = still to be transcribed. Click a cell to see its document and page.'
+};
+const colL=c=>c===0?'A':c===1?'B':COLS[c-2].L;
+const keyOf=(r,c)=>SH[cur]+'!'+colL(c)+r;
+function signedPct(v){if(!isNum(v))return '';return(v>=0?'+':'−')+fmtN(Math.abs(v)*100,1,'%');}
+function rpAmt(v){if(!isNum(v))return 'OPEN';return Math.abs(v)>=1e6?'Rp '+fmtN(v/1e6,2,'')+' T':'Rp '+fmtN(v/1000,0,'')+' bn';}
+
+function buildTable(s){
+  const t=document.createElement('table');t.className='grid';t.dataset.s=s;
+  t.style.width='calc(var(--numw) + var(--labw) + var(--unitw) + var(--colw) * '+COLS.length+')';
+  const cg=document.createElement('colgroup');cg.innerHTML='<col class="c-rn"><col class="c-lab"><col class="c-unit">'+COLS.map(()=>'<col class="c-d">').join('');t.appendChild(cg);
+  const th=document.createElement('thead');const htr=document.createElement('tr');
+  htr.innerHTML='<th class="corner" scope="col"></th><th class="colh colh-a" scope="col" data-c="0">A</th><th class="colh colh-b" scope="col" data-c="1">B</th>'+
+    COLS.map(c=>'<th class="colh'+(c.i===FC_FIRST?' fc-first':'')+'" scope="col" data-c="'+(c.i+2)+'">'+c.L+'</th>').join('');
+  th.appendChild(htr);t.appendChild(th);
+  const tb=document.createElement('tbody');
+  ROWS[s].forEach((row,idx)=>{
+    const r=idx+1;const tr=document.createElement('tr');
+    tr.className=((row.cls||'')+(r<=4?' hdr h'+r:'')).trim();
+    const rn=document.createElement('td');rn.className='rn';rn.textContent=r;tr.appendChild(rn);TD.set('#'+SH[s]+'!'+r,rn);
+    const lab=document.createElement('td');lab.className='lab';lab.textContent=row.label||'';lab.dataset.r=r;lab.dataset.c=0;tr.appendChild(lab);TD.set(SH[s]+'!A'+r,lab);
+    const un=document.createElement('td');un.className='unit';un.textContent=row.unit||'';un.dataset.r=r;un.dataset.c=1;tr.appendChild(un);TD.set(SH[s]+'!B'+r,un);
+    for(const c of COLS){
+      const td=document.createElement('td');const key=SH[s]+'!'+c.L+r;td.dataset.r=r;td.dataset.c=c.i+2;
+      const cl=[];if(c.fy||c.op)cl.push('fy');if(c.fc)cl.push('fc');if(c.i===FC_FIRST)cl.push('fc-first');
+      const cell=M.cells.get(key);if(cell)cl.push('k-'+cell.kind);
+      td.className=cl.join(' ');tr.appendChild(td);TD.set(key,td);
+    }
+    tb.appendChild(tr);
+  });
+  t.appendChild(tb);return t;
+}
+
+function paint(flash){
+  const vals=E.recalc();
+  for(const[key,cell]of M.cells){
+    const td=TD.get(key);if(!td||(editing&&td===editing.td))continue;
+    const v=vals.get(key);const sv=show(v,cell.fmt);
+    if(td.textContent!==sv){td.textContent=sv;if(flash&&cell.s===cur){td.classList.remove('flash');void td.offsetWidth;td.classList.add('flash');}}
+    td.classList.toggle('open',isOpen(v));
+    if(cell.kind==='as')td.classList.toggle('edited',cell.v!==cell.def);
+    if(cell.row.cls==='check'&&cell.kind==='f'){const ok=isNum(v)&&Math.abs(v)<=TOL;td.classList.toggle('ok',ok);td.classList.toggle('bad',!ok&&!isOpen(v));}
+  }
+  paintCards(vals);renderBar();renderCoverage();
+}
+function paintCards(vals){
+  const L=LATEST,F=LATEST_FY;
+  $('k1l').textContent='Revenue, '+L.label;$('k1v').textContent=rpAmt(vals.get(K('pl','rev',L)));$('k1s').textContent=(isNum(vals.get(K('pl','revYoy',L)))?signedPct(vals.get(K('pl','revYoy',L)))+' year on year':'needs Reported inputs');
+  $('k2l').textContent='Profit to owners, '+L.label;$('k2v').textContent=rpAmt(vals.get(K('pl','np_own',L)));$('k2s').textContent=(isNum(vals.get(K('pl','ownYoy',L)))?signedPct(vals.get(K('pl','ownYoy',L)))+' year on year':'needs Reported inputs');
+  $('k3l').textContent='Net debt (cash), '+END[L.q]+'/'+String(L.y).slice(2);$('k3v').textContent=rpAmt(vals.get(K('bs','netdebt',L)));$('k3s').textContent='borrowings + leases − cash − deposits';
+  $('k4l').textContent='Free cash flow, '+F.label;$('k4v').textContent=rpAmt(vals.get(K('cf','fcf',F)));$('k4s').textContent='operating cash flow + capex';
+  const cs=checkStatus(vals);const badge=$('k5v');badge.textContent=cs.fail?'FAIL':cs.open?'OPEN':'PASS';badge.className='v badge '+(cs.fail?'fail':cs.open?'open':'pass');
+  $('k5s').textContent=cs.pass+' pass · '+cs.fail+' fail · '+cs.open+' open';
+  const is=inputStatus();$('k6v').textContent=is.filled+' / '+(is.filled+is.open);$('k6s').textContent=is.open+' input cells still OPEN';
+}
+
+function clearSel(){
+  const old=TD.get(keyOf(SEL[cur].r,SEL[cur].c));if(old)old.classList.remove('sel');
+  TD.get('#'+SH[cur]+'!'+SEL[cur].r)?.classList.remove('hl');
+  TABLES[cur].querySelector('th.hl')?.classList.remove('hl');
+  precKeys.forEach(k=>TD.get(k)?.classList.remove('prec'));precKeys=[];
+}
+function select(r,c,scroll){
+  const n=ROWS[cur].length;r=Math.max(1,Math.min(n,r));c=Math.max(0,Math.min(COLS.length+1,c));
+  clearSel();SEL[cur]={r,c};
+  const td=TD.get(keyOf(r,c));td.classList.add('sel');
+  TD.get('#'+SH[cur]+'!'+r).classList.add('hl');
+  TABLES[cur].querySelector('th[data-c="'+c+'"]')?.classList.add('hl');
+  const cell=M.cells.get(keyOf(r,c));
+  if(cell&&cell.kind==='f'){precKeys=[...new Set(refsOf(cell.ast))].filter(k=>k.startsWith(SH[cur]+'!'));precKeys.forEach(k=>TD.get(k)?.classList.add('prec'));}
+  if(scroll)td.scrollIntoView({block:'nearest',inline:'nearest'});
+  renderBar();
+}
+function b(t){const e=document.createElement('b');e.textContent=t;return e;}
+function renderBar(){
+  const{r,c}=SEL[cur];const row=ROWS[cur][r-1];
+  $('addr').textContent=colL(c)+r;
+  const fval=$('fval'),fmeta=$('fmeta');fmeta.innerHTML='';
+  if(c<=1){fval.textContent=c===0?(row.label||''):(row.unit||'');fmeta.textContent=c===0?(row.basis?row.basis:(row.label?'Line label.':'')):(row.unit?'Unit.':'');return;}
+  const col=COLS[c-2];const cell=M.cells.get(keyOf(r,c));
+  const where=(row.label?row.label+', ':'')+col.label;
+  if(!cell){
+    fval.textContent='';
+    if(['sec','blank','sub'].some(x=>(row.cls||'').includes(x)))return;
+    fmeta.textContent=col.fc?where+': forecast columns are built in Stage 2.':col.op?where+': opening balance sheet holds balances only.':where+': not applicable in this period.';
+    return;
+  }
+  const v=E.memo.get(cell.key);
+  switch(cell.kind){
+    case 'f':{
+      fval.textContent='='+cell.f;
+      fmeta.append(b(isOpen(v)?'Formula, OPEN.':'Formula.'),' '+where+' = '+show(v,cell.fmt)+'.'+(isOpen(v)?' An input it depends on has not been transcribed yet.':''));
+      if(row.basis)fmeta.append(' Basis: '+row.basis);
+      if(row.cls==='check')fmeta.append(' Tolerance ±'+TOL+' '+DATA.unit+'.');
+      const other=[...new Set(refsOf(cell.ast))].filter(k=>!k.startsWith(SH[cur]+'!'));
+      const same=refsOf(cell.ast).some(k=>k.startsWith(SH[cur]+'!'));
+      if(same)fmeta.append(' Cells it uses here are outlined.');
+      if(other.length){fmeta.append(' Uses:');other.slice(0,8).forEach(k=>{const bt=document.createElement('button');bt.type='button';bt.className='jump';const i=k.lastIndexOf('!');bt.textContent=k.slice(0,i)+' '+k.slice(i+1);bt.addEventListener('click',()=>jumpTo(k));fmeta.append(bt);});if(other.length>8)fmeta.append(' and '+(other.length-8)+' more.');}
+      break;
+    }
+    case 'in':{fval.textContent=show(v,cell.fmt);const code=row.code?' Code '+row.code+'.':'';if(isOpen(v))fmeta.append(b('OPEN.'),' '+where+'.'+code+' '+cell.src+'.');else fmeta.append(b('From a published document.'),' '+where+'.'+code+' Source: '+cell.src+'.');break;}
+    case 'as':{
+      fval.textContent=show(cell.v,cell.fmt);const ch=cell.v!==cell.def;
+      fmeta.append(b(ch?'Assumption, edited.':'Assumption.'),' '+(ch?'Default '+show(cell.def,cell.fmt)+'. ':'')+cell.basis+'. Type a new value to change it.');break;
+    }
+    case 't':fval.textContent=cell.v;fmeta.textContent='Not available: needs a period that is not in the model.';break;
+    case 'h':fval.textContent=String(cell.v);fmeta.textContent='Period header.';break;
+  }
+}
+function jumpTo(key){
+  const i=key.lastIndexOf('!');const sname=key.slice(0,i);const addr=key.slice(i+1);
+  const s=ORDER.find(x=>SH[x]===sname);const m=/^([A-Z]+)(\d+)$/.exec(addr);if(!s||!m)return;
+  const L=m[1];const c=L==='A'?0:L==='B'?1:COLS.findIndex(x=>x.L===L)+2;
+  showSheet(s,false);select(+m[2],c,true);$('gridwrap').focus({preventScroll:true});
+}
+function setStatus(t){$('status').textContent=t;}
+
+/* ---------- sheets ---------- */
+function renderSheetTabs(){
+  const el=$('sheets');el.innerHTML='';
+  for(const s of ORDER){
+    const bt=document.createElement('button');bt.type='button';bt.className='sheet';bt.setAttribute('role','tab');bt.setAttribute('aria-selected',String(s===cur));bt.textContent=SH[s];
+    bt.addEventListener('click',()=>showSheet(s,true));el.appendChild(bt);
+  }
+  $('sheetnote').textContent=NOTE[cur];
+}
+function showSheet(s,focus){
+  if(editing)commit();
+  const gw=$('gridwrap');
+  if(s===cur&&SEEN[s]){renderSheetTabs();return;}
+  clearSel();POS[cur]={l:gw.scrollLeft,t:gw.scrollTop};
+  TABLES[cur].hidden=true;cur=s;TABLES[cur].hidden=false;
+  if(!SEEN[s]){
+    SEEN[s]=true;gw.scrollLeft=0;gw.scrollTop=0;
+    const startCol=COLS.find(c=>c.y===LATEST.y-1&&c.q===1)||COLS[0];
+    const start=TD.get(SH[s]+'!'+startCol.L+'1');
+    const fixed=TD.get(SH[s]+'!B6');const lab=TD.get(SH[s]+'!A6');
+    const fixedRight=getComputedStyle(fixed).position==='sticky'?fixed.offsetLeft+fixed.offsetWidth:lab.offsetLeft+lab.offsetWidth;
+    gw.scrollLeft=Math.max(0,start.offsetLeft-fixedRight);gw.scrollTop=0;
+  }else{gw.scrollLeft=POS[s].l;gw.scrollTop=POS[s].t;}
+  select(SEL[s].r,SEL[s].c,false);renderSheetTabs();
+  if(focus)gw.focus({preventScroll:true});
+}
+
+/* ---------- editing (assumption cells only) ---------- */
+function editString(cell){if(cell.fmt==='pct')return String(Math.round(cell.v*10000)/100).replace('.',',');return String(cell.v).replace('.',',');}
+function parseUser(s,fmt){
+  s=String(s).trim().replace(/\s/g,'').replace(/−/g,'-').replace(/[%×]/g,'');
+  if(!s)return NaN;
+  let neg=false;
+  if(/^\(.*\)$/.test(s)){neg=true;s=s.slice(1,-1);}
+  if(s[0]==='-'){neg=!neg;s=s.slice(1);}else if(s[0]==='+')s=s.slice(1);
+  if(s.includes(','))s=s.replace(/\./g,'').replace(',','.');
+  else if(/^\d{1,3}(\.\d{3})+$/.test(s))s=s.replace(/\./g,'');
+  if(!/^(\d+\.?\d*|\.\d+)$/.test(s))return NaN;
+  let n=parseFloat(s);if(neg)n=-n;if(fmt==='pct')n/=100;return n;
+}
+function startEdit(initial){
+  const key=keyOf(SEL[cur].r,SEL[cur].c);const cell=M.cells.get(key);
+  if(!cell||cell.kind!=='as'){setStatus(cell&&cell.kind==='in'?'Reported figures are transcribed from documents; they change in the DATA block, not here.':cell&&cell.kind==='f'?'Formula cells are calculated. Green cells on Drivers are the assumptions.':'Only green cells can be edited.');return;}
+  const td=TD.get(key);const inp=document.createElement('input');
+  inp.className='cellin';inp.type='text';inp.inputMode='decimal';inp.setAttribute('aria-label','Edit '+colL(SEL[cur].c)+SEL[cur].r);
+  inp.value=initial!==undefined?initial:editString(cell);
+  td.textContent='';td.classList.add('editing');td.appendChild(inp);
+  editing={td,cell,inp};inp.focus();
+  if(initial===undefined)inp.select();else{const n=inp.value.length;inp.setSelectionRange(n,n);}
+  inp.addEventListener('keydown',ev=>{
+    if(ev.key==='Enter'){ev.preventDefault();if(commit())move(1,0);}
+    else if(ev.key==='Tab'){ev.preventDefault();if(commit())move(0,ev.shiftKey?-1:1);}
+    else if(ev.key==='Escape'){ev.preventDefault();cancel();}
+    ev.stopPropagation();
+  });
+  inp.addEventListener('blur',()=>{if(editing&&editing.inp===inp)commit();});
+  setStatus('');
+}
+function endEdit(){editing.td.classList.remove('editing');editing=null;$('gridwrap').focus({preventScroll:true});}
+function commit(){
+  if(!editing)return false;
+  const{cell,inp,td}=editing;const n=parseUser(inp.value,cell.fmt);
+  if(!isNum(n)){setStatus('Enter a number, for example 5,0 or (2,5).');inp.focus();inp.select();return false;}
+  cell.v=n;endEdit();td.textContent='';paint(true);setStatus('Recalculated.');return true;
+}
+function cancel(){if(!editing)return;const{td,cell}=editing;endEdit();td.textContent=show(cell.v,cell.fmt);setStatus('');}
+function move(dr,dc){select(SEL[cur].r+dr,SEL[cur].c+dc,true);}
+
+/* ---------- export ---------- */
+function loadExcelJS(){
+  if(window.ExcelJS)return Promise.resolve(window.ExcelJS);
+  return new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js';s.onload=()=>res(window.ExcelJS);s.onerror=()=>rej(new Error('ExcelJS failed to load'));document.head.appendChild(s);});
+}
+async function buildXlsx(){
+  const XL=await loadExcelJS();const vals=E.recalc();
+  const wb=new XL.Workbook();wb.creator='Company models';wb.calcProperties.fullCalcOnLoad=true;
+  const NUM={mn:'#,##0;(#,##0);0',pct:'0.0%;(0.0%);0.0%',int:'#,##0;(#,##0);0',mnsh:'#,##0.0',rp:'#,##0;(#,##0);0',x:'0.0"×";(0.0"×")',x2:'0.00"×";(0.00"×")',d1:'#,##0.0;(#,##0.0);0.0',d2:'#,##0.00;(#,##0.00);0.00'};
+  const NAVY='FF1C2F57',BLUE='FF1F4FD6',RED='FFB91C1C',GREENBG='FFE2F2E7',GREEN='FF0B6636',FYBG='FFF0F2F6',GREY='FF7D879B';
+  const fill=c=>({type:'pattern',pattern:'solid',fgColor:{argb:c}});
+  for(const s of ORDER){
+    const ws=wb.addWorksheet(SH[s],{views:[{state:'frozen',xSplit:2,ySplit:4}]});
+    ws.getColumn(1).width=52;ws.getColumn(2).width=14;COLS.forEach(c=>{ws.getColumn(c.i+3).width=12;});
+    ROWS[s].forEach((row,idx)=>{
+      const r=idx+1;const cls=row.cls||'';const sec=cls.includes('sec');const bold=cls.includes('bold')||sec||r<=2||cls.includes('sub');const ital=cls.includes('ratio');
+      const a=ws.getCell('A'+r);a.value=row.label||null;a.font={bold,italic:ital,color:sec?{argb:'FFFFFFFF'}:undefined};if(ital)a.alignment={indent:1};
+      const u=ws.getCell('B'+r);u.value=row.unit||null;u.font={color:{argb:GREY}};
+      if(sec){a.fill=fill(NAVY);u.fill=fill(NAVY);}
+      for(const c of COLS){
+        const key=SH[s]+'!'+c.L+r;const xc=ws.getCell(c.L+r);const cell=M.cells.get(key);
+        if(sec){xc.fill=fill(NAVY);continue;}
+        if(c.fy||c.op)xc.fill=fill(r===2?'FF16213A':FYBG);
+        if(!cell)continue;
+        const font={bold,italic:ital};const v=vals.get(key);
+        if(cell.kind==='in'){if(cell.v===null||cell.v===undefined){xc.value='OPEN';font.color={argb:RED};}else{xc.value=cell.v;font.color={argb:BLUE};}}
+        else if(cell.kind==='as'){xc.value=cell.v;xc.fill=fill(GREENBG);font.color={argb:GREEN};}
+        else if(cell.kind==='f'){xc.value={formula:cell.f,result:(isErr(v)||typeof v==='boolean')?undefined:v};if(row.cls==='check'){font.color={argb:(isNum(v)&&Math.abs(v)<=TOL)?GREEN:RED};}}
+        else if(cell.kind==='t'){xc.value=cell.v;font.color={argb:GREY};}
+        else if(cell.kind==='h'){xc.value=cell.v;if(r===2&&(c.fy||c.op))font.color={argb:'FFFFFFFF'};}
+        xc.font=font;xc.alignment={horizontal:'right'};
+        if(NUM[cell.fmt]&&cell.kind!=='h')xc.numFmt=NUM[cell.fmt];
+      }
+    });
+  }
+  const s2=wb.addWorksheet('Sources');
+  s2.columns=[{header:'Sheet',key:'sh',width:12},{header:'Cell',key:'cell',width:8},{header:'Code',key:'code',width:14},{header:'Line',key:'line',width:48},{header:'Period',key:'per',width:10},{header:'Value',key:'val',width:14},{header:'Status',key:'type',width:14},{header:'Document, page / note',key:'src',width:100}];
+  s2.getRow(1).font={bold:true};
+  for(const[key,cell]of M.cells){
+    if(cell.kind!=='in'&&cell.kind!=='as')continue;
+    const open=cell.kind==='in'&&(cell.v===null||cell.v===undefined);
+    s2.addRow({sh:SH[cell.s],cell:key.slice(key.lastIndexOf('!')+1),code:cell.row.code||'',line:cell.row.label,per:cell.col.label,val:open?'OPEN':cell.v,type:open?'OPEN':cell.kind==='in'?'Published document':'Assumption',src:cell.kind==='in'?cell.src:cell.basis});
+  }
+  const s3=wb.addWorksheet('Documents');s3.columns=[{header:'Key',key:'k',width:10},{header:'Document',key:'t',width:110},{header:'Period',key:'p',width:28},{header:'Where',key:'w',width:90}];s3.getRow(1).font={bold:true};
+  for(const [k,d] of Object.entries(DATA.docs))s3.addRow({k,t:d.title,p:d.period,w:d.where});
+  const s4=wb.addWorksheet('Governance');s4.columns=[{header:'Code',key:'c',width:8},{header:'Driver',key:'d',width:44},{header:'Unit',key:'u',width:26},{header:'Basis',key:'b',width:110},{header:'Status',key:'s',width:14}];s4.getRow(1).font={bold:true};
+  for(const row of ROWS.dr)if(row.code)s4.addRow({c:row.code,d:row.label.replace(row.code,'').trim(),u:row.unit,b:row.basis,s:'Stage 2: forecast assumption OPEN'});
+  const s5=wb.addWorksheet('Notes');s5.getColumn(1).width=150;
+  [DATA.company.legal+' — quarterly three-statement model, Stage 1 structure. Units: '+DATA.unit+' as printed in the statements.',
+   'Blue: transcribed from a published document (Sources sheet lists document and page). Black: formula. Green: assumption. Red OPEN: input not yet transcribed.',
+   'Flows on the Reported sheet are year to date as published; P&L, Schedules and Cash flow derive discrete quarters by subtraction. FY columns sum the quarters.',
+   'Cash flow is indirect, derived from balance-sheet movements plus sourced note movements (capex, depreciation, borrowings, leases, dividends). The FX effect on cash is embedded. K01 ties CF closing cash to the balance sheet.',
+   'Checks: every row must be 0 within ±'+TOL+' '+DATA.unit+'. OPEN rows depend on inputs still to be transcribed.',
+   'Forecast columns (Q3 '+String(LATEST.y).slice(2)+'E onward) are built in Stage 2 from the Drivers sheet; WACC/DCF in Stage 3.'
+  ].forEach(t=>s5.addRow([t]));
+  return wb.xlsx.writeBuffer();
+}
+function saveBlob(name,blob){
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},0);
+}
+
+/* ---------- sources panel ---------- */
+function renderCoverage(){
+  const tb=$('docs');if(!tb)return;tb.innerHTML='';
+  for(const [k,d] of Object.entries(DATA.docs)){const tr=document.createElement('tr');tr.innerHTML='<td><b>'+k+'</b></td><td></td><td></td><td></td>';tr.children[1].textContent=d.title;tr.children[2].textContent=d.period;tr.children[3].textContent=d.where;tb.appendChild(tr);}
+  const cv=$('coverage');cv.innerHTML='';const is=inputStatus();
+  for(const c of COLS){if(c.fy||c.fc)continue;const s=is.byPeriod[c.pk]||{filled:0,open:0};const li=document.createElement('li');li.textContent=c.label+': '+s.filled+' transcribed, '+s.open+' OPEN';cv.appendChild(li);}
+}
+
+/* ---------- sectors and companies ---------- */
+const SECTORS=['Energy','Basic Materials','Industrials','Consumer Non-Cyclicals','Consumer Cyclicals','Healthcare','Financials','Properties & Real Estate','Technology','Infrastructures','Transportation & Logistic'];
+const COMPANIES={Energy:[{t:DATA.company.ticker,n:DATA.company.name,on:true},{t:'ADRO',n:'Alamtri Resources Indonesia'},{t:'HRUM',n:'Harum Energy'},{t:'INDY',n:'Indika Energy'},{t:'MEDC',n:'Medco Energi Internasional'}]};
+let curSector=DATA.company.sector,curCo=DATA.company.ticker;
+function renderNav(){
+  const st=$('sectors');st.innerHTML='';
+  for(const s of SECTORS){
+    const n=(COMPANIES[s]||[]).filter(c=>c.on).length;
+    const bt=document.createElement('button');bt.type='button';bt.className='tab';bt.setAttribute('aria-pressed',String(s===curSector));
+    bt.append(s);const sp=document.createElement('span');sp.className='n';sp.textContent=n;bt.append(sp);
+    bt.addEventListener('click',()=>{curSector=s;const list=COMPANIES[s]||[];curCo=(list.find(c=>c.on)||list[0]||{}).t||null;renderNav();renderView();});
+    st.appendChild(bt);
+  }
+  const cp=$('companies');cp.innerHTML='';
+  for(const co of COMPANIES[curSector]||[]){
+    const bt=document.createElement('button');bt.type='button';bt.className='pill'+(co.on?'':' off');bt.setAttribute('aria-pressed',String(co.t===curCo));
+    const bb=document.createElement('b');bb.textContent=co.t;const sp=document.createElement('span');sp.textContent=co.n;
+    if(!co.on){bt.title=co.n+': no model yet';bt.setAttribute('aria-label',co.t+', '+co.n+', no model yet');}
+    bt.append(bb,sp);bt.addEventListener('click',()=>{curCo=co.t;renderNav();renderView();});cp.appendChild(bt);
+  }
+  cp.hidden=!(COMPANIES[curSector]||[]).length;
+}
+function renderView(){
+  const on=curSector===DATA.company.sector&&curCo===DATA.company.ticker;
+  $('view').hidden=!on;$('empty').hidden=on;$('notes').hidden=!on;
+  if(on)return;
+  const list=COMPANIES[curSector]||[];
+  if(!list.length){$('emptyTitle').textContent='No models in '+curSector+' yet';$('emptyText').textContent='The '+DATA.company.ticker+' model is the template: the engine is generic, only the DATA block changes.';}
+  else{const co=list.find(c=>c.t===curCo);$('emptyTitle').textContent='No model for '+co.t+' yet';$('emptyText').textContent=co.n+' would reuse the same engine and sheets with its own DATA block (reported figures, fixed-asset classes, cost components).';}
+}
+
+/* ---------- wiring ---------- */
+function init(){
+  $('coName').textContent=DATA.company.legal+' ('+DATA.company.ticker+')';
+  const gw=$('gridwrap');
+  for(const s of ORDER){TABLES[s]=buildTable(s);TABLES[s].hidden=true;gw.appendChild(TABLES[s]);}
+  paint(false);
+  cur='pl';TABLES.pl.hidden=false;showSheet('sum',false);
+  renderNav();renderView();
+  gw.addEventListener('mousedown',ev=>{
+    const td=ev.target.closest('td[data-r]');if(!td||ev.target.tagName==='INPUT')return;
+    if(editing)commit();
+    select(+td.dataset.r,+td.dataset.c,false);
+  });
+  gw.addEventListener('dblclick',ev=>{const td=ev.target.closest('td[data-r]');if(td&&!editing)startEdit();});
+  gw.addEventListener('keydown',ev=>{
+    if(editing)return;
+    const k=ev.key;const S=SEL[cur];
+    if(k==='ArrowDown'){ev.preventDefault();move(1,0);}
+    else if(k==='ArrowUp'){ev.preventDefault();move(-1,0);}
+    else if(k==='ArrowRight'){ev.preventDefault();move(0,1);}
+    else if(k==='ArrowLeft'){ev.preventDefault();move(0,-1);}
+    else if(k==='Tab'&&!ev.shiftKey&&S.c<COLS.length+1){ev.preventDefault();move(0,1);}
+    else if(k==='Tab'&&ev.shiftKey&&S.c>0){ev.preventDefault();move(0,-1);}
+    else if(k==='Enter'||k==='F2'){ev.preventDefault();const cell=M.cells.get(keyOf(S.r,S.c));if(cell&&cell.kind==='as')startEdit();else if(k==='Enter')move(1,0);}
+    else if(k==='Escape'&&$('model').classList.contains('fs')){toggleFs(false);}
+    else if(/^[0-9,.\-(]$/.test(k)&&!ev.ctrlKey&&!ev.metaKey){const cell=M.cells.get(keyOf(S.r,S.c));if(cell&&cell.kind==='as'){ev.preventDefault();startEdit(k);}else startEdit();}
+  });
+  $('btnReset').addEventListener('click',()=>{let n=0;for(const cell of M.cells.values())if(cell.kind==='as'&&cell.v!==cell.def){cell.v=cell.def;n++;}paint(true);setStatus(n?'Reset '+n+' assumption'+(n>1?'s':'')+'.':'Assumptions are already at their defaults.');});
+  $('btnFs').addEventListener('click',()=>toggleFs());
+  $('btnOpenModel').addEventListener('click',()=>{curSector=DATA.company.sector;curCo=DATA.company.ticker;renderNav();renderView();});
+  $('btnTpl').addEventListener('click',async()=>{
+    const txt=JSON.stringify(inputTemplate(),null,1);
+    try{await navigator.clipboard.writeText(txt);setStatus('Input template copied: one object per period, code → [value, "document, page"].');}
+    catch(e){saveBlob(DATA.company.ticker+'_input_template.json',new Blob([txt],{type:'application/json'}));setStatus('Input template downloaded.');}
+  });
+  $('btnXlsx').addEventListener('click',async()=>{
+    const btn=$('btnXlsx');btn.disabled=true;setStatus('Preparing the workbook…');
+    const name=DATA.company.ticker+'_quarterly_model.xlsx';
+    try{
+      const buf=await buildXlsx();const blob=new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+      if(downloadsApi)await downloadsApi.save({filename:name,data:blob});else saveBlob(name,blob);
+      setStatus('Saved '+name+'.');
+    }catch(e){
+      const code=e&&e.code;
+      setStatus(code==='declined'?'Download cancelled.':code==='rate_limited'?'A save prompt is already open.':e&&e.message==='ExcelJS failed to load'?'The spreadsheet library did not load. Check the connection and try again.':'The workbook could not be saved here.');
+    }finally{btn.disabled=false;}
+  });
+  (async()=>{try{const d=window.claude&&typeof window.claude.use==='function'?await window.claude.use('downloads'):null;if(d)downloadsApi=d;}catch(e){}})();
+}
+function toggleFs(force){
+  const m=$('model');const on=force===undefined?!m.classList.contains('fs'):force;
+  m.classList.toggle('fs',on);$('btnFs').textContent=on?'Exit full screen':'Full screen';$('btnFs').setAttribute('aria-pressed',String(on));
+  document.body.style.overflow=on?'hidden':'';
+  $('gridwrap').focus({preventScroll:true});
+}
+init();
+</script>
+</body>
+</html>
+
+</body></html>

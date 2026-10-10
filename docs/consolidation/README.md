@@ -6,10 +6,20 @@ files in this folder. Nothing here is shipped as code.
 ## `source/pt-dummy-psak-338.xlsx`
 
 The owner's own dummy PSAK 338 consolidation workbook, "PT Dummy - C and its subsidiaries": 33 sheets,
-15,485 formulas, every formula with Excel's cached value, no external links. Committed byte for byte as
-the owner attached it on 10 October 2026, renamed from `DGI - PT Dummy and Its subsidiaries PSAK 338.xlsx`.
+15,485 formulas, every formula with Excel's cached value, no external links. Attached by the owner on
+10 October 2026 as `DGI - PT Dummy and Its subsidiaries PSAK 338.xlsx` and committed as cleaned by
+`npm run sanitize:workbook` (`scripts/consolidation/sanitize-workbook.ts`), on the owner's instruction of the
+same day (docs/sweep-2026-10/DECISIONS.md D15–D16): the names of real companies are removed (26 cell values
+deleted, 5 labels shortened, chosen by address so the names are not written into the repository) and so is
+the file's metadata (author fields, the OneDrive path, every comment and its authors, 73,336 legacy defined
+names; the four print ranges stay). No number, formula or cached value changed: a cell-by-cell comparison
+with openpyxl over all 31,869 cells differed at exactly the 31 edited cells. The original stays with the
+owner and is not in the repository or its pushed history.
 
-- sha256 `8fae6f0e71b6407b7ce2b5f77cd2069a051ab9bc5f75155bdfc5d8ad1323da5c`, 1,333,305 bytes.
+- Original: sha256 `8fae6f0e71b6407b7ce2b5f77cd2069a051ab9bc5f75155bdfc5d8ad1323da5c`, 1,333,305 bytes.
+- Committed: sha256 `cda94c8ede22a84a749d9d1f5ba493445ef44b1d73d4b3c4bdadc51c73d6c2db`, 601,127 bytes.
+- A new version of the workbook needs its own review of names: the script refuses any input but the
+  original above, so its cell list cannot be applied to the wrong cells.
 - The figures are dummy. They are not any company's data and must not be read as such.
 - Corrections to the workbook (its 49 error cells, its work notes) are made by the owner in Excel and
   committed as a new version of this file; the site never edits it (PRD R4.2, D8).
@@ -38,11 +48,11 @@ set against the PRD's profile (§1.2.4), the error cells (D8), every font colour
 examples (D10), the work notes (R4.2), and text naming a `PT` that is not a Dummy. The build reports;
 it changes nothing in the workbook.
 
-## `reference/Company_models__PTBA.html` — not committed
+## `reference/Company_models__PTBA.html`
 
-The PRD (Part 3, Phase E step 1) asks for the PTBA company-model page to be committed here as the visual
-reference for the viewer (tokens, fonts, cell legend, formula bar, sheet tabs). It is not committed:
-its DATA block holds PT Bukit Asam's reported figures transcribed from the FY2025 financial statements,
-and PRD §1.6 keeps real issuer figures out of the repo. Part 1 wins over Part 3, so the file stays
-outside the repo until the owner decides (commit it as is, commit a copy with the DATA block emptied, or
-keep it out). The visual reference it describes is summarised in PRD §1.2.4.
+The PTBA company-model page, kept as the visual reference for the viewer (tokens, fonts, cell legend, formula
+bar, sheet tabs, inspector). It is not shipped. Committed with its DATA block emptied, on the owner's
+instruction of 10 October 2026 (docs/sweep-2026-10/DECISIONS.md D17): every reported figure (`rep`) and the
+source register (`docs`) are gone, and the legend's sample figure, which came from PTBA's statements, reads
+`1.234`. The keys that hold no figure (identity, units, periods, the fixed-asset and cost-line labels) stay,
+so the page still draws its grid, with every input OPEN.
