@@ -11,7 +11,7 @@ import { mockSupabase } from './mockSupabase';
 // (no seed data) to prove the page degrades gracefully instead of crashing.
 const PUBLIC_ROUTES: { path: string; name: string }[] = [
   { path: '/', name: 'Home' },
-  { path: '/about', name: 'About' },
+  { path: '/about', name: 'About (redirects to /)' },
   { path: '/auth', name: 'Auth' },
   { path: '/accounting', name: 'Accounting' },
   { path: '/accounting/fsli', name: 'FSLI list' },

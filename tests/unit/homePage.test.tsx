@@ -2,8 +2,9 @@
  * The homepage after About (owner decisions D3(a), D4(a), 2026-10-10): the
  * map first, then the glimpse, then the argument in full and the revision of
  * judgment, as the same sections with the same ids they had on About, so a
- * link to #the-argument or #changed-my-mind still lands. The map is stubbed
- * here (its own suites cover it); everything under it is the real thing.
+ * link to #the-argument or #changed-my-mind still lands — and the page goes
+ * to it. The map is stubbed here (its own suites cover it); everything under
+ * it is the real thing.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor, within } from '@testing-library/react';
@@ -83,6 +84,41 @@ describe('the homepage', () => {
     await waitFor(() => expect(within(argument).getAllByText('Not written')).toHaveLength(READING_PATH.length));
     const changed = document.getElementById('changed-my-mind')!;
     expect(within(changed).getByRole('heading', { level: 2, name: CHANGED_MIND.heading })).toBeInTheDocument();
+  });
+
+  it('goes to a fragment once nothing is fetching, and leaves a reader who has already scrolled where they are', async () => {
+    const scrollTo = vi.fn();
+    window.scrollTo = scrollTo as unknown as typeof window.scrollTo;
+    fromMock.mockImplementation(essaysTable([essayRow(1)]).from);
+    const at = (url: string) =>
+      render(
+        <MemoryRouter initialEntries={[url]}>
+          <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+            <Index />
+          </QueryClientProvider>
+        </MemoryRouter>,
+      );
+
+    const first = at('/#changed-my-mind');
+    await waitFor(() => expect(scrollTo).toHaveBeenCalledTimes(1));
+    expect(scrollTo.mock.calls[0][0]).toMatchObject({ behavior: 'smooth' });
+    first.unmount();
+
+    // no fragment, no jump
+    scrollTo.mockReset();
+    const plain = at('/');
+    await screen.findByRole('list', { name: 'Glimpse' });
+    await new Promise((r) => requestAnimationFrame(r));
+    expect(scrollTo).not.toHaveBeenCalled();
+    plain.unmount();
+
+    // a reader already on their way down is not pulled back
+    Object.defineProperty(window, 'scrollY', { configurable: true, value: 400 });
+    at('/#the-argument');
+    await screen.findByRole('list', { name: 'Glimpse' });
+    await new Promise((r) => requestAnimationFrame(r));
+    expect(scrollTo).not.toHaveBeenCalled();
+    Object.defineProperty(window, 'scrollY', { configurable: true, value: 0 });
   });
 
   it('keeps the argument when nothing is published: the glimpse is absent, not empty', async () => {

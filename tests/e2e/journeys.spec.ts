@@ -171,7 +171,7 @@ test('thirty seconds: the map is the entrance, and a completed piece is one clic
 });
 
 test('three minutes: the scope, the comparison, the objection and the limits are all on the page', async ({ page }) => {
-  await page.goto('/about');
+  await page.goto('/');
   const argument = page.locator('#the-argument');
   for (const heading of [
     'The case it is made on',
@@ -189,6 +189,36 @@ test('three minutes: the scope, the comparison, the objection and the limits are
   // substring match.
   await expect(argument.getByText('Not written', { exact: true })).toHaveCount(2);
   await expect(page.locator('#changed-my-mind')).toBeVisible();
+});
+
+/**
+ * About was removed by owner decision on 10 October 2026 and its argument
+ * moved to the homepage. A link written before that still lands: on Home,
+ * with the map's address and the fragment it carried.
+ */
+test('an old About link lands on the homepage, with the address and the fragment it carried', async ({ page }) => {
+  await page.goto('/about');
+  await expect.poll(() => new URL(page.url()).pathname).toBe('/');
+  await expect(page.getByRole('heading', { name: 'The industry chain', exact: true })).toBeVisible();
+  await expect(page.locator('#the-argument')).toBeVisible();
+  await expect(page.locator('#changed-my-mind')).toBeVisible();
+
+  await page.goto('/about?lens=green&distance=finance&node=energy');
+  await expect.poll(() => new URL(page.url()).pathname).toBe('/');
+  expect(Object.fromEntries(new URL(page.url()).searchParams)).toEqual({ lens: 'green', distance: 'finance', node: 'energy' });
+  await expect(page.getByRole('region', { name: 'Energy' })).toBeVisible();
+  await expect(page.locator('.chain-plate')).toHaveAttribute('data-shift', 'green');
+
+  // The fragment is kept, and the page goes to it once it has drawn, clear
+  // of the sticky header: the section is thousands of pixels down on Home.
+  await page.goto('/about#changed-my-mind');
+  await expect.poll(() => new URL(page.url()).pathname).toBe('/');
+  expect(new URL(page.url()).hash).toBe('#changed-my-mind');
+  const heading = page.locator('#changed-my-mind h2');
+  await expect(heading).toBeInViewport();
+  await expect
+    .poll(() => page.evaluate(() => document.querySelector('#changed-my-mind h2')!.getBoundingClientRect().top - document.querySelector('header')!.getBoundingClientRect().bottom))
+    .toBeGreaterThanOrEqual(0);
 });
 
 test('one substantial reading: the completed argument carries its own objection', async ({ page }) => {

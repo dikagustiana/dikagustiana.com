@@ -17,7 +17,7 @@ export interface UnifiedContentItem {
   topic?: string | null;
   published: boolean;
   status: string | null;
-  /** The ONE featuring flag — drives homepage, About and Finance landing. */
+  /** The ONE featuring flag — leads the homepage row and drives the Finance landing. */
   is_selected?: boolean;
   voice_role: string | null;
   finance_section?: string | null;
