@@ -36,10 +36,21 @@ function useFragmentOnArrival() {
 
   useEffect(() => {
     if (fetching > 0) started.current = true;
-    if (done.current || !hash || !started.current || fetching > 0) return;
+    if (done.current || !started.current || fetching > 0) return;
+    // Arrival ends at the first settled pass, with a fragment or without; a
+    // fragment that comes later (the skip link, say) is the browser's to follow.
     done.current = true;
+    if (!hash) return;
+    // A hand-typed fragment need not be valid percent-encoding ("/#100%"), and
+    // a throw in the frame below would be uncaught: such a one is used as typed.
+    let id = hash.slice(1);
+    try {
+      id = decodeURIComponent(id);
+    } catch {
+      // keep it as typed
+    }
     requestAnimationFrame(() => {
-      const target = document.getElementById(decodeURIComponent(hash.slice(1)));
+      const target = document.getElementById(id);
       if (!target || window.scrollY > 0) return;
       const header = document.querySelector('header')?.getBoundingClientRect().height ?? 0;
       window.scrollTo({ top: target.getBoundingClientRect().top + window.scrollY - header, behavior: scrollBehavior() });

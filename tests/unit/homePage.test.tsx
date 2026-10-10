@@ -7,8 +7,8 @@
  * it is the real thing.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { configure, render, screen, waitFor, within } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { act, configure, render, screen, waitFor, within } from '@testing-library/react';
+import { MemoryRouter, useNavigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const { fromMock } = vi.hoisted(() => ({ fromMock: vi.fn() }));
@@ -124,6 +124,58 @@ describe('the homepage', () => {
     await new Promise((r) => requestAnimationFrame(r));
     expect(scrollTo).not.toHaveBeenCalled();
     Object.defineProperty(window, 'scrollY', { configurable: true, value: 0 });
+  });
+
+  it('looks a fragment up as typed when it is not valid percent-encoding, and throws nothing', async () => {
+    const scrollTo = vi.fn();
+    window.scrollTo = scrollTo as unknown as typeof window.scrollTo;
+    const errors: unknown[] = [];
+    const onError = (e: ErrorEvent) => errors.push(e.error);
+    window.addEventListener('error', onError);
+    const typed = document.body.appendChild(Object.assign(document.createElement('div'), { id: '100%' }));
+    fromMock.mockImplementation(essaysTable([essayRow(1)]).from);
+    try {
+      render(
+        <MemoryRouter initialEntries={['/#100%']}>
+          <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+            <Index />
+          </QueryClientProvider>
+        </MemoryRouter>,
+      );
+      await waitFor(() => expect(scrollTo).toHaveBeenCalledTimes(1));
+      expect(errors).toEqual([]);
+    } finally {
+      window.removeEventListener('error', onError);
+      typed.remove();
+    }
+  });
+
+  it('goes to a fragment on arrival only: one that comes after the page has settled is left to the browser', async () => {
+    const scrollTo = vi.fn();
+    window.scrollTo = scrollTo as unknown as typeof window.scrollTo;
+    fromMock.mockImplementation(essaysTable([essayRow(1)]).from);
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    let go: (to: string) => void = () => {};
+    const Navigator = () => {
+      go = useNavigate();
+      return null;
+    };
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <QueryClientProvider client={client}>
+          <Navigator />
+          <Index />
+        </QueryClientProvider>
+      </MemoryRouter>,
+    );
+    await screen.findByRole('list', { name: 'Glimpse' });
+    await waitFor(() => expect(client.isFetching()).toBe(0));
+    await new Promise((r) => requestAnimationFrame(r));
+
+    // the skip link, or any in-page move, after arrival
+    act(() => go('/#changed-my-mind'));
+    await new Promise((r) => requestAnimationFrame(r));
+    expect(scrollTo).not.toHaveBeenCalled();
   });
 
   it('keeps the argument when nothing is published: the glimpse is absent, not empty', async () => {
