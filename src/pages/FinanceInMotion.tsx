@@ -1,6 +1,12 @@
 /**
  * FinanceInMotion — Section 05: Capital in Motion
  * View 1: Clean continuous editorial list of all 21 conditions.
+ *
+ * The h1 and its subtitle lead straight into the list. The premise block that
+ * sat between them was removed on the owner's instruction (October 2026
+ * sweep, D7); if the owner writes a new one it arrives as
+ * docs/sweep-2026-10/copy/capital-in-motion-premise.md and is mounted here as
+ * one prose block.
  */
 
 import { useNavigate } from 'react-router-dom';
@@ -43,29 +49,6 @@ export default function FinanceInMotion() {
           <p className="text-sm text-muted-foreground mt-1.5">
             Twenty-one conditions I wish I understood earlier.
           </p>
-        </div>
-
-        {/* Premise */}
-        <div className="mb-10 pb-6 border-b border-border">
-          <span className="eyebrow block mb-3">
-            Premise
-          </span>
-          <div className="space-y-2.5 text-sm text-foreground leading-snug max-w-2xl">
-            <p>
-              If I could speak to my 22-year-old self, I would not tell him to slow down. I would tell him to increase intensity 5x.
-            </p>
-            <p>
-              At 22, I optimized for technical mastery.<br />
-              Today, I optimize for capital deployment quality.
-            </p>
-            <p className="text-muted-foreground">
-              Accounting tells you what happened.<br />
-              Finance decides what will happen.
-            </p>
-            <p className="font-medium">
-              Finance is capital allocation under structural conditions.
-            </p>
-          </div>
         </div>
 
         {/* Condition List */}

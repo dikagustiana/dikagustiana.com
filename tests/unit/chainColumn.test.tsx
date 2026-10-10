@@ -80,7 +80,7 @@ const region = (name: string) => screen.getByRole('region', { name });
 
 beforeEach(() => {
   narrowScreen();
-  window.history.replaceState({}, '', '/about');
+  window.history.replaceState({}, '', '/');
 });
 afterEach(() => {
   // @ts-expect-error — restore jsdom's absence of matchMedia for the next file
@@ -433,7 +433,7 @@ describe('a mark on a narrow screen', () => {
   });
 
   it('renders the reading a shared address asks for, so a link made on the wide plate still lands on a phone', () => {
-    window.history.replaceState({}, '', '/about?lens=green&node=recovery');
+    window.history.replaceState({}, '', '/?lens=green&node=recovery');
     mount(<ChainPlate links={[]} />);
     expect(document.querySelector('.cp-column[data-level="detail"]')).not.toBeNull();
     expect(region('Recovery')).toBeInTheDocument();

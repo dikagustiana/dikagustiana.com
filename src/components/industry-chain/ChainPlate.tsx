@@ -163,7 +163,7 @@ const EMPTY_HIDDEN: ReadonlySet<string> = new Set();
  * return path — calling focus() on an element a browser cannot focus does
  * nothing, so closing a reading opened from a chip dropped focus to <body> and
  * a keyboard reader was returned to the top of the document. Reproduced on
- * /about at 1348x936 on 14 September 2026.
+ * the About page at 1348x936 on 14 September 2026.
  *
  * So a chip hands back its joint, which is the door in the tab order and the
  * one the reader means. Anything else is returned as it came.
@@ -198,8 +198,9 @@ export function ChainPlate({
   /**
    * The rank of the map's own title. On the landing page nothing precedes the
    * map, so the map's title IS the page's main heading and this is `h1`;
-   * inside About it sits under that page's heading and stays `h2`. A prop
-   * rather than a guess, because the component cannot see what is above it.
+   * under a page's own heading (as on About, until the owner removed it) it
+   * stays `h2`. A prop rather than a guess, because the component cannot see
+   * what is above it.
    */
   heading?: 'h1' | 'h2';
   /**
@@ -531,9 +532,9 @@ export function ChainPlate({
     >
       <header className="max-w-3xl">
         {/* The map's own heading. On the landing page nothing precedes it, so
-            it is the page's h1; inside About it is an h2 under that page's
-            own heading. A title, not a hero: no artwork, no reserved empty
-            space, no call to action. */}
+            it is the page's h1; under a page's own heading it is an h2. A
+            title, not a hero: no artwork, no reserved empty space, no call
+            to action. */}
         <Heading className="font-display text-2xl font-semibold leading-tight tracking-tight text-foreground md:text-3xl [text-wrap:balance]">
           {CHAIN_COPY.title}
         </Heading>
@@ -797,7 +798,12 @@ export function ChainPlate({
  * the frame after that paint (gate 4, O8; src/components/world/Poster.tsx).
  */
 
-/** The plate as an About section: under that page's heading, so the map's title is an h2. */
+/**
+ * The plate as a section under a page's own heading, so the map's title is an
+ * h2. About mounted it until the owner removed that page (2026-10-10); no page
+ * mounts it now and the homepage's preview is the map's one place. Kept, with
+ * its world slot, because the world shell's suite still renders it.
+ */
 export function IndustryChainSection() {
   if (__WORLD_KAWASAN__) return <WorldSlot variant="full" heading="h2" Schematic={ChainPlate} />;
   return (

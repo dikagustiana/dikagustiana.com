@@ -1,6 +1,8 @@
 /**
  * CapitalConditionCard — Substack-style editorial list item.
- * Bold title, description snippet, subtle metadata line.
+ * Bold title, description snippet, subtle metadata line: the layer label
+ * alone. It carried the author's name on all 21 cards until the owner's
+ * instruction of 10 October 2026 (October sweep, R6.3).
  */
 
 import { getLayerLabel } from '@/data/capitalConditions';
@@ -24,7 +26,7 @@ export function CapitalConditionCard({ condition, onClick }: CapitalConditionCar
         {condition.tension}
       </p>
       <span className="eyebrow text-muted-foreground/70">
-        {getLayerLabel(condition.layer)} · Dika Gustiana
+        {getLayerLabel(condition.layer)}
       </span>
     </button>
   );

@@ -10,8 +10,15 @@ export interface FsliPage {
   dec_2024: string | null;
   dec_2023: string | null;
   category: string | null;
-  // Added by 20261009090000_fsli_component_flag.sql; absent until it is applied.
+  // Added by 20261009090000_fsli_component_flag.sql, applied in production
+  // (column verified present 2026-10-10). Optional only because this
+  // hand-written type predates it; the generated types carry it.
   is_component?: boolean | null;
+  // Added by 20261010100000_fsli_covered_by.sql, not yet in the generated
+  // types: the line item whose essay covers this one. Both reads below are
+  // select *, which never names it, so before the migration the key is just
+  // absent (no 42703 to catch) and reads as "not covered".
+  covered_by_slug?: string | null;
   sort_order: number | null;
   created_at: string;
   updated_at: string;
@@ -51,19 +58,6 @@ export function useFsliPage(slug: string) {
   });
 }
 
-export function useFsliSections(pageSlug: string) {
-  return useQuery({
-    queryKey: ['fsli-sections', pageSlug],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('fsli_sections')
-        .select('*')
-        .eq('page_slug', pageSlug)
-        .order('sort_order', { ascending: true });
-
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!pageSlug,
-  });
-}
+// useFsliSections is deleted with the fixed outline it filled: fsli_sections
+// holds no written row, and the FSLI page's body is the linked essay
+// (FsliDetail). The table and its rows are left in place.

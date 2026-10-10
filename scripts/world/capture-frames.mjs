@@ -216,7 +216,8 @@ async function pixelDiff(a, b) {
   await page.close();
   return r;
 }
-for (const [route, name] of want('flagoff') ? [['/', 'landing'], ['/about', 'about']] : []) {
+// The landing page only: About, the other page that carried the map, was removed on 2026-10-10.
+for (const [route, name] of want('flagoff') ? [['/', 'landing']] : []) {
   const results = {};
   for (const [base, tag] of [[OFF, 'branch'], [MAIN, 'main']]) {
     const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 });

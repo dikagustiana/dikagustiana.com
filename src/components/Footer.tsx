@@ -34,7 +34,6 @@ export function Footer() {
           <div>
             <h4 className="font-semibold text-foreground mb-4">Sections</h4>
             <ul className="space-y-2 text-sm">
-              <li><Link to="/about" className="text-muted-foreground hover:text-foreground transition-colors">About</Link></li>
               <li><Link to="/accounting" className="text-muted-foreground hover:text-foreground transition-colors">Accounting</Link></li>
               <li><Link to="/finance" className="text-muted-foreground hover:text-foreground transition-colors">Finance</Link></li>
               <li><Link to="/green-transition" className="text-muted-foreground hover:text-foreground transition-colors">Green Transition</Link></li>

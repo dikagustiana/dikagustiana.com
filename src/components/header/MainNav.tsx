@@ -30,8 +30,9 @@ export function MainNav() {
 
   return (
     /* TWO CAPACITY RULES, both measured.
-       `xl` and not `lg`: at 1024px the labels (seven then, eight now) did not
-       fit and the row did not wrap, so flexbox compressed them — "The Green Transition" ran to
+       `xl` and not `lg`: at 1024px the labels (seven then, eight with About,
+       seven again since it was removed) did not fit and the row did not
+       wrap, so flexbox compressed them — "The Green Transition" ran to
        three lines inside a 64px header and "The Next Big Thing" was clipped
        mid-word. A truncated destination is worse than a drawer, and the drawer
        carries every one of them.
@@ -45,15 +46,6 @@ export function MainNav() {
         className={cn('nav-link', location.pathname === '/' && 'nav-link-active')}
       >
         Home
-      </Link>
-
-      {/* Second, beside Home. See the note in navConfig: the page carrying
-          the argument and the revision of judgment was footer-only. */}
-      <Link
-        to="/about"
-        className={cn('nav-link', location.pathname === '/about' && 'nav-link-active')}
-      >
-        About
       </Link>
 
       {isAdmin && (
@@ -111,7 +103,7 @@ export function MainNav() {
         />
       )}
 
-      <NavDropdown label="Learning" items={learningItems} width="w-48" />
+      <NavDropdown label="Learning" items={learningItems} width="w-48" align="end" />
 
       {isAdmin && (
         <Link
