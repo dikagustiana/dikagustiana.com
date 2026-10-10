@@ -7,7 +7,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { ACCOUNTING_ZERO, formatCell, formatDate, formatGeneral, readNumFmt, type NumFmt } from '@/lib/workbook/format';
+import { ACCOUNTING_ZERO, excelRound, formatCell, formatDate, formatGeneral, readNumFmt, type NumFmt } from '@/lib/workbook/format';
 import type { PublishedWorkbook, WorkbookCell } from '@/lib/workbook/types';
 
 const book = JSON.parse(
@@ -98,6 +98,24 @@ describe('the number formats in the file', () => {
     expect(shown('Consol SoFP 24', 'D9')).toBe('–');
     expect(shown('Consol SoFP 24', 'P118')).toBe('(2.160.990.000)');
     expect(shown('Consol SoFP 24', 'H120')).toBe('0');
+  });
+
+  it("rounds a figure as Excel does, on its 15-digit decimal and half away from zero, not on the binary value", () => {
+    // Excel shows 52,876,483,666 for both Z29 and Z32, and 52,876,483,665 for Z34 in the same column.
+    expect(shown('-BS-RP Disclosure 2023', 'Z29')).toBe('52.876.483.666');
+    expect(shown('-BS-RP Disclosure 2023', 'Z32')).toBe('52.876.483.666');
+    expect(shown('-BS-RP Disclosure 2023', 'Z34')).toBe('52.876.483.665');
+    // -43168094.235 is stored as -43168094.234999999…; Excel shows -43,168,094.24.
+    expect(shown('Detail Elimination BS', 'AL55')).toBe('(43.168.094,24)');
+    expect(excelRound(52876483665.49999, 0)).toBe(52876483666);
+    expect(excelRound(-43168094.235, 2)).toBe(-43168094.24);
+    expect(excelRound(2.5, 0)).toBe(3);
+    expect(excelRound(-2.5, 0)).toBe(-3);
+    expect(excelRound(1.005, 2)).toBe(1.01);
+    expect(excelRound(0.3, 0)).toBe(0);
+    expect(excelRound(1234567.891, 1)).toBe(1234567.9);
+    expect(show(1.005, '#,##0.00')).toBe('1,01');
+    expect(show(-2.5, BRACKETS)).toBe('(3)');
   });
 
   it('writes a plain number format with its decimals, and zero as 0', () => {

@@ -15,6 +15,9 @@
  *     from five digits up the site's thousands point applies. At most ten significant digits.
  * Text shows as it is (the format's text section only pads it), an error as its code, an empty cell as
  * nothing. No Intl and no Date: the output depends on neither the machine's ICU data nor its time zone.
+ *
+ * A figure is rounded as Excel rounds it before the formatter writes it (excelRound): on its 15-digit
+ * decimal, half away from zero, where JavaScript's toFixed would round the binary value just below a half.
  */
 import { formatNumber, formatPercent } from '@/lib/finance-in-action/format';
 import type { WorkbookCell } from './types';
@@ -110,6 +113,19 @@ export function formatDate(iso: string, day = true): string {
   return day ? `${Number(m[3])} ${month} ${m[1]}` : `${month} ${m[1]}`;
 }
 
+/**
+ * `value` to `decimals` places as Excel shows it: Excel holds 15 significant digits and rounds that decimal
+ * half away from zero. 52876483665.49999 is 52876483665.5000 to 15 digits and shows as 52,876,483,666;
+ * -43168094.235, stored as -43168094.234999999…, shows as -43,168,094.24.
+ */
+export function excelRound(value: number, decimals: number): number {
+  if (!Number.isFinite(value) || value === 0) return value;
+  // The 15-digit decimal, shifted by `decimals` in its text, so no binary multiplication is involved.
+  const [digits15, exponent] = Math.abs(value).toExponential(14).split('e');
+  const shifted = Number(`${digits15}e${Number(exponent) + decimals}`);
+  return (Math.sign(value) * Math.round(shifted)) / 10 ** decimals;
+}
+
 /** A number under General: `2024`, `17`, `10.891.649.906`, `0,08404541`, `(17.228.149.502)`. */
 export function formatGeneral(value: number): string {
   const whole = Math.max(1, Math.floor(Math.log10(Math.abs(value))) + 1);
@@ -131,9 +147,9 @@ export function formatCell(cell: Pick<WorkbookCell, 'v' | 't'>, numFmt?: string)
   if (typeof v === 'string') return v;
   switch (fmt.kind) {
     case 'accounting':
-      return v === 0 ? ACCOUNTING_ZERO : formatNumber(v, fmt.decimals);
+      return v === 0 ? ACCOUNTING_ZERO : formatNumber(excelRound(v, fmt.decimals), fmt.decimals);
     case 'number':
-      return formatNumber(v, fmt.decimals);
+      return formatNumber(excelRound(v, fmt.decimals), fmt.decimals);
     case 'percent':
       return formatPercent(v, fmt.decimals);
     default:
