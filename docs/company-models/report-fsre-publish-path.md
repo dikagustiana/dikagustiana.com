@@ -3,6 +3,8 @@
 Pelaksana: Claude Code, 8 Okt 2026. PRD: Personal OS `docs/lab/fsre-publish-path/PRD.md` §6.3.
 Branch: `feat/fia-live`, draft PR https://github.com/dikagustiana/dikagustiana.com/pull/44. Dika yang merge, dan Dika yang menyalakan `VITE_FIA_LIVE` di production setelah paket asli pertama (O3).
 
+*[O3 DIGANTI 2026-10-10 oleh keputusan owner D12(a) (site sweep Oktober 2026, fase F): `VITE_FIA_LIVE=true` dinyalakan di Production sekarang, tanpa `VITE_FIA_PREVIEW`, dan halaman live menampilkan slate "Planned; no model yet." sampai paket pertama di-approve. Lihat entri 2026-10-10 di `docs/DECISIONS.md`.]*
+
 ## 1. SHA dan commit
 
 | | SHA |
@@ -86,3 +88,5 @@ Yang **tidak terverifikasi** di sini: PostgREST asli (header `Accept-Profile`, k
 | Merge PR #44 | GitHub |
 | Production: `VITE_FIA_LIVE=true` | Baru setelah paket asli pertama di-approve di 4F (O3). |
 | `sub-industries.json` memuat sub-industri pilot | Sebelum paket asli pertama; kalau tidak, situs menolaknya dengan alasan `meta.subIndustry`. |
+
+*[Baris "Production" di atas DIGANTI 2026-10-10 oleh D12(a); lihat catatan di awal laporan.]*
