@@ -6,10 +6,11 @@ particular part of the chain.
 ## The address
 
     /?lens=<shift>&distance=<distance>&node=<slug>
-    /about?lens=<shift>&distance=<distance>&node=<slug>
 
 Every parameter is optional and any it does not recognise it ignores, so a partial link is
-safe. The map is on both pages: `/` opens it at the overview, `/about` at the detail.
+safe. The map is on the homepage, which opens it at the overview. (Until 10 October 2026 it was
+also on About, at the detail; the owner removed that page, and a link written against
+`/about?…` forwards to `/` with its parameters and any `#fragment` intact.)
 
 | Parameter | Values | Leave it out when |
 | --- | --- | --- |
@@ -30,8 +31,8 @@ purpose. See `src/components/industry-chain/useChainUrl.ts`.
 - An element the named shift does not mark is **not opened**: a panel with a heading and nothing
   under it is the one thing the map must not show. The rejected parameter is then dropped from
   the address. The **Opens** column says what each element needs.
-- The figure is scrolled into view, because on both pages it is a long way down. A `#fragment`
-  in the same address is the reader’s own instruction and wins.
+- The figure is scrolled into view, because it can be a long way down. A `#fragment` in the same
+  address is the reader’s own instruction and wins.
 
 ## Two worked examples
 

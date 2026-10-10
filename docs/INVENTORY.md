@@ -22,8 +22,8 @@ Gating: **[P]** public · **[A]** admin-only (`RequireAdmin`).
 ### Core
 | Path | Page | Data | States present | SEO |
 |---|---|---|---|---|
-| `/` [P] | `Index.tsx` | `useSelectedEssays(4)` · `useChainModules()` (chain plate, short version under the hero; full chain and its joint readings on request) | loading | ✓ |
-| `/about` [P] | `About.tsx` | `useSelectedEssays()` · `useChainModules()` (chain plate; every joint and layer opens a reading, the curriculum list only for a joint with a mapped module) | loading (curriculum list) | ✓ |
+| `/` [P] | `Index.tsx` | `useChainModules()` (chain plate first on the page, at the overview; the detail and every joint and layer's reading on request or by address) · `useSelectedEssays(30)` (the glimpse: every published essay, starred first in `selected_rank` order, then newest first) · `useReadingPath()` (`#the-argument`, the argument in full) · static `#changed-my-mind` | loading; glimpse absent with nothing published | ✓ |
+| `/about` [P] | → redirects to `/` (client-side `Navigate`, query and `#fragment` kept). About was removed on 2026-10-10 by owner decision (sweep D4(a), D5(a)); its argument and *Changed my mind* are on `/` | — | — | — |
 | `/auth` [P] | `Auth.tsx` | `useAuth` + form | — | ✗ |
 | `*` [P] | `NotFound.tsx` | — | — | ✗ (also `console.error` on every hit) |
 
