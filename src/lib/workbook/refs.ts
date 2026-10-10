@@ -222,7 +222,9 @@ export function buildRefGraph(book: PublishedWorkbook): RefGraph {
   }
 
   // Every formula read once: its precedents, and the used part of each sheet it names grown to the
-  // reference's top-left.
+  // reference's top-left, where its chip jumps. Not to its bottom-right: the SUMIFS checks on four sheets
+  // read hundreds of empty rows past the last value (`'Adjustment Consol'!I5:I1010`, on a sheet whose
+  // values end at row 96), which would leave most of each grid blank and Ctrl+End far below the figures.
   for (const s of book.sheets) {
     const own = precedents.get(s.name)!;
     for (const cell of s.cells) {

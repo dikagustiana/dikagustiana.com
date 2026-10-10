@@ -21,7 +21,7 @@ vi.mock('@/integrations/supabase/client', () => ({
 vi.mock('@/lib/auditLog', () => ({ logAuditEvent: vi.fn(async () => undefined) }));
 
 import { useSelectedEssays } from '@/hooks/queries/useSelectedEssays';
-import { useSelectedOrder, useToggleSelectContent } from '@/hooks/queries/useUnifiedContent';
+import { useSaveSelectedOrder, useSelectedOrder, useToggleSelectContent } from '@/hooks/queries/useUnifiedContent';
 import { useFeaturedFinanceEssay } from '@/hooks/queries/useFinance';
 import { essayRow, essaysTable, type EssayRow } from './helpers/essaysTable';
 
@@ -61,24 +61,27 @@ beforeEach(() => fromMock.mockReset());
 describe('the homepage order', () => {
   const filters = (chain: Call[]) => chain.filter((c) => c.method === 'eq').map((c) => c.args);
   const slugs = (rows: unknown) => (rows as EssayRow[]).map((r) => r.slug);
-  const serve = (rows: EssayRow[], opts?: { rankColumn?: boolean }) => {
+  const serve = (rows: EssayRow[], opts?: Parameters<typeof essaysTable>[1]) => {
     const table = essaysTable(rows, opts);
     fromMock.mockImplementation(table.from);
     return table.chains;
   };
 
-  it('reads the starred in the owner\'s order and the rest newest first, in two queries', async () => {
-    const chains = queries([{ data: [{ id: 'a', slug: 'a' }], error: null }, { data: [{ id: 'b', slug: 'b' }], error: null }]);
+  it('reads every published essay in one query, the starred first in the owner\'s order, to twice the limit', async () => {
+    const a = { id: 'a', slug: 'a', is_selected: true };
+    const b = { id: 'b', slug: 'b', is_selected: false };
+    const chains = queries([{ data: [a, b], error: null }]);
     const { result } = renderHook(() => useSelectedEssays(30), { wrapper });
-    await waitFor(() => expect(result.current.data).toEqual([{ id: 'a', slug: 'a' }, { id: 'b', slug: 'b' }]));
-    expect(chains).toHaveLength(2);
-    expect(filters(chains[0])).toEqual([['is_selected', true], ['published', true]]);
-    expect(orderedBy(chains[0])).toEqual(['selected_rank', 'created_at']);
-    expect(chains[0].find((c) => c.method === 'order')!.args[1]).toEqual({ ascending: true, nullsFirst: false });
-    expect(filters(chains[1])).toEqual([['is_selected', false], ['published', true]]);
-    expect(orderedBy(chains[1])).toEqual(['created_at']);
-    expect(chains[1].find((c) => c.method === 'order')!.args[1]).toEqual({ ascending: false });
-    for (const chain of chains) expect(chain.find((c) => c.method === 'limit')!.args).toEqual([30]);
+    await waitFor(() => expect(result.current.data).toEqual([a, b]));
+    expect(chains).toHaveLength(1);
+    expect(filters(chains[0])).toEqual([['published', true]]);
+    expect(orderedBy(chains[0])).toEqual(['is_selected', 'selected_rank', 'created_at']);
+    expect(chains[0].filter((c) => c.method === 'order').map((c) => c.args[1])).toEqual([
+      { ascending: false },
+      { ascending: true, nullsFirst: false },
+      { ascending: false },
+    ]);
+    expect(chains[0].find((c) => c.method === 'limit')!.args).toEqual([60]);
   });
 
   it('puts the starred first by rank, an unplaced star after the placed ones, then every other essay newest first', async () => {
@@ -120,6 +123,19 @@ describe('the homepage order', () => {
     expect(slugs(got).at(-1)).toBe('essay-13');
   });
 
+  it('cuts only what the row would not show when the read stops at twice the limit', async () => {
+    // Twelve essays, a read of four: the oldest is starred, and an old
+    // unstarred one still holds a rank, so the database sorts it second.
+    serve([
+      essayRow(1, { is_selected: true, selected_rank: 1 }),
+      essayRow(2, { selected_rank: 2 }),
+      ...Array.from({ length: 10 }, (_, i) => essayRow(i + 3)),
+    ]);
+    const { result } = renderHook(() => useSelectedEssays(2), { wrapper });
+    await waitFor(() => expect(result.current.data).toBeDefined());
+    expect(slugs(result.current.data)).toEqual(['essay-1', 'essay-12']);
+  });
+
   it('falls back to newest first for the starred, with the same filters, before the migration is applied', async () => {
     const chains = serve(
       [
@@ -134,30 +150,45 @@ describe('the homepage order', () => {
     await waitFor(() => expect(result.current.data).toBeDefined());
     // The rank is not there, so the starred lead newest first; the rest follow as before.
     expect(slugs(result.current.data)).toEqual(['essay-2', 'essay-1', 'essay-4', 'essay-3']);
-    expect(chains).toHaveLength(3);
-    const retry = chains[2];
-    expect(orderedBy(retry)).toEqual(['created_at']);
+    expect(chains).toHaveLength(2);
+    const retry = chains[1];
+    expect(orderedBy(retry)).toEqual(['is_selected', 'created_at']);
     expect(filters(retry)).toEqual(filters(chains[0]));
-    expect(filters(retry)).toEqual([['is_selected', true], ['published', true]]);
+    expect(filters(retry)).toEqual([['published', true]]);
+    expect(retry.find((c) => c.method === 'limit')!.args).toEqual([16]);
   });
 
-  it('shows an essay once when it comes back from both reads', async () => {
-    // Starred between the two reads: the first saw it starred, the second not yet.
-    queries([
-      { data: [{ id: 'a', slug: 'a' }], error: null },
-      { data: [{ id: 'b', slug: 'b' }, { id: 'a', slug: 'a' }], error: null },
-    ]);
+  it('keeps an essay that is starred while the homepage reads', async () => {
+    // The owner stars essay 2 in Admin as the homepage loads, so every read
+    // answered after the first sees it starred. Read as the starred and then
+    // the rest, two snapshots, it was in neither.
+    const late = essayRow(2);
+    serve([essayRow(1, { is_selected: true, selected_rank: 1 }), late, essayRow(3)], {
+      afterRead: (n) => {
+        if (n === 1) late.is_selected = true;
+      },
+    });
     const { result } = renderHook(() => useSelectedEssays(30), { wrapper });
     await waitFor(() => expect(result.current.data).toBeDefined());
-    expect(result.current.data).toEqual([{ id: 'a', slug: 'a' }, { id: 'b', slug: 'b' }]);
+    // The table as it stood before the star: essay 2 among the rest, by date.
+    expect(slugs(result.current.data)).toEqual(['essay-1', 'essay-3', 'essay-2']);
+  });
+
+  it('keeps the rest newest first when an unstarred essay still holds a rank', async () => {
+    // A rank left on essay 2 after its unstar: by hand in the database, or by
+    // an order saved before the save ranked only rows still starred.
+    serve([essayRow(1, { is_selected: true, selected_rank: 1 }), essayRow(2, { selected_rank: 2 }), essayRow(3), essayRow(4)]);
+    const { result } = renderHook(() => useSelectedEssays(30), { wrapper });
+    await waitFor(() => expect(result.current.data).toBeDefined());
+    expect(slugs(result.current.data)).toEqual(['essay-1', 'essay-4', 'essay-3', 'essay-2']);
   });
 
   it('treats any other error as an error, and asks no fallback', async () => {
-    const chains = queries([{ data: null, error: { code: '42501', message: 'permission denied' } }, { data: [], error: null }]);
+    const chains = queries([{ data: null, error: { code: '42501', message: 'permission denied' } }]);
     const { result } = renderHook(() => useSelectedEssays(8), { wrapper });
     await waitFor(() => expect(result.current.isError).toBe(true));
-    expect(chains).toHaveLength(2);
-    expect(chains.map(orderedBy)).toEqual([['selected_rank', 'created_at'], ['created_at']]);
+    expect(chains).toHaveLength(1);
+    expect(chains.map(orderedBy)).toEqual([['is_selected', 'selected_rank', 'created_at']]);
   });
 
   it('tells the admin panel the order cannot be saved yet', async () => {
@@ -183,6 +214,17 @@ describe('the homepage order', () => {
     await result.current.mutateAsync({ id: 'a', currentlySelected: true });
     expect(chains[0].find((c) => c.method === 'update')!.args).toEqual([{ is_selected: false, selected_rank: null }]);
     expect(chains[1].find((c) => c.method === 'update')!.args).toEqual([{ is_selected: false }]);
+  });
+
+  it('saves a rank only onto an essay still starred, so a panel opened before an unstar cannot rank it', async () => {
+    const chains = queries([{ error: null }, { error: null }]);
+    const { result } = renderHook(() => useSaveSelectedOrder(), { wrapper });
+    await result.current.mutateAsync(['a', 'b']);
+    expect(chains).toHaveLength(2);
+    chains.forEach((chain, i) => {
+      expect(chain.find((c) => c.method === 'update')!.args).toEqual([{ selected_rank: i + 1 }]);
+      expect(filters(chain)).toEqual([['id', ['a', 'b'][i]], ['is_selected', true]]);
+    });
   });
 
   it('writes the flag only when starring: a new star joins the end of the row', async () => {

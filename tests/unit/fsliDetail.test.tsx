@@ -9,9 +9,9 @@
  * dummies, not any issuer's.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { act, fireEvent, render, screen, within } from '@testing-library/react';
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { MemoryRouter, Route, Routes, useNavigate } from 'react-router-dom';
+import { QueryClient, QueryClientProvider, onlineManager } from '@tanstack/react-query';
 import { HelmetProvider } from 'react-helmet-async';
 import type { ReactNode } from 'react';
 
@@ -32,8 +32,8 @@ import FsliDetail from '@/pages/FsliDetail';
 
 type Row = Record<string, unknown>;
 
-/** A query builder that answers from `tables`, filtering on eq() like PostgREST. */
-function builderFor(rows: Row[]) {
+/** A query builder that answers from `tables`, filtering on eq() like PostgREST, or fails with `error`. */
+function builderFor(rows: Row[], error: unknown = null) {
   let result = rows;
   let single = false;
   const builder: Record<string, unknown> = {};
@@ -47,7 +47,10 @@ function builderFor(rows: Row[]) {
     return builder;
   };
   builder.then = (resolve: (v: unknown) => unknown, reject?: (e: unknown) => unknown) =>
-    Promise.resolve({ data: single ? (result[0] ?? null) : result, error: null }).then(resolve, reject);
+    Promise.resolve(error ? { data: null, error } : { data: single ? (result[0] ?? null) : result, error: null }).then(
+      resolve,
+      reject,
+    );
   return builder;
 }
 
@@ -109,11 +112,16 @@ const NON_CURRENT = [
 ];
 
 let tables: Record<string, Row[]>;
+/** Tables whose reads fail, as a read does during an outage once its retries are spent. */
+let failing: Set<string>;
 
 beforeEach(() => {
   tables = { fsli_pages: [...CURRENT, ...NON_CURRENT], essays: [ESSAY] };
+  failing = new Set();
   fromMock.mockReset();
-  fromMock.mockImplementation((table: string) => builderFor(tables[table] ?? []));
+  fromMock.mockImplementation((table: string) =>
+    builderFor(tables[table] ?? [], failing.has(table) ? { message: 'fetch failed' } : null),
+  );
 });
 
 function renderAt(slug: string) {
@@ -265,6 +273,111 @@ describe('On this page highlight', () => {
   });
 });
 
+describe('On this page search', () => {
+  it('starts empty on the next line item, one already read included', async () => {
+    tables.essays = [
+      ESSAY,
+      {
+        ...ESSAY,
+        id: 'e-restricted',
+        slug: 'on-restriction',
+        title: 'The Restricted Essay',
+        fsli_slug: 'restricted',
+        content: JSON.stringify({ type: 'doc', content: [heading(2, 'Restrictions')] }),
+      },
+    ];
+    renderAt('cash');
+    await screen.findByRole('heading', { level: 2, name: 'What Cash Is' });
+    const related = () => screen.getByText('Related line items').closest('div')!;
+    await within(related()).findByRole('link', { name: 'Restricted' });
+    fireEvent.click(within(related()).getByRole('link', { name: 'Restricted' }));
+    await screen.findByRole('heading', { level: 2, name: 'The Restricted Essay' });
+    fireEvent.change(screen.getByPlaceholderText('Find in page...'), { target: { value: 'restrictions' } });
+
+    // Back to a line item already read: its page and essay come from the
+    // cache, so the page never passes through its loading state.
+    fireEvent.click(within(related()).getByRole('link', { name: 'Cash' }));
+    await screen.findByRole('heading', { level: 2, name: 'What Cash Is' });
+    expect(screen.getByPlaceholderText('Find in page...')).toHaveValue('');
+    const toc = screen.getByRole('navigation', { name: 'On this page' });
+    expect(within(toc).getAllByRole('button').map((b) => b.textContent)).toEqual([
+      'What counts as cash',
+      'Placements',
+      'Where it is presented',
+    ]);
+  });
+});
+
+describe('Arriving at one of the essay\'s headings', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  /** jsdom lays nothing out: the named heading is put 1,200px down. */
+  const placeHeading = () =>
+    vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(function (this: Element) {
+      const top = this.id === 'where-it-is-presented' ? 1200 : 0;
+      return { top, bottom: top + 40, left: 0, right: 0, width: 0, height: 40, x: 0, y: top, toJSON: () => ({}) } as DOMRect;
+    });
+
+  it('goes to the heading the address names once the essay has drawn it', async () => {
+    placeHeading();
+    const scrollTo = vi.spyOn(window, 'scrollTo').mockImplementation(() => {});
+
+    renderAt('cash#where-it-is-presented');
+    await screen.findByRole('heading', { level: 2, name: 'What Cash Is' });
+    await waitFor(() => expect(scrollTo).toHaveBeenCalledTimes(1));
+    expect(scrollTo.mock.calls[0][0]).toMatchObject({ top: 1200 });
+  });
+
+  it('goes to the heading a link to the next line item names: the page stays mounted, the arrival is new', async () => {
+    placeHeading();
+    const scrollTo = vi.spyOn(window, 'scrollTo').mockImplementation(() => {});
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    let go: (to: string) => void = () => {};
+    const Navigator = () => {
+      go = useNavigate();
+      return null;
+    };
+    render(
+      <HelmetProvider>
+        <MemoryRouter initialEntries={['/accounting/fsli/current-1']}>
+          <QueryClientProvider client={client}>
+            <Navigator />
+            <Routes>
+              <Route path="/accounting/fsli/:slug" element={<FsliDetail />} />
+            </Routes>
+          </QueryClientProvider>
+        </MemoryRouter>
+      </HelmetProvider>,
+    );
+    await screen.findByRole('heading', { level: 1, name: 'Current item 1' });
+    await waitFor(() => expect(client.isFetching()).toBe(0));
+    await new Promise((r) => requestAnimationFrame(r));
+
+    act(() => go('/accounting/fsli/cash#where-it-is-presented'));
+    await screen.findByRole('heading', { level: 2, name: 'What Cash Is' });
+    await waitFor(() => expect(scrollTo).toHaveBeenCalledTimes(1));
+    expect(scrollTo.mock.calls[0][0]).toMatchObject({ top: 1200 });
+  });
+
+  it('goes to the heading once a retry draws it, after the first read failed', async () => {
+    placeHeading();
+    const scrollTo = vi.spyOn(window, 'scrollTo').mockImplementation(() => {});
+    failing = new Set(['essays']);
+    renderAt('cash#where-it-is-presented');
+    await screen.findByText('Something went wrong');
+    await new Promise((r) => requestAnimationFrame(r));
+    expect(scrollTo).not.toHaveBeenCalled();
+
+    failing = new Set();
+    fireEvent.click(screen.getByRole('button', { name: /Try again/ }));
+    await screen.findByRole('heading', { level: 2, name: 'What Cash Is' });
+    await waitFor(() => expect(scrollTo).toHaveBeenCalledTimes(1));
+    expect(scrollTo.mock.calls[0][0]).toMatchObject({ top: 1200 });
+  });
+});
+
 describe('FSLI page without an essay', () => {
   it('says which essay covers it, linking to the covering line item', async () => {
     tables.essays = [{ ...ESSAY, fsli_slug: 'restricted', title: 'The Restricted Essay' }];
@@ -295,6 +408,51 @@ describe('FSLI page without an essay', () => {
       expect(screen.queryByRole('navigation', { name: 'On this page' })).toBeNull();
       unmount();
     }
+  });
+});
+
+describe('FSLI page whose essay read fails', () => {
+  it('says so and offers a retry, instead of reading as a page without an essay', async () => {
+    failing = new Set(['essays']);
+    renderAt('cash');
+    await screen.findByText('Something went wrong');
+    expect(main()).not.toHaveTextContent('What Cash Is');
+
+    failing = new Set();
+    fireEvent.click(screen.getByRole('button', { name: /Try again/ }));
+    await screen.findByRole('heading', { level: 2, name: 'What Cash Is' });
+    expect(screen.queryByText('Something went wrong')).toBeNull();
+  });
+
+  it('does not offer the covering line item as though this one had no essay', async () => {
+    failing = new Set(['essays']);
+    renderAt('cash-non-current');
+    await screen.findByText('Something went wrong');
+    expect(main()).not.toHaveTextContent('Covered in');
+  });
+
+  describe('retried while the browser is offline', () => {
+    // The query pauses the retry until the connection is back: no rows, no
+    // error, and not "loading" by isLoading's account either.
+    afterEach(() => {
+      act(() => onlineManager.setOnline(true));
+    });
+
+    it('keeps the body\'s place until the essay arrives', async () => {
+      failing = new Set(['essays']);
+      renderAt('cash');
+      await screen.findByText('Something went wrong');
+      act(() => onlineManager.setOnline(false));
+      failing = new Set();
+      fireEvent.click(screen.getByRole('button', { name: /Try again/ }));
+      await waitFor(() => expect(screen.queryByText('Something went wrong')).toBeNull());
+      expect(main().querySelector('.animate-pulse')).not.toBeNull();
+      expect(main().querySelector('hr')).not.toBeNull();
+
+      act(() => onlineManager.setOnline(true));
+      await screen.findByRole('heading', { level: 2, name: 'What Cash Is' });
+      expect(main().querySelector('.animate-pulse')).toBeNull();
+    });
   });
 });
 

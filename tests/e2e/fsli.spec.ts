@@ -183,3 +183,25 @@ test('a line item with neither an essay nor a cover ends at its figures', async 
   const related = p.getByText('Related line items').locator('..');
   await expect(related.getByRole('link')).toHaveText(['Cash and cash equivalents', 'Restricted cash']);
 });
+
+test('a link to one of the essay\'s headings opens at that heading', async ({ page: p }) => {
+  // Short enough that the heading starts below the fold.
+  await p.setViewportSize({ width: 1440, height: 500 });
+  await p.goto('/accounting/fsli/cash-and-cash-equivalents#test-heading-two');
+
+  // The heading is drawn only once the essay read returns, after the browser
+  // has looked for the fragment and found nothing.
+  const target = p.locator('#test-heading-two');
+  await expect(target).toHaveText('Test heading two');
+  const fromTop = await target.evaluate((el) => el.getBoundingClientRect().top + window.scrollY);
+  expect(fromTop).toBeGreaterThan(500);
+  await expect(target).toBeInViewport();
+  // ...and comes to rest clear of the sticky header, not under it.
+  const clearance = () =>
+    p.evaluate(() => {
+      const heading = document.getElementById('test-heading-two')!.getBoundingClientRect().top;
+      return Math.round(heading - document.querySelector('header')!.getBoundingClientRect().bottom);
+    });
+  await expect.poll(clearance).toBeGreaterThanOrEqual(0);
+  await expect.poll(clearance).toBeLessThan(10);
+});

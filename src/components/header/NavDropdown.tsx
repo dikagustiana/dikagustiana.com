@@ -74,18 +74,29 @@ export function NavDropdown({ label, items, width = 'w-56', basePath, align = 's
     setIsOpen(true);
   }, [cancelClose]);
 
+  // Closing used to strand keyboard focus on an unmounted menu item, dropping
+  // the user back to the top of the tab order. Only focus that was in the menu
+  // goes back to the chevron: a menu the pointer opened leaves focus where it
+  // was, and must not pull it out of the page onto a chevron nobody focused.
+  const closeKeepingFocus = useCallback(() => {
+    const focusInMenu = menuRef.current?.contains(document.activeElement) ?? false;
+    close();
+    if (focusInMenu) chevronRef.current?.focus();
+  }, [close]);
+
   // A timer left running after unmount would set state on nothing.
   useEffect(() => cancelClose, [cancelClose]);
 
   // One menu open at a time: opening this one closes the last without delay.
+  // The last keeps its focus: a hover opens this one without focusing it.
   useEffect(() => {
     if (!isOpen) return;
-    if (closeOpenMenu !== close) closeOpenMenu?.();
-    closeOpenMenu = close;
+    if (closeOpenMenu !== closeKeepingFocus) closeOpenMenu?.();
+    closeOpenMenu = closeKeepingFocus;
     return () => {
-      if (closeOpenMenu === close) closeOpenMenu = null;
+      if (closeOpenMenu === closeKeepingFocus) closeOpenMenu = null;
     };
-  }, [isOpen, close]);
+  }, [isOpen, closeKeepingFocus]);
 
   const handlePointerEnter = () => {
     cancelClose();
@@ -125,23 +136,15 @@ export function NavDropdown({ label, items, width = 'w-56', basePath, align = 's
     return () => document.removeEventListener('mousedown', handleClick);
   }, [isOpen, close]);
 
-  // Close on Escape — and RESTORE FOCUS to the trigger. Closing used to
-  // strand keyboard focus on an unmounted menu item, dropping the user back
-  // to the top of the tab order. Only focus that was in the menu is moved: a
-  // menu the pointer opened leaves focus where it was, and Escape must not
-  // pull it out of the page onto a chevron nobody focused.
+  // Close on Escape — and RESTORE FOCUS to the trigger.
   useEffect(() => {
     if (!isOpen) return;
     function handleKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') {
-        const focusInMenu = menuRef.current?.contains(document.activeElement) ?? false;
-        close();
-        if (focusInMenu) chevronRef.current?.focus();
-      }
+      if (e.key === 'Escape') closeKeepingFocus();
     }
     document.addEventListener('keydown', handleKey);
     return () => document.removeEventListener('keydown', handleKey);
-  }, [isOpen, close]);
+  }, [isOpen, closeKeepingFocus]);
 
   // Focus the first item when the menu opens via the keyboard, and only then:
   // this used to run on every open, so a pointer passing over the label pulled

@@ -4,6 +4,13 @@ Ditulis 10 Oktober 2026, setelah semua fase yang bisa dikerjakan punya draft PR 
 Rincian, output verifikasi mentah, dan keputusan per fase ada di `report-<fase>.md` di branch masing-masing.
 Keputusan Dika ada di `DECISIONS.md` (D1–D14 dari PRD, D15–D17 ditambahkan 10 Okt).
 
+**Pembaruan 10 Okt, setelah merge.** PR #59–#65 sudah merged (`main` @ `776803a`, CI hijau di setiap merge commit) dan
+production sudah dicek: Home menampilkan 21 kartu glimpse, `/about` mendarat di `/`, halaman FSLI memakai essay
+sebagai isi, Capital in Motion tanpa premise dan tanpa nama penulis, viewer working paper tampil. Temuan review Codex
+pada #60, #62, #63 dan #65 diperbaiki di satu PR susulan dari branch `claude/opus-site-sweep-d68k41`. Kolom
+"Menunggu" di §1 untuk merge sudah selesai; langkah migrasi, env, keputusan E, dan D14 di §2 masih berlaku. W tetap
+terblokir oleh D14.
+
 ## 1. Status
 
 | Fase | Isi | PR | CI | Menunggu |
@@ -134,7 +141,8 @@ menghitung ulang `MIN_TESTS` (aktual − 4), menggabungkan entri DECISIONS, memv
 - **Tes e2e flaky** `tests/e2e/chain.spec.ts:75`: gagal 2/40 juga dengan kode asli. Fase C memindahkan rutenya ke
   `/`; flakiness-nya belum diselidiki.
 - **Branch `world-v2/*`:** kelimanya sudah sepenuhnya di `main`.
-- **Branch sesi `claude/opus-site-sweep-d68k41`:** tidak dipakai, karena PR memakai nama branch PRD.
+- **Branch sesi `claude/opus-site-sweep-d68k41`:** PR fase memakai nama branch PRD; branch sesi dipakai untuk PR
+  susulan perbaikan review Codex.
 
 ## 6. Pertentangan yang dicatat (ringkas)
 

@@ -10,10 +10,9 @@ import { mockSupabase } from './mockSupabase';
  * on a phone, and never wider than the viewport. The stills the review needs
  * are written to GLIMPSE_SHOTS (default test-results/glimpse) at 1440 and 390.
  *
- * The shared mock answers every select with the whole table, which would
- * hand both of the homepage's reads every essay; this file answers the
- * essays table the way PostgREST does (filters, order, limit), so the order
- * on the page is the query's and not the seed's.
+ * The shared mock answers every select with the whole table, drafts and
+ * all; this file answers the essays table the way PostgREST does (filters,
+ * order, limit), so the order on the page is the query's and not the seed's.
  */
 const SHOTS = process.env.GLIMPSE_SHOTS ?? 'test-results/glimpse';
 const SECTIONS = ['finance', 'accounting', 'green-transition', 'next-big-thing', 'development-finance'];

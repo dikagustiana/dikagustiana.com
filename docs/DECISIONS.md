@@ -194,12 +194,20 @@ the order stays the owner's through Admin, and a new essay reaches the homepage 
   every other published essay newest first, and returns the first in front of the second, cut to
   `limit` (30 on the homepage, `GLIMPSE_LIMIT` in src/pages/Index.tsx). An essay starred between
   the two reads comes back from both and is shown once. The hook keeps its name and signature, so
-  no caller changed.
+  no caller changed. *(Superseded 2026-10-10, after review of PR #63: one read. Two reads were two
+  snapshots, so an essay starred or unstarred between them could come back from neither. The hook
+  now reads the published essays once, the database sorting the starred first in the owner's order,
+  puts the rest back in date order itself and stops the read at twice `limit`; its header says why.
+  `selectedOrder.test.tsx` stars an essay between two reads of the emulated table. After review of
+  PR #66, saving the homepage order ranks only rows still starred (`useSaveSelectedOrder`), so a
+  panel opened before an unstar cannot leave a rank on an unstarred essay, which would sort it ahead
+  of newer ones in the read; production held no such rank on 10 October 2026.)*
 - **The star decides who leads, not who is in.** `is_selected` is still the one featuring flag and
   `selected_rank` still the order, both set as before in Admin → Content → "Homepage order"; the
   panel's comments now say the unstarred follow newest first.
 - **The 42703 fallback stays on the starred read,** the only one that names the rank. The other
-  read never names it and needs none.
+  read never names it and needs none. *(Superseded 2026-10-10 with the two reads: the one read
+  falls back, without the rank.)*
 - **The Finance landing is not widened.** `useFeaturedFinanceEssay` still takes the first finance
   essay of the starred order (PRD R2.2); only the homepage row reads unstarred essays.
 - **Nothing published: the section is absent,** as it was with nothing starred.
@@ -209,7 +217,11 @@ Tests: `tests/unit/selectedOrder.test.tsx` runs the hook against an emulated ess
 the limit, the 42703 fallback, an essay returned by both reads); `tests/unit/glimpse.test.tsx`
 feeds the row from the homepage's own query (3 starred + 18 others); `tests/e2e/glimpse.spec.ts`
 seeds the production shape (3 starred, 18 not, a starred draft) through the production bundle and
-asserts all 21 columns in order, the draft nowhere.
+asserts all 21 columns in order, the draft nowhere. *(Superseded 2026-10-10 with the two reads: the
+test of an essay returned by both reads went with the duplicate filter. `selectedOrder.test.tsx` now
+also stars an essay between two reads of the emulated table, keeps the rest newest first when an
+unstarred essay still holds a rank, and cuts only what the row would not show when the read stops at
+twice the limit.)*
 
 Supersedes three passages of the 2026-10-09 entry "The homepage below the map is one row: the
 glimpse", each marked in place (line numbers at `0487609`, where the sweep's PRD counts them): "A

@@ -8,12 +8,13 @@ import { FsliMobileSidebar } from '@/components/fsli/FsliMobileSidebar';
 import { FsliCoveredBy } from '@/components/fsli/FsliCoveredBy';
 import { useFsliPage } from '@/hooks/queries/useFsliPages';
 import { useFsliEssayBodies } from '@/hooks/queries/useEssays';
+import { useFragmentOnArrival } from '@/hooks/useFragmentOnArrival';
 import { useAuth } from '@/contexts/AuthContext';
 import NotFound from './NotFound';
 import { ArticleBody } from '@/components/editorial/ArticleBody';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { LoadingState } from '@/components/states';
+import { ErrorState, LoadingState } from '@/components/states';
 import { buildFsliToc, fsliTocIds } from '@/lib/fsliToc';
 import { RefreshCw, ChevronRight, Pencil } from 'lucide-react';
 
@@ -49,13 +50,29 @@ export default function FsliDetail() {
   // Published essays linked to this line item, bodies included — the read
   // side of the FSLI authoring path (written in the studio, published here).
   // They ARE the page body.
-  const { data: linkedEssays, isLoading: essaysLoading } = useFsliEssayBodies(slug || '');
+  const {
+    data: linkedEssays,
+    isError: essaysError,
+    refetch: refetchEssays,
+  } = useFsliEssayBodies(slug || '');
+  // A failed read is not "no essay": read as zero rows, an outage removed the
+  // body and could put the covered-by sentence in its place. Rows from an
+  // earlier read, if there are any, still stand.
+  const essaysFailed = essaysError && !linkedEssays;
+  // Nor is a read still waiting for its rows. isLoading is false for one the
+  // query has paused because the browser is offline ("Try again" pressed
+  // offline, or a retry the connection dropped under), so only rows count as
+  // an answer.
+  const essaysLoading = !linkedEssays && !essaysFailed;
   const essays = useMemo(() => linkedEssays ?? [], [linkedEssays]);
 
   // "On this page": the essay's h2/h3 headings. The ids are minted here, for
   // the whole page, and handed to each ArticleBody so the body renders them.
   const toc = useMemo(() => buildFsliToc(essays.map((essay) => essay.content)), [essays]);
   const tocIds = useMemo(() => fsliTocIds(toc.entries), [toc]);
+  // A link to one of those headings (/accounting/fsli/cash#measurement) names
+  // one the essay read has not drawn when the browser looks for it.
+  useFragmentOnArrival();
 
   // Track the active heading on scroll — rAF-coalesced so the
   // getBoundingClientRect reads happen once per frame, not once per event.
@@ -116,7 +133,7 @@ export default function FsliDetail() {
   // No essay of its own: the page names the line item whose essay covers it,
   // if any (fsli_pages.covered_by_slug; absent before its migration). With
   // neither, the page ends at its figures — no outline, no empty state.
-  const coveredBy = !essaysLoading && essays.length === 0 ? item.covered_by_slug ?? null : null;
+  const coveredBy = !essaysLoading && !essaysFailed && essays.length === 0 ? item.covered_by_slug ?? null : null;
 
   return (
     <PageLayout variant="content" role="manager">
@@ -202,7 +219,7 @@ export default function FsliDetail() {
               )}
 
               {/* Divider — only above something. */}
-              {(essaysLoading || essays.length > 0 || coveredBy) && <hr className="border-border my-8" />}
+              {(essaysLoading || essaysFailed || essays.length > 0 || coveredBy) && <hr className="border-border my-8" />}
 
               {coveredBy && <FsliCoveredBy slug={coveredBy} />}
 
@@ -217,6 +234,8 @@ export default function FsliDetail() {
                   <div className="h-4 w-full rounded bg-muted animate-pulse" />
                   <div className="h-4 w-2/3 rounded bg-muted animate-pulse" />
                 </div>
+              ) : essaysFailed ? (
+                <ErrorState onRetry={() => void refetchEssays()} />
               ) : (
                 essays.map((essay, index) => (
                   <section key={essay.id} className="mb-12 last:mb-0" data-fsli-essay={essay.slug}>
@@ -237,8 +256,11 @@ export default function FsliDetail() {
               )}
             </div>
 
-            {/* Right Sidebar - On This Page */}
+            {/* Right Sidebar - On This Page. Keyed by line item: this page
+                stays mounted from one item to the next, and a search typed
+                on the last one must not filter this one's headings. */}
             <FsliOnThisPage
+              key={slug}
               sections={toc.entries}
               activeSection={activeSection}
             />
