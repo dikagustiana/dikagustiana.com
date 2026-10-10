@@ -167,6 +167,8 @@ export default function WorldFrame({ variant, heading, boardTicker = null, onBoa
   useEffect(() => { handle.current?.setOverlay(overlay); if (ready) handle.current?.setMarks(worldMarks); }, [overlay, ready, worldMarks]);
   useEffect(() => { if (ready && selection && (selection.kind === 'building' || selection.kind === 'company')) handle.current?.highlightChain(selection.id, fullChain ? 'all' : 1); }, [fullChain, ready, selection]);
   useEffect(() => { if (ready && handle.current) for (const l of LAYERS) handle.current.setLayer(l.layer, layers[l.layer]); }, [layers, ready]);
+  // the published flow classes arrive after the first paint: a lit story's hops are read again as the engine redrew them
+  useEffect(() => { const h = handle.current; if (ready && h && storyRef.current) setHops(h.storyHops()); }, [ready, data.flows]);
   // a story lit clears the selection first (its chain would replace the story's), then lights end to end and frames it
   useEffect(() => {
     const h = handle.current; if (!ready || !h) return;

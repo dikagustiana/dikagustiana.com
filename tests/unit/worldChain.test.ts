@@ -113,6 +113,32 @@ describe('the chain highlight (PRD v2 §3.9)', () => {
     expect(notes.has(found!.label)).toBe(true);
   });
 
+  it('draws every road a link’s goods take: every supplier lot to every customer lot, as the vehicles drive them', async () => {
+    await mount();
+    const link = LINKS.find((l) => l.from === 'A121' && l.to === 'B121')!;
+    const routes = window.world!.routes(link.from, link.to);
+    const pairs = new Set(routes.map((r) => `${r.from}>${r.to}`));
+    expect(routes.length).toBeGreaterThanOrEqual(2);
+    // no pair twice, and every vehicle on the link drives one of them
+    expect(pairs.size).toBe(routes.length);
+    let seen = 0;
+    for (let k = 0; k < 6 && seen < 4; k++) {
+      for (const v of window.world!.all().filter((e) => e.facts?.link === `${link.from}>${link.to}`)) { expect(pairs.has(`${v.facts!.from}>${v.facts!.to}`), `${v.facts!.from}>${v.facts!.to}`).toBe(true); seen++; }
+      window.world!.step(30);
+    }
+    expect(seen).toBeGreaterThan(0);
+  });
+
+  it('draws what is lit again when a measured class arrives later', async () => {
+    const { handle } = await mount();
+    handle.highlightChain(withLinks.code, 1);
+    expect(window.world!.chainDrawn().measured).toBe(0);
+    const l = linksFrom(withLinks.code)[0] ?? linksTo(withLinks.code)[0];
+    handle.setFlowWeights([{ from: l.from, to: l.to, cls: 'measured-light' }]);
+    expect(window.world!.chainDrawn().measured).toBe(1);
+    expect(window.world!.chain()[0]).toBe(withLinks.code);
+  });
+
   it('lights a selected vehicle’s route, ahead and behind, and its two lots only', async () => {
     const { handle } = await mount();
     const v = window.world!.all().find((e) => e.kind === 'vehicle' && e.facts && String(e.facts.link).includes('>'))!;

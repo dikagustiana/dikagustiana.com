@@ -36,7 +36,7 @@ const RAISE = 1.5;
 /** A link's way on the roads, from a supplier's lot to a customer's (sim/flows.ts gives them). */
 export interface ChainRoute { from: string; to: string; pts: readonly Pt[]; gates: readonly string[] }
 export interface ChainSource {
-  /** The roads a link's goods take: a route per supplier lot. */
+  /** The roads a link's goods take: every supplier lot to every customer lot. */
   routesOf(from: string, to: string): readonly ChainRoute[];
   /** The lot entity ids of a sub-industry. */
   lotsOf(code: string): readonly string[];
@@ -51,6 +51,9 @@ export interface Chain {
   set(id: string | null, depth: 1 | 'all'): void;
   /** Light a story end to end, and return its hops; null clears. */
   story(s: ChainStory | null): StoryHop[];
+  /** The lit story's hops as drawn now (a measured class arriving redraws them). */
+  hops(): StoryHop[];
+  /** The boundary's flow classes; whatever is lit is drawn again with them. */
   setFlows(flows: readonly FlowWeight[]): void;
   /** Codes in the lit chain, the selected one first; empty when nothing is lit. */
   codes(): string[];
@@ -109,6 +112,8 @@ export function createChain(ctx: EngineContext, links: readonly Link[], source: 
 
   let flows = new Map<string, FlowWeight['cls']>();
   let lit: string[] = [], counts = { measured: 0, expected: 0 }, routeCount = 0, outlined = 0, zoom = 1, offset = 0, box: Box | null = null;
+  /** What is lit, to draw again when the flow classes change: a selection's chain, or a story and its hops. */
+  let shown: { id: string; depth: 1 | 'all' } | { story: ChainStory; hops: StoryHop[] } | null = null;
   // dimming: shared theme materials are swapped for translucent clones on everything outside the chain
   const dims = new Map<THREE.Material, THREE.Material>();
   const swapped = new Map<Dimmable, THREE.Material | THREE.Material[]>();
@@ -192,6 +197,7 @@ export function createChain(ctx: EngineContext, links: readonly Link[], source: 
 
   function set(id: string | null, depth: 1 | 'all') {
     clearDraw();
+    shown = id ? { id, depth } : null;
     if (!id) return;
     const start = byId(id);
     if (start?.kind === 'vehicle') {
@@ -229,6 +235,7 @@ export function createChain(ctx: EngineContext, links: readonly Link[], source: 
   }
   function story(s: ChainStory | null): StoryHop[] {
     clearDraw();
+    shown = null;
     if (!s) return [];
     const hops: StoryHop[] = [], paths = [];
     const codes = new Set<string>([...s.hops, ...s.with]);
@@ -250,6 +257,7 @@ export function createChain(ctx: EngineContext, links: readonly Link[], source: 
     lit = [...codes];
     const lots = new Set<string>(); for (const c of codes) for (const x of source.lotsOf(c)) lots.add(x);
     draw(paths, lots, codes);
+    shown = { story: s, hops };
     return hops;
   }
   function update(z: number, dt = 0) {
@@ -261,7 +269,13 @@ export function createChain(ctx: EngineContext, links: readonly Link[], source: 
     if (swapped.size || routes.length) refresh();
   }
   return {
-    set, story, setFlows: (f) => { flows = new Map(f.map((x) => [flowKey(x.from, x.to), x.cls])); },
+    set, story,
+    hops: () => (shown && 'story' in shown ? [...shown.hops] : []),
+    setFlows: (f) => {
+      flows = new Map(f.map((x) => [flowKey(x.from, x.to), x.cls]));
+      // a class that arrives after something was lit (the published data loads after the first paint) redraws it
+      if (shown && 'story' in shown) story(shown.story); else if (shown) set(shown.id, shown.depth);
+    },
     codes: () => [...lit], drawn: () => ({ ...counts, routes: routeCount, outlined }), dimmed: () => swapped.size, bounds: () => (box ? { ...box } : null), offset: () => offset, update,
     dispose: () => {
       clearDraw();

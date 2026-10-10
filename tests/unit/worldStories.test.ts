@@ -47,6 +47,16 @@ describe('the stories (PRD v2 §3.10, D2)', () => {
     expect(window.world!.chainDrawn().measured).toBe(1);
   });
 
+  it('marks a lit story’s hop measured when its class arrives after the story was lit', async () => {
+    const { handle } = await mountWorld();
+    const hops = handle.lightStory(storyById('palm')!);
+    expect(hops.every((h) => !h.measured)).toBe(true);
+    handle.setFlowWeights([{ from: 'D232', to: 'D222', cls: 'measured-heavy' }]);
+    expect(handle.storyHops().map((h) => h.measured)).toEqual([true, false, false]);
+    expect(window.world!.chainDrawn().measured).toBe(1);
+    expect(window.world!.chain()).toEqual(expect.arrayContaining(['D232', 'D222', 'E711', 'D113']));
+  });
+
   it('gives way to a selection’s chain, and clearing the story then leaves that chain lit; a hop button frames its hop', async () => {
     const { handle } = await mountWorld();
     const s = storyById('palm')!;

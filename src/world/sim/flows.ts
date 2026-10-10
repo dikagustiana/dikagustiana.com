@@ -213,7 +213,7 @@ export interface FlowSystem {
   /** The gates with a vehicle at them now (on the plate or about to cross): their booms are up. */
   busyGates(): ReadonlySet<string>;
   cap(): number;
-  /** The roads a link's goods take: one route per supplier lot, each to a customer lot in turn; none when an end has no lot. */
+  /** The roads a link's goods take: every supplier lot to every customer lot; none when an end has no lot. */
   routesOf(from: string, to: string): LinkRoute[];
   /** The lot entity ids of a sub-industry: its companies' lots, else its first (an unplaced one has none). */
   lotsOf(code: string): string[];
@@ -565,19 +565,20 @@ export function createFlows(ctx: EngineContext, layout: GeneratedLayout, links: 
 
   const busy = new Set<string>(), weighbridges = layout.gates.filter((g) => g.weighbridge);
   const linkRoutes = new Map<string, LinkRoute[]>();
-  /** A link's routes on the roads (PRD v2 §3.9), one per supplier lot, cached. */
+  /** A link's routes on the roads (PRD v2 §3.9): every supplier lot to every customer lot, as its vehicles drive them, cached. */
   function routesOf(from: string, to: string): LinkRoute[] {
     const key = `${from}>${to}`, hit = linkRoutes.get(key); if (hit) return hit;
     // an unplaced end is the port, as for the flows
     const os = lotsOf(from), ds = lotsOf(to), origins = os.length ? os : quay, dests = ds.length ? ds : quay, out: LinkRoute[] = [];
-    origins.forEach((a, i) => {
-      const b = dests[i % dests.length]; if (a === b) return;
-      const ba = roads.bays(a.id), bb = roads.bays(b.id); if (!ba || !bb) return;
-      const r = roads.route(ba.despatch, bb.receiving); if (!r) return;
+    // spawn() sends each origin to each destination in turn, so every pair is a road the link's goods take
+    for (const a of origins) for (const b of dests) {
+      if (a === b) continue;
+      const ba = roads.bays(a.id), bb = roads.bays(b.id); if (!ba || !bb) continue;
+      const r = roads.route(ba.despatch, bb.receiving); if (!r) continue;
       const pts: Pt[] = []; for (let s = 0; s < r.length; s += ROUTE_STEP) { const p = r.path.at(s); pts.push([p.x, p.y]); }
       const end = r.path.at(r.length); pts.push([end.x, end.y]);
       out.push({ from: host.lotEntityId(a), to: host.lotEntityId(b), pts, gates: r.stops.map((x) => x.gate), length: r.length });
-    });
+    }
     linkRoutes.set(key, out);
     return out;
   }

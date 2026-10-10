@@ -214,6 +214,8 @@ export interface WorldHandle {
   lightStory(story: Story | null): LitHop[];
   /** Frame one hop of the lit story (the strip's hop buttons). */
   frameHop(i: number): void;
+  /** The lit story's hops as drawn now: a measured class that arrives later marks its hop. */
+  storyHops(): LitHop[];
   /** Light the entities whose id, code or chain id is named (a think-tank piece's tags); an empty list clears. */
   setHighlight(ids: readonly string[]): void;
   /** Open a company's plot as a section and mark its bound stations with the cost lines' labels (PRD §7.8). */

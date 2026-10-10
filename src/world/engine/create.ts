@@ -75,6 +75,8 @@ interface DebugApi {
   follow(): FollowReading | null;
   /** Space at a Follow's stop. */
   followNext(): void;
+  /** A link's routes, supplier lot to customer lot, and the gates each crosses. */
+  routes(from: string, to: string): { from: string; to: string; gates: string[] }[];
   /** The governance or regulation layer's pulses: how many, and where the first few stand along their links (0 supplier, 1 customer). */
   pulses(layer: 'governance' | 'regulation'): { count: number; along: number[] };
   statuses(): Record<string, ModelStatus>;
@@ -165,6 +167,7 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
   // the lit story's hops (PRD v2 §3.10); the joint a hop crosses is its gates' (the layout says which joint each gate carries)
   let story: StoryHop[] | null = null;
   const jointOf = new Map(options.layout.gates.map((g) => [g.id, g.jointId]));
+  const litHops = (hs: StoryHop[]): LitHop[] => hs.map((h) => ({ from: h.from, to: h.to, goods: h.goods, measured: h.measured, joints: [...new Set(h.gates.map((g) => jointOf.get(g)).filter((j): j is string => !!j))] }));
   const stations: Stations = createStations(ctx);
   // Follow (PRD v2 §3.10): rides a story's vehicles hop by hop, or one vehicle to its bay
   const follow: Follow = createFollow({
@@ -228,7 +231,7 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
     setMarks: (list) => marks.set(list),
     setLayer: (name, on) => { layers.set(name, on); flows.setLayer(name, on); activity.setLayer(name, on); },
     setModelStatus: (s) => { statuses = s; world.setStatuses(s); },
-    setFlowWeights: (weights: FlowWeight[]) => { flows.setFlows(weights); chain.setFlows(weights); },
+    setFlowWeights: (weights: FlowWeight[]) => { flows.setFlows(weights); chain.setFlows(weights); if (story) story = chain.hops(); },
     highlightChain: (id, depth) => {
       story = null;
       chain.set(id, depth);
@@ -240,8 +243,9 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
       if (!s) { if (story) { chain.story(null); story = null; } return []; }
       story = chain.story(s);
       const b = chain.bounds(); if (b) view.frame(b);
-      return story.map((h) => ({ from: h.from, to: h.to, goods: h.goods, measured: h.measured, joints: [...new Set(h.gates.map((g) => jointOf.get(g)).filter((j): j is string => !!j))] }));
+      return litHops(story);
     },
+    storyHops: () => (story ? litHops(story) : []),
     frameHop: (i) => { const b = story?.[i]?.box; if (b) view.frame(b); },
     setHighlight: (ids) => view.setHighlight(ids),
     exposeCompany: (ticker, bindings, whiteboard = null) => {
@@ -313,6 +317,7 @@ export function createWorld(container: HTMLElement, options: WorldOptions): Worl
       tick: (dt, render = true) => { last += dt * 1000; advance(Math.max(0, Math.min(FRAME_MAX, dt)), render); },
       follow: () => follow.reading(),
       followNext: () => follow.next(),
+      routes: (a, b) => flows.routesOf(a, b).map((r) => ({ from: r.from, to: r.to, gates: [...r.gates] })),
       pulses: (layer) => flows.pulses(layer),
       statuses: () => Object.fromEntries(statuses),
       chain: () => chain.codes(),
