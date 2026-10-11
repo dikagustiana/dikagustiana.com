@@ -1,11 +1,10 @@
 /**
- * The homepage after About (owner decisions D3(a), D4(a), 2026-10-10): the
- * map first, then the glimpse, then the revision of judgment, as the same
- * section with the same id it had on About, so a link to #changed-my-mind
- * still lands — and the page goes to it. The argument that came with it was
- * removed by owner decision on 2026-10-11: the glimpse is followed directly
- * by Changed my mind. The map is stubbed here (its own suites cover it);
- * everything under it is the real thing.
+ * The homepage: the map first, then the glimpse, and nothing after it. The
+ * two sections About left under the glimpse (owner decision D4(a),
+ * 2026-10-10), the argument and the revision of judgment, were removed by
+ * owner decision on 2026-10-11. A fragment that names a section of the page
+ * is still gone to once the page has drawn. The map is stubbed here (its own
+ * suites cover it); everything under it is the real thing.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { act, configure, render, screen, waitFor, within } from '@testing-library/react';
@@ -30,7 +29,6 @@ vi.mock('@/components/industry-chain', () => ({
 }));
 
 import Index from '@/pages/Index';
-import { CHANGED_MIND } from '@/data/changedMind';
 import { essayRow, essaysTable } from './helpers/essaysTable';
 
 // Generous waits: the full suite runs the world suites beside this one on four
@@ -52,7 +50,7 @@ const follows = (a: Element, b: Element) => (a.compareDocumentPosition(b) & Node
 beforeEach(() => fromMock.mockReset());
 
 describe('the homepage', () => {
-  it('follows the glimpse with the revision of judgment, and carries no argument section, with the map still first', async () => {
+  it('ends with the glimpse: the map first, then the row, and no argument or revision of judgment after it', async () => {
     fromMock.mockImplementation(essaysTable([essayRow(1, { is_selected: true, selected_rank: 1 }), essayRow(2)]).from);
     const { container } = mount();
     const glimpse = await screen.findByRole('list', { name: 'Glimpse' });
@@ -60,17 +58,14 @@ describe('the homepage', () => {
 
     const map = container.querySelector('#industry-chain')!;
     const glimpseSection = glimpse.closest('section')!;
-    const changed = container.querySelector('section#changed-my-mind')!;
-    expect(changed).not.toBeNull();
     expect(follows(map, glimpse)).toBe(true);
-    // nothing between the two: the next section after the glimpse is Changed my mind
-    expect(glimpseSection.nextElementSibling).toBe(changed);
-    expect(within(changed).getByRole('heading', { level: 2, name: CHANGED_MIND.heading })).toBeInTheDocument();
+    // the page's last section
+    expect(glimpseSection.nextElementSibling).toBeNull();
     expect(container.querySelector('main :is(h1, h2, h3)')!.textContent).toBe('The industry chain');
     expect(container.querySelector('#the-argument')).toBeNull();
     expect(screen.queryByText('The argument')).toBeNull();
-    // one of each: the page does not carry a second copy
-    expect(container.querySelectorAll('#changed-my-mind')).toHaveLength(1);
+    expect(container.querySelector('#changed-my-mind')).toBeNull();
+    expect(screen.queryByText('What I changed my mind about')).toBeNull();
   });
 
   it('goes to a fragment once nothing is fetching, and leaves a reader who has already scrolled where they are', async () => {
@@ -86,7 +81,7 @@ describe('the homepage', () => {
         </MemoryRouter>,
       );
 
-    const first = at('/#changed-my-mind');
+    const first = at('/#industry-chain');
     await waitFor(() => expect(scrollTo).toHaveBeenCalledTimes(1));
     expect(scrollTo.mock.calls[0][0]).toMatchObject({ behavior: 'smooth' });
     first.unmount();
@@ -101,7 +96,7 @@ describe('the homepage', () => {
 
     // a reader already on their way down is not pulled back
     Object.defineProperty(window, 'scrollY', { configurable: true, value: 400 });
-    at('/#changed-my-mind');
+    at('/#industry-chain');
     await screen.findByRole('list', { name: 'Glimpse' });
     await new Promise((r) => requestAnimationFrame(r));
     expect(scrollTo).not.toHaveBeenCalled();
@@ -155,15 +150,16 @@ describe('the homepage', () => {
     await new Promise((r) => requestAnimationFrame(r));
 
     // the skip link, or any in-page move, after arrival
-    act(() => go('/#changed-my-mind'));
+    act(() => go('/#industry-chain'));
     await new Promise((r) => requestAnimationFrame(r));
     expect(scrollTo).not.toHaveBeenCalled();
   });
 
-  it('keeps Changed my mind when nothing is published: the glimpse is absent, not empty', async () => {
+  it('is the map alone when nothing is published: the glimpse is absent, not empty', async () => {
     fromMock.mockImplementation(essaysTable([essayRow(1, { published: false, is_selected: true, selected_rank: 1 })]).from);
-    mount();
+    const { container } = mount();
     await waitFor(() => expect(screen.queryByRole('heading', { name: 'Glimpse' })).toBeNull());
-    expect(document.getElementById('changed-my-mind')).not.toBeNull();
+    expect(container.querySelectorAll('main > section')).toHaveLength(1);
+    expect(document.getElementById('industry-chain')).not.toBeNull();
   });
 });

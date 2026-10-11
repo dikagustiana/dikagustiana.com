@@ -1796,7 +1796,7 @@ export const ESSAY_ASSOCIATIONS: Record<string, readonly EssayAssociation[]> = {
       reads:
         'The case it is made on is processing capacity built for downstreaming \u2014 nickel smelting \u2014 and whether those assets are configured for the market they will have to sell into.',
       under: 'reindustrialisation',
-      basis: 'The homepage argument frame removed on 2026-10-11, as it stood at 2d37761 (caseStudy and claim); src/data/changedMind.ts revisedSource.',
+      basis: 'The homepage argument frame removed on 2026-10-11, as it stood at 2d37761 (caseStudy and claim); the homepage revision of judgment removed on 2026-10-11, as it stood at 1adf987 (revisedSource).',
     },
   ],
 };
