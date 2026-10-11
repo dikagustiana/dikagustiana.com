@@ -6,9 +6,13 @@ import { mockSupabase } from './mockSupabase';
  * The glimpse with a full row: every published essay from the mocked
  * backend, the three starred first in the owner's order and the eighteen
  * others newest first (owner decision D3(a), 2026-10-10), one column each,
- * scrolled by the buttons and by the keyboard on a wide screen and by swipe
- * on a phone, and never wider than the viewport. The stills the review needs
- * are written to GLIMPSE_SHOTS (default test-results/glimpse) at 1440 and 390.
+ * and never wider than the viewport. The row runs (owner decision,
+ * 2026-10-11): right to left at 30 px/s, looping on a frame identical to its
+ * start, stopped under the pointer and by keyboard focus, which brings the
+ * column it lands on to the page's margin. For a reader who asked for reduced
+ * motion it stands still, scrolled by the buttons and by the keyboard on a
+ * wide screen and by swipe on a phone. The stills the review needs are
+ * written to GLIMPSE_SHOTS (default test-results/glimpse) at 1440 and 390.
  *
  * The shared mock answers every select with the whole table, drafts and
  * all; this file answers the essays table the way PostgREST does (filters,
@@ -117,7 +121,8 @@ test('every published essay, the three starred first in the owner\'s order and t
   expect(errors).toEqual([]);
 });
 
-test('wide: 21 columns in the row, paged by the buttons and the arrow keys, each column one essay', async ({ page }) => {
+test('wide, reduced motion: 21 columns in a still row, paged by the buttons and the arrow keys, each column one essay', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.setViewportSize({ width: 1440, height: 900 });
   const { row, errors } = await open(page);
 
@@ -136,7 +141,7 @@ test('wide: 21 columns in the row, paged by the buttons and the arrow keys, each
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(1440);
 
   await row.scrollIntoViewIfNeeded();
-  await page.screenshot({ path: `${SHOTS}/home-1440.png` });
+  await page.screenshot({ path: `${SHOTS}/home-1440-still.png` });
 
   const back = page.getByRole('button', { name: 'Earlier in the row' });
   const forward = page.getByRole('button', { name: 'Further along the row' });
@@ -144,7 +149,7 @@ test('wide: 21 columns in the row, paged by the buttons and the arrow keys, each
   await forward.click();
   await expect.poll(() => row.evaluate((el) => el.scrollLeft)).toBeGreaterThan(500);
   await expect(back).toBeEnabled();
-  await page.screenshot({ path: `${SHOTS}/home-1440-scrolled.png` });
+  await page.screenshot({ path: `${SHOTS}/home-1440-still-scrolled.png` });
 
   // the keyboard: the row takes focus and the arrow keys move it
   await row.focus();
@@ -159,7 +164,8 @@ test('wide: 21 columns in the row, paged by the buttons and the arrow keys, each
   expect(errors).toEqual([]);
 });
 
-test('phone: the row swipes, the Sections list is gone, and nothing is wider than 390', async ({ page }) => {
+test('phone, reduced motion: the still row swipes, the Sections list is gone, and nothing is wider than 390', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.setViewportSize({ width: 390, height: 844 });
   const { row, errors } = await open(page);
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
@@ -170,12 +176,12 @@ test('phone: the row swipes, the Sections list is gone, and nothing is wider tha
   await expect(page.locator('main').getByText('Nothing written yet')).toHaveCount(0);
 
   await row.scrollIntoViewIfNeeded();
-  await page.screenshot({ path: `${SHOTS}/home-390.png` });
+  await page.screenshot({ path: `${SHOTS}/home-390-still.png` });
 
   // a swipe, as the touchscreen does it
   await row.evaluate((el) => el.scrollBy({ left: 600, behavior: 'instant' }));
   await expect.poll(() => row.evaluate((el) => el.scrollLeft)).toBeGreaterThan(500);
-  await page.screenshot({ path: `${SHOTS}/home-390-scrolled.png` });
+  await page.screenshot({ path: `${SHOTS}/home-390-still-scrolled.png` });
   expect(errors).toEqual([]);
 });
 
@@ -187,4 +193,124 @@ test('reduced motion: the buttons jump instead of gliding', async ({ page }) => 
   // an instant scroll has arrived by the next frame
   const after = await row.evaluate((el) => new Promise<number>((r) => requestAnimationFrame(() => r(el.scrollLeft))));
   expect(after).toBeGreaterThan(500);
+});
+
+/** The strip's offset along the row, in px (its transform's x). */
+const offset = (page: Page) =>
+  page.evaluate(() => new DOMMatrixReadOnly(getComputedStyle(document.querySelector('.glimpse__strip')!).transform).m41);
+
+/** The row's speed, in px/s, from samples a second apart, unwrapped at the loop point. */
+async function speed(page: Page, lap: number) {
+  const samples: { x: number; t: number }[] = [];
+  for (let i = 0; i < 4; i++) {
+    samples.push({ x: await offset(page), t: await page.evaluate(() => performance.now()) });
+    await page.waitForTimeout(1000);
+  }
+  const rates = samples.slice(1).map((s, i) => {
+    let moved = samples[i].x - s.x;
+    if (moved < 0) moved += lap;
+    return moved / ((s.t - samples[i].t) / 1000);
+  });
+  return rates.reduce((a, b) => a + b, 0) / rates.length;
+}
+
+for (const width of [1440, 390]) {
+  test(`${width}: the row runs right to left at 30 px/s, and the end of a lap is drawn exactly as its start`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 900 });
+    const { row, errors } = await open(page);
+    // the heading, not the row: a moving row is never still enough to scroll to
+    await page.locator('#glimpse-heading').scrollIntoViewIfNeeded();
+    await page.mouse.move(0, 0);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
+    // no buttons: nothing to page through
+    await expect(page.getByRole('button', { name: 'Further along the row' })).toHaveCount(0);
+
+    // the list twice; the second is hidden from screen readers and from Tab
+    const copy = page.locator('.glimpse__copy[aria-hidden="true"]');
+    await expect(copy.locator('li')).toHaveCount(21);
+    expect(await copy.locator('a').evaluateAll((links) => [...new Set(links.map((a) => a.getAttribute('tabindex')))])).toEqual(['-1']);
+    expect(await row.locator('a[tabindex]').count()).toBe(0);
+
+    // one lap is one copy: the strip is two copies wide, to the pixel
+    const lap = await page.evaluate(() => {
+      const [a, b] = [...document.querySelectorAll('.glimpse__copy')].map((c) => c.getBoundingClientRect());
+      const strip = document.querySelector('.glimpse__strip')!.getBoundingClientRect();
+      return { distance: b.left - a.left, half: strip.width / 2 };
+    });
+    expect(lap.distance).toBe(lap.half);
+
+    expect(Math.abs((await speed(page, lap.distance)) - 30)).toBeLessThan(2);
+    await page.screenshot({ path: `${SHOTS}/home-${width}.png` });
+
+    // the loop point: the frame at the end of a lap (-50%) and at its start
+    const frame = page.locator('.glimpse__marquee');
+    const at = (x: number) =>
+      page.evaluate((x) => {
+        const strip = document.querySelector<HTMLElement>('.glimpse__strip')!;
+        strip.style.animation = 'none';
+        strip.style.transform = `translateX(${x}px)`;
+      }, x);
+    await at(0);
+    const start = await frame.screenshot();
+    await at(-lap.distance);
+    const end = await frame.screenshot();
+    expect(end.equals(start)).toBe(true);
+    // and the comparison can fail: one gap off is a different picture
+    await at(-lap.distance + 32);
+    expect((await frame.screenshot()).equals(start)).toBe(false);
+    expect(errors).toEqual([]);
+  });
+}
+
+test('the row stops under the pointer and for keyboard focus, which brings the column to the page margin', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  const { row, errors } = await open(page);
+  // the heading, not the row: a moving row is never still enough to scroll to
+  await page.locator('#glimpse-heading').scrollIntoViewIfNeeded();
+  const frame = page.locator('.glimpse__marquee');
+
+  // the pointer over it stops it, and leaving starts it again
+  const box = (await frame.boundingBox())!;
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.waitForTimeout(200);
+  const held = await offset(page);
+  await page.waitForTimeout(1000);
+  expect(await offset(page)).toBe(held);
+  await page.mouse.move(0, 0);
+  await page.waitForTimeout(1000);
+  expect(await offset(page)).not.toBe(held);
+
+  // Tab into the row: it stops, and each column the focus lands on stands
+  // at the page's margin, under the heading, whole
+  const margin = await page.locator('#glimpse-heading').evaluate((h) => h.getBoundingClientRect().left);
+  await page.locator('#glimpse-heading').evaluate((h: HTMLElement) => {
+    h.tabIndex = -1;
+    h.focus();
+    h.removeAttribute('tabindex');
+  });
+  await page.keyboard.press('Tab');
+  await expect(row.getByRole('link').first()).toBeFocused();
+  for (const n of [2, 3, 10]) {
+    while (!(await row.getByRole('link').nth(n - 1).evaluate((a) => a === document.activeElement))) await page.keyboard.press('Tab');
+    const link = row.getByRole('link').nth(n - 1);
+    await expect(link).toContainText(`Essay ${n}:`);
+    const left = await link.evaluate((a) => a.getBoundingClientRect().left);
+    expect(Math.abs(left - margin)).toBeLessThan(1);
+    await expect(link).toBeInViewport({ ratio: 1 });
+    const stopped = await offset(page);
+    await page.waitForTimeout(500);
+    expect(await offset(page)).toBe(stopped);
+  }
+  await page.screenshot({ path: `${SHOTS}/home-1440-focus.png` });
+  expect(errors).toEqual([]);
+});
+
+test('reduced motion: the row stands still, drawn once, with no strip', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.setViewportSize({ width: 1440, height: 900 });
+  const { row } = await open(page);
+  await expect(page.locator('.glimpse__strip')).toHaveCount(0);
+  await expect(page.locator('.glimpse__copy[aria-hidden="true"]')).toHaveCount(0);
+  await expect(row).toHaveAttribute('tabindex', '0');
+  expect(await row.evaluate((el) => el.scrollWidth > el.clientWidth)).toBe(true);
 });

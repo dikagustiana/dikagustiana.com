@@ -1,10 +1,11 @@
 /**
  * The homepage after About (owner decisions D3(a), D4(a), 2026-10-10): the
- * map first, then the glimpse, then the argument in full and the revision of
- * judgment, as the same sections with the same ids they had on About, so a
- * link to #the-argument or #changed-my-mind still lands — and the page goes
- * to it. The map is stubbed here (its own suites cover it); everything under
- * it is the real thing.
+ * map first, then the glimpse, then the revision of judgment, as the same
+ * section with the same id it had on About, so a link to #changed-my-mind
+ * still lands — and the page goes to it. The argument that came with it was
+ * removed by owner decision on 2026-10-11: the glimpse is followed directly
+ * by Changed my mind. The map is stubbed here (its own suites cover it);
+ * everything under it is the real thing.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { act, configure, render, screen, waitFor, within } from '@testing-library/react';
@@ -29,7 +30,6 @@ vi.mock('@/components/industry-chain', () => ({
 }));
 
 import Index from '@/pages/Index';
-import { ARGUMENT, READING_PATH } from '@/data/readingPath';
 import { CHANGED_MIND } from '@/data/changedMind';
 import { essayRow, essaysTable } from './helpers/essaysTable';
 
@@ -52,43 +52,25 @@ const follows = (a: Element, b: Element) => (a.compareDocumentPosition(b) & Node
 beforeEach(() => fromMock.mockReset());
 
 describe('the homepage', () => {
-  it('carries the argument and the revision of judgment under the glimpse, with the map still first', async () => {
+  it('follows the glimpse with the revision of judgment, and carries no argument section, with the map still first', async () => {
     fromMock.mockImplementation(essaysTable([essayRow(1, { is_selected: true, selected_rank: 1 }), essayRow(2)]).from);
     const { container } = mount();
     const glimpse = await screen.findByRole('list', { name: 'Glimpse' });
     await waitFor(() => expect(within(glimpse).getAllByRole('listitem')).toHaveLength(2));
 
     const map = container.querySelector('#industry-chain')!;
-    const argument = container.querySelector('section#the-argument')!;
+    const glimpseSection = glimpse.closest('section')!;
     const changed = container.querySelector('section#changed-my-mind')!;
-    expect(argument).not.toBeNull();
     expect(changed).not.toBeNull();
     expect(follows(map, glimpse)).toBe(true);
-    expect(follows(glimpse, argument)).toBe(true);
-    expect(follows(argument, changed)).toBe(true);
-    expect(container.querySelector('main :is(h1, h2, h3)')!.textContent).toBe('The industry chain');
-    // one of each: the page does not carry a second copy of either
-    expect(container.querySelectorAll('#the-argument, #changed-my-mind')).toHaveLength(2);
-  });
-
-  it('carries the argument in full, not the compact form: the scope, the comparison, the objection and the limits', async () => {
-    fromMock.mockImplementation(essaysTable([]).from);
-    mount();
-    const argument = document.getElementById('the-argument')!;
-    expect(within(argument).getByRole('heading', { level: 2, name: ARGUMENT.question })).toBeInTheDocument();
-    for (const term of [
-      'The case it is made on',
-      'What is being compared',
-      'The strongest objection',
-      'What would change my mind',
-      'What the evidence does not cover',
-    ]) {
-      expect(within(argument).getByText(term)).toBeInTheDocument();
-    }
-    // every step, written or not
-    await waitFor(() => expect(within(argument).getAllByText('Not written')).toHaveLength(READING_PATH.length));
-    const changed = document.getElementById('changed-my-mind')!;
+    // nothing between the two: the next section after the glimpse is Changed my mind
+    expect(glimpseSection.nextElementSibling).toBe(changed);
     expect(within(changed).getByRole('heading', { level: 2, name: CHANGED_MIND.heading })).toBeInTheDocument();
+    expect(container.querySelector('main :is(h1, h2, h3)')!.textContent).toBe('The industry chain');
+    expect(container.querySelector('#the-argument')).toBeNull();
+    expect(screen.queryByText('The argument')).toBeNull();
+    // one of each: the page does not carry a second copy
+    expect(container.querySelectorAll('#changed-my-mind')).toHaveLength(1);
   });
 
   it('goes to a fragment once nothing is fetching, and leaves a reader who has already scrolled where they are', async () => {
@@ -119,7 +101,7 @@ describe('the homepage', () => {
 
     // a reader already on their way down is not pulled back
     Object.defineProperty(window, 'scrollY', { configurable: true, value: 400 });
-    at('/#the-argument');
+    at('/#changed-my-mind');
     await screen.findByRole('list', { name: 'Glimpse' });
     await new Promise((r) => requestAnimationFrame(r));
     expect(scrollTo).not.toHaveBeenCalled();
@@ -178,11 +160,10 @@ describe('the homepage', () => {
     expect(scrollTo).not.toHaveBeenCalled();
   });
 
-  it('keeps the argument when nothing is published: the glimpse is absent, not empty', async () => {
+  it('keeps Changed my mind when nothing is published: the glimpse is absent, not empty', async () => {
     fromMock.mockImplementation(essaysTable([essayRow(1, { published: false, is_selected: true, selected_rank: 1 })]).from);
     mount();
     await waitFor(() => expect(screen.queryByRole('heading', { name: 'Glimpse' })).toBeNull());
-    expect(document.getElementById('the-argument')).not.toBeNull();
     expect(document.getElementById('changed-my-mind')).not.toBeNull();
   });
 });

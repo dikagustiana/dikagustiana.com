@@ -142,8 +142,9 @@ test.beforeEach(async ({ page }) => seed(page));
  * landing page; the map is the first thing under the header, and the reader
  * goes deeper into a relation through the essays. So the thirty-second
  * journey is: meet the structure, pick something, land on a written piece.
- * The argument is not deleted — it sits under the glimpse, which the next
- * test checks (owner decision D4(a), 2026-10-10) — it is no longer the door.
+ * The argument block, moved under the glimpse when About went (owner
+ * decision D4(a), 2026-10-10), was removed from the homepage by owner
+ * decision on 2026-10-11.
  */
 test('thirty seconds: the map is the entrance, and a completed piece is one click away', async ({ page }) => {
   await page.goto('/');
@@ -153,13 +154,6 @@ test('thirty seconds: the map is the entrance, and a completed piece is one clic
   await expect(page.getByRole('link', { name: /Start with the argument/i })).toHaveCount(0);
   const first = page.locator('main :is(h1, h2, h3)').first();
   expect(await first.textContent()).toBe('The industry chain');
-  // The argument is on the page, but after the map and the glimpse, not before.
-  const argumentFollowsMap = await page.evaluate(() => {
-    const map = document.querySelector('#industry-chain');
-    const argument = document.querySelector('#the-argument');
-    return !!map && !!argument && !!(map.compareDocumentPosition(argument) & Node.DOCUMENT_POSITION_FOLLOWING);
-  });
-  expect(argumentFollowsMap).toBe(true);
 
   const flagship = page
     .getByRole('link', { name: /Indonesia.s Reindustrialization Bet/i })
@@ -170,37 +164,15 @@ test('thirty seconds: the map is the entrance, and a completed piece is one clic
   );
 });
 
-test('three minutes: the scope, the comparison, the objection and the limits are all on the page', async ({ page }) => {
-  await page.goto('/');
-  const argument = page.locator('#the-argument');
-  for (const heading of [
-    'The case it is made on',
-    'What is being compared',
-    'The strongest objection',
-    'What would change my mind',
-    'What the evidence does not cover',
-  ]) {
-    await expect(argument).toContainText(heading);
-  }
-
-  // An unfinished argument that looks finished is the failure this guards.
-  // Scoped and exact: the phrase also opens both gap explanations and the
-  // heading in the revision section, and getByText is a case-insensitive
-  // substring match.
-  await expect(argument.getByText('Not written', { exact: true })).toHaveCount(2);
-  await expect(page.locator('#changed-my-mind')).toBeVisible();
-});
-
 /**
- * About was removed by owner decision on 10 October 2026 and its argument
- * moved to the homepage. A link written before that still lands: on Home,
- * with the map's address and the fragment it carried.
+ * About was removed by owner decision on 10 October 2026 and what it
+ * carried moved to the homepage. A link written before that still lands: on
+ * Home, with the map's address and the fragment it carried.
  */
 test('an old About link lands on the homepage, with the address and the fragment it carried', async ({ page }) => {
   await page.goto('/about');
   await expect.poll(() => new URL(page.url()).pathname).toBe('/');
   await expect(page.getByRole('heading', { name: 'The industry chain', exact: true })).toBeVisible();
-  await expect(page.locator('#the-argument')).toBeVisible();
   await expect(page.locator('#changed-my-mind')).toBeVisible();
 
   await page.goto('/about?lens=green&distance=finance&node=energy');

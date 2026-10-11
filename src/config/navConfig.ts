@@ -80,11 +80,10 @@ export const nextBigThingItems: NavItem[] = NEXT_BIG_THING_THEMES.map(({ id, lab
 
 export const navSections: NavSection[] = [
   /**
-   * Home carries the argument in full — the case, the comparison, the
-   * strongest objection, the limits, the revision of judgment — under the
-   * glimpse. It used to be About's, the second door in this row; the owner
-   * removed About on 10 October 2026 (decision D4(a)) and the argument moved
-   * to the page every reader already lands on, so there is no About door.
+   * Home carries the revision of judgment under the glimpse. It used to be
+   * About's, the second door in this row; the owner removed About on
+   * 10 October 2026 (decision D4(a)) and what it carried moved to the page
+   * every reader already lands on, so there is no About door.
    */
   { label: 'Home', path: '/' },
   {

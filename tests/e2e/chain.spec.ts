@@ -400,8 +400,8 @@ test('/ at 1280px opens at the overview, with the map first on the page and the 
   // NOTHING PRECEDES THE MAP. The hero, its artwork, the argument block and
   // the reading path are gone from the entrance by owner decision, so the
   // map's own title is the page's main heading and the first heading in the
-  // document. What was there is not deleted, only moved: the argument and the
-  // reading path sit under the glimpse, below the map.
+  // document. The argument and the reading path moved under the glimpse,
+  // and were then removed from the homepage by owner decision (2026-10-11).
   const title = page.getByRole('heading', { name: TITLE, exact: true });
   await expect(title).toHaveRole('heading');
   expect(await title.evaluate((el) => el.tagName)).toBe('H1');
