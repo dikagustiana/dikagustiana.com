@@ -39,9 +39,7 @@ const FinanceWorkspace = lazy(() => import("./pages/FinanceWorkspace"));
 const GreenTransitionPhase = lazy(() => import("./pages/GreenTransitionPhase"));
 const GreenTransitionEssayPage = lazy(() => import("./pages/GreenTransitionEssayPage"));
 const GreenTransitionTracker = lazy(() => import("./pages/GreenTransitionTracker"));
-const GreenTransitionTrackerDetail = lazy(() => import("./pages/GreenTransitionTrackerDetail"));
-const GreenTransitionTrackerArchive = lazy(() => import("./pages/GreenTransitionTrackerArchive"));
-const GreenTransitionTrackerEssay = lazy(() => import("./pages/GreenTransitionTrackerEssay"));
+const GreenTransitionCurrentCondition = lazy(() => import("./pages/GreenTransitionCurrentCondition"));
 
 // Learning
 const CriticalThinkingResearch = lazy(() => import("./pages/CriticalThinkingResearch"));
@@ -143,6 +141,17 @@ const AboutRedirect = () => {
   return <Navigate to={{ pathname: '/', search, hash }} replace />;
 };
 
+// The tracker became one page on 11 October 2026 (docs/spec/01_PRD.md, Part B).
+// Its old issue pages land on the issue's section of that page; the archive and
+// the 22 entry pages, whose content was rewritten or deleted, land on the page
+// itself (owner's answer, docs/spec/00_discovery.md §9).
+const TRACKER_ISSUE_ANCHORS = new Set(['q1-2025', 'q2-2025']);
+const TrackerIssueRedirect = () => {
+  const { issueSlug } = useParams();
+  const hash = issueSlug && TRACKER_ISSUE_ANCHORS.has(issueSlug) ? `#${issueSlug}` : '';
+  return <Navigate to={{ pathname: '/green-transition/tracker', hash }} replace />;
+};
+
 const RouteFallback = () => (
   <div className="flex items-center justify-center min-h-screen">
     <LoadingState />
@@ -215,9 +224,10 @@ const App = () => (
             <Route path="/green-transition/climate-finance" element={<ClimateFinance />} />
             <Route path="/green-transition/climate-finance/:slug" element={<GreenTransitionEssayPage />} />
             <Route path="/green-transition/tracker" element={<GreenTransitionTracker />} />
-            <Route path="/green-transition/tracker/archive" element={<GreenTransitionTrackerArchive />} />
-            <Route path="/green-transition/tracker/:issueSlug/:sectionKey/:entrySlug" element={<GreenTransitionTrackerEssay />} />
-            <Route path="/green-transition/tracker/:issueSlug" element={<GreenTransitionTrackerDetail />} />
+            <Route path="/green-transition/tracker/archive" element={<Navigate to="/green-transition/tracker" replace />} />
+            <Route path="/green-transition/tracker/:issueSlug/:sectionKey/:entrySlug" element={<Navigate to="/green-transition/tracker" replace />} />
+            <Route path="/green-transition/tracker/:issueSlug" element={<TrackerIssueRedirect />} />
+            <Route path="/green-transition/current-condition" element={<GreenTransitionCurrentCondition />} />
             <Route path="/green-transition/now" element={<GreenTransitionPhase />} />
             <Route path="/green-transition/gaps" element={<GreenTransitionPhase />} />
             <Route path="/green-transition/future" element={<GreenTransitionPhase />} />

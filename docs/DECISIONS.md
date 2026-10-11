@@ -5,6 +5,43 @@ alternatives. Newest first.
 
 ---
 
+# 2026-10-11 — The Green Transition Tracker is rebuilt as a sourced register
+
+Branch `claude/sharp-noether-a2fkj7`, PR #69. Spec: `docs/spec/01_PRD.md` Part B and
+`docs/spec/02_PLAN.md` PR 2; owner decisions D5–D7 there are closed.
+
+## Rewritten with primary sources, not corrected in place — supersedes 2026-09-14
+
+- **What changed.** The 2026-09-14 response kept every entry body as published and rendered dated
+  corrections above it, with a fourth evidence state, "author observation"
+  (`docs/response-2026-09-14/tracker-claim-ledger.md`). D6 replaces that: Q1 and Q2 2025 are
+  rewritten from primary documents, and a claim with no primary source is deleted, not softened.
+- **Result.** All 30 claims on the old page were listed for deletion with their wording quoted
+  (`docs/spec/tracker_sources.md`, Part B); 14 new entries, one per sector per quarter, were
+  written from the documents and signed off by the owner on 11 October 2026. The old text and its
+  corrections stay in git history (`src/data/trackerIssues.ts` at `db79c55`).
+
+## The register lives in the database
+
+- `public.tracker_entry` (migration `20261011100000`), seeded from
+  `supabase/content/tracker_entries.json` by `scripts/tracker/seed.mjs`. The JSON's entry text is
+  copied from the signed-off file; the seed lands with `published = false`, and a later migration
+  publishes it once the page has been reviewed on the preview deployment.
+- RLS shows an admin the unpublished rows, so the preview can be reviewed while signed in; readers
+  see published rows only.
+
+## One page; the old routes redirect
+
+- `/green-transition/tracker` stays (D5). `/tracker/q1-2025` and `/tracker/q2-2025` land on that
+  issue's section of the page; `/tracker/archive` and the 22 entry pages land on the page.
+- Typography per the owner's answer: issue bodies in the sans face at the essay size (19px) under
+  serif headings; the column is the essay column (728px). No monospace and no bordered cards on
+  the route.
+- `/green-transition/current-condition` is a stub index for the essay series the tracker now
+  belongs to. Its one essay shows as a title until it is published, then as a link.
+
+---
+
 # 2026-10-11 — The homepage's argument is removed; the glimpse runs
 
 Branch `claude/landing-argument-glimpse-marquee-fy7m4s`, base `main` @ `2d37761`. Owner request,
