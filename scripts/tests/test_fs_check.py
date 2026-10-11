@@ -366,17 +366,17 @@ class Structure(unittest.TestCase):
     def test_the_soce_is_required(self):
         data = fixture()
         data['soce_cells'] = []
-        self.assertFails(data, 'STRUCT:present')
+        self.assertFails(data, 'STRUCT:soce:present')
 
     def test_the_soce_needs_its_total_columns(self):
         data = fixture()
         data['soce_cells'] = [c for c in data['soce_cells'] if c['col_key'] != 'nci']
-        self.assertFails(data, 'STRUCT:columns')
+        self.assertFails(data, 'STRUCT:soce:columns')
 
     def test_the_soce_needs_two_balances(self):
         data = fixture()
         data['soce_cells'] = [c for c in data['soce_cells'] if c['row_key'] not in ('balance_2022', 'balance_2023')]
-        self.assertFails(data, 'STRUCT:balances')
+        self.assertFails(data, 'STRUCT:soce:balances')
 
     def test_period_fields(self):
         data = fixture()

@@ -562,13 +562,13 @@ def index_soce(cells, pages, col: Collector):
         if cols.setdefault(ck, col_sig) != col_sig:
             col.fail('STRUCT', 'soce', ref, f'column {ck} has differing order or labels across its cells', 'soce')
     if not grid:
-        col.fail('STRUCT', 'soce', 'present', 'no statement of changes in equity')
+        col.fail('STRUCT', 'soce', 'soce:present', 'no statement of changes in equity', 'soce')
     else:
         missing = [c for c in SOCE_TOTALS if c not in cols]
         if missing:
-            col.fail('STRUCT', 'soce', 'columns', f'missing column(s): {", ".join(missing)}', 'soce')
+            col.fail('STRUCT', 'soce', 'soce:columns', f'missing column(s): {", ".join(missing)}', 'soce')
         if len([r for r in rows if BALANCE_ROW.match(r)]) < 2:
-            col.fail('STRUCT', 'soce', 'balances', 'needs an opening and a closing balance_<year> row', 'soce')
+            col.fail('STRUCT', 'soce', 'soce:balances', 'needs an opening and a closing balance_<year> row', 'soce')
     return grid, rows, cols
 
 

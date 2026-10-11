@@ -1036,6 +1036,36 @@ export type Database = {
       }
     }
     Functions: {
+      fs_publish_period: {
+        Args: { p_period_id: string }
+        Returns: {
+          failed: number
+          published: boolean
+          rules: number
+          run_at: string
+        }[]
+      }
+      fs_run_publish_gate: {
+        Args: { p_period_id: string }
+        Returns: {
+          failed: number
+          published: boolean
+          rules: number
+          run_at: string
+        }[]
+      }
+      fs_tieout: {
+        Args: { p_period_id: string }
+        Returns: {
+          actual: number
+          description: string
+          diff: number
+          expected: number
+          passed: boolean
+          rule_id: string
+          statement: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

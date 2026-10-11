@@ -8,6 +8,9 @@
 --   psql -d dry -f supabase/migrations/20261011170000_fs_printed_differences_soce_notes.sql
 --   psql -d dry -f docs/db/verify/03_fs_acceptance.sql
 --
+-- It runs as well after the later fs_* migrations (the PHE FY2024 load, the
+-- publish gate); 04_fs_publish_gate.sql covers those.
+--
 -- Every check raises on failure, so a clean run prints only PASS lines and the
 -- script exits 0. Everything it writes is rolled back. Fixture users match
 -- 01_rls_acceptance.sql. The fixture company and figures are invented.
@@ -23,6 +26,11 @@ INSERT INTO public.user_roles (user_id, role)
   VALUES ('00000000-0000-0000-0000-0000000000a1', 'admin') ON CONFLICT DO NOTHING;
 
 BEGIN;
+
+-- The counts below are the fixture's alone: periods a load migration put here
+-- (20261011180000, PHE FY2024) are set aside for the run, which rolls back.
+DELETE FROM public.fs_period;
+DELETE FROM public.fs_company;
 
 -- ---------------------------------------------------------------- fixture
 -- Written as the table owner, as the loader's migration is. Two companies:

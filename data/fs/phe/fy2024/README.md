@@ -110,3 +110,15 @@ The net decrease the FS prints, (2,384,682), is the one its operating items give
 `printed_difference` with its reason; the checker passes those two foots at exactly the
 declared difference and at no other, so a one-unit error anywhere, these rows included, still
 fails (discovery §19).
+
+## Loaded and published
+
+| Step | What ran | Result |
+|---|---|---|
+| Load (Plan 1.5) | `supabase/migrations/20261011180000_fs_phe_fy2024_load.sql`, written by `scripts/fs_load.mjs` from this folder's `statements.json` and `checks.json` | 1 draft period, 142 lines, 130 SoCE cells, the checker's 175 results; the migration's own hash check passed |
+| Publish (Plan 1.7) | `fs_run_publish_gate()` on 11 October 2026, 16:38:41 UTC | `fs_tieout()` re-ran 125 rules on the stored rows, 0 failed; status `published` |
+
+The 125 are the checker's rules that read only stored rows. They match the checker's run, rule
+id, figures and description, on every one of the 125 (`docs/db/verify/04_fs_publish_gate.sql`).
+The other 50 (LABEL, PAGE, SIGN, GOLDEN, STRUCT:header) ran in the checker before the load and
+stay in `fs_check` as the period's first run.
