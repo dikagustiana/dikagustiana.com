@@ -1,0 +1,1682 @@
+{
+  "checker": "scripts/fs_check.py",
+  "input": "data/fs/phe/fy2024/statements.json",
+  "input_sha256": "1296a2b013e864cd68fc02a92c5a3246352dcda307a5a1bb40fa2fdcdd8e2833",
+  "golden": "data/fs/phe/fy2024/golden.json",
+  "golden_sha256": "51d957d9dfa331eadf6b5d4c86221e27df00e48fe959daee553e790b7855f13a",
+  "passed": true,
+  "counts": {
+    "rules": 175,
+    "passed": 175,
+    "failed": 0
+  },
+  "results": [
+    {
+      "rule_id": "STRUCT:header",
+      "statement": null,
+      "description": "company and period fields are present and well-formed (9 checked)",
+      "expected": null,
+      "actual": null,
+      "diff": null,
+      "passed": true
+    },
+    {
+      "rule_id": "STRUCT:sofp",
+      "statement": "sofp",
+      "description": "lines are well-formed and every parent is a subtotal or total (83 checked)",
+      "expected": null,
+      "actual": null,
+      "diff": null,
+      "passed": true
+    },
+    {
+      "rule_id": "LABEL:sofp",
+      "statement": "sofp",
+      "description": "every line has label_id and label_en (83 checked)",
+      "expected": null,
+      "actual": null,
+      "diff": null,
+      "passed": true
+    },
+    {
+      "rule_id": "PAGE:sofp",
+      "statement": "sofp",
+      "description": "every line has its PDF page (83 checked)",
+      "expected": null,
+      "actual": null,
+      "diff": null,
+      "passed": true
+    },
+    {
+      "rule_id": "COVER:sofp",
+      "statement": "sofp",
+      "description": "every item sums into a row or feeds a named rule (57 checked)",
+      "expected": null,
+      "actual": null,
+      "diff": null,
+      "passed": true
+    },
+    {
+      "rule_id": "STRUCT:pl_oci",
+      "statement": "pl_oci",
+      "description": "lines are well-formed and every parent is a subtotal or total (32 checked)",
+      "expected": null,
+      "actual": null,
+      "diff": null,
+      "passed": true
+    },
+    {
+      "rule_id": "LABEL:pl_oci",
+      "statement": "pl_oci",
+      "description": "every line has label_id and label_en (32 checked)",
+      "expected": null,
+      "actual": null,
+      "diff": null,
+      "passed": true
+    },
+    {
+      "rule_id": "PAGE:pl_oci",
+      "statement": "pl_oci",
+      "description": "every line has its PDF page (32 checked)",
+      "expected": null,
+      "actual": null,
+      "diff": null,
+      "passed": true
+    },
+    {
+      "rule_id": "COVER:pl_oci",
+      "statement": "pl_oci",
+      "description": "every item sums into a row or feeds a named rule (19 checked)",
+      "expected": null,
+      "actual": null,
+      "diff": null,
+      "passed": true
+    },
+    {
+      "rule_id": "STRUCT:cf",
+      "statement": "cf",
+      "description": "lines are well-formed and every parent is a subtotal or total (27 checked)",
+      "expected": null,
+      "actual": null,
+      "diff": null,
+      "passed": true
+    },
+    {
+      "rule_id": "LABEL:cf",
+      "statement": "cf",
+      "description": "every line has label_id and label_en (27 checked)",
+      "expected": null,
+      "actual": null,
+      "diff": null,
+      "passed": true
+    },
+    {
+      "rule_id": "PAGE:cf",
+      "statement": "cf",
+      "description": "every line has its PDF page (27 checked)",
+      "expected": null,
+      "actual": null,
+      "diff": null,
+      "passed": true
+    },
+    {
+      "rule_id": "COVER:cf",
+      "statement": "cf",
+      "description": "every item sums into a row or feeds a named rule (19 checked)",
+      "expected": null,
+      "actual": null,
+      "diff": null,
+      "passed": true
+    },
+    {
+      "rule_id": "STRUCT:soce",
+      "statement": "soce",
+      "description": "cells are well-formed, with the balance rows and total columns (130 checked)",
+      "expected": null,
+      "actual": null,
+      "diff": null,
+      "passed": true
+    },
+    {
+      "rule_id": "LABEL:soce",
+      "statement": "soce",
+      "description": "every cell has row and column labels in both languages (130 checked)",
+      "expected": null,
+      "actual": null,
+      "diff": null,
+      "passed": true
+    },
+    {
+      "rule_id": "PAGE:soce",
+      "statement": "soce",
+      "description": "every cell has its PDF page (130 checked)",
+      "expected": null,
+      "actual": null,
+      "diff": null,
+      "passed": true
+    },
+    {
+      "rule_id": "FOOT:sofp:total_current_assets:cy",
+      "statement": "sofp",
+      "description": "Total Current Assets = sum of its 12 rows (2024)",
+      "expected": 8036328,
+      "actual": 8036328,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "FOOT:sofp:total_current_assets:py",
+      "statement": "sofp",
+      "description": "Total Current Assets = sum of its 12 rows (2023)",
+      "expected": 9879695,
+      "actual": 9879695,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "FOOT:sofp:total_non_current_assets:cy",
+      "statement": "sofp",
+      "description": "Total Non-current Assets = sum of its 13 rows (2024)",
+      "expected": 22398627,
+      "actual": 22398627,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "FOOT:sofp:total_non_current_assets:py",
+      "statement": "sofp",
+      "description": "Total Non-current Assets = sum of its 13 rows (2023)",
+      "expected": 21009221,
+      "actual": 21009221,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "FOOT:sofp:total_assets:cy",
+      "statement": "sofp",
+      "description": "TOTAL ASSETS = sum of its 2 rows (2024)",
+      "expected": 30434955,
+      "actual": 30434955,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "FOOT:sofp:total_assets:py",
+      "statement": "sofp",
+      "description": "TOTAL ASSETS = sum of its 2 rows (2023)",
+      "expected": 30888916,
+      "actual": 30888916,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "FOOT:sofp:total_current_liabilities:cy",
+      "statement": "sofp",
+      "description": "Total Current Liabilities = sum of its 15 rows (2024)",
+      "expected": 6158999,
+      "actual": 6158999,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "FOOT:sofp:total_current_liabilities:py",
+      "statement": "sofp",
+      "description": "Total Current Liabilities = sum of its 15 rows (2023)",
+      "expected": 6017916,
+      "actual": 6017916,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "FOOT:sofp:total_non_current_liabilities:cy",
+      "statement": "sofp",
+      "description": "Total Non-current Liabilities = sum of its 10 rows (2024)",
+      "expected": 9168604,
+      "actual": 9168604,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "FOOT:sofp:total_non_current_liabilities:py",
+      "statement": "sofp",
+      "description": "Total Non-current Liabilities = sum of its 10 rows (2023)",
+      "expected": 10692445,
+      "actual": 10692445,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "FOOT:sofp:total_liabilities:cy",
+      "statement": "sofp",
+      "description": "TOTAL LIABILITIES = sum of its 2 rows (2024)",
+      "expected": 15327603,
+      "actual": 15327603,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "FOOT:sofp:total_liabilities:py",
+      "statement": "sofp",
+      "description": "TOTAL LIABILITIES = sum of its 2 rows (2023)",
+      "expected": 16710361,
+      "actual": 16710361,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "FOOT:sofp:equity_parent:cy",
+      "statement": "sofp",
+      "description": "Total equity attributable to the owners of the parent = sum of its 6 rows (2024)",
+      "expected": 14433117,
+      "actual": 14433117,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "FOOT:sofp:equity_parent:py",
+      "statement": "sofp",
+      "description": "Total equity attributable to the owners of the parent = sum of its 6 rows (2023)",
+      "expected": 13534126,
+      "actual": 13534126,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "FOOT:sofp:total_equity:cy",
+      "statement": "sofp",
+      "description": "TOTAL EQUITY = sum of its 2 rows (2024)",
+      "expected": 15107352,
+      "actual": 15107352,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "FOOT:sofp:total_equity:py",
+      "statement": "sofp",
+      "description": "TOTAL EQUITY = sum of its 2 rows (2023)",
+      "expected": 14178555,
+      "actual": 14178555,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "FOOT:sofp:total_liabilities_and_equity:cy",
+      "statement": "sofp",
+      "description": "TOTAL LIABILITIES AND EQUITY = sum of its 2 rows (2024)",
+      "expected": 30434955,
+      "actual": 30434955,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "FOOT:sofp:total_liabilities_and_equity:py",
+      "statement": "sofp",
+      "description": "TOTAL LIABILITIES AND EQUITY = sum of its 2 rows (2023)",
+      "expected": 30888916,
+      "actual": 30888916,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "FOOT:pl_oci:total_cost_of_revenue:cy",
+      "statement": "pl_oci",
+      "description": "Total costs of revenue = sum of its 5 rows (2024)",
+      "expected": -9330714,
+      "actual": -9330714,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "FOOT:pl_oci:total_cost_of_revenue:py",
+      "statement": "pl_oci",
+      "description": "Total costs of revenue = sum of its 5 rows (2023)",
+      "expected": -8917865,
+      "actual": -8917865,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "FOOT:pl_oci:gross_profit:cy",
+      "statement": "pl_oci",
+      "description": "GROSS PROFIT = sum of its 2 rows (2024)",
+      "expected": 4999626,
+      "actual": 4999626,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "FOOT:pl_oci:gross_profit:py",
+      "statement": "pl_oci",
+      "description": "GROSS PROFIT = sum of its 2 rows (2023)",
+      "expected": 5650519,
+      "actual": 5650519,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "FOOT:pl_oci:profit_before_tax:cy",
+      "statement": "pl_oci",
+      "description": "PROFIT BEFORE INCOME TAX = sum of its 6 rows (2024)",
+      "expected": 4892576,
+      "actual": 4892576,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "FOOT:pl_oci:profit_before_tax:py",
+      "statement": "pl_oci",
+      "description": "PROFIT BEFORE INCOME TAX = sum of its 6 rows (2023)",
+      "expected": 4492029,
+      "actual": 4492029,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "FOOT:pl_oci:profit_for_the_year:cy",
+      "statement": "pl_oci",
+      "description": "PROFIT FOR THE YEAR = sum of its 2 rows (2024)",
+      "expected": 3121035,
+      "actual": 3121035,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "FOOT:pl_oci:profit_for_the_year:py",
+      "statement": "pl_oci",
+      "description": "PROFIT FOR THE YEAR = sum of its 2 rows (2023)",
+      "expected": 2725538,
+      "actual": 2725538,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "FOOT:pl_oci:total_comprehensive_income:cy",
+      "statement": "pl_oci",
+      "description": "TOTAL COMPREHENSIVE INCOME FOR THE YEAR = sum of its 4 rows (2024)",
+      "expected": 3083675,
+      "actual": 3083675,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "FOOT:pl_oci:total_comprehensive_income:py",
+      "statement": "pl_oci",
+      "description": "TOTAL COMPREHENSIVE INCOME FOR THE YEAR = sum of its 4 rows (2023)",
+      "expected": 2726914,
+      "actual": 2726914,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "FOOT:pl_oci:s280:cy",
+      "statement": "pl_oci",
+      "description": "PROFIT FOR THE YEAR ATTRIBUTABLE TO: = sum of its 2 rows (2024)",
+      "expected": 3121035,
+      "actual": 3121035,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "FOOT:pl_oci:s280:py",
+      "statement": "pl_oci",
+      "description": "PROFIT FOR THE YEAR ATTRIBUTABLE TO: = sum of its 2 rows (2023)",
+      "expected": 2725538,
+      "actual": 2725538,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "FOOT:pl_oci:s320:cy",
+      "statement": "pl_oci",
+      "description": "TOTAL COMPREHENSIVE INCOME FOR THE YEAR ATTRIBUTABLE TO: = sum of its 2 rows (2024)",
+      "expected": 3083675,
+      "actual": 3083675,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "FOOT:pl_oci:s320:py",
+      "statement": "pl_oci",
+      "description": "TOTAL COMPREHENSIVE INCOME FOR THE YEAR ATTRIBUTABLE TO: = sum of its 2 rows (2023)",
+      "expected": 2726914,
+      "actual": 2726914,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "FOOT:cf:net_cash_operating:cy",
+      "statement": "cf",
+      "description": "Net cash generated from operating activities = sum of its 8 rows (2024): a printed difference of +1 is declared",
+      "expected": 5629285,
+      "actual": 5629286,
+      "diff": 1,
+      "passed": true
+    },
+    {
+      "rule_id": "DECLARED:cf:net_cash_operating:cy",
+      "statement": "cf",
+      "description": "Net cash generated from operating activities (2024): printed 5,629,285, rows sum to 5,629,286. Rounding in the issuer's presentation: the eight operating rows sum to 5,629,286, the FS prints 5,629,285. Kept as printed.",
+      "expected": 1,
+      "actual": 1,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "FOOT:cf:net_cash_operating:py",
+      "statement": "cf",
+      "description": "Net cash generated from operating activities = sum of its 8 rows (2023)",
+      "expected": 8663780,
+      "actual": 8663780,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "FOOT:cf:net_cash_investing:cy",
+      "statement": "cf",
+      "description": "Net cash used in investing activities = sum of its 4 rows (2024)",
+      "expected": -3798984,
+      "actual": -3798984,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "FOOT:cf:net_cash_investing:py",
+      "statement": "cf",
+      "description": "Net cash used in investing activities = sum of its 4 rows (2023)",
+      "expected": -4169309,
+      "actual": -4169309,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "FOOT:cf:net_cash_financing:cy",
+      "statement": "cf",
+      "description": "Net cash used in financing activities = sum of its 5 rows (2024)",
+      "expected": -4214984,
+      "actual": -4214984,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "FOOT:cf:net_cash_financing:py",
+      "statement": "cf",
+      "description": "Net cash used in financing activities = sum of its 5 rows (2023)",
+      "expected": -3904888,
+      "actual": -3904888,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "FOOT:cf:net_change_in_cash:cy",
+      "statement": "cf",
+      "description": "NET (DECREASE)/INCREASE IN CASH AND CASH EQUIVALENTS = sum of its 3 rows (2024): a printed difference of -1 is declared",
+      "expected": -2384682,
+      "actual": -2384683,
+      "diff": -1,
+      "passed": true
+    },
+    {
+      "rule_id": "DECLARED:cf:net_change_in_cash:cy",
+      "statement": "cf",
+      "description": "NET (DECREASE)/INCREASE IN CASH AND CASH EQUIVALENTS (2024): printed -2,384,682, rows sum to -2,384,683. The FS prints the net decrease its unrounded operating cash flow gives, (2,384,682); from the printed subtotals it is (2,384,683). Kept as printed.",
+      "expected": -1,
+      "actual": -1,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "FOOT:cf:net_change_in_cash:py",
+      "statement": "cf",
+      "description": "NET (DECREASE)/INCREASE IN CASH AND CASH EQUIVALENTS = sum of its 3 rows (2023)",
+      "expected": 589583,
+      "actual": 589583,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "FOOT:cf:cash_end:cy",
+      "statement": "cf",
+      "description": "CASH AND CASH EQUIVALENTS AT END OF THE YEAR = sum of its 3 rows (2024)",
+      "expected": 2614318,
+      "actual": 2614318,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "FOOT:cf:cash_end:py",
+      "statement": "cf",
+      "description": "CASH AND CASH EQUIVALENTS AT END OF THE YEAR = sum of its 3 rows (2023)",
+      "expected": 5018739,
+      "actual": 5018739,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "SIGN:pl_oci",
+      "statement": "pl_oci",
+      "description": "items of cost and expense groups carry the sign the FS prints (10 checked)",
+      "expected": null,
+      "actual": null,
+      "diff": null,
+      "passed": true
+    },
+    {
+      "rule_id": "SOFP-BAL:cy",
+      "statement": "sofp",
+      "description": "Total assets = total liabilities + total equity (2024)",
+      "expected": 30434955,
+      "actual": 30434955,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "SOFP-BAL:py",
+      "statement": "sofp",
+      "description": "Total assets = total liabilities + total equity (2023)",
+      "expected": 30888916,
+      "actual": 30888916,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "SOFP-BAL:tle:cy",
+      "statement": "sofp",
+      "description": "Total liabilities and equity = total assets (2024)",
+      "expected": 30434955,
+      "actual": 30434955,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "SOFP-BAL:tle:py",
+      "statement": "sofp",
+      "description": "Total liabilities and equity = total assets (2023)",
+      "expected": 30888916,
+      "actual": 30888916,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "SOFP-EQ:cy",
+      "statement": "sofp",
+      "description": "Equity attributable to the parent + NCI = total equity (2024)",
+      "expected": 15107352,
+      "actual": 15107352,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "SOFP-EQ:py",
+      "statement": "sofp",
+      "description": "Equity attributable to the parent + NCI = total equity (2023)",
+      "expected": 14178555,
+      "actual": 14178555,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "PL-GP:cy",
+      "statement": "pl_oci",
+      "description": "Revenue + total costs of revenue = gross profit (2024)",
+      "expected": 4999626,
+      "actual": 4999626,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "PL-GP:py",
+      "statement": "pl_oci",
+      "description": "Revenue + total costs of revenue = gross profit (2023)",
+      "expected": 5650519,
+      "actual": 5650519,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "PL-PBT:cy",
+      "statement": "pl_oci",
+      "description": "Gross profit + the items below it = profit before tax (2024)",
+      "expected": 4892576,
+      "actual": 4892576,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "PL-PBT:py",
+      "statement": "pl_oci",
+      "description": "Gross profit + the items below it = profit before tax (2023)",
+      "expected": 4492029,
+      "actual": 4492029,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "PL-NI:cy",
+      "statement": "pl_oci",
+      "description": "Profit before tax + income tax = profit for the year (2024)",
+      "expected": 3121035,
+      "actual": 3121035,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "PL-NI:py",
+      "statement": "pl_oci",
+      "description": "Profit before tax + income tax = profit for the year (2023)",
+      "expected": 2725538,
+      "actual": 2725538,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "PL-TCI:cy",
+      "statement": "pl_oci",
+      "description": "Profit for the year + OCI = total comprehensive income (2024)",
+      "expected": 3083675,
+      "actual": 3083675,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "PL-TCI:py",
+      "statement": "pl_oci",
+      "description": "Profit for the year + OCI = total comprehensive income (2023)",
+      "expected": 2726914,
+      "actual": 2726914,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "PL-ATTR:profit:cy",
+      "statement": "pl_oci",
+      "description": "Profit attributable to the parent + NCI = profit for the year (2024)",
+      "expected": 3121035,
+      "actual": 3121035,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "PL-ATTR:profit:py",
+      "statement": "pl_oci",
+      "description": "Profit attributable to the parent + NCI = profit for the year (2023)",
+      "expected": 2725538,
+      "actual": 2725538,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "PL-ATTR:tci:cy",
+      "statement": "pl_oci",
+      "description": "TCI attributable to the parent + NCI = total comprehensive income (2024)",
+      "expected": 3083675,
+      "actual": 3083675,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "PL-ATTR:tci:py",
+      "statement": "pl_oci",
+      "description": "TCI attributable to the parent + NCI = total comprehensive income (2023)",
+      "expected": 2726914,
+      "actual": 2726914,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "SOCE-ROW:balance_2022:total_parent",
+      "statement": "soce",
+      "description": "Balance at December 31, 2022: the parent's columns sum to its total",
+      "expected": 14618811,
+      "actual": 14618811,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "SOCE-ROW:balance_2022:total",
+      "statement": "soce",
+      "description": "Balance at December 31, 2022: parent total + NCI = total",
+      "expected": 15158277,
+      "actual": 15158277,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "SOCE-ROW:dividend_2023:total_parent",
+      "statement": "soce",
+      "description": "Dividend declared: the parent's columns sum to its total",
+      "expected": -3664303,
+      "actual": -3664303,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "SOCE-ROW:dividend_2023:total",
+      "statement": "soce",
+      "description": "Dividend declared: parent total + NCI = total",
+      "expected": -3664303,
+      "actual": -3664303,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "SOCE-ROW:dividend_nci_2023:total_parent",
+      "statement": "soce",
+      "description": "Dividend declared to NCI: the parent's columns sum to its total",
+      "expected": 0,
+      "actual": 0,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "SOCE-ROW:dividend_nci_2023:total",
+      "statement": "soce",
+      "description": "Dividend declared to NCI: parent total + NCI = total",
+      "expected": -18881,
+      "actual": -18881,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "SOCE-ROW:reserve_2023:total_parent",
+      "statement": "soce",
+      "description": "Statutory reserve and general and investment reserve: the parent's columns sum to its total",
+      "expected": 0,
+      "actual": 0,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "SOCE-ROW:reserve_2023:total",
+      "statement": "soce",
+      "description": "Statutory reserve and general and investment reserve: parent total + NCI = total",
+      "expected": 0,
+      "actual": 0,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "SOCE-ROW:equity_adjustment_2023:total_parent",
+      "statement": "soce",
+      "description": "Equity adjustment in subsidiaries: the parent's columns sum to its total",
+      "expected": -23452,
+      "actual": -23452,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "SOCE-ROW:equity_adjustment_2023:total",
+      "statement": "soce",
+      "description": "Equity adjustment in subsidiaries: parent total + NCI = total",
+      "expected": -23452,
+      "actual": -23452,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "SOCE-ROW:tci_2023:total_parent",
+      "statement": "soce",
+      "description": "Total comprehensive income for the year: the parent's columns sum to its total",
+      "expected": 2603070,
+      "actual": 2603070,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "SOCE-ROW:tci_2023:total",
+      "statement": "soce",
+      "description": "Total comprehensive income for the year: parent total + NCI = total",
+      "expected": 2726914,
+      "actual": 2726914,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "SOCE-ROW:balance_2023:total_parent",
+      "statement": "soce",
+      "description": "Balance at December 31, 2023: the parent's columns sum to its total",
+      "expected": 13534126,
+      "actual": 13534126,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "SOCE-ROW:balance_2023:total",
+      "statement": "soce",
+      "description": "Balance at December 31, 2023: parent total + NCI = total",
+      "expected": 14178555,
+      "actual": 14178555,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "SOCE-ROW:dividend_2024:total_parent",
+      "statement": "soce",
+      "description": "Dividend declared: the parent's columns sum to its total",
+      "expected": -2079749,
+      "actual": -2079749,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "SOCE-ROW:dividend_2024:total",
+      "statement": "soce",
+      "description": "Dividend declared: parent total + NCI = total",
+      "expected": -2079749,
+      "actual": -2079749,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "SOCE-ROW:dividend_nci_2024:total_parent",
+      "statement": "soce",
+      "description": "Dividend declared to NCI: the parent's columns sum to its total",
+      "expected": 0,
+      "actual": 0,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "SOCE-ROW:dividend_nci_2024:total",
+      "statement": "soce",
+      "description": "Dividend declared to NCI: parent total + NCI = total",
+      "expected": -27797,
+      "actual": -27797,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "SOCE-ROW:reserve_2024:total_parent",
+      "statement": "soce",
+      "description": "Statutory reserve and general and investment reserve: the parent's columns sum to its total",
+      "expected": 0,
+      "actual": 0,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "SOCE-ROW:reserve_2024:total",
+      "statement": "soce",
+      "description": "Statutory reserve and general and investment reserve: parent total + NCI = total",
+      "expected": 0,
+      "actual": 0,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "SOCE-ROW:equity_adjustment_2024:total_parent",
+      "statement": "soce",
+      "description": "Equity adjustment in subsidiaries: the parent's columns sum to its total",
+      "expected": 6138,
+      "actual": 6138,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "SOCE-ROW:equity_adjustment_2024:total",
+      "statement": "soce",
+      "description": "Equity adjustment in subsidiaries: parent total + NCI = total",
+      "expected": -47332,
+      "actual": -47332,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "SOCE-ROW:tci_2024:total_parent",
+      "statement": "soce",
+      "description": "Total comprehensive income for the year: the parent's columns sum to its total",
+      "expected": 2972602,
+      "actual": 2972602,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "SOCE-ROW:tci_2024:total",
+      "statement": "soce",
+      "description": "Total comprehensive income for the year: parent total + NCI = total",
+      "expected": 3083675,
+      "actual": 3083675,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "SOCE-ROW:balance_2024:total_parent",
+      "statement": "soce",
+      "description": "Balance at December 31, 2024: the parent's columns sum to its total",
+      "expected": 14433117,
+      "actual": 14433117,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "SOCE-ROW:balance_2024:total",
+      "statement": "soce",
+      "description": "Balance at December 31, 2024: parent total + NCI = total",
+      "expected": 15107352,
+      "actual": 15107352,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "SOCE-COL:share_capital:balance_2023",
+      "statement": "soce",
+      "description": "Share capital: Balance at December 31, 2023 = Balance at December 31, 2022 + 5 movements",
+      "expected": 13631466,
+      "actual": 13631466,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "SOCE-COL:appropriated:balance_2023",
+      "statement": "soce",
+      "description": "Appropriated: Balance at December 31, 2023 = Balance at December 31, 2022 + 5 movements",
+      "expected": 647955,
+      "actual": 647955,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "SOCE-COL:unappropriated:balance_2023",
+      "statement": "soce",
+      "description": "Unappropriated: Balance at December 31, 2023 = Balance at December 31, 2022 + 5 movements",
+      "expected": 2782941,
+      "actual": 2782941,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "SOCE-COL:apic:balance_2023",
+      "statement": "soce",
+      "description": "Additional paid in capital: Balance at December 31, 2023 = Balance at December 31, 2022 + 5 movements",
+      "expected": -3649862,
+      "actual": -3649862,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "SOCE-COL:oci:balance_2023",
+      "statement": "soce",
+      "description": "Other Comprehensive Income: Balance at December 31, 2023 = Balance at December 31, 2022 + 5 movements",
+      "expected": 132724,
+      "actual": 132724,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "SOCE-COL:merging:balance_2023",
+      "statement": "soce",
+      "description": "Merging Entities: Balance at December 31, 2023 = Balance at December 31, 2022 + 5 movements",
+      "expected": 0,
+      "actual": 0,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "SOCE-COL:other_equity:balance_2023",
+      "statement": "soce",
+      "description": "Other equity component - net of tax: Balance at December 31, 2023 = Balance at December 31, 2022 + 5 movements",
+      "expected": -11098,
+      "actual": -11098,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "SOCE-COL:total_parent:balance_2023",
+      "statement": "soce",
+      "description": "Total equity attributable to owners of the parent: Balance at December 31, 2023 = Balance at December 31, 2022 + 5 movements",
+      "expected": 13534126,
+      "actual": 13534126,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "SOCE-COL:nci:balance_2023",
+      "statement": "soce",
+      "description": "Non-controlling interests: Balance at December 31, 2023 = Balance at December 31, 2022 + 5 movements",
+      "expected": 644429,
+      "actual": 644429,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "SOCE-COL:total:balance_2023",
+      "statement": "soce",
+      "description": "Total equity: Balance at December 31, 2023 = Balance at December 31, 2022 + 5 movements",
+      "expected": 14178555,
+      "actual": 14178555,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "SOCE-COL:share_capital:balance_2024",
+      "statement": "soce",
+      "description": "Share capital: Balance at December 31, 2024 = Balance at December 31, 2023 + 5 movements",
+      "expected": 13631466,
+      "actual": 13631466,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "SOCE-COL:appropriated:balance_2024",
+      "statement": "soce",
+      "description": "Appropriated: Balance at December 31, 2024 = Balance at December 31, 2023 + 5 movements",
+      "expected": 1167892,
+      "actual": 1167892,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "SOCE-COL:unappropriated:balance_2024",
+      "statement": "soce",
+      "description": "Unappropriated: Balance at December 31, 2024 = Balance at December 31, 2023 + 5 movements",
+      "expected": 3184728,
+      "actual": 3184728,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "SOCE-COL:apic:balance_2024",
+      "statement": "soce",
+      "description": "Additional paid in capital: Balance at December 31, 2024 = Balance at December 31, 2023 + 5 movements",
+      "expected": -3649862,
+      "actual": -3649862,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "SOCE-COL:oci:balance_2024",
+      "statement": "soce",
+      "description": "Other Comprehensive Income: Balance at December 31, 2024 = Balance at December 31, 2023 + 5 movements",
+      "expected": 103851,
+      "actual": 103851,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "SOCE-COL:merging:balance_2024",
+      "statement": "soce",
+      "description": "Merging Entities: Balance at December 31, 2024 = Balance at December 31, 2023 + 5 movements",
+      "expected": 0,
+      "actual": 0,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "SOCE-COL:other_equity:balance_2024",
+      "statement": "soce",
+      "description": "Other equity component - net of tax: Balance at December 31, 2024 = Balance at December 31, 2023 + 5 movements",
+      "expected": -4958,
+      "actual": -4958,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "SOCE-COL:total_parent:balance_2024",
+      "statement": "soce",
+      "description": "Total equity attributable to owners of the parent: Balance at December 31, 2024 = Balance at December 31, 2023 + 5 movements",
+      "expected": 14433117,
+      "actual": 14433117,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "SOCE-COL:nci:balance_2024",
+      "statement": "soce",
+      "description": "Non-controlling interests: Balance at December 31, 2024 = Balance at December 31, 2023 + 5 movements",
+      "expected": 674235,
+      "actual": 674235,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "SOCE-COL:total:balance_2024",
+      "statement": "soce",
+      "description": "Total equity: Balance at December 31, 2024 = Balance at December 31, 2023 + 5 movements",
+      "expected": 15107352,
+      "actual": 15107352,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "XS-SOCE-PROFIT:parent:cy",
+      "statement": "soce",
+      "description": "SoCE tci_2024 (total_parent) = P&L tci_parent (2024)",
+      "expected": 2972602,
+      "actual": 2972602,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "XS-SOCE-PROFIT:nci:cy",
+      "statement": "soce",
+      "description": "SoCE tci_2024 (nci) = P&L tci_nci (2024)",
+      "expected": 111073,
+      "actual": 111073,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "XS-SOCE-BAL:total:cy",
+      "statement": "soce",
+      "description": "SoCE balance_2024 (total) = SoFP total_equity (2024)",
+      "expected": 15107352,
+      "actual": 15107352,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "XS-SOCE-BAL:nci:cy",
+      "statement": "soce",
+      "description": "SoCE balance_2024 (nci) = SoFP nci (2024)",
+      "expected": 674235,
+      "actual": 674235,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "XS-SOCE-PROFIT:parent:py",
+      "statement": "soce",
+      "description": "SoCE tci_2023 (total_parent) = P&L tci_parent (2023)",
+      "expected": 2603070,
+      "actual": 2603070,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "XS-SOCE-PROFIT:nci:py",
+      "statement": "soce",
+      "description": "SoCE tci_2023 (nci) = P&L tci_nci (2023)",
+      "expected": 123844,
+      "actual": 123844,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "XS-SOCE-BAL:total:py",
+      "statement": "soce",
+      "description": "SoCE balance_2023 (total) = SoFP total_equity (2023)",
+      "expected": 14178555,
+      "actual": 14178555,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "XS-SOCE-BAL:nci:py",
+      "statement": "soce",
+      "description": "SoCE balance_2023 (nci) = SoFP nci (2023)",
+      "expected": 644429,
+      "actual": 644429,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "XS-CF-CASH:cy",
+      "statement": "cf",
+      "description": "Cash flow closing cash = SoFP cash and cash equivalents (2024)",
+      "expected": 2614318,
+      "actual": 2614318,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "XS-CF-CASH:py",
+      "statement": "cf",
+      "description": "Cash flow closing cash = SoFP cash and cash equivalents (2023)",
+      "expected": 5018739,
+      "actual": 5018739,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "GOLDEN:sofp.total_current_assets:cy",
+      "statement": "sofp",
+      "description": "sofp.total_current_assets = PRD §A6 golden value (2024)",
+      "expected": 8036328,
+      "actual": 8036328,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "GOLDEN:sofp.total_current_assets:py",
+      "statement": "sofp",
+      "description": "sofp.total_current_assets = PRD §A6 golden value (2023)",
+      "expected": 9879695,
+      "actual": 9879695,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "GOLDEN:sofp.total_non_current_assets:cy",
+      "statement": "sofp",
+      "description": "sofp.total_non_current_assets = PRD §A6 golden value (2024)",
+      "expected": 22398627,
+      "actual": 22398627,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "GOLDEN:sofp.total_non_current_assets:py",
+      "statement": "sofp",
+      "description": "sofp.total_non_current_assets = PRD §A6 golden value (2023)",
+      "expected": 21009221,
+      "actual": 21009221,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "GOLDEN:sofp.total_assets:cy",
+      "statement": "sofp",
+      "description": "sofp.total_assets = PRD §A6 golden value (2024)",
+      "expected": 30434955,
+      "actual": 30434955,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "GOLDEN:sofp.total_assets:py",
+      "statement": "sofp",
+      "description": "sofp.total_assets = PRD §A6 golden value (2023)",
+      "expected": 30888916,
+      "actual": 30888916,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "GOLDEN:sofp.total_current_liabilities:cy",
+      "statement": "sofp",
+      "description": "sofp.total_current_liabilities = PRD §A6 golden value (2024)",
+      "expected": 6158999,
+      "actual": 6158999,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "GOLDEN:sofp.total_current_liabilities:py",
+      "statement": "sofp",
+      "description": "sofp.total_current_liabilities = PRD §A6 golden value (2023)",
+      "expected": 6017916,
+      "actual": 6017916,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "GOLDEN:sofp.total_non_current_liabilities:cy",
+      "statement": "sofp",
+      "description": "sofp.total_non_current_liabilities = PRD §A6 golden value (2024)",
+      "expected": 9168604,
+      "actual": 9168604,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "GOLDEN:sofp.total_non_current_liabilities:py",
+      "statement": "sofp",
+      "description": "sofp.total_non_current_liabilities = PRD §A6 golden value (2023)",
+      "expected": 10692445,
+      "actual": 10692445,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "GOLDEN:sofp.total_liabilities:cy",
+      "statement": "sofp",
+      "description": "sofp.total_liabilities = PRD §A6 golden value (2024)",
+      "expected": 15327603,
+      "actual": 15327603,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "GOLDEN:sofp.total_liabilities:py",
+      "statement": "sofp",
+      "description": "sofp.total_liabilities = PRD §A6 golden value (2023)",
+      "expected": 16710361,
+      "actual": 16710361,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "GOLDEN:sofp.equity_parent:cy",
+      "statement": "sofp",
+      "description": "sofp.equity_parent = PRD §A6 golden value (2024)",
+      "expected": 14433117,
+      "actual": 14433117,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "GOLDEN:sofp.equity_parent:py",
+      "statement": "sofp",
+      "description": "sofp.equity_parent = PRD §A6 golden value (2023)",
+      "expected": 13534126,
+      "actual": 13534126,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "GOLDEN:sofp.nci:cy",
+      "statement": "sofp",
+      "description": "sofp.nci = PRD §A6 golden value (2024)",
+      "expected": 674235,
+      "actual": 674235,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "GOLDEN:sofp.nci:py",
+      "statement": "sofp",
+      "description": "sofp.nci = PRD §A6 golden value (2023)",
+      "expected": 644429,
+      "actual": 644429,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "GOLDEN:sofp.total_equity:cy",
+      "statement": "sofp",
+      "description": "sofp.total_equity = PRD §A6 golden value (2024)",
+      "expected": 15107352,
+      "actual": 15107352,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "GOLDEN:sofp.total_equity:py",
+      "statement": "sofp",
+      "description": "sofp.total_equity = PRD §A6 golden value (2023)",
+      "expected": 14178555,
+      "actual": 14178555,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "GOLDEN:pl_oci.revenue:cy",
+      "statement": "pl_oci",
+      "description": "pl_oci.revenue = PRD §A6 golden value (2024)",
+      "expected": 14330340,
+      "actual": 14330340,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "GOLDEN:pl_oci.revenue:py",
+      "statement": "pl_oci",
+      "description": "pl_oci.revenue = PRD §A6 golden value (2023)",
+      "expected": 14568384,
+      "actual": 14568384,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "GOLDEN:pl_oci.total_cost_of_revenue:cy",
+      "statement": "pl_oci",
+      "description": "pl_oci.total_cost_of_revenue = PRD §A6 golden value (2024)",
+      "expected": -9330714,
+      "actual": -9330714,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "GOLDEN:pl_oci.total_cost_of_revenue:py",
+      "statement": "pl_oci",
+      "description": "pl_oci.total_cost_of_revenue = PRD §A6 golden value (2023)",
+      "expected": -8917865,
+      "actual": -8917865,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "GOLDEN:pl_oci.gross_profit:cy",
+      "statement": "pl_oci",
+      "description": "pl_oci.gross_profit = PRD §A6 golden value (2024)",
+      "expected": 4999626,
+      "actual": 4999626,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "GOLDEN:pl_oci.gross_profit:py",
+      "statement": "pl_oci",
+      "description": "pl_oci.gross_profit = PRD §A6 golden value (2023)",
+      "expected": 5650519,
+      "actual": 5650519,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "GOLDEN:pl_oci.profit_before_tax:cy",
+      "statement": "pl_oci",
+      "description": "pl_oci.profit_before_tax = PRD §A6 golden value (2024)",
+      "expected": 4892576,
+      "actual": 4892576,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "GOLDEN:pl_oci.profit_before_tax:py",
+      "statement": "pl_oci",
+      "description": "pl_oci.profit_before_tax = PRD §A6 golden value (2023)",
+      "expected": 4492029,
+      "actual": 4492029,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "GOLDEN:pl_oci.income_tax:cy",
+      "statement": "pl_oci",
+      "description": "pl_oci.income_tax = PRD §A6 golden value (2024)",
+      "expected": -1771541,
+      "actual": -1771541,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "GOLDEN:pl_oci.income_tax:py",
+      "statement": "pl_oci",
+      "description": "pl_oci.income_tax = PRD §A6 golden value (2023)",
+      "expected": -1766491,
+      "actual": -1766491,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "GOLDEN:pl_oci.profit_for_the_year:cy",
+      "statement": "pl_oci",
+      "description": "pl_oci.profit_for_the_year = PRD §A6 golden value (2024)",
+      "expected": 3121035,
+      "actual": 3121035,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "GOLDEN:pl_oci.profit_for_the_year:py",
+      "statement": "pl_oci",
+      "description": "pl_oci.profit_for_the_year = PRD §A6 golden value (2023)",
+      "expected": 2725538,
+      "actual": 2725538,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "GOLDEN:pl_oci.total_comprehensive_income:cy",
+      "statement": "pl_oci",
+      "description": "pl_oci.total_comprehensive_income = PRD §A6 golden value (2024)",
+      "expected": 3083675,
+      "actual": 3083675,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "GOLDEN:pl_oci.total_comprehensive_income:py",
+      "statement": "pl_oci",
+      "description": "pl_oci.total_comprehensive_income = PRD §A6 golden value (2023)",
+      "expected": 2726914,
+      "actual": 2726914,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "GOLDEN:pl_oci.profit_parent:cy",
+      "statement": "pl_oci",
+      "description": "pl_oci.profit_parent = PRD §A6 golden value (2024)",
+      "expected": 3001475,
+      "actual": 3001475,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "GOLDEN:pl_oci.profit_parent:py",
+      "statement": "pl_oci",
+      "description": "pl_oci.profit_parent = PRD §A6 golden value (2023)",
+      "expected": 2599686,
+      "actual": 2599686,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "GOLDEN:pl_oci.profit_nci:cy",
+      "statement": "pl_oci",
+      "description": "pl_oci.profit_nci = PRD §A6 golden value (2024)",
+      "expected": 119560,
+      "actual": 119560,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "GOLDEN:pl_oci.profit_nci:py",
+      "statement": "pl_oci",
+      "description": "pl_oci.profit_nci = PRD §A6 golden value (2023)",
+      "expected": 125852,
+      "actual": 125852,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "GOLDEN:pl_oci.tci_parent:cy",
+      "statement": "pl_oci",
+      "description": "pl_oci.tci_parent = PRD §A6 golden value (2024)",
+      "expected": 2972602,
+      "actual": 2972602,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "GOLDEN:pl_oci.tci_parent:py",
+      "statement": "pl_oci",
+      "description": "pl_oci.tci_parent = PRD §A6 golden value (2023)",
+      "expected": 2603070,
+      "actual": 2603070,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "GOLDEN:pl_oci.tci_nci:cy",
+      "statement": "pl_oci",
+      "description": "pl_oci.tci_nci = PRD §A6 golden value (2024)",
+      "expected": 111073,
+      "actual": 111073,
+      "diff": 0,
+      "passed": true
+    },
+    {
+      "rule_id": "GOLDEN:pl_oci.tci_nci:py",
+      "statement": "pl_oci",
+      "description": "pl_oci.tci_nci = PRD §A6 golden value (2023)",
+      "expected": 123844,
+      "actual": 123844,
+      "diff": 0,
+      "passed": true
+    }
+  ],
+  "computed": {
+    "sofp": {
+      "170": {
+        "cy": 8036328,
+        "py": 9879695
+      },
+      "320": {
+        "cy": 22398627,
+        "py": 21009221
+      },
+      "330": {
+        "cy": 30434955,
+        "py": 30888916
+      },
+      "550": {
+        "cy": 6158999,
+        "py": 6017916
+      },
+      "670": {
+        "cy": 9168604,
+        "py": 10692445
+      },
+      "680": {
+        "cy": 15327603,
+        "py": 16710361
+      },
+      "800": {
+        "cy": 14433117,
+        "py": 13534126
+      },
+      "820": {
+        "cy": 15107352,
+        "py": 14178555
+      },
+      "830": {
+        "cy": 30434955,
+        "py": 30888916
+      }
+    },
+    "pl_oci": {
+      "80": {
+        "cy": -9330714,
+        "py": -8917865
+      },
+      "90": {
+        "cy": 4999626,
+        "py": 5650519
+      },
+      "150": {
+        "cy": 4892576,
+        "py": 4492029
+      },
+      "170": {
+        "cy": 3121035,
+        "py": 2725538
+      },
+      "240": {
+        "cy": 3083675,
+        "py": 2726914
+      },
+      "280": {
+        "cy": 3121035,
+        "py": 2725538
+      },
+      "320": {
+        "cy": 3083675,
+        "py": 2726914
+      }
+    },
+    "cf": {
+      "100": {
+        "cy": 5629286,
+        "py": 8663780
+      },
+      "160": {
+        "cy": -3798984,
+        "py": -4169309
+      },
+      "230": {
+        "cy": -4214984,
+        "py": -3904888
+      },
+      "240": {
+        "cy": -2384683,
+        "py": 589583
+      },
+      "270": {
+        "cy": 2614318,
+        "py": 5018739
+      }
+    }
+  }
+}

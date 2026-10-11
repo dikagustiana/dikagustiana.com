@@ -13,8 +13,10 @@ statements file. Run it from the repository root:
 How a row is read. Every figure and every note reference comes from the PDF's
 text layer (the statement pages are native text, not scans), found by its
 position: the line at a row's anchor `top`, the notes column, the 2024 column
-and the 2023 column. Nothing numeric is typed here. What is typed here is the
-structure the PDF's layout shows but its text does not carry: each row's type,
+and the 2023 column. Nothing numeric is typed here. The one exception is the two
+printed differences declared below, which fs_check.py verifies to the unit.
+What is typed here is the structure the PDF's layout shows but its text does
+not carry: each row's type,
 indent, the subtotal it sums into, and the line_key the rules address. The
 labels are typed too, joined across their printed lines, and each one is
 checked against the PDF: with whitespace and dashes ignored, the typed label
@@ -194,6 +196,21 @@ PL = [
 ]
 # Printed without a label; they carry the label of the heading they total.
 UNLABELLED = {(6, 287), (6, 365)}
+# Where the issuer's printed figure differs from the sum of its own rows
+# (sum minus printed). fs_check.py passes these foots at exactly this
+# difference and at no other, and lists each one as DECLARED.
+PRINTED_DIFFERENCES = {
+    (8, 370): {
+        'cy': 1,
+        'note': ('Rounding in the issuer\'s presentation: the eight operating rows sum to 5,629,286, the FS '
+                 'prints 5,629,285. Kept as printed.'),
+    },
+    (8, 634): {
+        'cy': -1,
+        'note': ('The FS prints the net decrease its unrounded operating cash flow gives, (2,384,682); from '
+                 'the printed subtotals it is (2,384,683). Kept as printed.'),
+    },
+}
 # The cost group whose items the FS prints in parentheses (SIGN).
 NEGATIVE_GROUPS = {'cor'}
 
@@ -353,6 +370,8 @@ def read_vertical(pdf, rows, statement):
             line['expect_sign'] = 'negative'
         if (page, top) in UNLABELLED:
             line['label_note'] = 'printed without a label; carries the label of the heading it totals'
+        if (page, top) in PRINTED_DIFFERENCES:
+            line['printed_difference'] = PRINTED_DIFFERENCES[(page, top)]
         out.append(line)
     return out, problems
 

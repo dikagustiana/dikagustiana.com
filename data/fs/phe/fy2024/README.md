@@ -92,9 +92,13 @@ heading that carry a figure in the 2024 column.
 
 ## Checker result
 
-`python3 scripts/fs_check.py data/fs/phe/fy2024/statements.json`: **173 rules, 171 passed,
-2 failed** (exit 1). Every golden value matches to the unit (40 of 40). Both failures are one
-difference printed in the audited cash flow statement itself, 2024 column:
+`python3 scripts/fs_check.py data/fs/phe/fy2024/statements.json`: **175 rules, 175 passed**
+(exit 0); CI runs it on every push. Every golden value matches to the unit (40 of 40). The
+results, with each subtotal's computed sum, are in `checks.json` (`--json`), which the loader
+reads.
+
+Two of the 175 are `DECLARED` rows: one difference printed in the audited cash flow statement
+itself, 2024 column, kept as printed.
 
 | Row (p. 17) | Printed | Sum of its rows | Sum − printed |
 |---|---|---|---|
@@ -102,5 +106,7 @@ difference printed in the audited cash flow statement itself, 2024 column:
 | (Penurunan)/kenaikan neto kas dan setara kas / Net (decrease)/increase in cash and cash equivalents | (2,384,682) | (2,384,683), from the printed subtotals | −1 |
 
 The net decrease the FS prints, (2,384,682), is the one its operating items give (5,629,286 −
-3,798,984 − 4,214,984). The rounding sits in the printed operating subtotal. Nothing has been
-changed to make it foot. How the gate treats a difference the issuer printed is open with Dika.
+3,798,984 − 4,214,984): the rounding sits in the printed operating subtotal. Each row carries a
+`printed_difference` with its reason; the checker passes those two foots at exactly the
+declared difference and at no other, so a one-unit error anywhere, these rows included, still
+fails (discovery §19).

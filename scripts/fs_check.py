@@ -36,16 +36,24 @@ Input, statements.json
               expect_sign ("negative" on a subtotal or total that a cost or
               expense group sums into), printed_positive (on an item of such a
               group that the FS prints without parentheses: true for both
-              years, or the years it does, e.g. ["cy"])
+              years, or the years it does, e.g. ["cy"]),
+              printed_difference (on a subtotal or total whose printed figure
+              differs from the sum of its rows in the issuer's own
+              presentation: {"cy": sum - printed, "note": "why"}; the foot
+              then passes only at exactly that difference)
   soce_cells one object per printed cell of the statement of changes in
              equity: row_key, row_label_id, row_label_en, row_order, col_key,
-             col_label_id, col_label_en, col_order, value, source_page.
-             Balance rows are keyed balance_<year>; the total comprehensive
+             col_label_id, col_label_en, col_order, value, source_page, and
+             notes_ref (the row's note reference, the same on every cell of
+             the row). Balance rows are keyed balance_<year>; the total comprehensive
              income row of a year is tci_<year>; the columns include
              total_parent, nci and total.
 
 Rule ids are RULE:scope:year, year being cy (current) or py (prior):
-  FOOT:<stmt>:<row>:<y>       a subtotal or total = the sum of its children
+  FOOT:<stmt>:<row>:<y>       a subtotal or total = the sum of its children,
+                              or differs from it by exactly a declared printed
+                              difference
+  DECLARED:<stmt>:<row>:<y>   a declared printed difference, found as declared
   SOFP-BAL:<y>                total assets = total liabilities + total equity
   SOFP-EQ:<y>                 equity to the parent + NCI = total equity
   PL-GP:<y>                   revenue + total costs of revenue = gross profit
@@ -325,6 +333,13 @@ def index_lines(lines, pages, col: Collector):
         pp = line.get('printed_positive')
         if not (pp in (None, True, False) or (isinstance(pp, list) and set(pp) <= set(YEARS))):
             col.fail('STRUCT', stmt, ref, 'printed_positive is true, false, a list of years or absent', stmt)
+        pd = line.get('printed_difference')
+        if pd is not None:
+            if lt not in SUMS:
+                col.fail('STRUCT', stmt, ref, 'printed_difference belongs on a subtotal or total', stmt)
+            if not well_formed_difference(pd):
+                col.fail('STRUCT', stmt, ref,
+                         'printed_difference is {"cy"|"py": a non-zero integer, "note": why}', stmt)
 
     children = {s: {} for s in VERTICAL}
     for stmt in VERTICAL:
@@ -361,6 +376,13 @@ def index_lines(lines, pages, col: Collector):
     return by_stmt, index, keyed, children
 
 
+def well_formed_difference(pd) -> bool:
+    return (isinstance(pd, dict) and set(pd) <= set(YEARS) | {'note'}
+            and isinstance(pd.get('note'), str) and bool(pd['note'].strip())
+            and any(y in pd for y in YEARS)
+            and all(is_int(pd[y]) and pd[y] != 0 for y in YEARS if y in pd))
+
+
 def foot(stmt, rows, children, years, out):
     computed = {}
     for line in sorted(rows, key=lambda r: r['sort_order']):
@@ -371,13 +393,28 @@ def foot(stmt, rows, children, years, out):
             continue  # reported under STRUCT
         name = line.get('line_key') or f's{line["sort_order"]}'
         label = line.get('label_en') or name
+        # A malformed declaration is reported under STRUCT and declares nothing.
+        declared = line.get('printed_difference') if well_formed_difference(line.get('printed_difference')) else {}
         comp = {}
         for y in YEARS:
             actual = total(num(k.get(f'value_{y}')) for k in kids)
             comp[y] = actual
-            out.append(compare(f'FOOT:{stmt}:{name}:{y}', stmt,
-                               f'{label} = sum of its {len(kids)} rows ({years[y]})',
-                               num(line.get(f'value_{y}')), actual))
+            rule = f'FOOT:{stmt}:{name}:{y}'
+            desc = f'{label} = sum of its {len(kids)} rows ({years[y]})'
+            result = compare(rule, stmt, desc, num(line.get(f'value_{y}')), actual)
+            want = declared.get(y) if is_int(declared.get(y)) else None
+            if want is not None:
+                # The issuer's own rounding: the foot passes at exactly the
+                # declared difference and at no other, and says so.
+                result.passed = result.diff == want
+                result.description = (f'{desc}: a printed difference of {want:+,} is declared'
+                                      + ('' if result.passed else f', found {fmt(result.diff)}'))
+            out.append(result)
+            if want is not None and result.passed:
+                out.append(Result(f'DECLARED:{stmt}:{name}:{y}', stmt,
+                                  f'{label} ({years[y]}): printed {fmt(result.expected)}, rows sum to '
+                                  f'{fmt(result.actual)}. {declared["note"]}',
+                                  want, result.diff, 0, True))
         computed[str(line['sort_order'])] = comp
     return computed
 
@@ -516,10 +553,12 @@ def index_soce(cells, pages, col: Collector):
         v = cell.get('value')
         if v is not None and not is_number(v):
             col.fail('STRUCT', 'soce', ref, 'value must be a number or null', 'soce')
-        row_sig = (cell['row_order'], cell.get('row_label_id'), cell.get('row_label_en'))
+        if cell.get('notes_ref') is not None and not isinstance(cell.get('notes_ref'), str):
+            col.fail('STRUCT', 'soce', ref, 'notes_ref must be text or null', 'soce')
+        row_sig = (cell['row_order'], cell.get('row_label_id'), cell.get('row_label_en'), cell.get('notes_ref'))
         col_sig = (cell['col_order'], cell.get('col_label_id'), cell.get('col_label_en'))
         if rows.setdefault(rk, row_sig) != row_sig:
-            col.fail('STRUCT', 'soce', ref, f'row {rk} has differing order or labels across its cells', 'soce')
+            col.fail('STRUCT', 'soce', ref, f'row {rk} has differing order, labels or notes across its cells', 'soce')
         if cols.setdefault(ck, col_sig) != col_sig:
             col.fail('STRUCT', 'soce', ref, f'column {ck} has differing order or labels across its cells', 'soce')
     if not grid:

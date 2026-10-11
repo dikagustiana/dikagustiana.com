@@ -587,6 +587,9 @@ export type Database = {
           notes_ref: string | null
           parent_id: string | null
           period_id: string
+          printed_diff_cy: number | null
+          printed_diff_note: string | null
+          printed_diff_py: number | null
           sort_order: number
           source_page: number
           statement: string
@@ -606,6 +609,9 @@ export type Database = {
           notes_ref?: string | null
           parent_id?: string | null
           period_id: string
+          printed_diff_cy?: number | null
+          printed_diff_note?: string | null
+          printed_diff_py?: number | null
           sort_order: number
           source_page: number
           statement: string
@@ -625,6 +631,9 @@ export type Database = {
           notes_ref?: string | null
           parent_id?: string | null
           period_id?: string
+          printed_diff_cy?: number | null
+          printed_diff_note?: string | null
+          printed_diff_py?: number | null
           sort_order?: number
           source_page?: number
           statement?: string
@@ -715,6 +724,7 @@ export type Database = {
           col_label_id: string
           col_order: number
           id: string
+          notes_ref: string | null
           period_id: string
           row_key: string
           row_label_en: string
@@ -729,6 +739,7 @@ export type Database = {
           col_label_id: string
           col_order: number
           id?: string
+          notes_ref?: string | null
           period_id: string
           row_key: string
           row_label_en: string
@@ -743,6 +754,7 @@ export type Database = {
           col_label_id?: string
           col_order?: number
           id?: string
+          notes_ref?: string | null
           period_id?: string
           row_key?: string
           row_label_en?: string

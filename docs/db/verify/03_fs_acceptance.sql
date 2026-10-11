@@ -5,6 +5,7 @@
 --
 --   psql -d dry -f supabase/migrations/20261009090000_fsli_component_flag.sql
 --   psql -d dry -f supabase/migrations/20261011130000_fs_statements.sql
+--   psql -d dry -f supabase/migrations/20261011170000_fs_printed_differences_soce_notes.sql
 --   psql -d dry -f docs/db/verify/03_fs_acceptance.sql
 --
 -- Every check raises on failure, so a clean run prints only PASS lines and the
@@ -171,6 +172,32 @@ BEGIN
     RAISE EXCEPTION 'a client role can write fs_check';
   END IF;
   RAISE NOTICE 'PASS no client role can write fs_period.status or fs_check';
+END $$;
+
+-- Declared printed differences (20261011170000): on sums only, always explained.
+DO $$
+BEGIN
+  BEGIN
+    INSERT INTO public.fs_line (period_id, statement, sort_order, line_type, label_id, label_en, value_cy, source_page, printed_diff_cy, printed_diff_note)
+    VALUES ('00000000-0000-0000-0000-00000000f002', 'sofp', 93, 'item', 'X', 'X', 1, 11, 1, 'x');
+    RAISE EXCEPTION 'printed difference on an item accepted';
+  EXCEPTION WHEN check_violation THEN
+    RAISE NOTICE 'PASS a printed difference sits on a subtotal or total only';
+  END;
+  BEGIN
+    INSERT INTO public.fs_line (period_id, statement, sort_order, line_type, label_id, label_en, value_cy, source_page, printed_diff_cy)
+    VALUES ('00000000-0000-0000-0000-00000000f002', 'sofp', 93, 'subtotal', 'X', 'X', 1, 11, 1);
+    RAISE EXCEPTION 'unexplained printed difference accepted';
+  EXCEPTION WHEN check_violation THEN
+    RAISE NOTICE 'PASS a printed difference carries its reason';
+  END;
+  BEGIN
+    INSERT INTO public.fs_line (period_id, statement, sort_order, line_type, label_id, label_en, value_cy, source_page, printed_diff_cy, printed_diff_note)
+    VALUES ('00000000-0000-0000-0000-00000000f002', 'sofp', 93, 'subtotal', 'X', 'X', 1, 11, 0, 'x');
+    RAISE EXCEPTION 'zero printed difference accepted';
+  EXCEPTION WHEN check_violation THEN
+    RAISE NOTICE 'PASS a declared difference is never zero';
+  END;
 END $$;
 
 -- Two NULL line_keys in one statement are allowed (most rows have none).

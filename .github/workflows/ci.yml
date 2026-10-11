@@ -42,6 +42,9 @@ jobs:
       # python3, nothing installed. A test module that fails to import is an
       # error here, and since Python 3.12 a run that finds no tests exits 5.
       - run: python3 -m unittest discover -s scripts/tests -v
+      # The extracted PHE FY2024 statements, proven against their own
+      # arithmetic and PRD §A6's golden table (golden.json beside them).
+      - run: python3 scripts/fs_check.py data/fs/phe/fy2024/statements.json --failures-only
       # The world engine's own check (scripts/world/check-engine.mjs): imports,
       # free names and load order from its entry. Files not yet wired are
       # listed as pending and do not fail; wired files must be clean.
