@@ -7,3 +7,6 @@ docs/consolidation/source/*.xlsx binary
 # Rebuilt byte for byte from that workbook by npm run build:workbook.
 public/consolidation/*.json text eol=lf
 docs/consolidation/build-report.md text eol=lf
+# The audited source statements (data/fs/<company>/<period>/source.pdf); each
+# folder's README records the file's sha256.
+data/fs/**/*.pdf binary
