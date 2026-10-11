@@ -8,8 +8,9 @@ the same commit as this file.
 - Production bundle (`vite build`), served with `vite preview` on 127.0.0.1:4173.
 - `VITE_SUPABASE_URL` pointed at a local stand-in for the Supabase REST API that serves the 14
   signed-off entries, resolved exactly as the seed migration stores them, **as published**. That is
-  what readers will see once the entries are published; in the project the rows are still
-  `published = false` (anon sees 0 rows).
+  what readers will see once the entries are published; at the time of measurement the rows in the
+  project were still `published = false` (anon saw 0 rows). They were published on 11 October 2026,
+  after Dika reviewed the preview, by `supabase/migrations/20261011120000_tracker_entry_publish.sql`.
 - Chromium 1194 (Playwright's bundled browser), axe-core 4.10.2, Lighthouse 12.2.1.
 - Raw numbers: `tracker-evidence.json` in this folder.
 

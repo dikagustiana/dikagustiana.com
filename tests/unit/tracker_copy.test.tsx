@@ -115,6 +115,16 @@ describe('tracker entries (supabase/content/tracker_entries.json)', () => {
     expect(readFileSync(SEED_PATH, 'utf8')).toBe(buildSeedSql(content));
     expect(content.entries.every((e) => e.published === false)).toBe(true);
   });
+
+  it('is published, after review, by a migration naming exactly these entries', () => {
+    const sql = readFileSync(SEED_PATH.replace('100100_tracker_entry_seed', '120000_tracker_entry_publish'), 'utf8').replace(
+      /--.*$/gm,
+      '',
+    );
+    expect(sql).toMatch(/SET published = true\s+WHERE verification = 'verified'/);
+    const ids = [...sql.matchAll(/'([a-z_]+-\d{4}q[1-4])'/g)].map((m) => m[1]);
+    expect(ids.sort()).toEqual(content.entries.map((e) => e.id).sort());
+  });
 });
 
 describe('the tracker page with the entries published', () => {
