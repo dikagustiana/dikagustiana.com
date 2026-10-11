@@ -1,5 +1,11 @@
 # Step 0 — Discovery
 
+Two parts. **Part 1** (sections 1–9) was written by the PR 2 (Tracker) session; PR 2 merged
+as dikagustiana/dikagustiana.com#69. **Part 2** (sections 10–19, at the end) is the PR 1
+(FSLI viewer) discovery.
+
+## Part 1 — PR 2 (Tracker)
+
 Read-only pass over `main` at `1adf987` and the live Supabase project, 11 October 2026.
 Written by the PR 2 (Tracker) session. Section 7 records facts relevant to PR 1 seen in
 passing; the PR 1 session owns the FSLI decisions.
@@ -205,3 +211,201 @@ response**.
 | 2. Register width | 728px, the essay column. |
 | 4. Sub-routes | Redirect to `/green-transition/tracker`: issue pages to `#q2-2025` / `#q1-2025`, entry pages and `/archive` to the page. |
 | 5–7 | Open; not needed for 2.1. To settle at 2.2–2.3. |
+
+---
+
+## Part 2 — PR 1 (FSLI viewer)
+
+Read-only pass over `main` at `509c737` and the live Supabase project, 11 October 2026.
+Nothing in the repo or the database was changed.
+
+## 10. Router
+
+- File: `src/App.tsx`, same pattern as section 1 (React Router v6, lazy pages, client-side
+  `<Navigate replace>` redirects, `vercel.json` rewrites everything to `/index.html`).
+- FSLI routes today (`src/App.tsx:180–181`):
+
+  | Route | Page | What it is |
+  |---|---|---|
+  | `/accounting/fsli` | `src/pages/FsliList.tsx` | The asset side of one statement, built from `fsli_pages`; every row links to its line-item page |
+  | `/accounting/fsli/:slug` | `src/pages/FsliDetail.tsx` | One line-item page: its figures (`FsliDetail.tsx:126–130`) and the published essays filed under it (`useFsliEssayBodies`, `src/hooks/queries/useEssays.ts:139`) |
+
+- The new route `/accounting/fsli/:company/:period` has two segments and does not collide
+  with `/:slug`. The D4 redirect `/accounting/fsli` → `/accounting/fsli/phe/fy2024` is one
+  `<Navigate replace>`.
+- Other entry points to `/accounting/fsli`: the nav entry "FSLI Detail"
+  (`src/config/navConfig.ts:24`) and the Accounting landing card, whose standing line counts
+  `fsli_pages` rows ("24 line items", `src/pages/Accounting.tsx:16–23`).
+
+## 11. Supabase
+
+- Migrations, MCP-only application, RLS pattern and typed client: as in section 2.
+- **Existing FSLI tables** (`supabase/migrations/20260731020000_baseline_finance.sql:420–560`):
+  - `fsli_pages`: 24 rows, all PHE FY2024, asset side only (`category` is
+    `current_assets` or `non_current_assets`). Columns `slug, title` (EN), `subtitle` (ID),
+    `notes_ref, dec_2024, dec_2023` (TEXT, pre-formatted: `'2,614,318'`), `category,
+    sort_order, is_component`. RLS: anon and authenticated read **every** row
+    (`USING (true)`, no publish gate); writes admin-only.
+  - `fsli_sections`: 0 rows. FK `page_slug → fsli_pages.slug` (cascade).
+  - These are the D2 rows: the live values match the "site value" column of PRD §A1 row for
+    row (`related-parties` 823,348 / 801,429; `trade-receivables-net` 2,203,018;
+    `notes_ref` `3i.6`, `3b,4dc`; and the rest).
+- **`essays.fsli_slug`** is a plain-text back-reference to `fsli_pages.slug` (no FK).
+  26 essays carry one; **13 are published**, one on each of 13 line-item pages:
+
+  | `fsli_pages.slug` | Published essay slug |
+  |---|---|
+  | `cash-and-cash-equivalents` | `cash-and-cash-equivalents-reading-a-fall` |
+  | `restricted-cash` | `restricted-cash-abandonment-fund-and-debt-reserve` |
+  | `trade-receivables-net` | `trade-receivables-upstream-expected-credit-losses` |
+  | `due-from-government` | `due-from-government-underlift-vat-and-other-receivables` |
+  | `inventories-net` | `inventories-net-upstream-materials-and-spares-superseded` |
+  | `corporate-dividend-taxes-receivable-current` | `corporate-dividend-taxes-receivable-refund-claims-and-disputes` |
+  | `advances-prepayments-current` | `advances-and-prepayments-destination-decides` |
+  | `fixed-assets-net` | `fixed-assets-boundary-with-oil-and-gas-properties` |
+  | `investment-properties` | `investment-property-classification-models-transfers` |
+  | `deferred-tax-assets` | `deferred-tax-assets-four-ways-the-line-can-fall` |
+  | `long-term-investments` | `long-term-investments-splitting-a-fall` |
+  | `oil-gas-properties-net` | `oil-gas-properties-capitalised-cost-and-reserves-superseded` |
+  | `right-of-use-assets-net` | `right-of-use-assets-reading-a-fall` |
+
+  The other 13 are drafts. The canonical URL of every one is `/accounting/fsli/<fsli_slug>`
+  (`src/lib/essayUrl.ts:122`, `src/domains/writing/schema/placement.ts:92`).
+- Other readers of `fsli_pages`: the Writer Studio's FSLI placement picker
+  (`src/components/writer/WriterEditor.tsx:131`), the admin content list and delete
+  (`src/hooks/queries/useUnifiedContent.ts:107,159,366–374`), `FsliMobileSidebar`,
+  `FsliRelatedItems`, `FsliCoveredBy`.
+- No `fs_*` table exists. No `_legacy_*` table exists.
+- `src/integrations/supabase/types.ts` is generated and stale (section 2); Plan 1.1's
+  regeneration is done with the Supabase MCP `generate_typescript_types`.
+
+## 12. Admin / publish flow
+
+- Essays: Writer Studio and `/admin/content`, as in section 3. Publishing an essay writes
+  `published` and `status` on the row from the client; there is no server-side gate.
+- The app calls no RPC today (`supabase.rpc(`: 0 hits in `src/`). One edge function exists,
+  `supabase/functions/link-preview`.
+- No admin surface exists for a non-essay table.
+- **Decision for 1.7:** the gate is a SQL function `fs_publish_period(period_id uuid)`,
+  `SECURITY DEFINER` with `SET search_path = ''`, admin-checked inside through the same
+  inline `user_roles` test the policies use. It re-runs the tie-out rules on
+  `fs_line` / `fs_soce_cell`, writes one `fs_check` row per rule, and sets
+  `status = 'published'` only when every rule passes. The client cannot write
+  `fs_period.status` directly (no UPDATE grant on that column to `authenticated`). The
+  publish button sits on the FSLI page, shown to an admin only, disabled while the latest
+  run has a failure. An RPC over an edge function: the rules are sums over rows the
+  database already holds, and an edge function would add a deploy step and a service key.
+
+## 13. Theme tokens
+
+As in section 4: Plus Jakarta Sans (body) and Spectral (headings), Tailwind's default type
+and 4px spacing scales, the 728px essay column, HSL colour tokens in `src/index.css`.
+FSLI-specific:
+
+- The current FSLI table sets figures in `font-mono` (`FsliList.tsx:44–45`) and header rows
+  in `bg-header`. The new table sets figures in the body font with `tabular-nums`
+  (`font-variant-numeric`, a Tailwind utility, not a new value). That Plus Jakarta Sans
+  carries a `tnum` feature is checked in 1.6 by measuring digit widths; if it does not,
+  this is reported before any other choice is made.
+- No tabs primitive exists in `src/components/ui/` and no `@radix-ui/react-tabs` dependency.
+  `FsTabs` is a `role="tablist"` of buttons on existing tokens; no dependency is added.
+- Total rows: a double rule is `border-b-4 border-double` (existing scale).
+- Table width: the statement is a four-column table with two figure columns; it sits in
+  `container` width, not the 728px essay column, which would wrap the bilingual labels.
+  To confirm with screenshots at 1.6.
+
+## 14. PDF and JSON storage
+
+- The repo already commits binary sources with their published artefacts pinned to them:
+  `docs/consolidation/source/*.xlsx` (marked `binary` in `.gitattributes`, sha256 pinned by
+  the published JSON), `scripts/og-fonts/*.ttf`. `.gitignore` excludes no PDF or `data/`
+  path. `.git` is 120 MB.
+- **Decision:** repo `data/fs/<company>/<period>/` for `source.pdf` and `statements.json`
+  (Plan default). `.gitattributes` gains `data/fs/**/*.pdf binary`.
+  `fs_period.source_file` holds the repo path. The README records the PDF's sha256.
+  Supabase Storage is not used.
+
+## 15. Checker runtime in CI
+
+- CI installs Node only (`.github/workflows/ci.yml`); no step runs Python today. The
+  runner image ships `python3`; this container has 3.13. One Python script exists in the
+  repo (`scripts/world/fetch-issuers.py`), run by hand.
+- **Decision:** the checker is Python stdlib, as the PRD asks. CI gains two steps on the
+  runner's `python3`, no `setup-python` and no package install:
+  `python3 -m unittest discover -s scripts/tests` and
+  `python3 scripts/fs_check.py data/fs/phe/fy2024/statements.json`. No TypeScript port.
+- The rules exist twice: in `fs_check.py` (gate before loading) and in the SQL publish
+  function (gate before publishing, Plan 1.7). Both are run against the same loaded data on
+  the local Postgres harness (`docs/db/verify/`) and their outputs compared rule by rule;
+  the comparison is an artefact in 1.8.
+
+## 16. Existing checker agent
+
+None. The repo has no `.claude/` directory, and this container has no `~/.claude/agents`.
+`scripts/fs_check.py` stands alone.
+
+## 17. Loader
+
+Repo scripts are Node (`.mjs`, and `.ts` run with `--experimental-strip-types`). Neither CI
+nor this environment holds a service-role key; database writes go through the Supabase MCP,
+as the tracker seed did. **Decision:** `scripts/fs_load.mjs` reads `statements.json` and the
+checker's `--json` output, refuses if any result has `passed=false`, and writes the load as
+SQL (`fs_period` as `draft`, `fs_line`, `fs_soce_cell`, `fs_check`). That SQL is applied with
+`apply_migration`, and a unit test fails if the committed SQL differs from what the script
+produces (the tracker seed's pattern).
+
+## 18. Contradictions and gaps
+
+### Contradictions with the PRD and plan
+
+1. **The table D2 retires is also the line-item essay index.** Plan 1.1 renames "the current
+   FSLI asset table" to `_legacy_*`. That table, `fsli_pages`, is also what
+   `/accounting/fsli/:slug` reads, and those pages carry the 13 published essays in section
+   11. Renaming it takes all 13 offline. It also breaks the Writer Studio's FSLI placement
+   picker and the admin content list. The PRD and plan do not say what becomes of the
+   line-item pages or their essays.
+2. **The wrong figures are on the line-item pages too.** `FsliDetail` prints `dec_2024`,
+   `dec_2023` and `notes_ref` from `fsli_pages` (`FsliDetail.tsx:126–130`). Plan 1.8 asks
+   for confirmation that the PRD §A1 figures appear nowhere, so these pages change in this
+   PR whatever is decided in item 1.
+3. **Two published essays sit under rows the FS does not have as labelled.**
+   `trade-receivables-net` is the 2,203,018 total the PRD says does not exist in the FS;
+   `corporate-dividend-taxes-receivable-current` is the figure the PRD identifies as
+   *Other taxes receivable – current*. Their slugs are their essays' public URLs.
+4. **"Not yet loaded" against loaded data.** D1 and §A7 have the SoCE and Cash Flow tabs
+   say "Not yet loaded from the FY2024 report." Plan 1.4 extracts SoCE and CF, and 1.5 loads
+   them, because XS-SOCE-PROFIT, XS-SOCE-BAL and XS-CF-CASH need them, including in the
+   server-side re-check (1.7). Once loaded, that sentence is untrue.
+
+### Gaps
+
+5. **The source PDF is not in this session.** Only `01_PRD.md` and `02_PLAN.md` were
+   attached. The `0 spec` commit and every step from 1.2 on need
+   `data/fs/phe/fy2024/source.pdf`. No public copy of the audited FY2024 report was found
+   on phe.pertamina.com. 1.1 (schema) and 1.3 (checker on the golden fixture) do not need
+   it.
+6. **"Authenticated owner"** (Plan 1.1) is read as the `admin` role in `user_roles`, the
+   repo's only owner concept.
+7. **Child-table RLS.** The repo's anon policies reference no other table (section 2).
+   `fs_line`, `fs_soce_cell` and `fs_check` have no publish flag of their own, so their anon
+   policy has to test the parent: `EXISTS (SELECT 1 FROM public.fs_period p WHERE p.id =
+   period_id AND p.status = 'published')`. This works because anon can read published
+   `fs_period` rows. It is a deliberate departure from the pattern, recorded here.
+
+### Checked and consistent
+
+- PRD §A6 golden table: every identity it implies holds to the unit for both years
+  (TCA + TNCA = TA, TCL + TNCL = TL, EQ + NCI = TE, TL + TE = TA, Rev + CoR = GP,
+  PBT + tax = NI, parent + NCI for profit and for TCI). Implied items below gross profit:
+  (107,050) / (1,158,490). Implied OCI: (37,360) / 1,376.
+
+### Operational
+
+8. **Branch.** This session pushes to `claude/sharp-noether-a2fkj7`, not
+   `feat/fsli-viewer`; the branch was restarted from `main` at `509c737` after PR 2 merged.
+9. **This file.** PR 2 merged first, so the add/add conflict in item 9 does not arise; PR 1
+   appends Part 2 here.
+
+## 19. Owner's answers
+
+Pending.
