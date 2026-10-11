@@ -165,15 +165,15 @@ test('thirty seconds: the map is the entrance, and a completed piece is one clic
 });
 
 /**
- * About was removed by owner decision on 10 October 2026 and what it
- * carried moved to the homepage. A link written before that still lands: on
- * Home, with the map's address and the fragment it carried.
+ * About was removed by owner decision on 10 October 2026 (what it carried
+ * moved to the homepage, and was removed from it on 11 October 2026). A link
+ * written before that still lands: on Home, with the map's address and the
+ * fragment it carried.
  */
 test('an old About link lands on the homepage, with the address and the fragment it carried', async ({ page }) => {
   await page.goto('/about');
   await expect.poll(() => new URL(page.url()).pathname).toBe('/');
   await expect(page.getByRole('heading', { name: 'The industry chain', exact: true })).toBeVisible();
-  await expect(page.locator('#changed-my-mind')).toBeVisible();
 
   await page.goto('/about?lens=green&distance=finance&node=energy');
   await expect.poll(() => new URL(page.url()).pathname).toBe('/');
@@ -181,15 +181,16 @@ test('an old About link lands on the homepage, with the address and the fragment
   await expect(page.getByRole('region', { name: 'Energy' })).toBeVisible();
   await expect(page.locator('.chain-plate')).toHaveAttribute('data-shift', 'green');
 
-  // The fragment is kept, and the page goes to it once it has drawn, clear
-  // of the sticky header: the section is thousands of pixels down on Home.
-  await page.goto('/about#changed-my-mind');
+  // The fragment is kept, and the section it names is in view, clear of the
+  // sticky header. (Changed my mind, which old About links named, was removed
+  // from Home on 11 October 2026; such a link now opens Home at its top.)
+  await page.goto('/about#industry-chain');
   await expect.poll(() => new URL(page.url()).pathname).toBe('/');
-  expect(new URL(page.url()).hash).toBe('#changed-my-mind');
-  const heading = page.locator('#changed-my-mind h2');
+  expect(new URL(page.url()).hash).toBe('#industry-chain');
+  const heading = page.locator('#industry-chain h1');
   await expect(heading).toBeInViewport();
   await expect
-    .poll(() => page.evaluate(() => document.querySelector('#changed-my-mind h2')!.getBoundingClientRect().top - document.querySelector('header')!.getBoundingClientRect().bottom))
+    .poll(() => page.evaluate(() => document.querySelector('#industry-chain h1')!.getBoundingClientRect().top - document.querySelector('header')!.getBoundingClientRect().bottom))
     .toBeGreaterThanOrEqual(0);
 });
 

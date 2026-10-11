@@ -80,10 +80,9 @@ export const nextBigThingItems: NavItem[] = NEXT_BIG_THING_THEMES.map(({ id, lab
 
 export const navSections: NavSection[] = [
   /**
-   * Home carries the revision of judgment under the glimpse. It used to be
-   * About's, the second door in this row; the owner removed About on
-   * 10 October 2026 (decision D4(a)) and what it carried moved to the page
-   * every reader already lands on, so there is no About door.
+   * There is no About door. About was the second door in this row; the owner
+   * removed it on 10 October 2026 (decision D4(a)), moved what it carried to
+   * Home, and removed that from Home on 11 October 2026.
    */
   { label: 'Home', path: '/' },
   {

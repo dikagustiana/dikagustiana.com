@@ -42,6 +42,34 @@ Branch `claude/sharp-noether-a2fkj7`, PR #69. Spec: `docs/spec/01_PRD.md` Part B
 
 ---
 
+# 2026-10-11 — Changed my mind is removed; the glimpse ends the homepage
+
+Branch `claude/landing-argument-glimpse-marquee-fy7m4s`, restarted from `main` @ `1adf987` after
+PR #68 merged. Owner request, the same day: the section headed "What I changed my mind about"
+goes too.
+
+- **Deleted:** `src/components/argument/ChangedMind.tsx` (`#changed-my-mind`) and its data
+  `src/data/changedMind.ts` (`CHANGED_MIND`). Nothing else imported either; the folder
+  `src/components/argument/` is gone with them.
+- **No link pointed at it** from the site's nav, footer or components, and the database holds no
+  essay, module, FSLI section or section manifesto that names `#changed-my-mind` (read-only query
+  on production, 2026-10-11). An old `/about#changed-my-mind` or `/#changed-my-mind` now opens the
+  homepage at its top.
+- **The homepage is the map, then the glimpse.** The glimpse keeps its `border-b py-12` and is
+  now the last section before the footer, as Changed my mind was.
+- **The fragment jump stays** (`useFragmentOnArrival` in src/pages/Index.tsx). It is not this
+  section's: FsliDetail uses it too, and `#industry-chain` and About's old links still arrive with
+  a fragment. Its homepage tests now aim at `#industry-chain`.
+- **The chain's provenance note** for `stage-processing` named `src/data/changedMind.ts`; it now
+  cites the section by its last commit, `1adf987`.
+
+Tests: `tests/unit/homePage.test.tsx` (the glimpse is the last section, neither removed section is
+on the page, the map alone when nothing is published; the fragment tests on `#industry-chain`);
+`tests/e2e/journeys.spec.ts` (an old About link keeps its fragment, now `#industry-chain`).
+`navConfig.test.ts` renames one test. No test was added or deleted; `MIN_TESTS` stays at 1252.
+
+---
+
 # 2026-10-11 — The homepage's argument is removed; the glimpse runs
 
 Branch `claude/landing-argument-glimpse-marquee-fy7m4s`, base `main` @ `2d37761`. Owner request,
@@ -54,7 +82,8 @@ two changes to the landing page and what it imports, nothing else redesigned.
   `READING_PATH`, `READING_PATH_SLUGS`, `LINK_LABEL`), its query
   `src/hooks/queries/useReadingPath.ts` and its suite `tests/unit/readingPath.test.tsx`. Each had
   no other importer. `ChangedMind` stays where it was, now directly under the glimpse, so its
-  folder `src/components/argument/` stays.
+  folder `src/components/argument/` stays. *(Superseded the same day: `ChangedMind` removed too,
+  entry "Changed my mind is removed; the glimpse ends the homepage" above.)*
 - **No link pointed at it from the site.** No nav entry, footer or component linked
   `#the-argument`; the database holds no essay, module, FSLI section or setting that names it
   (read-only query on production, 2026-10-11). An old `/about#the-argument` or `/#the-argument`
@@ -345,7 +374,8 @@ link into the site.
   (`IndustryChainSection`) is not repeated: the homepage opens on the same map. It stays exported,
   mounted nowhere, because the world shell's suite renders it. *(Superseded 2026-10-11 for
   `ReadingPath`: removed from the homepage with its data and query; entry "The homepage's argument
-  is removed; the glimpse runs".)*
+  is removed; the glimpse runs". And for `ChangedMind` the same day; entry "Changed my mind is
+  removed; the glimpse ends the homepage".)*
 - **Gone with the page:** `src/pages/About.tsx`, its hero, its "Selected Essays"
   (`useSelectedEssays(8)`; the hook stays for the homepage) and "On the shelf". The About door is
   gone from the header row (`MainNav.tsx`), from `navConfig.ts` (so from the phone's drawer, which
