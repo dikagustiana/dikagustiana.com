@@ -53,3 +53,6 @@ vitest-report.json
 
 # the world's Playwright build (playwright.world.config.ts)
 dist-world
+
+# Python bytecode (scripts/fs_check.py and its tests)
+__pycache__/

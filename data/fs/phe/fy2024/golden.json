@@ -1,0 +1,26 @@
+{
+  "_about": "Golden values for PT Pertamina Hulu Energi dan entitas anaknya, FY2024, in thousands of USD, copied from docs/spec/01_PRD.md §A6. The PRD's author read them from the audited consolidated statements (EY report 00489/2.1032/AU.1/02/1726-4/1/III/2025). scripts/fs_check.py compares each with the printed value of the row carrying that line_key; [0] is 31 December 2024 or the year 2024, [1] is 2023. Everything else is read from the PDF, not from this file.",
+  "unit": "thousands",
+  "values": {
+    "sofp.total_current_assets": [8036328, 9879695],
+    "sofp.total_non_current_assets": [22398627, 21009221],
+    "sofp.total_assets": [30434955, 30888916],
+    "sofp.total_current_liabilities": [6158999, 6017916],
+    "sofp.total_non_current_liabilities": [9168604, 10692445],
+    "sofp.total_liabilities": [15327603, 16710361],
+    "sofp.equity_parent": [14433117, 13534126],
+    "sofp.nci": [674235, 644429],
+    "sofp.total_equity": [15107352, 14178555],
+    "pl_oci.revenue": [14330340, 14568384],
+    "pl_oci.total_cost_of_revenue": [-9330714, -8917865],
+    "pl_oci.gross_profit": [4999626, 5650519],
+    "pl_oci.profit_before_tax": [4892576, 4492029],
+    "pl_oci.income_tax": [-1771541, -1766491],
+    "pl_oci.profit_for_the_year": [3121035, 2725538],
+    "pl_oci.total_comprehensive_income": [3083675, 2726914],
+    "pl_oci.profit_parent": [3001475, 2599686],
+    "pl_oci.profit_nci": [119560, 125852],
+    "pl_oci.tci_parent": [2972602, 2603070],
+    "pl_oci.tci_nci": [111073, 123844]
+  }
+}

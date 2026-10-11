@@ -70,6 +70,19 @@ non-admin block, audit-log append-only, the self-grant guard, and the
 Read the output rather than trusting an exit code — `ON_ERROR_STOP` is off on purpose,
 because most assertions here *expect* an `ERROR:` line. Each check names what it expects.
 
+## `02_tracker_entry_acceptance.sql`, `03_fs_acceptance.sql`
+
+Per-feature checks, run after the baseline and that feature's migrations (each file's
+header names them). Unlike `01`, `ON_ERROR_STOP` is on and every check raises on
+failure, so a clean run prints only `PASS` lines and ends with "all checks passed".
+Everything they write is rolled back.
+
+`03` covers the `fs_*` statement tables (Plan 1.1): the CHECKs and keys of §A5, anon and
+signed-in reads of published periods only, the admin's writes limited to drafts, and the
+publish gate held twice (`fs_period.status` neither granted nor reachable through the
+UPDATE policy). Each RLS rule it tests was also loosened once in a copy of the migration
+to confirm the script fails.
+
 ## The defect running it caught that reading did not
 
 `REVOKE EXECUTE ON FUNCTION public.has_role(...) FROM PUBLIC` — the obvious fix for the
