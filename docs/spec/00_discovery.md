@@ -196,3 +196,12 @@ response**.
 9. **This file.** The PR 1 session writes its own `docs/spec/00_discovery.md` on
    `feat/fsli-viewer`. Whichever PR merges second gets an add/add conflict on this path.
    `01_PRD.md` and `02_PLAN.md` are byte-identical copies and will not conflict.
+
+## 9. Owner's answers (Dika, 11 October 2026)
+
+| Item | Answer |
+|---|---|
+| 1. Issue-section body | Sans (Plus Jakarta Sans) at 19px, the essay size. Headings serif. |
+| 2. Register width | 728px, the essay column. |
+| 4. Sub-routes | Redirect to `/green-transition/tracker`: issue pages to `#q2-2025` / `#q1-2025`, entry pages and `/archive` to the page. |
+| 5–7 | Open; not needed for 2.1. To settle at 2.2–2.3. |
