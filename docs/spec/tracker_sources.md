@@ -1,9 +1,10 @@
 # Tracker sources: Q1 and Q2 2025
 
-Plan step 2.1 · PRD §B4, §B6, D6 · prepared 11 October 2026 · **status: awaiting Dika's sign-off**
+Plan step 2.1 · PRD §B4, §B6, D6 · prepared 11 October 2026 · **status: signed off by Dika,
+11 October 2026**, with one addition (the Maluku order in `pln_procurement-2025q2`). All 14 Part A
+entries are approved as written; all 30 Part B claims are deleted.
 
-Nothing in this file is in the database or on the page. After sign-off, the entries in Part A are
-seeded as `tracker_entry` rows with `published = false` (Plan 2.2).
+The entries in Part A are seeded as `tracker_entry` rows with `published = false` (Plan 2.2).
 
 ## How to review
 
@@ -20,9 +21,9 @@ seeded as `tracker_entry` rows with `published = false` (Plan 2.2).
 - **Part D, sources.** Numbered. Part A and Part B cite them as [n].
 - **Part E, what this changes elsewhere,** and access notes.
 
-**Status labels are proposals.** `advanced` / `unchanged` / `regressed` / `mixed` say what the
-cited documents record for that sector in that quarter. Each entry gives the reason in one line.
-They are a judgement for you to confirm or change.
+**Status labels.** `advanced` / `unchanged` / `regressed` / `mixed` say what the cited documents
+record for that sector in that quarter. Each entry gives the reason in one line. They were proposed
+for review and approved at sign-off.
 
 **Primary only.** Every source is the regulation, decree, plan, official release, or institutional
 or company disclosure itself (PRD §B4). No news article is cited anywhere in this file.
@@ -33,7 +34,7 @@ or company disclosure itself (PRD §B4). No news article is cited anywhere in th
 |---|---|---|
 | Geothermal | **advanced**: ESDM Reg. 5/2025 adds a geothermal price-adjustment rule; ADB signs Muara Laboh loan | **mixed**: Muara Laboh financial close; World Bank cuts its exploration facility by 57% |
 | Solar | **unchanged**: 2024 local-content rules (20% minimum) in force | **mixed**: RUPTL plans 17.1 GW; solar import relaxation ends 30 June |
-| PLN procurement | **advanced**: national electricity plan (RUKN) ratified 5 March | **advanced**: RUPTL 2025–2034 ratified 26 May |
+| PLN procurement | **advanced**: national electricity plan (RUKN) ratified 5 March | **advanced**: RUPTL 2025–2034 ratified 26 May; Maluku geothermal order |
 | JETP | **mixed**: US leaves partners group; Germany co-leads; USD 1.1 bn approved | **advanced**: Saguling signing; KfW EUR 200 m loan signed |
 | OJK taxonomy | **advanced**: TKBI version 2 issued 11 February | **unchanged**: version 2 still non-binding; socialisation only |
 | Danantara | **unchanged**: founding law and regulation silent on energy | **unchanged**: QIA fund names renewables; mandate unchanged |
@@ -53,7 +54,7 @@ for deletion** (Part B).
 #### `geothermal-2025q1`
 
 - **quarter** 2025Q1 · **sector** geothermal · **verification** verified
-- **status (proposed): advanced.** A new ministerial regulation added a geothermal price-adjustment
+- **status: advanced.** A new ministerial regulation added a geothermal price-adjustment
   rule, and a concessional loan for a geothermal expansion was signed.
 - **finding:** ESDM Regulation 5/2025 on renewable power purchase agreements (signed 27 February,
   promulgated 4 March 2025) allows the price in a geothermal pre-transaction agreement to be
@@ -73,7 +74,7 @@ for deletion** (Part B).
 #### `geothermal-2025q2`
 
 - **quarter** 2025Q2 · **sector** geothermal · **verification** verified
-- **status (proposed): mixed.** A geothermal expansion reached financial close and three plants
+- **status: mixed.** A geothermal expansion reached financial close and three plants
   entered operation, while the World Bank cut its geothermal exploration facility.
 - **finding:** Muara Laboh Unit 2 (80 MW) reached financial close on 18 April 2025 at a tariff under
   Presidential Regulation 112/2022, and the World Bank cut its geothermal exploration facility
@@ -98,7 +99,7 @@ for deletion** (Part B).
 #### `solar-2025q1`
 
 - **quarter** 2025Q1 · **sector** solar · **verification** verified
-- **status (proposed): unchanged.** The local-content rules in force were the ones set in
+- **status: unchanged.** The local-content rules in force were the ones set in
   July–August 2024.
 - **finding:** Solar plants in Q1 2025 were under the local-content rules of ESDM Regulation 11/2024
   (31 July 2024) and Ministerial Decision 191.K/EK.01/MEM.E/2024 (6 August 2024), which set a
@@ -117,7 +118,7 @@ for deletion** (Part B).
 #### `solar-2025q2`
 
 - **quarter** 2025Q2 · **sector** solar · **verification** verified
-- **status (proposed): mixed.** The national plan set a large solar build-out, and the import
+- **status: mixed.** The national plan set a large solar build-out, and the import
   relaxation for solar ended on the date the 2024 regulation set.
 - **finding:** RUPTL 2025–2034 (26 May 2025) plans 17.1 GW of utility-scale solar, and the import
   relaxation for solar projects under ESDM Regulation 11/2024 ended on 30 June 2025, the date the
@@ -135,7 +136,7 @@ for deletion** (Part B).
 #### `pln_procurement-2025q1`
 
 - **quarter** 2025Q1 · **sector** pln_procurement · **verification** verified
-- **status (proposed): advanced.** The national electricity plan that the next RUPTL must follow
+- **status: advanced.** The national electricity plan that the next RUPTL must follow
   was ratified, and new rules for renewable power purchase agreements took effect.
 - **finding:** ESDM ratified the national electricity plan (RUKN, Ministerial Decision
   85.K/TL.01/MEM.L/2025) on 5 March 2025, while PLN's procurement still ran under RUPTL 2021–2030
@@ -154,7 +155,7 @@ for deletion** (Part B).
 #### `pln_procurement-2025q2`
 
 - **quarter** 2025Q2 · **sector** pln_procurement · **verification** verified
-- **status (proposed): advanced.** The ten-year procurement plan was ratified and published.
+- **status: advanced.** The ten-year procurement plan was ratified and published.
 - **finding:** ESDM ratified RUPTL 2025–2034 on 26 May 2025 (Ministerial Decision
   188.K/TL.03/MEM.L/2025), planning 69.5 GW of new capacity of which 42.6 GW is renewable and
   10.3 GW is storage, and published the document on 3 June 2025.
@@ -164,20 +165,20 @@ for deletion** (Part B).
   equity or a higher margin PLN's debt-service and debt-to-EBITDA ratios are unhealthy. Earlier in
   the quarter, ESDM Regulation 10/2025 (signed 10 April 2025) set the power-sector transition
   roadmap required by Perpres 112/2022, restating its ban on new coal plants and the exceptions to
-  it.
+  it. On 6 April 2025 the Minister ordered PLN to build 40 MW of geothermal in Maluku, saying the
+  Tulehu 2×10 MW plant was at PLN's procurement stage with commercial operation targeted for 2031.
 - **sources:** [7] RUPTL decision, Diktum KEDUA and KEDELAPAN (PDF pp. 4–5), financing chapter
   (PDF pp. 569–570) · [16] ESDM release 046.Pers/04/SJI/2025 · [17] ESDM release, 3 June 2025 ·
-  [18] Permen ESDM 10/2025, Art. 6 · [3] Perpres 112/2022, Art. 3(4)
-- **review note:** the Minister's order of 6 April 2025 to PLN to build 40 MW of geothermal in
-  Maluku [19] is a sourced Q2 procurement fact for eastern Indonesia. It is not in this entry
-  because no claim on the current page was about it; add it if you want it.
+  [18] Permen ESDM 10/2025, Art. 6 · [3] Perpres 112/2022, Art. 3(4) · [19] ESDM release
+  028.Pers/04/SJI/2025
+- **added at review:** the Maluku sentence (Dika, 11 October 2026).
 
 ### A4. JETP
 
 #### `jetp-2025q1`
 
 - **quarter** 2025Q1 · **sector** jetp · **verification** verified
-- **status (proposed): mixed.** The partners group lost the United States and reorganised under
+- **status: mixed.** The partners group lost the United States and reorganised under
   German co-leadership, while approved financing was reported and a government task force formed.
 - **finding:** The United States left the JETP International Partners Group (recorded by South
   Africa's foreign ministry on 6 March 2025), Germany took the co-lead with Japan, and the partners
@@ -197,7 +198,7 @@ for deletion** (Part B).
 #### `jetp-2025q2`
 
 - **quarter** 2025Q2 · **sector** jetp · **verification** verified
-- **status (proposed): advanced.** Two financings were signed and one reached financial close.
+- **status: advanced.** Two financings were signed and one reached financial close.
 - **finding:** Germany's KfW and Indonesia's Ministry of Finance signed a EUR 200 million
   policy-based loan on 30 June 2025, which Germany presents as part of JETP, after the Saguling
   floating-solar investment was signed on 29 April 2025.
@@ -215,7 +216,7 @@ for deletion** (Part B).
 #### `ojk_taxonomy-2025q1`
 
 - **quarter** 2025Q1 · **sector** ojk_taxonomy · **verification** verified
-- **status (proposed): advanced.** A new edition of the taxonomy was issued.
+- **status: advanced.** A new edition of the taxonomy was issued.
 - **finding:** OJK issued version 2 of the Indonesian Taxonomy for Sustainable Finance (TKBI) on
   11 February 2025, adding construction and real estate, transport and storage, and forestry and
   oil palm to the energy sector covered by version 1.
@@ -230,7 +231,7 @@ for deletion** (Part B).
 #### `ojk_taxonomy-2025q2`
 
 - **quarter** 2025Q2 · **sector** ojk_taxonomy · **verification** verified
-- **status (proposed): unchanged.** No new edition or binding rule; the issued version was
+- **status: unchanged.** No new edition or binding rule; the issued version was
   disseminated.
 - **finding:** TKBI version 2 remained a non-binding reference in Q2 2025, and OJK held a second
   round of socialisation on it on 24–25 April 2025.
@@ -246,7 +247,7 @@ for deletion** (Part B).
 #### `danantara-2025q1`
 
 - **quarter** 2025Q1 · **sector** danantara · **verification** verified
-- **status (proposed): unchanged.** A new state investment manager was created, but its founding
+- **status: unchanged.** A new state investment manager was created, but its founding
   texts give it no energy-transition role. This label is the most open to your judgement.
 - **finding:** Law 1/2025 and Government Regulation 10/2025, both dated 24 February 2025, created
   Danantara with a mandate to increase and optimise the investment and operations of state-owned
@@ -265,7 +266,7 @@ for deletion** (Part B).
 #### `danantara-2025q2`
 
 - **quarter** 2025Q2 · **sector** danantara · **verification** verified
-- **status (proposed): unchanged.** A fund announcement named renewables; the legal mandate did
+- **status: unchanged.** A fund announcement named renewables; the legal mandate did
   not change.
 - **finding:** Danantara and the Qatar Investment Authority announced a USD 4 billion joint fund on
   15 April 2025 that names renewable energy among its focus sectors.
@@ -279,7 +280,7 @@ for deletion** (Part B).
 #### `other-2025q1`
 
 - **quarter** 2025Q1 · **sector** other · **verification** verified
-- **status (proposed): advanced.** A new procedure for government guarantees of renewable power
+- **status: advanced.** A new procedure for government guarantees of renewable power
   contracts took effect.
 - **finding:** Finance Minister Regulation 5/2025 (signed 7 January, promulgated 21 January 2025)
   set the procedure for government guarantees of PLN's payment obligations to independent power
@@ -295,7 +296,7 @@ for deletion** (Part B).
 #### `other-2025q2`
 
 - **quarter** 2025Q2 · **sector** other · **verification** verified
-- **status (proposed): advanced.** A development-bank loan to PLN was approved; the licensing
+- **status: advanced.** A development-bank loan to PLN was approved; the licensing
   regulation was replaced without changing the treatment of most power generation.
 - **finding:** The World Bank approved a USD 600 million loan to PLN for electricity access in
   Kalimantan and Sumatra (ISLE-2) on 12 June 2025, a week after Government Regulation 28/2025
@@ -324,8 +325,9 @@ holds; it is carried into the Part A entry named, and the rest is deleted).
 PLN signed a renewable power purchase agreement on 16 December 2024 (Muara Laboh, West Sumatra)
 [6], so there was no two-quarter silence on new agreements. The one eastern-Indonesia signal found
 in Q2 came from the Minister, who on 6 April 2025 ordered PLN to build 40 MW of geothermal in
-Maluku and said Tulehu 2×10 MW was at PLN's procurement stage [19]. No primary document shows a
-procurement signal issued by PLN for eastern Indonesia.
+Maluku and said Tulehu 2×10 MW was at PLN's procurement stage [19]; that order is in
+`pln_procurement-2025q2`. No primary document shows a procurement signal issued by PLN for eastern
+Indonesia.
 
 #### Q2-C2 · "What Changed: Changed" · unverifiable for Q2
 
