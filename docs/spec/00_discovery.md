@@ -406,6 +406,18 @@ produces (the tracker seed's pattern).
 9. **This file.** PR 2 merged first, so the add/add conflict in item 9 does not arise; PR 1
    appends Part 2 here.
 
-## 19. Owner's answers
+## 19. Owner's answers (Dika, 11 October 2026)
 
-Pending.
+| Item | Answer |
+|---|---|
+| 1. `fsli_pages` | Kept as the line-item page index: the 24 pages and their essays stay at their URLs. Only its figure columns retire: `dec_2024`, `dec_2023`, `notes_ref` are renamed `legacy_*` (reversible). Viewer rows link to their line-item page where one exists. |
+| 2. Figures on line-item pages | Read from `fs_line` for the matching row, which the checker has passed. |
+| 3. The two mislabelled pages | Slugs kept (they are public URLs); page titles changed to the FS labels. Which FS row each maps to is settled with Dika at 1.4, after the PDF is read. |
+| 4. SoCE and CF tabs | Both are loaded (the cross-checks need them). D1 holds: the tabs show the empty state, with the copy "Not yet shown on this page." |
+
+Consequences for the schema (1.1), beyond PRD §A5:
+
+- `fs_line.fsli_slug`: the link from a statement row to its line-item page (items 1 and 2).
+- `fs_line.line_key`: the stable name the checker and the publish function find a row by
+  (`total_assets`, `gross_profit`, …). Labels are verbatim and cannot be matched on, so
+  the rules in §A6 need it.
