@@ -22,9 +22,10 @@ export function SourceList({ sources }: { sources: TrackerSource[] }) {
             <li key={source.url} id={`source-${n}`} className="flex scroll-mt-24 gap-3 text-base leading-relaxed text-foreground">
               <span className="w-9 shrink-0 tabular-nums text-muted-foreground">[{n}]</span>
               <span className="min-w-0 [overflow-wrap:anywhere]">
-                {source.issuer}. <cite className="not-italic font-semibold">{source.title}</cite>.{' '}
+                {source.issuer && <>{source.issuer}. </>}
+                <cite className="not-italic font-semibold">{source.title}</cite>.{' '}
                 {source.doc_no && <>{source.doc_no}. </>}
-                {fullDate(source.date)}.{' '}
+                {source.date && <>{fullDate(source.date)}. </>}
                 <a
                   href={source.url}
                   target="_blank"
@@ -34,7 +35,7 @@ export function SourceList({ sources }: { sources: TrackerSource[] }) {
                   Open the document
                   <span className="sr-only"> (opens in a new tab)</span>
                 </a>
-                <span className="text-muted-foreground"> · accessed {fullDate(source.accessed)}</span>
+                {source.accessed && <span className="text-muted-foreground"> · accessed {fullDate(source.accessed)}</span>}
               </span>
             </li>
           );

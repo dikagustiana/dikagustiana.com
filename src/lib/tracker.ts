@@ -20,16 +20,21 @@ export type TrackerSector =
 
 export type TrackerStatus = 'advanced' | 'unchanged' | 'regressed' | 'mixed';
 
-/** One primary document, as the `sources jsonb` column stores it (PRD §B4). */
+/**
+ * One primary document, as the `sources jsonb` column stores it (PRD §B4).
+ * The table's CHECK requires only a title, an https url, and a doc_no or a
+ * date, so the other fields are optional here and SourceList renders each
+ * only when present. The repo's own content carries all of them.
+ */
 export interface TrackerSource {
   title: string;
-  issuer: string;
+  issuer?: string;
   doc_no?: string;
   /** ISO date of the document: signing date for a regulation, release date otherwise. */
-  date: string;
+  date?: string;
   url: string;
   /** ISO date the document was opened and checked. */
-  accessed: string;
+  accessed?: string;
 }
 
 export interface TrackerEntry {

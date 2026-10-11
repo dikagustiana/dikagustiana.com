@@ -28,7 +28,14 @@ vi.mock('@/integrations/supabase/client', () => ({
 }));
 vi.mock('@vercel/analytics/react', () => ({ Analytics: () => null }));
 
+import { MemoryRouter } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { HelmetProvider } from 'react-helmet-async';
 import App from '@/App';
+import { AuthProvider } from '@/contexts/AuthContext';
+import { TooltipProvider } from '@/components/ui/tooltip';
+import { SourceList } from '@/components/tracker/SourceList';
+import GreenTransitionCurrentCondition from '@/pages/GreenTransitionCurrentCondition';
 import { SECTOR_ORDER, STATUS_LABEL, TRACKER_QUARTERS, TRACKER_STANDFIRST, type TrackerEntry } from '@/lib/tracker';
 
 interface ContentEntry {
@@ -246,7 +253,7 @@ describe('the current-condition series stub', () => {
     expect(await screen.findByRole('heading', { level: 1, name: 'Current condition' })).toBeInTheDocument();
     const title = screen.getByText('Learn from the UK: It Was Never Just Political Will');
     expect(title.closest('a')).toBeNull();
-    expect(screen.getByText('Not yet published.')).toBeInTheDocument();
+    expect(await screen.findByText('Not yet published.')).toBeInTheDocument();
   });
 
   it('links the essay once it is published', async () => {
@@ -261,5 +268,38 @@ describe('the current-condition series stub', () => {
     render(<App />);
     const link = await screen.findByRole('link', { name: 'Learn from the UK: It Was Never Just Political Will' });
     expect(link.getAttribute('href')).toMatch(/learn-from-the-uk-it-was-never-just-political-will$/);
+  });
+
+  it('states no publication status when the read fails', async () => {
+    // Its own query client, retry off: App's client is shared across this
+    // file and would answer from an earlier test's cache.
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    fromMock.mockImplementation(() => makeQueryResult(null, { message: 'network down' }));
+    render(
+      <HelmetProvider>
+        <QueryClientProvider client={qc}>
+          <AuthProvider>
+            <TooltipProvider>
+              <MemoryRouter initialEntries={['/green-transition/current-condition']}>
+                <GreenTransitionCurrentCondition />
+              </MemoryRouter>
+            </TooltipProvider>
+          </AuthProvider>
+        </QueryClientProvider>
+      </HelmetProvider>,
+    );
+    expect(screen.getByText('Learn from the UK: It Was Never Just Political Will')).toBeInTheDocument();
+    expect(screen.queryByText('Not yet published.')).toBeNull();
+    await waitFor(() => expect(qc.getQueryState(['current-condition-series'])?.status).toBe('error'));
+    expect(screen.getByText('Learn from the UK: It Was Never Just Political Will').closest('a')).toBeNull();
+    expect(screen.queryByText('Not yet published.')).toBeNull();
+  });
+});
+
+describe('the source list', () => {
+  it('renders a source with only the fields the table requires, without empty parts', () => {
+    render(<SourceList sources={[{ title: 'Permen ESDM 1/2025', url: 'https://example.org/permen-1-2025', doc_no: 'No. 1 Tahun 2025' }]} />);
+    const item = document.getElementById('source-1')!;
+    expect(item.textContent).toBe('[1]Permen ESDM 1/2025. No. 1 Tahun 2025. Open the document (opens in a new tab)');
   });
 });

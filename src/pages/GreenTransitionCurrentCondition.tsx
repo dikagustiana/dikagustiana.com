@@ -38,7 +38,9 @@ function useSeriesEssays() {
 }
 
 export default function GreenTransitionCurrentCondition() {
-  const { data } = useSeriesEssays();
+  // Publication status is stated only from a successful read: while the
+  // query is loading, or if it fails, the title shows without a status line.
+  const { data, isSuccess } = useSeriesEssays();
   const bySlug = new Map((data ?? []).map((row) => [row.slug, row]));
 
   return (
@@ -83,7 +85,7 @@ export default function GreenTransitionCurrentCondition() {
                   ) : (
                     <>
                       <span className="block text-lg font-display font-semibold text-foreground">{item.title}</span>
-                      <span className="mt-1 block text-base text-muted-foreground">Not yet published.</span>
+                      {isSuccess && <span className="mt-1 block text-base text-muted-foreground">Not yet published.</span>}
                     </>
                   )}
                 </li>
