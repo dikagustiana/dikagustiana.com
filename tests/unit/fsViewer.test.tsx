@@ -169,15 +169,16 @@ function renderAt(path: string) {
 }
 
 const table = () => screen.getByRole('table', { name: /Consolidated Statement/ });
-const rowLabels = () => within(table()).getAllByRole('rowheader').map((h) => h.textContent);
+/** Each row's Indonesian label (the cell also holds the English, and the fold-out under it). */
+const rowLabels = () => within(table()).getAllByRole('rowheader').map((h) => h.querySelector('[lang="id"]')?.textContent);
 
 describe('the statement of financial position', () => {
   it('prints every row as stored, in order: ID label, English under it, notes, both years', async () => {
     renderAt('/accounting/fsli/acme/fy2024');
     await screen.findByRole('heading', { level: 1, name: 'Laporan Posisi Keuangan Konsolidasian' });
-    expect(rowLabels()).toHaveLength(4);
+    expect(rowLabels()).toEqual(['ASET', 'Kas dan setara kas', 'Piutang lain-lain', 'JUMLAH ASET']);
     const cash = within(table()).getByRole('row', { name: /Kas dan setara kas/ });
-    expect(within(cash).getByText('Cash and cash equivalents')).toBeInTheDocument();
+    expect(within(cash).getAllByText('Cash and cash equivalents')[0]).toBeInTheDocument();
     expect(within(cash).getAllByRole('cell').map((c) => c.textContent)).toEqual(['3f,6', '1,200', '1,000', 'p.11']);
     // A stored nil prints as the FS's dash; the total carries the double rule.
     const other = within(table()).getByRole('row', { name: /Piutang lain-lain/ });
@@ -229,7 +230,7 @@ describe('the tabs', () => {
     fireEvent.click(screen.getByRole('tab', { name: 'Laba Rugi & OCI' }));
     expect(await screen.findByRole('heading', { level: 1, name: /Laporan Laba Rugi/ })).toBeInTheDocument();
     expect(screen.getByTestId('location')).toHaveTextContent('/accounting/fsli/acme/fy2024?statement=pl_oci');
-    expect(rowLabels()).toEqual(['PENDAPATAN USAHAREVENUES', 'Beban pokokCost of revenue', 'LABA KOTORGROSS PROFIT']);
+    expect(rowLabels()).toEqual(['PENDAPATAN USAHA', 'Beban pokok', 'LABA KOTOR']);
     expect(within(table()).getByRole('row', { name: /Beban pokok/ })).toHaveTextContent('(300)');
     expect(screen.getByRole('main')).toHaveTextContent('Untuk Tahun yang Berakhir pada Tanggal 31 Desember 2024');
     fireEvent.click(screen.getByRole('tab', { name: 'Posisi Keuangan' }));
@@ -260,9 +261,9 @@ describe('search', () => {
     renderAt('/accounting/fsli/acme/fy2024');
     const box = await screen.findByRole('searchbox', { name: 'Search line items' });
     fireEvent.change(box, { target: { value: 'receivables' } });
-    expect(rowLabels()).toEqual(['Piutang lain-lainOther receivables']);
+    expect(rowLabels()).toEqual(['Piutang lain-lain']);
     fireEvent.change(box, { target: { value: '3f,6' } });
-    expect(rowLabels()).toEqual(['Kas dan setara kasCash and cash equivalents']);
+    expect(rowLabels()).toEqual(['Kas dan setara kas']);
     fireEvent.change(box, { target: { value: 'goodwill' } });
     expect(screen.getByRole('tabpanel')).toHaveTextContent('No line item matches “goodwill”.');
   });

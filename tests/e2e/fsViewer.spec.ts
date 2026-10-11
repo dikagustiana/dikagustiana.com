@@ -124,7 +124,7 @@ for (const statement of ['', '?statement=pl_oci']) {
     // Notes and the English label fold under a tap.
     const row = p.getByRole('row', { name: /Uang muka|PENDAPATAN USAHA/ });
     const detail = row.locator('[id$="-detail"]');
-    await expect(detail).toHaveCount(0);
+    await expect(detail).toBeHidden();
     await row.getByRole('button').click();
     await expect(detail).toBeVisible();
     await expect(detail).toContainText(/Advances and prepayments|REVENUES/);

@@ -106,13 +106,16 @@ export function FsVerticalStatement({
                       </button>
                       <div className="hidden text-sm font-normal text-muted-foreground md:block">{line.label_en}</div>
                     </div>
-                    {isOpen && (
-                      <div id={detailId} className={cn('mt-1 space-y-0.5 text-sm font-normal text-muted-foreground md:hidden', INDENT[Math.min(line.indent, INDENT.length - 1)])}>
-                        <div>{line.label_en}</div>
-                        {line.notes_ref && <div>Notes {line.notes_ref}</div>}
-                        <div>p.{line.source_page}</div>
-                      </div>
-                    )}
+                    {/* Always in the document, so the button's aria-controls names an element. */}
+                    <div
+                      id={detailId}
+                      hidden={!isOpen}
+                      className={cn('mt-1 space-y-0.5 text-sm font-normal text-muted-foreground md:hidden', INDENT[Math.min(line.indent, INDENT.length - 1)])}
+                    >
+                      <div>{line.label_en}</div>
+                      {line.notes_ref && <div>Notes {line.notes_ref}</div>}
+                      <div>p.{line.source_page}</div>
+                    </div>
                   </th>
                   <td className="hidden py-2 pr-3 pt-2.5 text-sm text-muted-foreground md:table-cell">{line.notes_ref}</td>
                   <td className={cn('whitespace-nowrap py-2 pl-2 text-right tabular-nums', bold && 'font-semibold')}>
