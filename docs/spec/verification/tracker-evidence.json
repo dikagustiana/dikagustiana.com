@@ -1,0 +1,318 @@
+{
+  "lighthouse": {
+    "mobile": {
+      "lighthouseVersion": "12.2.1",
+      "fetchTime": "2026-10-11T10:11:16.579Z",
+      "url": "http://127.0.0.1:4173/green-transition/tracker",
+      "accessibilityScore": 99,
+      "failingAudits": [
+        {
+          "id": "heading-order",
+          "title": "Heading elements are not in a sequentially-descending order",
+          "items": [
+            "<h4 class=\"font-semibold text-foreground mb-4\">"
+          ]
+        }
+      ]
+    },
+    "desktop": {
+      "lighthouseVersion": "12.2.1",
+      "fetchTime": "2026-10-11T10:11:28.414Z",
+      "url": "http://127.0.0.1:4173/green-transition/tracker",
+      "accessibilityScore": 99,
+      "failingAudits": [
+        {
+          "id": "heading-order",
+          "title": "Heading elements are not in a sequentially-descending order",
+          "items": [
+            "<h4 class=\"font-semibold text-foreground mb-4\">"
+          ]
+        }
+      ]
+    }
+  },
+  "playwright_axe": {
+    "375": {
+      "fontsRequested": [
+        "/fonts/plus-jakarta-sans-latin.woff2",
+        "/fonts/spectral-normal-400-latin.woff2",
+        "/fonts/spectral-normal-700-latin.woff2"
+      ],
+      "axe": {
+        "violations": [],
+        "passes": [
+          "aria-allowed-attr",
+          "aria-conditional-attr",
+          "aria-deprecated-role",
+          "aria-hidden-body",
+          "aria-hidden-focus",
+          "aria-prohibited-attr",
+          "aria-required-attr",
+          "aria-required-children",
+          "aria-required-parent",
+          "aria-roles",
+          "aria-valid-attr-value",
+          "aria-valid-attr",
+          "avoid-inline-spacing",
+          "button-name",
+          "bypass",
+          "color-contrast",
+          "document-title",
+          "duplicate-id-aria",
+          "html-has-lang",
+          "html-lang-valid",
+          "image-alt",
+          "link-in-text-block",
+          "link-name",
+          "list",
+          "listitem",
+          "meta-viewport",
+          "nested-interactive",
+          "scrollable-region-focusable",
+          "td-headers-attr",
+          "th-has-data-cells"
+        ],
+        "incomplete": [
+          {
+            "id": "aria-valid-attr-value",
+            "nodes": 1,
+            "targets": [
+              {
+                "target": ".whitespace-nowrap",
+                "why": "Unable to determine if aria-controls referenced ID exists on the page while using aria-haspopup: aria-controls=\"radix-:r0:\""
+              }
+            ]
+          },
+          {
+            "id": "color-contrast",
+            "nodes": 3,
+            "targets": [
+              {
+                "target": "a[href$=\"future\"]",
+                "why": "Element's background color could not be determined because it's partially obscured by another element"
+              },
+              {
+                "target": ".border-transparent.hover\\:border-border.flex-shrink-0:nth-child(4)",
+                "why": "Element's background color could not be determined because it's partially obscured by another element"
+              },
+              {
+                "target": ".border-primary",
+                "why": "Element's background color could not be determined because it's partially obscured by another element"
+              }
+            ]
+          }
+        ]
+      },
+      "measured": {
+        "standfirst": {
+          "ratio": 11.44,
+          "color": "rgb(54, 55, 55)",
+          "background": "rgb(250, 250, 250)",
+          "fontSize": "19px",
+          "fontFamily": "\"Plus Jakarta Sans\"",
+          "fontWeight": "400"
+        },
+        "statusLine": {
+          "ratio": 4.82,
+          "color": "rgb(98, 112, 132)",
+          "background": "rgb(250, 250, 250)",
+          "fontSize": "16px",
+          "fontFamily": "\"Plus Jakarta Sans\"",
+          "fontWeight": "400"
+        },
+        "issueBody": {
+          "ratio": 11.44,
+          "color": "rgb(54, 55, 55)",
+          "background": "rgb(250, 250, 250)",
+          "fontSize": "19px",
+          "fontFamily": "\"Plus Jakarta Sans\"",
+          "fontWeight": "400"
+        },
+        "tableFinding": {
+          "ratio": 13.88,
+          "color": "rgb(33, 42, 54)",
+          "background": "rgb(250, 250, 250)",
+          "fontSize": "16px",
+          "fontFamily": "\"Plus Jakarta Sans\"",
+          "fontWeight": "400"
+        },
+        "tableStatusLabel": {
+          "ratio": 4.82,
+          "color": "rgb(98, 112, 132)",
+          "background": "rgb(250, 250, 250)",
+          "fontSize": "14px",
+          "fontFamily": "\"Plus Jakarta Sans\"",
+          "fontWeight": "600"
+        },
+        "tableHeader": {
+          "ratio": 13.88,
+          "color": "rgb(33, 42, 54)",
+          "background": "rgb(250, 250, 250)",
+          "fontSize": "14px",
+          "fontFamily": "\"Plus Jakarta Sans\"",
+          "fontWeight": "600"
+        },
+        "sourceListItem": {
+          "ratio": 13.88,
+          "color": "rgb(33, 42, 54)",
+          "background": "rgb(250, 250, 250)",
+          "fontSize": "16px",
+          "fontFamily": "\"Plus Jakarta Sans\"",
+          "fontWeight": "400"
+        },
+        "mutedLabel": {
+          "ratio": 4.82,
+          "color": "rgb(98, 112, 132)",
+          "background": "rgb(250, 250, 250)",
+          "fontSize": "16px",
+          "fontFamily": "\"Plus Jakarta Sans\"",
+          "fontWeight": "400"
+        }
+      },
+      "minRowHeight": 489,
+      "scrollWidth": 375,
+      "viewportWidth": 375,
+      "monoElements": 0,
+      "errors": []
+    },
+    "1440": {
+      "fontsRequested": [
+        "/fonts/plus-jakarta-sans-latin.woff2",
+        "/fonts/spectral-normal-400-latin.woff2",
+        "/fonts/spectral-normal-700-latin.woff2"
+      ],
+      "axe": {
+        "violations": [],
+        "passes": [
+          "aria-allowed-attr",
+          "aria-conditional-attr",
+          "aria-deprecated-role",
+          "aria-hidden-body",
+          "aria-hidden-focus",
+          "aria-prohibited-attr",
+          "aria-required-attr",
+          "aria-required-children",
+          "aria-required-parent",
+          "aria-roles",
+          "aria-valid-attr-value",
+          "aria-valid-attr",
+          "avoid-inline-spacing",
+          "button-name",
+          "bypass",
+          "color-contrast",
+          "document-title",
+          "duplicate-id-aria",
+          "html-has-lang",
+          "html-lang-valid",
+          "image-alt",
+          "link-in-text-block",
+          "link-name",
+          "list",
+          "listitem",
+          "meta-viewport",
+          "nested-interactive",
+          "td-headers-attr",
+          "th-has-data-cells"
+        ],
+        "incomplete": []
+      },
+      "measured": {
+        "standfirst": {
+          "ratio": 11.44,
+          "color": "rgb(54, 55, 55)",
+          "background": "rgb(250, 250, 250)",
+          "fontSize": "19px",
+          "fontFamily": "\"Plus Jakarta Sans\"",
+          "fontWeight": "400"
+        },
+        "statusLine": {
+          "ratio": 4.82,
+          "color": "rgb(98, 112, 132)",
+          "background": "rgb(250, 250, 250)",
+          "fontSize": "16px",
+          "fontFamily": "\"Plus Jakarta Sans\"",
+          "fontWeight": "400"
+        },
+        "issueBody": {
+          "ratio": 11.44,
+          "color": "rgb(54, 55, 55)",
+          "background": "rgb(250, 250, 250)",
+          "fontSize": "19px",
+          "fontFamily": "\"Plus Jakarta Sans\"",
+          "fontWeight": "400"
+        },
+        "tableFinding": {
+          "ratio": 13.88,
+          "color": "rgb(33, 42, 54)",
+          "background": "rgb(250, 250, 250)",
+          "fontSize": "16px",
+          "fontFamily": "\"Plus Jakarta Sans\"",
+          "fontWeight": "400"
+        },
+        "tableStatusLabel": {
+          "ratio": 4.82,
+          "color": "rgb(98, 112, 132)",
+          "background": "rgb(250, 250, 250)",
+          "fontSize": "14px",
+          "fontFamily": "\"Plus Jakarta Sans\"",
+          "fontWeight": "600"
+        },
+        "tableHeader": {
+          "ratio": 13.88,
+          "color": "rgb(33, 42, 54)",
+          "background": "rgb(250, 250, 250)",
+          "fontSize": "14px",
+          "fontFamily": "\"Plus Jakarta Sans\"",
+          "fontWeight": "600"
+        },
+        "sourceListItem": {
+          "ratio": 13.88,
+          "color": "rgb(33, 42, 54)",
+          "background": "rgb(250, 250, 250)",
+          "fontSize": "16px",
+          "fontFamily": "\"Plus Jakarta Sans\"",
+          "fontWeight": "400"
+        },
+        "mutedLabel": {
+          "ratio": 4.82,
+          "color": "rgb(98, 112, 132)",
+          "background": "rgb(250, 250, 250)",
+          "fontSize": "16px",
+          "fontFamily": "\"Plus Jakarta Sans\"",
+          "fontWeight": "400"
+        }
+      },
+      "minRowHeight": 291,
+      "scrollWidth": 1440,
+      "viewportWidth": 1440,
+      "monoElements": 0,
+      "errors": []
+    },
+    "redirects": {
+      "/green-transition/tracker/q2-2025": {
+        "pathname": "/green-transition/tracker",
+        "hash": "#q2-2025",
+        "targetTop": 65,
+        "scrollY": 2817
+      },
+      "/green-transition/tracker/q1-2025": {
+        "pathname": "/green-transition/tracker",
+        "hash": "#q1-2025",
+        "targetTop": 65,
+        "scrollY": 5137
+      },
+      "/green-transition/tracker/archive": {
+        "pathname": "/green-transition/tracker",
+        "hash": "",
+        "targetTop": null,
+        "scrollY": 0
+      },
+      "/green-transition/tracker/q2-2025/policyMovement/geothermal-pricing-framework-revision": {
+        "pathname": "/green-transition/tracker",
+        "hash": "",
+        "targetTop": null,
+        "scrollY": 0
+      }
+    }
+  }
+}

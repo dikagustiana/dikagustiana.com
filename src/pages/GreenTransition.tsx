@@ -2,7 +2,6 @@ import { Link } from 'react-router-dom';
 import { PageLayout } from '@/components/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
 import { GREEN_TRANSITION_TABS } from '@/data/greenTransitionTabs';
-import { trackerIssues } from '@/data/trackerIssues';
 import { useSectionPhaseCounts } from '@/hooks/queries/useSectionPhaseCounts';
 import { sectionStanding } from '@/lib/sectionStanding';
 
@@ -91,12 +90,12 @@ export default function GreenTransition() {
                   Transition Tracker
                 </span>
                 <span className="mt-1 block text-sm text-muted-foreground">
-                  Quarterly readings of Indonesia's energy transition, January–June 2025, with dated corrections.
+                  What energy-transition policy did, sector by sector, each finding sourced to a primary document.
                 </span>
               </span>
               {/* Not in `essays`, so it has no count from the hook above. */}
               <span className="shrink-0 text-xs font-mono text-muted-foreground sm:text-right">
-                {trackerIssues.length} {trackerIssues.length === 1 ? 'issue' : 'issues'} · paused
+                January–June 2025
               </span>
             </Link>
           </li>

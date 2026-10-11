@@ -1,17 +1,38 @@
+import { Link } from 'react-router-dom';
 import { PageLayout } from '@/components/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
-import { Card, CardContent } from '@/components/ui/card';
+import { ErrorState } from '@/components/states';
+import { Skeleton } from '@/components/ui/skeleton';
 import { GREEN_TRANSITION_TABS } from '@/data/greenTransitionTabs';
-import { Link } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
-import { trackerIssues, READING_META, TRACKER_COVERAGE } from '@/data/trackerIssues';
-import { CoverageNotice } from '@/components/tracker/CoverageNotice';
-import { formatDate } from '@/lib/formatDate';
-import { WhatChangedPanel } from '@/components/tracker/WhatChangedPanel';
+import { useTrackerEntries } from '@/hooks/queries/useTrackerEntries';
+import { useFragmentOnArrival } from '@/hooks/useFragmentOnArrival';
+import { TRACKER_QUARTERS, TRACKER_STANDFIRST, numberSources } from '@/lib/tracker';
+import { SectorRegister } from '@/components/tracker/SectorRegister';
+import { IssueSection } from '@/components/tracker/IssueSection';
+import { SourceList } from '@/components/tracker/SourceList';
 
+/**
+ * Indonesia Green Transition Tracker: the per-sector data appendix to the
+ * current-condition essay series (PRD Part B, D5).
+ *
+ * Top to bottom, as PRD §B5 orders it: title and standfirst, one status line,
+ * the sector register, the two quarters as short essays (newest first), and
+ * the numbered sources. Every finding is a `tracker_entry` row, sourced to a
+ * primary document and signed off (docs/spec/tracker_sources.md). The
+ * standfirst and the two issue titles are the only copy written here, and
+ * each says only what the entries below it say.
+ *
+ * Serif headings, sans body, no monospace, no bordered cards; sections are
+ * divided by a single hairline. The column is the essay column, 728px.
+ */
 export default function GreenTransitionTracker() {
-  const latestIssue = trackerIssues[0] ?? null;
-  const pastIssues = trackerIssues.slice(1);
+  const { data: entries, isLoading, isError, refetch } = useTrackerEntries();
+  useFragmentOnArrival();
+
+  const rows = entries ?? [];
+  const { ordered, numberOf } = numberSources(rows);
+  const unpublished = rows.filter((e) => !e.published).length;
+  const newestFirst = [...TRACKER_QUARTERS].reverse();
 
   return (
     <PageLayout
@@ -25,128 +46,64 @@ export default function GreenTransitionTracker() {
     >
       <SEO
         title="Indonesia Green Transition Tracker"
-        description="A paused archive of quarterly readings on Indonesia's energy transition, covering January–June 2025: policy architecture, capital positioning, institutional incentives and execution friction, with dated corrections."
+        description="What Indonesian energy-transition policy did in January–June 2025, sector by sector, each finding sourced to the regulation, plan or official release itself."
       />
 
-      {/* 1. Page Header */}
-      <div className="border-b border-border py-10">
-        <div className="container max-w-4xl">
-          <h1 className="text-3xl font-display font-semibold text-foreground mb-3">
-            Indonesia Green Transition Tracker
-          </h1>
-          <p className="text-muted-foreground max-w-2xl">
-            Structured quarterly readings of the policy architecture, capital positioning,
-            institutional incentive shifts, and execution friction shaping Indonesia's energy transition —
-            written across {TRACKER_COVERAGE.coversFrom}–June 2025, and paused there.
-          </p>
-        </div>
-      </div>
+      <div className="container py-10">
+        <div className="editorial-column space-y-10">
+          <header>
+            <h1 className="text-3xl font-semibold text-foreground">Indonesia Green Transition Tracker</h1>
+            <p className="mt-4 font-sans text-[19px] leading-[1.6] text-prose-fg">{TRACKER_STANDFIRST}</p>
+            <p className="mt-4 text-base text-muted-foreground">
+              Covers January–June 2025. Not updated since.{' '}
+              <Link
+                to="/green-transition/current-condition"
+                className="text-accent underline underline-offset-2 hover:opacity-80"
+              >
+                Continued in the current-condition essay series&nbsp;→
+              </Link>
+            </p>
+          </header>
 
-      <div className="container max-w-4xl py-10 space-y-12">
-        <CoverageNotice />
-
-        {/* 2. Most recent issue. NOT "latest": an archive that stopped in
-            2025 calling its newest issue the latest one makes a promise of
-            continuation on the author's behalf. */}
-        {latestIssue ? (
-          <section>
-            <h2 className="text-sm font-mono text-muted-foreground uppercase tracking-widest mb-4">
-              Most recent issue
-            </h2>
-            <Card>
-              <CardContent className="p-6 space-y-3">
-                <p className="text-xs font-mono text-muted-foreground">
-                  {latestIssue.label} · Covering {latestIssue.periodCovered} · Published{' '}
-                  {formatDate(latestIssue.publishedAt)}
-                </p>
-                <h3 className="text-xl font-semibold text-foreground">
-                  {latestIssue.directionalReading}
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  {READING_META[latestIssue.directionalReading].means}
-                </p>
-                <p className="text-muted-foreground">
-                  {latestIssue.strategicImplicationPreview}
-                </p>
-                <Link
-                  to={`/green-transition/tracker/${latestIssue.slug}`}
-                  className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:gap-2.5 transition-all"
-                >
-                  Read this issue
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-              </CardContent>
-            </Card>
-          </section>
-        ) : (
-          <section>
-            <h2 className="text-sm font-mono text-muted-foreground uppercase tracking-widest mb-4">
-              Most recent issue
-            </h2>
-            <Card>
-              <CardContent className="p-6">
-                <p className="text-muted-foreground">
-                  No issue has been written.
-                </p>
-              </CardContent>
-            </Card>
-          </section>
-        )}
-
-        {/* 3. What Changed Panel */}
-        <section>
-          <h2 className="text-sm font-mono text-muted-foreground uppercase tracking-widest mb-4">
-            What Changed
-          </h2>
-          <WhatChangedPanel
-            changed={latestIssue?.whatChanged?.changed ?? []}
-            held={latestIssue?.whatChanged?.held ?? []}
-            reversed={latestIssue?.whatChanged?.reversed ?? []}
-            previousReading={latestIssue?.previousReading ?? ''}
-            currentReading={latestIssue?.directionalReading ?? ''}
-            issueLabel={latestIssue?.label}
-            previousLabel={trackerIssues[1]?.label}
-          />
-        </section>
-
-        {/* 4. Issue Feed */}
-        {pastIssues.length > 0 && (
-          <section>
-            <h2 className="text-sm font-mono text-muted-foreground uppercase tracking-widest mb-4">
-              Previous Issues
-            </h2>
-            <div className="divide-y divide-border/50">
-              {pastIssues.map((issue) => (
-                <Link
-                  key={issue.slug}
-                  to={`/green-transition/tracker/${issue.slug}`}
-                >
-                  <div className="group py-5 hover:bg-muted/30 -mx-4 px-4 transition-colors">
-                    <p className="text-xs font-mono text-muted-foreground mb-1.5">
-                      {issue.label} · Covering {issue.periodCovered}
-                    </p>
-                    <h3 className="text-base font-semibold text-foreground leading-snug mb-1 group-hover:text-foreground/80 transition-colors">
-                      {issue.directionalReading}
-                    </h3>
-                    <p className="text-sm text-muted-foreground leading-snug line-clamp-2">
-                      {issue.strategicImplicationPreview}
-                    </p>
-                  </div>
-                </Link>
+          {isLoading ? (
+            <div className="space-y-3" aria-busy="true" aria-label="Loading the register">
+              {Array.from({ length: 7 }).map((_, i) => (
+                <Skeleton key={i} className="h-11 w-full" />
               ))}
             </div>
-          </section>
-        )}
+          ) : isError ? (
+            <ErrorState message="The register could not be loaded." onRetry={() => void refetch()} />
+          ) : rows.length === 0 ? (
+            <p className="border-t border-border pt-10 text-base text-muted-foreground">
+              No entry is published yet.
+            </p>
+          ) : (
+            <>
+              <section aria-labelledby="register-title" className="border-t border-border pt-10">
+                <h2 id="register-title" className="text-2xl text-foreground">
+                  Sector register
+                </h2>
+                <p className="mt-2 text-base text-muted-foreground">
+                  What each sector&rsquo;s primary documents record for each quarter. Open a sector for the detail.
+                </p>
+                {unpublished > 0 && (
+                  <p className="mt-2 text-base text-foreground" role="note">
+                    Admin view: {unpublished} of {rows.length} entries are not published. Readers see only published
+                    entries.
+                  </p>
+                )}
+                <div className="mt-6">
+                  <SectorRegister entries={rows} numberOf={numberOf} />
+                </div>
+              </section>
 
-        {/* 5. Archive Link */}
-        <div className="pt-4 border-t border-border">
-          <Link
-            to="/green-transition/tracker/archive"
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:gap-2.5 transition-all"
-          >
-            View full archive
-            <ArrowRight className="h-4 w-4" />
-          </Link>
+              {newestFirst.map((quarter) => (
+                <IssueSection key={quarter.key} quarter={quarter} entries={rows} numberOf={numberOf} />
+              ))}
+
+              <SourceList sources={ordered} />
+            </>
+          )}
         </div>
       </div>
     </PageLayout>
