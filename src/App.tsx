@@ -132,12 +132,11 @@ const CapitalConditionLegacyRedirect = () => {
   );
 };
 
-// About was removed by owner decision on 10 October 2026; its revision of
-// judgment now sits on the homepage under the glimpse (the argument that moved
-// with it was removed on 11 October 2026). An old link keeps what it carried:
-// the map's address (?lens=&distance=&node=, the contract in useChainUrl.ts,
-// which the homepage's map reads too) and its fragment, so #changed-my-mind
-// means the same thing on /.
+// About was removed by owner decision on 10 October 2026; the two sections it
+// left on the homepage, the argument and the revision of judgment, were removed
+// on 11 October 2026. An old link keeps what it carried: the map's address
+// (?lens=&distance=&node=, the contract in useChainUrl.ts, which the homepage's
+// map reads too) and its fragment.
 const AboutRedirect = () => {
   const { search, hash } = useLocation();
   return <Navigate to={{ pathname: '/', search, hash }} replace />;

@@ -3,7 +3,6 @@ import { SEO } from '@/components/SEO';
 import { useSelectedEssays } from '@/hooks/queries/useSelectedEssays';
 import { IndustryChainPreview } from '@/components/industry-chain';
 import { Glimpse } from '@/components/home/Glimpse';
-import { ChangedMind } from '@/components/argument/ChangedMind';
 import { useFragmentOnArrival } from '@/hooks/useFragmentOnArrival';
 
 /**
@@ -18,10 +17,9 @@ const Index = () => {
   // the rest newest first (useSelectedEssays). Zero published essays hides
   // the glimpse entirely.
   const { data: selectedEssays, isLoading } = useSelectedEssays(GLIMPSE_LIMIT);
-  // A fragment names a section of this page: essays link to #changed-my-mind,
-  // and About's old links arrive here with theirs (App.tsx).
-  // Measured before the jump existed: a fresh load of /#changed-my-mind stayed
-  // at the top, with the section 3,700px down.
+  // A fragment names a section of this page (#industry-chain, the map), and
+  // About's old links arrive here with theirs (App.tsx). The page draws from
+  // queries, so the jump is made once they settle, not by the browser.
   useFragmentOnArrival();
 
   return (
@@ -40,22 +38,17 @@ const Index = () => {
           Kawasan Industri world; the page around it does not move.
 
           What stood here before was moved under the glimpse first; the
-          argument and its reading path were then removed by owner decision
-          on 2026-10-11 (docs/DECISIONS.md). */}
+          argument, its reading path and the revision of judgment were then
+          removed by owner decision on 2026-10-11 (docs/DECISIONS.md). */}
       <IndustryChainPreview />
 
       {/* The glimpse: every published essay, the starred ones first in the
-          owner's order, one running row. The Sections list that used to
-          follow it was removed by owner decision on 2026-10-09
+          owner's order, one running row, and the last section of the page.
+          The Sections list that used to follow it was removed by owner
+          decision on 2026-10-09, and the two sections About left here, the
+          argument and the revision of judgment, on 2026-10-11
           (docs/DECISIONS.md); the header's navigation names every section. */}
       <Glimpse essays={selectedEssays} isLoading={isLoading} />
-
-      {/* The revision of judgment. It came here from About when the owner
-          removed that page (decision D4(a), 2026-10-10), as the same section
-          with the same id, so a link to #changed-my-mind still lands; its
-          copy is unchanged. The argument section that came with it was removed
-          by owner decision on 2026-10-11 (docs/DECISIONS.md). */}
-      <ChangedMind />
     </PageLayout>
   );
 };
