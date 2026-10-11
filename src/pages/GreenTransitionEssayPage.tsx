@@ -106,22 +106,26 @@ export default function GreenTransitionEssayPage() {
     }
   };
 
-  // Fetch siblings via category_id FK
+  // Siblings are the essay's own phase, read the way the phase page reads it
+  // (section + phase, newest first). They used to come from category_id, but
+  // Green Transition has no categories of its own: its essays carry the
+  // finance-general catch-all, so prev/next walked into accounting and finance
+  // essays under a green-transition address.
   const { data: siblings } = useQuery({
-    queryKey: ['green-transition-siblings', essay?.category_id],
+    queryKey: ['green-transition-siblings', essay?.section, essay?.phase],
     queryFn: async () => {
-      if (!essay?.category_id) return [];
       const { data, error } = await supabase
         .from('essays')
         .select('slug, title')
-        .eq('category_id', essay.category_id)
+        .eq('section', 'green-transition')
+        .eq('phase', essay!.phase!)
         .eq('published', true)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
       return data as EssayListItem[];
     },
-    enabled: !!essay?.category_id,
+    enabled: essay?.section === 'green-transition' && !!essay?.phase,
   });
 
   if (loadError && !loading) {
@@ -201,7 +205,7 @@ export default function GreenTransitionEssayPage() {
       ? siblings[currentIndex + 1]
       : null;
 
-  // Siblings share this essay's category, so they share its phase segment —
+  // Siblings share this essay's phase, so they share its phase segment —
   // the essay's, never the URL's.
   const getEssayUrl = (essaySlug: string) =>
     essayUrl({ slug: essaySlug, section: 'green-transition', phase: essay.phase }) ??

@@ -1,4 +1,4 @@
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import { PageLayout } from '@/components/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
 import { Button } from '@/components/ui/button';
@@ -34,7 +34,12 @@ const phaseDetails: Record<string, { title: string; coreQuestion: string }> = {
 // Tabs imported from shared config
 
 export default function GreenTransitionPhase() {
-  const { phase } = useParams<{ phase: string }>();
+  // `/green-transition/now`, `/gaps` and `/future` are static routes in App.tsx,
+  // so they carry no :phase param and the feed below never ran on them. Take the
+  // segment from the path when the param is absent.
+  const { phase: phaseParam } = useParams<{ phase: string }>();
+  const { pathname } = useLocation();
+  const phase = phaseParam ?? pathname.split('/')[2];
   const { isAdmin } = useAuth();
   const navigate = useNavigate();
 

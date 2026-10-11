@@ -5,6 +5,32 @@ alternatives. Newest first.
 
 ---
 
+# 2026-10-11 — Where We Are Now opens with two essays; its tab lists them
+
+Branch `claude/pensive-fermi-t08feq`. Owner request: load "The Green Transition Isn't Only About
+Green" and "Learn from the UK" into Green Transition's Where We Are Now, then publish.
+
+- **Placement is data.** `section = 'green-transition'`, `phase = 'where-we-are-now'`, the
+  finance-general catch-all `category_id` (Green Transition has no categories). The phase page orders
+  newest first, so essay 1 (created 11 October) lists above essay 2 (10 October); `sort_order` 1 and 2
+  are set but nothing reads them.
+- **Body and end matter.** `content_json` is TipTap JSON in the editor's schema and `content` its
+  `getHTML()`, both checked byte for byte against a local conversion of the owner's markdown. Key
+  takeaways and references live in `presentation`, which the article shell renders after the body,
+  and are not repeated in the body. The byline line is dropped; the page prints author and date.
+- **Essay 2 reuses the stale draft's row** (`11cea50e…`, same slug). The SQL connector refuses DELETE,
+  so the earlier incomplete draft was overwritten in full. The other stale draft,
+  `why-indonesia-cannot-afford-to-wait`, is still there as an unplaced draft.
+- **The tabs were empty.** `/green-transition/now`, `/gaps` and `/future` are static routes, so
+  `GreenTransitionPhase` got no `:phase` and never queried. It now takes the segment from the path when
+  the param is absent; the routes are unchanged (two test suites read the route table).
+- **Prev/next stay in the phase.** The essay page took siblings from `category_id`, which for Green
+  Transition is the catch-all shared with accounting and finance essays. It now reads section and
+  phase, as the phase page does.
+- **The current-condition index lists both essays**, in reading order.
+
+---
+
 # 2026-10-11 — The Green Transition Tracker is rebuilt as a sourced register
 
 Branch `claude/sharp-noether-a2fkj7`, PR #69. Spec: `docs/spec/01_PRD.md` Part B and

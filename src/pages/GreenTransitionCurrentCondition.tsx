@@ -11,12 +11,16 @@ import { isPublished } from '@/lib/publication';
  * The current-condition essay series: a stub index (Plan 2.3).
  *
  * The tracker's status line points here; the tracker is this series' data
- * appendix (PRD D5). The series has one planned opening essay so far. Its
- * title shows whether or not it is published; it becomes a link only once
- * it is, so a reader is never sent to a page RLS will not serve them (owner's
- * answer of 11 October 2026).
+ * appendix (PRD D5). The series lists its essays in reading order. Each title
+ * shows whether or not it is published; it becomes a link only once it is, so
+ * a reader is never sent to a page RLS will not serve them (owner's answer of
+ * 11 October 2026).
  */
 const SERIES: { slug: string; title: string }[] = [
+  {
+    slug: 'the-green-transition-isnt-only-about-green',
+    title: "The Green Transition Isn't Only About Green: Why Indonesia Cannot Afford to Wait",
+  },
   { slug: 'learn-from-the-uk-it-was-never-just-political-will', title: 'Learn from the UK: It Was Never Just Political Will' },
 ];
 

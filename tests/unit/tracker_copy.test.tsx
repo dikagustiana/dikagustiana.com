@@ -246,14 +246,17 @@ describe('the old tracker addresses', () => {
 });
 
 describe('the current-condition series stub', () => {
-  it('lists the opening essay as a title, not a link, while it is unpublished', async () => {
+  it('lists the series essays in reading order, as titles not links, while they are unpublished', async () => {
     fromMock.mockImplementation(() => makeQueryResult([]));
     window.history.pushState({}, '', '/green-transition/current-condition');
     render(<App />);
     expect(await screen.findByRole('heading', { level: 1, name: 'Current condition' })).toBeInTheDocument();
-    const title = screen.getByText('Learn from the UK: It Was Never Just Political Will');
-    expect(title.closest('a')).toBeNull();
-    expect(await screen.findByText('Not yet published.')).toBeInTheDocument();
+    const first = screen.getByText("The Green Transition Isn't Only About Green: Why Indonesia Cannot Afford to Wait");
+    const second = screen.getByText('Learn from the UK: It Was Never Just Political Will');
+    expect(first.compareDocumentPosition(second) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(first.closest('a')).toBeNull();
+    expect(second.closest('a')).toBeNull();
+    expect(await screen.findAllByText('Not yet published.')).toHaveLength(2);
   });
 
   it('links the essay once it is published', async () => {
