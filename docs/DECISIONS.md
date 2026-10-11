@@ -39,7 +39,10 @@ two changes to the landing page and what it imports, nothing else redesigned.
   the speed (one copy is half the strip: duration = trackWidth / 2 / speed), again on every resize
   of the page or the columns, so the speed holds as essays are added. The row starts mid-lap (a
   negative delay) so its first column stands under the heading, at the page's margin.
-- **It stops** under the pointer and while a link in it has focus. A column reached by Tab is
+- **It stops** under the pointer, while a link in it has focus, and by a pause button in the
+  header (where the still row keeps its paging buttons, in the same style). The button was added
+  after review of PR #68 (Codex): a touchscreen has no hover and a tap on a column follows its
+  link, so without it a reader there could not stop the row (WCAG 2.2.2). A column reached by Tab is
   brought to the page's margin (the animation is set to that point; a click does not move it), and
   the fade is lifted while keyboard focus is in the row so the focused column and its ring are whole.
   The frame clips sideways and does not scroll, so only the animation places the row.
@@ -52,14 +55,15 @@ two changes to the landing page and what it imports, nothing else redesigned.
   a 1440 screen), where two copies could not cover the frame for a lap and the empty end would show
   at the loop.
 
-Tests: `tests/unit/glimpse.test.tsx` (the list twice with the copy hidden, the lap measured again
-when the columns change, still for reduced motion, for a short row and while loading);
+Tests: `tests/unit/glimpse.test.tsx` (the list twice with the copy hidden, the pause button, the
+lap measured again when the columns change, still for reduced motion, for a short row and while
+loading);
 `tests/unit/homePage.test.tsx` (Changed my mind directly after the glimpse, no argument section);
 `tests/e2e/glimpse.spec.ts` (at 1440 and 390: 30 px/s within 2, the strip exactly two copies wide,
-the frame at the end of a lap byte-identical to its start and one gap off not; the pointer and
-keyboard focus stopping it, focus bringing columns 2, 3 and 10 to the margin; the still row under
-reduced motion). The journeys suite drops its "three minutes" test, which read the argument.
-`MIN_TESTS` falls from 1262 to 1251 (actual 1255): 16 deleted with the section, 5 added.
+the frame at the end of a lap byte-identical to its start and one gap off not; the pointer, the
+pause button and keyboard focus stopping it, focus bringing columns 2, 3 and 10 to the margin; the
+still row under reduced motion). The journeys suite drops its "three minutes" test, which read the
+argument. `MIN_TESTS` falls from 1262 to 1252 (actual 1256): 16 deleted with the section, 6 added.
 
 ---
 

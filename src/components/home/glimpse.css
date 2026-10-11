@@ -71,10 +71,12 @@
   padding-right: 2rem;
 }
 
-/* Under the pointer and while a link in it has focus, the row stops where it
-   is, so a reader can read a column or click it. */
+/* Under the pointer, while a link in it has focus, and by its pause button
+   (data-paused), the row stops where it is, so a reader can read a column or
+   click it. */
 .glimpse__marquee:hover .glimpse__strip,
-.glimpse__marquee:focus-within .glimpse__strip {
+.glimpse__marquee:focus-within .glimpse__strip,
+.glimpse__marquee[data-paused] .glimpse__strip {
   animation-play-state: paused;
 }
 

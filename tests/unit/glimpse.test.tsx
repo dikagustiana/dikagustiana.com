@@ -8,8 +8,8 @@
  * reader's motion preference, and a focusable, named row so the arrow keys
  * reach it. Running (owner decision, 2026-10-11): the list twice with the
  * second copy hidden from screen readers and from Tab, a lap as long as one
- * copy at 30 px/s and measured again when the columns change, and still for
- * reduced motion or a row too short to loop. Fed by the homepage's own query,
+ * copy at 30 px/s and measured again when the columns change, a pause button,
+ * and still for reduced motion or a row too short to loop. Fed by the homepage's own query,
  * the row is every published essay with the starred ones leading (owner
  * decision D3(a), 2026-10-10).
  */
@@ -171,14 +171,25 @@ describe('the running row', () => {
     expect(copy.querySelectorAll('li')).toHaveLength(12);
     expect([...copy.querySelectorAll('h3')].map((h) => h.textContent)).toEqual(twelve().map((e) => e.title));
     for (const link of copy.querySelectorAll('a')) expect(link).toHaveAttribute('tabindex', '-1');
-    // the links are the stops: no focusable row, no buttons
+    // the links are the stops: no focusable row, and no paging buttons, only the pause
     expect(row).not.toHaveAttribute('tabindex');
-    expect(screen.queryByRole('button')).toBeNull();
+    expect(screen.getAllByRole('button').map((b) => b.getAttribute('aria-label'))).toEqual(['Pause the row']);
     // a lap is one copy at 30 px/s: twelve 288px columns (no gap in jsdom)
     expect(strip()).toHaveClass('animate-marquee');
     expect(strip().style.getPropertyValue('--marquee-duration')).toBe(`${(12 * 288) / 30}s`);
     // and it starts with the first column at the heading's edge
     expect(strip().style.animationDelay).toBe(`${-(12 * 288 - 32) / 30}s`);
+  });
+
+  it('stops and starts by its own button, the one way to stop it on a touchscreen', async () => {
+    mount(twelve());
+    const frame = strip().parentElement!;
+    expect(frame).not.toHaveAttribute('data-paused');
+    await userEvent.click(screen.getByRole('button', { name: 'Pause the row' }));
+    expect(frame).toHaveAttribute('data-paused');
+    await userEvent.click(screen.getByRole('button', { name: 'Resume the row' }));
+    expect(frame).not.toHaveAttribute('data-paused');
+    expect(screen.getByRole('button', { name: 'Pause the row' })).toBeInTheDocument();
   });
 
   it('measures the lap again when the columns change size, so the speed holds', () => {
@@ -209,6 +220,8 @@ describe('the running row', () => {
     expect(strip()).not.toHaveClass('animate-marquee');
     expect(screen.getByRole('list', { name: 'Glimpse' })).toHaveAttribute('tabindex', '0');
     expect(screen.getByRole('button', { name: 'Further along the row' })).toBeInTheDocument();
+    // nothing moves, so nothing to pause
+    expect(screen.queryByRole('button', { name: 'Pause the row' })).toBeNull();
   });
 
   it('stands still when one copy is narrower than the page, where a loop would show its empty end', () => {

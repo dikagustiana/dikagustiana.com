@@ -15,9 +15,10 @@
  * the strip moves by one copy per lap (the `marquee` keyframes in
  * tailwind.config.ts); the lap's length is measured from the copy
  * (useMarqueeDuration), so the speed holds whatever the number of essays. It
- * stops under the pointer and while a link in it has focus, and the edges
- * fade. The second copy is hidden from screen readers and from Tab, so both
- * meet one list.
+ * stops under the pointer, while a link in it has focus, and by its pause
+ * button, which is the one way to stop it on a touchscreen; the edges fade.
+ * The second copy is hidden from screen readers and from Tab, so both meet
+ * one list.
  *
  * It stands still, as a row that scrolls sideways (by swipe or trackpad, by
  * the two buttons, by the arrow keys once the row has focus, CSS snapping
@@ -26,7 +27,7 @@
  * end. With nothing published the section is absent, not empty.
  */
 import { useCallback, useEffect, useRef, useState, type CSSProperties, type FocusEvent } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
 import { EssayCardLink } from '@/components/EssayCardLink';
 import type { SelectedEssay } from '@/hooks/queries/useSelectedEssays';
 import { useMarqueeDuration } from '@/hooks/useMarqueeDuration';
@@ -94,6 +95,8 @@ export function Glimpse({ essays, isLoading }: GlimpseProps) {
   const heading = useRef<HTMLHeadingElement>(null);
   const [atStart, setAtStart] = useState(true);
   const [atEnd, setAtEnd] = useState(true);
+  // Stopped by the reader's own button; the pointer and focus stop it too.
+  const [paused, setPaused] = useState(false);
 
   const still = useMediaQuery(REDUCED_MOTION_QUERY);
   const timing = useMarqueeDuration(frame, track, heading, GLIMPSE_SPEED, essays);
@@ -161,6 +164,18 @@ export function Glimpse({ essays, isLoading }: GlimpseProps) {
           <h2 ref={heading} id="glimpse-heading" className="text-xl font-display font-semibold text-foreground">
             Glimpse
           </h2>
+          {/* A touchscreen has no hover, and a tap on a column follows its
+              link: the button is how a reader there stops the row to read. */}
+          {running && (
+            <button
+              type="button"
+              onClick={() => setPaused((p) => !p)}
+              aria-label={paused ? 'Resume the row' : 'Pause the row'}
+              className={cn(BUTTON, 'shrink-0')}
+            >
+              {paused ? <Play className="h-4 w-4" aria-hidden="true" /> : <Pause className="h-4 w-4" aria-hidden="true" />}
+            </button>
+          )}
           {scrollable && (
             <div className="flex shrink-0 gap-2">
               <button type="button" onClick={() => page(-1)} disabled={atStart} aria-label="Earlier in the row" className={BUTTON}>
@@ -177,7 +192,7 @@ export function Glimpse({ essays, isLoading }: GlimpseProps) {
       {/* One tree for both forms, so the list is the same element when the
           row starts or stops running: the frame and the strip only take
           their classes when it runs. */}
-      <div ref={frame} className={running ? 'glimpse__marquee' : undefined}>
+      <div ref={frame} className={running ? 'glimpse__marquee' : undefined} data-paused={running && paused ? '' : undefined}>
         <div
           ref={strip}
           className={running ? 'glimpse__strip animate-marquee motion-reduce:animate-none' : undefined}

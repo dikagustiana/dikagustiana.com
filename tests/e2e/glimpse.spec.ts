@@ -8,8 +8,8 @@ import { mockSupabase } from './mockSupabase';
  * others newest first (owner decision D3(a), 2026-10-10), one column each,
  * and never wider than the viewport. The row runs (owner decision,
  * 2026-10-11): right to left at 30 px/s, looping on a frame identical to its
- * start, stopped under the pointer and by keyboard focus, which brings the
- * column it lands on to the page's margin. For a reader who asked for reduced
+ * start, stopped under the pointer, by its pause button and by keyboard
+ * focus, which brings the column it lands on to the page's margin. For a reader who asked for reduced
  * motion it stands still, scrolled by the buttons and by the keyboard on a
  * wide screen and by swipe on a phone. The stills the review needs are
  * written to GLIMPSE_SHOTS (default test-results/glimpse) at 1440 and 390.
@@ -222,8 +222,9 @@ for (const width of [1440, 390]) {
     await page.locator('#glimpse-heading').scrollIntoViewIfNeeded();
     await page.mouse.move(0, 0);
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
-    // no buttons: nothing to page through
+    // no paging buttons: nothing to page through; the pause is there instead
     await expect(page.getByRole('button', { name: 'Further along the row' })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Pause the row' })).toBeVisible();
 
     // the list twice; the second is hidden from screen readers and from Tab
     const copy = page.locator('.glimpse__copy[aria-hidden="true"]');
@@ -262,7 +263,7 @@ for (const width of [1440, 390]) {
   });
 }
 
-test('the row stops under the pointer and for keyboard focus, which brings the column to the page margin', async ({ page }) => {
+test('the row stops under the pointer, by its pause button and for keyboard focus, which brings the column to the page margin', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   const { row, errors } = await open(page);
   // the heading, not the row: a moving row is never still enough to scroll to
@@ -280,6 +281,18 @@ test('the row stops under the pointer and for keyboard focus, which brings the c
   await page.waitForTimeout(1000);
   expect(await offset(page)).not.toBe(held);
 
+  // the pause button, the way a touchscreen stops it: a tap holds the row
+  // with the pointer away from it, and a second tap starts it again
+  await page.getByRole('button', { name: 'Pause the row' }).click();
+  await page.mouse.move(0, 0);
+  const paused = await offset(page);
+  await page.waitForTimeout(1000);
+  expect(await offset(page)).toBe(paused);
+  await page.getByRole('button', { name: 'Resume the row' }).click();
+  await page.mouse.move(0, 0);
+  await page.waitForTimeout(1000);
+  expect(await offset(page)).not.toBe(paused);
+
   // Tab into the row: it stops, and each column the focus lands on stands
   // at the page's margin, under the heading, whole
   const margin = await page.locator('#glimpse-heading').evaluate((h) => h.getBoundingClientRect().left);
@@ -288,6 +301,9 @@ test('the row stops under the pointer and for keyboard focus, which brings the c
     h.focus();
     h.removeAttribute('tabindex');
   });
+  // the pause button comes first, then the row's first column
+  await page.keyboard.press('Tab');
+  await expect(page.getByRole('button', { name: 'Pause the row' })).toBeFocused();
   await page.keyboard.press('Tab');
   await expect(row.getByRole('link').first()).toBeFocused();
   for (const n of [2, 3, 10]) {
@@ -313,4 +329,5 @@ test('reduced motion: the row stands still, drawn once, with no strip', async ({
   await expect(page.locator('.glimpse__copy[aria-hidden="true"]')).toHaveCount(0);
   await expect(row).toHaveAttribute('tabindex', '0');
   expect(await row.evaluate((el) => el.scrollWidth > el.clientWidth)).toBe(true);
+  await expect(page.getByRole('button', { name: 'Pause the row' })).toHaveCount(0);
 });
