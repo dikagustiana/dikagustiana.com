@@ -3,7 +3,7 @@
 -- 2026, docs/spec/00_discovery.md §19 item 1).
 --
 -- NOT APPLIED TO PRODUCTION until the FSLI viewer (PR 1,
--- dikagustiana/dikagustiana.com#71) is live: until then the production
+-- dikagustiana/dikagustiana.com#73) is live: until then the production
 -- FsliList and FsliDetail read these three columns. Apply with
 -- apply_migration once that deploy is out; after PR 1 nothing in the app
 -- reads them.

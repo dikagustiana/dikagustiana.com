@@ -39,7 +39,10 @@ function builderFor(rows: Row[], error: unknown = null) {
   const builder: Record<string, unknown> = {};
   for (const m of ['select', 'order', 'limit', 'in', 'is', 'neq', 'filter']) builder[m] = () => builder;
   builder.eq = (column: string, value: unknown) => {
-    result = result.filter((row) => row[column] === value);
+    // 'fs_period.status' filters on the embedded period, as PostgREST does.
+    const get = (row: Row) =>
+      column.split('.').reduce<unknown>((v, k) => (v && typeof v === 'object' ? (v as Row)[k] : undefined), row);
+    result = result.filter((row) => get(row) === value);
     return builder;
   };
   builder.maybeSingle = () => {
@@ -111,12 +114,51 @@ const NON_CURRENT = [
   page('legacy', 'Legacy', 'non_current_assets', 23), // no covered_by_slug key: the column is not there yet
 ];
 
+// The audited statement rows the line-item pages read their figures from
+// (fs_line, discovery §19 item 2). 'loose' links to an item row, 'legacy' to a
+// heading whose figures are the rows printed under it.
+const PERIOD = {
+  id: 'p-1',
+  company_id: 'acme',
+  period_key: 'fy2024',
+  period_end: '2024-12-31',
+  comparative_end: '2023-12-31',
+  currency: 'USD',
+  unit: 'thousands',
+  status: 'published',
+  fs_company: { id: 'acme', legal_name: 'PT Acme Fixture', short_name: 'ACME' },
+};
+const fsLine = (sort_order: number, line_type: string, label_id: string, label_en: string, over: Row = {}): Row => ({
+  id: `l-${sort_order}`,
+  period_id: 'p-1',
+  statement: 'sofp',
+  sort_order,
+  line_type,
+  indent: 0,
+  label_id,
+  label_en,
+  notes_ref: null,
+  value_cy: null,
+  value_py: null,
+  source_page: 11,
+  fsli_slug: null,
+  fs_period: PERIOD,
+  ...over,
+});
+const FS_LINES = [
+  fsLine(10, 'item', 'Lepas', 'Loose', { fsli_slug: 'loose', notes_ref: '7', value_cy: 4321, value_py: -12 }),
+  fsLine(20, 'header', 'Warisan, neto', 'Legacy, net', { fsli_slug: 'legacy' }),
+  fsLine(30, 'item', 'Pihak berelasi', 'Related parties', { indent: 1, value_cy: 70, value_py: 0, source_page: 12 }),
+  fsLine(40, 'item', 'Pihak ketiga', 'Third parties', { indent: 1, value_cy: 30, value_py: 20, source_page: 12 }),
+  fsLine(50, 'item', 'Persediaan', 'Inventories', { value_cy: 5, value_py: 5 }),
+];
+
 let tables: Record<string, Row[]>;
 /** Tables whose reads fail, as a read does during an outage once its retries are spent. */
 let failing: Set<string>;
 
 beforeEach(() => {
-  tables = { fsli_pages: [...CURRENT, ...NON_CURRENT], essays: [ESSAY] };
+  tables = { fsli_pages: [...CURRENT, ...NON_CURRENT], essays: [ESSAY], fs_line: FS_LINES };
   failing = new Set();
   fromMock.mockReset();
   fromMock.mockImplementation((table: string) =>
@@ -401,7 +443,7 @@ describe('FSLI page without an essay', () => {
     for (const slug of ['loose', 'legacy']) {
       const { unmount } = renderAt(slug);
       await screen.findByRole('heading', { level: 1 });
-      await screen.findByText('Figures as reported in the source financial statements.');
+      await screen.findByText('See it in the statement');
       expect(main()).not.toHaveTextContent('Covered in');
       expect(main()).not.toHaveTextContent('Not written yet');
       expect(within(main()).queryAllByRole('heading', { level: 2 })).toHaveLength(0);
@@ -475,5 +517,39 @@ describe('Related line items', () => {
       'Restricted',
       ...Array.from({ length: 7 }, (_, i) => `Current item ${i + 1}`),
     ]);
+  });
+});
+
+describe('Figures on a line-item page', () => {
+  it('come from the audited statement row linked to it, as printed, with its page and a link to the row', async () => {
+    renderAt('loose');
+    const link = await screen.findByRole('link', { name: 'See it in the statement' });
+    expect(link).toHaveAttribute('href', '/accounting/fsli/acme/fy2024#row-sofp-10');
+    const row = within(main()).getByRole('row', { name: /Lepas/ });
+    expect(row).toHaveTextContent('Loose');
+    expect(within(row).getAllByRole('cell').map((c) => c.textContent)).toEqual(['7', '4,321', '(12)']);
+    expect(link.closest('figcaption')).toHaveTextContent(
+      'ACME’s audited consolidated statement of financial position, p.11. Expressed in thousands of United States dollars, unless otherwise stated.',
+    );
+    // The fsli_pages figures (dummies '1,000' and '900' here) are retired.
+    expect(main()).not.toHaveTextContent('1,000');
+  });
+
+  it('for a heading, are the rows the statement prints under it', async () => {
+    renderAt('legacy');
+    await screen.findByRole('link', { name: 'See it in the statement' });
+    const labels = within(main()).getAllByRole('rowheader').map((h) => h.textContent);
+    expect(labels).toEqual(['Warisan, netoLegacy, net', 'Pihak berelasiRelated parties', 'Pihak ketigaThird parties']);
+    expect(within(main()).getByRole('row', { name: /Pihak berelasi/ })).toHaveTextContent('70-');
+    expect(screen.getByText(/pp\.11–12/)).toBeInTheDocument();
+  });
+
+  it('are absent where no published statement row links to the page', async () => {
+    tables.fs_line = FS_LINES.map((l) => (l.fsli_slug === 'loose' ? { ...l, fs_period: { ...PERIOD, status: 'draft' } } : l));
+    renderAt('loose');
+    await screen.findByRole('heading', { level: 1 });
+    await waitFor(() => expect(fromMock).toHaveBeenCalledWith('fs_line'));
+    expect(screen.queryByText('See it in the statement')).toBeNull();
+    expect(within(main()).queryByRole('table')).toBeNull();
   });
 });

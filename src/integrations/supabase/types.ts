@@ -777,11 +777,11 @@ export type Database = {
         Row: {
           category: string | null
           created_at: string
-          dec_2023: string | null
-          dec_2024: string | null
           id: string
           is_component: boolean | null
-          notes_ref: string | null
+          legacy_dec_2023: string | null
+          legacy_dec_2024: string | null
+          legacy_notes_ref: string | null
           slug: string
           sort_order: number | null
           subtitle: string | null
@@ -791,11 +791,11 @@ export type Database = {
         Insert: {
           category?: string | null
           created_at?: string
-          dec_2023?: string | null
-          dec_2024?: string | null
           id?: string
           is_component?: boolean | null
-          notes_ref?: string | null
+          legacy_dec_2023?: string | null
+          legacy_dec_2024?: string | null
+          legacy_notes_ref?: string | null
           slug: string
           sort_order?: number | null
           subtitle?: string | null
@@ -805,11 +805,11 @@ export type Database = {
         Update: {
           category?: string | null
           created_at?: string
-          dec_2023?: string | null
-          dec_2024?: string | null
           id?: string
           is_component?: boolean | null
-          notes_ref?: string | null
+          legacy_dec_2023?: string | null
+          legacy_dec_2024?: string | null
+          legacy_notes_ref?: string | null
           slug?: string
           sort_order?: number | null
           subtitle?: string | null

@@ -6,9 +6,10 @@ export interface FsliPage {
   slug: string;
   title: string;
   subtitle: string | null;
-  notes_ref: string | null;
-  dec_2024: string | null;
-  dec_2023: string | null;
+  // The figure columns (dec_2024, dec_2023, notes_ref) are retired: they held
+  // the wrong figures of PRD §A1, and 20261011130100_fsli_pages_retire_figures
+  // renames them legacy_*. A line item's figures come from its audited
+  // statement row (fs_line.fsli_slug, useFsLinesForSlug).
   category: string | null;
   // Added by 20261009090000_fsli_component_flag.sql, applied in production
   // (column verified present 2026-10-10). Optional only because this

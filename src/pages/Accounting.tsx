@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { PageLayout } from '@/components/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
-import { useFsliPages } from '@/hooks/queries/useFsliPages';
+import { useFsPeriods } from '@/hooks/queries/useFs';
 
 /**
  * OWNER-REPLACEABLE: the Consolidated Reporting row, after its section 4 became the PSAK 338 workbook
@@ -13,14 +13,15 @@ const CONSOLIDATED_REPORTING_ROW =
   'The PSAK 338 working paper of PT Dummy C and its subsidiaries, sheet by sheet: click a cell to see its formula and follow where it comes from.';
 
 export default function Accounting() {
-  const { data: fsliPages, isSuccess } = useFsliPages();
+  const { data: periods, isSuccess } = useFsPeriods();
+  const published = isSuccess ? periods.filter((p) => p.status === 'published').length : 0;
 
   const pages = [
     {
       title: 'FSLI Detail',
       path: '/accounting/fsli',
-      description: 'The asset-side line items of one consolidated statement of financial position, with the reported figures and note references.',
-      standing: isSuccess ? `${fsliPages.length} line items` : null,
+      description: 'Audited financial statements row by row as printed, each figure traced to its PDF page and checked against the statements\' own totals, with a page for each line item.',
+      standing: isSuccess && published > 0 ? `${published} audited ${published === 1 ? 'report' : 'reports'}` : null,
     },
     {
       title: 'Consolidated Reporting',

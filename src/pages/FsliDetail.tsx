@@ -6,6 +6,7 @@ import { FsliRelatedItems } from '@/components/fsli/FsliRelatedItems';
 import { FsliOnThisPage } from '@/components/fsli/FsliOnThisPage';
 import { FsliMobileSidebar } from '@/components/fsli/FsliMobileSidebar';
 import { FsliCoveredBy } from '@/components/fsli/FsliCoveredBy';
+import { FsliStatementRows } from '@/components/fs/FsliStatementRows';
 import { useFsliPage } from '@/hooks/queries/useFsliPages';
 import { useFsliEssayBodies } from '@/hooks/queries/useEssays';
 import { useFragmentOnArrival } from '@/hooks/useFragmentOnArrival';
@@ -122,14 +123,6 @@ export default function FsliDetail() {
     return <NotFound />;
   }
 
-  // The real, per-item facts this page actually has today: the reported
-  // figures and notes reference from the statement it was seeded from.
-  const figures = [
-    { label: '31 Dec 2024', value: item.dec_2024 },
-    { label: '31 Dec 2023', value: item.dec_2023 },
-    { label: 'Notes ref.', value: item.notes_ref },
-  ].filter((f) => f.value);
-
   // No essay of its own: the page names the line item whose essay covers it,
   // if any (fsli_pages.covered_by_slug; absent before its migration). With
   // neither, the page ends at its figures — no outline, no empty state.
@@ -199,24 +192,10 @@ export default function FsliDetail() {
                 </div>
               </div>
 
-              {/* Reported figures — the one thing every line item genuinely
-                  has. Replaces a hero that showed a stock photo and
-                  cash-equivalents "key points" on all 24 pages. */}
-              {figures.length > 0 && (
-                <div className="mb-2 grid max-w-xl grid-cols-2 gap-4 sm:grid-cols-3">
-                  {figures.map((f) => (
-                    <div key={f.label} className="rounded-lg border border-border bg-card p-4">
-                      <div className="text-xs text-muted-foreground mb-1">{f.label}</div>
-                      <div className="text-lg font-semibold text-foreground tabular-nums">{f.value}</div>
-                    </div>
-                  ))}
-                </div>
-              )}
-              {figures.length > 0 && (
-                <p className="text-xs text-muted-foreground mb-6">
-                  Figures as reported in the source financial statements.
-                </p>
-              )}
+              {/* The figures, from the audited statement row linked to this
+                  line item: the row the tie-out checks passed (discovery §19
+                  item 2). The old fsli_pages figures were wrong (PRD §A1). */}
+              <FsliStatementRows slug={slug || ''} />
 
               {/* Divider — only above something. */}
               {(essaysLoading || essaysFailed || essays.length > 0 || coveredBy) && <hr className="border-border my-8" />}
