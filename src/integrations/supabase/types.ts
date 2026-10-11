@@ -505,6 +505,262 @@ export type Database = {
         }
         Relationships: []
       }
+      fs_check: {
+        Row: {
+          actual: number | null
+          description: string
+          diff: number | null
+          expected: number | null
+          id: string
+          passed: boolean
+          period_id: string
+          rule_id: string
+          run_at: string
+          statement: string | null
+        }
+        Insert: {
+          actual?: number | null
+          description: string
+          diff?: number | null
+          expected?: number | null
+          id?: string
+          passed: boolean
+          period_id: string
+          rule_id: string
+          run_at?: string
+          statement?: string | null
+        }
+        Update: {
+          actual?: number | null
+          description?: string
+          diff?: number | null
+          expected?: number | null
+          id?: string
+          passed?: boolean
+          period_id?: string
+          rule_id?: string
+          run_at?: string
+          statement?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fs_check_period_id_fkey"
+            columns: ["period_id"]
+            isOneToOne: false
+            referencedRelation: "fs_period"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fs_company: {
+        Row: {
+          created_at: string
+          id: string
+          legal_name: string
+          short_name: string
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          legal_name: string
+          short_name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          legal_name?: string
+          short_name?: string
+        }
+        Relationships: []
+      }
+      fs_line: {
+        Row: {
+          computed_cy: number | null
+          computed_py: number | null
+          fsli_slug: string | null
+          id: string
+          indent: number
+          label_en: string
+          label_id: string
+          line_key: string | null
+          line_type: string
+          notes_ref: string | null
+          parent_id: string | null
+          period_id: string
+          sort_order: number
+          source_page: number
+          statement: string
+          value_cy: number | null
+          value_py: number | null
+        }
+        Insert: {
+          computed_cy?: number | null
+          computed_py?: number | null
+          fsli_slug?: string | null
+          id?: string
+          indent?: number
+          label_en: string
+          label_id: string
+          line_key?: string | null
+          line_type: string
+          notes_ref?: string | null
+          parent_id?: string | null
+          period_id: string
+          sort_order: number
+          source_page: number
+          statement: string
+          value_cy?: number | null
+          value_py?: number | null
+        }
+        Update: {
+          computed_cy?: number | null
+          computed_py?: number | null
+          fsli_slug?: string | null
+          id?: string
+          indent?: number
+          label_en?: string
+          label_id?: string
+          line_key?: string | null
+          line_type?: string
+          notes_ref?: string | null
+          parent_id?: string | null
+          period_id?: string
+          sort_order?: number
+          source_page?: number
+          statement?: string
+          value_cy?: number | null
+          value_py?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fs_line_fsli_slug_fkey"
+            columns: ["fsli_slug"]
+            isOneToOne: false
+            referencedRelation: "fsli_pages"
+            referencedColumns: ["slug"]
+          },
+          {
+            foreignKeyName: "fs_line_parent_in_scope"
+            columns: ["parent_id", "period_id", "statement"]
+            isOneToOne: false
+            referencedRelation: "fs_line"
+            referencedColumns: ["id", "period_id", "statement"]
+          },
+          {
+            foreignKeyName: "fs_line_period_id_fkey"
+            columns: ["period_id"]
+            isOneToOne: false
+            referencedRelation: "fs_period"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fs_period: {
+        Row: {
+          auditor: string | null
+          auditor_opinion: string | null
+          auditor_report_no: string | null
+          company_id: string
+          comparative_end: string
+          currency: string
+          id: string
+          period_end: string
+          period_key: string
+          source_file: string
+          status: string
+          unit: string
+        }
+        Insert: {
+          auditor?: string | null
+          auditor_opinion?: string | null
+          auditor_report_no?: string | null
+          company_id: string
+          comparative_end: string
+          currency: string
+          id?: string
+          period_end: string
+          period_key: string
+          source_file: string
+          status?: string
+          unit: string
+        }
+        Update: {
+          auditor?: string | null
+          auditor_opinion?: string | null
+          auditor_report_no?: string | null
+          company_id?: string
+          comparative_end?: string
+          currency?: string
+          id?: string
+          period_end?: string
+          period_key?: string
+          source_file?: string
+          status?: string
+          unit?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fs_period_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "fs_company"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fs_soce_cell: {
+        Row: {
+          col_key: string
+          col_label_en: string
+          col_label_id: string
+          col_order: number
+          id: string
+          period_id: string
+          row_key: string
+          row_label_en: string
+          row_label_id: string
+          row_order: number
+          source_page: number
+          value: number | null
+        }
+        Insert: {
+          col_key: string
+          col_label_en: string
+          col_label_id: string
+          col_order: number
+          id?: string
+          period_id: string
+          row_key: string
+          row_label_en: string
+          row_label_id: string
+          row_order: number
+          source_page: number
+          value?: number | null
+        }
+        Update: {
+          col_key?: string
+          col_label_en?: string
+          col_label_id?: string
+          col_order?: number
+          id?: string
+          period_id?: string
+          row_key?: string
+          row_label_en?: string
+          row_label_id?: string
+          row_order?: number
+          source_page?: number
+          value?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fs_soce_cell_period_id_fkey"
+            columns: ["period_id"]
+            isOneToOne: false
+            referencedRelation: "fs_period"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fsli_pages: {
         Row: {
           category: string | null
@@ -651,6 +907,48 @@ export type Database = {
         }
         Relationships: []
       }
+      tracker_entry: {
+        Row: {
+          created_at: string
+          detail: string
+          finding: string
+          id: string
+          published: boolean
+          quarter: string
+          sector: Database["public"]["Enums"]["tracker_sector"]
+          sources: Json
+          status: Database["public"]["Enums"]["tracker_status"]
+          updated_at: string
+          verification: string
+        }
+        Insert: {
+          created_at?: string
+          detail: string
+          finding: string
+          id: string
+          published?: boolean
+          quarter: string
+          sector: Database["public"]["Enums"]["tracker_sector"]
+          sources: Json
+          status: Database["public"]["Enums"]["tracker_status"]
+          updated_at?: string
+          verification: string
+        }
+        Update: {
+          created_at?: string
+          detail?: string
+          finding?: string
+          id?: string
+          published?: boolean
+          quarter?: string
+          sector?: Database["public"]["Enums"]["tracker_sector"]
+          sources?: Json
+          status?: Database["public"]["Enums"]["tracker_status"]
+          updated_at?: string
+          verification?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -733,6 +1031,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      tracker_sources_valid: { Args: { s: Json }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "user"
@@ -744,6 +1043,15 @@ export type Database = {
         | "exercise"
         | "model-walkthrough"
       model_depth: "foundation" | "executive" | "institutional"
+      tracker_sector:
+        | "geothermal"
+        | "solar"
+        | "pln_procurement"
+        | "jetp"
+        | "ojk_taxonomy"
+        | "danantara"
+        | "other"
+      tracker_status: "advanced" | "unchanged" | "regressed" | "mixed"
       voice_role_enum: "manager" | "economist" | "educator" | "coach" | "hybrid"
     }
     CompositeTypes: {
@@ -882,6 +1190,16 @@ export const Constants = {
         "model-walkthrough",
       ],
       model_depth: ["foundation", "executive", "institutional"],
+      tracker_sector: [
+        "geothermal",
+        "solar",
+        "pln_procurement",
+        "jetp",
+        "ojk_taxonomy",
+        "danantara",
+        "other",
+      ],
+      tracker_status: ["advanced", "unchanged", "regressed", "mixed"],
       voice_role_enum: ["manager", "economist", "educator", "coach", "hybrid"],
     },
   },
