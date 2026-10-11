@@ -1,10 +1,12 @@
-/* The glimpse's track (Glimpse.tsx): one row that runs to the viewport's
-   edges and scrolls sideways, its first column aligned with the container's
-   left edge and its last with the right. The inset is the container's own
-   margin: centred, 2rem of padding, at most 1400px wide (tailwind.config.ts).
-   Percentages, not 100vw, because the row is as wide as the page and 100vw
-   also counts a vertical scrollbar the page is not using. A column snaps to
-   the inset, so the row never rests on a column cut in half. */
+/* The glimpse's still row (Glimpse.tsx), for a reader who asked for reduced
+   motion and for a list too short to run: one row that runs to the
+   viewport's edges and scrolls sideways, its first column aligned with the
+   container's left edge and its last with the right. The inset is the
+   container's own margin: centred, 2rem of padding, at most 1400px wide
+   (tailwind.config.ts). Percentages, not 100vw, because the row is as wide as
+   the page and 100vw also counts a vertical scrollbar the page is not using.
+   A column snaps to the inset, so the row never rests on a column cut in
+   half. */
 .glimpse__track {
   --glimpse-inset: calc((100% - min(100%, 1400px)) / 2 + 2rem);
   display: flex;
@@ -27,4 +29,66 @@
   .glimpse__item {
     width: 18rem;
   }
+}
+
+/* The running row: a frame the width of the page, and in it a strip that
+   holds the list twice and moves by one copy per lap (the `marquee`
+   keyframes, translateX 0 to -50%, tailwind.config.ts). For -50% to be
+   exactly one copy, the strip's width must be two copies exactly: the gap
+   between the two copies and the padding after the second are each the gap
+   between columns, so every copy is its columns with one gap after each,
+   and the loop point falls on a column's edge with nothing to see.
+
+   The frame clips sideways only, and does not scroll even when a link in it
+   takes focus (clip; hidden where clip is unknown, and Glimpse.tsx sets the
+   scroll back): the row is placed by its animation alone. Its block padding
+   is room for a focus ring, and its negative margin gives that room back, so
+   the section's rhythm is the same as every other section's.
+
+   The edges fade over the page's margin, so a column is at full strength
+   wherever the page's content runs: the mask is alpha only, nothing is
+   painted. */
+.glimpse__marquee {
+  --glimpse-inset: calc((100% - min(100%, 1400px)) / 2 + 2rem);
+  --glimpse-fade: clamp(2rem, var(--glimpse-inset), 6rem);
+  overflow-x: hidden;
+  overflow-x: clip;
+  padding-block: 0.5rem;
+  margin-block: -0.5rem;
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    black var(--glimpse-fade),
+    black calc(100% - var(--glimpse-fade)),
+    transparent
+  );
+}
+
+.glimpse__strip {
+  display: flex;
+  gap: 2rem;
+  width: max-content;
+  padding-right: 2rem;
+}
+
+/* Under the pointer, while a link in it has focus, and by its pause button
+   (data-paused), the row stops where it is, so a reader can read a column or
+   click it. */
+.glimpse__marquee:hover .glimpse__strip,
+.glimpse__marquee:focus-within .glimpse__strip,
+.glimpse__marquee[data-paused] .glimpse__strip {
+  animation-play-state: paused;
+}
+
+/* A column a reader has tabbed to is drawn whole, its focus ring with it:
+   the first column, which the row cannot bring in past the page's margin,
+   would otherwise stand in the left fade. */
+.glimpse__marquee:has(:focus-visible) {
+  mask-image: none;
+}
+
+.glimpse__copy {
+  display: flex;
+  flex: none;
+  gap: 2rem;
 }

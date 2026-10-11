@@ -92,7 +92,7 @@ describe('navConfig', () => {
     expect(labels).not.toContain('The Green Transition');
   });
 
-  it('has no About door: the argument it carried is on Home (owner decision D4(a), 2026-10-10)', () => {
+  it('has no About door: what it carried is on Home (owner decision D4(a), 2026-10-10)', () => {
     expect(navSections.map(s => s.label)).not.toContain('About');
     expect(navSections[0]).toEqual({ label: 'Home', path: '/' });
   });

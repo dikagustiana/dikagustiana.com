@@ -1776,7 +1776,7 @@ export const ESSAY_ASSOCIATIONS: Record<string, readonly EssayAssociation[]> = {
       reads:
         'Argues from this layer: the electricity a new smelter will run on is chosen with the plant, and captive generation contracted for its life fixes the asset\u2019s carbon exposure before any carbon price arrives.',
       under: 'green',
-      basis: 'The V5 assessed condition on band-energy under the green transition; src/data/readingPath.ts (claim, caseStudy, establishes).',
+      basis: 'The V5 assessed condition on band-energy under the green transition; the homepage argument frame removed on 2026-10-11, as it stood at 2d37761 (claim, caseStudy, establishes).',
     },
   ],
   'band-capital': [
@@ -1786,7 +1786,7 @@ export const ESSAY_ASSOCIATIONS: Record<string, readonly EssayAssociation[]> = {
       reads:
         'Reads the plant, its captive power and their financing as one structure, and asks which constraint \u2014 capacity, access, contract or risk allocation \u2014 binds for a given asset.',
       under: 'green',
-      basis: 'src/data/readingPath.ts: the essay\u2019s subtitle names capital sequencing, and the path records that it establishes whether infrastructure or finance binds as a question about a specific asset.',
+      basis: 'The homepage argument frame removed on 2026-10-11, as it stood at 2d37761: the essay\u2019s subtitle names capital sequencing, and the path recorded that it establishes whether infrastructure or finance binds as a question about a specific asset.',
     },
   ],
   'stage-processing': [
@@ -1796,7 +1796,7 @@ export const ESSAY_ASSOCIATIONS: Record<string, readonly EssayAssociation[]> = {
       reads:
         'The case it is made on is processing capacity built for downstreaming \u2014 nickel smelting \u2014 and whether those assets are configured for the market they will have to sell into.',
       under: 'reindustrialisation',
-      basis: 'src/data/readingPath.ts ARGUMENT.caseStudy and claim; src/data/changedMind.ts revisedSource.',
+      basis: 'The homepage argument frame removed on 2026-10-11, as it stood at 2d37761 (caseStudy and claim); src/data/changedMind.ts revisedSource.',
     },
   ],
 };

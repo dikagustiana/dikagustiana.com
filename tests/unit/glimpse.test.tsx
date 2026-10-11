@@ -2,14 +2,19 @@
  * The glimpse (src/components/home/Glimpse.tsx): absent with nothing
  * published; one column per essay in the order given, each a section, a
  * title, a deck and a month, and nothing a card would add (no author, no
- * reading time, no number); the buttons only when the row overflows, paging
- * by most of the visible width, smoothly or at once by the reader's motion
- * preference; and a focusable, named row so the arrow keys reach it. Fed by
- * the homepage's own query, the row is every published essay with the
- * starred ones leading (owner decision D3(a), 2026-10-10).
+ * reading time, no number). Still (jsdom lays nothing out, so a row here
+ * stands still unless a test gives it widths): the buttons only when the row
+ * overflows, paging by most of the visible width, smoothly or at once by the
+ * reader's motion preference, and a focusable, named row so the arrow keys
+ * reach it. Running (owner decision, 2026-10-11): the list twice with the
+ * second copy hidden from screen readers and from Tab, a lap as long as one
+ * copy at 30 px/s and measured again when the columns change, a pause button,
+ * and still for reduced motion or a row too short to loop. Fed by the homepage's own query,
+ * the row is every published essay with the starred ones leading (owner
+ * decision D3(a), 2026-10-10).
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { configure, render, screen, waitFor, within } from '@testing-library/react';
+import { act, configure, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -127,6 +132,109 @@ describe('Glimpse', () => {
     mount(undefined, true);
     expect(screen.getByRole('heading', { name: 'Glimpse' })).toBeInTheDocument();
     expect(screen.queryAllByRole('link')).toHaveLength(0);
+  });
+});
+
+describe('the running row', () => {
+  const layout = Element.prototype.getBoundingClientRect;
+  let columnWidth = 288;
+  const reduce = () => {
+    window.matchMedia = ((q: string) => ({ matches: q.includes('reduce'), media: q, addEventListener() {}, removeEventListener() {} })) as unknown as typeof window.matchMedia;
+  };
+  const twelve = () => Array.from({ length: 12 }, (_, i) => essay(i + 1));
+  const strip = () => screen.getByRole('list', { name: 'Glimpse' }).parentElement!;
+
+  beforeEach(() => {
+    columnWidth = 288;
+    // A page 1000px wide whose heading starts at 32px, with columns 288px wide.
+    overflow(0, 1000);
+    Element.prototype.getBoundingClientRect = function (this: Element) {
+      const width = this.tagName === 'LI' ? columnWidth : 0;
+      const left = this.tagName === 'H2' ? 32 : 0;
+      return { x: left, y: 0, left, top: 0, right: left + width, bottom: 0, width, height: 0, toJSON() {} } as DOMRect;
+    };
+  });
+  afterEach(() => {
+    Element.prototype.getBoundingClientRect = layout;
+    vi.unstubAllGlobals();
+    delete (window as { matchMedia?: unknown }).matchMedia;
+  });
+
+  it('runs when one copy is wider than the page: the list twice, the second hidden from screen readers and from Tab', () => {
+    mount(twelve());
+    // one list for a screen reader, with every essay once
+    expect(screen.getAllByRole('list')).toHaveLength(1);
+    const row = screen.getByRole('list', { name: 'Glimpse' });
+    expect(within(row).getAllByRole('listitem')).toHaveLength(12);
+    for (const link of within(row).getAllByRole('link')) expect(link).not.toHaveAttribute('tabindex');
+    const copy = document.querySelector('ul[aria-hidden="true"]')!;
+    expect(copy.querySelectorAll('li')).toHaveLength(12);
+    expect([...copy.querySelectorAll('h3')].map((h) => h.textContent)).toEqual(twelve().map((e) => e.title));
+    for (const link of copy.querySelectorAll('a')) expect(link).toHaveAttribute('tabindex', '-1');
+    // the links are the stops: no focusable row, and no paging buttons, only the pause
+    expect(row).not.toHaveAttribute('tabindex');
+    expect(screen.getAllByRole('button').map((b) => b.getAttribute('aria-label'))).toEqual(['Pause the row']);
+    // a lap is one copy at 30 px/s: twelve 288px columns (no gap in jsdom)
+    expect(strip()).toHaveClass('animate-marquee');
+    expect(strip().style.getPropertyValue('--marquee-duration')).toBe(`${(12 * 288) / 30}s`);
+    // and it starts with the first column at the heading's edge
+    expect(strip().style.animationDelay).toBe(`${-(12 * 288 - 32) / 30}s`);
+  });
+
+  it('stops and starts by its own button, the one way to stop it on a touchscreen', async () => {
+    mount(twelve());
+    const frame = strip().parentElement!;
+    expect(frame).not.toHaveAttribute('data-paused');
+    await userEvent.click(screen.getByRole('button', { name: 'Pause the row' }));
+    expect(frame).toHaveAttribute('data-paused');
+    await userEvent.click(screen.getByRole('button', { name: 'Resume the row' }));
+    expect(frame).not.toHaveAttribute('data-paused');
+    expect(screen.getByRole('button', { name: 'Pause the row' })).toBeInTheDocument();
+  });
+
+  it('measures the lap again when the columns change size, so the speed holds', () => {
+    const observers: Array<() => void> = [];
+    vi.stubGlobal(
+      'ResizeObserver',
+      class {
+        constructor(callback: () => void) {
+          observers.push(callback);
+        }
+        observe() {}
+        disconnect() {}
+      },
+    );
+    mount(twelve());
+    expect(strip().style.getPropertyValue('--marquee-duration')).toBe(`${(12 * 288) / 30}s`);
+    // the phone's narrower columns
+    columnWidth = 256;
+    act(() => observers.forEach((callback) => callback()));
+    expect(strip().style.getPropertyValue('--marquee-duration')).toBe(`${(12 * 256) / 30}s`);
+  });
+
+  it('stands still for a reader who asked for reduced motion, however long the row', () => {
+    reduce();
+    overflow(3000, 1000);
+    mount(twelve());
+    expect(document.querySelector('ul[aria-hidden="true"]')).toBeNull();
+    expect(strip()).not.toHaveClass('animate-marquee');
+    expect(screen.getByRole('list', { name: 'Glimpse' })).toHaveAttribute('tabindex', '0');
+    expect(screen.getByRole('button', { name: 'Further along the row' })).toBeInTheDocument();
+    // nothing moves, so nothing to pause
+    expect(screen.queryByRole('button', { name: 'Pause the row' })).toBeNull();
+  });
+
+  it('stands still when one copy is narrower than the page, where a loop would show its empty end', () => {
+    mount([essay(1), essay(2), essay(3)]);
+    expect(document.querySelector('ul[aria-hidden="true"]')).toBeNull();
+    expect(strip()).not.toHaveClass('animate-marquee');
+    expect(screen.getByRole('list', { name: 'Glimpse' })).toHaveAttribute('tabindex', '0');
+  });
+
+  it('does not run its placeholders while loading', () => {
+    mount(undefined, true);
+    expect(document.querySelector('ul[aria-hidden="true"]')).toBeNull();
+    expect(screen.getByRole('list', { name: 'Glimpse' }).parentElement).not.toHaveClass('animate-marquee');
   });
 });
 

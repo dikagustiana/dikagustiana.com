@@ -5,6 +5,68 @@ alternatives. Newest first.
 
 ---
 
+# 2026-10-11 — The homepage's argument is removed; the glimpse runs
+
+Branch `claude/landing-argument-glimpse-marquee-fy7m4s`, base `main` @ `2d37761`. Owner request,
+two changes to the landing page and what it imports, nothing else redesigned.
+
+## The argument section is removed
+
+- **Deleted with nothing left mounted:** `src/components/argument/ReadingPath.tsx` (the section
+  headed "The argument", `#the-argument`), its data `src/data/readingPath.ts` (`ARGUMENT`,
+  `READING_PATH`, `READING_PATH_SLUGS`, `LINK_LABEL`), its query
+  `src/hooks/queries/useReadingPath.ts` and its suite `tests/unit/readingPath.test.tsx`. Each had
+  no other importer. `ChangedMind` stays where it was, now directly under the glimpse, so its
+  folder `src/components/argument/` stays.
+- **No link pointed at it from the site.** No nav entry, footer or component linked
+  `#the-argument`; the database holds no essay, module, FSLI section or setting that names it
+  (read-only query on production, 2026-10-11). An old `/about#the-argument` or `/#the-argument`
+  now opens the homepage at its top, as an unknown fragment does.
+- **Rhythm.** Every homepage section is `border-b py-12`, so the glimpse and Changed my mind sit
+  together as the argument did between them: 48px from the last column to the rule, 48px from the
+  rule to the next heading, measured at 1440 and 375. No CSS was the section's own; its Tailwind
+  classes go with the component.
+- **The chain's provenance notes** (`ESSAY_ASSOCIATIONS[*].basis`, src/data/industryChain.ts, not
+  shown) named the deleted data file; they now name it by its last commit, `2d37761`.
+
+## The glimpse runs
+
+- **A marquee, right to left, at 30 px/s,** the slow end of the 30–40 asked for, because the
+  deck is five lines of serif: a column takes about twenty seconds to cross a 375px phone. The
+  list is drawn twice on one strip; the `marquee` keyframes (tailwind.config.ts) move it from
+  `translateX(0)` to `-50%`, which is one copy because each copy is its columns with one gap after
+  each. A lap's length is not written down: `useMarqueeDuration` measures the copy and divides by
+  the speed (one copy is half the strip: duration = trackWidth / 2 / speed), again on every resize
+  of the page or the columns, so the speed holds as essays are added. The row starts mid-lap (a
+  negative delay) so its first column stands under the heading, at the page's margin.
+- **It stops** under the pointer, while a link in it has focus, and by a pause button in the
+  header (where the still row keeps its paging buttons, in the same style). The button was added
+  after review of PR #68 (Codex): a touchscreen has no hover and a tap on a column follows its
+  link, so without it a reader there could not stop the row (WCAG 2.2.2). A column reached by Tab is
+  brought to the page's margin (the animation is set to that point; a click does not move it), and
+  the fade is lifted while keyboard focus is in the row so the focused column and its ring are whole.
+  The frame clips sideways and does not scroll, so only the animation places the row.
+- **The edges fade** over the page's margin (CSS `mask-image`, alpha only; no colour was added).
+- **The second copy** is `aria-hidden="true"` and its links `tabIndex={-1}`, so a screen reader
+  and Tab meet one list. `EssayCardLink` gained an optional `tabIndex` for it.
+- **It stands still** for `prefers-reduced-motion: reduce` (read at render, `useMediaQuery`, and a
+  `motion-reduce:animate-none` guard), as the row it was: scrolled by swipe, the two buttons or the
+  arrow keys. It also stands still when one copy is narrower than the page (four essays or fewer on
+  a 1440 screen), where two copies could not cover the frame for a lap and the empty end would show
+  at the loop.
+
+Tests: `tests/unit/glimpse.test.tsx` (the list twice with the copy hidden, the pause button, the
+lap measured again when the columns change, still for reduced motion, for a short row and while
+loading);
+`tests/unit/homePage.test.tsx` (Changed my mind directly after the glimpse, no argument section);
+`tests/e2e/glimpse.spec.ts` (at 1440 and 390: 30 px/s within 2, the strip exactly two copies wide,
+the frame at the end of a lap byte-identical to its start and one gap off not; the pointer, the
+pause button and keyboard focus stopping it, focus bringing columns 2, 3 and 10 to the margin; the
+still row under reduced motion). The journeys suite drops its "three minutes" test, which read the
+argument. `MIN_TESTS` falls from 1262 to 1252 (actual 1256): 16 deleted with the section, 6 added.
+
+---
+
 # 2026-10-10 — The consolidation working paper is the owner's PSAK 338 workbook, in a viewer
 
 Branch `sweep/e-workbook`, base `main` @ `0487609`. The October 2026 site sweep, phase E (PRD R4).
@@ -244,7 +306,9 @@ link into the site.
   (`#changed-my-mind`) mount in src/pages/Index.tsx directly under the glimpse, as the same
   components, so the ids, the markup and the copy are About's. About's chain section
   (`IndustryChainSection`) is not repeated: the homepage opens on the same map. It stays exported,
-  mounted nowhere, because the world shell's suite renders it.
+  mounted nowhere, because the world shell's suite renders it. *(Superseded 2026-10-11 for
+  `ReadingPath`: removed from the homepage with its data and query; entry "The homepage's argument
+  is removed; the glimpse runs".)*
 - **Gone with the page:** `src/pages/About.tsx`, its hero, its "Selected Essays"
   (`useSelectedEssays(8)`; the hook stays for the homepage) and "On the shelf". The About door is
   gone from the header row (`MainNav.tsx`), from `navConfig.ts` (so from the phone's drawer, which
