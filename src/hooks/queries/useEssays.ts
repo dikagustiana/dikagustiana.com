@@ -164,13 +164,16 @@ export const useFsliEssayBodies = (fsliSlug: string) => {
   });
 };
 
+// The essays a consolidation topic page shows, bodies included: the page
+// renders each one in full (ConsolidationDetail), and the card columns alone
+// left it nothing to render.
 export const useEssaysByTopic = (section: string, topic: string) => {
   return useQuery({
     queryKey: ['essays', 'topic', section, topic],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('essays')
-        .select(ESSAY_CARD_COLUMNS)
+        .select(`${ESSAY_CARD_COLUMNS}, content`)
         .eq('section', section)
         .eq('topic', topic)
         .eq('published', true)
@@ -180,5 +183,31 @@ export const useEssaysByTopic = (section: string, topic: string) => {
       return data as unknown as Essay[];
     },
     enabled: !!section && !!topic,
+  });
+};
+
+/**
+ * The consolidation series (Accounting › Consolidated Reporting): published
+ * accounting essays placed in consolidated-reporting on a topic of their own,
+ * so each is its own page at /accounting/consolidation/<slug>. sort_order is
+ * the series part. The nine configured topics hold placed essays, not
+ * pages of their own, and are left out.
+ */
+export const useConsolidationSeries = () => {
+  return useQuery({
+    queryKey: ['essays', 'consolidation-series'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('essays')
+        .select('id, slug, title, snippet, section, phase, topic, sort_order, read_time')
+        .eq('section', 'accounting')
+        .eq('phase', 'consolidated-reporting')
+        .eq('published', true)
+        .order('sort_order', { ascending: true });
+
+      if (error) throw error;
+      const rows = (data ?? []) as Array<Pick<Essay, 'id' | 'slug' | 'title' | 'snippet' | 'section' | 'phase' | 'topic' | 'sort_order' | 'read_time'>>;
+      return rows.filter((row) => row.topic === row.slug);
+    },
   });
 };

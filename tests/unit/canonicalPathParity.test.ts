@@ -87,6 +87,14 @@ describe('accounting: page-level canonicals are SKIPPED, the rest match', () => 
       .toBe('/accounting/statutory-reporting');
   });
 
+  it('a consolidation-series essay, on a topic of its own, is its page: written, and in parity', () => {
+    const series = { section: 'accounting', phase: 'consolidated-reporting', slug: 'consolidation-worksheet-elimination-entries', topic: 'consolidation-worksheet-elimination-entries' };
+    expectParity(series);
+    expect(canonicalPath(row(series))).toBe('/accounting/consolidation/consolidation-worksheet-elimination-entries');
+    // A configured topic that inlines several essays stays skipped.
+    expect(canonicalPath(row({ section: 'accounting', phase: 'consolidated-reporting', slug: 'nci-measurement', topic: 'nci' }))).toBeNull();
+  });
+
   it('an accounting essay with no page-level placement goes universal on both sides', () => {
     expectParity({ section: 'accounting' });
     expect(canonicalPath(row({ section: 'accounting' }))).toBe('/essays/my-essay');

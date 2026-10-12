@@ -6,6 +6,8 @@ import { Link } from 'react-router-dom';
 import { WorkingPaperSection } from '@/components/workbook/WorkingPaperSection';
 import { CONSOLIDATION_TOPICS } from '@/config/consolidationTopics';
 import { useTopicCounts } from '@/hooks/queries/useTopicCounts';
+import { useConsolidationSeries } from '@/hooks/queries/useEssays';
+import { essayUrl } from '@/lib/essayUrl';
 import { sectionStanding } from '@/lib/sectionStanding';
 
 const PROCESS_STEPS = [
@@ -18,6 +20,7 @@ const PROCESS_STEPS = [
 
 export default function ConsolidatedReporting() {
   const { data: topicCounts, isSuccess: countsLoaded } = useTopicCounts('accounting');
+  const { data: series = [] } = useConsolidationSeries();
 
   return (
     <PageLayout
@@ -98,6 +101,31 @@ export default function ConsolidatedReporting() {
 
           {/* ── SECTION 4 — Working Paper: the owner's PSAK 338 workbook, sheet by sheet ── */}
           <WorkingPaperSection />
+
+          {/* The consolidation series, in part order: each essay is its own
+              page. Hidden until one is published. */}
+          {series.length > 0 && (
+            <section className="mb-14 max-w-3xl">
+              <h2 className="text-2xl font-bold text-foreground mb-4">Consolidation series</h2>
+              <ol className="divide-y divide-border border-y border-border">
+                {series.map((essay) => (
+                  <li key={essay.id}>
+                    <Link
+                      to={essayUrl(essay) ?? `/accounting/consolidation/${essay.slug}`}
+                      className="group flex flex-col gap-1 py-3 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4"
+                    >
+                      <span className="font-medium text-foreground group-hover:text-accent transition-colors">
+                        {essay.title}
+                      </span>
+                      <span className="shrink-0 text-xs font-mono text-muted-foreground sm:text-right">
+                        Part {essay.sort_order}
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ol>
+            </section>
+          )}
 
           {/* The nine topic pages essays are placed on. They were reachable
               only by typing the URL; listed here with what each holds. */}

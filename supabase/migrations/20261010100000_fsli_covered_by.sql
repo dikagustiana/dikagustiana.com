@@ -50,9 +50,10 @@ UPDATE public.fsli_pages SET covered_by_slug = 'trade-receivables-net'
  WHERE slug IN ('trade-receivables-net-non-current', 'third-parties', 'related-parties')
    AND covered_by_slug IS NULL;
 
-UPDATE public.fsli_pages SET covered_by_slug = 'due-from-government'
- WHERE slug IN ('other-receivables-net', 'other-non-current-receivables')
-   AND covered_by_slug IS NULL;
+-- other-receivables-net and other-non-current-receivables pointed at
+-- due-from-government here. Superseded before this file was ever applied:
+-- 20261012100100_fsli_covered_by_essays_2026_10.sql maps them from the
+-- essays of 11 Oct 2026 (trade-receivables-net, and none).
 
 UPDATE public.fsli_pages SET covered_by_slug = 'corporate-dividend-taxes-receivable-current'
  WHERE slug = 'corporate-dividend-taxes-receivable-non-current'

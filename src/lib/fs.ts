@@ -220,19 +220,30 @@ export function matchesSearch(line: Pick<FsLine, 'label_id' | 'label_en' | 'note
  * "Piutang usaha, neto" carries no figure of its own; its two parties do).
  */
 export function rowsForSlug(lines: readonly FsLine[], slug: string): FsLine[] {
-  const row = lines.find((l) => l.fsli_slug === slug);
-  if (!row) return [];
-  if (row.line_type !== 'header') return [row];
-  const sameStatement = lines
-    .filter((l) => l.statement === row.statement)
-    .sort((a, b) => a.sort_order - b.sort_order);
-  const under: FsLine[] = [];
-  for (const l of sameStatement) {
-    if (l.sort_order <= row.sort_order) continue;
-    if (l.indent <= row.indent) break;
-    under.push(l);
-  }
-  return [row, ...under];
+  // Every row linked to the page, not the first one found: one essay can
+  // cover several lines (deferred tax assets and liabilities and the tax
+  // charge), in more than one statement. They come in the viewer's order,
+  // statement by statement, each heading with the rows printed under it.
+  const order = (l: FsLine) => FS_TABS.findIndex((t) => t.key === l.statement);
+  const sorted = [...lines].sort((a, b) => order(a) - order(b) || a.sort_order - b.sort_order);
+  const out: FsLine[] = [];
+  const seen = new Set<string>();
+  const add = (l: FsLine) => {
+    const key = `${l.statement}:${l.sort_order}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+    out.push(l);
+  };
+  sorted.forEach((row, i) => {
+    if (row.fsli_slug !== slug) return;
+    add(row);
+    if (row.line_type !== 'header') return;
+    for (const l of sorted.slice(i + 1)) {
+      if (l.statement !== row.statement || l.indent <= row.indent) break;
+      add(l);
+    }
+  });
+  return out;
 }
 
 /** The id a statement row carries on the page, so a line-item page can link to it. */

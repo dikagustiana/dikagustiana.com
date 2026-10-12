@@ -101,4 +101,17 @@ describe('rowsForSlug', () => {
     expect(rowsForSlug(lines, 'trade').map((l) => l.sort_order)).toEqual([40, 50, 60]);
     expect(rowsForSlug(lines, 'nothing')).toEqual([]);
   });
+
+  it('is every row linked to the page, statement by statement, not the first one found', () => {
+    // Deferred tax: the asset (sofp 240), the liability (sofp 610) and the tax
+    // charge (pl_oci 160, which sorts first by sort_order alone).
+    const pl = (sort_order: number, slug: string | null = null): FsLine => ({ ...fl(sort_order, 'item', 0, slug), id: `pl${sort_order}`, statement: 'pl_oci' });
+    const mixed = [pl(160, 'dta'), fl(240, 'item', 0, 'dta'), fl(250, 'item', 0), fl(610, 'item', 0, 'dta'), pl(170)];
+    expect(rowsForSlug(mixed, 'dta').map((l) => `${l.statement} ${l.sort_order}`)).toEqual(['sofp 240', 'sofp 610', 'pl_oci 160']);
+  });
+
+  it('lists a heading and its linked rows once', () => {
+    const block = [fl(370, 'header', 0, 'tp'), fl(380, 'item', 1, 'tp'), fl(390, 'item', 1, 'tp'), fl(400, 'item', 0), fl(540, 'item', 0, 'tp')];
+    expect(rowsForSlug(block, 'tp').map((l) => l.sort_order)).toEqual([370, 380, 390, 540]);
+  });
 });

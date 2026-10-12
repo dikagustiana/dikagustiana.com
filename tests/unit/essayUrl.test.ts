@@ -91,6 +91,16 @@ describe('essayUrl — every branch resolves to a real route', () => {
       expected: '/accounting/fsli/cash',
     },
     {
+      name: 'accounting consolidation series essay: placed on a topic of its own, so the essay is the page',
+      input: {
+        slug: 'consolidation-worksheet-elimination-entries',
+        section: 'accounting',
+        phase: 'consolidated-reporting',
+        topic: 'consolidation-worksheet-elimination-entries',
+      },
+      expected: '/accounting/consolidation/consolidation-worksheet-elimination-entries',
+    },
+    {
       name: 'unknown section falls back to the universal route',
       input: { slug: 'u1', section: 'mystery' },
       expected: '/essays/u1',
