@@ -421,3 +421,20 @@ Consequences for the schema (1.1), beyond PRD §A5:
 - `fs_line.line_key`: the stable name the checker and the publish function find a row by
   (`total_assets`, `gross_profit`, …). Labels are verbatim and cannot be matched on, so
   the rules in §A6 need it.
+
+### Decided at 1.4 (Claude, 11 October 2026)
+
+Dika asked for the viewer to be finished and published without waiting for his review
+("kerjain sampai selesai … hiraukan dulu aja yang kebutuhan review aku"). The four questions
+raised at 1.4 were settled on the recommendations put to him:
+
+| Question | Decision |
+|---|---|
+| A rounding the issuer printed (cash flow 2024: operating subtotal printed 5,629,285, rows sum to 5,629,286) | Declared per row and year (`printed_difference` in `statements.json`; `fs_line.printed_diff_*`). The foot passes at exactly the declared difference and at no other; each declaration is reported as a `DECLARED` rule. |
+| `fsli_slug` mapping | By title, 21 pages. The two pages item 3 called mislabelled already carry the FS labels; their figures were the error. `trade-receivables-net` links to the heading "Piutang usaha, neto" (the FS prints no total under it); `corporate-dividend-taxes-receivable-current` to "Piutang pajak penghasilan dan dividen - bagian lancar" (26,288). Unlinked, having no FS row with their label and no essay: `trade-receivables-net-non-current`, `other-non-current-receivables`, `other-non-current-assets` (a duplicate of `other-non-current-assets-final`). |
+| SoCE note references (33, 34) | `fs_soce_cell.notes_ref`. |
+| The two attribution totals on p. 15 printed without a label | Stored as totals carrying the label of the heading they total, marked `label_note`. |
+
+Publishing follows the same instruction: the period is published once the server-side re-check
+passes, without a preview review.
+

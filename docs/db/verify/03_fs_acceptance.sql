@@ -5,7 +5,11 @@
 --
 --   psql -d dry -f supabase/migrations/20261009090000_fsli_component_flag.sql
 --   psql -d dry -f supabase/migrations/20261011130000_fs_statements.sql
+--   psql -d dry -f supabase/migrations/20261011170000_fs_printed_differences_soce_notes.sql
 --   psql -d dry -f docs/db/verify/03_fs_acceptance.sql
+--
+-- It runs as well after the later fs_* migrations (the PHE FY2024 load, the
+-- publish gate, the row trigger); 04_fs_publish_gate.sql covers those.
 --
 -- Every check raises on failure, so a clean run prints only PASS lines and the
 -- script exits 0. Everything it writes is rolled back. Fixture users match
@@ -22,6 +26,18 @@ INSERT INTO public.user_roles (user_id, role)
   VALUES ('00000000-0000-0000-0000-0000000000a1', 'admin') ON CONFLICT DO NOTHING;
 
 BEGIN;
+
+-- This file tests the constraints and the RLS policies one layer at a time.
+-- The trigger 20261011200000 adds over them (a published period's rows are
+-- closed to every writer) would answer first and hide them, so it is off for
+-- this run; 04_fs_publish_gate.sql tests it.
+ALTER TABLE public.fs_line DISABLE TRIGGER fs_line_period_is_draft;
+ALTER TABLE public.fs_soce_cell DISABLE TRIGGER fs_soce_cell_period_is_draft;
+
+-- The counts below are the fixture's alone: periods a load migration put here
+-- (20261011180000, PHE FY2024) are set aside for the run, which rolls back.
+DELETE FROM public.fs_period;
+DELETE FROM public.fs_company;
 
 -- ---------------------------------------------------------------- fixture
 -- Written as the table owner, as the loader's migration is. Two companies:
@@ -171,6 +187,32 @@ BEGIN
     RAISE EXCEPTION 'a client role can write fs_check';
   END IF;
   RAISE NOTICE 'PASS no client role can write fs_period.status or fs_check';
+END $$;
+
+-- Declared printed differences (20261011170000): on sums only, always explained.
+DO $$
+BEGIN
+  BEGIN
+    INSERT INTO public.fs_line (period_id, statement, sort_order, line_type, label_id, label_en, value_cy, source_page, printed_diff_cy, printed_diff_note)
+    VALUES ('00000000-0000-0000-0000-00000000f002', 'sofp', 93, 'item', 'X', 'X', 1, 11, 1, 'x');
+    RAISE EXCEPTION 'printed difference on an item accepted';
+  EXCEPTION WHEN check_violation THEN
+    RAISE NOTICE 'PASS a printed difference sits on a subtotal or total only';
+  END;
+  BEGIN
+    INSERT INTO public.fs_line (period_id, statement, sort_order, line_type, label_id, label_en, value_cy, source_page, printed_diff_cy)
+    VALUES ('00000000-0000-0000-0000-00000000f002', 'sofp', 93, 'subtotal', 'X', 'X', 1, 11, 1);
+    RAISE EXCEPTION 'unexplained printed difference accepted';
+  EXCEPTION WHEN check_violation THEN
+    RAISE NOTICE 'PASS a printed difference carries its reason';
+  END;
+  BEGIN
+    INSERT INTO public.fs_line (period_id, statement, sort_order, line_type, label_id, label_en, value_cy, source_page, printed_diff_cy, printed_diff_note)
+    VALUES ('00000000-0000-0000-0000-00000000f002', 'sofp', 93, 'subtotal', 'X', 'X', 1, 11, 0, 'x');
+    RAISE EXCEPTION 'zero printed difference accepted';
+  EXCEPTION WHEN check_violation THEN
+    RAISE NOTICE 'PASS a declared difference is never zero';
+  END;
 END $$;
 
 -- Two NULL line_keys in one statement are allowed (most rows have none).

@@ -24,7 +24,7 @@ const DevelopmentFinanceEssayPage = lazy(() => import("./pages/DevelopmentFinanc
 const ClimateFinance = lazy(() => import("./pages/ClimateFinance"));
 
 // FSLI
-const FsliList = lazy(() => import("./pages/FsliList"));
+const FsViewer = lazy(() => import("./pages/FsViewer"));
 const FsliDetail = lazy(() => import("./pages/FsliDetail"));
 
 // Accounting
@@ -177,7 +177,9 @@ const App = () => (
 
             {/* Accounting */}
             <Route path="/accounting" element={<Accounting />} />
-            <Route path="/accounting/fsli" element={<FsliList />} />
+            {/* D4: the statements live at /:company/:period; the old address goes to PHE FY2024. */}
+            <Route path="/accounting/fsli" element={<Navigate to="/accounting/fsli/phe/fy2024" replace />} />
+            <Route path="/accounting/fsli/:company/:period" element={<FsViewer />} />
             <Route path="/accounting/fsli/:slug" element={<FsliDetail />} />
             <Route path="/accounting/consolidated-reporting" element={<ConsolidatedReporting />} />
             <Route path="/accounting/statutory-reporting" element={<StatutoryReporting />} />

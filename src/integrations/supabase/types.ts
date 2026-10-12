@@ -587,6 +587,9 @@ export type Database = {
           notes_ref: string | null
           parent_id: string | null
           period_id: string
+          printed_diff_cy: number | null
+          printed_diff_note: string | null
+          printed_diff_py: number | null
           sort_order: number
           source_page: number
           statement: string
@@ -606,6 +609,9 @@ export type Database = {
           notes_ref?: string | null
           parent_id?: string | null
           period_id: string
+          printed_diff_cy?: number | null
+          printed_diff_note?: string | null
+          printed_diff_py?: number | null
           sort_order: number
           source_page: number
           statement: string
@@ -625,6 +631,9 @@ export type Database = {
           notes_ref?: string | null
           parent_id?: string | null
           period_id?: string
+          printed_diff_cy?: number | null
+          printed_diff_note?: string | null
+          printed_diff_py?: number | null
           sort_order?: number
           source_page?: number
           statement?: string
@@ -715,6 +724,7 @@ export type Database = {
           col_label_id: string
           col_order: number
           id: string
+          notes_ref: string | null
           period_id: string
           row_key: string
           row_label_en: string
@@ -729,6 +739,7 @@ export type Database = {
           col_label_id: string
           col_order: number
           id?: string
+          notes_ref?: string | null
           period_id: string
           row_key: string
           row_label_en: string
@@ -743,6 +754,7 @@ export type Database = {
           col_label_id?: string
           col_order?: number
           id?: string
+          notes_ref?: string | null
           period_id?: string
           row_key?: string
           row_label_en?: string
@@ -765,11 +777,11 @@ export type Database = {
         Row: {
           category: string | null
           created_at: string
-          dec_2023: string | null
-          dec_2024: string | null
           id: string
           is_component: boolean | null
-          notes_ref: string | null
+          legacy_dec_2023: string | null
+          legacy_dec_2024: string | null
+          legacy_notes_ref: string | null
           slug: string
           sort_order: number | null
           subtitle: string | null
@@ -779,11 +791,11 @@ export type Database = {
         Insert: {
           category?: string | null
           created_at?: string
-          dec_2023?: string | null
-          dec_2024?: string | null
           id?: string
           is_component?: boolean | null
-          notes_ref?: string | null
+          legacy_dec_2023?: string | null
+          legacy_dec_2024?: string | null
+          legacy_notes_ref?: string | null
           slug: string
           sort_order?: number | null
           subtitle?: string | null
@@ -793,11 +805,11 @@ export type Database = {
         Update: {
           category?: string | null
           created_at?: string
-          dec_2023?: string | null
-          dec_2024?: string | null
           id?: string
           is_component?: boolean | null
-          notes_ref?: string | null
+          legacy_dec_2023?: string | null
+          legacy_dec_2024?: string | null
+          legacy_notes_ref?: string | null
           slug?: string
           sort_order?: number | null
           subtitle?: string | null
@@ -1024,6 +1036,36 @@ export type Database = {
       }
     }
     Functions: {
+      fs_publish_period: {
+        Args: { p_period_id: string }
+        Returns: {
+          failed: number
+          published: boolean
+          rules: number
+          run_at: string
+        }[]
+      }
+      fs_run_publish_gate: {
+        Args: { p_period_id: string }
+        Returns: {
+          failed: number
+          published: boolean
+          rules: number
+          run_at: string
+        }[]
+      }
+      fs_tieout: {
+        Args: { p_period_id: string }
+        Returns: {
+          actual: number
+          description: string
+          diff: number
+          expected: number
+          passed: boolean
+          rule_id: string
+          statement: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

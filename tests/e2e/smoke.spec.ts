@@ -14,7 +14,7 @@ const PUBLIC_ROUTES: { path: string; name: string }[] = [
   { path: '/about', name: 'About (redirects to /)' },
   { path: '/auth', name: 'Auth' },
   { path: '/accounting', name: 'Accounting' },
-  { path: '/accounting/fsli', name: 'FSLI list' },
+  { path: '/accounting/fsli', name: 'FSLI (redirects to /accounting/fsli/phe/fy2024)' },
   { path: '/accounting/consolidated-reporting', name: 'Consolidated reporting' },
   { path: '/accounting/statutory-reporting', name: 'Statutory reporting' },
   { path: '/finance', name: 'Finance landing' },

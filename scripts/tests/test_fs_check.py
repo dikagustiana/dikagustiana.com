@@ -366,17 +366,17 @@ class Structure(unittest.TestCase):
     def test_the_soce_is_required(self):
         data = fixture()
         data['soce_cells'] = []
-        self.assertFails(data, 'STRUCT:present')
+        self.assertFails(data, 'STRUCT:soce:present')
 
     def test_the_soce_needs_its_total_columns(self):
         data = fixture()
         data['soce_cells'] = [c for c in data['soce_cells'] if c['col_key'] != 'nci']
-        self.assertFails(data, 'STRUCT:columns')
+        self.assertFails(data, 'STRUCT:soce:columns')
 
     def test_the_soce_needs_two_balances(self):
         data = fixture()
         data['soce_cells'] = [c for c in data['soce_cells'] if c['row_key'] not in ('balance_2022', 'balance_2023')]
-        self.assertFails(data, 'STRUCT:balances')
+        self.assertFails(data, 'STRUCT:soce:balances')
 
     def test_period_fields(self):
         data = fixture()
@@ -457,6 +457,76 @@ class CommandLine(unittest.TestCase):
         self.assertNotIn(' pass', table)
         self.assertIn('FOOT:sofp:total_current_assets:cy', table)
 
+
+
+class DeclaredPrintedDifferences(unittest.TestCase):
+    """The issuer's own rounding (PHE FY2024's cash flow prints an operating
+    subtotal one unit off its rows) is declared per row and year; the foot then
+    passes at exactly that difference and at no other."""
+
+    def rounded(self):
+        data = fixture()
+        line(data, 'cf', 10)['value_cy'] += 1  # operating cash flow: rows now sum one higher than s40
+        return data
+
+    def test_without_a_declaration_the_foot_fails(self):
+        self.assertIn('FOOT:cf:s40:cy', failing(self.rounded()))
+
+    def test_a_declared_difference_passes_and_is_reported(self):
+        data = self.rounded()
+        line(data, 'cf', 40)['printed_difference'] = {'cy': 1, 'note': 'Rounding in the issuer\'s presentation.'}
+        results, _ = fs_check.run(data, None)
+        self.assertEqual([r.rule_id for r in results if not r.passed], [])
+        declared = [r for r in results if r.rule_id.startswith('DECLARED:')]
+        self.assertEqual([r.rule_id for r in declared], ['DECLARED:cf:s40:cy'])
+        self.assertEqual((declared[0].expected, declared[0].actual), (1, 1))
+        self.assertIn('Rounding', declared[0].description)
+
+    def test_a_different_difference_fails(self):
+        data = self.rounded()
+        line(data, 'cf', 40)['printed_difference'] = {'cy': 2, 'note': 'x'}
+        results, _ = fs_check.run(data, None)
+        foot = next(r for r in results if r.rule_id == 'FOOT:cf:s40:cy')
+        self.assertFalse(foot.passed)
+        self.assertIn('found 1', foot.description)
+        self.assertFalse([r for r in results if r.rule_id.startswith('DECLARED:')])
+
+    def test_a_declaration_where_the_foot_is_exact_fails(self):
+        data = fixture()
+        line(data, 'cf', 40)['printed_difference'] = {'py': -1, 'note': 'x'}
+        self.assertIn('FOOT:cf:s40:py', failing(data))
+
+    def test_a_declaration_does_not_hide_another_error(self):
+        data = self.rounded()
+        line(data, 'cf', 40)['printed_difference'] = {'cy': 1, 'note': 'x'}
+        line(data, 'cf', 20)['value_py'] -= 1  # a one-unit error in the other year
+        self.assertIn('FOOT:cf:s40:py', failing(data))
+
+    def test_a_declaration_needs_a_note_and_a_sum_row(self):
+        data = self.rounded()
+        line(data, 'cf', 40)['printed_difference'] = {'cy': 1}
+        self.assertIn('STRUCT:cf:40', failing(data))
+        data = fixture()
+        line(data, 'cf', 10)['printed_difference'] = {'cy': 1, 'note': 'x'}
+        self.assertIn('STRUCT:cf:10', failing(data))
+
+
+class SoceNotes(unittest.TestCase):
+    def test_a_row_carries_one_note_reference(self):
+        data = fixture()
+        for c in data['soce_cells']:
+            if c['row_key'] == 'dividend_2024':
+                c['notes_ref'] = '34'
+        self.assertEqual(failing(data), [])
+        cell(data, 'dividend_2024', 'nci')['notes_ref'] = '35'
+        self.assertIn('STRUCT:soce:dividend_2024:nci', failing(data))
+
+    def test_a_note_reference_is_text(self):
+        data = fixture()
+        for c in data['soce_cells']:
+            if c['row_key'] == 'dividend_2024':
+                c['notes_ref'] = 34
+        self.assertTrue([f for f in failing(data) if f.startswith('STRUCT:soce:dividend_2024')])
 
 if __name__ == '__main__':
     unittest.main()

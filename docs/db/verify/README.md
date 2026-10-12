@@ -70,7 +70,7 @@ non-admin block, audit-log append-only, the self-grant guard, and the
 Read the output rather than trusting an exit code — `ON_ERROR_STOP` is off on purpose,
 because most assertions here *expect* an `ERROR:` line. Each check names what it expects.
 
-## `02_tracker_entry_acceptance.sql`, `03_fs_acceptance.sql`
+## `02_tracker_entry_acceptance.sql`, `03_fs_acceptance.sql`, `04_fs_publish_gate.sql`
 
 Per-feature checks, run after the baseline and that feature's migrations (each file's
 header names them). Unlike `01`, `ON_ERROR_STOP` is on and every check raises on
@@ -82,6 +82,25 @@ signed-in reads of published periods only, the admin's writes limited to drafts,
 publish gate held twice (`fs_period.status` neither granted nor reachable through the
 UPDATE policy). Each RLS rule it tests was also loosened once in a copy of the migration
 to confirm the script fails.
+
+`04` covers the publish gate (Plan 1.7) on the PHE FY2024 load while it is a draft:
+`fs_tieout()` equals the checker's stored run on all 125 rules both run, descriptions
+included; nine one-change mutations (a figure, a declared printed difference, a SoCE
+cell, a parent link, a missing key) each fail exactly the rules they break; a failing
+gate records its run and leaves the period a draft; anon and a signed-in non-admin are
+refused; an admin publishes, after which the lines take no writes and anon reads the
+statements with a latest run of 125 passes. The row trigger (20261011200000) closes a
+published period's rows to the owner too, still lets a line-item link change and the
+period's own delete cascade. Its first check runs read-only on production too. `03`
+turns that trigger off inside its own transaction so each RLS layer still answers for
+itself.
+
+The race the trigger closes (an admin's edit landing just after a publish that never saw
+it) needs two sessions, so it is not in a script. Run by hand on 11 October 2026: a
+publish holding the period made a concurrent edit wait and then refused it; an edit
+holding the period made the publish wait, and the publish then counted the edit (2
+failures) and left the period a draft. With the trigger off, the same first order
+published the period with the edited figure in it.
 
 ## The defect running it caught that reading did not
 

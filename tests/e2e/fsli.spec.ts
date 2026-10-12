@@ -84,7 +84,29 @@ const ESSAYS = [
   ]),
 ];
 
-const TABLES: Record<string, Record<string, unknown>[]> = { fsli_pages: FSLI_PAGES, essays: ESSAYS };
+// The audited statement row the line-item page reads its figures from
+// (fs_line, with its period embedded as PostgREST returns it). Dummies.
+const PERIOD = {
+  id: 'p-test',
+  company_id: 'test',
+  period_key: 'fy2024',
+  period_end: '2024-12-31',
+  comparative_end: '2023-12-31',
+  currency: 'USD',
+  unit: 'thousands',
+  status: 'published',
+  fs_company: { id: 'test', legal_name: 'PT Test', short_name: 'TEST' },
+};
+const FS_LINES = [
+  {
+    id: 'l-test-160', period_id: 'p-test', statement: 'sofp', parent_id: null, sort_order: 160, line_type: 'item',
+    indent: 0, label_id: 'Aset lancar lainnya', label_en: 'Other current assets', notes_ref: '14a', value_cy: 1234,
+    value_py: -56, source_page: 11, line_key: null, fsli_slug: 'other-current-assets', printed_diff_cy: null,
+    printed_diff_py: null, printed_diff_note: null, fs_period: PERIOD,
+  },
+];
+
+const TABLES: Record<string, Record<string, unknown>[]> = { fsli_pages: FSLI_PAGES, essays: ESSAYS, fs_line: FS_LINES };
 
 /** What PostgREST would return for this URL, given the seed above. */
 function rowsFor(url: string): Record<string, unknown>[] {
@@ -95,7 +117,10 @@ function rowsFor(url: string): Record<string, unknown>[] {
     if (['select', 'order', 'limit', 'offset'].includes(key)) continue;
     const [op, ...rest] = raw.split('.');
     const value = rest.join('.');
-    if (op === 'eq') rows = rows.filter((r) => String(r[key]) === value);
+    // 'fs_period.status' filters on the embedded period.
+    const get = (r: Record<string, unknown>) =>
+      key.split('.').reduce<unknown>((v, k) => (v && typeof v === 'object' ? (v as Record<string, unknown>)[k] : undefined), r);
+    if (op === 'eq') rows = rows.filter((r) => String(get(r)) === value);
   }
   return rows;
 }
@@ -174,7 +199,13 @@ test('a line item with neither an essay nor a cover ends at its figures', async 
 
   const main = p.locator('main');
   await expect(main.getByRole('heading', { level: 1, name: 'Other current assets' })).toBeVisible();
-  await expect(main.getByText('Figures as reported in the source financial statements.')).toBeVisible();
+  // Its figures come from the audited statement row, as printed, with a link to that row.
+  await expect(main.getByRole('row', { name: /Aset lancar lainnya/ })).toContainText('1,234');
+  await expect(main.getByRole('row', { name: /Aset lancar lainnya/ })).toContainText('(56)');
+  await expect(main.getByRole('link', { name: 'See it in the statement' })).toHaveAttribute(
+    'href',
+    '/accounting/fsli/test/fy2024#row-sofp-160',
+  );
   await expect(p.getByText('Not written yet')).toHaveCount(0);
   await expect(p.getByText('Covered in')).toHaveCount(0);
   await expect(main.locator('h2')).toHaveCount(0);

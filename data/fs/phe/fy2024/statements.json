@@ -1911,7 +1911,11 @@
       "parent": 240,
       "line_key": "net_cash_operating",
       "fsli_slug": null,
-      "source_page": 17
+      "source_page": 17,
+      "printed_difference": {
+        "cy": 1,
+        "note": "Rounding in the issuer's presentation: the eight operating rows sum to 5,629,286, the FS prints 5,629,285. Kept as printed."
+      }
     },
     {
       "statement": "cf",
@@ -2121,7 +2125,11 @@
       "parent": 270,
       "line_key": "net_change_in_cash",
       "fsli_slug": null,
-      "source_page": 17
+      "source_page": 17,
+      "printed_difference": {
+        "cy": -1,
+        "note": "The FS prints the net decrease its unrounded operating cash flow gives, (2,384,682); from the printed subtotals it is (2,384,683). Kept as printed."
+      }
     },
     {
       "statement": "cf",

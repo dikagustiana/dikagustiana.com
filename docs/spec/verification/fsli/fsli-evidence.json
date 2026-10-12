@@ -1,0 +1,226 @@
+{
+  "375": {
+    "redirected_to": "/accounting/fsli/phe/fy2024",
+    "sofp_rows": 83,
+    "scroll_width": 375,
+    "badge": "Ties to audited FS — 125 checks passed · p.11–17",
+    "mono_elements": 0,
+    "figure_font": {
+      "family": "\"Plus Jakarta Sans\"",
+      "numeric": "tabular-nums",
+      "size": "14px"
+    },
+    "contrast": {
+      "label_id": {
+        "rgb": [
+          33,
+          42,
+          54
+        ],
+        "ratio": 13.88
+      },
+      "figure": {
+        "rgb": [
+          33,
+          42,
+          54
+        ],
+        "ratio": 13.88
+      },
+      "label_en_or_notes": {
+        "rgb": [
+          98,
+          112,
+          132
+        ],
+        "ratio": 4.82
+      },
+      "header_lines": {
+        "rgb": [
+          98,
+          112,
+          132
+        ],
+        "ratio": 4.82
+      },
+      "background": [
+        250,
+        250,
+        250
+      ]
+    },
+    "axe_wcag": {
+      "violations": [],
+      "passes": 34,
+      "incomplete": [
+        "aria-valid-attr-value"
+      ]
+    },
+    "pl_rows": 32,
+    "scroll_width_pl": 375,
+    "fonts_requested": [
+      "/fonts/plus-jakarta-sans-latin.woff2",
+      "/fonts/spectral-normal-400-latin.woff2",
+      "/fonts/spectral-normal-700-latin.woff2"
+    ]
+  },
+  "1440": {
+    "redirected_to": "/accounting/fsli/phe/fy2024",
+    "sofp_rows": 83,
+    "scroll_width": 1440,
+    "badge": "Ties to audited FS — 125 checks passed · p.11–17",
+    "mono_elements": 0,
+    "figure_font": {
+      "family": "\"Plus Jakarta Sans\"",
+      "numeric": "tabular-nums",
+      "size": "14px"
+    },
+    "contrast": {
+      "label_id": {
+        "rgb": [
+          33,
+          42,
+          54
+        ],
+        "ratio": 13.88
+      },
+      "figure": {
+        "rgb": [
+          33,
+          42,
+          54
+        ],
+        "ratio": 13.88
+      },
+      "label_en_or_notes": {
+        "rgb": [
+          98,
+          112,
+          132
+        ],
+        "ratio": 4.82
+      },
+      "header_lines": {
+        "rgb": [
+          98,
+          112,
+          132
+        ],
+        "ratio": 4.82
+      },
+      "background": [
+        250,
+        250,
+        250
+      ]
+    },
+    "axe_wcag": {
+      "violations": [],
+      "passes": 34,
+      "incomplete": []
+    },
+    "pl_rows": 32,
+    "scroll_width_pl": 1440,
+    "fonts_requested": [
+      "/fonts/plus-jakarta-sans-latin.woff2",
+      "/fonts/spectral-normal-400-latin.woff2",
+      "/fonts/spectral-normal-700-latin.woff2"
+    ]
+  },
+  "measured_at": "2026-10-11T17:12:27.956Z",
+  "base": "local vite build, VITE_SUPABASE_URL = production project, anon key",
+  "old_figures": {
+    "searched": [
+      "823,348",
+      "801,429",
+      "520,885",
+      "28,830",
+      "85,053",
+      "94,887",
+      "809,397",
+      "275,812",
+      "2,203,018",
+      "3i.6",
+      "3b,4dc"
+    ],
+    "pages_searched": 28,
+    "line_item_pages": 24,
+    "hits": [
+      {
+        "where": "trade-receivables-net",
+        "value": "823,348"
+      },
+      {
+        "where": "trade-receivables-net",
+        "value": "801,429"
+      },
+      {
+        "where": "trade-receivables-net",
+        "value": "520,885"
+      },
+      {
+        "where": "trade-receivables-net",
+        "value": "2,203,018"
+      },
+      {
+        "where": "due-from-government",
+        "value": "28,830"
+      },
+      {
+        "where": "due-from-government",
+        "value": "85,053"
+      },
+      {
+        "where": "due-from-government",
+        "value": "94,887"
+      },
+      {
+        "where": "inventories-net",
+        "value": "809,397"
+      },
+      {
+        "where": "corporate-dividend-taxes-receivable-current",
+        "value": "275,812"
+      }
+    ]
+  },
+  "line_item_pages_with_figures": [
+    "cash-and-cash-equivalents",
+    "restricted-cash",
+    "trade-receivables-net",
+    "third-parties",
+    "related-parties",
+    "other-receivables-net",
+    "due-from-government",
+    "inventories-net",
+    "corporate-dividend-taxes-receivable-current",
+    "advances-prepayments-current",
+    "other-current-assets",
+    "restricted-cash-non-current",
+    "fixed-assets-net",
+    "investment-properties",
+    "deferred-tax-assets",
+    "long-term-investments",
+    "advances-prepayments-non-current",
+    "corporate-dividend-taxes-receivable-non-current",
+    "oil-gas-properties-net",
+    "right-of-use-assets-net",
+    "other-non-current-assets-final"
+  ],
+  "lighthouse": {
+    "desktop": {
+      "version": "12.2.1",
+      "accessibility": 99,
+      "failing": [
+        "heading-order"
+      ]
+    },
+    "mobile": {
+      "version": "12.2.1",
+      "accessibility": 99,
+      "failing": [
+        "heading-order"
+      ]
+    }
+  }
+}
