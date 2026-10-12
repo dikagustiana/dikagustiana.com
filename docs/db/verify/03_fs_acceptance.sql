@@ -9,7 +9,7 @@
 --   psql -d dry -f docs/db/verify/03_fs_acceptance.sql
 --
 -- It runs as well after the later fs_* migrations (the PHE FY2024 load, the
--- publish gate); 04_fs_publish_gate.sql covers those.
+-- publish gate, the row trigger); 04_fs_publish_gate.sql covers those.
 --
 -- Every check raises on failure, so a clean run prints only PASS lines and the
 -- script exits 0. Everything it writes is rolled back. Fixture users match
@@ -26,6 +26,13 @@ INSERT INTO public.user_roles (user_id, role)
   VALUES ('00000000-0000-0000-0000-0000000000a1', 'admin') ON CONFLICT DO NOTHING;
 
 BEGIN;
+
+-- This file tests the constraints and the RLS policies one layer at a time.
+-- The trigger 20261011200000 adds over them (a published period's rows are
+-- closed to every writer) would answer first and hide them, so it is off for
+-- this run; 04_fs_publish_gate.sql tests it.
+ALTER TABLE public.fs_line DISABLE TRIGGER fs_line_period_is_draft;
+ALTER TABLE public.fs_soce_cell DISABLE TRIGGER fs_soce_cell_period_is_draft;
 
 -- The counts below are the fixture's alone: periods a load migration put here
 -- (20261011180000, PHE FY2024) are set aside for the run, which rolls back.

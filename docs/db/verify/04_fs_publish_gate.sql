@@ -5,6 +5,7 @@
 --
 --   psql -d dry -f supabase/migrations/20261011180000_fs_phe_fy2024_load.sql
 --   psql -d dry -f supabase/migrations/20261011190000_fs_publish_gate.sql
+--   psql -d dry -f supabase/migrations/20261011200000_fs_rows_lock_their_period.sql
 --   psql -d dry -f docs/db/verify/04_fs_publish_gate.sql
 --
 -- Every check raises on failure, so a clean run prints only PASS lines and the
@@ -253,6 +254,44 @@ BEGIN
   RAISE NOTICE 'PASS a published period''s lines no longer take writes';
 END $$;
 RESET ROLE;
+
+-- A published period's rows are closed to every writer, the owner included
+-- (20261011200000), except a change of the line-item link alone and the
+-- cascade of the period's own delete.
+DO $$
+DECLARE
+  pid uuid := md5('https://dikagustiana.com/fs/phe/fy2024')::uuid;
+BEGIN
+  BEGIN
+    UPDATE public.fs_line SET value_cy = value_cy + 1 WHERE period_id = pid AND statement = 'sofp' AND sort_order = 30;
+    RAISE EXCEPTION 'the owner changed a figure of a published period';
+  EXCEPTION WHEN check_violation THEN
+    RAISE NOTICE 'PASS a published period''s figures are refused to the owner too';
+  END;
+  BEGIN
+    INSERT INTO public.fs_soce_cell (period_id, row_key, row_label_id, row_label_en, row_order, col_key, col_label_id, col_label_en, col_order, value, source_page)
+    VALUES (pid, 'extra', 'Ekstra', 'Extra', 99, 'total', 'Jumlah', 'Total', 10, 1, 16);
+    RAISE EXCEPTION 'a cell was added to a published period';
+  EXCEPTION WHEN check_violation THEN
+    RAISE NOTICE 'PASS a published period takes no new SoCE cell';
+  END;
+  BEGIN
+    UPDATE public.fs_line SET fsli_slug = NULL WHERE period_id = pid AND fsli_slug = 'cash-and-cash-equivalents';
+    IF NOT FOUND THEN RAISE EXCEPTION 'no row carried the link'; END IF;
+    RAISE EXCEPTION 'undo';
+  EXCEPTION WHEN raise_exception THEN
+    IF SQLERRM <> 'undo' THEN RAISE; END IF;
+    RAISE NOTICE 'PASS a line-item link alone can still change (renaming or deleting a page)';
+  END;
+  BEGIN
+    DELETE FROM public.fs_period WHERE id = pid;
+    IF EXISTS (SELECT 1 FROM public.fs_line WHERE period_id = pid) THEN RAISE EXCEPTION 'lines survived'; END IF;
+    RAISE EXCEPTION 'undo';
+  EXCEPTION WHEN raise_exception THEN
+    IF SQLERRM <> 'undo' THEN RAISE; END IF;
+    RAISE NOTICE 'PASS the load''s DOWN still deletes a published period with its rows';
+  END;
+END $$;
 
 SET ROLE anon;
 SELECT set_config('request.jwt.claims', NULL, true);

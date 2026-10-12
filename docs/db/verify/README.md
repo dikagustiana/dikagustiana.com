@@ -89,8 +89,18 @@ included; nine one-change mutations (a figure, a declared printed difference, a 
 cell, a parent link, a missing key) each fail exactly the rules they break; a failing
 gate records its run and leaves the period a draft; anon and a signed-in non-admin are
 refused; an admin publishes, after which the lines take no writes and anon reads the
-statements with a latest run of 125 passes. Its first check runs read-only on
-production too.
+statements with a latest run of 125 passes. The row trigger (20261011200000) closes a
+published period's rows to the owner too, still lets a line-item link change and the
+period's own delete cascade. Its first check runs read-only on production too. `03`
+turns that trigger off inside its own transaction so each RLS layer still answers for
+itself.
+
+The race the trigger closes (an admin's edit landing just after a publish that never saw
+it) needs two sessions, so it is not in a script. Run by hand on 11 October 2026: a
+publish holding the period made a concurrent edit wait and then refused it; an edit
+holding the period made the publish wait, and the publish then counted the edit (2
+failures) and left the period a draft. With the trigger off, the same first order
+published the period with the edited figure in it.
 
 ## The defect running it caught that reading did not
 
