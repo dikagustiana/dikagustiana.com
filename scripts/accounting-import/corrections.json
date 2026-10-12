@@ -1,0 +1,73 @@
+{
+  "$comment": "Corrections applied to the accounting essay batch of 11 Oct 2026 before import (owner brief of 12 Oct 2026). Every entry is an exact-match replacement; `count` is how often it must match in that file, and the import refuses the batch if it matches any other number of times. `global` entries may match any number of times in any file; what they did is recorded per file. Placeholders: {K1}..{K6} become the consolidation essay's public path, {fsli:<slug>} becomes /accounting/fsli/<slug>. Rules: C1 PSAK numbering, C3 in-text file references to site links, C4 local paths to document titles. C2 (related_fsli) is `relatedFsliRemap`; C3 slug links are made by the script after these entries.",
+  "relatedFsliRemap": {
+    "additional-paid-in-capital": "share-capital",
+    "other-equity-component": "share-capital",
+    "deferred-tax-liabilities": "deferred-tax-assets",
+    "lease-liabilities-non-current": "right-of-use-assets-net",
+    "other-payables": "trade-payables"
+  },
+  "global": [
+    { "rule": "C4", "find": ", `Downloads\\FS PHE 2024.pdf`", "replace": "" },
+    { "rule": "C4", "find": ", `_referensi\\renewables\\src\\BRPT_FS_FY2025.pdf`", "replace": "" },
+    { "rule": "C4", "find": ", `BRPT_FS_FY2025.pdf`", "replace": "" },
+    { "rule": "C4", "find": "`_phe-2024-fs-data.csv`", "replace": "the PHE FS 2024 data extract" }
+  ],
+  "files": {
+    "K1-business-combinations.md": [
+      { "rule": "C1", "find": "under PSAK 211 (formerly PSAK 66, IFRS 11)", "replace": "under PSAK 111 (formerly PSAK 66, IFRS 11)", "count": 1 },
+      { "rule": "C1", "find": "PSAK 211 (IFRS 11) para. 21A", "replace": "PSAK 111 (IFRS 11) para. 21A", "count": 1 },
+      { "rule": "C3", "find": "- K2 `K2-consolidation-worksheet.md`:", "replace": "- [K2]({K2}):", "count": 1 },
+      { "rule": "C3", "find": "- K5 `K5-consolidated-cash-flows-midyear.md`:", "replace": "- [K5]({K5}):", "count": 1 },
+      { "rule": "C3", "find": "- K6 `K6-mutual-holdings-complex-structures.md`:", "replace": "- [K6]({K6}):", "count": 1 },
+      { "rule": "C4", "find": "tables read from the `.raw.txt` extraction", "replace": "tables read from the raw text extraction", "count": 1 }
+    ],
+    "K2-consolidation-worksheet.md": [
+      { "rule": "C3", "find": "the Non-Controlling Interest essay (`fsli/25-non-controlling-interest.md`)", "replace": "the [Non-Controlling Interest essay]({fsli:non-controlling-interest})", "count": 1 },
+      { "rule": "C3", "find": "the Long-Term Investments essay (`fsli/04-long-term-investments.md`, section 5)", "replace": "the [Long-Term Investments essay]({fsli:long-term-investments}) (section 5)", "count": 1 },
+      { "rule": "C3", "find": "see `fsli/24-other-comprehensive-income.md`)", "replace": "see [other-comprehensive-income]({fsli:other-comprehensive-income}))", "count": 1 },
+      { "rule": "C3", "find": "- `fsli/25-non-controlling-interest.md` (`non-controlling-interest`):", "replace": "- [non-controlling-interest]({fsli:non-controlling-interest}):", "count": 1 },
+      { "rule": "C3", "find": "- `fsli/04-long-term-investments.md` (`long-term-investments`):", "replace": "- [long-term-investments]({fsli:long-term-investments}):", "count": 1 },
+      { "rule": "C3", "find": "- `fsli/14-intangible-assets-net.md` (`intangible-assets-net`):", "replace": "- [intangible-assets-net]({fsli:intangible-assets-net}):", "count": 1 },
+      { "rule": "C3", "find": "- `fsli/24-other-comprehensive-income.md` (`other-comprehensive-income`):", "replace": "- [other-comprehensive-income]({fsli:other-comprehensive-income}):", "count": 1 },
+      { "rule": "C3", "find": "- `fsli/23-retained-earnings.md` (`retained-earnings`) and", "replace": "- [retained-earnings]({fsli:retained-earnings}) and", "count": 1 },
+      { "rule": "C3", "find": "- K1 `K1-business-combinations.md`:", "replace": "- [K1]({K1}):", "count": 1 },
+      { "rule": "C3", "find": "- K3 `K3-intercompany-inventory.md` and K4 `K4-intercompany-plant-assets.md`:", "replace": "- [K3]({K3}) and [K4]({K4}):", "count": 1 },
+      { "rule": "C3", "find": "- K5 `K5-consolidated-cash-flows-midyear.md`:", "replace": "- [K5]({K5}):", "count": 1 },
+      { "rule": "C3", "find": "- K6 `K6-mutual-holdings-complex-structures.md`:", "replace": "- [K6]({K6}):", "count": 1 },
+      { "rule": "C4", "find": ", `BREN_FS_FY2025.pdf` (statement of financial position", "replace": " (statement of financial position", "count": 1 },
+      { "rule": "C4", "find": "and `BREN_FS_FY2024.pdf`.", "replace": "and BREN FS 2024.", "count": 1 }
+    ],
+    "K3-intercompany-inventory.md": [
+      { "rule": "C4", "find": "31 December 2025, `BREN_FS_FY2025.pdf`, Note 29", "replace": "31 December 2025, Note 29", "count": 1 }
+    ],
+    "K4-intercompany-plant-assets.md": [
+      { "rule": "C1", "find": "PSAK 219 (formerly PSAK 19, IAS 38)", "replace": "PSAK 238 (formerly PSAK 19, IAS 38)", "count": 1 },
+      { "rule": "C4", "find": "read from the second extraction (`.raw.txt`) because", "replace": "read from the second extraction because", "count": 1 }
+    ],
+    "K5-consolidated-cash-flows-midyear.md": [
+      { "rule": "C3", "find": "- `08-cash-and-cash-equivalents`:", "replace": "- [cash-and-cash-equivalents]({fsli:cash-and-cash-equivalents}):", "count": 1 },
+      { "rule": "C3", "find": "- `25-non-controlling-interest`:", "replace": "- [non-controlling-interest]({fsli:non-controlling-interest}):", "count": 1 },
+      { "rule": "C3", "find": "- K1 `K1-business-combinations`:", "replace": "- [K1]({K1}):", "count": 1 },
+      { "rule": "C3", "find": "- K2 `K2-consolidation-worksheet`:", "replace": "- [K2]({K2}):", "count": 1 },
+      { "rule": "C3", "find": "- K6 `K6-mutual-holdings-complex-structures`:", "replace": "- [K6]({K6}):", "count": 1 }
+    ],
+    "K6-mutual-holdings-complex-structures.md": [
+      { "rule": "C3", "find": "- K1 Business Combinations (`K1-business-combinations.md`):", "replace": "- [K1 Business Combinations]({K1}):", "count": 1 },
+      { "rule": "C3", "find": "- K2 Consolidation Worksheet (`K2-consolidation-worksheet.md`):", "replace": "- [K2 Consolidation Worksheet]({K2}):", "count": 1 },
+      { "rule": "C3", "find": "- K3 and K4 (`K3-intercompany-inventory.md`, `K4-intercompany-plant-assets.md`):", "replace": "- [K3]({K3}) and [K4]({K4}):", "count": 1 },
+      { "rule": "C3", "find": "- K5 (`K5-consolidated-cash-flows-midyear.md`):", "replace": "- [K5]({K5}):", "count": 1 },
+      { "rule": "C4", "find": "(audited), `BREN_FS_FY2025.pdf`:", "replace": "(audited):", "count": 1 }
+    ],
+    "06-advances-prepayments.md": [
+      { "rule": "C3", "find": ", `fsli/_recheck/06-recheck.md` (2026-10-09), and the v0.5 recheck, `fsli/_recheck/06-recheck-v05.md` (2026-10-11)", "replace": " (2026-10-09), and the v0.5 recheck (2026-10-11)", "count": 1 }
+    ],
+    "12-oil-gas-properties-net.md": [
+      { "rule": "C3", "find": ", `fsli/_recheck/12-recheck.md` (2026-10-09), and the v0.5 recheck, `fsli/_recheck/12-recheck-v05.md` (2026-10-11)", "replace": " (2026-10-09), and the v0.5 recheck (2026-10-11)", "count": 1 }
+    ],
+    "17-accrued-expenses.md": [
+      { "rule": "C1", "find": "Under PSAK 211 *Joint Arrangements*", "replace": "Under PSAK 111 *Joint Arrangements*", "count": 1 },
+      { "rule": "C1", "find": "PSAK 211 (IFRS 11),", "replace": "PSAK 111 (IFRS 11),", "count": 1 }
+    ]
+  }
+}
