@@ -4,7 +4,6 @@
  *
  *   npx vite-node scripts/accounting-import/import.ts -- --src <dir> --out <dir> --dry-run
  *   npx vite-node scripts/accounting-import/import.ts -- --src <dir> --out <dir> [--snapshot <json>]
- *   npx vite-node scripts/accounting-import/import.ts -- --src <dir> --out <dir> --apply
  *
  * <dir> holds "Accounting - FSLI/NN-*.md" and "Accounting - Consolidation/K*.md".
  * The source and the output stay out of the repo: the bodies are unpublished
@@ -19,16 +18,21 @@
  *
  *   --dry-run   stops there. With --snapshot (the current rows, JSON) the
  *               report also says, row by row, which columns would change.
- *   (default)   also writes payload.json, the rows to send.
- *   --apply     sends payload.json, one essay per call, to the temporary
- *               import function (a SECURITY DEFINER RPC that checks a one-time
- *               token against its hash, upserts by slug and writes one
- *               `migration` revision per changed essay; see the PR). Reads
- *               ACCOUNTING_IMPORT_TOKEN, SUPABASE_URL and SUPABASE_KEY (the
- *               publishable key) from the environment and never prints them.
+ *   (default)   also writes payload.json, the rows, and sql/NN-<slug>.sql:
+ *               one statement per essay that upserts it by slug, only within
+ *               section 'accounting' and only when a column differs, and
+ *               writes one `migration` revision for it. Data writes in this
+ *               repo go through the Supabase MCP (execute_sql) or psql, so the
+ *               script holds no key and sends nothing. (The 12 Oct 2026 run
+ *               passed each body in md5-checked parts to a staging table,
+ *               because of the tool's request size, and ran this statement
+ *               over the joined parts.)
  *
  * Status is never set here: new rows are drafts, existing rows keep theirs.
  * Re-running with unchanged files changes nothing and writes no revision.
+ * content_json is stored as null: the public pages read content, and the
+ * Studio builds its document from content when content_json is null
+ * (WriterEditor), so a second stored copy could only drift from the first.
  */
 import { readFileSync, readdirSync, writeFileSync, mkdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
@@ -210,7 +214,7 @@ async function main() {
       topic: s.group === 'consolidation' ? slug : null,
       sort_order: s.group === 'consolidation' ? Number(conv.str(s.fm, 'series_part')) : 0,
       content,
-      content_json: doc,
+      content_json: null,
       presentation,
       change_summary: summary,
     };
@@ -257,21 +261,49 @@ async function main() {
   if (flag('--dry-run')) return;
 
   writeFileSync(join(out, 'payload.json'), JSON.stringify(rows));
-  console.log(`wrote payload.json (${rows.length} rows)`);
-  if (!flag('--apply')) return;
+  mkdirSync(join(out, 'sql'), { recursive: true });
+  rows.forEach((row, i) => {
+    writeFileSync(join(out, 'sql', `${String(i + 1).padStart(2, '0')}-${row.slug}.sql`), upsertSql(row));
+  });
+  console.log(`wrote payload.json and sql/ (${rows.length} rows)`);
+}
 
-  const { ACCOUNTING_IMPORT_TOKEN: token, SUPABASE_URL: base, SUPABASE_KEY: key } = process.env;
-  if (!token || !base || !key) throw new Error('ACCOUNTING_IMPORT_TOKEN, SUPABASE_URL and SUPABASE_KEY must be set');
-  for (const row of rows) {
-    const res = await fetch(`${base}/rest/v1/rpc/_import_accounting_essays_20261012`, {
-      method: 'POST',
-      headers: { apikey: key, authorization: `Bearer ${key}`, 'content-type': 'application/json' },
-      body: JSON.stringify({ p_token: token, p_rows: [row] }),
-    });
-    const text = await res.text();
-    if (!res.ok) throw new Error(`${row.slug}: HTTP ${res.status} ${text.slice(0, 300)}`);
-    console.log(text);
-  }
+/** A dollar-quoted literal, refused if the text could close it early. */
+function literal(text: string, tag: string): string {
+  if (text.includes(`$${tag}$`)) throw new Error(`text contains $${tag}$`);
+  return `$${tag}$${text}$${tag}$`;
+}
+const quoted = (v: unknown) => (v === null || v === undefined ? 'null' : `'${String(v).replace(/'/g, "''")}'`);
+
+const COLUMNS = ['title', 'snippet', 'author', 'date', 'read_time', 'content', 'content_json', 'presentation', 'fsli_slug', 'phase', 'topic', 'sort_order'];
+
+/**
+ * Upsert one essay by slug and record it. A row outside section 'accounting'
+ * is never touched, an unchanged row is not updated, and only a row inserted
+ * or changed gets its `migration` revision. Returns the row, whether it was
+ * inserted, and the revision number; no row means nothing changed.
+ */
+function upsertSql(row: Record<string, unknown>): string {
+  return `with up as (
+  insert into public.essays as e (slug, section, title, snippet, author, date, read_time, content, content_json, presentation, fsli_slug, phase, topic, sort_order, voice_role)
+  values (${quoted(row.slug)}, 'accounting', ${literal(String(row.title), 't')}, ${literal(String(row.snippet), 's')}, ${quoted(row.author)}, ${quoted(row.date)}, ${quoted(row.read_time)},
+          ${literal(String(row.content), 'c')}, null, ${literal(JSON.stringify(row.presentation), 'p')}::jsonb,
+          ${quoted(row.fsli_slug)}, ${quoted(row.phase)}, ${quoted(row.topic)}, ${Number(row.sort_order)}, 'economist')
+  on conflict on constraint essays_slug_key do update set
+    ${COLUMNS.map((c) => `${c} = excluded.${c}`).join(', ')}
+  where e.section = 'accounting'
+    and (${COLUMNS.map((c) => `e.${c}`).join(', ')})
+        is distinct from (${COLUMNS.map((c) => `excluded.${c}`).join(', ')})
+  returning e.id, e.title, e.snippet, e.status, (e.xmax = 0) as inserted
+), rev as (
+  insert into public.essay_revisions (essay_id, revision_no, change_type, title, snippet, content_json, status, change_summary, changed_by)
+  select up.id, coalesce((select max(x.revision_no) from public.essay_revisions x where x.essay_id = up.id), 0) + 1, 'migration',
+         up.title, up.snippet, null, up.status, ${literal(String(row.change_summary), 'm')}, null
+    from up
+  returning essay_id, revision_no
+)
+select up.id, up.inserted, rev.revision_no from up join rev on rev.essay_id = up.id;
+`;
 }
 
 // The schema's imports start a Supabase client whose timers would keep the

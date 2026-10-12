@@ -9,8 +9,14 @@
 -- and prepayments) covers other current and other non-current assets, which
 -- pointed nowhere. Each pointer below is an essay's own `also_covers` (or, for
 -- the component pages, the line they break down). other-non-current-receivables
--- stays NULL: no essay claims it. Applied after this, the older migration
--- changes nothing (each of its UPDATEs touches only rows still NULL).
+-- stays NULL: no essay claims it.
+--
+-- Either order of the two files ends in this mapping. The older file no
+-- longer sets the two due-from-government pointers this one supersedes, and
+-- each of its other UPDATEs touches only rows still NULL, so applied after
+-- this it changes nothing. A database where it did run as first written
+-- (a replay of an earlier checkout) holds those two stale pointers, and this
+-- one replaces exactly that value; a pointer anyone set by hand is kept.
 --
 -- updated_at is stamped on every UPDATE and printed on the page as
 -- "Updated <date>", so the trigger is suspended around the UPDATEs, in one
@@ -37,6 +43,13 @@ UPDATE public.fsli_pages SET covered_by_slug = 'restricted-cash'
 UPDATE public.fsli_pages SET covered_by_slug = 'trade-receivables-net'
  WHERE slug IN ('trade-receivables-net-non-current', 'third-parties', 'related-parties', 'other-receivables-net')
    AND covered_by_slug IS NULL;
+
+-- The older migration's stale pointers, where a replay has set them.
+UPDATE public.fsli_pages SET covered_by_slug = 'trade-receivables-net'
+ WHERE slug = 'other-receivables-net' AND covered_by_slug = 'due-from-government';
+
+UPDATE public.fsli_pages SET covered_by_slug = NULL
+ WHERE slug = 'other-non-current-receivables' AND covered_by_slug = 'due-from-government';
 
 UPDATE public.fsli_pages SET covered_by_slug = 'corporate-dividend-taxes-receivable-current'
  WHERE slug = 'corporate-dividend-taxes-receivable-non-current' AND covered_by_slug IS NULL;

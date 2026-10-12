@@ -13,7 +13,8 @@
  * advertise a doorway that redirects. Both are wrong, so those rows are
  * SKIPPED (null) and named in the prerender's log rather than silently
  * mishandled. Giving those pages their own page-level cards is separate work
- * on a separate object.
+ * on a separate object. The consolidation series is the exception: each of
+ * its essays is placed on a topic of its own, so that page is the essay's.
  *
  * Parity with essayUrl is asserted per-branch in
  * tests/unit/canonicalPathParity.test.ts — a drift here ships a wrong
@@ -46,6 +47,13 @@ export function canonicalPath(row) {
     case 'critical-thinking-research':
       return `/critical-thinking-research/${row.phase || 'clarify'}/${row.slug}`;
     case 'accounting':
+      // One exception: an essay of the consolidation series sits on a topic
+      // of its own (topic = its slug), so /accounting/consolidation/<slug>
+      // is that essay's page alone (ConsolidationDetail renders it as the
+      // essay) and its card is the essay's to write.
+      if (row.phase === 'consolidated-reporting' && row.topic && row.topic === row.slug && !row.fsli_slug) {
+        return `/accounting/consolidation/${row.slug}`;
+      }
       // Page-level canonical: not this essay's URL to claim. See above.
       if (row.fsli_slug || row.topic || row.phase === 'statutory-reporting') return null;
       return `/essays/${row.slug}`;
