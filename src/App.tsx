@@ -10,6 +10,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { lazy, Suspense } from "react";
 import { LoadingState } from "@/components/states";
 import { Analytics } from "@vercel/analytics/react";
+import { RETIRED_ESSAY_REDIRECTS } from "@/config/retiredEssaySlugs";
 
 // Pages — lazy-loaded so each route ships its own chunk and heavy libraries
 // (editor, charts, math) only download when a route that needs them is visited.
@@ -213,6 +214,11 @@ const App = () => (
             <Route path="/finance-101/budgeting" element={<Navigate to="/finance/planning/budget-architecture" replace />} />
             <Route path="/finance-101/cfa-prep" element={<Navigate to="/finance/fundamentals" replace />} />
             <Route path="/finance-101/essays/:slug" element={<FinanceEssayLegacyRedirect />} />
+            {/* Accounting essays archived when a newer version replaced them
+                (12 Oct 2026): their old address goes to the line item's page. */}
+            {Object.entries(RETIRED_ESSAY_REDIRECTS).map(([slug, to]) => (
+              <Route key={slug} path={`/essays/${slug}`} element={<Navigate to={to} replace />} />
+            ))}
             {/* Universal essay route: canonical home for placement-less essays,
                 redirect to the canonical URL for everything else. */}
             <Route path="/essays/:slug" element={<EssayBySlug />} />
