@@ -16,9 +16,10 @@
 --                         or meta.contentHash differ from its columns, whose
 --                         provenance is not filings, or that is published
 --                         without an approver and a time, with an approval
---                         time in the future, or with a failed gate (D5). A published row is never edited or
---                         deleted; it can only be withdrawn. A withdrawn row
---                         is final. A revision is a new row with a new version.
+--                         time in the future, or with a failed gate (D5). A
+--                         published row is never edited or deleted; it can
+--                         only be withdrawn. A withdrawn row is final. A
+--                         revision is a new row with a new version.
 --   fia.model_packages    what the site reads (R2): the FSRE channel and the
 --                         published manual rows, one row per ticker, the most
 --                         recent approved_at winning and FSRE winning an exact
@@ -569,10 +570,10 @@ $fn$;
 -- approved_at is older than any time (NULLS LAST, since DESC alone puts nulls
 -- first). Two candidates of one channel that tie on approved_at fall to the
 -- higher version (compared as text), then the content hash, so the choice
--- never depends on the plan. D5: a package with a failed gate is not a candidate, from either
--- channel (the manual table refuses one at publish already). In the package,
--- meta.status is published and workpaper.approvedBy/approvedAt come from the
--- row, as the FSRE view does.
+-- never depends on the plan. D5: a package with a failed gate is not a
+-- candidate, from either channel (the manual table refuses one at publish
+-- already). In the package, meta.status is published and
+-- workpaper.approvedBy/approvedAt come from the row, as the FSRE view does.
 CREATE VIEW fia.model_packages AS
 WITH candidates AS (
   SELECT f.ticker, f.version, 'fsre'::text AS channel, f.content_hash, f.approved_by, f.approved_at, f.package
