@@ -75,3 +75,30 @@ export const EMPHASIS = 2;
 
 export const PERCENT = 100;
 export const HALF = 0.5;
+
+/** "Where a unit goes": the hand-built sankey (chain view §3.5). viewBox units. */
+export const SANKEY = {
+  width: 840,
+  /** Height the revenue (and any loss) stack takes. */
+  stack: 300,
+  top: 16,
+  bottom: 16,
+  nodeWidth: 14,
+  /** Gap between two line slots in the middle column. */
+  gap: 10,
+  /** Smallest slot a line gets, so its label fits even when its flow is thin. */
+  minSlot: 22,
+  upstreamX: 230,
+  lineX: 400,
+  revenueX: 680,
+  /** Space between a node and its label. */
+  labelPad: 8,
+  /** Characters per line before an upstream label wraps. */
+  wrapAt: 30,
+  lineHeight: 13,
+  fontSize: 12,
+  smallFont: 11,
+  /** Opacity of a flow's ribbon, so its label stays readable over it. */
+  ribbonOpacity: 0.35,
+  hatch: 6,
+} as const;

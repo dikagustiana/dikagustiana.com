@@ -24,6 +24,7 @@ import { CompanyRailNav } from '@/components/finance-in-action/viewer/model/Comp
 import { KeyFigures } from '@/components/finance-in-action/viewer/model/KeyFigures';
 import { ModelCard } from '@/components/finance-in-action/viewer/model/ModelCard';
 import { AlongTheChain } from '@/components/finance-in-action/viewer/model/AlongTheChain';
+import { CostSankey, SANKEY_TITLE } from '@/components/finance-in-action/viewer/model/CostSankey';
 import { LinkCard } from '@/components/finance-in-action/viewer/links/LinkCard';
 import { keyFigures } from '@/lib/finance-in-action/keyFigures';
 import { UELineDetail } from '@/components/finance-in-action/viewer/model/UELineDetail';
@@ -95,6 +96,12 @@ export function FiaModelPage({ pkg, reg }: { pkg: ModelPackage; reg: Registry })
   const figures = useMemo(() => keyFigures(view.wb, view.values), [view.wb, view.values]);
   const [chainLinkId, setChainLinkId] = useState<string | null>(null);
   const chainLink = chainLinkId ? reg.links.find((l) => l.id === chainLinkId) ?? null : null;
+  // A link opened from the cost flow, below, is shown in "Along the chain": bring it into view.
+  useEffect(() => {
+    if (!chainLinkId) return;
+    const card = document.getElementById('links');
+    if (card && typeof card.scrollIntoView === 'function') card.scrollIntoView({ block: 'start' });
+  }, [chainLinkId]);
 
   const { meta } = pkg;
   const sub = reg.subIndustry(meta.subIndustry);
@@ -222,6 +229,11 @@ export function FiaModelPage({ pkg, reg }: { pkg: ModelPackage; reg: Registry })
                 decorate={decorate}
                 barNote={barNote}
               />
+            </Section>
+
+            {/* Directly after the waterfall, on the waterfall's own period (chain view §3.5). */}
+            <Section id="fia-cost-flow" title={SANKEY_TITLE(sub?.unitNoun ?? pkg.unitEconomics.unit)}>
+              <CostSankey reg={reg} pkg={pkg} ue={ue} onlyMessage={noVolume} onOpenLink={setChainLinkId} />
             </Section>
 
             <Section id="fia-peers" title={`Where ${meta.ticker} sits in ${subName}`}>
