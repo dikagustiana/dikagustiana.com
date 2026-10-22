@@ -5,6 +5,22 @@ alternatives. Newest first.
 
 ---
 
+# 2026-10-22 — The glimpse's arrows show on a phone too
+
+Owner request, the same day: "make the arrows show on mobile too". The two arrow buttons ("Earlier in the
+row", "Further along the row") were hidden below 768px, where the swipe was thought enough. They now show at
+every width, in the header beside the pause button, the same 36px circles; nothing else about them changes (a
+tap moves the row one column to the page's margin, stops it, and lets it run three seconds later; disabled at
+a still row's ends). At 320px the heading and three buttons still fit on one line with room to spare. A tapped
+button keeps its hover tint until the next tap elsewhere, as the pause button always has on a touchscreen.
+
+Tests: `tests/unit/glimpse.test.tsx` (no class hides the arrows at any width); `tests/e2e/glimpse.spec.ts`
+(at 1440, 1280 and 390 both arrows visible, the pause button's size and on its line; at 390 with touch, a tap
+on each moves the row one column to the margin; with reduced motion at 390, the arrows jump and are disabled
+at either end). No test was added or removed; `MIN_TESTS` stays at 1391.
+
+---
+
 # 2026-10-22 — The arrow keys move the glimpse again
 
 Owner request, the same day, after the entry below: "make the arrow keys scroll the row again". The still row
@@ -79,7 +95,8 @@ three seconds later. Decided without the owner, as asked ("pick the most conserv
 - **Arrows on a wide screen** (from 768px, Tailwind's `md`), in the header beside the pause button and in its
   style, with the still row's names ("Earlier in the row", "Further along the row"). Each stops the row,
   moves it one column so that column stands at the page's margin under the heading, and lets it run three
-  seconds later. Hidden on a phone, which has the swipe.
+  seconds later. Hidden on a phone, which has the swipe. *(Superseded the same day: shown at every width; entry "The glimpse's
+  arrows show on a phone too" above.)*
 - **Keyboard.** The links are the Tab stops, as they were in the running row; Embla's `watchFocus` brings a
   column reached by Tab to the page's margin at once. The still row used to be a focusable scroller the arrow
   keys moved; it is now the same carousel, so for a keyboard there are the Tab stops and the arrows, and the

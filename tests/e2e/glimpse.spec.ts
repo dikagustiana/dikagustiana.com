@@ -10,11 +10,11 @@ import { mockSupabase } from './mockSupabase';
  * 2026-10-11): right to left at 30 px/s, looping with the last column
  * directly before the first. A reader can take hold of it (owner request,
  * 2026-10-22): a mouse drag, a sideways trackpad scroll, Shift and the wheel,
- * a swipe on a touchscreen and the arrows on a wide screen move it, it stays
+ * a swipe on a touchscreen and the arrows at every width move it, it stays
  * where it is let go, and it runs again from there three seconds after the
  * reader is done. The row is a Tab stop and the arrow keys move it a column
- * at a time; on a column they take focus to the next one. It stops under the pointer, while a column has keyboard
- * focus (which brings that column to the page's margin) and by its pause
+ * at a time; on a column they take focus to the next one. It stops under
+ * the pointer, while a column has keyboard focus (which brings that column to the page's margin) and by its pause
  * button, which nothing else undoes. A drag does not open an essay; a click
  * and a tap do. A vertical swipe or wheel over it scrolls the page. For a
  * reader who asked for reduced motion it stands still and moves only by
@@ -218,13 +218,14 @@ for (const width of [1440, 1280, 390]) {
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
     await expect(page.locator('.glimpse__frame--running')).toHaveCount(1);
     await expect(page.getByRole('button', { name: 'Pause the row' })).toBeVisible();
-    // the arrows on a wide screen; a phone has the swipe
+    // the arrows at every width, beside the pause button and its size
     const arrows = page.getByRole('button', { name: /Earlier in the row|Further along the row/ });
-    if (width >= 768) {
-      await expect(arrows).toHaveCount(2);
-      for (const arrow of await arrows.all()) await expect(arrow).toBeVisible();
-    } else {
-      for (const arrow of await arrows.all()) await expect(arrow).toBeHidden();
+    await expect(arrows).toHaveCount(2);
+    const pause = (await page.getByRole('button', { name: 'Pause the row' }).boundingBox())!;
+    for (const arrow of await arrows.all()) {
+      await expect(arrow).toBeVisible();
+      const box = (await arrow.boundingBox())!;
+      expect([box.width, box.height, box.y]).toEqual([pause.width, pause.height, pause.y]);
     }
 
     // the list once, every link a stop for Tab
@@ -534,7 +535,7 @@ test.describe('390, a touchscreen', () => {
     await cdp.detach();
   }
 
-  test('a sideways swipe moves the row with the finger, opens nothing, and the row runs again 3 s later; a vertical swipe scrolls the page', async ({ page }) => {
+  test('a sideways swipe moves the row with the finger, opens nothing, and the row runs again 3 s later; a vertical swipe scrolls the page; the arrows move it by tap', async ({ page }) => {
     const { row, errors } = await open(page);
     await page.locator('#glimpse-heading').scrollIntoViewIfNeeded();
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
@@ -563,13 +564,27 @@ test.describe('390, a touchscreen', () => {
     expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(scrolled + 100);
     expect(Math.abs(moved(across, await offset(page), lapWidth))).toBeLessThan(5);
 
-    // the pause button, then a tap on a column opens its essay
+    // the pause button, then the arrows by tap: a column at a time, to the margin
     await page.locator('#glimpse-heading').scrollIntoViewIfNeeded();
     await page.getByRole('button', { name: 'Pause the row' }).tap();
-    const link = row.getByRole('link', { name: /Essay 2:/ });
+    const left = await margin(page);
+    await page.getByRole('button', { name: 'Further along the row' }).tap();
+    await page.waitForTimeout(1500);
+    const tapped = (await inView(page)).find((c) => Math.abs(c.left - left) < 1)?.n;
+    expect(tapped).toBeDefined();
+    await page.getByRole('button', { name: 'Further along the row' }).tap();
+    await page.waitForTimeout(1500);
+    expect((await inView(page)).find((c) => Math.abs(c.left - left) < 1)?.n).toBe((tapped! % 21) + 1);
+    await page.getByRole('button', { name: 'Earlier in the row' }).tap();
+    await page.waitForTimeout(1500);
+    expect((await inView(page)).find((c) => Math.abs(c.left - left) < 1)?.n).toBe(tapped);
+    await page.screenshot({ path: `${SHOTS}/home-390-arrows.png` });
+
+    // then a tap on the column at the margin opens its essay
+    const link = row.getByRole('link', { name: new RegExp(`Essay ${tapped}:`) });
     const target = (await link.boundingBox())!;
-    await page.touchscreen.tap(Math.min(Math.max(target.x + 40, 20), 370), target.y + 60);
-    await expect(page).toHaveURL(/\/essays\/glimpse-essay-2$/);
+    await page.touchscreen.tap(target.x + 40, target.y + 60);
+    await expect(page).toHaveURL(new RegExp(`/glimpse-essay-${tapped}$`));
     expect(errors).toEqual([]);
   });
 });
@@ -600,25 +615,23 @@ for (const width of [1440, 390]) {
     expect(dragged).toBeLessThan(-200);
     expect(await holds(page, 3500)).toBe(true);
 
-    if (width >= 768) {
-      // the arrows jump a column at a time, and give up at the start
-      const back = page.getByRole('button', { name: 'Earlier in the row' });
-      const forward = page.getByRole('button', { name: 'Further along the row' });
-      await forward.click();
-      const jumped = await page.evaluate(() => new Promise<number>((r) => requestAnimationFrame(() => r(new DOMMatrixReadOnly(getComputedStyle(document.querySelector('.glimpse__row')!).transform).m41))));
-      expect(jumped).toBeLessThan(dragged);
-      while (await back.isEnabled()) await back.click();
-      await expect.poll(() => offset(page)).toBeCloseTo(0, 0);
-      await expect(back).toBeDisabled();
-      // and to the end: the last column ends at the page's right margin
-      while (await forward.isEnabled()) await forward.click();
-      await expect(forward).toBeDisabled();
-      const last = row.getByRole('listitem').last();
-      await expect(last).toBeInViewport();
-      const lastLink = await last.getByRole('link').evaluate((a) => a.getBoundingClientRect().right);
-      expect(Math.abs(lastLink - (width - left))).toBeLessThan(1);
-      await page.screenshot({ path: `${SHOTS}/home-${width}-still-end.png` });
-    }
+    // the arrows jump a column at a time, and give up at the start
+    const back = page.getByRole('button', { name: 'Earlier in the row' });
+    const forward = page.getByRole('button', { name: 'Further along the row' });
+    await forward.click();
+    const jumped = await page.evaluate(() => new Promise<number>((r) => requestAnimationFrame(() => r(new DOMMatrixReadOnly(getComputedStyle(document.querySelector('.glimpse__row')!).transform).m41))));
+    expect(jumped).toBeLessThan(dragged);
+    while (await back.isEnabled()) await back.click();
+    await expect.poll(() => offset(page)).toBeCloseTo(0, 0);
+    await expect(back).toBeDisabled();
+    // and to the end: the last column ends at the page's right margin
+    while (await forward.isEnabled()) await forward.click();
+    await expect(forward).toBeDisabled();
+    const last = row.getByRole('listitem').last();
+    await expect(last).toBeInViewport();
+    const lastLink = await last.getByRole('link').evaluate((a) => a.getBoundingClientRect().right);
+    expect(Math.abs(lastLink - (width - left))).toBeLessThan(1);
+    await page.screenshot({ path: `${SHOTS}/home-${width}-still-end.png` });
     expect(errors).toEqual([]);
   });
 }

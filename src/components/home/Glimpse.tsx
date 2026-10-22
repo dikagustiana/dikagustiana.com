@@ -13,10 +13,10 @@
  * The row runs, right to left at GLIMPSE_SPEED, looping without a seam
  * (owner decision, 2026-10-11), and a reader can take hold of it at any time
  * (owner request, 2026-10-22): a swipe, a drag with the mouse, a sideways
- * scroll on a trackpad or with Shift and the wheel, the two arrow buttons on
- * a wide screen, and the arrow keys (the row is a Tab stop; on a column, an
- * arrow key takes focus to the next column). It is an Embla carousel (the engine under shadcn/ui's
- * Carousel): `loop` shifts columns from one end to the other, so the list is
+ * scroll on a trackpad or with Shift and the wheel, the two arrow buttons at
+ * every width, and the arrow keys (the row is a Tab stop; on a column, an
+ * arrow key takes focus to the next column). It is an Embla carousel (the
+ * engine under shadcn/ui's Carousel): `loop` shifts columns from one end to the other, so the list is
  * drawn once; `dragFree` leaves the row where the reader lets go of it; the
  * AutoScroll plugin runs it and WheelGestures turns a sideways scroll into a
  * drag. The row stops under the pointer, while a reader holds it, while a
@@ -332,7 +332,7 @@ export function Glimpse({ essays, isLoading }: GlimpseProps) {
             Glimpse
           </h2>
           <div className="flex shrink-0 gap-2">
-            {/* On a wide screen; a phone has the swipe. */}
+            {/* At every width: a phone has the swipe as well. */}
             {(canPrev || canNext) && (
               <>
                 <button
@@ -340,7 +340,7 @@ export function Glimpse({ essays, isLoading }: GlimpseProps) {
                   onClick={() => page(-1)}
                   disabled={!canPrev}
                   aria-label="Earlier in the row"
-                  className={cn(BUTTON, 'hidden md:inline-flex')}
+                  className={BUTTON}
                 >
                   <ChevronLeft className="h-4 w-4" aria-hidden="true" />
                 </button>
@@ -349,7 +349,7 @@ export function Glimpse({ essays, isLoading }: GlimpseProps) {
                   onClick={() => page(1)}
                   disabled={!canNext}
                   aria-label="Further along the row"
-                  className={cn(BUTTON, 'hidden md:inline-flex')}
+                  className={BUTTON}
                 >
                   <ChevronRight className="h-4 w-4" aria-hidden="true" />
                 </button>

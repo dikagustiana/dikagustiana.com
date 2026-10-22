@@ -200,7 +200,7 @@ describe('Glimpse', () => {
     expect(screen.queryAllByRole('link')).toHaveLength(0);
   });
 
-  it('has arrows on a wide screen only when there is somewhere to go, the first disabled at the start of a still row', () => {
+  it('has arrows at every width only when there is somewhere to go, the first disabled at the start of a still row', () => {
     embla.canScrollPrev = false;
     embla.canScrollNext = false;
     const { unmount } = mount([essay(1), essay(2)]);
@@ -215,8 +215,8 @@ describe('Glimpse', () => {
     const forward = screen.getByRole('button', { name: 'Further along the row' });
     expect(back).toBeDisabled();
     expect(forward).toBeEnabled();
-    // hidden on a phone, which has the swipe
-    for (const arrow of [back, forward]) expect(arrow).toHaveClass('hidden', 'md:inline-flex');
+    // shown at every width, a phone's included
+    for (const arrow of [back, forward]) expect(arrow.className).not.toMatch(/(^|\s)(\w+:)?hidden(\s|$)/);
     fireEvent.click(forward);
     expect(embla.api.scrollNext).toHaveBeenCalledWith(false);
   });
