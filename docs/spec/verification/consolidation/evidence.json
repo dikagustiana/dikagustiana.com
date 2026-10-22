@@ -1,0 +1,2410 @@
+{
+ "measured_at": "2026-10-22",
+ "host": "https://dikagustiana-com.vercel.app",
+ "commit": "4d4588c",
+ "results": [
+  {
+   "path": "/accounting/fsli/retained-earnings",
+   "width": 1440,
+   "scrollW": 1440,
+   "clientW": 1440,
+   "article": {
+    "x": 356,
+    "w": 728,
+    "right": 1084
+   },
+   "title": {
+    "x": 356,
+    "w": 728,
+    "right": 1084,
+    "family": "Spectral",
+    "size": "32px",
+    "lh": "36px",
+    "weight": "700"
+   },
+   "deck": {
+    "family": "Spectral",
+    "size": "18px",
+    "lh": "24px",
+    "weight": "400"
+   },
+   "body": {
+    "family": "Spectral",
+    "size": "19px",
+    "lh": "30.4px",
+    "weight": "400"
+   },
+   "h2": {
+    "family": "Plus Jakarta Sans",
+    "size": "30.875px",
+    "lh": "35.815px",
+    "weight": "700"
+   },
+   "pMargin": "20px",
+   "tables": [
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 356,
+     "wrapRight": 1084,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 356,
+     "wrapRight": 1084,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 356,
+     "wrapRight": 1084,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 356,
+     "wrapRight": 1084,
+     "overflowX": "auto",
+     "scrolls": false
+    }
+   ],
+   "rail": {
+    "x": 1164,
+    "w": 224,
+    "right": 1388
+   },
+   "inlineToc": false,
+   "byline": false
+  },
+  {
+   "path": "/accounting/fsli/retained-earnings",
+   "width": 1280,
+   "scrollW": 1280,
+   "clientW": 1280,
+   "article": {
+    "x": 288,
+    "w": 704,
+    "right": 992
+   },
+   "title": {
+    "x": 288,
+    "w": 704,
+    "right": 992,
+    "family": "Spectral",
+    "size": "32px",
+    "lh": "36px",
+    "weight": "700"
+   },
+   "deck": {
+    "family": "Spectral",
+    "size": "18px",
+    "lh": "24px",
+    "weight": "400"
+   },
+   "body": {
+    "family": "Spectral",
+    "size": "19px",
+    "lh": "30.4px",
+    "weight": "400"
+   },
+   "h2": {
+    "family": "Plus Jakarta Sans",
+    "size": "30.875px",
+    "lh": "35.815px",
+    "weight": "700"
+   },
+   "pMargin": "20px",
+   "tables": [
+    {
+     "table": 704,
+     "wrap": 704,
+     "wrapLeft": 288,
+     "wrapRight": 992,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 704,
+     "wrap": 704,
+     "wrapLeft": 288,
+     "wrapRight": 992,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 704,
+     "wrap": 704,
+     "wrapLeft": 288,
+     "wrapRight": 992,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 704,
+     "wrap": 704,
+     "wrapLeft": 288,
+     "wrapRight": 992,
+     "overflowX": "auto",
+     "scrolls": false
+    }
+   ],
+   "rail": {
+    "x": 1024,
+    "w": 224,
+    "right": 1248
+   },
+   "inlineToc": false,
+   "byline": false
+  },
+  {
+   "path": "/accounting/fsli/retained-earnings",
+   "width": 375,
+   "scrollW": 375,
+   "clientW": 375,
+   "article": {
+    "x": 32,
+    "w": 311,
+    "right": 343
+   },
+   "title": {
+    "x": 32,
+    "w": 311,
+    "right": 343,
+    "family": "Spectral",
+    "size": "32px",
+    "lh": "36px",
+    "weight": "700"
+   },
+   "deck": {
+    "family": "Spectral",
+    "size": "18px",
+    "lh": "24px",
+    "weight": "400"
+   },
+   "body": {
+    "family": "Spectral",
+    "size": "19px",
+    "lh": "30.4px",
+    "weight": "400"
+   },
+   "h2": {
+    "family": "Plus Jakarta Sans",
+    "size": "30.875px",
+    "lh": "35.815px",
+    "weight": "700"
+   },
+   "pMargin": "20px",
+   "tables": [
+    {
+     "table": 311,
+     "wrap": 343,
+     "wrapLeft": 16,
+     "wrapRight": 359,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 388,
+     "wrap": 343,
+     "wrapLeft": 16,
+     "wrapRight": 359,
+     "overflowX": "auto",
+     "scrolls": true
+    },
+    {
+     "table": 432,
+     "wrap": 343,
+     "wrapLeft": 16,
+     "wrapRight": 359,
+     "overflowX": "auto",
+     "scrolls": true
+    },
+    {
+     "table": 430,
+     "wrap": 343,
+     "wrapLeft": 16,
+     "wrapRight": 359,
+     "overflowX": "auto",
+     "scrolls": true
+    }
+   ],
+   "rail": null,
+   "inlineToc": false,
+   "byline": false
+  },
+  {
+   "path": "/accounting/consolidation/business-combinations-acquisition-method-goodwill-common-control",
+   "width": 1440,
+   "scrollW": 1440,
+   "clientW": 1440,
+   "article": {
+    "x": 228,
+    "w": 728,
+    "right": 956
+   },
+   "title": {
+    "x": 208,
+    "w": 768,
+    "right": 976,
+    "family": "Spectral",
+    "size": "32px",
+    "lh": "36px",
+    "weight": "700"
+   },
+   "deck": {
+    "family": "Spectral",
+    "size": "18px",
+    "lh": "24px",
+    "weight": "400"
+   },
+   "body": {
+    "family": "Spectral",
+    "size": "19px",
+    "lh": "30.4px",
+    "weight": "400"
+   },
+   "h2": {
+    "family": "Plus Jakarta Sans",
+    "size": "30.875px",
+    "lh": "35.815px",
+    "weight": "700"
+   },
+   "pMargin": "20px",
+   "tables": [
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 228,
+     "wrapRight": 956,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 228,
+     "wrapRight": 956,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 228,
+     "wrapRight": 956,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 228,
+     "wrapRight": 956,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 228,
+     "wrapRight": 956,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 228,
+     "wrapRight": 956,
+     "overflowX": "auto",
+     "scrolls": false
+    }
+   ],
+   "rail": {
+    "x": 1024,
+    "w": 208,
+    "right": 1232
+   },
+   "inlineToc": false,
+   "byline": true
+  },
+  {
+   "path": "/accounting/consolidation/business-combinations-acquisition-method-goodwill-common-control",
+   "width": 1280,
+   "scrollW": 1280,
+   "clientW": 1280,
+   "article": {
+    "x": 148,
+    "w": 728,
+    "right": 876
+   },
+   "title": {
+    "x": 128,
+    "w": 768,
+    "right": 896,
+    "family": "Spectral",
+    "size": "32px",
+    "lh": "36px",
+    "weight": "700"
+   },
+   "deck": {
+    "family": "Spectral",
+    "size": "18px",
+    "lh": "24px",
+    "weight": "400"
+   },
+   "body": {
+    "family": "Spectral",
+    "size": "19px",
+    "lh": "30.4px",
+    "weight": "400"
+   },
+   "h2": {
+    "family": "Plus Jakarta Sans",
+    "size": "30.875px",
+    "lh": "35.815px",
+    "weight": "700"
+   },
+   "pMargin": "20px",
+   "tables": [
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 148,
+     "wrapRight": 876,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 148,
+     "wrapRight": 876,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 148,
+     "wrapRight": 876,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 148,
+     "wrapRight": 876,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 148,
+     "wrapRight": 876,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 148,
+     "wrapRight": 876,
+     "overflowX": "auto",
+     "scrolls": false
+    }
+   ],
+   "rail": {
+    "x": 944,
+    "w": 208,
+    "right": 1152
+   },
+   "inlineToc": false,
+   "byline": true
+  },
+  {
+   "path": "/accounting/consolidation/business-combinations-acquisition-method-goodwill-common-control",
+   "width": 375,
+   "scrollW": 375,
+   "clientW": 375,
+   "article": {
+    "x": 32,
+    "w": 311,
+    "right": 343
+   },
+   "title": {
+    "x": 32,
+    "w": 311,
+    "right": 343,
+    "family": "Spectral",
+    "size": "32px",
+    "lh": "36px",
+    "weight": "700"
+   },
+   "deck": {
+    "family": "Spectral",
+    "size": "18px",
+    "lh": "24px",
+    "weight": "400"
+   },
+   "body": {
+    "family": "Spectral",
+    "size": "19px",
+    "lh": "30.4px",
+    "weight": "400"
+   },
+   "h2": {
+    "family": "Plus Jakarta Sans",
+    "size": "30.875px",
+    "lh": "35.815px",
+    "weight": "700"
+   },
+   "pMargin": "20px",
+   "tables": [
+    {
+     "table": 311,
+     "wrap": 343,
+     "wrapLeft": 16,
+     "wrapRight": 359,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 311,
+     "wrap": 343,
+     "wrapLeft": 16,
+     "wrapRight": 359,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 311,
+     "wrap": 343,
+     "wrapLeft": 16,
+     "wrapRight": 359,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 311,
+     "wrap": 343,
+     "wrapLeft": 16,
+     "wrapRight": 359,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 311,
+     "wrap": 343,
+     "wrapLeft": 16,
+     "wrapRight": 359,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 317,
+     "wrap": 343,
+     "wrapLeft": 16,
+     "wrapRight": 359,
+     "overflowX": "auto",
+     "scrolls": true
+    }
+   ],
+   "rail": null,
+   "inlineToc": true,
+   "byline": true
+  },
+  {
+   "path": "/accounting/consolidation/consolidation-worksheet-elimination-entries",
+   "width": 1440,
+   "scrollW": 1440,
+   "clientW": 1440,
+   "article": {
+    "x": 228,
+    "w": 728,
+    "right": 956
+   },
+   "title": {
+    "x": 208,
+    "w": 768,
+    "right": 976,
+    "family": "Spectral",
+    "size": "32px",
+    "lh": "36px",
+    "weight": "700"
+   },
+   "deck": {
+    "family": "Spectral",
+    "size": "18px",
+    "lh": "24px",
+    "weight": "400"
+   },
+   "body": {
+    "family": "Spectral",
+    "size": "19px",
+    "lh": "30.4px",
+    "weight": "400"
+   },
+   "h2": {
+    "family": "Plus Jakarta Sans",
+    "size": "30.875px",
+    "lh": "35.815px",
+    "weight": "700"
+   },
+   "pMargin": "20px",
+   "tables": [
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 228,
+     "wrapRight": 956,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 228,
+     "wrapRight": 956,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 228,
+     "wrapRight": 956,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 228,
+     "wrapRight": 956,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 228,
+     "wrapRight": 956,
+     "overflowX": "auto",
+     "scrolls": false
+    }
+   ],
+   "rail": {
+    "x": 1024,
+    "w": 208,
+    "right": 1232
+   },
+   "inlineToc": false,
+   "byline": true
+  },
+  {
+   "path": "/accounting/consolidation/consolidation-worksheet-elimination-entries",
+   "width": 1280,
+   "scrollW": 1280,
+   "clientW": 1280,
+   "article": {
+    "x": 148,
+    "w": 728,
+    "right": 876
+   },
+   "title": {
+    "x": 128,
+    "w": 768,
+    "right": 896,
+    "family": "Spectral",
+    "size": "32px",
+    "lh": "36px",
+    "weight": "700"
+   },
+   "deck": {
+    "family": "Spectral",
+    "size": "18px",
+    "lh": "24px",
+    "weight": "400"
+   },
+   "body": {
+    "family": "Spectral",
+    "size": "19px",
+    "lh": "30.4px",
+    "weight": "400"
+   },
+   "h2": {
+    "family": "Plus Jakarta Sans",
+    "size": "30.875px",
+    "lh": "35.815px",
+    "weight": "700"
+   },
+   "pMargin": "20px",
+   "tables": [
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 148,
+     "wrapRight": 876,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 148,
+     "wrapRight": 876,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 148,
+     "wrapRight": 876,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 148,
+     "wrapRight": 876,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 148,
+     "wrapRight": 876,
+     "overflowX": "auto",
+     "scrolls": false
+    }
+   ],
+   "rail": {
+    "x": 944,
+    "w": 208,
+    "right": 1152
+   },
+   "inlineToc": false,
+   "byline": true
+  },
+  {
+   "path": "/accounting/consolidation/consolidation-worksheet-elimination-entries",
+   "width": 375,
+   "scrollW": 375,
+   "clientW": 375,
+   "article": {
+    "x": 32,
+    "w": 311,
+    "right": 343
+   },
+   "title": {
+    "x": 32,
+    "w": 311,
+    "right": 343,
+    "family": "Spectral",
+    "size": "32px",
+    "lh": "36px",
+    "weight": "700"
+   },
+   "deck": {
+    "family": "Spectral",
+    "size": "18px",
+    "lh": "24px",
+    "weight": "400"
+   },
+   "body": {
+    "family": "Spectral",
+    "size": "19px",
+    "lh": "30.4px",
+    "weight": "400"
+   },
+   "h2": {
+    "family": "Plus Jakarta Sans",
+    "size": "30.875px",
+    "lh": "35.815px",
+    "weight": "700"
+   },
+   "pMargin": "20px",
+   "tables": [
+    {
+     "table": 311,
+     "wrap": 343,
+     "wrapLeft": 16,
+     "wrapRight": 359,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 311,
+     "wrap": 343,
+     "wrapLeft": 16,
+     "wrapRight": 359,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 567,
+     "wrap": 343,
+     "wrapLeft": 16,
+     "wrapRight": 359,
+     "overflowX": "auto",
+     "scrolls": true
+    },
+    {
+     "table": 311,
+     "wrap": 343,
+     "wrapLeft": 16,
+     "wrapRight": 359,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 311,
+     "wrap": 343,
+     "wrapLeft": 16,
+     "wrapRight": 359,
+     "overflowX": "auto",
+     "scrolls": false
+    }
+   ],
+   "rail": null,
+   "inlineToc": true,
+   "byline": true
+  },
+  {
+   "path": "/accounting/consolidation/intercompany-profit-in-inventory",
+   "width": 1440,
+   "scrollW": 1440,
+   "clientW": 1440,
+   "article": {
+    "x": 228,
+    "w": 728,
+    "right": 956
+   },
+   "title": {
+    "x": 208,
+    "w": 768,
+    "right": 976,
+    "family": "Spectral",
+    "size": "32px",
+    "lh": "36px",
+    "weight": "700"
+   },
+   "deck": {
+    "family": "Spectral",
+    "size": "18px",
+    "lh": "24px",
+    "weight": "400"
+   },
+   "body": {
+    "family": "Spectral",
+    "size": "19px",
+    "lh": "30.4px",
+    "weight": "400"
+   },
+   "h2": {
+    "family": "Plus Jakarta Sans",
+    "size": "30.875px",
+    "lh": "35.815px",
+    "weight": "700"
+   },
+   "pMargin": "20px",
+   "tables": [
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 228,
+     "wrapRight": 956,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 228,
+     "wrapRight": 956,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 228,
+     "wrapRight": 956,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 228,
+     "wrapRight": 956,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 228,
+     "wrapRight": 956,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 228,
+     "wrapRight": 956,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 228,
+     "wrapRight": 956,
+     "overflowX": "auto",
+     "scrolls": false
+    }
+   ],
+   "rail": {
+    "x": 1024,
+    "w": 208,
+    "right": 1232
+   },
+   "inlineToc": false,
+   "byline": true
+  },
+  {
+   "path": "/accounting/consolidation/intercompany-profit-in-inventory",
+   "width": 1280,
+   "scrollW": 1280,
+   "clientW": 1280,
+   "article": {
+    "x": 148,
+    "w": 728,
+    "right": 876
+   },
+   "title": {
+    "x": 128,
+    "w": 768,
+    "right": 896,
+    "family": "Spectral",
+    "size": "32px",
+    "lh": "36px",
+    "weight": "700"
+   },
+   "deck": {
+    "family": "Spectral",
+    "size": "18px",
+    "lh": "24px",
+    "weight": "400"
+   },
+   "body": {
+    "family": "Spectral",
+    "size": "19px",
+    "lh": "30.4px",
+    "weight": "400"
+   },
+   "h2": {
+    "family": "Plus Jakarta Sans",
+    "size": "30.875px",
+    "lh": "35.815px",
+    "weight": "700"
+   },
+   "pMargin": "20px",
+   "tables": [
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 148,
+     "wrapRight": 876,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 148,
+     "wrapRight": 876,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 148,
+     "wrapRight": 876,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 148,
+     "wrapRight": 876,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 148,
+     "wrapRight": 876,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 148,
+     "wrapRight": 876,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 148,
+     "wrapRight": 876,
+     "overflowX": "auto",
+     "scrolls": false
+    }
+   ],
+   "rail": {
+    "x": 944,
+    "w": 208,
+    "right": 1152
+   },
+   "inlineToc": false,
+   "byline": true
+  },
+  {
+   "path": "/accounting/consolidation/intercompany-profit-in-inventory",
+   "width": 375,
+   "scrollW": 375,
+   "clientW": 375,
+   "article": {
+    "x": 32,
+    "w": 311,
+    "right": 343
+   },
+   "title": {
+    "x": 32,
+    "w": 311,
+    "right": 343,
+    "family": "Spectral",
+    "size": "32px",
+    "lh": "36px",
+    "weight": "700"
+   },
+   "deck": {
+    "family": "Spectral",
+    "size": "18px",
+    "lh": "24px",
+    "weight": "400"
+   },
+   "body": {
+    "family": "Spectral",
+    "size": "19px",
+    "lh": "30.4px",
+    "weight": "400"
+   },
+   "h2": {
+    "family": "Plus Jakarta Sans",
+    "size": "30.875px",
+    "lh": "35.815px",
+    "weight": "700"
+   },
+   "pMargin": "20px",
+   "tables": [
+    {
+     "table": 311,
+     "wrap": 343,
+     "wrapLeft": 16,
+     "wrapRight": 359,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 311,
+     "wrap": 343,
+     "wrapLeft": 16,
+     "wrapRight": 359,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 311,
+     "wrap": 343,
+     "wrapLeft": 16,
+     "wrapRight": 359,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 311,
+     "wrap": 343,
+     "wrapLeft": 16,
+     "wrapRight": 359,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 496,
+     "wrap": 343,
+     "wrapLeft": 16,
+     "wrapRight": 359,
+     "overflowX": "auto",
+     "scrolls": true
+    },
+    {
+     "table": 311,
+     "wrap": 343,
+     "wrapLeft": 16,
+     "wrapRight": 359,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 653,
+     "wrap": 343,
+     "wrapLeft": 16,
+     "wrapRight": 359,
+     "overflowX": "auto",
+     "scrolls": true
+    }
+   ],
+   "rail": null,
+   "inlineToc": true,
+   "byline": true
+  },
+  {
+   "path": "/accounting/consolidation/intercompany-profit-plant-assets",
+   "width": 1440,
+   "scrollW": 1440,
+   "clientW": 1440,
+   "article": {
+    "x": 228,
+    "w": 728,
+    "right": 956
+   },
+   "title": {
+    "x": 208,
+    "w": 768,
+    "right": 976,
+    "family": "Spectral",
+    "size": "32px",
+    "lh": "36px",
+    "weight": "700"
+   },
+   "deck": {
+    "family": "Spectral",
+    "size": "18px",
+    "lh": "24px",
+    "weight": "400"
+   },
+   "body": {
+    "family": "Spectral",
+    "size": "19px",
+    "lh": "30.4px",
+    "weight": "400"
+   },
+   "h2": {
+    "family": "Plus Jakarta Sans",
+    "size": "30.875px",
+    "lh": "35.815px",
+    "weight": "700"
+   },
+   "pMargin": "20px",
+   "tables": [
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 228,
+     "wrapRight": 956,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 228,
+     "wrapRight": 956,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 228,
+     "wrapRight": 956,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 228,
+     "wrapRight": 956,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 228,
+     "wrapRight": 956,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 228,
+     "wrapRight": 956,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 228,
+     "wrapRight": 956,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 228,
+     "wrapRight": 956,
+     "overflowX": "auto",
+     "scrolls": false
+    }
+   ],
+   "rail": {
+    "x": 1024,
+    "w": 208,
+    "right": 1232
+   },
+   "inlineToc": false,
+   "byline": true
+  },
+  {
+   "path": "/accounting/consolidation/intercompany-profit-plant-assets",
+   "width": 1280,
+   "scrollW": 1280,
+   "clientW": 1280,
+   "article": {
+    "x": 148,
+    "w": 728,
+    "right": 876
+   },
+   "title": {
+    "x": 128,
+    "w": 768,
+    "right": 896,
+    "family": "Spectral",
+    "size": "32px",
+    "lh": "36px",
+    "weight": "700"
+   },
+   "deck": {
+    "family": "Spectral",
+    "size": "18px",
+    "lh": "24px",
+    "weight": "400"
+   },
+   "body": {
+    "family": "Spectral",
+    "size": "19px",
+    "lh": "30.4px",
+    "weight": "400"
+   },
+   "h2": {
+    "family": "Plus Jakarta Sans",
+    "size": "30.875px",
+    "lh": "35.815px",
+    "weight": "700"
+   },
+   "pMargin": "20px",
+   "tables": [
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 148,
+     "wrapRight": 876,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 148,
+     "wrapRight": 876,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 148,
+     "wrapRight": 876,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 148,
+     "wrapRight": 876,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 148,
+     "wrapRight": 876,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 148,
+     "wrapRight": 876,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 148,
+     "wrapRight": 876,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 148,
+     "wrapRight": 876,
+     "overflowX": "auto",
+     "scrolls": false
+    }
+   ],
+   "rail": {
+    "x": 944,
+    "w": 208,
+    "right": 1152
+   },
+   "inlineToc": false,
+   "byline": true
+  },
+  {
+   "path": "/accounting/consolidation/intercompany-profit-plant-assets",
+   "width": 375,
+   "scrollW": 375,
+   "clientW": 375,
+   "article": {
+    "x": 32,
+    "w": 311,
+    "right": 343
+   },
+   "title": {
+    "x": 32,
+    "w": 311,
+    "right": 343,
+    "family": "Spectral",
+    "size": "32px",
+    "lh": "36px",
+    "weight": "700"
+   },
+   "deck": {
+    "family": "Spectral",
+    "size": "18px",
+    "lh": "24px",
+    "weight": "400"
+   },
+   "body": {
+    "family": "Spectral",
+    "size": "19px",
+    "lh": "30.4px",
+    "weight": "400"
+   },
+   "h2": {
+    "family": "Plus Jakarta Sans",
+    "size": "30.875px",
+    "lh": "35.815px",
+    "weight": "700"
+   },
+   "pMargin": "20px",
+   "tables": [
+    {
+     "table": 311,
+     "wrap": 343,
+     "wrapLeft": 16,
+     "wrapRight": 359,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 311,
+     "wrap": 343,
+     "wrapLeft": 16,
+     "wrapRight": 359,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 311,
+     "wrap": 343,
+     "wrapLeft": 16,
+     "wrapRight": 359,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 482,
+     "wrap": 343,
+     "wrapLeft": 16,
+     "wrapRight": 359,
+     "overflowX": "auto",
+     "scrolls": true
+    },
+    {
+     "table": 311,
+     "wrap": 343,
+     "wrapLeft": 16,
+     "wrapRight": 359,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 311,
+     "wrap": 343,
+     "wrapLeft": 16,
+     "wrapRight": 359,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 311,
+     "wrap": 343,
+     "wrapLeft": 16,
+     "wrapRight": 359,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 311,
+     "wrap": 343,
+     "wrapLeft": 16,
+     "wrapRight": 359,
+     "overflowX": "auto",
+     "scrolls": false
+    }
+   ],
+   "rail": null,
+   "inlineToc": true,
+   "byline": true
+  },
+  {
+   "path": "/accounting/consolidation/consolidated-cash-flows-and-mid-year-acquisitions",
+   "width": 1440,
+   "scrollW": 1440,
+   "clientW": 1440,
+   "article": {
+    "x": 228,
+    "w": 728,
+    "right": 956
+   },
+   "title": {
+    "x": 208,
+    "w": 768,
+    "right": 976,
+    "family": "Spectral",
+    "size": "32px",
+    "lh": "36px",
+    "weight": "700"
+   },
+   "deck": {
+    "family": "Spectral",
+    "size": "18px",
+    "lh": "24px",
+    "weight": "400"
+   },
+   "body": {
+    "family": "Spectral",
+    "size": "19px",
+    "lh": "30.4px",
+    "weight": "400"
+   },
+   "h2": {
+    "family": "Plus Jakarta Sans",
+    "size": "30.875px",
+    "lh": "35.815px",
+    "weight": "700"
+   },
+   "pMargin": "20px",
+   "tables": [
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 228,
+     "wrapRight": 956,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 228,
+     "wrapRight": 956,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 228,
+     "wrapRight": 956,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 228,
+     "wrapRight": 956,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 228,
+     "wrapRight": 956,
+     "overflowX": "auto",
+     "scrolls": false
+    }
+   ],
+   "rail": {
+    "x": 1024,
+    "w": 208,
+    "right": 1232
+   },
+   "inlineToc": false,
+   "byline": true
+  },
+  {
+   "path": "/accounting/consolidation/consolidated-cash-flows-and-mid-year-acquisitions",
+   "width": 1280,
+   "scrollW": 1280,
+   "clientW": 1280,
+   "article": {
+    "x": 148,
+    "w": 728,
+    "right": 876
+   },
+   "title": {
+    "x": 128,
+    "w": 768,
+    "right": 896,
+    "family": "Spectral",
+    "size": "32px",
+    "lh": "36px",
+    "weight": "700"
+   },
+   "deck": {
+    "family": "Spectral",
+    "size": "18px",
+    "lh": "24px",
+    "weight": "400"
+   },
+   "body": {
+    "family": "Spectral",
+    "size": "19px",
+    "lh": "30.4px",
+    "weight": "400"
+   },
+   "h2": {
+    "family": "Plus Jakarta Sans",
+    "size": "30.875px",
+    "lh": "35.815px",
+    "weight": "700"
+   },
+   "pMargin": "20px",
+   "tables": [
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 148,
+     "wrapRight": 876,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 148,
+     "wrapRight": 876,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 148,
+     "wrapRight": 876,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 148,
+     "wrapRight": 876,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 148,
+     "wrapRight": 876,
+     "overflowX": "auto",
+     "scrolls": false
+    }
+   ],
+   "rail": {
+    "x": 944,
+    "w": 208,
+    "right": 1152
+   },
+   "inlineToc": false,
+   "byline": true
+  },
+  {
+   "path": "/accounting/consolidation/consolidated-cash-flows-and-mid-year-acquisitions",
+   "width": 375,
+   "scrollW": 375,
+   "clientW": 375,
+   "article": {
+    "x": 32,
+    "w": 311,
+    "right": 343
+   },
+   "title": {
+    "x": 32,
+    "w": 311,
+    "right": 343,
+    "family": "Spectral",
+    "size": "32px",
+    "lh": "36px",
+    "weight": "700"
+   },
+   "deck": {
+    "family": "Spectral",
+    "size": "18px",
+    "lh": "24px",
+    "weight": "400"
+   },
+   "body": {
+    "family": "Spectral",
+    "size": "19px",
+    "lh": "30.4px",
+    "weight": "400"
+   },
+   "h2": {
+    "family": "Plus Jakarta Sans",
+    "size": "30.875px",
+    "lh": "35.815px",
+    "weight": "700"
+   },
+   "pMargin": "20px",
+   "tables": [
+    {
+     "table": 311,
+     "wrap": 343,
+     "wrapLeft": 16,
+     "wrapRight": 359,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 311,
+     "wrap": 343,
+     "wrapLeft": 16,
+     "wrapRight": 359,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 371,
+     "wrap": 343,
+     "wrapLeft": 16,
+     "wrapRight": 359,
+     "overflowX": "auto",
+     "scrolls": true
+    },
+    {
+     "table": 332,
+     "wrap": 343,
+     "wrapLeft": 16,
+     "wrapRight": 359,
+     "overflowX": "auto",
+     "scrolls": true
+    },
+    {
+     "table": 346,
+     "wrap": 343,
+     "wrapLeft": 16,
+     "wrapRight": 359,
+     "overflowX": "auto",
+     "scrolls": true
+    }
+   ],
+   "rail": null,
+   "inlineToc": true,
+   "byline": true
+  },
+  {
+   "path": "/accounting/consolidation/mutual-holdings-complex-group-structures",
+   "width": 1440,
+   "scrollW": 1440,
+   "clientW": 1440,
+   "article": {
+    "x": 228,
+    "w": 728,
+    "right": 956
+   },
+   "title": {
+    "x": 208,
+    "w": 768,
+    "right": 976,
+    "family": "Spectral",
+    "size": "32px",
+    "lh": "36px",
+    "weight": "700"
+   },
+   "deck": {
+    "family": "Spectral",
+    "size": "18px",
+    "lh": "24px",
+    "weight": "400"
+   },
+   "body": {
+    "family": "Spectral",
+    "size": "19px",
+    "lh": "30.4px",
+    "weight": "400"
+   },
+   "h2": {
+    "family": "Plus Jakarta Sans",
+    "size": "30.875px",
+    "lh": "35.815px",
+    "weight": "700"
+   },
+   "pMargin": "20px",
+   "tables": [
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 228,
+     "wrapRight": 956,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 228,
+     "wrapRight": 956,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 228,
+     "wrapRight": 956,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 228,
+     "wrapRight": 956,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 228,
+     "wrapRight": 956,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 228,
+     "wrapRight": 956,
+     "overflowX": "auto",
+     "scrolls": false
+    }
+   ],
+   "rail": {
+    "x": 1024,
+    "w": 208,
+    "right": 1232
+   },
+   "inlineToc": false,
+   "byline": true
+  },
+  {
+   "path": "/accounting/consolidation/mutual-holdings-complex-group-structures",
+   "width": 1280,
+   "scrollW": 1280,
+   "clientW": 1280,
+   "article": {
+    "x": 148,
+    "w": 728,
+    "right": 876
+   },
+   "title": {
+    "x": 128,
+    "w": 768,
+    "right": 896,
+    "family": "Spectral",
+    "size": "32px",
+    "lh": "36px",
+    "weight": "700"
+   },
+   "deck": {
+    "family": "Spectral",
+    "size": "18px",
+    "lh": "24px",
+    "weight": "400"
+   },
+   "body": {
+    "family": "Spectral",
+    "size": "19px",
+    "lh": "30.4px",
+    "weight": "400"
+   },
+   "h2": {
+    "family": "Plus Jakarta Sans",
+    "size": "30.875px",
+    "lh": "35.815px",
+    "weight": "700"
+   },
+   "pMargin": "20px",
+   "tables": [
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 148,
+     "wrapRight": 876,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 148,
+     "wrapRight": 876,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 148,
+     "wrapRight": 876,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 148,
+     "wrapRight": 876,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 148,
+     "wrapRight": 876,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 148,
+     "wrapRight": 876,
+     "overflowX": "auto",
+     "scrolls": false
+    }
+   ],
+   "rail": {
+    "x": 944,
+    "w": 208,
+    "right": 1152
+   },
+   "inlineToc": false,
+   "byline": true
+  },
+  {
+   "path": "/accounting/consolidation/mutual-holdings-complex-group-structures",
+   "width": 375,
+   "scrollW": 375,
+   "clientW": 375,
+   "article": {
+    "x": 32,
+    "w": 311,
+    "right": 343
+   },
+   "title": {
+    "x": 32,
+    "w": 311,
+    "right": 343,
+    "family": "Spectral",
+    "size": "32px",
+    "lh": "36px",
+    "weight": "700"
+   },
+   "deck": {
+    "family": "Spectral",
+    "size": "18px",
+    "lh": "24px",
+    "weight": "400"
+   },
+   "body": {
+    "family": "Spectral",
+    "size": "19px",
+    "lh": "30.4px",
+    "weight": "400"
+   },
+   "h2": {
+    "family": "Plus Jakarta Sans",
+    "size": "30.875px",
+    "lh": "35.815px",
+    "weight": "700"
+   },
+   "pMargin": "20px",
+   "tables": [
+    {
+     "table": 416,
+     "wrap": 343,
+     "wrapLeft": 16,
+     "wrapRight": 359,
+     "overflowX": "auto",
+     "scrolls": true
+    },
+    {
+     "table": 311,
+     "wrap": 343,
+     "wrapLeft": 16,
+     "wrapRight": 359,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 311,
+     "wrap": 343,
+     "wrapLeft": 16,
+     "wrapRight": 359,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 311,
+     "wrap": 343,
+     "wrapLeft": 16,
+     "wrapRight": 359,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 347,
+     "wrap": 343,
+     "wrapLeft": 16,
+     "wrapRight": 359,
+     "overflowX": "auto",
+     "scrolls": true
+    },
+    {
+     "table": 311,
+     "wrap": 343,
+     "wrapLeft": 16,
+     "wrapRight": 359,
+     "overflowX": "auto",
+     "scrolls": false
+    }
+   ],
+   "rail": null,
+   "inlineToc": true,
+   "byline": true
+  },
+  {
+   "path": "/green-transition/now/the-green-transition-isnt-only-about-green",
+   "width": 1440,
+   "scrollW": 1440,
+   "clientW": 1440,
+   "article": {
+    "x": 228,
+    "w": 728,
+    "right": 956
+   },
+   "title": {
+    "x": 208,
+    "w": 768,
+    "right": 976,
+    "family": "Spectral",
+    "size": "32px",
+    "lh": "36px",
+    "weight": "700"
+   },
+   "deck": {
+    "family": "Spectral",
+    "size": "18px",
+    "lh": "24px",
+    "weight": "400"
+   },
+   "body": {
+    "family": "Spectral",
+    "size": "19px",
+    "lh": "30.4px",
+    "weight": "400"
+   },
+   "h2": {
+    "family": "Plus Jakarta Sans",
+    "size": "30.875px",
+    "lh": "35.815px",
+    "weight": "700"
+   },
+   "pMargin": "20px",
+   "tables": [
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 228,
+     "wrapRight": 956,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 228,
+     "wrapRight": 956,
+     "overflowX": "auto",
+     "scrolls": false
+    }
+   ],
+   "rail": {
+    "x": 1024,
+    "w": 208,
+    "right": 1232
+   },
+   "inlineToc": false,
+   "byline": true
+  },
+  {
+   "path": "/green-transition/now/the-green-transition-isnt-only-about-green",
+   "width": 1280,
+   "scrollW": 1280,
+   "clientW": 1280,
+   "article": {
+    "x": 148,
+    "w": 728,
+    "right": 876
+   },
+   "title": {
+    "x": 128,
+    "w": 768,
+    "right": 896,
+    "family": "Spectral",
+    "size": "32px",
+    "lh": "36px",
+    "weight": "700"
+   },
+   "deck": {
+    "family": "Spectral",
+    "size": "18px",
+    "lh": "24px",
+    "weight": "400"
+   },
+   "body": {
+    "family": "Spectral",
+    "size": "19px",
+    "lh": "30.4px",
+    "weight": "400"
+   },
+   "h2": {
+    "family": "Plus Jakarta Sans",
+    "size": "30.875px",
+    "lh": "35.815px",
+    "weight": "700"
+   },
+   "pMargin": "20px",
+   "tables": [
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 148,
+     "wrapRight": 876,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 728,
+     "wrap": 728,
+     "wrapLeft": 148,
+     "wrapRight": 876,
+     "overflowX": "auto",
+     "scrolls": false
+    }
+   ],
+   "rail": {
+    "x": 944,
+    "w": 208,
+    "right": 1152
+   },
+   "inlineToc": false,
+   "byline": true
+  },
+  {
+   "path": "/green-transition/now/the-green-transition-isnt-only-about-green",
+   "width": 375,
+   "scrollW": 375,
+   "clientW": 375,
+   "article": {
+    "x": 32,
+    "w": 311,
+    "right": 343
+   },
+   "title": {
+    "x": 32,
+    "w": 311,
+    "right": 343,
+    "family": "Spectral",
+    "size": "32px",
+    "lh": "36px",
+    "weight": "700"
+   },
+   "deck": {
+    "family": "Spectral",
+    "size": "18px",
+    "lh": "24px",
+    "weight": "400"
+   },
+   "body": {
+    "family": "Spectral",
+    "size": "19px",
+    "lh": "30.4px",
+    "weight": "400"
+   },
+   "h2": {
+    "family": "Plus Jakarta Sans",
+    "size": "30.875px",
+    "lh": "35.815px",
+    "weight": "700"
+   },
+   "pMargin": "20px",
+   "tables": [
+    {
+     "table": 311,
+     "wrap": 343,
+     "wrapLeft": 16,
+     "wrapRight": 359,
+     "overflowX": "auto",
+     "scrolls": false
+    },
+    {
+     "table": 459,
+     "wrap": 343,
+     "wrapLeft": 16,
+     "wrapRight": 359,
+     "overflowX": "auto",
+     "scrolls": true
+    }
+   ],
+   "rail": null,
+   "inlineToc": true,
+   "byline": true
+  },
+  {
+   "path": "/finance/analytics/driver-tree-construction",
+   "width": 1440,
+   "scrollW": 1440,
+   "clientW": 1440,
+   "article": {
+    "x": 228,
+    "w": 728,
+    "right": 956
+   },
+   "title": {
+    "x": 208,
+    "w": 768,
+    "right": 976,
+    "family": "Spectral",
+    "size": "32px",
+    "lh": "36px",
+    "weight": "700"
+   },
+   "deck": {
+    "family": "Spectral",
+    "size": "18px",
+    "lh": "24px",
+    "weight": "400"
+   },
+   "body": {
+    "family": "Spectral",
+    "size": "19px",
+    "lh": "30.4px",
+    "weight": "400"
+   },
+   "h2": {
+    "family": "Plus Jakarta Sans",
+    "size": "30.875px",
+    "lh": "35.815px",
+    "weight": "700"
+   },
+   "pMargin": "20px",
+   "tables": [],
+   "rail": {
+    "x": 1024,
+    "w": 208,
+    "right": 1232
+   },
+   "inlineToc": false,
+   "byline": true
+  },
+  {
+   "path": "/finance/analytics/driver-tree-construction",
+   "width": 1280,
+   "scrollW": 1280,
+   "clientW": 1280,
+   "article": {
+    "x": 148,
+    "w": 728,
+    "right": 876
+   },
+   "title": {
+    "x": 128,
+    "w": 768,
+    "right": 896,
+    "family": "Spectral",
+    "size": "32px",
+    "lh": "36px",
+    "weight": "700"
+   },
+   "deck": {
+    "family": "Spectral",
+    "size": "18px",
+    "lh": "24px",
+    "weight": "400"
+   },
+   "body": {
+    "family": "Spectral",
+    "size": "19px",
+    "lh": "30.4px",
+    "weight": "400"
+   },
+   "h2": {
+    "family": "Plus Jakarta Sans",
+    "size": "30.875px",
+    "lh": "35.815px",
+    "weight": "700"
+   },
+   "pMargin": "20px",
+   "tables": [],
+   "rail": {
+    "x": 944,
+    "w": 208,
+    "right": 1152
+   },
+   "inlineToc": false,
+   "byline": true
+  },
+  {
+   "path": "/finance/analytics/driver-tree-construction",
+   "width": 375,
+   "scrollW": 375,
+   "clientW": 375,
+   "article": {
+    "x": 32,
+    "w": 311,
+    "right": 343
+   },
+   "title": {
+    "x": 32,
+    "w": 311,
+    "right": 343,
+    "family": "Spectral",
+    "size": "32px",
+    "lh": "36px",
+    "weight": "700"
+   },
+   "deck": {
+    "family": "Spectral",
+    "size": "18px",
+    "lh": "24px",
+    "weight": "400"
+   },
+   "body": {
+    "family": "Spectral",
+    "size": "19px",
+    "lh": "30.4px",
+    "weight": "400"
+   },
+   "h2": {
+    "family": "Plus Jakarta Sans",
+    "size": "30.875px",
+    "lh": "35.815px",
+    "weight": "700"
+   },
+   "pMargin": "20px",
+   "tables": [],
+   "rail": null,
+   "inlineToc": true,
+   "byline": true
+  },
+  {
+   "path": "/the-next-big-thing/technology/the-agentic-finance-function",
+   "width": 1440,
+   "scrollW": 1440,
+   "clientW": 1440,
+   "article": {
+    "x": 228,
+    "w": 728,
+    "right": 956
+   },
+   "title": {
+    "x": 208,
+    "w": 768,
+    "right": 976,
+    "family": "Spectral",
+    "size": "32px",
+    "lh": "36px",
+    "weight": "700"
+   },
+   "deck": {
+    "family": "Spectral",
+    "size": "18px",
+    "lh": "24px",
+    "weight": "400"
+   },
+   "body": {
+    "family": "Spectral",
+    "size": "19px",
+    "lh": "30.4px",
+    "weight": "400"
+   },
+   "h2": null,
+   "pMargin": "20px",
+   "tables": [],
+   "rail": null,
+   "inlineToc": false,
+   "byline": true
+  },
+  {
+   "path": "/the-next-big-thing/technology/the-agentic-finance-function",
+   "width": 1280,
+   "scrollW": 1280,
+   "clientW": 1280,
+   "article": {
+    "x": 148,
+    "w": 728,
+    "right": 876
+   },
+   "title": {
+    "x": 128,
+    "w": 768,
+    "right": 896,
+    "family": "Spectral",
+    "size": "32px",
+    "lh": "36px",
+    "weight": "700"
+   },
+   "deck": {
+    "family": "Spectral",
+    "size": "18px",
+    "lh": "24px",
+    "weight": "400"
+   },
+   "body": {
+    "family": "Spectral",
+    "size": "19px",
+    "lh": "30.4px",
+    "weight": "400"
+   },
+   "h2": null,
+   "pMargin": "20px",
+   "tables": [],
+   "rail": null,
+   "inlineToc": false,
+   "byline": true
+  },
+  {
+   "path": "/the-next-big-thing/technology/the-agentic-finance-function",
+   "width": 375,
+   "scrollW": 375,
+   "clientW": 375,
+   "article": {
+    "x": 32,
+    "w": 311,
+    "right": 343
+   },
+   "title": {
+    "x": 32,
+    "w": 311,
+    "right": 343,
+    "family": "Spectral",
+    "size": "32px",
+    "lh": "36px",
+    "weight": "700"
+   },
+   "deck": {
+    "family": "Spectral",
+    "size": "18px",
+    "lh": "24px",
+    "weight": "400"
+   },
+   "body": {
+    "family": "Spectral",
+    "size": "19px",
+    "lh": "30.4px",
+    "weight": "400"
+   },
+   "h2": null,
+   "pMargin": "20px",
+   "tables": [],
+   "rail": null,
+   "inlineToc": false,
+   "byline": true
+  }
+ ]
+}
