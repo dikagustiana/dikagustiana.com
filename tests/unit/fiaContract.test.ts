@@ -346,15 +346,21 @@ describe('the link register', () => {
     expect(validLinks(syntheticLinks)).toBe(true);
   });
 
-  it('is seeded with one link, coal to cement, all weights unmeasured', () => {
+  it('is seeded with one link, coal to cement, measured on both weights with a source each; intensity and pass-through still unmeasured', () => {
     expect(links).toHaveLength(1);
     const [seed] = links as IndustryLink[];
     expect(seed.whatFlows).toBe('Coal burnt as kiln fuel');
-    expect([seed.intensity, seed.costShare, seed.demandShare, seed.passThrough]).toEqual([null, null, null, null]);
-    expect(seed.caveat).toBe(
-      "The price a cement plant pays can differ from a coal producer's realised price: calorific value, contract terms and domestic market obligation rules all sit between them.",
+    expect([seed.intensity, seed.passThrough]).toEqual([null, null]);
+    for (const w of [seed.costShare!, seed.demandShare!]) {
+      expect(w.value).toBeGreaterThan(0);
+      expect(w.value).toBeLessThanOrEqual(1);
+      expect(w.period).not.toBe('');
+      expect(w.source.trim()).not.toBe('');
+    }
+    expect(seed.caveat).toMatch(
+      /^The price a cement plant pays can differ from a coal producer's realised price: calorific value, contract terms and domestic market obligation rules all sit between them\./,
     );
-    expect(isMeasured(seed)).toBe(false);
+    expect(isMeasured(seed)).toBe(true);
   });
 
   it('counts a link as measured only when both weights carry a value and a source (constraint 10)', () => {

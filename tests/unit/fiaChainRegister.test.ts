@@ -2,8 +2,10 @@
  * Chain view, commit 2 (docs/company-models/chain-view, PRD D-C1): the link
  * register's `downstreamLines`, which names the downstream company's
  * unit-economics line that carries a link's input. It validates against the
- * schema; an entry whose ticker or line id does not resolve against a loaded
- * package is reported and ignored, never guessed. SYNTHETIC fixtures only.
+ * schema. A ticker with no loaded package is not yet published: skipped, not
+ * reported. An entry whose package is loaded but whose line id does not
+ * resolve is reported and ignored, never guessed. SYNTHETIC fixtures, plus the
+ * real register's entries for companies the preview has no package for.
  */
 import Ajv from 'ajv';
 import { describe, expect, it } from 'vitest';
@@ -24,7 +26,9 @@ describe('downstreamLines in the link register', () => {
   it('validates against the schema, on the real register and the SYNTHETIC one', () => {
     expect(validLinks(links)).toBe(true);
     expect(validLinks(syntheticLinks)).toBe(true);
-    expect((links as IndustryLink[]).find((l) => l.id === 'coal-to-cement')!.downstreamLines).toEqual({});
+    for (const link of links as IndustryLink[]) {
+      for (const lineId of Object.values(link.downstreamLines ?? {})) expect(typeof lineId).toBe('string');
+    }
     expect(syn.downstreamLines).toEqual({ SCEM: 'fuel', XCEM: 'fuel' });
   });
 
@@ -43,19 +47,29 @@ describe('downstreamLines in the link register', () => {
     expect(downstreamLine(reg, syn, 'XCEM')?.id).toBe('fuel');
   });
 
-  it('reports an unknown ticker, a ticker outside the downstream sub-industry, an unknown line and a line that cannot carry an input', () => {
-    const link: IndustryLink = { ...syn, downstreamLines: { NOPE: 'fuel', SCOA: 'fuel', SCEM: 'kiln_gas', XCEM: 'gross_profit' } };
+  it('reports a loaded ticker outside the downstream sub-industry, an unknown line and a line that cannot carry an input', () => {
+    const link: IndustryLink = { ...syn, downstreamLines: { SCOA: 'fuel', SCEM: 'kiln_gas', XCEM: 'gross_profit' } };
     const issues = validateLinkRegister([link], reg.packages);
     expect(issues.map((i) => i.path)).toEqual([
-      'links.syn-coal-to-cement.downstreamLines.NOPE',
       'links.syn-coal-to-cement.downstreamLines.SCOA',
       'links.syn-coal-to-cement.downstreamLines.SCEM',
       'links.syn-coal-to-cement.downstreamLines.XCEM',
     ]);
-    expect(issues[0].message).toMatch(/not a loaded package/);
-    expect(issues[1].message).toMatch(/not in SYN-CEM/);
-    expect(issues[2].message).toMatch(/no unit-economics line kiln_gas/);
-    expect(issues[3].message).toMatch(/subtotal line/);
+    expect(issues[0].message).toMatch(/not in SYN-CEM/);
+    expect(issues[1].message).toMatch(/no unit-economics line kiln_gas/);
+    expect(issues[2].message).toMatch(/subtotal line/);
+  });
+
+  it('skips a ticker with no loaded package as not yet published, and shows nothing for it on screen', () => {
+    const real = reg.links.find((l) => l.id === 'coal-to-cement')!;
+    expect(Object.keys(real.downstreamLines ?? {})).toEqual(['SMGR', 'INTP']);
+    expect(reg.company('SMGR')?.pkg ?? null).toBeNull();
+    expect(validateLinkRegister([real], reg.packages)).toEqual([]);
+    expect(validateLinkRegister([{ ...syn, downstreamLines: { NOPE: 'fuel', SCEM: 'kiln_gas' } }], reg.packages).map((i) => i.path)).toEqual([
+      'links.syn-coal-to-cement.downstreamLines.SCEM',
+    ]);
+    expect(downstreamLine(reg, real, 'SMGR')).toBeNull();
+    expect(downstreamLine(reg, real, 'INTP')).toBeNull();
   });
 
   it('ignores an entry that does not resolve on screen, and never falls back to another line', () => {

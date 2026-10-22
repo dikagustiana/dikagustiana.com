@@ -51,9 +51,10 @@ export interface IndustryLink {
    * PRD D-C1 (chain view, 22 October 2026): where this input sits in each
    * downstream company's unit economics. Ticker → the `unitEconomics.lines[].id`
    * of that company's line that carries this input. Site data, not the package
-   * contract. A ticker or a line id that does not resolve against a loaded
-   * package is reported by validation (validateLinkRegister) and ignored on
-   * screen, never guessed.
+   * contract. A ticker with no loaded package is not yet published: it is
+   * skipped by validation and shows nothing on screen. A line id that does not
+   * resolve against a loaded package is reported by validation
+   * (validateLinkRegister) and ignored on screen, never guessed.
    */
   downstreamLines?: Record<string, string>;
 }
