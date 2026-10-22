@@ -7,6 +7,6 @@
     { "ticker": "ADRO", "name": "Alamtri Resources Indonesia", "subIndustry": "A121", "status": "not_started", "depth": "executive", "conditionIds": [3, 9] },
     { "ticker": "INTP", "name": "Indocement Tunggal Prakarsa", "subIndustry": "B121", "status": "not_started", "depth": "executive", "conditionIds": [1] },
     { "ticker": "SMGR", "name": "Semen Indonesia", "subIndustry": "B121", "status": "not_started", "depth": "institutional", "conditionIds": [1, 6] },
-    { "ticker": "BREN", "name": "Barito Renewables Energy", "subIndustry": "OWNER-DECISION", "status": "not_started", "depth": "executive", "conditionIds": [4, 6] }
+    { "ticker": "BREN", "name": "Barito Renewables Energy", "subIndustry": "J411", "status": "not_started", "depth": "executive", "conditionIds": [4, 6] }
   ]
 }

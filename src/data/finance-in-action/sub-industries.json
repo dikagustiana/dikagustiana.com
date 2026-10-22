@@ -16,11 +16,11 @@
     "note": "Cement makers: kiln fuel, power and limestone, run through capacity that is costly to leave idle."
   },
   {
-    "code": "OWNER-DECISION",
-    "name": "OWNER-DECISION",
+    "code": "J411",
+    "name": "Electric utilities",
     "chainStage": "band-energy",
     "unitNoun": "electricity",
     "unit": "MWh",
-    "note": "Geothermal generators: steam-field drilling, plant availability and the tariff in the power purchase agreement set the margin on a megawatt-hour."
+    "note": "Power producers, geothermal among them: plant availability, the steam or fuel that drives the turbines and the tariff in the power purchase agreement set the margin on a megawatt-hour."
   }
 ]

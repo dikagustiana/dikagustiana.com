@@ -46,24 +46,14 @@ git clone https://github.com/dikagustiana/dikagustiana.com.git
 cd dikagustiana.com
 ```
 
-Kalau sudah ada, masuk ke foldernya (`cd` ke folder `dikagustiana.com`). Lalu:
+Kalau sudah ada, masuk ke foldernya (`cd` ke folder `dikagustiana.com`). Lalu (PR sudah di-merge, jadi
+semuanya dari `main`):
 
-- **Sebelum PR di-merge** (fase 6 di bawah memakai skrip dari branch PR):
-
-  ```
-  git fetch origin
-  git checkout claude/fia-two-gates-gslvkn
-  git pull
-  npm ci
-  ```
-
-- **Sesudah PR di-merge** (pemakaian sehari-hari):
-
-  ```
-  git checkout main
-  git pull
-  npm ci
-  ```
+```
+git checkout main
+git pull
+npm ci
+```
 
 ### 1.3 Buat `.env.local` (tempat password database)
 
@@ -103,77 +93,43 @@ kirim pesan ke Claude Code.
 npx vite-node scripts/fia/publish-manual.ts --list
 ```
 
-- Sebelum migrasi diterapkan (fase 6), jawaban yang benar adalah:
-  `the database refused it: relation "fia.manual_release" does not exist` dan
-  `meaning: the fia schema is not in this database yet; apply the migration first (RUNBOOK.md)`.
-  Itu artinya **sambungan berhasil**; tabelnya saja yang belum ada.
-- Sesudah migrasi: `Manual rows (0), times in WIB:` dan `What the site shows (fia.model_packages, 0):`.
+- Harapan (migrasi sudah diterapkan di production 22 Okt, bagian 2.1): `Manual rows (0), times in WIB:` dan
+  `What the site shows (fia.model_packages, 0):` (angkanya naik setelah Dika menerbitkan paket).
+- Kalau keluar `the database refused it: relation "fia.manual_release" does not exist`, sambungannya berhasil
+  tetapi ke database lain: periksa nama project di baris `SUPABASE_DB_URL` (harus `asypkbkiebjvvpimewfp`).
 - Kalau muncul `Tenant or user not found`: buka `.env.local`, ganti `aws-0` menjadi `aws-1` di baris
   `SUPABASE_DB_URL`, simpan, jalankan lagi. (Atau salin string dari Supabase → tombol **Connect** →
   **Session pooler**, tempel sebagai `SUPABASE_DB_URL=...`; biarkan `[YOUR-PASSWORD]` di dalamnya, karena
   baris `SUPABASE_DB_PASSWORD` yang dipakai.)
 
-## 2. Fase 6: menyalakan jalur manual (sekali, urut, sebelum merge)
+## 2. Fase 6 dan fase 0: menyalakan jalur manual
 
-Urutannya penting: kalau PR di-merge sebelum langkah 2–4, situs membaca skema `fia` yang belum ada dan
-menampilkan kalimat "The published models are not available yet…". Jadi: migrasi, expose, tes, **baru** merge.
-Prasyarat terpisah (fase 0): `VITE_FIA_LIVE=true` di Vercel Production, `VITE_FIA_PREVIEW` tidak ada.
+### 2.1 Yang sudah dikerjakan (22 Okt 2026)
 
-**Langkah 1. Simpan fingerprint FSRE sebelum migrasi.**
+Atas instruksi Dika ("Merge. Selesain semua sampai selesai"), Claude Code menjalankan langkah database fase 6 di
+production lewat Supabase MCP. Bukti lengkap: `output/production-phase6.txt`.
 
-```
-npx vite-node scripts/fia/run-sql.ts supabase/tests/fsre_fingerprint.sql > fsre-before.txt
-grep '^total' fsre-before.txt
-```
+| Langkah | Hasil |
+|---|---|
+| Fingerprint FSRE sebelum migrasi | `total \| - \| 229 \| 201cddfeaa5ae54387a05fa5e47d6d79`, sama dengan snapshot pagi (`fsre-snapshot.md`) |
+| Migrasi `fia_two_gates` lewat `apply_migration` (file pada commit `15dbd35`) | `{"success":true}`; kontrak, fungsi, view, kolom dan trigger di production identik (md5) dengan database lokal yang dibangun dari file yang sama |
+| Tes SQL `fia_manual_release.sql` | `fia_manual_release: 86 PASS, 0 FAIL`, satu transaksi yang di-rollback; `fia.manual_release` tetap 0 baris |
+| Fingerprint FSRE sesudah migrasi dan tes | Identik dengan sebelum (A7) |
+| PR #76 | Di-merge ke `main` sesudah CI hijau |
 
-PowerShell: `Select-String '^total' fsre-before.txt`
+Merge itu aman walau bagian 2.2 belum dikerjakan: build Production belum punya `VITE_FIA_LIVE`, dan build tanpa
+flag itu tidak membaca `fia` sama sekali. Halaman production tetap halaman legacy sampai langkah D.
 
-Harapan (snapshot 22 Okt, `fsre-snapshot.md`): `total | - | 229 | 201cddfeaa5ae54387a05fa5e47d6d79`. Kalau
-berbeda, FSRE kemungkinan sudah menjalankan migrasinya sendiri sejak 22 Okt; itu boleh, yang penting langkah 5
-sama dengan langkah 1.
+### 2.2 Yang tersisa (Dika, urut)
 
-**Langkah 2. Terapkan migrasi.** Pilih satu cara (README repo: jangan `supabase db push`).
+Claude Code tidak punya akses ke pengaturan Data API Supabase maupun ke project Vercel ini, jadi langkah berikut
+tetap di tangan Dika. Urutannya penting: kalau `VITE_FIA_LIVE` dinyalakan sebelum `fia` di-expose, halaman
+menampilkan "The published models are not available yet…". Jadi: expose, cek, **baru** nyalakan flag.
 
-- Cara A (seperti migrasi sebelumnya, tercatat di riwayat migrasi Supabase): di Claude Code, tempel kalimat ini:
-
-  > Terapkan `supabase/migrations/20261022100000_fia_two_gates.sql` dari branch `claude/fia-two-gates-gslvkn`
-  > ke project Supabase `asypkbkiebjvvpimewfp` dengan `apply_migration`, nama `fia_two_gates`. Saya
-  > menyetujui penulisan ini. Sesudahnya jalankan `list_migrations` dan tunjukkan baris terakhir.
-
-- Cara B (SQL Editor): salin isi file ke clipboard,
-
-  ```
-  pbcopy < supabase/migrations/20261022100000_fia_two_gates.sql
-  ```
-
-  PowerShell: `Get-Content supabase/migrations/20261022100000_fia_two_gates.sql -Raw | Set-Clipboard`
-
-  lalu Supabase → **SQL Editor** → **New query** → tempel → **Run**. Harapan: `Success. No rows returned`.
-
-**Langkah 3. Expose skema `fia` ke Data API.** Supabase → **Project Settings** → **Data API** → **Exposed
+**Langkah A. Expose skema `fia` ke Data API.** Supabase → **Project Settings** → **Data API** → **Exposed
 schemas** → tambahkan `fia` (jangan hapus yang sudah ada, termasuk `fsre_published`) → **Save**.
 
-**Langkah 4. Jalankan tes SQL** (satu transaksi, di-rollback; tidak ada yang tertinggal):
-
-```
-npx vite-node scripts/fia/run-sql.ts supabase/tests/fia_manual_release.sql
-```
-
-Baris terakhir harus: `fia_manual_release: 86 PASS, 0 FAIL`. Setiap baris lain diawali `PASS` atau `FAIL`
-dengan nama aturannya.
-
-**Langkah 5. Fingerprint FSRE sesudah migrasi, bandingkan:**
-
-```
-npx vite-node scripts/fia/run-sql.ts supabase/tests/fsre_fingerprint.sql > fsre-after.txt
-diff fsre-before.txt fsre-after.txt && echo IDENTIK
-```
-
-PowerShell: `if (-not (Compare-Object (Get-Content fsre-before.txt) (Get-Content fsre-after.txt))) { "IDENTIK" }`
-
-Harus keluar `IDENTIK`. Kalau tidak, **jangan merge**; kirim kedua file ke Claude Code.
-
-**Langkah 6. Cek view yang akan dibaca situs** (anon, kunci publik situs):
+**Langkah B. Cek view yang akan dibaca situs** (anon, kunci publik situs):
 
 ```
 VITE_SUPABASE_URL=https://asypkbkiebjvvpimewfp.supabase.co VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_T8D6Uq_flTdtQT5mZuYVsw_nfgiZ203 npx vite-node scripts/world/check-published.ts
@@ -186,15 +142,48 @@ $env:VITE_SUPABASE_URL="https://asypkbkiebjvvpimewfp.supabase.co"; $env:VITE_SUP
 ```
 
 Harapan: `check-published: fia.model_packages HTTP 200, 0 package(s)`. Kalau keluar
-`published models answered ... (not-available)`, langkah 3 belum tersimpan (atau tunggu satu menit lalu
-ulangi). Kalau `(refused)`, kirim output-nya ke Claude Code.
+`published models answered 406 (not-available)`, langkah A belum tersimpan (atau tunggu satu menit lalu
+ulangi). Kalau `(refused)`, kirim output-nya ke Claude Code. **Jangan lanjut ke langkah D sebelum ini HTTP 200.**
 
-**Langkah 7. Merge PR** di GitHub, tunggu deploy Vercel Production selesai.
+**Langkah C. Hapus tabel bantu tes.** Supabase → **SQL Editor** → **New query** → tempel
+`drop table fia_private.test_fixture_scratch;` → **Run**. Harapan: `Success. No rows returned`. Tabel ini dibuat
+Claude Code untuk menjalankan tes SQL di production (file tesnya terlalu besar untuk satu panggilan MCP) dan hanya
+berisi teks fixture SYNTHETIC; skemanya tidak di-expose dan tabelnya tanpa grant, jadi tidak mendesak. Supabase
+MCP menahan `DROP` sampai Dika mengonfirmasi, dan tiga percobaan habis waktu menunggu, jadi tabelnya masih ada.
 
-**Langkah 8. Verifikasi production.** Buka `https://dikagustiana.com/finance/finance-in-action`: harus tampil
-"The chain, read one company at a time" dengan PTBA, ITMG, INDY, ADRO, INTP, SMGR, BREN berstatus "Planned;
-no model yet", tanpa kalimat "not available". Ulangi perintah langkah 6. Kirim ke Claude Code: output langkah
-4, 5, 6 dan screenshot halaman.
+**Langkah D. Fase 0: nyalakan halaman live** (PLAN fase 0):
+
+1. Vercel → project **dikagustiana-com** → Settings → Environment Variables.
+2. Pastikan `VITE_FIA_LIVE` = `true` untuk Production. Kalau belum ada: Add → Key `VITE_FIA_LIVE`, Value `true`,
+   centang Production saja → Save.
+3. Pastikan **tidak ada** `VITE_FIA_PREVIEW` di Production.
+4. Deployments → deployment Production teratas → ⋯ → Redeploy (tanpa build cache). Nilai flag ditanam saat
+   build, jadi tanpa redeploy tidak ada yang berubah.
+
+**Langkah E. Verifikasi production.** Buka `https://www.dikagustiana.com/finance/finance-in-action` (dengan
+`www`, lihat catatan di bawah): harus tampil "The chain, read one company at a time" dengan PTBA, ITMG, INDY,
+ADRO, INTP, SMGR, BREN berstatus "Planned; no model yet", tanpa kalimat "not available". Ulangi perintah langkah
+B. Kirim ke Claude Code: output langkah B dan screenshot halaman (A1).
+
+**Catatan domain.** `https://dikagustiana.com` (tanpa `www`) masih dialihkan 308 ke project Vercel lama
+`dika-s-digital-studio`, yang tampil layar putih. Ini sudah ada sejak Agustus dan tidak terkait PR ini; langkah
+perbaikannya ada di `docs/review/claude-audit.md` §1.2 (pindahkan domain apex ke project `dikagustiana-com`).
+
+### 2.3 Menjalankan ulang tes atau fingerprint
+
+Keduanya boleh diulang kapan saja dari laptop (tes di-rollback, fingerprint hanya membaca):
+
+```
+npx vite-node scripts/fia/run-sql.ts supabase/tests/fia_manual_release.sql
+npx vite-node scripts/fia/run-sql.ts supabase/tests/fsre_fingerprint.sql > fsre-now.txt
+grep '^total' fsre-now.txt
+```
+
+PowerShell untuk baris terakhir: `Select-String '^total' fsre-now.txt`
+
+Baris terakhir tes harus `fia_manual_release: 86 PASS, 0 FAIL`; setiap baris lain diawali `PASS` atau `FAIL`
+dengan nama aturannya. Baris `total` fingerprint berubah hanya kalau FSRE menjalankan migrasinya sendiri; itu
+boleh, asalkan bukan karena migrasi dari repo ini.
 
 ## 3. Memeriksa paket (`--check`), tidak menulis apa pun
 
@@ -267,7 +256,7 @@ is left out (...)` di log (Supabase → Logs → Postgres). Kirim pesan itu ke C
 | Pesan (awal baris) | Artinya | Yang dilakukan |
 |---|---|---|
 | `meta.provenance synthetic is not filings; production shows models built from filings only` | Paket sintetis/fixture. Production hanya menerima paket dari laporan keuangan. | Pakai paket asli dengan `"provenance": "filings"`. Fixture `SYNTHETIC` memang selalu ditolak. |
-| `meta.subIndustry X is not a sub-industry the section lists, ...` | Kode sub-industri di paket belum ada di `sub-industries.json`. | Pakai kode yang terdaftar (INDY/ADRO: `A121`). Untuk BREN, kode panas bumi harus ditetapkan dulu (lihat `report.md`, OWNER-DECISION) dan masuk lewat PR. |
+| `meta.subIndustry X is not a sub-industry the section lists, ...` | Kode sub-industri di paket belum ada di `sub-industries.json`. | Pakai kode yang terdaftar: INDY/ADRO `A121`, BREN `J411` (Electric utilities). Sub-industri baru masuk lewat PR ke `sub-industries.json`. |
 | `meta.contentHash is ...; the package hashes to ...` | Isi paket berubah setelah hash dihitung. | Kosongkan nilainya di file (`"contentHash": ""`); skrip menghitung dan memakai hash yang benar. |
 | `note: meta.contentHash was empty; ...` | Bukan error. Hash dihitung oleh skrip. | Tidak perlu apa-apa. |
 | `... (model-package.schema.json)` | Bentuk JSON tidak sesuai kontrak v3.1. Awal baris menunjukkan lokasinya, misalnya `sheets[0].rows[3].cells[2]`. | Perbaiki bagian itu di model/paket. |
@@ -287,7 +276,7 @@ is left out (...)` di log (Supabase → Logs → Postgres). Kirim pesan itu ke C
 | `Refused: there is no manual row X V ...` | Ticker/versi salah ketik. | Lihat `--list`. |
 | `X V is already withdrawn; nothing changed.` | Sudah ditarik sebelumnya. | Tidak perlu apa-apa. |
 | `the database refused it: ...` lalu `meaning: ...` | Database menolak dan menjelaskan aturannya: kontrak tidak cocok, ticker/versi/hash beda dengan isi paket, provenance bukan filings, publish tanpa approver, waktu approve di masa depan, gate failed, baris published terkunci, withdrawn final. | Biasanya sudah tertangkap oleh pemeriksaan; kalau muncul, kirim output-nya ke Claude Code. |
-| `meaning: the fia schema is not in this database yet; apply the migration first` | Migrasi belum diterapkan. | Fase 6, langkah 2. |
+| `meaning: the fia schema is not in this database yet; apply the migration first` | Database yang disambung belum punya skema `fia`. Production sudah (2.1), jadi `.env.local` menunjuk ke project lain. | Periksa `SUPABASE_DB_URL` (langkah 1.3). |
 | `(The write stands. What the site shows for X could not be read: ...)` | Penulisan **sudah berhasil** (published/withdrawn); hanya pembacaan tampilan sesudahnya yang gagal. | Jangan ulangi perintahnya; cek dengan `--list`. |
 
 ### Sambungan

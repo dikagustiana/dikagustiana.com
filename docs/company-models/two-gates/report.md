@@ -1,18 +1,21 @@
 # Laporan: Finance in Action, dua jalur masuk (FSRE dan manual)
 
-Pelaksana: Claude Code, 22 Okt 2026. Spesifikasi: `PRD.md`, `PLAN.md`, `PROMPT.md` di folder ini. Fase 1–5
-dikerjakan; fase 0 dan 6 milik Dika (langkahnya di bagian 5 dan `RUNBOOK.md`). Draft PR: https://github.com/dikagustiana/dikagustiana.com/pull/76.
+Pelaksana: Claude Code, 22 Okt 2026. Spesifikasi: `PRD.md`, `PLAN.md`, `PROMPT.md` di folder ini. PR:
+https://github.com/dikagustiana/dikagustiana.com/pull/76.
 
-**Database production tidak ditulis sama sekali.** Yang dilakukan di production hanya `SELECT` (lewat Supabase
-MCP) dan satu `GET` anonim ke PostgREST dengan kunci publik situs. Migrasi dan tes SQL dijalankan di Postgres
-lokal; hasilnya di bagian 2.2.
+**Dua tahap.** (1) Fase 1–5 sesuai prompt, dengan production hanya dibaca: migrasi dan tes SQL dijalankan di
+Postgres lokal (bagian 2.2). (2) Sesudah instruksi Dika kedua, "Merge. Selesain semua sampai selesai", Claude
+Code juga mengerjakan langkah database fase 6 di production: migrasi diterapkan dengan `apply_migration`, tes SQL
+86 PASS, fingerprint FSRE identik sebelum dan sesudah (bagian 2.6). Lalu PR di-merge. Yang tersisa hanya tombol
+yang tidak bisa dijangkau sesi ini (expose `fia`, fase 0 di Vercel, satu `DROP`); bagian 5.
 
 ## 1. SHA dan commit
 
 | | SHA |
 |---|---|
 | Awal (`main`, HEAD saat clone) | `b6fd24c` |
-| Akhir (commit terakhir sebelum laporan ini; laporan dan `output/` di-commit sesudahnya) | `5590a00` |
+| Akhir tahap 1 (commit terakhir sebelum laporan pertama) | `5590a00` |
+| File migrasi yang diterapkan ke production (SQL-nya sama dengan `5590a00`; `15dbd35` hanya merapikan dua baris komentar) | `15dbd35` |
 
 Branch: `claude/fia-two-gates-gslvkn` (lihat 3.2 no. 1 soal nama branch).
 
@@ -27,6 +30,9 @@ Branch: `claude/fia-two-gates-gslvkn` (lihat 3.2 no. 1 soal nama branch).
 | `7dfc1e4` | `docs(fia)`: RUNBOOK.md, DECISIONS.md D1–D7, `.env.example`; perbaikan prioritas password di `db.ts` dan satu kasus tes SQL yang rapuh |
 | `01697f1` | `docs(fia)`: `schema-proposal-v3.md` menyebut `fia.model_packages` |
 | `5590a00` | `fix(fia)`: temuan review independen (3.4): pembaca FSRE tidak lagi menjatuhkan jalur manual, CLI tidak lagi berkata "Nothing written" sesudah commit, tes A6 diperketat, approval masa depan ditolak, trigger `ENABLE ALWAYS`; `MIN_TESTS` 1380 → 1384 |
+| `c739535` | `docs(fia)`: laporan ini (versi pertama) dan setiap output yang dikutipnya |
+| `15dbd35` | `chore(fia)`: dua baris komentar migrasi dirapikan (komentar saja); versi file inilah yang diterapkan |
+| commit penutup | `feat(fia)`: BREN di J411 "Electric utilities" (bagian 4), bukti fase 6 production (`output/production-phase6.txt`), RUNBOOK §2 dan laporan ini diperbarui, DECISIONS D3–D7 |
 
 ## 2. Output verifikasi
 
@@ -35,6 +41,9 @@ Output lengkap apa adanya ada di `output/` (satu file per perintah). Di bawah: k
 ### 2.1 CI, perintah yang sama dengan `.github/workflows/ci.yml`
 
 Dijalankan pada `5590a00`; setiap file di `output/ci-*.txt` dimulai dengan perintahnya dan diakhiri `[exit N]`.
+Diulang dengan hasil yang sama sebelum commit penutup (sesudah perubahan J411): eslint 22 warning, typecheck
+bersih, vitest 1388 passed, `assert-test-count` ok (floor 1384), python 60 OK, `fs_check` 175/175,
+`check:world` bersih, build dan build live (`assert-no-synthetic`) lolos. CI GitHub pada commit itu: lihat PR.
 
 ```
 $ npx eslint . --max-warnings=35
@@ -347,21 +356,49 @@ versi akhir (`output/a9-db-modes-local.txt`): staged, staged ulang, publish tanp
 publish ulang (ditolak: sudah published), withdraw, withdraw ulang, withdraw versi yang tidak ada (ditolak),
 semuanya sesuai; `.env.local` sementara untuk itu sudah dihapus.
 
-### 2.4 Production, hanya baca
+### 2.4 Production, hanya baca (tahap 1)
 
 - Snapshot `fsre*`: `fsre-snapshot.md`.
-- `check-published` dari branch ini terhadap production **hari ini** (sebelum migrasi):
+- `check-published` dari branch ini terhadap production pagi itu (sebelum migrasi):
   ```
   check-published: fia.model_packages published models answered 406 (not-available)
   ```
   PostgREST menjawab `PGRST106 Invalid schema: fia`; situs menggolongkannya `not-available`. Pembacaan lama
-  (`Accept-Profile: fsre_published`) menjawab `HTTP 200`. Karena itu urutan fase 6: migrasi dan expose
-  **sebelum** merge. A10 (HTTP 200, 0 paket dari `fia`) baru bisa dibuktikan sesudah langkah Dika.
+  (`Accept-Profile: fsre_published`) menjawab `HTTP 200`. A10 (HTTP 200, 0 paket dari `fia`) baru bisa
+  dibuktikan sesudah `fia` di-expose (bagian 5, langkah A dan B).
 
 ### 2.5 Yang tidak terverifikasi di sini
 
-Migrasi di production (PG 17.6, `CREATE EXTENSION` lewat supautils); PostgREST asli terhadap `fia`; host
-pooler (`aws-0` vs `aws-1`, tidak dicoba karena butuh percobaan login); deploy Vercel; A1 (fase 0).
+PostgREST asli terhadap `fia` (skema belum di-expose; masih `406 PGRST106`, dicek ulang sesudah merge); host
+pooler (`aws-0` vs `aws-1`, tidak dicoba karena butuh percobaan login dengan password Dika); halaman live di
+production (A1, fase 0). Migrasi di production, yang di tahap 1 masih masuk daftar ini, sudah terbukti (2.6).
+
+### 2.6 Fase 6 di production (tahap 2, atas instruksi Dika)
+
+Semua lewat Supabase MCP sebagai role `postgres`; output apa adanya di `output/production-phase6.txt`.
+
+| Langkah | Hasil |
+|---|---|
+| Fingerprint `fsre*` sebelum | `outside-dependants \| - \| - \| 0`, `total \| - \| 229 \| 201cddfeaa5ae54387a05fa5e47d6d79`: sama dengan snapshot pagi |
+| Event trigger yang bisa ikut bereaksi | Hanya `CREATE/DROP EXTENSION` dan notifikasi PostgREST; tidak ada yang menyentuh skema, tabel, view atau `pg_jsonschema` |
+| `apply_migration`, nama `fia_two_gates`, file pada `15dbd35` (md5 `2b31e15ea4ac83379623977254b09abf`) | `{"success":true}` |
+| Isi production dibandingkan dengan database lokal dari file yang sama (md5) | Kontrak, keempat fungsi, kolom, trigger (nama, `ENABLE ALWAYS`, jenis), view, RLS, `pg_jsonschema 0.3.3@extensions`: identik. Dua beda yang dijelaskan: CHECK `jsonschema_is_valid` ditampilkan tanpa awalan `extensions.` (ada di `search_path` role `postgres` di sana), dan PostgreSQL 17 menambah hak `MAINTAIN` pada grant pemilik. Grant `anon` identik: USAGE `fia`, SELECT `fia.model_packages`, EXECUTE `fia_private.fsre_packages()` |
+| Dua probe sebelum tes | Satu permintaan MCP = satu transaksi; error membatalkan seluruhnya (tabel probe tidak tertinggal) |
+| Tes SQL `fia_manual_release.sql` (satu transaksi, di-rollback) | `fia_manual_release: 86 PASS, 0 FAIL`. File tes terlalu besar untuk satu panggilan, jadi fixture SYNTHETIC ditaruh dulu di `fia_private.test_fixture_scratch` dalam 5 potongan yang md5-nya dicocokkan dengan potongan lokal. Tes dijalankan seperti di-commit kecuali tiga hal: tanpa `BEGIN` (permintaan itu sudah satu transaksi), fixture dibaca dari tabel itu, dan hasil di-`RAISE` sebagai error penutup sehingga semuanya di-rollback. Varian yang sama dilatih dulu di lokal (86 PASS). Tampilan MCP memotong bagian tengah teks error; yang tampil disalin apa adanya |
+| Sesudah tes | `fia.manual_release` 0 baris; pembaca FSRE di production tetap fungsi plpgsql asli (bukan stand-in tes) |
+| Fingerprint `fsre*` sesudah migrasi dan tes | Identik dengan sebelum (A7) |
+| Security advisor | `rls_enabled_no_policy` (INFO) untuk dua tabel `fia` (disengaja, PRD R1); sisanya temuan lama. `security_definer_view` akan menyebut `fia.model_packages` begitu `fia` di-expose (disengaja, dijelaskan di kepala migrasi) |
+
+Yang tidak selesai: `DROP TABLE fia_private.test_fixture_scratch`. Supabase MCP menahan perintah destruktif
+sampai Dika mengonfirmasi; tiga percobaan habis waktu 60 detik menunggu (tidak ada lock: `lock_timeout` 10 detik
+tidak terpicu). Isinya hanya teks fixture SYNTHETIC, di skema yang tidak di-expose, tanpa grant. Langkah C di
+bagian 5.
+
+Situs, dicek hanya baca: `www.dikagustiana.com/finance/finance-in-action` masih halaman legacy karena build
+Production belum punya `VITE_FIA_LIVE` (fase 0). Build tanpa flag itu tidak pernah membaca `fia`, jadi merge
+tidak mengubah apa pun yang terlihat sampai flag dinyalakan; itu sebabnya merge aman sebelum `fia` di-expose,
+asalkan expose dikerjakan **sebelum** flag. Domain apex `dikagustiana.com` dialihkan 308 ke project Vercel lama
+(masalah lama, `docs/review/claude-audit.md` §1.2).
 
 ## 3. Koreksi atas sketsa PLAN, perbedaan dokumen, dan keputusan sendiri
 
@@ -392,7 +429,10 @@ pooler (`aws-0` vs `aws-1`, tidak dicoba karena butuh percobaan login); deploy V
 1. **Nama branch.** Prompt: `feat/fia-two-gates`. Sesi ini ditetapkan bekerja dan push hanya ke
    `claude/fia-two-gates-gslvkn` (dibuat dari `main` @ `b6fd24c`, isi identik). Semua kerja ada di sana; tidak
    ada push ke branch lain.
-2. **PR mengikuti PLAN "fase 3–5 setelah fase 2"**, semuanya dalam satu draft PR seperti prompt.
+2. **PR mengikuti PLAN "fase 3–5 setelah fase 2"**, semuanya dalam satu draft PR seperti prompt. Prompt
+   melarang merge dan menyerahkan fase 0 dan 6 ke Dika; instruksi kedua Dika ("Merge. Selesain semua sampai
+   selesai") mencabut keduanya untuk tugas ini. Aturan rahasia tetap berlaku: `SUPABASE_DB_URL` dan password
+   tidak pernah dipakai, dicetak atau di-commit (production dijangkau lewat Supabase MCP).
 3. **RLS tanpa policy (PRD R1) vs README "zero tables without a policy".** Dibangun sesuai PRD. Invarian README
    ditulis untuk tabel `public` yang punya grant default; di sini tidak ada grant sama sekali. Kalau Dika ingin
    invarian itu berlaku juga, satu policy restriktif `USING (false)` tidak mengubah perilaku.
@@ -420,8 +460,9 @@ pooler (`aws-0` vs `aws-1`, tidak dicoba karena butuh percobaan login); deploy V
    Indonesia.
 8. **Kunci publik situs** (`sb_publishable_…`) ditulis di runbook untuk `check-published`: kunci ini memang
    dikirim ke setiap pengunjung situs; bukan rahasia.
-9. **BREN**: `unitNoun` `electricity`, catatan satu kalimat tentang panas bumi; **nama ADRO** "Alamtri Resources
-   Indonesia" (nama emiten ADRO sejak restrukturisasi 2024); lihat 4.
+9. **BREN**: sub-industri `J411` "Electric utilities" (tahap 2, lihat 4 no. 1), `unitNoun` `electricity`, unit
+   MWh, catatan satu kalimat yang menyebut panas bumi; **nama ADRO** "Alamtri Resources Indonesia" (nama emiten
+   ADRO sejak restrukturisasi 2024); lihat 4.
 10. **Komentar world registry** (`generate.ts` → `links.generated.ts`, di-generate ulang) dan `.env.example`
     menyebut `fia.model_packages`; `schema-proposal-v3.md` diberi catatan.
 11. **Screenshot** build live dengan slate baru: `screenshots/`.
@@ -439,98 +480,37 @@ saya. Temuannya diperiksa ulang satu per satu:
 | 4 | Tes "anon cannot write through fia.model_packages" menerima 55000, yang muncul sebelum cek hak, jadi lolos walau `DELETE` di-grant | Diganti dengan cek `has_table_privilege` (anon hanya SELECT, authenticated tidak ada) dan cek EXECUTE di `fia_private` |
 | 5 | Kecil: approval masa depan; trigger bisa dilewati `session_replication_role = replica`; komentar kepala `db.ts` usang; TLS tanpa verifikasi bisa disadap jaringan yang mampu MITM | Dua pertama diperbaiki (3.1 no. 16, 17); komentar diperbaiki; TLS tetap seperti 3.3 no. 2, dengan peringatan di komentar dan opsi `SUPABASE_DB_CA` |
 
-## 4. OWNER-DECISION dan hal yang perlu dikonfirmasi
+## 4. Keputusan pemilik: yang sudah diambil dan yang masih terbuka
+
+Di tahap 1 bagian ini berjudul "OWNER-DECISION". Instruksi kedua meminta semuanya diselesaikan tanpa berhenti,
+jadi dua hal pertama diputuskan dengan default yang paling dapat dipertanggungjawabkan; masing-masing berubah
+dengan satu edit kalau Dika memilih lain.
 
 | # | Hal | Keadaan sekarang | Yang dibutuhkan |
 |---|---|---|---|
-| 1 | **Kode dan nama sub-industri panas bumi untuk BREN** (D6) | `"code": "OWNER-DECISION"`, `"name": "OWNER-DECISION"` di `sub-industries.json`; slate BREN memakainya. Tampil apa adanya di halaman live (lihat `screenshots/live-energy-layer-1440.png`) | Kode dan nama dari Dika, **sebelum merge** (atau terima tampilan sementara itu). Paket BREN nanti harus memakai kode yang sama di `meta.subIndustry`. |
-| 2 | D3, D4, D5, D6, D7 | Dibangun sesuai default PRD §4 | Konfirmasi. |
-| 3 | ADRO di A121 | Sejak restrukturisasi 2024, emiten ADRO (Alamtri Resources Indonesia) tidak lagi memegang bisnis batu bara termal; itu pindah ke Adaro Andalan Indonesia (AADI) | Tetap ADRO di A121, atau AADI? |
+| 1 | **Kode dan nama sub-industri BREN** (D6) | **`J411` "Electric utilities"**: klasifikasi IDX-IC milik bursa sendiri untuk BREN (dan PGEO, produsen panas bumi tercatat lainnya) di snapshot repo `docs/world/sources/issuers-snapshot.json`, berkode seperti A121 dan B121, dan sudah di `band-energy` di world registry. Catatan sub-industri menyebut panas bumi. Tampilan: `screenshots/live-energy-layer-1440.png`. Paket BREN nanti memakai `meta.subIndustry: "J411"` | Tidak ada, kecuali Dika ingin kode/nama lain: ubah `sub-industries.json` dan `fixtures/slate.json` |
+| 2 | D3, D4, D5, D6, D7 | Dibangun sesuai default PRD §4, diterima bersama instruksi merge (dicatat di `DECISIONS.md`) | Tidak ada |
+| 3 | ADRO di A121 | Tetap ADRO di A121 seperti D6. Catatan: sejak restrukturisasi 2024, emiten ADRO (Alamtri Resources Indonesia) tidak lagi memegang bisnis batu bara termal; itu pindah ke Adaro Andalan Indonesia (AADI) | Opsional: ganti ke AADI sebelum paket ADRO pertama dibuat |
 | 4 | Policy RLS eksplisit | Tanpa policy (PRD R1) | Opsional (3.2 no. 3). |
 | 5 | Host pooler | `aws-0-ap-southeast-1.pooler.supabase.com` | Kalau `Tenant or user not found`, ganti ke `aws-1` (runbook 1.5). |
 | 6 | Saringan provenance di view | Hanya gate `failed` yang disaring (R2) | Opsional: juga `provenance = 'filings'` di view (3.4 no. 3), dengan konsekuensi pada build preview. |
 | 7 | Jalur FSRE yang tidak terbaca | Dikosongkan dengan `WARNING` di log, jalur manual tetap tampil | Konfirmasi bahwa ini lebih baik daripada seluruh halaman gagal (`not-available`/`failed`). |
 
-## 5. Langkah Dika yang tersisa (fase 6, disalin dari `RUNBOOK.md` §2)
+## 5. Langkah Dika yang tersisa (perintah lengkap di `RUNBOOK.md` §2.2)
 
-Urutannya penting: kalau PR di-merge sebelum langkah 2–4, situs membaca skema `fia` yang belum ada dan
-menampilkan kalimat "The published models are not available yet…". Jadi: migrasi, expose, tes, **baru** merge.
-Prasyarat terpisah (fase 0): `VITE_FIA_LIVE=true` di Vercel Production, `VITE_FIA_PREVIEW` tidak ada.
+Migrasi, tes SQL dan kedua fingerprint sudah selesai di production (2.6), dan PR sudah di-merge. Yang tersisa
+butuh akses yang tidak dimiliki sesi ini (pengaturan Data API Supabase, project Vercel ini) atau konfirmasi Dika.
+Urutannya penting: kalau `VITE_FIA_LIVE` dinyalakan sebelum `fia` di-expose, halaman menampilkan "The published
+models are not available yet…". Jadi: expose, cek, **baru** flag.
 
-**Langkah 1. Simpan fingerprint FSRE sebelum migrasi.**
+| Langkah | Apa | Harapan |
+|---|---|---|
+| A | Supabase → Project Settings → Data API → Exposed schemas → tambahkan `fia` (jangan hapus `fsre_published`) → Save | — |
+| B | `check-published` dengan kunci publik situs (RUNBOOK §2.2 langkah B) | `check-published: fia.model_packages HTTP 200, 0 package(s)` |
+| C | Supabase → SQL Editor → `drop table fia_private.test_fixture_scratch;` → Run | `Success. No rows returned` |
+| D | Fase 0: Vercel → project dikagustiana-com → Settings → Environment Variables → `VITE_FIA_LIVE` = `true` untuk Production saja, tanpa `VITE_FIA_PREVIEW` → Deployments → Production teratas → ⋯ → Redeploy (tanpa build cache) | Deploy selesai |
+| E | Buka `https://www.dikagustiana.com/finance/finance-in-action`; ulangi B; kirim screenshot ke Claude Code (A1) | "The chain, read one company at a time"; PTBA, ITMG, INDY, ADRO, INTP, SMGR, BREN berstatus "Planned; no model yet"; tanpa "not available" |
 
-```
-npx vite-node scripts/fia/run-sql.ts supabase/tests/fsre_fingerprint.sql > fsre-before.txt
-grep '^total' fsre-before.txt
-```
-
-PowerShell: `Select-String '^total' fsre-before.txt`
-
-Harapan (snapshot 22 Okt, `fsre-snapshot.md`): `total | - | 229 | 201cddfeaa5ae54387a05fa5e47d6d79`. Kalau
-berbeda, FSRE kemungkinan sudah menjalankan migrasinya sendiri sejak 22 Okt; itu boleh, yang penting langkah 5
-sama dengan langkah 1.
-
-**Langkah 2. Terapkan migrasi.** Pilih satu cara (README repo: jangan `supabase db push`).
-
-- Cara A (seperti migrasi sebelumnya, tercatat di riwayat migrasi Supabase): di Claude Code, tempel kalimat ini:
-
-  > Terapkan `supabase/migrations/20261022100000_fia_two_gates.sql` dari branch `claude/fia-two-gates-gslvkn`
-  > ke project Supabase `asypkbkiebjvvpimewfp` dengan `apply_migration`, nama `fia_two_gates`. Saya
-  > menyetujui penulisan ini. Sesudahnya jalankan `list_migrations` dan tunjukkan baris terakhir.
-
-- Cara B (SQL Editor): salin isi file ke clipboard,
-
-  ```
-  pbcopy < supabase/migrations/20261022100000_fia_two_gates.sql
-  ```
-
-  PowerShell: `Get-Content supabase/migrations/20261022100000_fia_two_gates.sql -Raw | Set-Clipboard`
-
-  lalu Supabase → **SQL Editor** → **New query** → tempel → **Run**. Harapan: `Success. No rows returned`.
-
-**Langkah 3. Expose skema `fia` ke Data API.** Supabase → **Project Settings** → **Data API** → **Exposed
-schemas** → tambahkan `fia` (jangan hapus yang sudah ada, termasuk `fsre_published`) → **Save**.
-
-**Langkah 4. Jalankan tes SQL** (satu transaksi, di-rollback; tidak ada yang tertinggal):
-
-```
-npx vite-node scripts/fia/run-sql.ts supabase/tests/fia_manual_release.sql
-```
-
-Baris terakhir harus: `fia_manual_release: 86 PASS, 0 FAIL`. Setiap baris lain diawali `PASS` atau `FAIL`
-dengan nama aturannya.
-
-**Langkah 5. Fingerprint FSRE sesudah migrasi, bandingkan:**
-
-```
-npx vite-node scripts/fia/run-sql.ts supabase/tests/fsre_fingerprint.sql > fsre-after.txt
-diff fsre-before.txt fsre-after.txt && echo IDENTIK
-```
-
-PowerShell: `if (-not (Compare-Object (Get-Content fsre-before.txt) (Get-Content fsre-after.txt))) { "IDENTIK" }`
-
-Harus keluar `IDENTIK`. Kalau tidak, **jangan merge**; kirim kedua file ke Claude Code.
-
-**Langkah 6. Cek view yang akan dibaca situs** (anon, kunci publik situs):
-
-```
-VITE_SUPABASE_URL=https://asypkbkiebjvvpimewfp.supabase.co VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_T8D6Uq_flTdtQT5mZuYVsw_nfgiZ203 npx vite-node scripts/world/check-published.ts
-```
-
-PowerShell:
-
-```
-$env:VITE_SUPABASE_URL="https://asypkbkiebjvvpimewfp.supabase.co"; $env:VITE_SUPABASE_PUBLISHABLE_KEY="sb_publishable_T8D6Uq_flTdtQT5mZuYVsw_nfgiZ203"; npx vite-node scripts/world/check-published.ts
-```
-
-Harapan: `check-published: fia.model_packages HTTP 200, 0 package(s)`. Kalau keluar
-`published models answered ... (not-available)`, langkah 3 belum tersimpan (atau tunggu satu menit lalu
-ulangi). Kalau `(refused)`, kirim output-nya ke Claude Code.
-
-**Langkah 7. Merge PR** di GitHub, tunggu deploy Vercel Production selesai.
-
-**Langkah 8. Verifikasi production.** Buka `https://dikagustiana.com/finance/finance-in-action`: harus tampil
-"The chain, read one company at a time" dengan PTBA, ITMG, INDY, ADRO, INTP, SMGR, BREN berstatus "Planned;
-no model yet", tanpa kalimat "not available". Ulangi perintah langkah 6. Kirim ke Claude Code: output langkah
-4, 5, 6 dan screenshot halaman.
+Terpisah dan sudah lama: domain apex `dikagustiana.com` masih dialihkan ke project Vercel lama
+`dika-s-digital-studio` (layar putih). Langkahnya di `docs/review/claude-audit.md` §1.2.
 
