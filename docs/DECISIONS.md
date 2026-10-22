@@ -31,9 +31,14 @@ same batch are fine.
 - **The import now stores what the editor stores.** The studio writes `content` and `content_json`
   (the document `content` was serialised from); the 12 Oct import wrote `content_json: null`.
   `scripts/accounting-import/import.ts` now writes the document it already proves round-trips, to the
-  row and its revision. A re-run fills `content_json` on the 36 imported rows and changes nothing else;
-  it was not run here (no write access to the project from this session, and the FSLI rows are outside
-  this change).
+  row and its revision.
+- **The 36 imported rows were backfilled the same day, on the owner's instruction** — see
+  `docs/db/content-json-backfill-2026-10-22/`. Not by re-running the import: its markdown sources stay
+  out of the repo, and its upsert would have fired the `updated_at` trigger and redated all 36 essays
+  (share-card versions, feed dates, an "Updated" line) for a change no reader sees. The database built
+  each document from the row's own `content`, wrote it only if its md5 equalled TipTap's
+  `generateJSON` output for that row, and kept `updated_at` by disabling that one trigger inside the
+  transaction.
 
 # 2026-10-11 — Where We Are Now opens with two essays; its tab lists them
 
