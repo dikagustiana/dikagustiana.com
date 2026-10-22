@@ -50,14 +50,13 @@ the MCP. So the database built them itself:
 
 ## Roll back
 
-```sql
-begin;
-alter table public.essays disable trigger update_essays_updated_at;
-update public.essays set content_json = null
- where section = 'accounting' and id in (<the 36 ids in rows.json>);
-delete from public.essay_revisions
- where change_type = 'migration'
-   and change_summary like 'content_json backfilled:%';
-alter table public.essays enable trigger update_essays_updated_at;
-commit;
-```
+`rollback.sql`, one transaction. It reverts only the rows still exactly as the backfill left them:
+same `content` md5 and same `md5(content_json::text)` as written. An essay edited since keeps its
+newer document and its history. The backfill's `migration` revision is removed only for the rows
+reverted, so no other essay's revisions are touched. `updated_at` is kept the same way `apply.sql`
+kept it.
+
+Rehearsed on the local copy after the backfill, with one essay edited afterwards and an essay outside
+the 36 carrying a revision with the same summary text: 35 rows reverted and 35 revisions removed;
+the edited essay kept its document and revision; the other essay's revision stayed; `updated_at`
+was unchanged and the trigger enabled again. In production on 22 Oct the guard matches all 36 rows.
