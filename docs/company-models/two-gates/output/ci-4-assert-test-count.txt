@@ -1,0 +1,4 @@
+$ node scripts/assert-test-count.mjs vitest-report.json
+assert-test-count: 1388 tests, 0 failed, 0 failed suite(s) (floor 1384)
+assert-test-count: ok
+[exit 0]

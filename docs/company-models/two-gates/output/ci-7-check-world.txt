@@ -1,0 +1,11 @@
+$ npm run check:world
+
+> vite_react_shadcn_ts@0.0.0 check:world
+> node scripts/world/check-engine.mjs
+
+40 files · 37 wired from the entry · 3 pending
+pending (not wired from the entry): data/boundary.ts, placement/empty.ts, placement/layout.generated.ts
+wired files clean
+load order ok
+no Factory Yard code in src/
+[exit 0]

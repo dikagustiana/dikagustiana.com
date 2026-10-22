@@ -1,0 +1,5 @@
+$ python3 scripts/fs_check.py data/fs/phe/fy2024/statements.json --failures-only
+RULE  EXPECTED  ACTUAL  DIFF  RESULT
+
+175 rules: 175 passed, 0 failed.
+[exit 0]

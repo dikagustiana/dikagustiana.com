@@ -1,0 +1,3 @@
+$ (after the tests) what is left in fia.manual_release, and the reader's definition
+manual_release rows: 0
+fsre_packages is the plpgsql reader: true

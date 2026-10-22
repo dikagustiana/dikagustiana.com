@@ -1,0 +1,6 @@
+$ psql (postgres) -d run_empty -f supabase/tests/fsre_fingerprint.sql   # before
+kind | schema | name | digest
+outside-dependants | - | - | 0
+total | - | 1 | 2291ecd4cf5faf4a330347622b8af0db
+(2 rows)
+[exit 0]

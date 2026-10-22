@@ -1,0 +1,916 @@
+$ TZ=America/Chicago npx vitest run --reporter=default --reporter=json --outputFile=vitest-report.json
+
+ RUN  v2.1.9 /home/user/dikagustiana.com
+
+ ✓ tests/unit/industryChain.test.ts (87 tests) 67ms
+Browserslist: browsers data (caniuse-lite) is 16 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+stderr | tests/unit/chainMarks.test.tsx > the marks on the plate > are one per marked target, each a button that says its number, its title and its status, and each inside its own overlay
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | tests/unit/chainColumn.test.tsx > the column > replaces the plate: one column, no svg, the title still first, nothing under it
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | tests/unit/chainPlate.test.tsx > ChainPlate at rest > leads with the map’s own title, at the rank the page gives it
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ tests/unit/chainMarks.test.tsx (36 tests) 3637ms
+   ✓ the marks on the plate > are one per marked target, each a button that says its number, its title and its status, and each inside its own overlay 352ms
+   ✓ the marks on the plate > opens a target that is not a door in its own right — a stage the overlay marks — as a reading beside its mark, and closes it when the overlay changes 392ms
+   ✓ the marks on the plate > leads from Energy to its essay with no overlay on, keeps the context, and says so when the index cannot be reached 312ms
+ ✓ tests/unit/chainColumn.test.tsx (21 tests) 3740ms
+   ✓ the column > makes every joint a tappable row marked in the form of its margin kind, and opens its reading as a bottom sheet 562ms
+   ✓ the column > hides returns and the money and information flows behind two toggles, off by default 303ms
+   ✓ the column > lists every layer as a row that opens, with its span in words, and no chip word on a layer that only sets the terms 416ms
+stderr | tests/unit/fsliDetail.test.tsx > FSLI page with a published essay > renders the essay as the body: its title the first h2, its snippet the lede, then the essay
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ tests/unit/fsliDetail.test.tsx (21 tests) 1659ms
+ ✓ tests/unit/chainPlate.test.tsx (41 tests) 7790ms
+   ✓ the distance control > isolates an open joint at finance: the joint, its two hands and its layers stay, the rest steps back — and economy brings it back 317ms
+   ✓ the two controls compose > opens a marked element as a reading in one voice, and re-reads it in the other voice when the distance changes 337ms
+   ✓ the two controls compose > keeps a door open while a control changes: the same joint, from close, then as a reading under the shift, then anatomy again 440ms
+   ✓ a joint with a module pinned to it > follows the margin with the module, and its lessons one level down — only for chain-located rows 341ms
+stderr | tests/unit/workbookViewer.test.tsx > the workbook viewer > shows the sheets as tabs in workbook order, the first open, and opens another as a new history entry
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+
+ ✓ tests/unit/linkPreview.test.ts (76 tests) 540ms
+stderr | tests/unit/autosaveWrites.test.tsx > useEssayAutosave > backs up a debounced edit of a published essay, revision only
+Warning: An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at TestComponent (/home/user/dikagustiana.com/node_modules/@testing-library/react/dist/pure.js:307:5)
+Warning: An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at TestComponent (/home/user/dikagustiana.com/node_modules/@testing-library/react/dist/pure.js:307:5)
+Warning: An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at TestComponent (/home/user/dikagustiana.com/node_modules/@testing-library/react/dist/pure.js:307:5)
+Warning: An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at TestComponent (/home/user/dikagustiana.com/node_modules/@testing-library/react/dist/pure.js:307:5)
+Warning: An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at TestComponent (/home/user/dikagustiana.com/node_modules/@testing-library/react/dist/pure.js:307:5)
+
+stderr | tests/unit/autosaveWrites.test.tsx > useEssayAutosave > writes backup FIRST, then the guarded row, for a never-published essay
+Warning: An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at TestComponent (/home/user/dikagustiana.com/node_modules/@testing-library/react/dist/pure.js:307:5)
+Warning: An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at TestComponent (/home/user/dikagustiana.com/node_modules/@testing-library/react/dist/pure.js:307:5)
+Warning: An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at TestComponent (/home/user/dikagustiana.com/node_modules/@testing-library/react/dist/pure.js:307:5)
+Warning: An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at TestComponent (/home/user/dikagustiana.com/node_modules/@testing-library/react/dist/pure.js:307:5)
+Warning: An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at TestComponent (/home/user/dikagustiana.com/node_modules/@testing-library/react/dist/pure.js:307:5)
+
+stderr | tests/unit/autosaveWrites.test.tsx > useEssayAutosave > fails loudly but keeps the backup when the row guard matches zero rows
+Warning: An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at TestComponent (/home/user/dikagustiana.com/node_modules/@testing-library/react/dist/pure.js:307:5)
+Warning: An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at TestComponent (/home/user/dikagustiana.com/node_modules/@testing-library/react/dist/pure.js:307:5)
+Warning: An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at TestComponent (/home/user/dikagustiana.com/node_modules/@testing-library/react/dist/pure.js:307:5)
+
+stderr | tests/unit/autosaveWrites.test.tsx > useEssayAutosave > surfaces a row-write error instead of silently claiming Saved
+Warning: An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at TestComponent (/home/user/dikagustiana.com/node_modules/@testing-library/react/dist/pure.js:307:5)
+Warning: An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at TestComponent (/home/user/dikagustiana.com/node_modules/@testing-library/react/dist/pure.js:307:5)
+Warning: An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at TestComponent (/home/user/dikagustiana.com/node_modules/@testing-library/react/dist/pure.js:307:5)
+
+stderr | tests/unit/autosaveWrites.test.tsx > useEssayAutosave > a brief-body autosave is backup-only even when told to persist the row
+Warning: An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at TestComponent (/home/user/dikagustiana.com/node_modules/@testing-library/react/dist/pure.js:307:5)
+Warning: An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at TestComponent (/home/user/dikagustiana.com/node_modules/@testing-library/react/dist/pure.js:307:5)
+Warning: An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at TestComponent (/home/user/dikagustiana.com/node_modules/@testing-library/react/dist/pure.js:307:5)
+Warning: An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at TestComponent (/home/user/dikagustiana.com/node_modules/@testing-library/react/dist/pure.js:307:5)
+Warning: An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at TestComponent (/home/user/dikagustiana.com/node_modules/@testing-library/react/dist/pure.js:307:5)
+
+stderr | tests/unit/autosaveWrites.test.tsx > useDraftRecovery > offers a differing autosave of the same body as a recovery candidate
+Warning: An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at TestComponent (/home/user/dikagustiana.com/node_modules/@testing-library/react/dist/pure.js:307:5)
+
+stderr | tests/unit/autosaveWrites.test.tsx > useDraftRecovery > offers the differing autosave even when it predates the last save
+Warning: An update to TestComponent inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at TestComponent (/home/user/dikagustiana.com/node_modules/@testing-library/react/dist/pure.js:307:5)
+
+ ✓ tests/unit/autosaveWrites.test.tsx (20 tests) 87ms
+ ✓ tests/unit/editorHtmlRoundTrip.test.ts (35 tests) 1005ms
+stderr | tests/unit/fsViewer.test.tsx > the statement of financial position > prints every row as stored, in order: ID label, English under it, notes, both years
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | tests/unit/fsViewer.test.tsx > an address with nothing behind it > is a not-found page, not an empty statement
+404 Error: User attempted to access non-existent route: /accounting/fsli/acme/fy2019
+
+ ✓ tests/unit/workbookViewer.test.tsx (19 tests) 6770ms
+   ✓ the workbook viewer > shows the sheets as tabs in workbook order, the first open, and opens another as a new history entry 554ms
+   ✓ the workbook viewer > jumps across sheets from the inspector, and Back returns 574ms
+   ✓ the workbook viewer > keeps up with a held arrow key, writing the URL at most every 300 ms, and moves on when the browser refuses a write 4182ms
+   ✓ the workbook viewer > goes to a typed address with Ctrl+G, on this sheet or another, and says when there is no such cell 541ms
+ ✓ tests/unit/fsViewer.test.tsx (17 tests) 2000ms
+   ✓ PHE FY2024, every row of the two statements shown > sofp: 83 rows, labels and notes verbatim, figures as printed, nothing added 444ms
+ ✓ tests/unit/fiaContract.test.ts (48 tests) 56ms
+ ✓ tests/unit/fiaPublishManual.test.ts (25 tests) 332ms
+stderr | tests/unit/tracker_copy.test.tsx > the tracker page with the entries published > says "paused" or "archive" at most once, and none of the banned phrases
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ tests/unit/tracker_copy.test.tsx (51 tests) 2738ms
+   ✓ the tracker page with the entries published > says "paused" or "archive" at most once, and none of the banned phrases 460ms
+stderr | tests/unit/worldShell.test.tsx > flag off > is off in tests as in production, and the wrappers render the schematic with no world markup
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ tests/unit/worldShell.test.tsx (13 tests) 515ms
+   ✓ flag off > is off in tests as in production, and the wrappers render the schematic with no world markup 324ms
+stderr | tests/unit/fiaLens.test.tsx > the lens on the model page > turns the driver row into the drawn tree, with its edges and the direction caption
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ tests/unit/worldActivity.test.ts (14 tests) 7949ms
+   ✓ the activity in the world (PRD v2 §3.7, C1, C3) > shows every kind of each family that stands in the world 959ms
+   ✓ the activity in the world (PRD v2 §3.7, C1, C3) > draws all its activity and the lamps instanced, within its draw-call budget, at the district band 475ms
+   ✓ the activity in the world (PRD v2 §3.7, C1, C3) > moves with the simulation’s clock: held while the world is paused, on again when it runs 660ms
+   ✓ the activity in the world (PRD v2 §3.7, C1, C3) > replays with the seed: two worlds with one seed pose every actor alike after the same steps 3291ms
+   ✓ the activity in the world (PRD v2 §3.7, C1, C3) > runs the energy layer’s line from the power plant to every block, its pulses in place when the layer is shown, even paused 333ms
+   ✓ the activity in the world (PRD v2 §3.7, C1, C3) > carries the vehicles’ scale once: a forklift and a car stand at 1.25 × their metric length 317ms
+   ✓ day and night (PRD v2 §3.8, C2) > lasts six minutes from 10:00 390ms
+   ✓ day and night (PRD v2 §3.8, C2) > lights every block at 20:00: every building’s windows warm, the published brighter in the accent, a lamp at every block, lamps along every road 393ms
+   ✓ day and night (PRD v2 §3.8, C2) > lights the exchange’s band after dark, in the accent, above the darkened world 473ms
+stderr | tests/unit/glimpse.test.tsx > Glimpse > is absent, not empty, with nothing published
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ tests/unit/glimpse.test.tsx (14 tests) 713ms
+stderr | tests/unit/fiaLens.test.tsx > editing an assumption > recalculates, marks the edit and its effects with deltas, and lists what changed
+Warning: An update to ModelGrid inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ModelGrid (/home/user/dikagustiana.com/src/components/finance-in-action/viewer/model/ModelGrid.tsx:52:22)
+    at section
+    at Section (/home/user/dikagustiana.com/src/pages/finance-in-action/FiaModelPage.tsx:104:20)
+    at div
+    at div
+    at div
+    at main
+    at div
+    at PageLayout (/home/user/dikagustiana.com/src/components/layouts/PageLayout.tsx:11:23)
+    at FiaModelPage (/home/user/dikagustiana.com/src/pages/finance-in-action/FiaModelPage.tsx:137:25)
+    at FiaModelRouter (/home/user/dikagustiana.com/src/pages/finance-in-action/FiaModelRouter.tsx:20:27)
+    at FiaModelRoute
+    at RenderedRoute (/home/user/dikagustiana.com/node_modules/react-router/dist/umd/react-router.development.js:535:7)
+    at Routes (/home/user/dikagustiana.com/node_modules/react-router/dist/umd/react-router.development.js:1269:7)
+    at Router (/home/user/dikagustiana.com/node_modules/react-router/dist/umd/react-router.development.js:1203:17)
+    at MemoryRouter (/home/user/dikagustiana.com/node_modules/react-router/dist/umd/react-router.development.js:1097:7)
+    at Provider (file:///home/user/dikagustiana.com/node_modules/@radix-ui/react-context/dist/index.mjs:27:15)
+    at TooltipProvider (file:///home/user/dikagustiana.com/node_modules/@radix-ui/react-tooltip/dist/index.mjs:29:5)
+    at AuthProvider (/home/user/dikagustiana.com/src/contexts/AuthContext.tsx:8:25)
+    at QueryClientProvider (file:///home/user/dikagustiana.com/node_modules/@tanstack/react-query/build/modern/QueryClientProvider.js:20:3)
+    at _HelmetProvider (/home/user/dikagustiana.com/node_modules/react-helmet-async/lib/index.js:483:5)
+
+stderr | tests/unit/fiaLens.test.tsx > editing an assumption > shows the delta on the tree node and the waterfall bar
+Warning: An update to ModelGrid inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ModelGrid (/home/user/dikagustiana.com/src/components/finance-in-action/viewer/model/ModelGrid.tsx:52:22)
+    at section
+    at Section (/home/user/dikagustiana.com/src/pages/finance-in-action/FiaModelPage.tsx:104:20)
+    at div
+    at div
+    at div
+    at main
+    at div
+    at PageLayout (/home/user/dikagustiana.com/src/components/layouts/PageLayout.tsx:11:23)
+    at FiaModelPage (/home/user/dikagustiana.com/src/pages/finance-in-action/FiaModelPage.tsx:137:25)
+    at FiaModelRouter (/home/user/dikagustiana.com/src/pages/finance-in-action/FiaModelRouter.tsx:20:27)
+    at FiaModelRoute
+    at RenderedRoute (/home/user/dikagustiana.com/node_modules/react-router/dist/umd/react-router.development.js:535:7)
+    at Routes (/home/user/dikagustiana.com/node_modules/react-router/dist/umd/react-router.development.js:1269:7)
+    at Router (/home/user/dikagustiana.com/node_modules/react-router/dist/umd/react-router.development.js:1203:17)
+    at MemoryRouter (/home/user/dikagustiana.com/node_modules/react-router/dist/umd/react-router.development.js:1097:7)
+    at Provider (file:///home/user/dikagustiana.com/node_modules/@radix-ui/react-context/dist/index.mjs:27:15)
+    at TooltipProvider (file:///home/user/dikagustiana.com/node_modules/@radix-ui/react-tooltip/dist/index.mjs:29:5)
+    at AuthProvider (/home/user/dikagustiana.com/src/contexts/AuthContext.tsx:8:25)
+    at QueryClientProvider (file:///home/user/dikagustiana.com/node_modules/@tanstack/react-query/build/modern/QueryClientProvider.js:20:3)
+    at _HelmetProvider (/home/user/dikagustiana.com/node_modules/react-helmet-async/lib/index.js:483:5)
+
+ ✓ tests/unit/selectedOrder.test.tsx (14 tests) 633ms
+stderr | tests/unit/fiaLens.test.tsx > editing an assumption > resets to the published model
+Warning: An update to ModelGrid inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ModelGrid (/home/user/dikagustiana.com/src/components/finance-in-action/viewer/model/ModelGrid.tsx:52:22)
+    at section
+    at Section (/home/user/dikagustiana.com/src/pages/finance-in-action/FiaModelPage.tsx:104:20)
+    at div
+    at div
+    at div
+    at main
+    at div
+    at PageLayout (/home/user/dikagustiana.com/src/components/layouts/PageLayout.tsx:11:23)
+    at FiaModelPage (/home/user/dikagustiana.com/src/pages/finance-in-action/FiaModelPage.tsx:137:25)
+    at FiaModelRouter (/home/user/dikagustiana.com/src/pages/finance-in-action/FiaModelRouter.tsx:20:27)
+    at FiaModelRoute
+    at RenderedRoute (/home/user/dikagustiana.com/node_modules/react-router/dist/umd/react-router.development.js:535:7)
+    at Routes (/home/user/dikagustiana.com/node_modules/react-router/dist/umd/react-router.development.js:1269:7)
+    at Router (/home/user/dikagustiana.com/node_modules/react-router/dist/umd/react-router.development.js:1203:17)
+    at MemoryRouter (/home/user/dikagustiana.com/node_modules/react-router/dist/umd/react-router.development.js:1097:7)
+    at Provider (file:///home/user/dikagustiana.com/node_modules/@radix-ui/react-context/dist/index.mjs:27:15)
+    at TooltipProvider (file:///home/user/dikagustiana.com/node_modules/@radix-ui/react-tooltip/dist/index.mjs:29:5)
+    at AuthProvider (/home/user/dikagustiana.com/src/contexts/AuthContext.tsx:8:25)
+    at QueryClientProvider (file:///home/user/dikagustiana.com/node_modules/@tanstack/react-query/build/modern/QueryClientProvider.js:20:3)
+    at _HelmetProvider (/home/user/dikagustiana.com/node_modules/react-helmet-async/lib/index.js:483:5)
+
+stderr | tests/unit/fiaLens.test.tsx > editing an assumption > refuses what is not a number, and opens no editor on a formula
+Warning: An update to ModelGrid inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ModelGrid (/home/user/dikagustiana.com/src/components/finance-in-action/viewer/model/ModelGrid.tsx:52:22)
+    at section
+    at Section (/home/user/dikagustiana.com/src/pages/finance-in-action/FiaModelPage.tsx:104:20)
+    at div
+    at div
+    at div
+    at main
+    at div
+    at PageLayout (/home/user/dikagustiana.com/src/components/layouts/PageLayout.tsx:11:23)
+    at FiaModelPage (/home/user/dikagustiana.com/src/pages/finance-in-action/FiaModelPage.tsx:137:25)
+    at FiaModelRouter (/home/user/dikagustiana.com/src/pages/finance-in-action/FiaModelRouter.tsx:20:27)
+    at FiaModelRoute
+    at RenderedRoute (/home/user/dikagustiana.com/node_modules/react-router/dist/umd/react-router.development.js:535:7)
+    at Routes (/home/user/dikagustiana.com/node_modules/react-router/dist/umd/react-router.development.js:1269:7)
+    at Router (/home/user/dikagustiana.com/node_modules/react-router/dist/umd/react-router.development.js:1203:17)
+    at MemoryRouter (/home/user/dikagustiana.com/node_modules/react-router/dist/umd/react-router.development.js:1097:7)
+    at Provider (file:///home/user/dikagustiana.com/node_modules/@radix-ui/react-context/dist/index.mjs:27:15)
+    at TooltipProvider (file:///home/user/dikagustiana.com/node_modules/@radix-ui/react-tooltip/dist/index.mjs:29:5)
+    at AuthProvider (/home/user/dikagustiana.com/src/contexts/AuthContext.tsx:8:25)
+    at QueryClientProvider (file:///home/user/dikagustiana.com/node_modules/@tanstack/react-query/build/modern/QueryClientProvider.js:20:3)
+    at _HelmetProvider (/home/user/dikagustiana.com/node_modules/react-helmet-async/lib/index.js:483:5)
+
+stderr | tests/unit/fiaLens.test.tsx > editing an assumption > refuses what is not a number, and opens no editor on a formula
+Warning: An update to ModelGrid inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ModelGrid (/home/user/dikagustiana.com/src/components/finance-in-action/viewer/model/ModelGrid.tsx:52:22)
+    at section
+    at Section (/home/user/dikagustiana.com/src/pages/finance-in-action/FiaModelPage.tsx:104:20)
+    at div
+    at div
+    at div
+    at main
+    at div
+    at PageLayout (/home/user/dikagustiana.com/src/components/layouts/PageLayout.tsx:11:23)
+    at FiaModelPage (/home/user/dikagustiana.com/src/pages/finance-in-action/FiaModelPage.tsx:137:25)
+    at FiaModelRouter (/home/user/dikagustiana.com/src/pages/finance-in-action/FiaModelRouter.tsx:20:27)
+    at FiaModelRoute
+    at RenderedRoute (/home/user/dikagustiana.com/node_modules/react-router/dist/umd/react-router.development.js:535:7)
+    at Routes (/home/user/dikagustiana.com/node_modules/react-router/dist/umd/react-router.development.js:1269:7)
+    at Router (/home/user/dikagustiana.com/node_modules/react-router/dist/umd/react-router.development.js:1203:17)
+    at MemoryRouter (/home/user/dikagustiana.com/node_modules/react-router/dist/umd/react-router.development.js:1097:7)
+    at Provider (file:///home/user/dikagustiana.com/node_modules/@radix-ui/react-context/dist/index.mjs:27:15)
+    at TooltipProvider (file:///home/user/dikagustiana.com/node_modules/@radix-ui/react-tooltip/dist/index.mjs:29:5)
+    at AuthProvider (/home/user/dikagustiana.com/src/contexts/AuthContext.tsx:8:25)
+    at QueryClientProvider (file:///home/user/dikagustiana.com/node_modules/@tanstack/react-query/build/modern/QueryClientProvider.js:20:3)
+    at _HelmetProvider (/home/user/dikagustiana.com/node_modules/react-helmet-async/lib/index.js:483:5)
+
+ ✓ tests/unit/fiaLens.test.tsx (15 tests) 6464ms
+   ✓ the lens on the model page > turns the driver row into the drawn tree, with its edges and the direction caption 740ms
+   ✓ the lens on the model page > writes the forecast caption for a forecast quarter 365ms
+   ✓ the lens on the model page > marks one level each way in the tree, the waterfall and the grid, and the full chain on request 956ms
+   ✓ the lens on the model page > shows the chain in the inspector as a breadcrumb from the filing to profit to owners 552ms
+   ✓ editing an assumption > recalculates, marks the edit and its effects with deltas, and lists what changed 1319ms
+   ✓ editing an assumption > shows the delta on the tree node and the waterfall bar 592ms
+   ✓ editing an assumption > resets to the published model 979ms
+   ✓ editing an assumption > refuses what is not a number, and opens no editor on a formula 826ms
+stderr | tests/unit/fiaLive.test.tsx > the production index > draws the slate as planned with nothing published, and nothing synthetic anywhere
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ tests/unit/fiaLive.test.tsx (26 tests) 1081ms
+ ✓ tests/unit/worldV2Scale.test.ts (12 tests) 7350ms
+   ✓ the hero and the map (PRD v2 §3.1, A1) > opens on the hero at ≥ 1.25 px/m, a 40 m block ≥ 60 px wide on screen 916ms
+   ✓ the hero and the map (PRD v2 §3.1, A1) > frames everything drawn on the map at ≥ 0.75 px/m, below the hero 925ms
+   ✓ the hero and the map (PRD v2 §3.1, A1) > on a phone’s 390 px stage opens on the estate at ≥ 1 px/m 325ms
+   ✓ the hero and the map (PRD v2 §3.1, A1) > H, like the distance control’s 0, returns to the hero from anywhere 1713ms
+   ✓ the bands of detail (PRD v2 §3.3) > switches district → street → inside by the zoom, with hysteresis at each threshold 331ms
+   ✓ companies are buildings (PRD v2 §3.5, A3, A4) > makes every lot an entity with its box and bays, never hidden, two per block with a sign each 327ms
+   ✓ companies are buildings (PRD v2 §3.5, A3, A4) > resolves a hit in a zone to the lot whose footprint holds it, else to the block (its signboard and yard) 371ms
+   ✓ pointing (PRD v2 §3.4, A2) > hovering a lot labels it TICKER · name with a pointer and an outline; a block, its sub-industry; a gate, its joint; empty ground, nothing 442ms
+   ✓ the keyboard (PRD v2 §3.4) > [ and ] step through the companies in registry order; with Shift, through the sub-industries 392ms
+   ✓ the pointer on the canvas (PRD v2 §3.4, A3) > a click (pointer down and up in place) at a company’s anchor selects the company; a mouse moving over it hovers it 390ms
+   ✓ a lot opened as its section (PRD v2 §3.3, §3.5) > draws its zone without it, and switching to another lot of the same zone keeps the new one out and the old one back 626ms
+   ✓ a lot opened as its section (PRD v2 §3.3, §3.5) > leaves no discarded text in the registry the view hides small text through, however often a zone is redrawn 591ms
+stderr | tests/unit/worldQuality.test.tsx > the shell’s fallbacks > under reduced motion renders the schematic and one line, and mounts no engine
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | tests/unit/worldQuality.test.tsx > the shell’s fallbacks > under reduced motion renders the schematic and one line, and mounts no engine
+Warning: An update to WorldFrame inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at WorldFrame (/home/user/dikagustiana.com/src/components/world/WorldFrame.tsx:69:23)
+    at Router (/home/user/dikagustiana.com/node_modules/react-router/dist/umd/react-router.development.js:1203:17)
+    at MemoryRouter (/home/user/dikagustiana.com/node_modules/react-router/dist/umd/react-router.development.js:1097:7)
+    at QueryClientProvider (file:///home/user/dikagustiana.com/node_modules/@tanstack/react-query/build/modern/QueryClientProvider.js:20:3)
+
+stderr | tests/unit/worldQuality.test.tsx > the shell’s fallbacks > on a phone keeps the poster and offers to start the world by hand; the places fold into a disclosure
+Warning: React does not recognize the `fetchPriority` prop on a DOM element. If you intentionally want it to appear in the DOM as a custom attribute, spell it as lowercase `fetchpriority` instead. If you accidentally passed it from a parent component, remove it from the DOM element.
+    at img
+    at PosterImage (/home/user/dikagustiana.com/src/components/world/FrameShell.tsx:395:123)
+    at div
+    at div
+    at WorldFrame (/home/user/dikagustiana.com/src/components/world/WorldFrame.tsx:69:23)
+    at Router (/home/user/dikagustiana.com/node_modules/react-router/dist/umd/react-router.development.js:1203:17)
+    at MemoryRouter (/home/user/dikagustiana.com/node_modules/react-router/dist/umd/react-router.development.js:1097:7)
+    at QueryClientProvider (file:///home/user/dikagustiana.com/node_modules/@tanstack/react-query/build/modern/QueryClientProvider.js:20:3)
+
+stderr | tests/unit/worldQuality.test.tsx > the shell’s fallbacks > on a phone keeps the poster and offers to start the world by hand; the places fold into a disclosure
+Warning: An update to WorldFrame inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at WorldFrame (/home/user/dikagustiana.com/src/components/world/WorldFrame.tsx:69:23)
+    at Router (/home/user/dikagustiana.com/node_modules/react-router/dist/umd/react-router.development.js:1203:17)
+    at MemoryRouter (/home/user/dikagustiana.com/node_modules/react-router/dist/umd/react-router.development.js:1097:7)
+    at QueryClientProvider (file:///home/user/dikagustiana.com/node_modules/@tanstack/react-query/build/modern/QueryClientProvider.js:20:3)
+
+ ✓ tests/unit/worldQuality.test.tsx (10 tests) 2352ms
+   ✓ the LOD switch > hides the near group at the far view and shows it at the middle and near distances, frame by frame 1872ms
+ ✓ tests/unit/chainCondition.test.ts (20 tests) 40ms
+stderr | tests/unit/fiaModelPage.test.tsx > the model page header > names the company and ticker, its sub-industry, pair, quarters and status
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ tests/unit/worldChain.test.ts (6 tests) 9254ms
+   ✓ the chain highlight (PRD v2 §3.9) > lights one level on the roads: every link’s routes with travelling dashes, the linked lots outlined, the rest dimmed, no label on any route; a company lights its sub-industry 985ms
+   ✓ the chain highlight (PRD v2 §3.9) > shows a hovered route’s link note 598ms
+   ✓ the chain highlight (PRD v2 §3.9) > draws every road a link’s goods take: every supplier lot to every customer lot, as the vehicles drive them 6007ms
+   ✓ the chain highlight (PRD v2 §3.9) > draws what is lit again when a measured class arrives later 385ms
+   ✓ the chain highlight (PRD v2 §3.9) > lights a selected vehicle’s route, ahead and behind, and its two lots only 390ms
+   ✓ the chain highlight (PRD v2 §3.9) > a measured link draws its long dashes; the full chain lights the connected component and frames it at the district band; dispose leaves nothing 888ms
+stderr | tests/unit/fiaModelPage.test.tsx > the model page header > falls through to the existing page for a slug with no package
+404 Error: User attempted to access non-existent route: /finance/finance-in-action/ptba
+
+ ✓ tests/unit/worldInteriors.test.ts (5 tests) 1144ms
+   ✓ driver placement > exposing a company opens its plot, marks its bound stations with the lines’ labels, lights one by line id, clears on deselect and on dispose 1111ms
+ ✓ tests/unit/worldPlacement.test.ts (11 tests) 396ms
+stderr | tests/unit/fiaModelPage.test.tsx > The model grid and the inspector > moves with the arrow keys from one tab stop
+Warning: An update to ModelGrid inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act
+    at ModelGrid (/home/user/dikagustiana.com/src/components/finance-in-action/viewer/model/ModelGrid.tsx:52:22)
+    at section
+    at Section (/home/user/dikagustiana.com/src/pages/finance-in-action/FiaModelPage.tsx:104:20)
+    at div
+    at div
+    at div
+    at main
+    at div
+    at PageLayout (/home/user/dikagustiana.com/src/components/layouts/PageLayout.tsx:11:23)
+    at FiaModelPage (/home/user/dikagustiana.com/src/pages/finance-in-action/FiaModelPage.tsx:137:25)
+    at FiaModelRouter (/home/user/dikagustiana.com/src/pages/finance-in-action/FiaModelRouter.tsx:20:27)
+    at FiaModelRoute
+    at RenderedRoute (/home/user/dikagustiana.com/node_modules/react-router/dist/umd/react-router.development.js:535:7)
+    at Routes (/home/user/dikagustiana.com/node_modules/react-router/dist/umd/react-router.development.js:1269:7)
+    at Router (/home/user/dikagustiana.com/node_modules/react-router/dist/umd/react-router.development.js:1203:17)
+    at MemoryRouter (/home/user/dikagustiana.com/node_modules/react-router/dist/umd/react-router.development.js:1097:7)
+    at Provider (file:///home/user/dikagustiana.com/node_modules/@radix-ui/react-context/dist/index.mjs:27:15)
+    at TooltipProvider (file:///home/user/dikagustiana.com/node_modules/@radix-ui/react-tooltip/dist/index.mjs:29:5)
+    at AuthProvider (/home/user/dikagustiana.com/src/contexts/AuthContext.tsx:8:25)
+    at QueryClientProvider (file:///home/user/dikagustiana.com/node_modules/@tanstack/react-query/build/modern/QueryClientProvider.js:20:3)
+    at _HelmetProvider (/home/user/dikagustiana.com/node_modules/react-helmet-async/lib/index.js:483:5)
+
+ ✓ tests/unit/fiaEngine.test.ts (32 tests) 99ms
+ ✓ tests/unit/fiaModelPage.test.tsx (17 tests) 5732ms
+   ✓ the model page header > names the company and ticker, its sub-industry, pair, quarters and status 606ms
+   ✓ The model grid and the inspector > opens the inspector on a formula cell, in words and with values 699ms
+   ✓ The model grid and the inspector > shows the tie-out of a sourced cell, agreeing and differing 664ms
+   ✓ The model grid and the inspector > explains a missing cell instead of inventing one 492ms
+   ✓ The model grid and the inspector > moves with the arrow keys from one tab stop 1192ms
+ ✓ tests/unit/worldRegistry.test.ts (14 tests) 162ms
+stderr | tests/unit/fiaUnitEconomics.test.tsx > no volume, no unit economics (constraint 9) > draws nothing on the page but the one line
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ tests/unit/fiaUnitEconomics.test.tsx (15 tests) 2320ms
+   ✓ no volume, no unit economics (constraint 9) > draws nothing on the page but the one line 419ms
+   ✓ the unit economics section > opens a driver’s input rows with their values and units 304ms
+stderr | tests/unit/financeLandingSection06.test.tsx > section 06 on /finance > draws six cards in sort order, numbered 01 to 06
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ tests/unit/financeLandingSection06.test.tsx (7 tests) 638ms
+stderr | tests/unit/capitalInMotionRoutes.test.tsx > Capital in Motion at /finance/capital-allocation > the index shows all 21 condition cards, in layer order
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ tests/unit/capitalInMotionRoutes.test.tsx (34 tests) 1895ms
+stderr | tests/unit/worldBoundary.test.tsx > the data boundary > the world and the board run against a client that throws on writes, and the index is read once
+Warning: React does not recognize the `fetchPriority` prop on a DOM element. If you intentionally want it to appear in the DOM as a custom attribute, spell it as lowercase `fetchpriority` instead. If you accidentally passed it from a parent component, remove it from the DOM element.
+    at img
+    at PosterImage (/home/user/dikagustiana.com/src/components/world/FrameShell.tsx:395:123)
+    at div
+    at div
+    at WorldFrame (/home/user/dikagustiana.com/src/components/world/WorldFrame.tsx:69:23)
+    at Router (/home/user/dikagustiana.com/node_modules/react-router/dist/umd/react-router.development.js:1203:17)
+    at MemoryRouter (/home/user/dikagustiana.com/node_modules/react-router/dist/umd/react-router.development.js:1097:7)
+    at QueryClientProvider (file:///home/user/dikagustiana.com/node_modules/@tanstack/react-query/build/modern/QueryClientProvider.js:20:3)
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ tests/unit/worldBoundary.test.tsx (5 tests) 1424ms
+   ✓ the data boundary > the world and the board run against a client that throws on writes, and the index is read once 302ms
+   ✓ the data boundary > an outage reads unavailable everywhere, never absence 1047ms
+stderr | tests/unit/navDropdown.test.tsx > NavDropdown under a pointer > opens on hover and stays open while the pointer moves from the label to the last item
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ tests/unit/navDropdown.test.tsx (15 tests) 509ms
+ ✓ tests/unit/revisions.test.ts (33 tests) 19ms
+stderr | tests/unit/fiaLinks.test.tsx > the index with the lens on > draws nothing of the links with the lens off
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ tests/unit/fiaLinks.test.tsx (10 tests) 1008ms
+ ✓ tests/unit/accountingImport.test.ts (13 tests) 250ms
+ ✓ tests/unit/fiaTwoGates.test.ts (14 tests) 19ms
+stderr | tests/unit/fiaExport.test.tsx > loading > downloads the workbook from the model page’s primary button
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ tests/unit/fiaExport.test.tsx (9 tests) 1629ms
+   ✓ the exported workbook > names its sheets and its file after the model version 316ms
+   ✓ loading > downloads the workbook from the model page’s primary button 892ms
+stderr | tests/unit/worldThinkTank.test.tsx > the think tank panel > lists each room’s pieces by title and date with the owner’s kind; an untagged piece lights nothing
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | tests/unit/worldThinkTank.test.tsx > the think tank panel > a thesis shows its evidence and falsifier; a model-based piece its models; a tag selects its building
+Warning: validateDOMNesting(...): <ul> cannot appear as a descendant of <p>.
+    at ul
+    at p
+    at section
+    at div
+    at ThinkTank (/home/user/dikagustiana.com/src/components/world/ThinkTank.tsx:22:22)
+    at Router (/home/user/dikagustiana.com/node_modules/react-router/dist/umd/react-router.development.js:1203:17)
+    at MemoryRouter (/home/user/dikagustiana.com/node_modules/react-router/dist/umd/react-router.development.js:1097:7)
+
+ ✓ tests/unit/worldThinkTank.test.tsx (4 tests) 1034ms
+   ✓ the think tank in the world > the building on the hill lists its rooms and offers the think tank 870ms
+ ✓ tests/unit/worldFlows.test.ts (22 tests) 70929ms
+   ✓ the roads at runtime (PRD v2 §3.6) > sends the raw-export trucks along the dashed raw-export road, and keeps a link’s route off it unless its lot’s driveway joins it 454ms
+   ✓ flows from the registry’s links (PRD v2 §3.6, Appendix A) > gives every goods vehicle an origin lot, a destination lot and a load named after its link (B1) 1160ms
+   ✓ flows from the registry’s links (PRD v2 §3.6, Appendix A) > starts the world full and keeps it within the cap: three hundred on a laptop, a hundred and twenty on a phone 4808ms
+   ✓ flows from the registry’s links (PRD v2 §3.6, Appendix A) > sends one vehicle per 30 s on an expected link, per 18 s measured light and per 10 s heavy; a phone half as many 3876ms
+   ✓ flows from the registry’s links (PRD v2 §3.6, Appendix A) > at the cap gives the free places to the flows by their cadence: a heavy flow sends more than an expected one 24805ms
+   ✓ flows from the registry’s links (PRD v2 §3.6, Appendix A) > keeps the roads moving at the cap: over the sixth simulated minute, three in four vehicles are on the move 13274ms
+   ✓ flows from the registry’s links (PRD v2 §3.6, Appendix A) > stops a vehicle crossing a gate on the weighbridge for a second and a half, and unloads one at the bay for two (B3) 6040ms
+   ✓ flows from the registry’s links (PRD v2 §3.6, Appendix A) > drives back empty in a lighter tone and is gone at home, leaving nothing behind (spawn and despawn) 10490ms
+   ✓ flows from the registry’s links (PRD v2 §3.6, Appendix A) > calls ships at the quays, runs the rail shuttle, and walks the town’s pavements on a laptop only (B5) 1726ms
+   ✓ flows from the registry’s links (PRD v2 §3.6, Appendix A) > draws the whole fleet in a handful of draw calls, whatever its size (B6) 1536ms
+   ✓ the cards and the pointer on flows (PRD v2 §3.4, §3.11) > says on a vehicle’s card its kind, load, ends and link state, that the traffic is illustrative, and no figure 761ms
+   ✓ the cards and the pointer on flows (PRD v2 §3.4, §3.11) > counts the flows crossing a gate in words on its card 579ms
+   ✓ the cards and the pointer on flows (PRD v2 §3.4, §3.11) > finds a vehicle under the pointer through its instance, labels it by its load and ends, and frames it 444ms
+stderr | tests/unit/homePage.test.tsx > the homepage > ends with the glimpse: the map first, then the row, and no argument or revision of judgment after it
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ tests/unit/homePage.test.tsx (5 tests) 415ms
+ ✓ tests/unit/worldEngineMount.test.ts (5 tests) 682ms
+   ✓ the world engine mounts and disposes > mounts and disposes ten times with nothing left behind 371ms
+stderr | tests/unit/essayOwnership.test.tsx > green transition essay ownership > renders at the address the essay actually owns
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ tests/unit/essayOwnership.test.tsx (7 tests) 395ms
+stderr | tests/unit/fiaIndex.test.tsx > with the preview flag unset > renders the existing Finance in Action index, unchanged, with nothing synthetic
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ tests/unit/worldScene.test.ts (6 tests) 32992ms
+   ✓ the world scene > has an entity for every placed sub-industry, two lots each, every gate, signpost and fixture, and the flows 849ms
+   ✓ the world scene > reads model statuses: published lights the building, an outage reads as unavailable, absence as no model yet 659ms
+   ✓ the world scene > says on every vehicle card that the traffic is illustrative 452ms
+   ✓ the world scene > switches the cold-chain reefers, the goods and the money layer with their layers, and sends vehicles more often on measured flows 12993ms
+   ✓ the world scene > replays deterministically: two worlds with one seed agree after 120 simulated seconds 17686ms
+   ✓ the world scene > keeps the renderable count under the PRD budgets at the far, middle and near views 351ms
+ ✓ tests/unit/fiaIndex.test.tsx (9 tests) 1864ms
+   ✓ the preview index, lens off > filters by ticker or name 417ms
+ ✓ tests/unit/worldMarks.test.ts (3 tests) 1445ms
+   ✓ condition marks > draws one disc per placed mark, numbered and selectable, offering the condition; the overlay clears them and dispose leaves nothing 943ms
+   ✓ condition marks > reads the camera distance for the slider: 0 at the home view, within [0, 1] always, and carried on every frame reading 497ms
+stderr | tests/unit/consolidationDetail.test.tsx > consolidation series essay page > renders the essay in the essay layout, not the topic template
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ tests/unit/consolidationDetail.test.tsx (3 tests) 634ms
+   ✓ consolidation series essay page > renders the essay in the essay layout, not the topic template 351ms
+ ✓ tests/unit/essayUrl.test.ts (21 tests) 9ms
+ ✓ tests/unit/pasteFromWord.test.ts (9 tests) 219ms
+ ✓ tests/unit/placement.test.ts (18 tests) 8ms
+ ✓ tests/unit/linkCardDialog.test.tsx (6 tests) 3917ms
+   ✓ LinkCardDialog: Fetch details > fills every field, shows when, keeps them editable, and inserts the whole snapshot 1022ms
+   ✓ LinkCardDialog: Fetch details > never overwrites a field the author typed first 670ms
+   ✓ LinkCardDialog: Fetch details > …nor one typed WHILE the fetch was in flight 614ms
+   ✓ LinkCardDialog: Fetch details > a failed fetch says so plainly and manual entry still works, with no fetch time claimed 341ms
+   ✓ LinkCardDialog: Fetch details > changing the link drops the untouched fetched values and the fetch time; typed values stay 729ms
+   ✓ LinkCardDialog: Fetch details > an answer for a link the author has since changed is ignored 539ms
+ ✓ tests/unit/fsliToc.test.tsx (9 tests) 168ms
+ ✓ tests/unit/worldWhiteboard.test.ts (3 tests) 1061ms
+   ✓ the whiteboard in the world > draws "No model yet" on an exposed company without a model, the content with one, and clicking it opens the board 1006ms
+ ✓ tests/unit/worldStories.test.ts (6 tests) 4342ms
+   ✓ the stories (PRD v2 §3.10, D2) > lights each of the six stories end to end: every hop drawn on its routes, every hop’s lots outlined, the rest dimmed, framed at the district band 1716ms
+   ✓ the stories (PRD v2 §3.10, D2) > reads the rupiah upstream, against the goods, with the banks lit beside it; a measured hop says so 529ms
+   ✓ the stories (PRD v2 §3.10, D2) > marks a lit story’s hop measured when its class arrives after the story was lit 395ms
+   ✓ the stories (PRD v2 §3.10, D2) > gives way to a selection’s chain, and clearing the story then leaves that chain lit; a hop button frames its hop 806ms
+   ✓ the governance and regulation pulses (PRD v2 §3.6, §3.12, D5) > runs a pulse up every link’s route from the customer with governance, and down it from the supplier with regulation; nothing until a layer is on 610ms
+ ✓ tests/unit/serialize.test.ts (19 tests) 27ms
+ ✓ tests/unit/fsLib.test.ts (9 tests) 8ms
+stderr | tests/unit/shareImage.test.tsx > the hydrated og:image is the one the prerender wrote > ArticleShell: the essay's card when it has no hero
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ tests/unit/shareImage.test.tsx (8 tests) 260ms
+ ✓ tests/unit/navConfig.test.ts (34 tests) 13ms
+ ✓ tests/unit/sanitizeHtml.test.ts (14 tests) 76ms
+ ✓ tests/unit/canonicalPathParity.test.ts (11 tests) 5ms
+stderr | tests/unit/takeawaysGuidance.test.tsx > key-takeaways guidance copy matches the gate > says three are required for an editorial essay
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ tests/unit/takeawaysGuidance.test.tsx (8 tests) 370ms
+stderr | tests/unit/greenTransitionPhase.test.tsx > green transition phase tabs > /green-transition/now titles itself Where We Are Now and lists the essays in phase where-we-are-now
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ tests/unit/greenTransitionPhase.test.tsx (5 tests) 458ms
+stderr | tests/unit/fiaPublished.test.tsx > the preview with a published model > draws the index with the published model once the read returns
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ tests/unit/genreContract.test.ts (13 tests) 13ms
+ ✓ tests/unit/fiaPublished.test.tsx (6 tests) 760ms
+   ✓ the preview with a published model > draws the index with the published model once the read returns 495ms
+ ✓ tests/unit/fs_load.test.ts (11 tests) 23ms
+stderr | tests/unit/publishModalPlacement.test.tsx > publish modal placement fork > editorial section: a Placement block with the category select, and no module controls
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ tests/unit/publishModalPlacement.test.tsx (5 tests) 594ms
+ ✓ tests/unit/siteFeeds.test.ts (7 tests) 51ms
+ ✓ tests/unit/linkCardRender.test.tsx (4 tests) 150ms
+stderr | src/components/industry-chain/ChainAudit.test.tsx > audit corrections > resets reindustrialisation without losing the selected joint or distance
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ tests/unit/worldEngineRules.test.ts (6 tests) 99ms
+ ✓ src/components/industry-chain/ChainAudit.test.tsx (6 tests) 2073ms
+   ✓ audit corrections > resets reindustrialisation without losing the selected joint or distance 855ms
+   ✓ audit corrections > resets green transition without losing the selected joint or distance 457ms
+   ✓ audit corrections > retains the same map and stage elements through all composed states 464ms
+stderr | tests/unit/authFailurePath.test.tsx > AuthContext transient admin-check failure > bounces the signed-in admin to /auth when the first check fails
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ tests/unit/worldFollow.test.ts (5 tests) 34689ms
+   ✓ Follow (PRD v2 §3.10, D4) > rides a story from its first lot to its last: a vehicle out of each lot, the lot’s card at each bay, the story’s card at the end, in 60 to 90 seconds 14278ms
+   ✓ Follow (PRD v2 §3.10, D4) > glides a hop no vehicle carries, and keeps the clock at its own pace while the world runs faster 10703ms
+   ✓ Follow (PRD v2 §3.10, D4) > moves on from a stop at Space; lets go at Escape, at the arrows (a drag) and at follow(null) 5523ms
+   ✓ Follow (PRD v2 §3.10, D4) > F rides the selected vehicle to its customer’s bay and shows the customer’s card 1910ms
+   ✓ Follow a vehicle on its way back (PRD v2 §3.10) > rides an empty vehicle home to its supplier’s lot 2274ms
+ ✓ tests/unit/authFailurePath.test.tsx (2 tests) 172ms
+ ✓ tests/unit/publicationContract.test.ts (6 tests) 64ms
+ ✓ tests/unit/brief.test.ts (10 tests) 7ms
+stderr | tests/unit/editorialFeed.test.tsx > EditorialFeed > says the fetch failed instead of reporting an empty section
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ tests/unit/editorialFeed.test.tsx (5 tests) 244ms
+ ✓ tests/unit/worldPeerBand.test.ts (5 tests) 7ms
+ ✓ tests/unit/figureValidation.test.ts (12 tests) 8ms
+stderr | tests/unit/booksList.test.tsx > BooksList > queries useBooks scoped to the URL category
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ tests/unit/booksList.test.tsx (5 tests) 130ms
+stderr | tests/unit/authTabFocus.test.tsx > auth events on tab focus > keeps the editor mounted through SIGNED_IN / TOKEN_REFRESHED for the same user
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ tests/unit/chainCurriculumMap.test.ts (7 tests) 7ms
+ ✓ tests/unit/authTabFocus.test.tsx (2 tests) 122ms
+ ✓ tests/unit/worldPoster.test.ts (5 tests) 13ms
+ ✓ tests/unit/linkPreviewClient.test.ts (4 tests) 14ms
+stderr | tests/unit/capitalConditionCaseGate.test.tsx > SHOW_CASE_COMPANIES = true > restores the "observed in the case of" clause in The Situation
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ tests/unit/imageBlock.test.ts (11 tests) 8ms
+ ✓ tests/unit/capitalConditionCaseGate.test.tsx (2 tests) 392ms
+   ✓ SHOW_CASE_COMPANIES = true > restores the "observed in the case of" clause in The Situation 318ms
+ ✓ tests/unit/articleBodyInline.test.tsx (12 tests) 92ms
+ ✓ tests/unit/fiaFormat.test.ts (8 tests) 7ms
+ ✓ tests/unit/queryHooks.test.tsx (3 tests) 205ms
+ ✓ tests/unit/motion.test.ts (4 tests) 6ms
+ ✓ tests/unit/readingPathWeight.test.ts (4 tests) 4ms
+stderr | tests/unit/componentStates.test.tsx > EmptyState > renders default copy
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ tests/unit/componentStates.test.tsx (8 tests) 221ms
+ ✓ tests/unit/tocHeadingIds.test.tsx (2 tests) 77ms
+ ✓ tests/unit/fiaQuality.test.ts (33 tests) 21ms
+ ✓ tests/unit/errorBoundary.test.tsx (4 tests) 204ms
+stderr | tests/unit/siteChrome.test.tsx > the site chrome > opens the header row on Home, with no About beside it
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ tests/unit/siteChrome.test.tsx (2 tests) 190ms
+ ✓ tests/unit/presentation.test.ts (4 tests) 5ms
+ ✓ tests/unit/formatDate.test.ts (4 tests) 20ms
+ ✓ tests/unit/workbookFormat.test.ts (9 tests) 724ms
+   ✓ the number formats in the file > writes every value cell of the file in the site convention: a figure, an en dash, a date, an error code or the text itself 635ms
+ ✓ tests/unit/workbookRefs.test.ts (14 tests) 1257ms
+   ✓ the workbook's graph > grows a sheet past its cells with a value to every cell a formula names, so a jump lands on that cell 444ms
+   ✓ the workbook's graph > lists the same dependents as a plain walk over the file, for every filled cell of three sheets 672ms
+ ✓ tests/unit/shareCard.test.ts (10 tests) 1467ms
+   ✓ share card > holds the longest published title in three lines, at the largest size 322ms
+ ✓ tests/unit/workbookBuild.test.ts (9 tests) 3258ms
+   ✓ the working paper build > publishes every cell exceljs reads with a value or a formula on a published sheet, with that formula, and no other 819ms
+
+ Test Files  100 passed (100)
+      Tests  1388 passed (1388)
+   Start at  03:23:09
+   Duration  125.04s (transform 6.93s, setup 17.88s, collect 25.73s, tests 252.74s, environment 46.30s, prepare 7.82s)
+
+JSON report written to /home/user/dikagustiana.com/vitest-report.json
+[exit 0]
