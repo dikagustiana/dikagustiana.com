@@ -62,6 +62,8 @@ import {
 import { cn } from '@/lib/utils';
 import { StatusBadge } from './ChainTargetPanel';
 import { ChainLensContext } from './chainLensContext';
+import { ChainModelsContext, type StageModels } from './chainModelsContext';
+import { useNavigate } from 'react-router-dom';
 import { isDoor, markNumber } from './chainTargets';
 
 const S = Object.fromEntries(STAGES.map((s) => [s.id, s]));
@@ -170,10 +172,33 @@ function LitNote({ id }: { id: string }) {
  * plate keeps it at both levels, and the shift's reading stays, because the
  * overview is a map to work at rather than a picture of one.
  */
+/** A stage's door into Finance in Action, at the finance distance (chain view §3.7). */
+function StageModelsLink({ models: m }: { models: StageModels }) {
+  const navigate = useNavigate();
+  return (
+    <a
+      href={m.href}
+      aria-label={m.name}
+      data-chain-models=""
+      onClick={(e) => {
+        if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+        e.preventDefault();
+        navigate(m.href);
+      }}
+      className="mt-1 inline-flex min-h-11 items-center text-sm font-medium text-accent underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+    >
+      {m.text}
+    </a>
+  );
+}
+
 function StageBox({ id, detail = true }: { id: string; detail?: boolean }) {
   const stage = S[id];
   const lit = useLit(id);
   const status = useStatus(id);
+  const { lens } = useContext(ChainLensContext);
+  const models = useContext(ChainModelsContext);
+  const door = lens === 'finance' ? models?.get(id) : undefined;
   return (
     <div className="min-w-0">
       <div
@@ -187,6 +212,7 @@ function StageBox({ id, detail = true }: { id: string; detail?: boolean }) {
       >
         {stage.origin && <p className={KICKER}>{CHAIN_COPY.controls.origin}</p>}
         <p className="break-words text-[15px] font-semibold leading-snug text-foreground">{stage.label}</p>
+        {door && <StageModelsLink models={door} />}
         {detail && stage.lanes && <p className="mt-1 text-xs leading-snug text-muted-foreground">{stage.lanes.join(' · ')}</p>}
         {detail && stage.detail && <p className="mt-1 text-xs leading-snug text-muted-foreground">{stage.detail}</p>}
         {detail && stage.demand && (

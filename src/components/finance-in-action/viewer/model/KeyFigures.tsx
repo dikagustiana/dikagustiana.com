@@ -5,13 +5,10 @@
  * as well as a sign. A role the model does not carry says so and shows no
  * number. Every figure comes from lib/finance-in-action/keyFigures.ts.
  */
-import { formatNumber, formatPercent } from '@/lib/finance-in-action/format';
-import { KEY_FIGURE_WORDS, type KeyFigure, type KeyFigureSet } from '@/lib/finance-in-action/keyFigures';
+import { formatNumber } from '@/lib/finance-in-action/format';
+import { KEY_FIGURE_WORDS, yearOnYearText, type KeyFigure, type KeyFigureSet } from '@/lib/finance-in-action/keyFigures';
 
 export const KEY_FIGURES_LABEL = 'Key figures';
-
-export const yearOnYearText = (f: KeyFigure): string | null =>
-  f.yearOnYear === null ? null : `${f.yearOnYear > 0 ? '+' : ''}${formatPercent(f.yearOnYear)} year on year`;
 
 function Card({ figure: f }: { figure: KeyFigure }) {
   const yoy = yearOnYearText(f);

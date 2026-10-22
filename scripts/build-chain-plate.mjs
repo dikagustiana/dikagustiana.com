@@ -123,8 +123,17 @@ const chip = (x, y, s, cls, anchor = 'middle', size = 14, perEm = 0.56, h = 18) 
   return `<rect x="${x0}" y="${y0}" width="${w}" height="${h}" rx="2" className="cp-chip" />${T(x, y, s, cls, anchor)}`;
 };
 
+/**
+ * The finance-distance doors into Finance in Action (chain view, PROMPT-site
+ * §3.7): one <StageModelsHit> per stage box, emitted after every other hit so
+ * the map's existing keyboard order is unchanged. It draws nothing at the
+ * economy distance, or for a stage with no company on the slate.
+ */
+let stageHits = [];
+
 /** Transformation stage: one style for every stage. An origin gets a small bar, never a fill. */
 const stage = (x, y, w, h, id, lines, { titleTop = false, size = T_STAGE } = {}) => {
+  stageHits.push(`<StageModelsHit id="${id}" x={${x}} y={${y}} width={${w}} height={${h}} />`);
   const L = [].concat(lines);
   const lh = size + 1;
   const y0 = titleTop ? y + size + 4 : y + h / 2 + size * 0.36 - ((L.length - 1) * lh) / 2;
@@ -484,6 +493,7 @@ function overlays(ctx, orderFrom = null) {
 
 function plateDetail() {
   obstacles = [];
+  stageHits = [];
   const AX = 275;
   const base = [], jointHits = [], bandHits = [], layerSwitches = [];
 
@@ -775,7 +785,7 @@ function plateDetail() {
   bands(ctx);
   rails(base, C.fanT, C.org[0], C.cons[1], RAIL0);
   const { shiftLayers, marks, markOrder } = overlays(ctx);
-  return { W, H, base, shiftLayers, marks, markOrder, hits: [...jointHits, ...bandHits, ...layerSwitches], aria: CHAIN_COPY.aria.wide };
+  return { W, H, base, shiftLayers, marks, markOrder, hits: [...jointHits, ...bandHits, ...layerSwitches, ...stageHits], aria: CHAIN_COPY.aria.wide };
 }
 
 /* ═══ THE OVERVIEW — the same records in five groups ══════════════════════ */
@@ -795,6 +805,7 @@ function plateDetail() {
  */
 function plateOverview(orderFrom) {
   obstacles = [];
+  stageHits = [];
   const AX = 300;
   const base = [], jointHits = [], bandHits = [], layerSwitches = [];
   const lines = (id, max) => wrap(label(id), max);
@@ -1024,7 +1035,7 @@ function plateOverview(orderFrom) {
   bands(ctx);
   rails(base, fanT, g1[0], g5[1], RAIL0);
   const { shiftLayers, marks, markOrder } = overlays(ctx, orderFrom);
-  return { W, H, base, shiftLayers, marks, markOrder, hits: [...jointHits, ...bandHits, ...layerSwitches], aria: CHAIN_COPY.aria.compact };
+  return { W, H, base, shiftLayers, marks, markOrder, hits: [...jointHits, ...bandHits, ...layerSwitches, ...stageHits], aria: CHAIN_COPY.aria.compact };
 }
 
 /* ═══ EMIT ════════════════════════════════════════════════════════════════ */
@@ -1078,6 +1089,7 @@ import { BandHit } from './BandHit';
 import { JointHit } from './JointHit';
 import { LayerSwitch } from './LayerSwitch';
 import { ShiftMark } from './ShiftMark';
+import { StageModelsHit } from './StageModelsHit';
 
 export function ChainPlateWide() {
   return (

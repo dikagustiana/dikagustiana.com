@@ -55,7 +55,7 @@
  * the document.
  */
 
-import { useCallback, useEffect, useId, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent, type ReactNode } from 'react';
+import { Suspense, lazy, useCallback, useEffect, useId, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent, type ReactNode } from 'react';
 import {
   CHAIN_COPY,
   CONDITION_AS_OF,
@@ -82,11 +82,24 @@ import { ChainTargetPanel } from './ChainTargetPanel';
 import { HoverLabel } from './HoverLabel';
 import { isDoor, isJointId, isolationSet, markNumber, markedIds, targetLabel } from './chainTargets';
 import { asksForFullChain, initialChainUrl, useChainUrl, type ChainUrlState } from './useChainUrl';
+import { ChainModelsContext, type StageModelsMap } from './chainModelsContext';
 import './chain-plate.css';
 import './chain-review.css';
 // last: with the flag off the slot is dropped, and its own imports (useMediaQuery) must not move ahead of this
 // module's and reorder the flag-off chunk
 import { WorldSlot } from '@/components/world/Poster';
+
+/**
+ * Finance in Action's counts per stage, for the finance distance's stage
+ * doors (chain view, PROMPT-site §3.7). Picked at build time like App.tsx's
+ * routes: the preview reads the preview registry, production the published
+ * models, and with neither flag nothing is loaded and no door is drawn.
+ */
+const StageModelsFeed = __FIA_PREVIEW__
+  ? lazy(() => import('@/components/finance-in-action/stageModels/PreviewStageModelsFeed'))
+  : __FIA_LIVE__
+    ? lazy(() => import('@/components/finance-in-action/stageModels/LiveStageModelsFeed'))
+    : null;
 
 /** The wide plate needs this much room before its type stays readable. */
 export const WIDE_PLATE_QUERY = '(min-width: 1280px)';
@@ -191,6 +204,7 @@ export function ChainPlate({
   variant = 'full',
   initialShift = null,
   heading = 'h2',
+  stageModels: givenModels,
 }: {
   links?: readonly ChainModuleLink[];
   /** `preview` opens short and expands in place; `full` is the whole chain from the start. */
@@ -209,7 +223,15 @@ export function ChainPlate({
    * An address always wins over it.
    */
   initialShift?: ShiftId | null;
+  /**
+   * Finance in Action's models per stage, when the caller already has them;
+   * otherwise the build's own feed supplies them. Drawn at the finance
+   * distance only.
+   */
+  stageModels?: StageModelsMap | null;
 }) {
+  const [fedModels, setFedModels] = useState<StageModelsMap | null>(null);
+  const stageModels = givenModels ?? fedModels;
   const base = useId();
   const panelId = `${base}-chain-panel`;
   const figureId = `${base}-chain-figure`;
@@ -639,6 +661,12 @@ export function ChainPlate({
         )}
       </header>
 
+      {StageModelsFeed && givenModels === undefined && (
+        <Suspense fallback={null}>
+          <StageModelsFeed onModels={setFedModels} />
+        </Suspense>
+      )}
+      <ChainModelsContext.Provider value={stageModels}>
       <ChainLensContext.Provider value={lensState}>
         {/* Below the plate's width the column is the map, and a column is
             read at reading width — not stretched across a tablet. The figure
@@ -785,6 +813,7 @@ export function ChainPlate({
           </button>
         )}
       </ChainLensContext.Provider>
+      </ChainModelsContext.Provider>
     </div>
   );
 }

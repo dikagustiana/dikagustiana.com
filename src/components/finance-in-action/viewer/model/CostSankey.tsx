@@ -34,8 +34,7 @@ import { PER_UNIT_DECIMALS, type UEView } from '@/lib/finance-in-action/unitEcon
 import { periodById } from '@/lib/finance-in-action/model/periods';
 import { cn } from '@/lib/utils';
 
-export const SANKEY_TITLE = (noun: string) => `Where a ${SANKEY_UNIT_WORD} of ${noun} goes`;
-const SANKEY_UNIT_WORD = 'unit';
+const SANKEY_TITLE = COPY.sankeyTitle;
 
 const FILL: Record<FlowKind, string> = {
   cost: 'hsl(var(--fia-cost))',

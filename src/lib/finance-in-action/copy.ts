@@ -69,6 +69,8 @@ export const COPY = {
   noLayerLink: 'No link to the energy or logistics layer in the register yet.',
   noCompanies: 'No company on the slate here yet.',
   openLink: 'Open the link card',
+  // Cost flow (chain view §3.5)
+  sankeyTitle: (noun: string) => `Where a unit of ${noun} goes`,
   publishedFailed: 'Published models could not be read, so only the preview companies are shown. The reason:',
   publishedLoading: 'Reading the published models…',
   // Production (VITE_FIA_LIVE): no fixture stands in, so each failure is a sentence of its own.

@@ -17,7 +17,7 @@ import { isNum, type Value } from './engine/engine';
 import { latestReported, periodById, quarterPeriods, yearAgo } from './model/periods';
 import type { Workbook } from './model/workbook';
 import { denominatorState, noVolumeAnywhere, PER_UNIT_DECIMALS, plural, unitEconomicsAt, type UEView } from './unitEconomics';
-import { decimalsFor } from './format';
+import { decimalsFor, formatPercent } from './format';
 
 export const KEY_FIGURE_ROLES = [
   { id: 'volume', title: 'Volume sold' },
@@ -188,3 +188,7 @@ export function keyFigures(wb: Workbook, values: Map<string, Value>): KeyFigureS
 
   return { periodId, periodLabel, figures: [volume, revenue, cost, profit, owners] };
 }
+
+/** The year-on-year pill: "+4,1% year on year", or nothing without a comparator. */
+export const yearOnYearText = (f: KeyFigure): string | null =>
+  f.yearOnYear === null ? null : `${f.yearOnYear > 0 ? '+' : ''}${formatPercent(f.yearOnYear)} year on year`;

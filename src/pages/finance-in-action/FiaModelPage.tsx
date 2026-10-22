@@ -24,7 +24,7 @@ import { CompanyRailNav } from '@/components/finance-in-action/viewer/model/Comp
 import { KeyFigures } from '@/components/finance-in-action/viewer/model/KeyFigures';
 import { ModelCard } from '@/components/finance-in-action/viewer/model/ModelCard';
 import { AlongTheChain } from '@/components/finance-in-action/viewer/model/AlongTheChain';
-import { CostSankey, SANKEY_TITLE } from '@/components/finance-in-action/viewer/model/CostSankey';
+import { CostSankey } from '@/components/finance-in-action/viewer/model/CostSankey';
 import { LinkCard } from '@/components/finance-in-action/viewer/links/LinkCard';
 import { keyFigures } from '@/lib/finance-in-action/keyFigures';
 import { UELineDetail } from '@/components/finance-in-action/viewer/model/UELineDetail';
@@ -232,7 +232,7 @@ export function FiaModelPage({ pkg, reg }: { pkg: ModelPackage; reg: Registry })
             </Section>
 
             {/* Directly after the waterfall, on the waterfall's own period (chain view §3.5). */}
-            <Section id="fia-cost-flow" title={SANKEY_TITLE(sub?.unitNoun ?? pkg.unitEconomics.unit)}>
+            <Section id="fia-cost-flow" title={COPY.sankeyTitle(sub?.unitNoun ?? pkg.unitEconomics.unit)}>
               <CostSankey reg={reg} pkg={pkg} ue={ue} onlyMessage={noVolume} onOpenLink={setChainLinkId} />
             </Section>
 
