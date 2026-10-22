@@ -5,6 +5,34 @@ alternatives. Newest first.
 
 ---
 
+# 2026-10-22 — The arrow keys move the glimpse again
+
+Owner request, the same day, after the entry below: "make the arrow keys scroll the row again". The still row
+had been a focusable scroller the arrow keys moved; the carousel that replaced it was moved by Tab and the
+arrow buttons only.
+
+- **The row is a Tab stop again**, after the header's buttons and before the columns, named by the heading
+  ("Glimpse", a list), whenever it has somewhere to go, running or still. Focus on it holds the running row,
+  as focus on a column does, until three seconds after focus leaves.
+- **On the row, ArrowLeft and ArrowRight move it one column**, as the arrow buttons do: the column lands at
+  the page's margin, at once for reduced motion. Before, the still row scrolled natively by the browser's
+  arrow-key step (about 40px); a column a press matches the buttons and the carousel's stops.
+- **On a column, they take focus to the next column** (round the loop when the row runs, stopping at a still
+  row's ends) and the row brings that column to the margin. Paging the row under a focused link would leave
+  focus off the frame's edge, out of sight.
+- **Alt with an arrow is left alone** (the browser's back and forward), and Ctrl, Meta and Shift with an arrow
+  too. Up and Down stay the page's.
+- **The ring.** The list moves under the frame, so a ring on the list would move off screen with it: the frame
+  draws it, inset, 2px of `--ring`, as the still row's was, and the edge fade lifts while the row has focus.
+
+Tests: `tests/unit/glimpse.test.tsx` (the row a Tab stop only with somewhere to go; the arrow keys on the row,
+Alt and ArrowDown left to the page; on a column, focus along and the row brought to it, the still row's ends
+and the loop's wrap; reduced motion jumps); `tests/e2e/glimpse.spec.ts` (at 1440, running and with reduced
+motion: Tab order, the ring, a column a press on the row, focus along the columns each at the margin and whole
+in view, no sideways page scroll). `MIN_TESTS` rises from 1388 to 1391 (actual 1395).
+
+---
+
 # 2026-10-22 — The glimpse can be taken by hand
 
 Owner request, the same day: the running row could not be moved. It was a CSS keyframe marquee
@@ -55,7 +83,8 @@ three seconds later. Decided without the owner, as asked ("pick the most conserv
 - **Keyboard.** The links are the Tab stops, as they were in the running row; Embla's `watchFocus` brings a
   column reached by Tab to the page's margin at once. The still row used to be a focusable scroller the arrow
   keys moved; it is now the same carousel, so for a keyboard there are the Tab stops and the arrows, and the
-  arrow keys no longer move it.
+  arrow keys no longer move it. *(Superseded the same day: the arrow keys move it again; entry "The arrow keys move the glimpse
+  again" above.)*
 - **Reduced motion:** no auto-scroll and no pause button, and the row moves by hand (drag, swipe, trackpad,
   the arrows, which jump instead of easing). It is the carousel without `loop`: its first column at the page's
   left margin and its last ending at the right one, as before, with no native scrollbar now. Same for a row

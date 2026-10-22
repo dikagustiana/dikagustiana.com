@@ -35,9 +35,17 @@
   );
 }
 
-/* A column a reader has tabbed to is drawn whole, its focus ring with it. */
+/* A column a reader has tabbed to is drawn whole, its focus ring with it;
+   so is the row, when it has focus itself. */
 .glimpse__frame--running:has(:focus-visible) {
   mask-image: none;
+}
+
+/* The row takes keyboard focus so the arrow keys reach it, but the list
+   moves under the frame, so the frame draws the ring: inset, in the
+   frame's block padding. */
+.glimpse__frame:has(> .glimpse__row:focus-visible) {
+  box-shadow: inset 0 0 0 2px hsl(var(--ring));
 }
 
 /* The list is as wide as the frame and its columns overflow it. A vertical

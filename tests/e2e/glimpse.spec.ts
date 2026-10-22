@@ -12,7 +12,8 @@ import { mockSupabase } from './mockSupabase';
  * 2026-10-22): a mouse drag, a sideways trackpad scroll, Shift and the wheel,
  * a swipe on a touchscreen and the arrows on a wide screen move it, it stays
  * where it is let go, and it runs again from there three seconds after the
- * reader is done. It stops under the pointer, while a column has keyboard
+ * reader is done. The row is a Tab stop and the arrow keys move it a column
+ * at a time; on a column they take focus to the next one. It stops under the pointer, while a column has keyboard
  * focus (which brings that column to the page's margin) and by its pause
  * button, which nothing else undoes. A drag does not open an essay; a click
  * and a tap do. A vertical swipe or wheel over it scrolls the page. For a
@@ -372,12 +373,14 @@ test('1440: the row stops under the pointer and for keyboard focus, which brings
     h.focus();
     h.removeAttribute('tabindex');
   });
-  // the arrows and the pause button come first, then the row's first column
+  // the arrows and the pause button come first, then the row, then its first column
   await page.keyboard.press('Tab');
   await expect(page.getByRole('button', { name: 'Earlier in the row' })).toBeFocused();
   await page.keyboard.press('Tab');
   await page.keyboard.press('Tab');
   await expect(page.getByRole('button', { name: 'Pause the row' })).toBeFocused();
+  await page.keyboard.press('Tab');
+  await expect(row).toBeFocused();
   await page.keyboard.press('Tab');
   await expect(row.getByRole('link').first()).toBeFocused();
   for (const n of [2, 3, 10]) {
@@ -400,6 +403,53 @@ test('1440: the row stops under the pointer and for keyboard focus, which brings
   expect(await holds(page, 500)).toBe(false);
   expect(errors).toEqual([]);
 });
+
+for (const reduced of [false, true]) {
+  test(`1440${reduced ? ', reduced motion' : ''}: the arrow keys move the row a column at a time, and on a column take focus to the next one`, async ({ page }) => {
+    if (reduced) await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.setViewportSize({ width: 1440, height: 900 });
+    const { row, errors } = await open(page);
+    await page.locator('#glimpse-heading').scrollIntoViewIfNeeded();
+    await page.mouse.move(0, 0);
+    const left = await margin(page);
+    const atMargin = async () => (await inView(page)).find((c) => Math.abs(c.left - left) < 1)?.n;
+    // eased in, or at once for reduced motion; arrived well within 1.5 s
+    const settle = () => page.waitForTimeout(reduced ? 100 : 1500);
+
+    // the row itself: Tab to it, and it stops; each arrow key moves it a column
+    await page.getByRole('button', { name: reduced ? 'Further along the row' : 'Pause the row' }).focus();
+    await page.keyboard.press('Tab');
+    await expect(row).toBeFocused();
+    expect(await page.locator('.glimpse__frame').evaluate((f) => getComputedStyle(f).boxShadow)).toContain('inset');
+    await page.keyboard.press('ArrowRight');
+    await settle();
+    const first = await atMargin();
+    expect(first).toBeDefined();
+    await page.keyboard.press('ArrowRight');
+    await settle();
+    expect(await atMargin()).toBe((first! % 21) + 1);
+    await page.keyboard.press('ArrowLeft');
+    await settle();
+    expect(await atMargin()).toBe(first);
+    expect(await holds(page, 1000)).toBe(true);
+    await page.screenshot({ path: `${SHOTS}/home-1440${reduced ? '-still' : ''}-row-focus.png` });
+
+    // a column: the arrow keys take focus along, and the row brings each to the margin
+    await page.keyboard.press('Tab');
+    const focused = () => page.evaluate(() => Number(/Essay (\d+):/.exec(document.activeElement?.textContent ?? '')?.[1]));
+    const start = await focused();
+    for (const [key, expected] of [['ArrowRight', start + 1], ['ArrowRight', start + 2], ['ArrowLeft', start + 1]] as const) {
+      await page.keyboard.press(key);
+      await settle();
+      expect(await focused()).toBe(expected);
+      expect(await atMargin()).toBe(expected);
+      await expect(page.locator(':focus')).toBeInViewport({ ratio: 1 });
+    }
+    // and the page did not scroll sideways on the way
+    expect(await page.evaluate(() => window.scrollX)).toBe(0);
+    expect(errors).toEqual([]);
+  });
+}
 
 test('1440: the pause button holds the row through a drag, a hover and a sideways scroll, until it is pressed again', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });

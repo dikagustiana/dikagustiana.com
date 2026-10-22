@@ -13,7 +13,9 @@
  * to left; and what holds it (owner request, 2026-10-22): a drag, a swipe or
  * a sideways scroll, the pointer over it, keyboard focus in it, each until 3
  * s after the reader is done, and the pause button, which nothing else
- * undoes; and the arrows, which move one column, at once for reduced motion.
+ * undoes; and the arrows, which move one column, at once for reduced motion,
+ * and the arrow keys: on the row, a column as the arrows do; on a column,
+ * focus to the next column, brought into view.
  * The motion itself is the e2e suite's (tests/e2e/glimpse.spec.ts). Fed by
  * the homepage's own query, the row is every published essay with the
  * starred ones leading (owner decision D3(a), 2026-10-10).
@@ -50,11 +52,17 @@ const { fromMock, embla } = vi.hoisted(() => {
         return state.api;
       },
       plugins: () => ({ autoScroll: auto }),
-      internalEngine: () => ({ options: { loop: !!state.options.loop } }),
+      // one snap per column, as Embla's loop has, and its still row away from its end
+      internalEngine: () => ({
+        options: { loop: !!state.options.loop },
+        slideRegistry: state.api.slideNodes().map((_, i) => [i]),
+      }),
+      slideNodes: () => [...document.querySelectorAll<HTMLElement>('.glimpse__item')],
       canScrollPrev: () => state.canScrollPrev,
       canScrollNext: () => state.canScrollNext,
       scrollPrev: vi.fn(),
       scrollNext: vi.fn(),
+      scrollTo: vi.fn(),
       scrollSnapList: () => [0, -288, -576],
     },
     emit(event: string) {
@@ -71,6 +79,7 @@ const { fromMock, embla } = vi.hoisted(() => {
       });
       state.api.scrollPrev.mockReset();
       state.api.scrollNext.mockReset();
+      state.api.scrollTo.mockReset();
       state.canScrollPrev = true;
       state.canScrollNext = true;
       state.options = {};
@@ -172,11 +181,12 @@ describe('Glimpse', () => {
     expect(first).not.toHaveTextContent('7 min');
     expect(first).not.toHaveTextContent('01');
     expect(within(first).getByRole('link')).toHaveAttribute('href', '/the-next-big-thing/essay-1');
-    // the list once, for a screen reader and for Tab: its links are the stops
+    // the list once, for a screen reader and for Tab: the row itself takes
+    // focus, so the arrow keys reach it, and its links are the stops after it
     expect(screen.getAllByRole('list')).toHaveLength(1);
     expect(document.querySelectorAll('[aria-hidden="true"] a')).toHaveLength(0);
     for (const link of within(row).getAllByRole('link')) expect(link).not.toHaveAttribute('tabindex');
-    expect(row).not.toHaveAttribute('tabindex');
+    expect(row).toHaveAttribute('tabindex', '0');
   });
 
   it('dates an undated essay by its creation month', () => {
@@ -195,6 +205,8 @@ describe('Glimpse', () => {
     embla.canScrollNext = false;
     const { unmount } = mount([essay(1), essay(2)]);
     expect(screen.queryByRole('button')).toBeNull();
+    // nowhere to go, so no Tab stop on the row either
+    expect(screen.getByRole('list', { name: 'Glimpse' })).not.toHaveAttribute('tabindex');
     unmount();
 
     embla.canScrollNext = true;
@@ -216,6 +228,44 @@ describe('Glimpse', () => {
     expect(embla.api.scrollNext).toHaveBeenCalledWith(true);
     fireEvent.click(screen.getByRole('button', { name: 'Earlier in the row' }));
     expect(embla.api.scrollPrev).toHaveBeenCalledWith(true);
+    // the arrow keys too
+    const row = screen.getByRole('list', { name: 'Glimpse' });
+    act(() => row.focus());
+    fireEvent.keyDown(row, { key: 'ArrowRight' });
+    expect(embla.api.scrollNext).toHaveBeenLastCalledWith(true);
+  });
+
+  it('pages by the arrow keys while the row has focus, as the arrows do, and leaves Alt with an arrow to the browser', () => {
+    mount(Array.from({ length: 12 }, (_, i) => essay(i + 1)));
+    const row = screen.getByRole('list', { name: 'Glimpse' });
+    act(() => row.focus());
+    expect(fireEvent.keyDown(row, { key: 'ArrowRight' })).toBe(false);
+    expect(embla.api.scrollNext).toHaveBeenCalledWith(false);
+    fireEvent.keyDown(row, { key: 'ArrowLeft' });
+    expect(embla.api.scrollPrev).toHaveBeenCalledWith(false);
+    // Alt and an arrow is back or forward; the other keys are the page's
+    expect(fireEvent.keyDown(row, { key: 'ArrowLeft', altKey: true })).toBe(true);
+    expect(fireEvent.keyDown(row, { key: 'ArrowDown' })).toBe(true);
+    expect(embla.api.scrollPrev).toHaveBeenCalledTimes(1);
+    expect(embla.api.scrollNext).toHaveBeenCalledTimes(1);
+  });
+
+  it('on a column, takes focus to the next column by the arrow keys and brings it into view, stopping at a still row\'s ends', () => {
+    mount(Array.from({ length: 12 }, (_, i) => essay(i + 1)));
+    const links = within(screen.getByRole('list', { name: 'Glimpse' })).getAllByRole('link');
+    act(() => links[4].focus());
+    fireEvent.keyDown(links[4], { key: 'ArrowRight' });
+    expect(links[5]).toHaveFocus();
+    expect(embla.api.scrollTo).toHaveBeenLastCalledWith(5, false);
+    fireEvent.keyDown(links[5], { key: 'ArrowLeft' });
+    fireEvent.keyDown(links[4], { key: 'ArrowLeft' });
+    expect(links[3]).toHaveFocus();
+    expect(embla.api.scrollTo).toHaveBeenLastCalledWith(3, false);
+    // a still row ends: nothing before the first column
+    act(() => links[0].focus());
+    fireEvent.keyDown(links[0], { key: 'ArrowLeft' });
+    expect(links[0]).toHaveFocus();
+    expect(embla.api.scrollTo).toHaveBeenCalledTimes(3);
   });
 });
 
@@ -311,6 +361,20 @@ describe('the running row', () => {
     expect(embla.auto.playing).toBe(false);
     act(() => vi.advanceTimersByTime(1));
     expect(embla.auto.playing).toBe(true);
+  });
+
+  it('goes round the loop by the arrow keys on a column: from the first column back to the last', () => {
+    mount(twelve());
+    const links = within(screen.getByRole('list', { name: 'Glimpse' })).getAllByRole('link');
+    act(() => links[0].focus());
+    fireEvent.keyDown(links[0], { key: 'ArrowLeft' });
+    expect(links[11]).toHaveFocus();
+    expect(embla.api.scrollTo).toHaveBeenLastCalledWith(11, false);
+    fireEvent.keyDown(links[11], { key: 'ArrowRight' });
+    expect(links[0]).toHaveFocus();
+    expect(embla.api.scrollTo).toHaveBeenLastCalledWith(0, false);
+    // the row stopped for it, and held while focus stays in the row
+    expect(embla.auto.playing).toBe(false);
   });
 
   it('stops and starts by its own button, which a drag, a hover or focus does not undo', () => {

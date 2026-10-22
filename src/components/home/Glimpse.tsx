@@ -13,8 +13,9 @@
  * The row runs, right to left at GLIMPSE_SPEED, looping without a seam
  * (owner decision, 2026-10-11), and a reader can take hold of it at any time
  * (owner request, 2026-10-22): a swipe, a drag with the mouse, a sideways
- * scroll on a trackpad or with Shift and the wheel, or the two arrow buttons
- * on a wide screen. It is an Embla carousel (the engine under shadcn/ui's
+ * scroll on a trackpad or with Shift and the wheel, the two arrow buttons on
+ * a wide screen, and the arrow keys (the row is a Tab stop; on a column, an
+ * arrow key takes focus to the next column). It is an Embla carousel (the engine under shadcn/ui's
  * Carousel): `loop` shifts columns from one end to the other, so the list is
  * drawn once; `dragFree` leaves the row where the reader lets go of it; the
  * AutoScroll plugin runs it and WheelGestures turns a sideways scroll into a
@@ -25,13 +26,13 @@
  * the reader is done, from where they left it. A drag never opens an essay;
  * a click does. The edges fade.
  *
- * It stands still, a row that still moves by swipe, drag, trackpad and the
- * buttons, for a reader who asked for reduced motion, and whenever the
+ * It stands still, a row that still moves by swipe, drag, trackpad, the
+ * buttons and the arrow keys, for a reader who asked for reduced motion, and whenever the
  * columns are too few to loop, where the row's empty end would show: its
  * first column at the page's margin and its last at the other. With nothing
  * published the section is absent, not empty.
  */
-import { useCallback, useEffect, useMemo, useRef, useState, type FocusEvent, type PointerEvent } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type FocusEvent, type KeyboardEvent, type PointerEvent } from 'react';
 import useEmblaCarousel from 'embla-carousel-react';
 import AutoScroll, { type AutoScrollType } from 'embla-carousel-auto-scroll';
 import { WheelGesturesPlugin } from 'embla-carousel-wheel-gestures';
@@ -287,15 +288,38 @@ export function Glimpse({ essays, isLoading }: GlimpseProps) {
     decide(RESUME_AFTER);
   };
 
-  // The arrows move by one column: at once for a reader who asked for
-  // reduced motion. The row stops first, so the column lands where it
-  // should, and runs again RESUME_AFTER later.
+  // The arrows and the arrow keys move by one column: at once for a reader
+  // who asked for reduced motion. The row stops first, so the column lands
+  // where it should, and runs again RESUME_AFTER later.
+  const move = (scroll: (jump: boolean) => void) => {
+    (api?.plugins().autoScroll as AutoScrollType | undefined)?.stop();
+    scroll(prefersReducedMotion());
+    decide(RESUME_AFTER);
+  };
   const page = (direction: -1 | 1) => {
     if (!api) return;
-    (api.plugins().autoScroll as AutoScrollType | undefined)?.stop();
-    if (direction < 0) api.scrollPrev(prefersReducedMotion());
-    else api.scrollNext(prefersReducedMotion());
-    decide(RESUME_AFTER);
+    move((jump) => (direction < 0 ? api.scrollPrev(jump) : api.scrollNext(jump)));
+  };
+
+  // The arrow keys, while the row or a column in it has focus. On the row
+  // they page it, as the arrow buttons do. On a column, focus goes to the
+  // next column along (round the loop when the row runs) and the row brings
+  // that column to the page's margin, so focus is never left off the edge.
+  // Alt with an arrow is the browser's back and forward, and stays so.
+  const arrowKeys = (event: KeyboardEvent) => {
+    if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+    if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey || !api) return;
+    event.preventDefault();
+    const direction = event.key === 'ArrowLeft' ? -1 : 1;
+    const slides = api.slideNodes();
+    const from = slides.findIndex((slide) => slide.contains(event.target as Node));
+    if (from < 0) return page(direction);
+    const engine = api.internalEngine();
+    const to = engine.options.loop ? (from + direction + slides.length) % slides.length : from + direction;
+    if (to < 0 || to >= slides.length) return;
+    const snap = engine.slideRegistry.findIndex((group) => group.includes(to));
+    move((jump) => api.scrollTo(Math.max(snap, 0), jump));
+    slides[to].querySelector<HTMLElement>('a')?.focus({ preventScroll: true });
   };
 
   if (!isLoading && (!essays || essays.length === 0)) return null;
@@ -349,7 +373,10 @@ export function Glimpse({ essays, isLoading }: GlimpseProps) {
 
       {/* The frame is Embla's viewport and the list its container: one tree
           whether the row runs or stands still, so the list is the same
-          element when it starts or stops. The links are the stops for Tab. */}
+          element when it starts or stops. The list is a Tab stop, named by
+          the heading, whenever it has somewhere to go, so the arrow keys
+          reach it; the links are the stops after it. The list moves under
+          the frame, so the frame draws its focus ring (glimpse.css). */}
       <div
         ref={setFrame}
         className={cn('glimpse__frame', running && 'glimpse__frame--running')}
@@ -358,11 +385,13 @@ export function Glimpse({ essays, isLoading }: GlimpseProps) {
         onPointerLeave={hover(false)}
         onFocus={focusIn}
         onBlur={focusOut}
+        onKeyDown={arrowKeys}
       >
         <ul
           ref={track}
+          tabIndex={canPrev || canNext ? 0 : undefined}
           aria-labelledby="glimpse-heading"
-          className={cn('glimpse__row', loopable ? 'glimpse__row--loop' : 'glimpse__row--still')}
+          className={cn('glimpse__row', loopable ? 'glimpse__row--loop' : 'glimpse__row--still', 'focus-visible:outline-none')}
         >
           {isLoading
             ? Array.from({ length: 4 }, (_, i) => (
