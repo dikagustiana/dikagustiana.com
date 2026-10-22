@@ -73,7 +73,7 @@ describe('the preview index, lens off', () => {
     renderIndex();
     const region = await screen.findByRole('region', { name: /Chain stages/ });
     const extraction = within(region).getByRole('link', { name: /Geological extraction/ });
-    expect(extraction).toHaveTextContent('2 sub-industries, 4 companies');
+    expect(extraction).toHaveTextContent('2 sub-industries, 6 companies'); // A121: PTBA, ITMG, INDY, ADRO planned; the two SYNTHETIC coal fixtures
     expect(extraction).toHaveTextContent('2 published');
     expect(within(region).getByRole('link', { name: /Recovery/ })).toHaveTextContent(COPY.noModels);
   });

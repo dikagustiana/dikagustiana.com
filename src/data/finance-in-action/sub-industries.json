@@ -14,5 +14,13 @@
     "unitNoun": "cement",
     "unit": "tonne",
     "note": "Cement makers: kiln fuel, power and limestone, run through capacity that is costly to leave idle."
+  },
+  {
+    "code": "OWNER-DECISION",
+    "name": "OWNER-DECISION",
+    "chainStage": "band-energy",
+    "unitNoun": "electricity",
+    "unit": "MWh",
+    "note": "Geothermal generators: steam-field drilling, plant availability and the tariff in the power purchase agreement set the margin on a megawatt-hour."
   }
 ]
