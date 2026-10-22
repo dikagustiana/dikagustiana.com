@@ -164,23 +164,27 @@ export const useFsliEssayBodies = (fsliSlug: string) => {
   });
 };
 
+/** A topic page's essay: the card columns, the body, and what the essay layout reads. */
+export type TopicEssay = Essay & { brief_json: unknown };
+
 // The essays a consolidation topic page shows, bodies included: the page
 // renders each one in full (ConsolidationDetail), and the card columns alone
-// left it nothing to render.
+// left it nothing to render. A series essay's page is the essay layout, which
+// also reads the presentation (deck, references, genre) and the Brief.
 export const useEssaysByTopic = (section: string, topic: string) => {
   return useQuery({
     queryKey: ['essays', 'topic', section, topic],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('essays')
-        .select(`${ESSAY_CARD_COLUMNS}, content`)
+        .select(`${ESSAY_CARD_COLUMNS}, content, presentation, brief_json`)
         .eq('section', section)
         .eq('topic', topic)
         .eq('published', true)
         .order('sort_order', { ascending: true });
 
       if (error) throw error;
-      return data as unknown as Essay[];
+      return data as unknown as TopicEssay[];
     },
     enabled: !!section && !!topic,
   });

@@ -5,6 +5,36 @@ alternatives. Newest first.
 
 ---
 
+# 2026-10-22 — The consolidation series wears the essay layout
+
+Branch `claude/consolidation-essays-layout-45352w`. Owner report: on desktop every essay of the
+Consolidation series renders with a layout unlike the other essays; the FSLI essays imported in the
+same batch are fine.
+
+- **Root cause: the template, not the data.** `/accounting/consolidation/<slug>` is a series
+  essay's own page, but `ConsolidationDetail` rendered it inside the topic-list template: a
+  `max-w-3xl` box with no `mx-auto` (pinned left, half the desktop empty), a display-font h1 in a
+  768px box while the 728px body centred inside it (title 20px left of the body), a sans deck, no
+  "On this page" rail, no byline. The FSLI page and every other essay page centre the 728px measure
+  under the editorial title/deck with a TOC rail.
+- **Fix: the series essay renders through `ArticleShell`**, the single canonical essay layout (Finance,
+  Green Transition, Next Big Thing and `/essays/:slug` already use it). Back link to Consolidated
+  Reporting, prev/next in part order, related essays. The nine configured topic pages keep the topic
+  template. No CSS keyed to the section, no per-essay switch.
+- **Key takeaways are not passed.** The import copies them from each essay's own opening "In brief",
+  so the end-matter box would print the same bullets twice. The FSLI page shows none either.
+- **No data migration.** The six rows are byte-for-byte the format of the thirty FSLI rows that render
+  correctly (TipTap `getHTML()` in `content`, the same `min-width` table styles and link classes, no
+  wrappers or widths beyond those). A dry-run comparison found 0 rows to normalise. A snapshot of the
+  six rows as served is in `backups/consolidation-essays-20261022T021749Z.json` (force-added; the
+  folder is ignored for full dumps, and these rows are published).
+- **The import now stores what the editor stores.** The studio writes `content` and `content_json`
+  (the document `content` was serialised from); the 12 Oct import wrote `content_json: null`.
+  `scripts/accounting-import/import.ts` now writes the document it already proves round-trips, to the
+  row and its revision. A re-run fills `content_json` on the 36 imported rows and changes nothing else;
+  it was not run here (no write access to the project from this session, and the FSLI rows are outside
+  this change).
+
 # 2026-10-11 — Where We Are Now opens with two essays; its tab lists them
 
 Branch `claude/pensive-fermi-t08feq`. Owner request: load "The Green Transition Isn't Only About

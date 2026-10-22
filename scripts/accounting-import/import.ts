@@ -30,9 +30,12 @@
  *
  * Status is never set here: new rows are drafts, existing rows keep theirs.
  * Re-running with unchanged files changes nothing and writes no revision.
- * content_json is stored as null: the public pages read content, and the
- * Studio builds its document from content when content_json is null
- * (WriterEditor), so a second stored copy could only drift from the first.
+ * The row is stored the way the Writer Studio stores a save: `content` is the
+ * HTML (generateHTML over the app's schema, which is the editor's getHTML())
+ * and `content_json` is the document it was serialised from, and the
+ * revision carries that document too. The round-trip check below proves the
+ * two describe one document before anything is written. (The 12 Oct 2026 run
+ * stored content_json as null; a re-run fills it in and changes nothing else.)
  */
 import { readFileSync, readdirSync, writeFileSync, mkdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
@@ -214,7 +217,7 @@ async function main() {
       topic: s.group === 'consolidation' ? slug : null,
       sort_order: s.group === 'consolidation' ? Number(conv.str(s.fm, 'series_part')) : 0,
       content,
-      content_json: null,
+      content_json: doc,
       presentation,
       change_summary: summary,
     };
@@ -287,7 +290,7 @@ function upsertSql(row: Record<string, unknown>): string {
   return `with up as (
   insert into public.essays as e (slug, section, title, snippet, author, date, read_time, content, content_json, presentation, fsli_slug, phase, topic, sort_order, voice_role)
   values (${quoted(row.slug)}, 'accounting', ${literal(String(row.title), 't')}, ${literal(String(row.snippet), 's')}, ${quoted(row.author)}, ${quoted(row.date)}, ${quoted(row.read_time)},
-          ${literal(String(row.content), 'c')}, null, ${literal(JSON.stringify(row.presentation), 'p')}::jsonb,
+          ${literal(String(row.content), 'c')}, ${literal(JSON.stringify(row.content_json), 'j')}::jsonb, ${literal(JSON.stringify(row.presentation), 'p')}::jsonb,
           ${quoted(row.fsli_slug)}, ${quoted(row.phase)}, ${quoted(row.topic)}, ${Number(row.sort_order)}, 'economist')
   on conflict on constraint essays_slug_key do update set
     ${COLUMNS.map((c) => `${c} = excluded.${c}`).join(', ')}
@@ -298,7 +301,7 @@ function upsertSql(row: Record<string, unknown>): string {
 ), rev as (
   insert into public.essay_revisions (essay_id, revision_no, change_type, title, snippet, content_json, status, change_summary, changed_by)
   select up.id, coalesce((select max(x.revision_no) from public.essay_revisions x where x.essay_id = up.id), 0) + 1, 'migration',
-         up.title, up.snippet, null, up.status, ${literal(String(row.change_summary), 'm')}, null
+         up.title, up.snippet, ${literal(JSON.stringify(row.content_json), 'j')}::jsonb, up.status, ${literal(String(row.change_summary), 'm')}, null
     from up
   returning essay_id, revision_no
 )
