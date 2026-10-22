@@ -184,7 +184,7 @@ export function CostSankey({
                     strokeDasharray={f.kind === 'unsplit' ? `${SANKEY.hatch} ${SANKEY.hatch * HALF}` : undefined}
                   />
                   <rect x={SANKEY.lineX} y={p.y1} width={nodeW} height={Math.max(p.h, 1)} fill={fill} stroke="hsl(var(--foreground))" />
-                  {label(midRight + SANKEY.labelPad, p.slotTop + SANKEY.fontSize, [f.line.label, `${show(f.value)} · ${share(f.value)}`], 'start', f.kind === 'profit')}
+                  {label(midRight + SANKEY.labelPad, p.slotTop + SANKEY.fontSize, [...wrapLabel(f.line.label), `${show(f.value)} · ${share(f.value)}`], 'start', f.kind === 'profit')}
                 </g>
                 {/* The upstream sub-industries that feed this line. */}
                 {L.upstream

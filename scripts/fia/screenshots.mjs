@@ -32,7 +32,10 @@ const jobs = process.argv.slice(3).map((spec) => {
 });
 fs.mkdirSync(out, { recursive: true });
 
-const server = spawn('npx', ['vite', 'preview', '--host', '127.0.0.1', '--port', String(PORT), '--strictPort'], { stdio: 'ignore' });
+// Windows runs npx as npx.cmd, which Node spawns only through a shell; the
+// shell then owns the server, so it is stopped with its whole tree below.
+const WINDOWS = process.platform === 'win32';
+const server = spawn('npx', ['vite', 'preview', '--host', '127.0.0.1', '--port', String(PORT), '--strictPort'], { stdio: 'ignore', shell: WINDOWS });
 const wait = async () => {
   for (let i = 0; i < 60; i++) {
     try {
@@ -73,5 +76,6 @@ try {
   }
   await browser.close();
 } finally {
-  server.kill();
+  if (WINDOWS) spawn('taskkill', ['/pid', String(server.pid), '/T', '/F'], { stdio: 'ignore' });
+  else server.kill();
 }

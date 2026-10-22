@@ -136,7 +136,12 @@ export function layoutSankey(m: SankeyModel): SankeyLayout {
   let slotY = SANKEY.top;
   const flows: PlacedFlow[] = m.flows.map((flow) => {
     const h = flow.value * k;
-    const slotHeight = Math.max(h, SANKEY.minSlot);
+    // Room for the line's own label (wrapped, plus its value) and for any upstream label beside it.
+    const lines = Math.max(
+      wrapLabel(flow.line.label).length + 1,
+      ...flow.upstream.map((u) => wrapLabel(u.name).length + 1),
+    );
+    const slotHeight = Math.max(h, SANKEY.minSlot, lines * SANKEY.lineHeight + SANKEY.slotPad);
     const placed = { flow, y0: stackY, h, slotTop: slotY, slotHeight, y1: slotY + (slotHeight - h) / 2 };
     stackY += h;
     slotY += slotHeight + SANKEY.gap;

@@ -2,7 +2,7 @@
  * A stage box's door into Finance in Action, at the finance distance only
  * (chain view, PROMPT-site §3.7). Over the generated box: a transparent hit
  * area that is a link to the stage's section of the index, with a small "n
- * models" (or "planned") label inside the box's top right corner, clear of
+ * models" (or "planned") label inside the box's bottom right corner, clear of
  * the stage's own name. At the economy distance, or for a stage with no
  * company on the slate, it renders nothing, so that distance is unchanged.
  */
@@ -11,10 +11,13 @@ import { useNavigate } from 'react-router-dom';
 import { ChainLensContext } from './chainLensContext';
 import { ChainModelsContext, type StageModels } from './chainModelsContext';
 
-/** Inset of the label from the box's corner, and its size, in the plate's units. */
+/**
+ * Inset of the label from the box's bottom right corner, and its size, in the
+ * plate's units: under the stage's last line of name, clear of its letters.
+ */
 const INSET = 6;
-const LABEL_TOP = 12;
-const LABEL_SIZE = 11;
+const LABEL_BOTTOM = 3;
+const LABEL_SIZE = 10;
 
 function Door({ models: m, id, x, y, width, height }: { models: StageModels; id: string; x: number; y: number; width: number; height: number }) {
   const navigate = useNavigate();
@@ -37,7 +40,7 @@ function Door({ models: m, id, x, y, width, height }: { models: StageModels; id:
       />
       <text
         x={x + width - INSET}
-        y={y + LABEL_TOP}
+        y={y + height - LABEL_BOTTOM}
         textAnchor="end"
         aria-hidden="true"
         className="fill-accent font-semibold underline"

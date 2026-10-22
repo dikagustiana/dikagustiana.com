@@ -115,7 +115,8 @@ describe('the cost flow on the page', () => {
     for (const f of m.flows) {
       const g = svg.querySelector(`[data-sankey-flow="${f.line.id}"]`)!;
       const text = g.querySelector('text')!.textContent!;
-      expect(text).toContain(f.line.label);
+      // A long label wraps onto lines (tspans), so compare without the spaces between them.
+      expect(text.replace(/\s/g, '')).toContain(f.line.label.replace(/\s/g, ''));
       expect(text).toContain(formatNumber(f.value, PER_UNIT_DECIMALS));
       const row = within(table as HTMLElement).getByRole('rowheader', { name: new RegExp(`^${f.line.label}`) }).closest('tr')!;
       expect(row).toHaveTextContent(formatNumber(f.value, PER_UNIT_DECIMALS));

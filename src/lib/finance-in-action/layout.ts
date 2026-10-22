@@ -88,15 +88,17 @@ export const SANKEY = {
   gap: 10,
   /** Smallest slot a line gets, so its label fits even when its flow is thin. */
   minSlot: 22,
+  /** Room above and below a slot's label lines. */
+  slotPad: 6,
   upstreamX: 230,
   lineX: 400,
   revenueX: 680,
   /** Space between a node and its label. */
   labelPad: 8,
   /** Characters per line before an upstream label wraps. */
-  wrapAt: 30,
-  lineHeight: 13,
-  fontSize: 12,
+  wrapAt: 24,
+  lineHeight: 17,
+  fontSize: 15,
   smallFont: 11,
   /** Opacity of a flow's ribbon, so its label stays readable over it. */
   ribbonOpacity: 0.35,

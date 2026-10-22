@@ -72,7 +72,7 @@ export function LinkCard({ reg, link, onClose }: { reg: Registry; link: Industry
   // Chain view §3.6: one company on each side, chosen among the published ones; never an average.
   const companyPicker = (side: 'up' | 'down', label: string, list: typeof ups, value: string, onChange: (t: string) => void) =>
     list.length ? (
-      <span className="inline-flex items-center gap-2">
+      <span className="flex min-w-0 max-w-full flex-wrap items-center gap-2">
         <label htmlFor={`${pickerId}-${side}`} className="text-sm text-muted-foreground">
           {label}
         </label>
@@ -80,7 +80,7 @@ export function LinkCard({ reg, link, onClose }: { reg: Registry; link: Industry
           id={`${pickerId}-${side}`}
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="h-11 rounded-md border border-input bg-background px-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="h-11 min-w-0 max-w-full rounded-md border border-input bg-background px-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           {list.map((p) => (
             <option key={p.meta.ticker} value={p.meta.ticker}>
