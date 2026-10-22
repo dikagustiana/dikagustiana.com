@@ -1,0 +1,4 @@
+# LOCAL ONLY: run_fsre scratch database with the FSRE stand-in; one published FSRE package (SYNP, relabelled filings in the transaction), then a newer manual SYNP row; then the SQL tests inside the same transaction; all rolled back.
+anon sees, FSRE only:|SYNP|fsre|SYNP-FY25-r1-SYNTHETIC|published|2026-10-01T10:00:00Z
+anon sees, manual newer:|SYNP|manual|SYNP-m2
+fia_manual_release: 86 PASS, 0 FAIL

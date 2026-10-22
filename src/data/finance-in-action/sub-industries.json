@@ -14,5 +14,13 @@
     "unitNoun": "cement",
     "unit": "tonne",
     "note": "Cement makers: kiln fuel, power and limestone, run through capacity that is costly to leave idle."
+  },
+  {
+    "code": "J411",
+    "name": "Electric utilities",
+    "chainStage": "band-energy",
+    "unitNoun": "electricity",
+    "unit": "MWh",
+    "note": "Power producers, geothermal among them: plant availability, the steam or fuel that drives the turbines and the tariff in the power purchase agreement set the margin on a megawatt-hour."
   }
 ]

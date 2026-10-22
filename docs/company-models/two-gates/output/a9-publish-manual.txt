@@ -1,0 +1,38 @@
+# No .env.local exists while these run: a refusal never reaches the connection step.
+
+$ npx vite-node scripts/fia/publish-manual.ts --check src/data/finance-in-action/fixtures/XCOA.SYNTHETIC.json
+publish-manual: src/data/finance-in-action/fixtures/XCOA.SYNTHETIC.json
+  XCOA XCOA-2025Q4-r1-SYNTHETIC, provenance synthetic, sub-industry SYN-COAL
+Refused: XCOA fails the site's checks, 1 reason(s); nothing written.
+  meta.provenance synthetic is not filings; production shows models built from filings only
+[exit 1]
+
+$ npx vite-node scripts/fia/publish-manual.ts --publish src/data/finance-in-action/fixtures/XCOA.SYNTHETIC.json --by "Dika Gustiana Irawan"
+publish-manual: src/data/finance-in-action/fixtures/XCOA.SYNTHETIC.json
+  XCOA XCOA-2025Q4-r1-SYNTHETIC, provenance synthetic, sub-industry SYN-COAL
+Refused: XCOA fails the site's checks, 1 reason(s); nothing written.
+  meta.provenance synthetic is not filings; production shows models built from filings only
+[exit 1]
+
+$ npx vite-node scripts/fia/publish-manual.ts --publish src/data/finance-in-action/fixtures/SCEM.SYNTHETIC.json --by "Dika Gustiana Irawan"
+publish-manual: src/data/finance-in-action/fixtures/SCEM.SYNTHETIC.json
+  SCEM SCEM-2025Q4-r1-SYNTHETIC, provenance synthetic, sub-industry SYN-CEM
+Refused: SCEM fails the site's checks, 1 reason(s); nothing written.
+  meta.provenance synthetic is not filings; production shows models built from filings only
+[exit 1]
+
+$ npx vite-node scripts/fia/publish-manual.ts --check scratchpad/XCOA.broken.local.json
+publish-manual: scratchpad/XCOA.broken.local.json
+  XCOA XCOA-broken, provenance filings, sub-industry A121
+  note: meta.contentHash was empty; the package hashes to e83f4bf5c37f7cf5e300f0420c95708d556fb748216dfc8a88170fc2a1d79671, which is what will be written
+Refused: XCOA fails the site's checks, 1 reason(s); nothing written.
+  meta.chainStage nowhere is not a chain map stage or spanning layer
+[exit 1]
+
+$ npx vite-node scripts/fia/publish-manual.ts --check scratchpad/XCOA.filings.local.json
+publish-manual: scratchpad/XCOA.filings.local.json
+  XCOA XCOA-2025Q4-r1-local, provenance filings, sub-industry A121
+  note: meta.contentHash was empty; the package hashes to 75aa591f05df732c06671f6ddb0beee9fddc13132913ae6d394a918db12e6354, which is what will be written
+OK: XCOA XCOA-2025Q4-r1-local passes the site's checks and can be published.
+[exit 0]
+

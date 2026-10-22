@@ -1,0 +1,6 @@
+# LOCAL ONLY: run_fsre scratch database with the FSRE stand-in; one FSRE package (SYNP) and one manual package (MANU) published; every change rolled back. Script: a rolled-back transaction as fsre_owner and anon.
+1. both readable, as anon:|MANU:manual, SYNP:fsre
+psql:resilience.sql:18: WARNING:  fia.model_packages: the FSRE channel cannot be read and is left out (42501: permission denied for view model_packages)
+2. FSRE revokes anon, as anon:|MANU:manual
+psql:resilience.sql:23: WARNING:  fia.model_packages: the FSRE channel cannot be read and is left out (42703: column p.approved_by does not exist)
+3. FSRE renames a column, as anon:|MANU:manual

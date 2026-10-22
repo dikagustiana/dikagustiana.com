@@ -1,0 +1,150 @@
+# Production (Supabase asypkbkiebjvvpimewfp, PostgreSQL 17.6), 22 Oct 2026, phase 6 run by Claude Code on the
+# owner's instruction ("Merge. Selesain semua sampai selesai"). Every query below went through the Supabase MCP
+# as the postgres role. Values copied from the tool results.
+
+## 1. fsre* fingerprint BEFORE the migration (supabase/tests/fsre_fingerprint.sql, total and dependants rows)
+outside-dependants | - | - | 0
+total | - | 229 | 201cddfeaa5ae54387a05fa5e47d6d79
+(same as the read-only snapshot taken in the morning, fsre-snapshot.md)
+
+## 2. Event triggers that could touch new objects (read-only)
+issue_graphql_placeholder (sql_drop, DROP EXTENSION) | issue_pg_cron_access, issue_pg_graphql_access,
+issue_pg_net_access (ddl_command_end, CREATE EXTENSION) | pgrst_ddl_watch, pgrst_drop_watch (notify only)
+-> none acts on CREATE SCHEMA / TABLE / VIEW or on pg_jsonschema.
+
+## 3. apply_migration, name fia_two_gates, query = supabase/migrations/20261022100000_fia_two_gates.sql
+##    as of commit 15dbd35 (md5 of the file 2b31e15ea4ac83379623977254b09abf)
+{"success":true}
+
+## 4. What production holds, against a local database built from the same file (scratchpad verify query)
+item                             production                         local (run_fsre, PG 16)
+contract (md5 of jsonb text)     3da9dc1442f3395046fa424751e848a6   3da9dc1442f3395046fa424751e848a6
+fn:contract_schema_insert_only   21a365cafcba8aaab13f57910efb847d   21a365cafcba8aaab13f57910efb847d
+fn:fsre_packages                 0e675235539bd88cea14ed4f867f4ae6   0e675235539bd88cea14ed4f867f4ae6
+fn:manual_release_guard          20f2eb57f443e4968dc2f0aa6893c4ca   20f2eb57f443e4968dc2f0aa6893c4ca
+fn:refuse_truncate               fc39efc99189ed0c2cee54cbbce5fd97   fc39efc99189ed0c2cee54cbbce5fd97
+columns                          ae784776d298f56cd8cbe2ddb6cdd9bd   ae784776d298f56cd8cbe2ddb6cdd9bd
+triggers (name, enabled, type)   474b901343630b9a0544cace20a2ff1a   474b901343630b9a0544cace20a2ff1a
+view (whitespace-normalised)     069f690819ae7700aec36e2c5eb1ba75   069f690819ae7700aec36e2c5eb1ba75
+rls                              contract_schema:true,manual_release:true (both)
+pg_jsonschema                    0.3.3@extensions (both)
+constraints                      627507575b2450e385ce077a4c031d1b   6280b66298dea1ea114969c80f1fb261
+  -> the only difference: production deparses CHECK (jsonschema_is_valid((schema)::json)) without the
+     extensions. prefix, because extensions is on the postgres role's search_path there; same function.
+grants                           5ca886400bb5ccb9f40a96ea1b5df43e   7a089ded5ad07740e6fafee5e89b82c7
+  -> the only difference: PostgreSQL 17 adds MAINTAIN (m) to the owner's table grants
+     (postgres=arwdDxtm vs arwdDxt). anon: USAGE on fia, SELECT on fia.model_packages, EXECUTE on
+     fia_private.fsre_packages(), identical on both.
+
+## 5. Two probes before the SQL tests: one MCP request is one transaction, and an error rolls it all back
+create temp table fia_probe ... on commit drop; insert ...; select count(*)   -> rows_in_same_transaction 1
+create table fia.rollback_probe (x int); do $$ ... raise exception ... $$;     -> ERROR (expected)
+select to_regclass('fia.rollback_probe') is null, aborted sessions            -> true, 0
+
+## 6. The SQL tests (supabase/tests/fia_manual_release.sql), run as one request
+The file was too large for one tool call, so the SYNTHETIC fixture was staged first in a scratch table,
+fia_private.test_fixture_scratch (not exposed, no grants), in five chunks:
+1:62cc61c176d0d524b34a72bd49d0d4c2 2:4a831e89985a4136bb1558e12c6135a9 3:1e704c3462cb2e6903226c130033aea4
+4:4b38df45ee72f7b9ecfd1ac33d93118e 5:a1bbbfc8bd828b1664b58a6602b1203f  (each equal to the local chunk)
+fixture_jsonb_md5 e57ad7e439a3c30a25468e5746fb39fe  (= md5 of XCOA.SYNTHETIC.json as jsonb, computed locally)
+The test then ran as committed except: no BEGIN (the request is one implicit transaction), the fixture read
+from the scratch table, and the result raised as the closing error, which rolls everything back. The same
+variant was rehearsed locally first (86 PASS). The MCP tool shortened the middle of the error text in its
+display ("[4054 characters truncated]"); what it showed, verbatim:
+
+ERROR:  P0001: FIA TESTS (everything rolled back)
+PASS  D4 contract: fia.contract_schema holds proposal-v3.1, a valid JSON Schema (draft-07)  (got proposal-v3.1:true:http://json-schema.org/draft-07/schema#, expected proposal-v3.1:true:http://json-schema.org/draft-07/schema#)
+PASS  D4 contract: the SYNTHETIC fixture as filed matches the stored schema  (got true, expected true)
+PASS  D4 contract: the schema's $ref definitions are applied (a bad rowRef does not match)  (got false, expected false)
+PASS  D4 contract: the stored contract cannot be changed  (refused: 23514 contract_schema_insert_only, fia.contract_schema proposal-v3.1 cannot be changed or deleted; a new contract is a new row)
+PASS  D4 contract: the stored contract cannot be deleted  (refused: 23514 contract_schema_insert_only, fia.contract_schema proposal-v3.1 cannot be changed or deleted; a new contract is a new row)
+PASS  D4 contract: the stored contract cannot be truncated  (refused: 23514 contract_schema_no_truncate, fia.contract_schema cannot be truncated)
+PASS  FSRE reader: reads every row of fsre_published.model_packages, or none where it does not exist  (got true, expected true)
+PASS  FSRE reader: anon reads fia.model_packages with the FSRE channel in it, without an error  (got true, expected true)
+PASS  A7 fsre untouched: no view outside fsre* depends on an fsre* object  (got 0, expected 0)
+PASS  R1 positive: a filings package that matches the contract is staged  (accepted)
+PASS  R1 JSON Schema: a cell without a kind is refused  (refused: 23514 manual_release_contract, fia.manual_release XCOA r-schema-1 does not match the contract (model-package.schema.json, proposal v3.1))
+PASS  R1 JSON Schema: a key the contract does not have is refused  (refused: 23514 manual_release_contract, fia.manual_release XCOA r-schema-2 does not match the contract (model-package.schema.json, proposal v3.1))
+PASS  R1 JSON Schema: a rowRef that is not <sheet>!<row> is refused  (refused: 23514 manual_release_contract, fia.manual_release XCOA r-schema-3 does not match the contract (model-package.schema.json, proposal v3.1))
+PASS  R1 JSON Schema: a sourced cell without a source is refused  (refused: 23514 manual_release_contract, fia.manual_release XCOA r-schema-4 does not match the contract (model-package.schema.json, proposal v3.1))
+PASS  R1 JSON Schema: a meta.status outside the enumeration is refused  (refused: 23514 manual_release_contract, fia.manual_release XCOA r-schema-5 does not match the contract (model-package.schema.json, proposal v3.1))
+PASS  R1 JSON Schema: a staged row edited into a package that does not match is refused  (refused: 23514 manual_release_contract, fia.manual_release XCOA XCOA-2025Q4-r1-SYNTHETIC does not match the contract (model-package.schema.json, proposal v3.1))
+PASS  R1 meta.ticker: a ticker column other than meta.ticker is refused  (refused: 23514 manual_release_meta_ticker, new row for relation "manual_release" violates check constraint "manual_release_meta_ticker")
+PASS  R1 meta.ticker: a ticker that is not 2 to 8 capitals or digits is refused  (refused: 23514 manual_release_contract, fia.manual_release xcoa r-meta-2 does not match the contract (model-package.schema.json, proposal v3.1))
+PASS  R1 meta.version: a version column other than meta.version is refused  (refused: 23514 manual_release_meta_version, new row for relation "manual_release" violates check constraint "manual_release_meta_version")
+PASS  R1 meta.contentHash: a content_hash column other than meta.contentHash is refused  (refused: 23514 manual_release_meta_content_hash, new row for relation "manual_release" violates check constraint "manual_release_meta_content_hash")
+PASS  R1 meta.contentHash: a content_hash that is not 64 lower-case hex digits is refused  (refused: 23514 manual_release_content_hash_format, new row for relation "manual_release" violates check constraint "manual_release_content_hash_format")
+PASS  R1 provenance: the SYNTHETIC fixture as filed (provenance synthetic) is refused  (refused: 23514 manual_release_provenance_filings, new row for relation "manual_release" violates check constraint "manual_release_provenance_filings")
+PASS  R1 provenance: provenance fixture is refused  (refused: 23514 manual_release_provenance_filings, new row for relation "manual_release" violates check constraint "manual_release_provenance_filings")
+PASS  R1 published approved: published without approved_by is refused  (refused: 23514 manual_release_published_approved, new row for relation "manual_release" violates check constraint "manual_release_published_approved")
+PASS  R1 published approved: published with a blank approved_by is refused  (refused: 23514 manual_release_published_approved, new row for relation "manual_release" violates check constraint "manual_release_published_approved")
+PASS  R1 published approved: published without approv
+... [4054 characters truncated] ...
+514 manual_release_withdrawn_final, fia.manual_release XCOA XCOA-r2 is withdrawn, which is final)
+PASS  R1 withdrawn final: a withdrawn row cannot be deleted  (refused: 23514 manual_release_withdrawn_final, fia.manual_release XCOA XCOA-r2 is withdrawn and cannot be deleted)
+PASS  R1 withdrawn final: a withdrawn row is not in fia.model_packages  (got 0, expected 0)
+PASS  R1 guards always on: the four guard triggers are ENABLE ALWAYS  (got contract_schema_insert_only:A,contract_schema_no_truncate:A,manual_release_guard:A,manual_release_no_truncate:A, expected contract_schema_insert_only:A,contract_schema_no_truncate:A,manual_release_guard:A,manual_release_no_truncate:A)
+PASS  R1 no grant: row security is on for both tables, with no policy  (got contract_schema:true:0,manual_release:true:0, expected contract_schema:true:0,manual_release:true:0)
+PASS  R1 no grant: neither anon nor authenticated holds any privilege on either table  (got 0, expected 0)
+PASS  A5 failed gate: a manual row with a failed gate cannot be published, so cannot reach the view  (refused: 23514 manual_release_published_no_failed_gate, new row for relation "manual_release" violates check constraint "manual_release_published_no_failed_gate")
+PASS  A5 failed gate: a manual row with a failed gate can be staged  (accepted)
+PASS  A4 D2: a ticker only in the manual channel is shown from it  (got manual:TMAN-r1, expected manual:TMAN-r1)
+PASS  A4 D2: a ticker only in the FSRE channel is shown from it  (got fsre:TFSR-f1, expected fsre:TFSR-f1)
+PASS  A4 D2: in both, the more recent approval wins: manual  (got manual:TNEW-m1, expected manual:TNEW-m1)
+PASS  A4 D2: in both, the more recent approval wins: FSRE  (got fsre:TOLD-f1, expected fsre:TOLD-f1)
+PASS  A4 D2: in both with exactly the same approved_at (to the microsecond, other zone), FSRE wins  (got fsre:TTIE-f1, expected fsre:TTIE-f1)
+PASS  A4 D2: an FSRE approved_at that is null loses to any manual approval  (got manual:TNUL-m1, expected manual:TNUL-m1)
+PASS  A4 D2: an FSRE row with a null approved_at and no rival is shown  (got fsre:TNUF-f1, expected fsre:TNUF-f1)
+PASS  A4 D2: two published manual versions: the more recent approval wins  (got manual:TTWO-m2, expected manual:TTWO-m2)
+PASS  A4 D2: one row per ticker  (got true, expected true)
+PASS  A4 D2: the manual package says published, with the row's approver and time (UTC), and no channel key  (got published | Dika Gustiana Irawan | 2026-10-02T10:00:00Z | false | Dika Gustiana Irawan | manual, expected published | Dika Gustiana Irawan | 2026-10-02T10:00:00Z | false | Dika Gustiana Irawan | manual)
+PASS  A4 D2: the view has the columns of PRD R2, in order  (got ticker,version,channel,content_hash,approved_by,approved_at,package, expected ticker,version,channel,content_hash,approved_by,approved_at,package)
+PASS  A4 D2: staged rows are not shown  (got none, expected none)
+PASS  A5 failed gate: an FSRE package with a failed gate is not shown  (got none, expected none)
+PASS  A5 failed gate: a newer FSRE package with a failed gate gives way to the older manual one  (got manual:TFGN-m1, expected manual:TFGN-m1)
+PASS  A5 failed gate: no package in the view has a failed gate  (got 0, expected 0)
+PASS  A6 anon: anon reads fia.model_packages, both channels  (got TFSR:fsre,TMAN:manual, expected TFSR:fsre,TMAN:manual)
+PASS  A6 anon: anon cannot read fia.manual_release  (refused: 42501, permission denied for table manual_release)
+PASS  A6 anon: anon cannot insert into fia.manual_release  (refused: 42501, permission denied for table manual_release)
+PASS  A6 anon: anon cannot update fia.manual_release  (refused: 42501, permission denied for table manual_release)
+PASS  A6 anon: anon cannot delete from fia.manual_release  (refused: 42501, permission denied for table manual_release)
+PASS  A6 anon: anon cannot read fia.contract_schema  (refused: 42501, permission denied for table contract_schema)
+PASS  A6 anon: anon cannot write fia.contract_schema  (refused: 42501, permission denied for table contract_schema)
+PASS  A6 anon: anon holds SELECT on fia.model_packages and no other privilege on it; authenticated holds none  (got anon:SELECT, expected anon:SELECT)
+PASS  A6 anon: of fia_private, anon may execute the FSRE reader only (the view calls it), and use the schema not at all  (got false | fsre_packages | 0, expected false | fsre_packages | 0)
+PASS  A6 anon: anon cannot call the FSRE reader by name  (refused: 42501, permission denied for schema fia_private)
+PASS  A6 authenticated: authenticated cannot read fia.manual_release  (refused: 42501, permission denied for schema fia)
+PASS  A6 authenticated: authenticated cannot insert into fia.manual_release  (refused: 42501, permission denied for schema fia)
+PASS  A6 authenticated: authenticated cannot read fia.contract_schema  (refused: 42501, permission denied for schema fia)
+fia_manual_release: 86 PASS, 0 FAIL
+CONTEXT:  PL/pgSQL function inline_code_block line 11 at RAISE
+
+## 7. After the tests
+manual_rows 0 | fsre_packages digest 0e675235539bd88cea14ed4f867f4ae6 (the plpgsql reader, not the test's stand-in)
+DROP TABLE fia_private.test_fixture_scratch: not done. The Supabase MCP holds destructive statements for the
+user's confirmation; two attempts timed out at 60 s waiting for it (no lock was involved: a 10 s lock_timeout did
+not fire and pg_stat_activity showed no waiting session). The table holds the SYNTHETIC fixture's text only, in a
+schema the Data API does not expose, with no grants. The owner drops it (RUNBOOK §2).
+
+## 8. fsre* fingerprint AFTER the migration and the tests
+function | fsre | approve_package(p_company text, p_version text, p_approver text) | 625e621adc1ff29007524f5eaee916eb
+outside-dependants | - | - | 0
+relation:v | fsre_published | model_packages | 75c9abc8ad226e8812e639132a3f19bd
+total | - | 229 | 201cddfeaa5ae54387a05fa5e47d6d79
+-> identical to section 1 (A7).
+
+## 9. Security advisor after the migration
+rls_enabled_no_policy (INFO): fia.contract_schema, fia.manual_release (by design, PRD R1), and three older
+backup.* tables. Nothing else new; security_definer_view will list fia.model_packages once fia is exposed
+(by design, documented in the migration header). The other findings predate this work.
+
+## 10. The site, read-only, 22 Oct ~09:10 UTC
+https://dikagustiana.com/...            -> 308 to https://dika-s-digital-studio.vercel.app/... (the old Vercel
+                                           project; blank page, "supabaseUrl is required"; known since August,
+                                           docs/review/claude-audit.md, GATE_LEDGER.md P5)
+https://www.dikagustiana.com/finance/finance-in-action -> the legacy page ("0 of 0 models available"); REST calls
+                                           only to public.essays and public.finance_models: the Production build
+                                           has VITE_FIA_LIVE unset (phase 0 not done). A build without the flag never
+                                           reads fia, so merging this branch changes nothing visible until it is set.
+https://asypkbkiebjvvpimewfp.supabase.co/rest/v1/model_packages (Accept-Profile: fia) -> 406 PGRST106
+                                           "Invalid schema: fia" until fia is exposed in the Data API.

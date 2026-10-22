@@ -1,0 +1,206 @@
+$ psql (postgres) -d run_fsre -tA -f supabase/tests/fia_manual_release.sql
+BEGIN
+CREATE TABLE
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE TABLE
+INSERT 0 1
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+CREATE TABLE
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+CREATE FUNCTION
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+PASS  D4 contract: fia.contract_schema holds proposal-v3.1, a valid JSON Schema (draft-07)  (got proposal-v3.1:true:http://json-schema.org/draft-07/schema#, expected proposal-v3.1:true:http://json-schema.org/draft-07/schema#)
+PASS  D4 contract: the SYNTHETIC fixture as filed matches the stored schema  (got true, expected true)
+PASS  D4 contract: the schema's $ref definitions are applied (a bad rowRef does not match)  (got false, expected false)
+PASS  D4 contract: the stored contract cannot be changed  (refused: 23514 contract_schema_insert_only, fia.contract_schema proposal-v3.1 cannot be changed or deleted; a new contract is a new row)
+PASS  D4 contract: the stored contract cannot be deleted  (refused: 23514 contract_schema_insert_only, fia.contract_schema proposal-v3.1 cannot be changed or deleted; a new contract is a new row)
+PASS  D4 contract: the stored contract cannot be truncated  (refused: 23514 contract_schema_no_truncate, fia.contract_schema cannot be truncated)
+PASS  FSRE reader: reads every row of fsre_published.model_packages, or none where it does not exist  (got true, expected true)
+PASS  FSRE reader: anon reads fia.model_packages with the FSRE channel in it, without an error  (got true, expected true)
+PASS  A7 fsre untouched: no view outside fsre* depends on an fsre* object  (got 0, expected 0)
+PASS  R1 positive: a filings package that matches the contract is staged  (accepted)
+PASS  R1 JSON Schema: a cell without a kind is refused  (refused: 23514 manual_release_contract, fia.manual_release XCOA r-schema-1 does not match the contract (model-package.schema.json, proposal v3.1))
+PASS  R1 JSON Schema: a key the contract does not have is refused  (refused: 23514 manual_release_contract, fia.manual_release XCOA r-schema-2 does not match the contract (model-package.schema.json, proposal v3.1))
+PASS  R1 JSON Schema: a rowRef that is not <sheet>!<row> is refused  (refused: 23514 manual_release_contract, fia.manual_release XCOA r-schema-3 does not match the contract (model-package.schema.json, proposal v3.1))
+PASS  R1 JSON Schema: a sourced cell without a source is refused  (refused: 23514 manual_release_contract, fia.manual_release XCOA r-schema-4 does not match the contract (model-package.schema.json, proposal v3.1))
+PASS  R1 JSON Schema: a meta.status outside the enumeration is refused  (refused: 23514 manual_release_contract, fia.manual_release XCOA r-schema-5 does not match the contract (model-package.schema.json, proposal v3.1))
+PASS  R1 JSON Schema: a staged row edited into a package that does not match is refused  (refused: 23514 manual_release_contract, fia.manual_release XCOA XCOA-2025Q4-r1-SYNTHETIC does not match the contract (model-package.schema.json, proposal v3.1))
+PASS  R1 meta.ticker: a ticker column other than meta.ticker is refused  (refused: 23514 manual_release_meta_ticker, new row for relation "manual_release" violates check constraint "manual_release_meta_ticker")
+PASS  R1 meta.ticker: a ticker that is not 2 to 8 capitals or digits is refused  (refused: 23514 manual_release_contract, fia.manual_release xcoa r-meta-2 does not match the contract (model-package.schema.json, proposal v3.1))
+PASS  R1 meta.version: a version column other than meta.version is refused  (refused: 23514 manual_release_meta_version, new row for relation "manual_release" violates check constraint "manual_release_meta_version")
+PASS  R1 meta.contentHash: a content_hash column other than meta.contentHash is refused  (refused: 23514 manual_release_meta_content_hash, new row for relation "manual_release" violates check constraint "manual_release_meta_content_hash")
+PASS  R1 meta.contentHash: a content_hash that is not 64 lower-case hex digits is refused  (refused: 23514 manual_release_content_hash_format, new row for relation "manual_release" violates check constraint "manual_release_content_hash_format")
+PASS  R1 provenance: the SYNTHETIC fixture as filed (provenance synthetic) is refused  (refused: 23514 manual_release_provenance_filings, new row for relation "manual_release" violates check constraint "manual_release_provenance_filings")
+PASS  R1 provenance: provenance fixture is refused  (refused: 23514 manual_release_provenance_filings, new row for relation "manual_release" violates check constraint "manual_release_provenance_filings")
+PASS  R1 published approved: published without approved_by is refused  (refused: 23514 manual_release_published_approved, new row for relation "manual_release" violates check constraint "manual_release_published_approved")
+PASS  R1 published approved: published with a blank approved_by is refused  (refused: 23514 manual_release_published_approved, new row for relation "manual_release" violates check constraint "manual_release_published_approved")
+PASS  R1 published approved: published without approved_at is refused  (refused: 23514 manual_release_published_approved, new row for relation "manual_release" violates check constraint "manual_release_published_approved")
+PASS  R1 published approved: a staged row moved to published without an approver is refused  (refused: 23514 manual_release_published_approved, new row for relation "manual_release" violates check constraint "manual_release_published_approved")
+PASS  R1 approval time: published with an approval time in the future is refused (it would win D2 until withdrawn)  (refused: 23514 manual_release_approved_not_future, fia.manual_release XCOA r-time-1: approved_at 2026-10-23 08:19:14.610916+00 is in the future)
+PASS  R1 approval time: a staged row moved to published with a future approval time is refused  (refused: 23514 manual_release_approved_not_future, fia.manual_release XCOA XCOA-2025Q4-r1-SYNTHETIC: approved_at 2026-10-23 08:19:14.610916+00 is in the future)
+PASS  R1 approval time: published with the approval time now is accepted  (accepted)
+PASS  R1 published approved: published with an approver and a time is accepted  (accepted)
+PASS  R1 failed gate: published with a failed gate is refused  (refused: 23514 manual_release_published_no_failed_gate, new row for relation "manual_release" violates check constraint "manual_release_published_no_failed_gate")
+PASS  R1 failed gate: a staged row with a failed gate moved to published is refused  (refused: 23514 manual_release_published_no_failed_gate, new row for relation "manual_release" violates check constraint "manual_release_published_no_failed_gate")
+PASS  R1 failed gate: staged with a failed gate is accepted (it is not shown)  (accepted)
+PASS  R1 failed gate: published with passed and passed_with_escalation gates is accepted  (accepted)
+PASS  R1 unique: a second row for the same ticker and version is refused  (refused: 23505 manual_release_pkey, duplicate key value violates unique constraint "manual_release_pkey")
+PASS  R1 unique: the same ticker under a new version is accepted  (accepted)
+PASS  R1 status: a new row that is withdrawn is refused  (refused: 23514 manual_release_new_row_status, a new fia.manual_release row is staged or published, not withdrawn)
+PASS  R1 status: a status outside staged, published and withdrawn is refused  (refused: 23514 manual_release_status_known, new row for relation "manual_release" violates check constraint "manual_release_status_known")
+PASS  R1 staged editable: a staged row can be edited  (accepted)
+PASS  R1 staged editable: a staged row can be deleted  (accepted)
+PASS  R1 staged editable: an edit keeps created_by and created_at  (got true, expected true)
+PASS  R1 published locked: its package cannot be edited  (refused: 23514 manual_release_published_locked, fia.manual_release XCOA XCOA-r2 is published: it can only be withdrawn)
+PASS  R1 published locked: its note cannot be edited  (refused: 23514 manual_release_published_locked, fia.manual_release XCOA XCOA-r2 is published: it can only be withdrawn)
+PASS  R1 published locked: its approver cannot be edited  (refused: 23514 manual_release_published_locked, fia.manual_release XCOA XCOA-r2 is published: it can only be withdrawn)
+PASS  R1 published locked: it cannot go back to staged  (refused: 23514 manual_release_published_locked, fia.manual_release XCOA XCOA-r2 is published: it can only be withdrawn)
+PASS  R1 published locked: it cannot be withdrawn and edited in one statement  (refused: 23514 manual_release_published_locked, fia.manual_release XCOA XCOA-r2 is published: it can only be withdrawn)
+PASS  R1 published locked: it cannot be deleted  (refused: 23514 manual_release_published_locked, fia.manual_release XCOA XCOA-r2 is published and cannot be deleted)
+PASS  R1 published locked: the table cannot be truncated  (refused: 23514 manual_release_no_truncate, fia.manual_release cannot be truncated)
+PASS  R1 published locked: it can be withdrawn  (accepted)
+PASS  R1 withdrawn final: a withdrawn row cannot be published again  (refused: 23514 manual_release_withdrawn_final, fia.manual_release XCOA XCOA-r2 is withdrawn, which is final)
+PASS  R1 withdrawn final: a withdrawn row cannot be deleted  (refused: 23514 manual_release_withdrawn_final, fia.manual_release XCOA XCOA-r2 is withdrawn and cannot be deleted)
+PASS  R1 withdrawn final: a withdrawn row is not in fia.model_packages  (got 0, expected 0)
+PASS  R1 guards always on: the four guard triggers are ENABLE ALWAYS  (got contract_schema_insert_only:A,contract_schema_no_truncate:A,manual_release_guard:A,manual_release_no_truncate:A, expected contract_schema_insert_only:A,contract_schema_no_truncate:A,manual_release_guard:A,manual_release_no_truncate:A)
+PASS  R1 no grant: row security is on for both tables, with no policy  (got contract_schema:true:0,manual_release:true:0, expected contract_schema:true:0,manual_release:true:0)
+PASS  R1 no grant: neither anon nor authenticated holds any privilege on either table  (got 0, expected 0)
+PASS  A5 failed gate: a manual row with a failed gate cannot be published, so cannot reach the view  (refused: 23514 manual_release_published_no_failed_gate, new row for relation "manual_release" violates check constraint "manual_release_published_no_failed_gate")
+PASS  A5 failed gate: a manual row with a failed gate can be staged  (accepted)
+PASS  A4 D2: a ticker only in the manual channel is shown from it  (got manual:TMAN-r1, expected manual:TMAN-r1)
+PASS  A4 D2: a ticker only in the FSRE channel is shown from it  (got fsre:TFSR-f1, expected fsre:TFSR-f1)
+PASS  A4 D2: in both, the more recent approval wins: manual  (got manual:TNEW-m1, expected manual:TNEW-m1)
+PASS  A4 D2: in both, the more recent approval wins: FSRE  (got fsre:TOLD-f1, expected fsre:TOLD-f1)
+PASS  A4 D2: in both with exactly the same approved_at (to the microsecond, other zone), FSRE wins  (got fsre:TTIE-f1, expected fsre:TTIE-f1)
+PASS  A4 D2: an FSRE approved_at that is null loses to any manual approval  (got manual:TNUL-m1, expected manual:TNUL-m1)
+PASS  A4 D2: an FSRE row with a null approved_at and no rival is shown  (got fsre:TNUF-f1, expected fsre:TNUF-f1)
+PASS  A4 D2: two published manual versions: the more recent approval wins  (got manual:TTWO-m2, expected manual:TTWO-m2)
+PASS  A4 D2: one row per ticker  (got true, expected true)
+PASS  A4 D2: the manual package says published, with the row's approver and time (UTC), and no channel key  (got published | Dika Gustiana Irawan | 2026-10-02T10:00:00Z | false | Dika Gustiana Irawan | manual, expected published | Dika Gustiana Irawan | 2026-10-02T10:00:00Z | false | Dika Gustiana Irawan | manual)
+PASS  A4 D2: the view has the columns of PRD R2, in order  (got ticker,version,channel,content_hash,approved_by,approved_at,package, expected ticker,version,channel,content_hash,approved_by,approved_at,package)
+PASS  A4 D2: staged rows are not shown  (got none, expected none)
+PASS  A5 failed gate: an FSRE package with a failed gate is not shown  (got none, expected none)
+PASS  A5 failed gate: a newer FSRE package with a failed gate gives way to the older manual one  (got manual:TFGN-m1, expected manual:TFGN-m1)
+PASS  A5 failed gate: no package in the view has a failed gate  (got 0, expected 0)
+PASS  A6 anon: anon reads fia.model_packages, both channels  (got TFSR:fsre,TMAN:manual, expected TFSR:fsre,TMAN:manual)
+PASS  A6 anon: anon cannot read fia.manual_release  (refused: 42501, permission denied for table manual_release)
+PASS  A6 anon: anon cannot insert into fia.manual_release  (refused: 42501, permission denied for table manual_release)
+PASS  A6 anon: anon cannot update fia.manual_release  (refused: 42501, permission denied for table manual_release)
+PASS  A6 anon: anon cannot delete from fia.manual_release  (refused: 42501, permission denied for table manual_release)
+PASS  A6 anon: anon cannot read fia.contract_schema  (refused: 42501, permission denied for table contract_schema)
+PASS  A6 anon: anon cannot write fia.contract_schema  (refused: 42501, permission denied for table contract_schema)
+PASS  A6 anon: anon holds SELECT on fia.model_packages and no other privilege on it; authenticated holds none  (got anon:SELECT, expected anon:SELECT)
+PASS  A6 anon: of fia_private, anon may execute the FSRE reader only (the view calls it), and use the schema not at all  (got false | fsre_packages | 0, expected false | fsre_packages | 0)
+PASS  A6 anon: anon cannot call the FSRE reader by name  (refused: 42501, permission denied for schema fia_private)
+PASS  A6 authenticated: authenticated cannot read fia.manual_release  (refused: 42501, permission denied for schema fia)
+PASS  A6 authenticated: authenticated cannot insert into fia.manual_release  (refused: 42501, permission denied for schema fia)
+PASS  A6 authenticated: authenticated cannot read fia.contract_schema  (refused: 42501, permission denied for schema fia)
+fia_manual_release: 86 PASS, 0 FAIL
+ROLLBACK
+[exit 0]

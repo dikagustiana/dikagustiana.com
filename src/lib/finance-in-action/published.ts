@@ -1,12 +1,17 @@
 /**
- * Published model packages: what the owner approved, read from the FSRE suite.
+ * Published model packages: what the owner approved, by either way in.
  *
- * The suite's approval function (fsre.approve_package) is the only way a package
- * reaches the view fsre_published.model_packages; this module only reads it,
- * with the site's publishable key and no session, so the database answers as
- * `anon` and shows approved packages only. Nothing is written back
- * (constraint 12). Every package still passes the contract and formula checks
- * in buildRegistry before anything is drawn.
+ * The view fia.model_packages (supabase/migrations/20261022100000_fia_two_gates.sql)
+ * joins the two channels a package can reach the section by: the FSRE suite,
+ * whose approval function (fsre.approve_package) fills
+ * fsre_published.model_packages, and the manual channel, fia.manual_release,
+ * which the owner fills with scripts/fia/publish-manual.ts. It keeps one
+ * package per ticker (the latest approval; FSRE on an exact tie) and never one
+ * with a failed gate. This module only reads the view, with the site's
+ * publishable key and no session, so the database answers as `anon` and shows
+ * approved packages only. Nothing is written back (constraint 12). Every
+ * package still passes the contract and formula checks in buildRegistry before
+ * anything is drawn, whichever channel it came by.
  *
  * A failed read says WHICH failure it was (PRD "FSRE publish path" G8), because
  * the three mean different things to whoever reads the page:
@@ -21,8 +26,8 @@ import type { ModelPackage } from './contract/types';
 
 export const PUBLISHED_QUERY_KEY = ['finance-in-action', 'published'] as const;
 
-/** The view, in the schema the Data API exposes for the suite's published output. */
-const SCHEMA = 'fsre_published';
+/** The view, in the schema the Data API exposes for both channels' published output. */
+const SCHEMA = 'fia';
 const VIEW = 'model_packages';
 
 export type PublishedFailureReason = 'not-available' | 'refused' | 'failed';

@@ -3,10 +3,11 @@
  * The expected links between sub-industries (PRD §8.4): supplier → customer,
  * with a one-line rationale and no weights. Every link here is
  * `state: 'expected'`. AT RUNTIME A PUBLISHED PACKAGE WINS: when a model
- * package in fsre_published carries measured weights for a link (cost share
- * and demand share, both sourced), src/world/data/boundary.ts overrides this
- * entry with the measured state and class, and the registry is updated at
- * the next review. Nothing here is ever drawn as a figure.
+ * package in fia.model_packages (FSRE or manual) carries measured weights
+ * for a link (cost share and demand share, both sourced),
+ * src/world/data/boundary.ts overrides this entry with the measured state and
+ * class, and the registry is updated at the next review. Nothing here is ever
+ * drawn as a figure.
  */
 import type { Link } from './types.ts';
 

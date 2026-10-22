@@ -18,6 +18,9 @@ The viewer reads one JSON package per model version (`src/lib/finance-in-action/
 The package itself is FSRE's output and belongs in FSRE's published schema: the view
 `fsre_published.model_packages` (FSRE `db/postgres/0004_live.sql`, one row per approved
 `package_release`, the package as JSON), which `src/lib/finance-in-action/published.ts` reads.
+*[Since 22 Oct 2026 (two ways in, `docs/company-models/two-gates/`) `published.ts` reads
+`fia.model_packages` instead: this view and the owner's manual channel, `fia.manual_release`, one
+package per ticker.]*
 The older views `model_snapshots` and `workbooks` (`0003_published.sql`) belong to the
 `tools/publish.py` xlsx path and are not read by the site. None of it is on the project until
 the FSRE bring-up runbook (`fsre-skills/docs/deployment-runbook-0005.md`) has been run. `finance_models` should stay the site's own listing: one row per company in
@@ -60,7 +63,8 @@ Notes:
   existing pages; the v3.1 viewer does not read them.
 - RLS needs no change: anon keeps reading `is_published` rows only. Whether `is_published`
   should follow `status in ('published', 'preview')` is an owner decision.
-- The package is fetched from `fsre_published.model_packages` (today: every approved package in
+- The package is fetched from `fsre_published.model_packages` (since 22 Oct 2026 `fia.model_packages`,
+  both channels; today: every approved package in
   one read; by `(company_id, version)` once this listing exists) and checked against
   `package_hash` before rendering: a package whose hash differs from the listed one is not
   shown.

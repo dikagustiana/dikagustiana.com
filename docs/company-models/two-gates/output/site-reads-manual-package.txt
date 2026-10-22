@@ -1,0 +1,2 @@
+# LOCAL ONLY: run_fsre; a manual XCOA package (SYNTHETIC figures, relabelled filings and A121 in a scratch file) published in a rolled-back transaction, fia.model_packages read as anon, and the rows passed to the site's buildLiveRegistry (src/lib/finance-in-action/live.ts) by a scratch script.
+{"rows":1,"rejected":[],"shown":[["XCOA","XCOA-2025Q4-r2-local","published","Dika Gustiana Irawan","2026-10-22T08:26:38Z"]],"company":"published"}

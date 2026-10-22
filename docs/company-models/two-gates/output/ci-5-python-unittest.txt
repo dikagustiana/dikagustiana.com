@@ -1,0 +1,67 @@
+$ python3 -m unittest discover -s scripts/tests -v
+test_exit_two_on_unreadable_input (test_fs_check.CommandLine.test_exit_two_on_unreadable_input) ... ok
+test_exit_zero_on_the_fixture (test_fs_check.CommandLine.test_exit_zero_on_the_fixture) ... ok
+test_failures_only (test_fs_check.CommandLine.test_failures_only) ... ok
+test_golden_json_beside_the_file_is_used_unless_told_not_to (test_fs_check.CommandLine.test_golden_json_beside_the_file_is_used_unless_told_not_to) ... ok
+test_json_output_for_the_loader (test_fs_check.CommandLine.test_json_output_for_the_loader) ... ok
+test_a_declaration_does_not_hide_another_error (test_fs_check.DeclaredPrintedDifferences.test_a_declaration_does_not_hide_another_error) ... ok
+test_a_declaration_needs_a_note_and_a_sum_row (test_fs_check.DeclaredPrintedDifferences.test_a_declaration_needs_a_note_and_a_sum_row) ... ok
+test_a_declaration_where_the_foot_is_exact_fails (test_fs_check.DeclaredPrintedDifferences.test_a_declaration_where_the_foot_is_exact_fails) ... ok
+test_a_declared_difference_passes_and_is_reported (test_fs_check.DeclaredPrintedDifferences.test_a_declared_difference_passes_and_is_reported) ... ok
+test_a_different_difference_fails (test_fs_check.DeclaredPrintedDifferences.test_a_different_difference_fails) ... ok
+test_without_a_declaration_the_foot_fails (test_fs_check.DeclaredPrintedDifferences.test_without_a_declaration_the_foot_fails) ... ok
+test_a_golden_key_with_no_row_fails (test_fs_check.Golden.test_a_golden_key_with_no_row_fails) ... ok
+test_a_golden_value_one_unit_off_fails (test_fs_check.Golden.test_a_golden_value_one_unit_off_fails) ... ok
+test_a_unit_mismatch_fails (test_fs_check.Golden.test_a_unit_mismatch_fails) ... ok
+test_computed_totals_equal_the_printed_ones (test_fs_check.GoldenFixture.test_computed_totals_equal_the_printed_ones) ... ok
+test_every_rule_family_in_the_prd_runs (test_fs_check.GoldenFixture.test_every_rule_family_in_the_prd_runs) ... ok
+test_every_rule_passes (test_fs_check.GoldenFixture.test_every_rule_passes) ... ok
+test_the_golden_table_matches_to_the_unit (test_fs_check.GoldenFixture.test_the_golden_table_matches_to_the_unit) ... ok
+test_blank_label_en (test_fs_check.Labels.test_blank_label_en) ... ok
+test_blank_soce_label (test_fs_check.Labels.test_blank_soce_label) ... ok
+test_missing_label_id (test_fs_check.Labels.test_missing_label_id) ... ok
+test_a_missing_key_fails_its_rule_and_says_which (test_fs_check.NamedRules.test_a_missing_key_fails_its_rule_and_says_which) ... ok
+test_pl_attr (test_fs_check.NamedRules.test_pl_attr) ... ok
+test_pl_pbt_reads_the_rows_between_gross_profit_and_profit_before_tax (test_fs_check.NamedRules.test_pl_pbt_reads_the_rows_between_gross_profit_and_profit_before_tax) ... ok
+test_pl_rules (test_fs_check.NamedRules.test_pl_rules) ... ok
+test_sofp_bal_catches_an_imbalance_the_foots_cannot (test_fs_check.NamedRules.test_sofp_bal_catches_an_imbalance_the_foots_cannot) ... ok
+test_sofp_eq (test_fs_check.NamedRules.test_sofp_eq) ... ok
+test_xs_cf_cash_catches_a_cash_flow_that_foots_but_disagrees (test_fs_check.NamedRules.test_xs_cf_cash_catches_a_cash_flow_that_foots_but_disagrees) ... ok
+test_xs_cf_cash_runs_only_when_the_cash_flow_is_loaded (test_fs_check.NamedRules.test_xs_cf_cash_runs_only_when_the_cash_flow_is_loaded) ... ok
+test_xs_soce_bal_catches_a_soce_that_foots_but_disagrees (test_fs_check.NamedRules.test_xs_soce_bal_catches_a_soce_that_foots_but_disagrees) ... ok
+test_xs_soce_profit (test_fs_check.NamedRules.test_xs_soce_profit) ... ok
+test_every_item (test_fs_check.OneUnitErrors.test_every_item) ... ok
+test_every_soce_cell (test_fs_check.OneUnitErrors.test_every_soce_cell) ... ok
+test_every_subtotal_and_total (test_fs_check.OneUnitErrors.test_every_subtotal_and_total) ... ok
+test_the_command_exits_non_zero_and_names_the_rule (test_fs_check.OneUnitErrors.test_the_command_exits_non_zero_and_names_the_rule) ... ok
+test_a_positive_cost_fails (test_fs_check.Signs.test_a_positive_cost_fails) ... ok
+test_items_outside_cost_groups_may_be_positive (test_fs_check.Signs.test_items_outside_cost_groups_may_be_positive) ... ok
+test_printed_positive_exempts_it (test_fs_check.Signs.test_printed_positive_exempts_it) ... ok
+test_printed_positive_for_one_year_only (test_fs_check.Signs.test_printed_positive_for_one_year_only) ... ok
+test_printed_positive_on_a_negative_figure_fails (test_fs_check.Signs.test_printed_positive_on_a_negative_figure_fails) ... ok
+test_a_note_reference_is_text (test_fs_check.SoceNotes.test_a_note_reference_is_text) ... ok
+test_a_row_carries_one_note_reference (test_fs_check.SoceNotes.test_a_row_carries_one_note_reference) ... ok
+test_a_cycle (test_fs_check.Structure.test_a_cycle) ... ok
+test_a_figure_that_is_not_a_number (test_fs_check.Structure.test_a_figure_that_is_not_a_number) ... ok
+test_a_header_with_a_figure (test_fs_check.Structure.test_a_header_with_a_figure) ... ok
+test_a_page_outside_the_statement (test_fs_check.Structure.test_a_page_outside_the_statement) ... ok
+test_a_soce_cell_without_its_page (test_fs_check.Structure.test_a_soce_cell_without_its_page) ... ok
+test_a_subtotal_with_nothing_under_it (test_fs_check.Structure.test_a_subtotal_with_nothing_under_it) ... ok
+test_a_total_cannot_sum_into_another_row (test_fs_check.Structure.test_a_total_cannot_sum_into_another_row) ... ok
+test_an_item_no_rule_would_catch (test_fs_check.Structure.test_an_item_no_rule_would_catch) ... ok
+test_duplicate_line_key (test_fs_check.Structure.test_duplicate_line_key) ... ok
+test_duplicate_sort_order (test_fs_check.Structure.test_duplicate_sort_order) ... ok
+test_no_record_without_its_page (test_fs_check.Structure.test_no_record_without_its_page) ... ok
+test_parent_not_in_the_statement (test_fs_check.Structure.test_parent_not_in_the_statement) ... ok
+test_parent_that_is_an_item (test_fs_check.Structure.test_parent_that_is_an_item) ... ok
+test_period_fields (test_fs_check.Structure.test_period_fields) ... ok
+test_sofp_and_pl_are_required (test_fs_check.Structure.test_sofp_and_pl_are_required) ... ok
+test_the_soce_is_required (test_fs_check.Structure.test_the_soce_is_required) ... ok
+test_the_soce_needs_its_total_columns (test_fs_check.Structure.test_the_soce_needs_its_total_columns) ... ok
+test_the_soce_needs_two_balances (test_fs_check.Structure.test_the_soce_needs_two_balances) ... ok
+
+----------------------------------------------------------------------
+Ran 60 tests in 1.105s
+
+OK
+[exit 0]

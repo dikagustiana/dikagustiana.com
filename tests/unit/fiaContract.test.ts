@@ -31,6 +31,7 @@ import {
 } from '@/lib/finance-in-action/constants';
 import { FIA_PREVIEW } from '@/lib/finance-in-action/flag';
 import { STAGES } from '@/data/industryChain';
+import { CONDITIONS } from '@/data/capitalConditions';
 import links from '@/data/finance-in-action/links.json';
 import subIndustries from '@/data/finance-in-action/sub-industries.json';
 import slate from '@/data/finance-in-action/fixtures/slate.json';
@@ -311,12 +312,22 @@ describe('the package rules beyond the schema', () => {
 });
 
 describe('the slate', () => {
-  it('lists PTBA, ITMG, INTP and SMGR as not started, with no figures at all', () => {
-    expect(slate.companies.map((c) => c.ticker)).toEqual(['PTBA', 'ITMG', 'INTP', 'SMGR']);
+  it('lists PTBA, ITMG, INDY, ADRO, INTP, SMGR and BREN as not started, with no figures at all', () => {
+    expect(slate.companies.map((c) => c.ticker)).toEqual(['PTBA', 'ITMG', 'INDY', 'ADRO', 'INTP', 'SMGR', 'BREN']);
     for (const c of slate.companies) {
       expect(c.status).toBe('not_started');
       expect(Object.keys(c).sort()).toEqual(['conditionIds', 'depth', 'name', 'status', 'subIndustry', 'ticker']);
     }
+  });
+
+  it('places INDY and ADRO on coal production and BREN on the energy layer, executive, with the conditions of D7 (two ways in, 22 Oct 2026)', () => {
+    const at = (ticker: string) => slate.companies.find((c) => c.ticker === ticker);
+    expect(at('INDY')).toMatchObject({ subIndustry: 'A121', depth: 'executive', conditionIds: [3, 8] });
+    expect(at('ADRO')).toMatchObject({ subIndustry: 'A121', depth: 'executive', conditionIds: [3, 9] });
+    expect(at('BREN')).toMatchObject({ depth: 'executive', conditionIds: [4, 6] });
+    expect(subIndustries.find((s) => s.code === at('BREN')?.subIndustry)).toMatchObject({ chainStage: 'band-energy', unit: 'MWh' });
+    const conditions = new Set(CONDITIONS.map((c) => c.number));
+    for (const c of slate.companies) for (const n of c.conditionIds) expect(conditions.has(n), `${c.ticker} condition ${n}`).toBe(true);
   });
 
   it('places every company in a known sub-industry on a chain-map stage', () => {

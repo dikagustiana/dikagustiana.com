@@ -1,0 +1,61 @@
+# LOCAL ONLY: .env.local pointed at the run_fsre scratch database (removed afterwards). The packages are SYNTHETIC XCOA relabelled filings/A121 in scratch files, never committed.
+
+$ npx vite-node scripts/fia/publish-manual.ts --stage scratchpad/XCOA.filings.local.json --note "first try"
+publish-manual: scratchpad/XCOA.filings.local.json
+  XCOA XCOA-2025Q4-r1-local, provenance filings, sub-industry A121
+  note: meta.contentHash was empty; the package hashes to 75aa591f05df732c06671f6ddb0beee9fddc13132913ae6d394a918db12e6354, which is what will be written
+Staged: XCOA XCOA-2025Q4-r1-local. Not shown until published.
+[exit 0]
+
+$ npx vite-node scripts/fia/publish-manual.ts --stage scratchpad/XCOA.filings.local.json
+publish-manual: scratchpad/XCOA.filings.local.json
+  XCOA XCOA-2025Q4-r1-local, provenance filings, sub-industry A121
+  note: meta.contentHash was empty; the package hashes to 75aa591f05df732c06671f6ddb0beee9fddc13132913ae6d394a918db12e6354, which is what will be written
+Staged: XCOA XCOA-2025Q4-r1-local (replacing the staged copy). Not shown until published.
+[exit 0]
+
+$ npx vite-node scripts/fia/publish-manual.ts --publish scratchpad/XCOA.filings.local.json
+publish-manual: --publish needs --by "<the approver's name>"
+[exit 2]
+
+$ npx vite-node scripts/fia/publish-manual.ts --publish scratchpad/XCOA.filings.local.json --by "Dika Gustiana Irawan"
+publish-manual: scratchpad/XCOA.filings.local.json
+  XCOA XCOA-2025Q4-r1-local, provenance filings, sub-industry A121
+  note: meta.contentHash was empty; the package hashes to 75aa591f05df732c06671f6ddb0beee9fddc13132913ae6d394a918db12e6354, which is what will be written
+Published: XCOA XCOA-2025Q4-r1-local, approved by Dika Gustiana Irawan.
+The site now shows XCOA from this row (manual XCOA-2025Q4-r1-local).
+[exit 0]
+
+$ npx vite-node scripts/fia/publish-manual.ts --publish scratchpad/XCOA.filings.local.json --by "Dika Gustiana Irawan"
+publish-manual: scratchpad/XCOA.filings.local.json
+  XCOA XCOA-2025Q4-r1-local, provenance filings, sub-industry A121
+  note: meta.contentHash was empty; the package hashes to 75aa591f05df732c06671f6ddb0beee9fddc13132913ae6d394a918db12e6354, which is what will be written
+Refused: XCOA XCOA-2025Q4-r1-local is already published; nothing written. A revision is a new version (meta.version).
+[exit 1]
+
+$ npx vite-node scripts/fia/publish-manual.ts --list
+Manual rows (1), times in WIB:
+  XCOA  XCOA-2025Q4-r1-local  published  approved by Dika Gustiana Irawan 2026-10-22 15:27  (stored 2026-10-22 15:27)  note: first try
+What the site shows (fia.model_packages, 1):
+  XCOA  manual  XCOA-2025Q4-r1-local
+[exit 0]
+
+$ npx vite-node scripts/fia/publish-manual.ts --withdraw XCOA XCOA-2025Q4-r1-local
+Withdrawn: XCOA XCOA-2025Q4-r1-local.
+The site now shows XCOA as nothing.
+[exit 0]
+
+$ npx vite-node scripts/fia/publish-manual.ts --withdraw XCOA XCOA-2025Q4-r1-local
+XCOA XCOA-2025Q4-r1-local is already withdrawn; nothing changed.
+[exit 0]
+
+$ npx vite-node scripts/fia/publish-manual.ts --withdraw XCOA nope
+Refused: there is no manual row XCOA nope (--list shows them); nothing changed.
+[exit 1]
+
+$ npx vite-node scripts/fia/publish-manual.ts --list
+Manual rows (1), times in WIB:
+  XCOA  XCOA-2025Q4-r1-local  withdrawn  approved by Dika Gustiana Irawan 2026-10-22 15:27  (stored 2026-10-22 15:27)  note: first try
+What the site shows (fia.model_packages, 0):
+[exit 0]
+

@@ -5,6 +5,70 @@ alternatives. Newest first.
 
 ---
 
+# 2026-10-22 — Finance in Action: two ways in, FSRE and manual (D1–D7)
+
+Branch `claude/fia-two-gates-gslvkn`. Spec: `docs/company-models/two-gates/PRD.md` and `PLAN.md`; build
+report `report.md` and owner runbook `RUNBOOK.md` beside them. Migration
+`supabase/migrations/20261022100000_fia_two_gates.sql`, applied on 22 Oct with `apply_migration` (name
+`fia_two_gates`) on the owner's instruction ("merge, finish everything"); the evidence is in `report.md`.
+Exposing `fia` in the Data API and phase 0 (`VITE_FIA_LIVE` on Production) remain the owner's, in that order
+(`RUNBOOK.md` §2.2); until then Production shows the legacy page and never reads `fia`.
+
+- **D1, two ways in, one view (agreed 22 Oct).** The site reads `fia.model_packages` instead of
+  `fsre_published.model_packages`: the FSRE channel, untouched, and a manual channel, `fia.manual_release`,
+  filled with `scripts/fia/publish-manual.ts`. `channel` is a column of the view, never part of `package`, so
+  the contract (proposal v3.1) is unchanged. Every package still passes `buildRegistry` on the page.
+- **D2, a ticker in both channels (agreed 22 Oct).** As built: `DISTINCT ON (ticker) … ORDER BY approved_at
+  DESC NULLS LAST, (channel = 'fsre') DESC, version DESC, content_hash`. The most recent approval wins, FSRE
+  wins an exact tie, a null `approved_at` loses to any time (`DESC` alone would put it first), and two rows of
+  one channel that tie fall to a fixed order rather than to the plan. Because the order is by time, a manual
+  approval dated more than a minute ahead of the moment it is made is refused (it would outrank everything
+  until withdrawn); the script stamps `now()`.
+- **D3, who owns what (default, accepted with the owner's merge instruction of 22 Oct).** Schema `fia`, owned
+  by this repository's migrations, plus `fia_private` for the helpers (the FSRE reader and the guard triggers),
+  never exposed to the Data API. No DDL, grant or row in `fsre`, `fsre_private`, `fsre_status` or
+  `fsre_published`; the fingerprint (`supabase/tests/fsre_fingerprint.sql`) was identical before and after, on
+  a local stand-in and on production (229 objects, total `201cddfeaa5ae54387a05fa5e47d6d79`, no outside
+  dependant, both times). FSRE is read by `fia_private.fsre_packages()`, plpgsql, **as the caller**: no
+  view depends on `fsre_published.model_packages`, so an FSRE migration may replace its view, the migration
+  applies on a database without FSRE (a local stack; the channel is then empty), and anon sees FSRE packages
+  only as far as FSRE's own grant on its view allows. One way in does not take the other down: a view the
+  reader cannot read (grant revoked, a column renamed, dropped or retyped) leaves the FSRE channel empty with a
+  database WARNING, and the manual packages still show (found by an independent review of the branch; shown on
+  the local stand-in). Rejected: a view naming `fsre_published` directly (fails without FSRE, and an FSRE
+  `DROP VIEW … CASCADE` would drop the site's view with it); a SECURITY DEFINER reader (it would read past
+  FSRE's grant).
+- **D4, the contract in the database (default, accepted with the owner's merge instruction of 22 Oct).**
+  `pg_jsonschema` (0.3.3, the version the project offers) in `extensions`. `fia.contract_schema` holds `model-package.schema.json` verbatim, insert-only; a
+  unit test keeps the migration's copy equal to the file. A trigger refuses a manual row that does not match;
+  a missing contract refuses rather than lets through. On 2,005 packages (the five SYNTHETIC ones and 2,000
+  seeded single mutations) pg_jsonschema and ajv agreed every time.
+- **D5, a failed gate (default, accepted with the owner's merge instruction of 22 Oct).** Never shown. The
+  manual table refuses `published` with a failed gate (staged is allowed); the view drops such a package from either channel **before** choosing, so an
+  older valid package of the ticker shows rather than nothing. Only the gate is filtered there, as R2 says: a
+  newer FSRE package the site refuses for another reason (provenance not `filings`, say) still wins D2 and the
+  page lists it under "Not shown"; filtering provenance in the view as well is the owner's call (it would also
+  hide the synthetic FSRE packages the preview build shows).
+- **D6, placement (default, accepted with the owner's merge instruction of 22 Oct).** INDY and ADRO on A121 Coal
+  production; BREN on `band-energy` (accepted by `CHAIN_POSITIONS`/`groupAlongChain`), unit MWh. The owner was to
+  give BREN's sub-industry code and name; asked to finish without stopping, I used **J411 "Electric
+  utilities"**, the exchange's own classification of BREN (and of PGEO, the other listed geothermal producer)
+  in the repository's IDX-IC snapshot (`docs/world/sources/issuers-snapshot.json`), coded like A121 and B121,
+  and already on `band-energy` in the world registry. One JSON edit changes it. Still for the owner: since its
+  2024 restructuring the listed ADRO is Alamtri Resources Indonesia, the thermal coal business having moved to
+  Adaro Andalan Indonesia (AADI); A121 keeps ADRO as D6 says.
+- **D7, depth and Capital in Motion (default, accepted with the owner's merge instruction of 22 Oct).** All
+  three `executive`; INDY [3, 8], ADRO [3, 9], BREN [4, 6].
+- **Row security without a policy, as PRD R1 says.** `fia.manual_release` and `fia.contract_schema` have RLS
+  on, no policy and no grant to anon or authenticated. The README's "zero tables without a policy" invariant
+  was written for the public schema's tables, which carry default grants; if the owner wants it here too, a
+  restrictive `USING (false)` policy changes nothing in behaviour. The Supabase linter will also report
+  `fia.model_packages` as a security-definer view: it is the design (anon reads the table only through it).
+- **Migrations are applied with `apply_migration` or the SQL Editor, never `supabase db push`** (README),
+  although PLAN phase 6 offered the CLI.
+
+---
+
 # 2026-10-22 — The consolidation series wears the essay layout
 
 Branch `claude/consolidation-essays-layout-45352w`. Owner report: on desktop every essay of the

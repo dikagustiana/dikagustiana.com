@@ -1,0 +1,15 @@
+$ psql (postgres) -d run_fsre -f supabase/tests/fsre_fingerprint.sql   # before
+kind | schema | name | digest
+constraint | fsre | manifest.manifest_pkey | 9410801fc3a0efb2b27d9f651284c0c4
+constraint | fsre | package_release.package_release_pkey | 9410801fc3a0efb2b27d9f651284c0c4
+index | fsre | manifest_pkey | 33cfef7eae28fd61a705ebeded5966c2
+index | fsre | package_release_pkey | 28f4b6e5485c757763f1fbf2dbf4dbc1
+outside-dependants | - | - | 0
+relation:r | fsre | manifest | 7145b0bd7d15c41bfc8f1b5a75b6a3e1
+relation:r | fsre | package_release | 5e6ab0b1f17e0dbe9946ff2dabe818db
+relation:v | fsre_published | model_packages | f5e8a4024a765a1552850fe8f5b87bc6
+schema | fsre | fsre | 3e6e809a646762a850487c1ba32c11b1
+schema | fsre_published | fsre_published | de7ff9ab58e0a9e75a5b62162d6bd81f
+total | - | 10 | 0223689600a03d6785c7c2a879a22c93
+(11 rows)
+[exit 0]
