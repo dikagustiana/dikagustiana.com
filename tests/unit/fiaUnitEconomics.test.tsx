@@ -57,6 +57,14 @@ describe('the per-unit scale', () => {
     expect(unitScale('Rp mn', 't')).toEqual({ multiplier: 1, label: 'Rp million', known: true });
     expect(unitScale('USD m', 'Mt')).toMatchObject({ multiplier: 1, known: false, label: 'USD m per Mt' });
   });
+
+  it('keeps US dollars in dollars per unit and reads thousand tonnes and MWh', () => {
+    expect(unitScale('US$ thousand', 'Mt')).toEqual({ multiplier: 1e-3, label: 'US$', known: true });
+    expect(unitScale('US$ thousand', 'MWh')).toEqual({ multiplier: 1e3, label: 'US$', known: true });
+    expect(unitScale('USD million', 'Mt')).toEqual({ multiplier: 1, label: 'US$', known: true });
+    expect(unitScale('Rp million', 'thousand tonnes')).toEqual({ multiplier: 1, label: 'Rp thousand', known: true });
+    expect(unitScale('Rp bn', 'GWh')).toEqual({ multiplier: 1, label: 'Rp million', known: true });
+  });
 });
 
 describe('unit economics worked from the rows', () => {

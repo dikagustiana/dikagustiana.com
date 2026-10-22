@@ -14,24 +14,51 @@ import { isNum, type Value } from './engine/engine';
 import { formatNumber } from './format';
 import type { Workbook } from './model/workbook';
 
-const MONEY: Record<string, number> = {
-  Rp: 1,
-  'Rp thousand': 1e3,
-  'Rp mn': 1e6,
-  'Rp million': 1e6,
-  'Rp bn': 1e9,
-  'Rp billion': 1e9,
-  'Rp tn': 1e12,
-  'Rp trillion': 1e12,
+// A money unit is a currency and an optional magnitude: "Rp million", "US$ thousand".
+// Companies that report in US dollars keep their own currency; nothing is converted.
+const CURRENCY: Record<string, string> = { Rp: 'Rp', IDR: 'Rp', US$: 'US$', USD: 'US$' };
+const MAGNITUDE: Record<string, number> = {
+  '': 1,
+  thousand: 1e3,
+  mn: 1e6,
+  million: 1e6,
+  bn: 1e9,
+  billion: 1e9,
+  tn: 1e12,
+  trillion: 1e12,
 };
-const VOLUME: Record<string, number> = { t: 1, tonne: 1, tonnes: 1, kt: 1e3, Mt: 1e6 };
+// Volumes relative to their family's base unit (tonne, MWh).
+const VOLUME: Record<string, number> = {
+  t: 1,
+  tonne: 1,
+  tonnes: 1,
+  kt: 1e3,
+  'thousand tonne': 1e3,
+  'thousand tonnes': 1e3,
+  Mt: 1e6,
+  'million tonne': 1e6,
+  'million tonnes': 1e6,
+  MWh: 1,
+  GWh: 1e3,
+  TWh: 1e6,
+};
 const SCALE_LABEL: [number, string][] = [
-  [1e12, 'Rp trillion'],
-  [1e9, 'Rp billion'],
-  [1e6, 'Rp million'],
-  [1e3, 'Rp thousand'],
-  [1, 'Rp'],
+  [1e12, ' trillion'],
+  [1e9, ' billion'],
+  [1e6, ' million'],
+  [1e3, ' thousand'],
+  [1, ''],
 ];
+
+/** A volume unit as a multiple of its family's base unit, or undefined when not recognised. */
+export const volumeFactor = (unit: string): number | undefined => VOLUME[unit.trim()];
+
+/** A money unit's currency ("Rp", "US$") and magnitude, or null when not recognised. */
+export function parseMoney(unit: string): { currency: string; magnitude: number } | null {
+  const match = /^(Rp|IDR|US\$|USD)(?:\s+(thousand|mn|million|bn|billion|tn|trillion))?$/.exec(unit.trim());
+  if (!match) return null;
+  return { currency: CURRENCY[match[1]], magnitude: MAGNITUDE[match[2] ?? ''] };
+}
 
 export interface UnitScale {
   /** Multiply row ÷ volume by this to land in `label` per unit. */
@@ -47,12 +74,14 @@ export interface UnitScale {
  * Unknown units keep their own names and a multiplier of one.
  */
 export function unitScale(moneyUnit: string, volumeUnit: string): UnitScale {
-  const m = MONEY[moneyUnit.trim()];
+  const m = parseMoney(moneyUnit);
   const v = VOLUME[volumeUnit.trim()];
   if (!m || !v) return { multiplier: 1, label: `${moneyUnit} per ${volumeUnit}`, known: false };
-  const ratio = m / v;
-  const [base, label] = SCALE_LABEL.find(([b]) => ratio >= b) ?? SCALE_LABEL[SCALE_LABEL.length - 1];
-  return { multiplier: ratio / base, label, known: true };
+  const ratio = m.magnitude / v;
+  // Dollar figures per unit are small (tens of dollars a tonne), so they are always stated in whole dollars.
+  const scales = m.currency === 'Rp' ? SCALE_LABEL : SCALE_LABEL.slice(-1);
+  const [base, suffix] = scales.find(([b]) => ratio >= b) ?? scales[scales.length - 1];
+  return { multiplier: ratio / base, label: `${m.currency}${suffix}`, known: true };
 }
 
 export const plural = (unit: string): string => (unit.endsWith('s') ? unit : `${unit}s`);
