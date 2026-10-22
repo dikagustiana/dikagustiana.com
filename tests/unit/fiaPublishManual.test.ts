@@ -283,8 +283,15 @@ describe('the connection settings (.env.local)', () => {
       SUPABASE_DB_URL: 'postgresql://postgres.ref@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres',
       SUPABASE_DB_PASSWORD: 'p@ss#w/rd',
     });
-    expect(s.config.password).toBe('p@ss#w/rd');
+    expect(s.config).toMatchObject({ host: 'aws-0-ap-southeast-1.pooler.supabase.com', port: 5432, user: 'postgres.ref', database: 'postgres', password: 'p@ss#w/rd' });
+    expect(s.config).not.toHaveProperty('connectionString'); // node-postgres would let it override the password
     expect(s.config.ssl).toEqual({ rejectUnauthorized: false });
+    // The dashboard's string pasted as it is: the password line still wins.
+    const pasted = settingsFrom({
+      SUPABASE_DB_URL: 'postgresql://postgres.ref:[YOUR-PASSWORD]@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres',
+      SUPABASE_DB_PASSWORD: 'p@ss#w/rd',
+    });
+    expect(pasted.config.password).toBe('p@ss#w/rd');
     expect(redact('auth failed for p@ss#w/rd at postgresql://postgres.ref@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres', s.secrets))
       .toBe('auth failed for *** at ***');
     expect(settingsFrom({ SUPABASE_DB_URL: 'postgresql://postgres@localhost:54322/postgres' }).config.ssl).toBeUndefined();

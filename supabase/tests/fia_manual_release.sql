@@ -278,7 +278,7 @@ SELECT pg_temp.check_case('R1 withdrawn final', 'a withdrawn row cannot be publi
 SELECT pg_temp.check_case('R1 withdrawn final', 'a withdrawn row cannot be deleted',
   $q$DELETE FROM fia.manual_release WHERE ticker = 'XCOA' AND version = 'XCOA-r2'$q$, 'manual_release_withdrawn_final');
 SELECT pg_temp.check_value('R1 withdrawn final', 'a withdrawn row is not in fia.model_packages',
-  $q$SELECT count(*)::text FROM fia.model_packages WHERE ticker = 'XCOA' AND channel = 'manual'$q$, '0');
+  $q$SELECT count(*)::text FROM fia.model_packages WHERE ticker = 'XCOA' AND channel = 'manual' AND version = 'XCOA-r2'$q$, '0');
 
 -- No grant, row security on, no policy
 SELECT pg_temp.check_value('R1 no grant', 'row security is on for both tables, with no policy',

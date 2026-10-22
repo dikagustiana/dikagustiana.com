@@ -58,27 +58,37 @@ export interface DbSettings {
 export function settingsFrom(env: Record<string, string>): DbSettings {
   const url = env.SUPABASE_DB_URL;
   if (!url) throw new SetupError(`${ENV_FILE} has no SUPABASE_DB_URL line (RUNBOOK.md, first-time setup)`);
-  let host: string;
-  let urlPassword: string;
+  let u: URL;
   try {
-    const u = new URL(url);
-    host = u.hostname;
-    urlPassword = decodeURIComponent(u.password);
+    u = new URL(url);
   } catch {
     throw new SetupError(`SUPABASE_DB_URL in ${ENV_FILE} is not a connection string (postgresql://…)`);
   }
+  if (u.protocol !== 'postgresql:' && u.protocol !== 'postgres:') {
+    throw new SetupError(`SUPABASE_DB_URL in ${ENV_FILE} is not a connection string (postgresql://…)`);
+  }
+  const urlPassword = decodeURIComponent(u.password);
+  // SUPABASE_DB_PASSWORD wins, so the dashboard's string can be pasted as it is, [YOUR-PASSWORD] and all.
   const password = env.SUPABASE_DB_PASSWORD || urlPassword;
-  if (!password && !isLocal(host)) {
+  if (!password && !isLocal(u.hostname)) {
     throw new SetupError(`${ENV_FILE} has no SUPABASE_DB_PASSWORD line, and SUPABASE_DB_URL carries no password (RUNBOOK.md, first-time setup)`);
   }
-  const config: pg.ClientConfig = { connectionString: url, application_name: 'fia-scripts' };
+  // Built from the parts, not passed as connectionString: node-postgres lets a
+  // connection string override the options beside it, password included.
+  const config: pg.ClientConfig = {
+    host: u.hostname,
+    port: u.port ? Number(u.port) : 5432,
+    user: decodeURIComponent(u.username) || 'postgres',
+    database: decodeURIComponent(u.pathname.replace(/^\//, '')) || 'postgres',
+    application_name: 'fia-scripts',
+  };
   if (password) config.password = password;
-  if (!isLocal(host)) {
+  if (!isLocal(u.hostname)) {
     config.ssl = env.SUPABASE_DB_CA
       ? { ca: fs.readFileSync(path.resolve(env.SUPABASE_DB_CA), 'utf8') }
       : { rejectUnauthorized: false };
   }
-  return { config, secrets: [url, password, urlPassword].filter(Boolean) };
+  return { config, secrets: [url, password, urlPassword, u.password].filter(Boolean) };
 }
 
 function isLocal(host: string): boolean {
