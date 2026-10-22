@@ -60,7 +60,7 @@ describe('the model page header', () => {
     at('xcoa');
     await screen.findByRole('heading', { level: 1 });
     expect(screen.getByRole('link', { name: 'Finance in Action' })).toHaveAttribute('href', '/finance/finance-in-action');
-    expect(screen.getByRole('link', { name: 'Geological extraction' })).toHaveAttribute('href', '/finance/finance-in-action#stage-extraction');
+    expect(screen.getByRole('link', { name: 'Geological extraction' })).toHaveAttribute('href', '/finance/finance-in-action#stage-stage-extraction');
   });
 
   it('states the provenance in one sentence when the figures are not from filings', async () => {

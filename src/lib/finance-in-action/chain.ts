@@ -45,6 +45,12 @@ export function chainMapHref(positionId?: string): string {
   return `/?${params.toString()}`;
 }
 
-/** The index anchor of a chain position, and of a sub-industry. */
-export const positionAnchor = (id: string): string => id;
+/**
+ * The index anchor of a chain position, and of a sub-industry. Chain view
+ * (PROMPT-site §3.1): a stage's section is `stage-<stage id>` and a spanning
+ * layer's `band-<band id>`, so `#stage-stage-extraction` and
+ * `#band-band-energy`. Chosen once, here; the index, its stage pills, the
+ * breadcrumbs and the homepage chain map all read it through this helper.
+ */
+export const positionAnchor = (id: string): string => (positionOf(id)?.kind === 'layer' ? `band-${id}` : `stage-${id}`);
 export const subIndustryAnchor = (code: string): string => `sub-${code}`;

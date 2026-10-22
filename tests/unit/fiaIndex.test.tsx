@@ -24,7 +24,7 @@ vi.mock('@vercel/analytics/react', () => ({ Analytics: () => null }));
 
 import App from '@/App';
 import FiaIndexPage from '@/pages/finance-in-action/FiaIndexPage';
-import { CHAIN_STAGES, SPANNING_LAYERS } from '@/lib/finance-in-action/chain';
+import { CHAIN_STAGES, SPANNING_LAYERS, positionAnchor } from '@/lib/finance-in-action/chain';
 import { COPY } from '@/lib/finance-in-action/copy';
 import { STATUSES } from '@/lib/finance-in-action/constants';
 import { STAGES } from '@/data/industryChain';
@@ -64,7 +64,10 @@ describe('the preview index, lens off', () => {
     expect(cards.map((li) => within(li).getByRole('link').firstChild?.textContent)).toEqual(CHAIN_STAGES.map((s) => s.label));
     expect(CHAIN_STAGES).toHaveLength(STAGES.length);
     for (const layer of SPANNING_LAYERS) {
-      expect(screen.getByRole('link', { name: new RegExp(layer.label) })).toHaveAttribute('href', `#${layer.id}`);
+      // The stage pills (chain view §3.1) name the layers too; the strip's band is the link outside them.
+      const band = screen.getAllByRole('link', { name: new RegExp(layer.label) }).filter((a) => !a.closest('nav'));
+      expect(band).toHaveLength(1);
+      expect(band[0]).toHaveAttribute('href', `#${positionAnchor(layer.id)}`);
     }
     expect(SPANNING_LAYERS.map((l) => l.label)).toEqual(['Energy', 'Logistics and warehousing']);
   });
@@ -92,7 +95,7 @@ describe('the preview index, lens off', () => {
   it('gives every stage a section, and an empty stage says so', async () => {
     renderIndex();
     for (const s of CHAIN_STAGES) expect(await screen.findByRole('heading', { level: 2, name: s.label })).toBeInTheDocument();
-    const recovery = document.getElementById('stage-recovery')!;
+    const recovery = document.getElementById('stage-stage-recovery')!;
     expect(recovery).toHaveTextContent(COPY.noModels);
   });
 
