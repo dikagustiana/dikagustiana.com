@@ -1,8 +1,10 @@
 /**
  * Finance in Action, programme milestone M5 step 4: the preview reads the
- * owner's published models from fsre_published.model_packages, read-only, and
- * a failed read never empties the page. The package here is SYNTHETIC (built
- * by the FSRE suite from its synthetic golden case and relabelled).
+ * owner's published models, read-only, and a failed read never empties the
+ * page. Since the two ways in (docs/company-models/two-gates) the read is
+ * fia.model_packages, the FSRE channel and the manual one in one view. The
+ * package here is SYNTHETIC (built by the FSRE suite from its synthetic golden
+ * case and relabelled).
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { screen } from '@testing-library/react';
@@ -42,7 +44,7 @@ afterEach(() => {
 });
 
 describe('reading the published models', () => {
-  it('asks the published schema with the publishable key only, and returns the packages', async () => {
+  it('asks the fia schema (both channels) with the publishable key only, and returns the packages', async () => {
     const fetchMock = vi.fn(async () => new Response(JSON.stringify([{ package: PKG }]), { status: 200 }));
     vi.stubGlobal('fetch', fetchMock);
     const got = await fetchPublishedPackages('https://example.supabase.test', 'publishable-key');
@@ -51,7 +53,7 @@ describe('reading the published models', () => {
     const [url, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
     expect(url).toBe('https://example.supabase.test/rest/v1/model_packages?select=package');
     const headers = init.headers as Record<string, string>;
-    expect(headers['Accept-Profile']).toBe('fsre_published');
+    expect(headers['Accept-Profile']).toBe('fia'); // fia.model_packages, not fsre_published: both ways in
     expect(headers.apikey).toBe('publishable-key');
     expect(headers).not.toHaveProperty('Authorization'); // no session: the database answers as anon
     expect(init.method ?? 'GET').toBe('GET'); // read-only

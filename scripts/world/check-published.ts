@@ -1,6 +1,6 @@
 /**
  * Reads the published model index exactly as the site does (the anonymous
- * role, `fsre_published.model_packages`, through `fetchPublishedPackages`)
+ * role, `fia.model_packages`, both channels, through `fetchPublishedPackages`)
  * and prints the HTTP outcome and the package count. Read-only.
  *
  *   VITE_SUPABASE_URL=… VITE_SUPABASE_PUBLISHABLE_KEY=… npx vite-node scripts/world/check-published.ts
@@ -18,8 +18,8 @@ if (!url || !key) {
 try {
   const packages = await fetchPublishedPackages(url, key);
   const tickers = packages.map((p) => p.meta?.ticker).filter(Boolean).join(', ');
-  console.log(`check-published: HTTP 200, ${packages.length} package(s)${tickers ? `: ${tickers}` : ''}`);
+  console.log(`check-published: fia.model_packages HTTP 200, ${packages.length} package(s)${tickers ? `: ${tickers}` : ''}`);
 } catch (e) {
-  console.log(`check-published: ${e instanceof Error ? e.message : String(e)}`);
+  console.log(`check-published: fia.model_packages ${e instanceof Error ? e.message : String(e)}`);
   process.exit(1);
 }
