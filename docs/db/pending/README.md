@@ -5,6 +5,9 @@
 >
 > **One exception, added 2026-09-28:** `wo-r05-rebuild/` IS pending work. It holds SQL that
 > has not run anywhere, waiting on the owner's gates. See its README.
+>
+> **Also pending, added 2026-10-22:** `content-json-backfill-2026-10-22/` fills `content_json`
+> on the 36 essays of the accounting import. Rehearsed locally, not applied. See its README.
 
 ## Where the SQL is now
 

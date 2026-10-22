@@ -1,0 +1,218 @@
+[
+ {
+  "slug": "accrued-expenses-received-not-invoiced",
+  "id": "1dd0a7ad-6098-4615-bf5d-94ca2decb699",
+  "content_md5": "abf2c6094f30c83bc264d62fb2893364",
+  "content_json_bytes": 61003
+ },
+ {
+  "slug": "advances-and-prepayments-deferral-and-classification",
+  "id": "edfe0641-4ab9-4978-9faf-790f494d7bb1",
+  "content_md5": "ac80a4601ae9923b54830b481934efc3",
+  "content_json_bytes": 61932
+ },
+ {
+  "slug": "business-combinations-acquisition-method-goodwill-common-control",
+  "id": "9d9e015d-22ec-409b-863c-788653d84d50",
+  "content_md5": "8414e59cd09e1b173acfa02c1c296171",
+  "content_json_bytes": 64973
+ },
+ {
+  "slug": "cash-and-cash-equivalents-definition-control-and-flows",
+  "id": "d64f7bdf-ee33-4484-98bf-4ff3c136e469",
+  "content_md5": "b96b7c8cf9e7417e3b6e7c9f21ec2ec8",
+  "content_json_bytes": 63671
+ },
+ {
+  "slug": "consolidated-cash-flows-and-mid-year-acquisitions",
+  "id": "31865371-572a-48b7-96fe-03d502d3ddf9",
+  "content_md5": "27c329fa74299c98ca791d02f5142b95",
+  "content_json_bytes": 69832
+ },
+ {
+  "slug": "consolidation-worksheet-elimination-entries",
+  "id": "4146bf74-cfa6-4833-a95c-11f44131c80f",
+  "content_md5": "9f4ced497a0523037acc1059dc0e6e5f",
+  "content_json_bytes": 105462
+ },
+ {
+  "slug": "corporate-dividend-taxes-receivable-current-tax-assets-and-refunds",
+  "id": "d7acd544-a882-41bc-b9de-68981b29ade8",
+  "content_md5": "9bf40a5de1007fc70075c3151901b5c3",
+  "content_json_bytes": 58463
+ },
+ {
+  "slug": "decommissioning-provision-psak-237-and-contingencies",
+  "id": "8e26845c-467c-4c83-b593-a0c647e354be",
+  "content_md5": "a0829f570ef6d752fd50576e498a541b",
+  "content_json_bytes": 60163
+ },
+ {
+  "slug": "deferred-revenue-contract-liabilities-take-or-pay",
+  "id": "4af0724c-712f-4fa7-8cff-9e640cf00627",
+  "content_md5": "c12aa247658e1b306501d0dee3260f86",
+  "content_json_bytes": 54548
+ },
+ {
+  "slug": "deferred-tax-assets-deductible-differences-and-recoverability",
+  "id": "a26e639f-4bb5-43a2-8119-f77003148ec2",
+  "content_md5": "f400cf084f6f1715f50f88070608e931",
+  "content_json_bytes": 73323
+ },
+ {
+  "slug": "due-from-government-underlifting-dmo-fees",
+  "id": "2671e055-567e-4d34-83e3-178af2661656",
+  "content_md5": "7730c6baecf7d6a3016baa52714ee5ee",
+  "content_json_bytes": 53604
+ },
+ {
+  "slug": "employee-benefits-liabilities-non-current-psak-219",
+  "id": "14a25fdc-7f5b-4d0d-9fac-e3b2cf6c8f2c",
+  "content_md5": "a3350dcabba3f79960ee582d387776b3",
+  "content_json_bytes": 79432
+ },
+ {
+  "slug": "finance-cost-and-finance-income-interest-presentation-coverage",
+  "id": "072a003d-0fb4-488b-bc5e-ac0fc130e6de",
+  "content_md5": "c1e985c1a3c0c9bee3cf5dfc60b3b74b",
+  "content_json_bytes": 73988
+ },
+ {
+  "slug": "fixed-assets-net-cost-depreciation-impairment",
+  "id": "5ce9af9a-af6c-4e3f-b924-155969777f74",
+  "content_md5": "ca8aa0dcc402861d9404bd2ec575c884",
+  "content_json_bytes": 68931
+ },
+ {
+  "slug": "foreign-exchange-loss-net-functional-currency-monetary-items",
+  "id": "5910e0a4-08c0-46f4-af2f-8d14c0133676",
+  "content_md5": "685924979be44988986c7ff671ff61e1",
+  "content_json_bytes": 62310
+ },
+ {
+  "slug": "impairment-non-financial-assets-psak-236",
+  "id": "024cc475-7902-4b1e-ad3f-97e432c92c43",
+  "content_md5": "ea13c0c970d2a454fb5d79422d1e565e",
+  "content_json_bytes": 67381
+ },
+ {
+  "slug": "intangible-assets-net-software-land-rights-goodwill",
+  "id": "29be61c1-9966-4d98-906b-b522bf8f8108",
+  "content_md5": "76e668ef793b7109974c9ce520f2f5a8",
+  "content_json_bytes": 66479
+ },
+ {
+  "slug": "intercompany-profit-in-inventory",
+  "id": "ff940d50-0c65-48a8-8459-9f0457aa0c40",
+  "content_md5": "6a546405b42eab06bc8e931a6684da9c",
+  "content_json_bytes": 75117
+ },
+ {
+  "slug": "intercompany-profit-plant-assets",
+  "id": "5e8874e3-0e04-4270-ba48-0e7bd2edba2e",
+  "content_md5": "904a5a6c196ea197feb03c319a751ff5",
+  "content_json_bytes": 66509
+ },
+ {
+  "slug": "inventories-net-upstream-materials-and-spares",
+  "id": "103737ec-579a-4330-a996-adf381d57bbe",
+  "content_md5": "5352b46ddb06944702d24c7df048823d",
+  "content_json_bytes": 58059
+ },
+ {
+  "slug": "investment-properties-definition-models-transfers",
+  "id": "bfe42851-b6bc-480b-9d14-5572fc9e1272",
+  "content_md5": "4a1d28a38e957671623de1957a1e70d0",
+  "content_json_bytes": 55376
+ },
+ {
+  "slug": "long-term-bank-loans-non-current-amortised-cost-and-sukuk",
+  "id": "e7716f4d-6d57-443d-9221-92b00916bbd7",
+  "content_md5": "ff350bbe3021d7143f99193aaffd5754",
+  "content_json_bytes": 69875
+ },
+ {
+  "slug": "long-term-investments-classification-equity-method",
+  "id": "d035aea1-7784-4c3c-9da1-d942b016fedc",
+  "content_md5": "dd8f3335e1738ebb73b73b296e0e54af",
+  "content_json_bytes": 66823
+ },
+ {
+  "slug": "mutual-holdings-complex-group-structures",
+  "id": "aab4ee41-2d26-4015-85c2-6c81bba23314",
+  "content_md5": "4001e591c05141ac7ac01257a56da2e9",
+  "content_json_bytes": 79214
+ },
+ {
+  "slug": "non-controlling-interest-control-attribution-and-ownership-changes",
+  "id": "2d6391ad-0b0d-472c-a2d9-1db6ecfc014a",
+  "content_md5": "64a6ac56ebd51e374a312a5f2565301c",
+  "content_json_bytes": 61969
+ },
+ {
+  "slug": "oil-gas-properties-capitalised-cost-and-reserves",
+  "id": "607700de-8b2a-4086-bb39-03f553b3dfed",
+  "content_md5": "6fbfd5861ad3b4e88f424fd1fe6bf569",
+  "content_json_bytes": 66862
+ },
+ {
+  "slug": "other-comprehensive-income-recycling-translation-hedges",
+  "id": "ef880563-d83f-44ad-a3d7-4ae2cec54d82",
+  "content_md5": "8fccd68b31b3fdbb6eb5e51bab774fde",
+  "content_json_bytes": 64888
+ },
+ {
+  "slug": "other-taxes-receivable-current-vat-and-withholding",
+  "id": "2eb7a514-cb2d-4ebf-b316-8a1b0b1b2b98",
+  "content_md5": "d508cbaa77576165154e682fc022d861",
+  "content_json_bytes": 65407
+ },
+ {
+  "slug": "production-expenses-structure-of-profit-or-loss",
+  "id": "d0e39c63-c632-4985-bbaf-2d0dfb91dcf4",
+  "content_md5": "b245022060d293eade4d5315b6da2611",
+  "content_json_bytes": 65296
+ },
+ {
+  "slug": "restricted-cash-access-test-classification-and-funds",
+  "id": "363824fb-fc9b-4087-b955-c0622b5148b3",
+  "content_md5": "7b6b491f46dd12f8d4081fbb81ccde0f",
+  "content_json_bytes": 60027
+ },
+ {
+  "slug": "retained-earnings-profit-allocation-and-dividends",
+  "id": "1f457ee0-84b2-49ad-81bc-7e075c96513e",
+  "content_md5": "a37992149484beec91ea55e7fa9e5376",
+  "content_json_bytes": 69662
+ },
+ {
+  "slug": "revenues-five-steps-psc-entitlement",
+  "id": "d29a13f3-0f60-4efe-b744-172af36d2d62",
+  "content_md5": "3aa1306703c422af0c4c04baa2801cde",
+  "content_json_bytes": 62737
+ },
+ {
+  "slug": "right-of-use-assets-net-lessee-accounting",
+  "id": "7f56ddf3-eb7b-4ec4-9216-919e7b1b853c",
+  "content_md5": "24d72e7928daacd9fac4a2b486e5c2bd",
+  "content_json_bytes": 64202
+ },
+ {
+  "slug": "share-capital-contributed-capital-and-common-control",
+  "id": "7dbd6dc0-0e0a-43c3-92ab-b41c2fc36c3b",
+  "content_md5": "ce2b64a2edb42f43534ee358d1eb6fb8",
+  "content_json_bytes": 66567
+ },
+ {
+  "slug": "trade-payables-accounts-payable-and-supplier-finance",
+  "id": "a1561fc6-765d-4fc0-84b1-a5da1a890033",
+  "content_md5": "d58db82fdcf6b3c3adc2182132e153e9",
+  "content_json_bytes": 59883
+ },
+ {
+  "slug": "trade-receivables-net-recognition-ecl-derecognition",
+  "id": "ff2f67b2-8acc-408d-84c4-c5d044c7d648",
+  "content_md5": "4409ed06553e0041de6ce342fc67b0cb",
+  "content_json_bytes": 63691
+ }
+]
