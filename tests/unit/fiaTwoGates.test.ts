@@ -68,6 +68,21 @@ describe('the fia migration and the FSRE schemas', () => {
   });
 });
 
+describe('one way in does not take the other down', () => {
+  it('leaves the FSRE channel empty, with a warning, when FSRE\'s view cannot be read as the reader reads it', () => {
+    const reader = MIGRATION.slice(MIGRATION.indexOf('CREATE FUNCTION fia_private.fsre_packages()'));
+    const body = reader.slice(0, reader.indexOf('$fn$;'));
+    expect(body).toMatch(/EXCEPTION\s+WHEN insufficient_privilege OR undefined_table OR undefined_column OR invalid_schema_name\s+OR datatype_mismatch OR cannot_coerce OR undefined_function THEN\s+RAISE WARNING [^;]+;\s+RETURN;/);
+    expect(body).toMatch(/p\.version::text, p\.content_hash::text, p\.approved_by::text,\s+p\.approved_at::timestamptz, p\.package::jsonb/);
+  });
+
+  it('fires the guards in every replication role', () => {
+    for (const trigger of ['manual_release_guard', 'manual_release_no_truncate', 'contract_schema_insert_only', 'contract_schema_no_truncate']) {
+      expect(MIGRATION).toMatch(new RegExp(`ENABLE ALWAYS TRIGGER ${trigger};`));
+    }
+  });
+});
+
 describe('the grants', () => {
   it('give anon the view and nothing else in fia, and authenticated nothing', () => {
     const grants = code(MIGRATION).match(/^GRANT [^;]+;/gm) ?? [];

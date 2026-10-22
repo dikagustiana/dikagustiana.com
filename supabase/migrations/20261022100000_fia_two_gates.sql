@@ -15,8 +15,8 @@
 --                         (pg_jsonschema, D4), whose meta.ticker, meta.version
 --                         or meta.contentHash differ from its columns, whose
 --                         provenance is not filings, or that is published
---                         without an approver and a time, or with a failed
---                         gate (D5). A published row is never edited or
+--                         without an approver and a time, with an approval
+--                         time in the future, or with a failed gate (D5). A published row is never edited or
 --                         deleted; it can only be withdrawn. A withdrawn row
 --                         is final. A revision is a new row with a new version.
 --   fia.model_packages    what the site reads (R2): the FSRE channel and the
@@ -33,10 +33,15 @@
 -- the private fsre-skills repository and are not touched: no DDL, no grant, no
 -- row. fia_private.fsre_packages() reads fsre_published.model_packages from
 -- plpgsql, so the view records no dependency on it: an FSRE migration can
--- replace its view freely, and this migration applies on a database without
--- the FSRE schemas at all (a local stack, PRD A2), where the FSRE channel is
--- simply empty. The reader runs as the caller, so the site's anon role sees
--- the FSRE packages exactly as far as FSRE's own grant on its view lets it.
+-- replace its view, and this migration applies on a database without the FSRE
+-- schemas at all (a local stack, PRD A2), where the FSRE channel is simply
+-- empty. The reader runs as the caller, so the site's anon role sees the FSRE
+-- packages exactly as far as FSRE's own grant on its view lets it. One way in
+-- does not take the other down: if FSRE's view cannot be read as the reader
+-- reads it (anon's grant revoked, a column renamed, dropped or retyped), the
+-- FSRE channel is empty, with a WARNING in the database log, and the manual
+-- packages still show. publish-manual.ts --list says per ticker which channel
+-- the site shows.
 --
 -- fia.model_packages runs with its owner's rights (no security_invoker): anon
 -- is granted the view and nothing else in fia, and reads fia.manual_release
@@ -364,6 +369,8 @@ CREATE TABLE fia.manual_release (
   CONSTRAINT manual_release_published_approved CHECK (
     status <> 'published' OR (btrim(coalesce(approved_by, '')) <> '' AND approved_at IS NOT NULL)
   ),
+  -- (An approval time in the future, which would win D2 until withdrawn, is refused by the guard below:
+  -- a CHECK may not depend on the clock.)
   CONSTRAINT manual_release_published_no_failed_gate CHECK (
     status <> 'published' OR NOT jsonb_path_exists(package, '$.workpaper.gates[*] ? (@.status == "failed")')
   )
@@ -429,6 +436,15 @@ BEGIN
     new.created_at := old.created_at;
     new.created_by := old.created_by;
     new.updated_at := now();
+  END IF;
+
+  -- D2 orders by approved_at: an approval dated after the moment it is made
+  -- would outrank every later one. A minute's grace covers a clock_timestamp().
+  IF new.status = 'published' AND new.approved_at > now() + interval '1 minute' THEN
+    RAISE EXCEPTION USING
+      ERRCODE = 'check_violation',
+      CONSTRAINT = 'manual_release_approved_not_future',
+      MESSAGE = format('fia.manual_release %s %s: approved_at %s is in the future', new.ticker, new.version, new.approved_at);
   END IF;
 
   -- The contract (D4), on a new package only. A missing contract refuses the
@@ -511,7 +527,11 @@ CREATE TRIGGER contract_schema_no_truncate
 -- The FSRE suite's published packages, as fsre_published.model_packages gives
 -- them, or none on a database without it. Runs as the caller (SECURITY
 -- INVOKER): what anon reads here is what FSRE grants anon on its own view.
--- Reads only package, version, content_hash, approved_by and approved_at.
+-- Reads only package, version, content_hash, approved_by and approved_at, each
+-- cast to the type the view promises, so a compatible change of type on
+-- FSRE's side (varchar for text, say) changes nothing. A view that cannot be
+-- read this way leaves the FSRE channel empty, with a WARNING, rather than
+-- failing fia.model_packages and the manual channel with it.
 CREATE FUNCTION fia_private.fsre_packages()
 RETURNS TABLE (
   ticker       text,
@@ -530,8 +550,14 @@ BEGIN
     RETURN;
   END IF;
   RETURN QUERY
-    SELECT p.package #>> '{meta,ticker}', p.version, p.content_hash, p.approved_by, p.approved_at, p.package
+    SELECT (p.package::jsonb #>> '{meta,ticker}'), p.version::text, p.content_hash::text, p.approved_by::text,
+           p.approved_at::timestamptz, p.package::jsonb
     FROM fsre_published.model_packages AS p;
+EXCEPTION
+  WHEN insufficient_privilege OR undefined_table OR undefined_column OR invalid_schema_name
+       OR datatype_mismatch OR cannot_coerce OR undefined_function THEN
+    RAISE WARNING 'fia.model_packages: the FSRE channel cannot be read and is left out (%: %)', SQLSTATE, SQLERRM;
+    RETURN;
 END
 $fn$;
 
@@ -576,6 +602,13 @@ COMMENT ON VIEW fia.model_packages IS
 
 ALTER TABLE fia.manual_release ENABLE ROW LEVEL SECURITY;   -- no policy: nobody but the owner
 ALTER TABLE fia.contract_schema ENABLE ROW LEVEL SECURITY;
+
+-- The guards fire even under session_replication_role = replica (a data
+-- restore's setting), which skips ordinary triggers.
+ALTER TABLE fia.manual_release ENABLE ALWAYS TRIGGER manual_release_guard;
+ALTER TABLE fia.manual_release ENABLE ALWAYS TRIGGER manual_release_no_truncate;
+ALTER TABLE fia.contract_schema ENABLE ALWAYS TRIGGER contract_schema_insert_only;
+ALTER TABLE fia.contract_schema ENABLE ALWAYS TRIGGER contract_schema_no_truncate;
 
 REVOKE ALL ON SCHEMA fia, fia_private FROM PUBLIC;
 REVOKE ALL ON ALL TABLES IN SCHEMA fia FROM PUBLIC, anon, authenticated;

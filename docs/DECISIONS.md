@@ -18,7 +18,9 @@ report `report.md` and owner runbook `RUNBOOK.md` beside them. Migration
 - **D2, a ticker in both channels (agreed 22 Oct).** As built: `DISTINCT ON (ticker) … ORDER BY approved_at
   DESC NULLS LAST, (channel = 'fsre') DESC, version DESC, content_hash`. The most recent approval wins, FSRE
   wins an exact tie, a null `approved_at` loses to any time (`DESC` alone would put it first), and two rows of
-  one channel that tie fall to a fixed order rather than to the plan.
+  one channel that tie fall to a fixed order rather than to the plan. Because the order is by time, a manual
+  approval dated more than a minute ahead of the moment it is made is refused (it would outrank everything
+  until withdrawn); the script stamps `now()`.
 - **D3, who owns what (default, to confirm).** Schema `fia`, owned by this repository's migrations, plus
   `fia_private` for the helpers (the FSRE reader and the guard triggers), never exposed to the Data API. No
   DDL, grant or row in `fsre`, `fsre_private`, `fsre_status` or `fsre_published`; the fingerprint
@@ -26,9 +28,12 @@ report `report.md` and owner runbook `RUNBOOK.md` beside them. Migration
   owner's check on production. FSRE is read by `fia_private.fsre_packages()`, plpgsql, **as the caller**: no
   view depends on `fsre_published.model_packages`, so an FSRE migration may replace its view, the migration
   applies on a database without FSRE (a local stack; the channel is then empty), and anon sees FSRE packages
-  only as far as FSRE's own grant on its view allows. Rejected: a view naming `fsre_published` directly (fails
-  without FSRE, and an FSRE `DROP VIEW … CASCADE` would drop the site's view with it); a SECURITY DEFINER
-  reader (it would read past FSRE's grant).
+  only as far as FSRE's own grant on its view allows. One way in does not take the other down: a view the
+  reader cannot read (grant revoked, a column renamed, dropped or retyped) leaves the FSRE channel empty with a
+  database WARNING, and the manual packages still show (found by an independent review of the branch; shown on
+  the local stand-in). Rejected: a view naming `fsre_published` directly (fails without FSRE, and an FSRE
+  `DROP VIEW … CASCADE` would drop the site's view with it); a SECURITY DEFINER reader (it would read past
+  FSRE's grant).
 - **D4, the contract in the database (default, to confirm).** `pg_jsonschema` (0.3.3, the version the project
   offers) in `extensions`. `fia.contract_schema` holds `model-package.schema.json` verbatim, insert-only; a
   unit test keeps the migration's copy equal to the file. A trigger refuses a manual row that does not match;
@@ -36,7 +41,10 @@ report `report.md` and owner runbook `RUNBOOK.md` beside them. Migration
   seeded single mutations) pg_jsonschema and ajv agreed every time.
 - **D5, a failed gate (default, to confirm).** Never shown. The manual table refuses `published` with a failed
   gate (staged is allowed); the view drops such a package from either channel **before** choosing, so an
-  older valid package of the ticker shows rather than nothing.
+  older valid package of the ticker shows rather than nothing. Only the gate is filtered there, as R2 says: a
+  newer FSRE package the site refuses for another reason (provenance not `filings`, say) still wins D2 and the
+  page lists it under "Not shown"; filtering provenance in the view as well is the owner's call (it would also
+  hide the synthetic FSRE packages the preview build shows).
 - **D6, placement (default, to confirm).** INDY and ADRO on A121 Coal production; BREN on a new geothermal
   sub-industry on `band-energy` (accepted by `CHAIN_POSITIONS`/`groupAlongChain`), unit MWh. Its code and name
   are the owner's and read `OWNER-DECISION` until given; they show on the live page as written. To check

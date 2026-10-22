@@ -135,6 +135,7 @@ export const REFUSALS: Record<string, string> = {
   manual_release_ticker_format: 'the ticker is not 2 to 8 capital letters or digits',
   manual_release_provenance_filings: 'package.meta.provenance is not filings',
   manual_release_published_approved: 'a published row needs an approver and an approval time',
+  manual_release_approved_not_future: 'the approval time is in the future',
   manual_release_published_no_failed_gate: 'a package with a failed gate cannot be published',
   manual_release_published_locked: 'the row is published: it can only be withdrawn; a revision is a new version',
   manual_release_withdrawn_final: 'the row is withdrawn, which is final; a revision is a new version',
@@ -163,6 +164,19 @@ async function shownNow(db: Db, ticker: string): Promise<string> {
   const { rows } = await db.query<{ channel: string; version: string }>(
     'SELECT channel, version FROM fia.model_packages WHERE ticker = $1', [ticker]);
   return rows.length ? `${rows[0].channel} ${rows[0].version}` : 'nothing';
+}
+
+/**
+ * What the site shows for the ticker, read after the write has committed. A
+ * failure here says so and changes nothing: the write stands, and the command
+ * still succeeded.
+ */
+async function reportShown(db: Db, out: (l: string) => void, ticker: string, line: (shown: string) => string): Promise<void> {
+  try {
+    out(line(await shownNow(db, ticker)));
+  } catch (e) {
+    out(`(The write stands. What the site shows for ${ticker} could not be read: ${e instanceof Error ? e.message : String(e)}; --list shows it.)`);
+  }
 }
 
 async function existingStatus(db: Db, ticker: string, version: string): Promise<string | null> {
@@ -256,6 +270,7 @@ export async function run(argv: string[], deps: Deps): Promise<number> {
     }
 
     const db = await deps.connect();
+    let committed = false;
     try {
       await db.query('BEGIN');
       const status = await existingStatus(db, c.ticker, c.version);
@@ -276,6 +291,7 @@ export async function run(argv: string[], deps: Deps): Promise<number> {
             [c.ticker, c.version, c.pkg.meta.contentHash, pkgJson, note]);
         }
         await db.query('COMMIT');
+        committed = true;
         out(`Staged: ${c.ticker} ${c.version}${status === 'staged' ? ' (replacing the staged copy)' : ''}. Not shown until published.`);
         return 0;
       }
@@ -289,13 +305,18 @@ export async function run(argv: string[], deps: Deps): Promise<number> {
           [c.ticker, c.version, c.pkg.meta.contentHash, pkgJson, by!.trim(), note]);
       }
       await db.query('COMMIT');
+      committed = true;
       out(`Published: ${c.ticker} ${c.version}, approved by ${by!.trim()}.`);
-      const shown = await shownNow(db, c.ticker);
-      out(shown === `manual ${c.version}`
+      await reportShown(db, out, c.ticker, (shown) => (shown === `manual ${c.version}`
         ? `The site now shows ${c.ticker} from this row (manual ${c.version}).`
-        : `The site shows ${c.ticker} as ${shown}: a more recent approval wins (D2), and FSRE wins an exact tie.`);
+        : `The site shows ${c.ticker} as ${shown}: a more recent approval wins (D2), and FSRE wins an exact tie.`));
       return 0;
     } catch (e) {
+      // Only a write that has not committed is undone and reported as not written.
+      if (committed) {
+        out(`(The write stands; then: ${e instanceof Error ? e.message : String(e)})`);
+        return 0;
+      }
       await db.query('ROLLBACK').catch(() => undefined);
       for (const l of describeDbError(e)) out(l);
       out('Nothing written.');
@@ -326,7 +347,8 @@ export async function run(argv: string[], deps: Deps): Promise<number> {
           : `Refused: there is no manual row ${ticker} ${version} (--list shows them); nothing changed.`);
         return found.length ? 0 : 1;
       }
-      out(`Withdrawn: ${ticker} ${version}. The site now shows ${ticker} as ${await shownNow(db, ticker)}.`);
+      out(`Withdrawn: ${ticker} ${version}.`);
+      await reportShown(db, out, ticker, (shown) => `The site now shows ${ticker} as ${shown}.`);
       return 0;
     } catch (e) {
       for (const l of describeDbError(e)) out(l);

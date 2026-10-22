@@ -4,12 +4,15 @@
  *
  *   SUPABASE_DB_URL       the connection string (the session pooler's, from
  *                         the Supabase dashboard's Connect panel)
- *   SUPABASE_DB_PASSWORD  the database password, when the URL does not carry
- *                         it; kept apart so a password with @, # or / needs
- *                         no URL encoding
+ *   SUPABASE_DB_PASSWORD  the database password, kept apart so a password
+ *                         with @, # or / needs no URL encoding; it wins over
+ *                         a password in the URL (the dashboard's string
+ *                         carries [YOUR-PASSWORD] there)
  *   SUPABASE_DB_CA        optional: the path of Supabase's CA certificate, to
  *                         verify the server; without it the connection is
- *                         encrypted but the certificate is not checked
+ *                         encrypted but the certificate is not checked, so
+ *                         a network that can intercept it could pose as the
+ *                         database
  *
  * .env.local is git-ignored (.gitignore: ".env.local"). Nothing here prints a
  * value from it; every error that leaves this module has the URL and the

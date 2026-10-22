@@ -216,6 +216,14 @@ SELECT pg_temp.check_case('R1 published approved', 'published without approved_a
 SELECT pg_temp.check_case('R1 published approved', 'a staged row moved to published without an approver is refused',
   $q$UPDATE fia.manual_release SET status = 'published' WHERE ticker = 'XCOA' AND version = 'XCOA-2025Q4-r1-SYNTHETIC'$q$,
   'manual_release_published_approved');
+SELECT pg_temp.check_case('R1 approval time', 'published with an approval time in the future is refused (it would win D2 until withdrawn)',
+  pg_temp.insert_sql(pg_temp.filings('XCOA', 'r-time-1'), 'published', 'Dika Gustiana Irawan', now() + interval '1 day'),
+  'manual_release_approved_not_future');
+SELECT pg_temp.check_case('R1 approval time', 'a staged row moved to published with a future approval time is refused',
+  $q$UPDATE fia.manual_release SET status = 'published', approved_by = 'Dika Gustiana Irawan', approved_at = now() + interval '1 day'
+     WHERE ticker = 'XCOA' AND version = 'XCOA-2025Q4-r1-SYNTHETIC'$q$, 'manual_release_approved_not_future');
+SELECT pg_temp.check_case('R1 approval time', 'published with the approval time now is accepted',
+  pg_temp.insert_sql(pg_temp.filings('XCOA', 'r-time-2'), 'published', 'Dika Gustiana Irawan', now()), 'accept');
 SELECT pg_temp.check_case('R1 published approved', 'published with an approver and a time is accepted',
   pg_temp.insert_sql(pg_temp.filings('XCOA', 'XCOA-r2'), 'published', 'Dika Gustiana Irawan', '2026-10-22 09:00+07'), 'accept', NULL, true);
 
@@ -279,6 +287,12 @@ SELECT pg_temp.check_case('R1 withdrawn final', 'a withdrawn row cannot be delet
   $q$DELETE FROM fia.manual_release WHERE ticker = 'XCOA' AND version = 'XCOA-r2'$q$, 'manual_release_withdrawn_final');
 SELECT pg_temp.check_value('R1 withdrawn final', 'a withdrawn row is not in fia.model_packages',
   $q$SELECT count(*)::text FROM fia.model_packages WHERE ticker = 'XCOA' AND channel = 'manual' AND version = 'XCOA-r2'$q$, '0');
+
+-- The guards fire in every replication role (a restore's session_replication_role = replica skips ordinary triggers)
+SELECT pg_temp.check_value('R1 guards always on', 'the four guard triggers are ENABLE ALWAYS',
+  $q$SELECT string_agg(tgname || ':' || tgenabled::text, ',' ORDER BY tgname) FROM pg_trigger
+     WHERE tgrelid IN ('fia.manual_release'::regclass, 'fia.contract_schema'::regclass) AND NOT tgisinternal$q$,
+  'contract_schema_insert_only:A,contract_schema_no_truncate:A,manual_release_guard:A,manual_release_no_truncate:A');
 
 -- No grant, row security on, no policy
 SELECT pg_temp.check_value('R1 no grant', 'row security is on for both tables, with no policy',
@@ -410,8 +424,19 @@ SELECT pg_temp.check_case('A6 anon', 'anon cannot read fia.contract_schema',
   $q$SELECT count(*) FROM fia.contract_schema$q$, '42501', 'anon');
 SELECT pg_temp.check_case('A6 anon', 'anon cannot write fia.contract_schema',
   $q$INSERT INTO fia.contract_schema (version, schema) VALUES ('x', '{}')$q$, '42501', 'anon');
-SELECT pg_temp.check_case('A6 anon', 'anon cannot write through fia.model_packages',
-  $q$DELETE FROM fia.model_packages$q$, '42501|0A000|55000', 'anon');
+SELECT pg_temp.check_value('A6 anon', 'anon holds SELECT on fia.model_packages and no other privilege on it; authenticated holds none',
+  $q$SELECT string_agg(r.role || ':' || p.priv, ',' ORDER BY r.role, p.priv)
+     FROM (VALUES ('anon'), ('authenticated')) AS r(role),
+          (VALUES ('SELECT'), ('INSERT'), ('UPDATE'), ('DELETE'), ('TRUNCATE'), ('REFERENCES'), ('TRIGGER')) AS p(priv)
+     WHERE has_table_privilege(r.role, 'fia.model_packages', p.priv)$q$, 'anon:SELECT');
+SELECT pg_temp.check_value('A6 anon', 'of fia_private, anon may execute the FSRE reader only (the view calls it), and use the schema not at all',
+  $q$SELECT concat_ws(' | ',
+       has_schema_privilege('anon', 'fia_private', 'USAGE')::text,
+       (SELECT string_agg(p.proname, ',' ORDER BY p.proname) FROM pg_proc p
+         WHERE p.pronamespace = 'fia_private'::regnamespace AND has_function_privilege('anon', p.oid, 'EXECUTE')),
+       (SELECT count(*) FROM pg_proc p
+         WHERE p.pronamespace = 'fia_private'::regnamespace AND has_function_privilege('authenticated', p.oid, 'EXECUTE'))::text)$q$,
+  'false | fsre_packages | 0');
 SELECT pg_temp.check_case('A6 anon', 'anon cannot call the FSRE reader by name',
   $q$SELECT count(*) FROM fia_private.fsre_packages()$q$, '42501', 'anon');
 SELECT pg_temp.check_case('A6 authenticated', 'authenticated cannot read fia.manual_release',

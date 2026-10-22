@@ -202,6 +202,16 @@ describe('--publish', () => {
     }
   });
 
+  it('never says "Nothing written" once the publish has committed, even if what follows fails', async () => {
+    const db = fakeDb((sql) => (sql.startsWith('SELECT channel') ? new Error('connection terminated unexpectedly') : []));
+    const h = harness({ 'pkg.json': filings() }, db);
+    expect(await run(['--publish', 'pkg.json', '--by', 'Dika Gustiana Irawan'], h.deps)).toBe(0);
+    expect(h.lines).toContain('Published: XCOA XCOA-2025Q4-r1, approved by Dika Gustiana Irawan.');
+    expect(h.lines.at(-1)).toMatch(/^\(The write stands\. What the site shows for XCOA could not be read: connection terminated unexpectedly/);
+    expect(h.lines).not.toContain('Nothing written.');
+    expect(db.calls.map((c) => c.sql)).not.toContain('ROLLBACK');
+  });
+
   it('says what the database\'s refusal means, by its constraint', async () => {
     const refusal = Object.assign(new Error('fia.manual_release XCOA XCOA-2025Q4-r1 does not match the contract'), {
       constraint: 'manual_release_contract',
@@ -237,7 +247,15 @@ describe('--stage, --withdraw, --list', () => {
     const h = harness({}, db);
     expect(await run(['--withdraw', 'XCOA', 'XCOA-2025Q4-r1'], h.deps)).toBe(0);
     expect(db.calls[0].sql).toMatch(/SET status = 'withdrawn' WHERE ticker = \$1 AND version = \$2 AND status IN \('staged', 'published'\)/);
-    expect(h.lines).toEqual(['Withdrawn: XCOA XCOA-2025Q4-r1. The site now shows XCOA as fsre XCOA-f1.']);
+    expect(h.lines).toEqual(['Withdrawn: XCOA XCOA-2025Q4-r1.', 'The site now shows XCOA as fsre XCOA-f1.']);
+  });
+
+  it('keeps a withdrawal it made when the read of what the site shows fails afterwards', async () => {
+    const db = fakeDb((sql) => (sql.startsWith('UPDATE') ? [{ status: 'withdrawn' }] : sql.startsWith('SELECT channel') ? new Error('canceling statement due to statement timeout') : []));
+    const h = harness({}, db);
+    expect(await run(['--withdraw', 'XCOA', 'XCOA-2025Q4-r1'], h.deps)).toBe(0);
+    expect(h.lines[0]).toBe('Withdrawn: XCOA XCOA-2025Q4-r1.');
+    expect(h.lines[1]).toMatch(/^\(The write stands\. What the site shows for XCOA could not be read: canceling statement/);
   });
 
   it('says so when there is no such row', async () => {

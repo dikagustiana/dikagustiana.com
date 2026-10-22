@@ -159,7 +159,7 @@ schemas** → tambahkan `fia` (jangan hapus yang sudah ada, termasuk `fsre_publi
 npx vite-node scripts/fia/run-sql.ts supabase/tests/fia_manual_release.sql
 ```
 
-Baris terakhir harus: `fia_manual_release: 81 PASS, 0 FAIL`. Setiap baris lain diawali `PASS` atau `FAIL`
+Baris terakhir harus: `fia_manual_release: 86 PASS, 0 FAIL`. Setiap baris lain diawali `PASS` atau `FAIL`
 dengan nama aturannya.
 
 **Langkah 5. Fingerprint FSRE sesudah migrasi, bandingkan:**
@@ -255,6 +255,11 @@ npx vite-node scripts/fia/publish-manual.ts --list
 Menampilkan semua baris manual (ticker, versi, status, siapa dan kapan approve, dalam WIB, catatan) lalu apa
 yang sedang tampil di situs per ticker dan dari jalur mana (`fsre` atau `manual`).
 
+Kalau paket FSRE yang seharusnya tampil tidak ada di daftar itu: kemungkinan view FSRE sedang tidak bisa dibaca
+(misalnya migrasi `fsre-skills` mengganti kolomnya atau mencabut grant `anon`). Jalur FSRE lalu dikosongkan dan
+jalur manual tetap tampil; database mencatat `WARNING: fia.model_packages: the FSRE channel cannot be read and
+is left out (...)` di log (Supabase → Logs → Postgres). Kirim pesan itu ke Claude Code.
+
 ## 8. Arti setiap pesan
 
 ### Dari pemeriksaan paket (sebelum menulis)
@@ -281,8 +286,9 @@ yang sedang tampil di situs per ticker dan dari jalur mana (`fsre` atau `manual`
 | `Refused: X V is already withdrawn; ...` | Versi itu sudah ditarik (final). | Sama: versi baru. |
 | `Refused: there is no manual row X V ...` | Ticker/versi salah ketik. | Lihat `--list`. |
 | `X V is already withdrawn; nothing changed.` | Sudah ditarik sebelumnya. | Tidak perlu apa-apa. |
-| `the database refused it: ...` lalu `meaning: ...` | Database menolak dan menjelaskan aturannya: kontrak tidak cocok, ticker/versi/hash beda dengan isi paket, provenance bukan filings, publish tanpa approver, gate failed, baris published terkunci, withdrawn final. | Biasanya sudah tertangkap oleh pemeriksaan; kalau muncul, kirim output-nya ke Claude Code. |
+| `the database refused it: ...` lalu `meaning: ...` | Database menolak dan menjelaskan aturannya: kontrak tidak cocok, ticker/versi/hash beda dengan isi paket, provenance bukan filings, publish tanpa approver, waktu approve di masa depan, gate failed, baris published terkunci, withdrawn final. | Biasanya sudah tertangkap oleh pemeriksaan; kalau muncul, kirim output-nya ke Claude Code. |
 | `meaning: the fia schema is not in this database yet; apply the migration first` | Migrasi belum diterapkan. | Fase 6, langkah 2. |
+| `(The write stands. What the site shows for X could not be read: ...)` | Penulisan **sudah berhasil** (published/withdrawn); hanya pembacaan tampilan sesudahnya yang gagal. | Jangan ulangi perintahnya; cek dengan `--list`. |
 
 ### Sambungan
 
