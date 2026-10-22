@@ -10,6 +10,21 @@
     "costShare": { "value": 0.12, "period": "FY25", "source": "SYNTHETIC: invented to exercise the viewer" },
     "demandShare": { "value": 0.25, "period": "FY25", "source": "SYNTHETIC: invented to exercise the viewer" },
     "passThrough": { "estimate": 0.6, "low": 0.4, "high": 0.8, "quarters": 8, "source": "SYNTHETIC: invented to exercise the viewer" },
-    "caveat": "SYNTHETIC link. In a real pair the price a cement plant pays can differ from a coal producer's realised price: calorific value, contract terms and domestic market obligation rules all sit between them."
+    "caveat": "SYNTHETIC link. In a real pair the price a cement plant pays can differ from a coal producer's realised price: calorific value, contract terms and domestic market obligation rules all sit between them.",
+    "downstreamLines": { "SCEM": "fuel", "XCEM": "fuel" }
+  },
+  {
+    "id": "syn-power-to-cement",
+    "from": "SYN-POWER",
+    "to": "SYN-CEM",
+    "whatFlows": "Electricity for the mills and the kiln (SYNTHETIC)",
+    "driverFrom": "Tariff per MWh",
+    "driverTo": "Power cost per tonne of cement",
+    "intensity": null,
+    "costShare": null,
+    "demandShare": null,
+    "passThrough": null,
+    "caveat": "SYNTHETIC link, unmeasured on purpose: it puts a second upstream node, on the energy layer, in the cost flow of the synthetic cement makers.",
+    "downstreamLines": { "SCEM": "power", "XCEM": "power" }
   }
 ]

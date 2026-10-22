@@ -18,7 +18,7 @@ import { CompanyList } from '@/components/finance-in-action/viewer/CompanyList';
 import { ALL, IndexFilters } from '@/components/finance-in-action/viewer/IndexFilters';
 import { StageStrip } from '@/components/finance-in-action/viewer/StageStrip';
 import { SyntheticBanner } from '@/components/finance-in-action/viewer/SyntheticBanner';
-import { RejectedPackages } from '@/components/finance-in-action/viewer/RejectedPackages';
+import { LinkRegisterIssues, RejectedPackages } from '@/components/finance-in-action/viewer/RejectedPackages';
 import { LinkLayer, LinkLegend } from '@/components/finance-in-action/viewer/links/LinkLayer';
 import { LinkCard } from '@/components/finance-in-action/viewer/links/LinkCard';
 import { linksFrom, linksTo, placeLinks } from '@/lib/finance-in-action/links';
@@ -93,6 +93,7 @@ export function FiaIndex({ useRegistry }: { useRegistry: RegistryHook }) {
         {anySynthetic && <SyntheticBanner />}
         <PublishedNote state={published} failure={failure} fixtures={fixtures} />
         <RejectedPackages rejected={reg.rejected} />
+        <LinkRegisterIssues issues={reg.linkIssues} />
 
         <header className="mb-8 max-w-3xl">
           <span className="mb-3 block font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{COPY.section}</span>

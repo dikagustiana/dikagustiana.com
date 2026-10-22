@@ -50,7 +50,13 @@
           }
         ]
       },
-      "caveat": { "type": "string" }
+      "caveat": { "type": "string" },
+      "downstreamLines": {
+        "description": "PRD D-C1: ticker of a downstream company -> the id of its unitEconomics line that carries this input.",
+        "type": "object",
+        "propertyNames": { "pattern": "^[A-Z0-9]+$" },
+        "additionalProperties": { "type": "string", "minLength": 1 }
+      }
     }
   },
   "definitions": {

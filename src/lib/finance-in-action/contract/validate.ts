@@ -13,6 +13,7 @@
 import { BANDS, STAGES } from '@/data/industryChain';
 import { CONDITIONS } from '@/data/capitalConditions';
 import { splitRowRef, type Cell, type ModelPackage, type Row, type UELine } from './types';
+import type { IndustryLink } from './links';
 
 export interface ValidationIssue {
   path: string;
@@ -218,5 +219,40 @@ export function validatePackage(pkg: ModelPackage): ValidationIssue[] {
     if (!agrees) add(path, `value ${entry.value} differs from ${entry.rowRef} in ${entry.period} (${v})`);
   });
 
+  return out;
+}
+
+/** The roles a line may have to carry a bought-in input (PRD D-C1): a cost, or the unsplit remainder. */
+export const INPUT_LINE_ROLES: readonly UELine['role'][] = ['cost', 'unsplit'];
+
+/**
+ * Why one `downstreamLines` entry of a link does not resolve, or null when it
+ * does: the ticker must be a loaded package in the link's downstream
+ * sub-industry, and the line id one of its unit-economics lines that can carry
+ * an input (a cost or the unsplit remainder).
+ */
+export function downstreamLineProblem(link: IndustryLink, ticker: string, lineId: string, packages: readonly ModelPackage[]): string | null {
+  const pkg = packages.find((p) => p.meta.ticker === ticker);
+  if (!pkg) return `${ticker} is not a loaded package`;
+  if (pkg.meta.subIndustry !== link.to) return `${ticker} sits in ${pkg.meta.subIndustry}, not in ${link.to}, the downstream end of the link`;
+  const line = pkg.unitEconomics.lines.find((l) => l.id === lineId);
+  if (!line) return `${ticker} has no unit-economics line ${lineId}`;
+  if (!INPUT_LINE_ROLES.includes(line.role)) return `${ticker} line ${lineId} is a ${line.role} line; an input sits on a cost or the unsplit line`;
+  return null;
+}
+
+/**
+ * The link register against the packages that are loaded (PRD D-C1). Every
+ * `downstreamLines` entry that does not resolve is reported here; the viewer
+ * ignores it on screen and never guesses another line.
+ */
+export function validateLinkRegister(links: readonly IndustryLink[], packages: readonly ModelPackage[]): ValidationIssue[] {
+  const out: ValidationIssue[] = [];
+  for (const link of links) {
+    for (const [ticker, lineId] of Object.entries(link.downstreamLines ?? {})) {
+      const problem = downstreamLineProblem(link, ticker, lineId, packages);
+      if (problem) out.push({ path: `links.${link.id}.downstreamLines.${ticker}`, message: problem });
+    }
+  }
   return out;
 }
