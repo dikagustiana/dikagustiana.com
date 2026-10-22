@@ -10,30 +10,38 @@
  * Analysis" (a four-card grid, newest first) and the Sections list
  * (docs/DECISIONS.md, 2026-10-09).
  *
- * The row runs: a marquee, right to left, at GLIMPSE_SPEED, looping without a
- * seam (owner decision, 2026-10-11). The list is drawn twice on one strip and
- * the strip moves by one copy per lap (the `marquee` keyframes in
- * tailwind.config.ts); the lap's length is measured from the copy
- * (useMarqueeDuration), so the speed holds whatever the number of essays. It
- * stops under the pointer, while a link in it has focus, and by its pause
- * button, which is the one way to stop it on a touchscreen; the edges fade.
- * The second copy is hidden from screen readers and from Tab, so both meet
- * one list.
+ * The row runs, right to left at GLIMPSE_SPEED, looping without a seam
+ * (owner decision, 2026-10-11), and a reader can take hold of it at any time
+ * (owner request, 2026-10-22): a swipe, a drag with the mouse, a sideways
+ * scroll on a trackpad or with Shift and the wheel, or the two arrow buttons
+ * on a wide screen. It is an Embla carousel (the engine under shadcn/ui's
+ * Carousel): `loop` shifts columns from one end to the other, so the list is
+ * drawn once; `dragFree` leaves the row where the reader lets go of it; the
+ * AutoScroll plugin runs it and WheelGestures turns a sideways scroll into a
+ * drag. The row stops under the pointer, while a reader holds it, while a
+ * column has keyboard focus (which brings that column to the page's margin),
+ * and by its pause button, which is the one way to stop it on a touchscreen
+ * and which nothing else undoes. Otherwise it starts again RESUME_AFTER after
+ * the reader is done, from where they left it. A drag never opens an essay;
+ * a click does. The edges fade.
  *
- * It stands still, as a row that scrolls sideways (by swipe or trackpad, by
- * the two buttons, by the arrow keys once the row has focus, CSS snapping
- * doing the rest), for a reader who asked for reduced motion, and whenever
- * one copy is narrower than the page, where a loop would show its empty
- * end. With nothing published the section is absent, not empty.
+ * It stands still, a row that still moves by swipe, drag, trackpad and the
+ * buttons, for a reader who asked for reduced motion, and whenever the
+ * columns are too few to loop, where the row's empty end would show: its
+ * first column at the page's margin and its last at the other. With nothing
+ * published the section is absent, not empty.
  */
-import { useCallback, useEffect, useRef, useState, type CSSProperties, type FocusEvent } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type FocusEvent, type PointerEvent } from 'react';
+import useEmblaCarousel from 'embla-carousel-react';
+import AutoScroll, { type AutoScrollType } from 'embla-carousel-auto-scroll';
+import { WheelGesturesPlugin } from 'embla-carousel-wheel-gestures';
 import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
 import { EssayCardLink } from '@/components/EssayCardLink';
 import type { SelectedEssay } from '@/hooks/queries/useSelectedEssays';
-import { useMarqueeDuration } from '@/hooks/useMarqueeDuration';
+import { useCanLoop } from '@/hooks/useCanLoop';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { monthYear } from '@/lib/formatDate';
-import { REDUCED_MOTION_QUERY, scrollBehavior } from '@/lib/motion';
+import { REDUCED_MOTION_QUERY, prefersReducedMotion } from '@/lib/motion';
 import { sectionLabel } from '@/lib/sectionLabels';
 import { cn } from '@/lib/utils';
 import './glimpse.css';
@@ -44,12 +52,15 @@ import './glimpse.css';
  */
 const GLIMPSE_SPEED = 30;
 
-const FOCUS =
-  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background';
+/** Embla moves in fixed steps of 1/60 s, and AutoScroll's speed is px per step. */
+const SPEED_PER_STEP = GLIMPSE_SPEED / 60;
+
+/** How long the row waits, after a reader is done with it, before it runs again, in ms. */
+const RESUME_AFTER = 3000;
 
 const BUTTON = cn(
   'inline-flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background text-foreground transition-colors hover:bg-muted disabled:pointer-events-none disabled:opacity-30',
-  FOCUS,
+  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
 );
 
 interface GlimpseProps {
@@ -57,11 +68,11 @@ interface GlimpseProps {
   isLoading: boolean;
 }
 
-/** One essay's column. `repeat` marks the running row's second copy: out of the tab order. */
-function Column({ essay, repeat = false }: { essay: SelectedEssay; repeat?: boolean }) {
+/** One essay's column. */
+function Column({ essay }: { essay: SelectedEssay }) {
   return (
     <li className="glimpse__item">
-      <EssayCardLink essay={essay} className="group flex h-full flex-col" tabIndex={repeat ? -1 : undefined}>
+      <EssayCardLink essay={essay} className="group flex h-full flex-col">
         <p className="eyebrow mb-3">
           {sectionLabel(essay.section)}
         </p>
@@ -88,74 +99,206 @@ function focusedByKeyboard(el: Element): boolean {
   }
 }
 
+/**
+ * Embla watches the row's size and which column is in view; a browser
+ * without either observer (and jsdom) gets the row as a plain list.
+ */
+function carouselSupported(): boolean {
+  return (
+    typeof window !== 'undefined' &&
+    typeof window.ResizeObserver === 'function' &&
+    typeof window.IntersectionObserver === 'function'
+  );
+}
+
+/** What holds the running row still. Any one of them stops it. */
+interface Holds {
+  running: boolean;
+  paused: boolean;
+  pointer: boolean;
+  hover: boolean;
+  focus: boolean;
+}
+
 export function Glimpse({ essays, isLoading }: GlimpseProps) {
-  const frame = useRef<HTMLDivElement>(null);
-  const strip = useRef<HTMLDivElement>(null);
+  const frame = useRef<HTMLDivElement | null>(null);
   const track = useRef<HTMLUListElement>(null);
   const heading = useRef<HTMLHeadingElement>(null);
-  const [atStart, setAtStart] = useState(true);
-  const [atEnd, setAtEnd] = useState(true);
   // Stopped by the reader's own button; the pointer and focus stop it too.
   const [paused, setPaused] = useState(false);
 
   const still = useMediaQuery(REDUCED_MOTION_QUERY);
-  const timing = useMarqueeDuration(frame, track, heading, GLIMPSE_SPEED, essays);
-  const running = !still && !isLoading && !!essays?.length && timing !== null;
+  const loops = useCanLoop(frame, track, essays);
+  const loopable = !still && !isLoading && !!essays?.length && loops;
 
-  // Where the still row is, for the buttons: disabled at either edge, hidden
-  // when every column already fits.
-  const measure = useCallback(() => {
-    const el = track.current;
-    if (!el) return;
-    const max = el.scrollWidth - el.clientWidth;
-    setAtStart(el.scrollLeft <= 1);
-    setAtEnd(el.scrollLeft >= max - 1);
+  // Every column stops at the page's margin, under the heading, wherever
+  // the page is: the arrows and keyboard focus bring a column there, and
+  // the running row starts with its first column there.
+  const atMargin = useCallback(() => {
+    if (!heading.current || !frame.current) return 0;
+    return heading.current.getBoundingClientRect().left - frame.current.getBoundingClientRect().left;
   }, []);
+  const options = useMemo(() => ({ loop: loopable, dragFree: true, align: atMargin }), [loopable, atMargin]);
+  const plugins = useMemo(
+    () => [
+      // Started and stopped by the holds below, never by the plugin itself,
+      // except that it stops for a column reached by Tab (stopOnFocusIn)
+      // before Embla brings that column into view.
+      AutoScroll({
+        speed: SPEED_PER_STEP,
+        direction: 'forward',
+        playOnInit: false,
+        startDelay: 0,
+        stopOnInteraction: true,
+        stopOnMouseEnter: false,
+        stopOnFocusIn: true,
+      }),
+      WheelGesturesPlugin(),
+    ],
+    [],
+  );
+  const [carousel, api] = useEmblaCarousel(options, plugins);
+  const setFrame = useCallback(
+    (node: HTMLDivElement | null) => {
+      frame.current = node;
+      if (carouselSupported()) carousel(node);
+    },
+    [carousel],
+  );
+
+  // What Embla made of the row: whether it loops (it falls back to a still
+  // row by itself when the columns cannot cover the frame), and whether
+  // there is anywhere to go for the arrows.
+  const [looping, setLooping] = useState(false);
+  const [canPrev, setCanPrev] = useState(false);
+  const [canNext, setCanNext] = useState(false);
+  useEffect(() => {
+    if (!api) {
+      setLooping(false);
+      setCanPrev(false);
+      setCanNext(false);
+      return;
+    }
+    const read = () => {
+      setLooping(api.internalEngine().options.loop);
+      setCanPrev(api.canScrollPrev());
+      setCanNext(api.canScrollNext());
+    };
+    read();
+    api.on('reInit', read).on('select', read);
+    return () => {
+      api.off('reInit', read).off('select', read);
+    };
+  }, [api]);
+
+  const running = loopable && looping;
+
+  // Run the row, or hold it. A hold stops it at once; when the last hold
+  // lets go, it starts again after `delay`, from where it stands.
+  const holds = useRef<Holds>({ running, paused, pointer: false, hover: false, focus: false });
+  const timer = useRef(0);
+  const decide = useCallback(
+    (delay: number) => {
+      window.clearTimeout(timer.current);
+      const auto = api?.plugins().autoScroll as AutoScrollType | undefined;
+      if (!api || !auto) return;
+      const { running, paused, pointer, hover, focus } = holds.current;
+      if (!running || paused || pointer || hover || focus || api.scrollSnapList().length < 2) {
+        auto.stop();
+        return;
+      }
+      if (auto.isPlaying()) return;
+      if (delay > 0) timer.current = window.setTimeout(() => decide(0), delay);
+      else auto.play(0);
+    },
+    [api],
+  );
 
   useEffect(() => {
-    const el = track.current;
-    if (!el) return;
-    measure();
-    el.addEventListener('scroll', measure, { passive: true });
-    const ro = typeof ResizeObserver === 'function' ? new ResizeObserver(measure) : null;
-    ro?.observe(el);
-    return () => {
-      el.removeEventListener('scroll', measure);
-      ro?.disconnect();
-    };
-  }, [measure, essays, running]);
+    holds.current.running = running;
+    holds.current.paused = paused;
+    decide(0);
+  }, [running, paused, decide]);
 
-  const page = (direction: -1 | 1) => {
-    const el = track.current;
-    if (!el) return;
-    el.scrollBy({ left: direction * el.clientWidth * 0.8, behavior: scrollBehavior() });
+  // A drag, a swipe or a sideways scroll (Embla's pointer events, which the
+  // wheel plugin raises as well), and a fresh carousel after a resize.
+  useEffect(() => {
+    if (!api) return;
+    const down = () => {
+      holds.current.pointer = true;
+      decide(0);
+    };
+    const up = () => {
+      holds.current.pointer = false;
+      decide(RESUME_AFTER);
+    };
+    const again = () => decide(0);
+    api.on('pointerDown', down).on('pointerUp', up).on('reInit', again);
+    return () => {
+      api.off('pointerDown', down).off('pointerUp', up).off('reInit', again);
+      window.clearTimeout(timer.current);
+    };
+  }, [api, decide]);
+
+  // Shift and the wheel scroll sideways. Most browsers turn the wheel's
+  // delta sideways themselves; where one has not, it is turned here, before
+  // the wheel plugin (which listens on the frame) reads it, and the page is
+  // not scrolled down instead.
+  useEffect(() => {
+    const el = frame.current;
+    if (!api || !el) return;
+    const sideways = (event: WheelEvent) => {
+      if (!event.isTrusted || !event.shiftKey || event.deltaX !== 0 || event.deltaY === 0) return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      event.target?.dispatchEvent(
+        new WheelEvent('wheel', {
+          deltaX: event.deltaY,
+          deltaMode: event.deltaMode,
+          clientX: event.clientX,
+          clientY: event.clientY,
+          screenX: event.screenX,
+          screenY: event.screenY,
+          shiftKey: true,
+          bubbles: true,
+          cancelable: true,
+        }),
+      );
+    };
+    el.addEventListener('wheel', sideways, { capture: true, passive: false });
+    return () => el.removeEventListener('wheel', sideways, { capture: true });
+  }, [api]);
+
+  // A touch also sends pointer events; only a mouse hovers.
+  const hover = (on: boolean) => (event: PointerEvent) => {
+    if (event.pointerType !== 'mouse') return;
+    holds.current.hover = on;
+    decide(on ? 0 : RESUME_AFTER);
+  };
+  const focusIn = (event: FocusEvent) => {
+    if (!focusedByKeyboard(event.target)) return;
+    holds.current.focus = true;
+    decide(0);
+  };
+  const focusOut = (event: FocusEvent) => {
+    if (event.relatedTarget instanceof Node && frame.current?.contains(event.relatedTarget)) return;
+    if (!holds.current.focus) return;
+    holds.current.focus = false;
+    decide(RESUME_AFTER);
   };
 
-  // Focus stops the running row (glimpse.css, :focus-within), but the column
-  // a reader tabs to may be off either edge. So the row is set where that
-  // column stands at the page's margin, where the row starts; the first
-  // column, which starts left of the margin, is set at the lap's start.
-  // Not for a click: the column would move from under the pointer.
-  const bringIntoView = (event: FocusEvent<HTMLUListElement>) => {
-    const moving = strip.current;
-    const item = (event.target as HTMLElement).closest('li');
-    const lap = moving?.getAnimations?.()[0];
-    if (!timing || !moving || !item || !lap || !focusedByKeyboard(event.target)) return;
-    // The column's place on the strip: both boxes move together.
-    const x = item.getBoundingClientRect().left - moving.getBoundingClientRect().left;
-    // The animation's own time runs from the (negative) delay, and a time
-    // before zero is before the animation starts, drawn unmoved: so the time
-    // is taken within one lap.
-    const delay = Number(lap.effect?.getTiming().delay ?? 0);
-    const lapMs = timing.duration * 1000;
-    const at = (Math.max(0, x - timing.lead) / GLIMPSE_SPEED) * 1000 + delay;
-    lap.currentTime = ((at % lapMs) + lapMs) % lapMs;
-    if (frame.current) frame.current.scrollLeft = 0;
+  // The arrows move by one column: at once for a reader who asked for
+  // reduced motion. The row stops first, so the column lands where it
+  // should, and runs again RESUME_AFTER later.
+  const page = (direction: -1 | 1) => {
+    if (!api) return;
+    (api.plugins().autoScroll as AutoScrollType | undefined)?.stop();
+    if (direction < 0) api.scrollPrev(prefersReducedMotion());
+    else api.scrollNext(prefersReducedMotion());
+    decide(RESUME_AFTER);
   };
 
   if (!isLoading && (!essays || essays.length === 0)) return null;
-
-  const scrollable = !running && !(atStart && atEnd);
 
   return (
     <section aria-labelledby="glimpse-heading" className="border-b border-border py-12">
@@ -164,74 +307,71 @@ export function Glimpse({ essays, isLoading }: GlimpseProps) {
           <h2 ref={heading} id="glimpse-heading" className="text-xl font-display font-semibold text-foreground">
             Glimpse
           </h2>
-          {/* A touchscreen has no hover, and a tap on a column follows its
-              link: the button is how a reader there stops the row to read. */}
-          {running && (
-            <button
-              type="button"
-              onClick={() => setPaused((p) => !p)}
-              aria-label={paused ? 'Resume the row' : 'Pause the row'}
-              className={cn(BUTTON, 'shrink-0')}
-            >
-              {paused ? <Play className="h-4 w-4" aria-hidden="true" /> : <Pause className="h-4 w-4" aria-hidden="true" />}
-            </button>
-          )}
-          {scrollable && (
-            <div className="flex shrink-0 gap-2">
-              <button type="button" onClick={() => page(-1)} disabled={atStart} aria-label="Earlier in the row" className={BUTTON}>
-                <ChevronLeft className="h-4 w-4" aria-hidden="true" />
+          <div className="flex shrink-0 gap-2">
+            {/* On a wide screen; a phone has the swipe. */}
+            {(canPrev || canNext) && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => page(-1)}
+                  disabled={!canPrev}
+                  aria-label="Earlier in the row"
+                  className={cn(BUTTON, 'hidden md:inline-flex')}
+                >
+                  <ChevronLeft className="h-4 w-4" aria-hidden="true" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => page(1)}
+                  disabled={!canNext}
+                  aria-label="Further along the row"
+                  className={cn(BUTTON, 'hidden md:inline-flex')}
+                >
+                  <ChevronRight className="h-4 w-4" aria-hidden="true" />
+                </button>
+              </>
+            )}
+            {/* A touchscreen has no hover, and a tap on a column follows its
+                link: the button is how a reader there stops the row to read. */}
+            {running && (
+              <button
+                type="button"
+                onClick={() => setPaused((p) => !p)}
+                aria-label={paused ? 'Resume the row' : 'Pause the row'}
+                className={BUTTON}
+              >
+                {paused ? <Play className="h-4 w-4" aria-hidden="true" /> : <Pause className="h-4 w-4" aria-hidden="true" />}
               </button>
-              <button type="button" onClick={() => page(1)} disabled={atEnd} aria-label="Further along the row" className={BUTTON}>
-                <ChevronRight className="h-4 w-4" aria-hidden="true" />
-              </button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
 
-      {/* One tree for both forms, so the list is the same element when the
-          row starts or stops running: the frame and the strip only take
-          their classes when it runs. */}
-      <div ref={frame} className={running ? 'glimpse__marquee' : undefined} data-paused={running && paused ? '' : undefined}>
-        <div
-          ref={strip}
-          className={running ? 'glimpse__strip animate-marquee motion-reduce:animate-none' : undefined}
-          style={
-            running && timing
-              ? ({ '--marquee-duration': `${timing.duration}s`, animationDelay: `${-timing.offset}s` } as CSSProperties)
-              : undefined
-          }
+      {/* The frame is Embla's viewport and the list its container: one tree
+          whether the row runs or stands still, so the list is the same
+          element when it starts or stops. The links are the stops for Tab. */}
+      <div
+        ref={setFrame}
+        className={cn('glimpse__frame', running && 'glimpse__frame--running')}
+        data-paused={running && paused ? '' : undefined}
+        onPointerEnter={hover(true)}
+        onPointerLeave={hover(false)}
+        onFocus={focusIn}
+        onBlur={focusOut}
+      >
+        <ul
+          ref={track}
+          aria-labelledby="glimpse-heading"
+          className={cn('glimpse__row', loopable ? 'glimpse__row--loop' : 'glimpse__row--still')}
         >
-          {/* Still, a focusable scroll region, so the arrow keys reach it;
-              named by the heading, as a focusable region must be. Running, the
-              links are the stops. */}
-          <ul
-            ref={track}
-            tabIndex={running ? undefined : 0}
-            aria-labelledby="glimpse-heading"
-            onFocus={running ? bringIntoView : undefined}
-            className={
-              running
-                ? 'glimpse__copy'
-                : cn('glimpse__track', FOCUS, 'focus-visible:ring-inset focus-visible:ring-offset-0')
-            }
-          >
-            {isLoading
-              ? Array.from({ length: 4 }, (_, i) => (
-                  <li key={i} className="glimpse__item" aria-hidden="true">
-                    <div className="h-48 animate-pulse rounded-md bg-muted/40" />
-                  </li>
-                ))
-              : essays!.map((essay) => <Column key={essay.id} essay={essay} />)}
-          </ul>
-          {running && (
-            <ul aria-hidden="true" className="glimpse__copy">
-              {essays!.map((essay) => (
-                <Column key={essay.id} essay={essay} repeat />
-              ))}
-            </ul>
-          )}
-        </div>
+          {isLoading
+            ? Array.from({ length: 4 }, (_, i) => (
+                <li key={i} className="glimpse__item" aria-hidden="true">
+                  <div className="h-48 animate-pulse rounded-md bg-muted/40" />
+                </li>
+              ))
+            : essays!.map((essay) => <Column key={essay.id} essay={essay} />)}
+        </ul>
       </div>
     </section>
   );

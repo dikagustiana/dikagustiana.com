@@ -5,6 +5,84 @@ alternatives. Newest first.
 
 ---
 
+# 2026-10-22 — The glimpse can be taken by hand
+
+Owner request, the same day: the running row could not be moved. It was a CSS keyframe marquee
+(`translateX(0)` to `-50%` on a strip holding the list twice) inside a frame with `overflow-x: clip`, so the
+row had no scroll position for a swipe, a drag or a trackpad to move, and nothing listened for them; only
+the pointer (hover), focus and the pause button could stop it. Asked for: the row keeps running when nobody
+touches it, follows the reader's hand at once, stays where it is let go, and runs again from there about
+three seconds later. Decided without the owner, as asked ("pick the most conservative option, log it"):
+
+- **Embla, used directly, not shadcn/ui's `Carousel` wrapper.** The request preferred shadcn's Carousel with
+  `embla-carousel-auto-scroll`; nothing like it was in the repository. `src/components/home/Glimpse.tsx` uses
+  `embla-carousel-react` (the engine and hook the shadcn component is built on) because the wrapper would
+  replace the row's list (a `ul` named by the heading, one `li` per essay, which screen readers, the tests and
+  the homepage's test read) with `role="group"` slides, and put its arrows on the row's sides instead of the
+  header beside the pause button. No `src/components/ui/carousel.tsx` is added, since nothing would import it.
+- **Three dependencies:** `embla-carousel-react` 8.6.0 (with `embla-carousel` and
+  `embla-carousel-reactive-utils`), `embla-carousel-auto-scroll` 8.6.0 and `embla-carousel-wheel-gestures`
+  8.1.0 (with `wheel-gestures`). Embla has no wheel support of its own; the plugin turns a sideways trackpad
+  scroll into a drag and calls `preventDefault` only for a wheel that is mostly sideways, so a vertical wheel
+  over the row still scrolls the page. Shift and the wheel: browsers turn the delta sideways themselves
+  (Chromium on Windows and Linux, Firefox, macOS); where one has not (Chromium's synthetic input, in the e2e
+  suite), the glimpse turns it before the plugin reads it.
+- **Speed and direction unchanged:** right to left (`direction: 'forward'`) at 30 px/s. Embla steps its
+  animation at a fixed 1/60 s whatever the display's rate, and AutoScroll's `speed` is pixels per step, so
+  the speed is 0.5. Measured at 1440, 1280 and 390: 30 px/s within 2.
+- **The loop** is Embla's `loop`: it shifts a column from one end of the row to the other, so the list is
+  drawn once and the second copy, `aria-hidden` and out of the tab order, is gone. Each column carries the
+  gap after it inside its box (16rem of text and 2rem of padding, 18rem and 2rem from 640px), so the seam
+  between the last column and the first is a gap like any other. Whether the row can loop is measured before
+  the carousel is made (`src/hooks/useCanLoop.ts`, Embla's own test: every column but one must cover the
+  frame); it replaces `useMarqueeDuration`, which is deleted with the `marquee` keyframes in
+  `tailwind.config.ts` and `EssayCardLink`'s `tabIndex` prop.
+- **Let go, it stays.** `dragFree`: no snapping back to a column. A flick glides on as any touch scroller does,
+  and stops where its momentum runs out.
+- **What holds it, and for how long.** A drag, a swipe or a sideways scroll (Embla's `pointerDown` and
+  `pointerUp`, which the wheel plugin raises too), a mouse over the row (a finger's pointer events are not a
+  hover), keyboard focus in it (a click's focus is not), and the arrows. Each holds it at once, and the row
+  runs again **three seconds after the last of them lets go**, from where it stands. That includes the hover,
+  which used to let it go at once: the request names it with the others. On a desktop the pointer is still
+  over the row after a drag, so there it runs again three seconds after the pointer leaves. The plugin never
+  starts or restarts the row by itself (`playOnInit: false`, `stopOnInteraction: true`); the glimpse decides.
+- **The pause button wins.** While it is pressed nothing starts the row again: not a drag, not the pointer
+  leaving, not focus leaving, not a resize. Pressed again, the row runs at once.
+- **Arrows on a wide screen** (from 768px, Tailwind's `md`), in the header beside the pause button and in its
+  style, with the still row's names ("Earlier in the row", "Further along the row"). Each stops the row,
+  moves it one column so that column stands at the page's margin under the heading, and lets it run three
+  seconds later. Hidden on a phone, which has the swipe.
+- **Keyboard.** The links are the Tab stops, as they were in the running row; Embla's `watchFocus` brings a
+  column reached by Tab to the page's margin at once. The still row used to be a focusable scroller the arrow
+  keys moved; it is now the same carousel, so for a keyboard there are the Tab stops and the arrows, and the
+  arrow keys no longer move it.
+- **Reduced motion:** no auto-scroll and no pause button, and the row moves by hand (drag, swipe, trackpad,
+  the arrows, which jump instead of easing). It is the carousel without `loop`: its first column at the page's
+  left margin and its last ending at the right one, as before, with no native scrollbar now. Same for a row
+  too short to loop and for the placeholders while loading.
+- **Kept exactly:** the column (eyebrow, title, five-line deck, month), its widths, the 2rem gap, the edge fade
+  (now on the frame only while the row runs, as before), the frame's clip and focus-ring room, and the
+  section's `border-b py-12`. `touch-action: pan-y pinch-zoom` on the list leaves a vertical swipe to the page.
+- **A drag never opens an essay** (Embla cancels the click that ends a drag of more than 10px); a click and a
+  tap do.
+- Without `ResizeObserver` and `IntersectionObserver`, which Embla needs (jsdom), the row is a plain list.
+
+Tests: `tests/unit/glimpse.test.tsx` replaces Embla's hook with a stand-in and holds the glimpse's own part:
+when it runs and when it stands still, 30 px/s forward, each hold and the three seconds after it, the pause
+button over every hold, the arrows (one column; at once for reduced motion). `tests/e2e/glimpse.spec.ts`
+(Chromium) at 1440, 1280 and 390: the speed, the last column directly before the first and the columns
+covering the frame; a mouse drag, a trackpad scroll and Shift with the wheel following the input and a
+vertical wheel scrolling the page; release, three seconds still, then running from there; a drag opening
+nothing and a click opening the essay; hover and keyboard focus (columns 2, 3 and 10 at the margin); the
+pause button through a drag, a hover and a scroll; the arrows; at 390 with touch, a swipe, a vertical swipe
+scrolling the page and a tap opening the essay; reduced motion at 1440 and 390. `MIN_TESTS` rises from 1384
+to 1388 (actual 1392).
+
+Rollback: revert the merge on `main` (the deploy follows), or promote the previous production deployment in
+Vercel. No data or schema is involved.
+
+---
+
 # 2026-10-22 — Finance in Action: two ways in, FSRE and manual (D1–D7)
 
 Branch `claude/fia-two-gates-gslvkn`. Spec: `docs/company-models/two-gates/PRD.md` and `PLAN.md`; build
@@ -255,6 +333,9 @@ the frame at the end of a lap byte-identical to its start and one gap off not; t
 pause button and keyboard focus stopping it, focus bringing columns 2, 3 and 10 to the margin; the
 still row under reduced motion). The journeys suite drops its "three minutes" test, which read the
 argument. `MIN_TESTS` falls from 1262 to 1252 (actual 1256): 16 deleted with the section, 6 added.
+*(Superseded on 2026-10-22 for how the row runs, not that it runs: it is an Embla carousel a reader can
+drag, swipe and scroll, drawn once, with no keyframes and no second copy; entry "The glimpse can be taken by
+hand" above.)*
 
 ---
 

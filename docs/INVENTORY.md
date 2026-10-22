@@ -22,7 +22,7 @@ Gating: **[P]** public · **[A]** admin-only (`RequireAdmin`).
 ### Core
 | Path | Page | Data | States present | SEO |
 |---|---|---|---|---|
-| `/` [P] | `Index.tsx` | `useChainModules()` (chain plate first on the page, at the overview; the detail and every joint and layer's reading on request or by address) · `useSelectedEssays(30)` (the glimpse: every published essay, starred first in `selected_rank` order, then newest first, in a running row; still for reduced motion or a row too short to loop) (the last section; the argument and *Changed my mind* were removed on 2026-10-11 by owner decision) | loading; glimpse absent with nothing published | ✓ |
+| `/` [P] | `Index.tsx` | `useChainModules()` (chain plate first on the page, at the overview; the detail and every joint and layer's reading on request or by address) · `useSelectedEssays(30)` (the glimpse: every published essay, starred first in `selected_rank` order, then newest first, in a running row a reader can drag, swipe or scroll; still for reduced motion or a row too short to loop, and moved by hand) (the last section; the argument and *Changed my mind* were removed on 2026-10-11 by owner decision) | loading; glimpse absent with nothing published | ✓ |
 | `/about` [P] | → redirects to `/` (client-side `Navigate`, query and `#fragment` kept). About was removed on 2026-10-10 by owner decision (sweep D4(a), D5(a)); its argument and *Changed my mind* were on `/` until 2026-10-11 | — | — | — |
 | `/auth` [P] | `Auth.tsx` | `useAuth` + form | — | ✗ |
 | `*` [P] | `NotFound.tsx` | — | — | ✗ (also `console.error` on every hit) |

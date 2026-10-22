@@ -39,11 +39,9 @@ interface Props {
   essay: EssayCardRow;
   children: ReactNode;
   className?: string;
-  /** -1 for a copy that only repeats a link already in the tab order (the glimpse's running row). */
-  tabIndex?: number;
 }
 
-export function EssayCardLink({ essay, children, className, tabIndex }: Props) {
+export function EssayCardLink({ essay, children, className }: Props) {
   const href = essayUrl(toInput(essay));
 
   if (!href) {
@@ -53,7 +51,7 @@ export function EssayCardLink({ essay, children, className, tabIndex }: Props) {
   }
 
   return (
-    <Link to={href} className={className} tabIndex={tabIndex}>
+    <Link to={href} className={className}>
       {children}
     </Link>
   );
