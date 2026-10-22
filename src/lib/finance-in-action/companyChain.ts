@@ -6,7 +6,10 @@
  * source names who supplies whom.
  */
 import type { ModelPackage } from './contract/types';
-import type { CompanyEntry, Registry } from './registry';
+import { isMeasured, type IndustryLink } from './contract/links';
+import { positionOf, type ChainPosition } from './chain';
+import { linksFrom, linksTo } from './links';
+import type { CompanyEntry, Registry, SubIndustry } from './registry';
 
 export interface CompanyRail {
   /** The company's own sub-industry, the company included, in registry order. */
@@ -21,5 +24,63 @@ export function companyRail(reg: Registry, pkg: ModelPackage): CompanyRail {
   return {
     sameSubIndustry: reg.companies.filter((c) => c.subIndustry === pkg.meta.subIndustry),
     restOfStage: reg.companies.filter((c) => c.subIndustry !== pkg.meta.subIndustry && stageOf(c) === pkg.meta.chainStage),
+  };
+}
+
+/** One sub-industry at the other end of a register link, with its companies. */
+export interface ChainNeighbour {
+  link: IndustryLink;
+  /** Which end of the link the neighbour is: upstream feeds this company's sub-industry, downstream is fed by it. */
+  direction: 'upstream' | 'downstream';
+  code: string;
+  subIndustry: SubIndustry | undefined;
+  /** Where the neighbour sits: a stage, or a spanning layer. */
+  position: ChainPosition | undefined;
+  companies: CompanyEntry[];
+  measured: boolean;
+}
+
+export interface CompanyChainView {
+  /** Links into this sub-industry from a stage. */
+  upstream: ChainNeighbour[];
+  /** The other companies of this sub-industry. */
+  sameSubIndustry: CompanyEntry[];
+  /** Links out of this sub-industry to a stage. */
+  downstream: ChainNeighbour[];
+  /** Links to or from a spanning layer (energy, logistics), kept as their own group. */
+  layers: ChainNeighbour[];
+  /** When the company itself sits on a spanning layer: the layer, and where it runs. */
+  band: ChainPosition | null;
+}
+
+/**
+ * The company-level chain (PRD D-C2): the upstream companies of X are the
+ * companies in `link.from` of every link whose `to` is X's sub-industry, and
+ * downstream likewise. Derived on every read, never stored.
+ */
+export function companyChain(reg: Registry, pkg: ModelPackage): CompanyChainView {
+  const code = pkg.meta.subIndustry;
+  const neighbour = (link: IndustryLink, direction: ChainNeighbour['direction']): ChainNeighbour => {
+    const other = direction === 'upstream' ? link.from : link.to;
+    const subIndustry = reg.subIndustry(other);
+    return {
+      link,
+      direction,
+      code: other,
+      subIndustry,
+      position: subIndustry ? positionOf(subIndustry.chainStage) : undefined,
+      companies: reg.companies.filter((c) => c.subIndustry === other),
+      measured: isMeasured(link),
+    };
+  };
+  const all = [...linksTo(reg, code).map((l) => neighbour(l, 'upstream')), ...linksFrom(reg, code).map((l) => neighbour(l, 'downstream'))];
+  const onLayer = (n: ChainNeighbour) => n.position?.kind === 'layer';
+  const own = positionOf(pkg.meta.chainStage);
+  return {
+    upstream: all.filter((n) => n.direction === 'upstream' && !onLayer(n)),
+    sameSubIndustry: reg.companies.filter((c) => c.subIndustry === code && c.ticker !== pkg.meta.ticker),
+    downstream: all.filter((n) => n.direction === 'downstream' && !onLayer(n)),
+    layers: all.filter(onLayer),
+    band: own?.kind === 'layer' ? own : null,
   };
 }

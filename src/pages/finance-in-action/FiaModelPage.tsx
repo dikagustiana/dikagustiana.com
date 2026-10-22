@@ -23,6 +23,8 @@ import { UnitEconomics } from '@/components/finance-in-action/viewer/model/UnitE
 import { CompanyRailNav } from '@/components/finance-in-action/viewer/model/CompanyRail';
 import { KeyFigures } from '@/components/finance-in-action/viewer/model/KeyFigures';
 import { ModelCard } from '@/components/finance-in-action/viewer/model/ModelCard';
+import { AlongTheChain } from '@/components/finance-in-action/viewer/model/AlongTheChain';
+import { LinkCard } from '@/components/finance-in-action/viewer/links/LinkCard';
 import { keyFigures } from '@/lib/finance-in-action/keyFigures';
 import { UELineDetail } from '@/components/finance-in-action/viewer/model/UELineDetail';
 import { DriverTree } from '@/components/finance-in-action/viewer/model/DriverTree';
@@ -91,6 +93,8 @@ export function FiaModelPage({ pkg, reg }: { pkg: ModelPackage; reg: Registry })
   const ue = useMemo(() => unitEconomicsAt(view.wb, view.values, uePeriod), [view.wb, view.values, uePeriod]);
   const noVolume = useMemo(() => noVolumeAnywhere(view.wb, view.values), [view.wb, view.values]);
   const figures = useMemo(() => keyFigures(view.wb, view.values), [view.wb, view.values]);
+  const [chainLinkId, setChainLinkId] = useState<string | null>(null);
+  const chainLink = chainLinkId ? reg.links.find((l) => l.id === chainLinkId) ?? null : null;
 
   const { meta } = pkg;
   const sub = reg.subIndustry(meta.subIndustry);
@@ -195,6 +199,15 @@ export function FiaModelPage({ pkg, reg }: { pkg: ModelPackage; reg: Registry })
                 </div>
               ) : (
                 <DriverRow view={view} periodId={treePeriod} feeds={feeds} reg={reg} decorate={decorate} />
+              )}
+            </Section>
+
+            <Section id="fia-along-chain" title={COPY.alongChainTitle}>
+              <AlongTheChain reg={reg} pkg={pkg} onOpenLink={setChainLinkId} />
+              {chainLink && (
+                <div className="mt-6">
+                  <LinkCard key={chainLink.id} reg={reg} link={chainLink} onClose={() => setChainLinkId(null)} />
+                </div>
               )}
             </Section>
 
