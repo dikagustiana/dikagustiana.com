@@ -53,7 +53,8 @@ describe('the model page header', () => {
     at('xcem');
     await screen.findByRole('heading', { level: 1 });
     expect(screen.getByText(`YCEM, ${COPY.notYetModelled}`)).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /Sample Cement Co/ })).toHaveAttribute('href', '/finance/finance-in-action/scem');
+    // The header's pair and the company rail (chain view §3.2) both link to it.
+    for (const l of screen.getAllByRole('link', { name: /Sample Cement Co/ })) expect(l).toHaveAttribute('href', '/finance/finance-in-action/scem');
   });
 
   it('carries the breadcrumb Finance in Action / stage / sub-industry', async () => {
