@@ -7,10 +7,21 @@
     "driverFrom": "Realised price per tonne of coal",
     "driverTo": "Kiln fuel cost per tonne of cement",
     "intensity": null,
-    "costShare": null,
-    "demandShare": null,
+    "costShare": {
+      "value": 0.3537,
+      "period": "FY25",
+      "source": "PT Semen Indonesia (Persero) Tbk (SMGR), Laporan Keuangan Konsolidasian 31 Desember 2025 dan Laporan Auditor Independen, FY2025, note 26 Cost of revenues, PDF p98: 'Bahan bakar dan energi / Fuel and energy' Rp9,964,766 million ÷ total cost of revenues Rp28,173,648 million = 35.37%; docSha256 599cd8d3e547180debdcca589a4e15b29656631687832afa6f02e434b5bc1152. Default pick: SMGR is the larger producer (cement production 31.24 Mt in 2025, Annual Report 2025 p174, against INTP 18.5 Mt, Annual Report 2025 p155). INTP for the same year: 'Bahan bakar dan listrik / Fuel and power' Rp4,948,263 million ÷ Rp11,961,315 million = 41.37%, Laporan Keuangan Konsolidasian 31 Desember 2025, note 24, PDF p93, docSha256 e1b9a1f32ac62b0e42754d1758ed83d6b75c632cdbd490354d806cd9e10fa779."
+    },
+    "demandShare": {
+      "value": 0.0356,
+      "period": "FY25",
+      "source": "Direktorat Jenderal Mineral dan Batubara, Kementerian ESDM, Laporan Kinerja Ditjen Minerba Tahun 2025, PDF p59 (printed p41), Gambar 3.8 'Sektor Industri Pengguna Batubara Tahun 2025': cement (Semen) 3.56% of 2025 domestic market obligation (DMO) coal realisation; the total, 246.88 million tonnes (cut-off 31 December 2025, data drawn end January 2026), is on PDF p58. Basis: share of domestic (DMO) coal sales in calendar 2025, not of national production or total sales. Downloaded from esdm.go.id; docSha256 601c5fcc5c03ff59b35b1e55fbff98e364429f2832887c284506742ab67d9fb0."
+    },
     "passThrough": null,
-    "caveat": "The price a cement plant pays can differ from a coal producer's realised price: calorific value, contract terms and domestic market obligation rules all sit between them.",
-    "downstreamLines": {}
+    "caveat": "The price a cement plant pays can differ from a coal producer's realised price: calorific value, contract terms and domestic market obligation rules all sit between them. Neither cement maker splits kiln fuel from electricity in its cost-of-revenue note: SMGR's line is 'fuel and energy' and INTP's is 'fuel and power', so the cost share includes purchased electricity (PLN power was about 11% of SMGR's and 13% of INTP's 2025 energy use) and alternative fuels, and overstates the coal share. The demand share is cement's share of Indonesia's domestic (DMO) coal sales in 2025 (3.56%, Ministry of Energy and Mineral Resources), not of the coal producers' total sales: with exports, national production was 817 million tonnes against 247 million tonnes sold domestically, so cement takes roughly 1% of all coal produced.",
+    "downstreamLines": {
+      "SMGR": "fuel_power",
+      "INTP": "fuel_power"
+    }
   }
 ]

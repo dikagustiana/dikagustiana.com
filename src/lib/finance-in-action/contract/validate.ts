@@ -242,14 +242,19 @@ export function downstreamLineProblem(link: IndustryLink, ticker: string, lineId
 }
 
 /**
- * The link register against the packages that are loaded (PRD D-C1). Every
- * `downstreamLines` entry that does not resolve is reported here; the viewer
- * ignores it on screen and never guesses another line.
+ * The link register against the packages that are loaded (PRD D-C1). A ticker
+ * with no loaded package is a company not yet published: it is skipped, not
+ * reported, so the register can name a line before its package lands. Every
+ * entry whose package IS loaded but does not resolve (the package sits outside
+ * the link's downstream sub-industry, has no such line, or the line is a
+ * subtotal) is reported here; the viewer ignores it on screen and never
+ * guesses another line.
  */
 export function validateLinkRegister(links: readonly IndustryLink[], packages: readonly ModelPackage[]): ValidationIssue[] {
   const out: ValidationIssue[] = [];
   for (const link of links) {
     for (const [ticker, lineId] of Object.entries(link.downstreamLines ?? {})) {
+      if (!packages.some((p) => p.meta.ticker === ticker)) continue;
       const problem = downstreamLineProblem(link, ticker, lineId, packages);
       if (problem) out.push({ path: `links.${link.id}.downstreamLines.${ticker}`, message: problem });
     }

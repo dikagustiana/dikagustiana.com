@@ -15,6 +15,8 @@ import type { ReactElement } from 'react';
 import type { ModelPackage } from '@/lib/finance-in-action/contract/types';
 import { formatDelta, formatNumber, formatPercent } from '@/lib/finance-in-action/format';
 import fixture from '@/data/finance-in-action/fixtures/XCEM.SYNTHETIC.json';
+import { isMeasured, type IndustryLink } from '@/lib/finance-in-action/contract/links';
+import links from '@/data/finance-in-action/links.json';
 
 const base = fixture as unknown as ModelPackage;
 /** The capture script's mock, in the test: the SYNTHETIC cement fixture re-labelled for a placed company (rule 8: a mock, never ships). */
@@ -82,7 +84,9 @@ describe('the data boundary', () => {
     mount(<WorldFrame variant="full" heading="h1" boardTicker="SMGR" />);
     const board = await screen.findByRole('dialog', { name: 'Board: SMGR' });
     await waitFor(() => expect(board).toHaveTextContent('No model yet'));
-    expect(figuresIn(board.textContent ?? '')).toEqual([]);
+    // A measured link's sourced weights belong to the link register, not to the company: the board may show them, and nothing else.
+    const linkWeights = new Set((links as IndustryLink[]).filter(isMeasured).flatMap((l) => [l.costShare!.value, l.demandShare!.value]).map((v) => formatNumber(v * 100, 1) + '%'));
+    expect(figuresIn(board.textContent ?? '').filter((t) => !linkWeights.has(t))).toEqual([]);
     expect(writes.count).toBe(0);
   }, 15000);
 
