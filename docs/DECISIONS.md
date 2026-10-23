@@ -5,6 +5,38 @@ alternatives. Newest first.
 
 ---
 
+# 2026-10-22 — Finance in Action: the chain view (PRD D-M1 to D-C2, all defaults accepted)
+
+Spec: `docs/company-models/chain-view/` (PRD, PLAN, PROMPT-site, PROMPT-model). On 22 October 2026 the owner
+accepted every default and proposal in PRD §4, D-M1 to D-C2, in his words "kerjain aja, bikin langsung
+semuanya". This entry records the site side (PLAN Fase B); the model side (Fase A) is separate work.
+
+- **D-M1, no market data.** The model page's key-figure cards are operating figures: volume sold with a
+  year-on-year pill, revenue, cost of revenue and the last profit subtotal per unit, and profit to owners from
+  the driver tree's root. Every figure is worked from package rows (lib/finance-in-action/keyFigures.ts); a role
+  the model does not carry says "Not in this model". The cards read the latest reported quarter with note-level
+  detail, not the FY column, so a year-earlier quarter exists to compare with.
+- **D-C1, `downstreamLines` in the link register.** Optional, site data, not the package contract:
+  ticker → the downstream company's unit-economics line that carries the input. `validateLinkRegister` reports
+  an entry whose ticker or line does not resolve (or names a revenue or subtotal line); the screen ignores it.
+  `coal-to-cement` carries `{}` until the model work measures it. The contract (`types.ts`,
+  `model-package.schema.json`, `fia.contract_schema`) is unchanged.
+- **D-C2, company-level chain derived.** `companyChain` works upstream and downstream companies from
+  `linksTo`/`linksFrom` on every read; links to a spanning layer are their own group. No company-to-company edge
+  is written anywhere.
+- **Anchors.** A stage's index section is `stage-<stage id>` (`#stage-stage-extraction`), a layer's
+  `band-<band id>` (`#band-band-energy`), from `positionAnchor`, which the pills, the strip, the breadcrumbs and
+  the homepage map all use. Every layer now has a section, so every pill lands.
+- **Homepage doors.** At the finance distance only, the plate generator's `StageModelsHit` (emitted after every
+  other hit, so the existing keyboard order holds) and the column's stage box link to the stage's section with
+  "n models" or "planned". The counts come from a feed ChainPlate lazy-loads by build flag: the preview or the
+  live registry; with neither flag nothing loads. In production this adds the published-models read to the
+  homepage (one cached request, the same query key as Section 06).
+- **Download .xlsx** moved from the page header into "The model" card, so it stays the page's only primary
+  action. Full screen is a modal dialog that traps focus; Escape returns it to the button.
+
+---
+
 # 2026-10-22 — The glimpse's arrows show on a phone too
 
 Owner request, the same day: "make the arrows show on mobile too". The two arrow buttons ("Earlier in the

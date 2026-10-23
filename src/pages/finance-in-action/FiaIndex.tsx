@@ -17,8 +17,9 @@ import { ConnectionsToggle } from '@/components/finance-in-action/viewer/Connect
 import { CompanyList } from '@/components/finance-in-action/viewer/CompanyList';
 import { ALL, IndexFilters } from '@/components/finance-in-action/viewer/IndexFilters';
 import { StageStrip } from '@/components/finance-in-action/viewer/StageStrip';
+import { StagePills } from '@/components/finance-in-action/viewer/StagePills';
 import { SyntheticBanner } from '@/components/finance-in-action/viewer/SyntheticBanner';
-import { RejectedPackages } from '@/components/finance-in-action/viewer/RejectedPackages';
+import { LinkRegisterIssues, RejectedPackages } from '@/components/finance-in-action/viewer/RejectedPackages';
 import { LinkLayer, LinkLegend } from '@/components/finance-in-action/viewer/links/LinkLayer';
 import { LinkCard } from '@/components/finance-in-action/viewer/links/LinkCard';
 import { linksFrom, linksTo, placeLinks } from '@/lib/finance-in-action/links';
@@ -69,14 +70,16 @@ export function FiaIndex({ useRegistry }: { useRegistry: RegistryHook }) {
   const drawn = useMemo(() => placeLinks(reg, stages.map((g) => g.position.id)), [reg, stages]);
   const openLink = (id: string) => update({ [PARAM.lens]: 'on', [PARAM.link]: id });
   const layers = all.filter((g) => g.position.kind === 'layer');
-  const sections = filtered.filter((g) => g.position.kind === 'stage' || g.subIndustries.length > 0);
+  // Every stage and layer has a section, so every stage pill has somewhere to go.
+  const sections = filtered;
   const anySynthetic = reg.companies.some((c) => c.synthetic);
   const filtering = query.trim() !== '' || condition !== ALL;
 
   // A breadcrumb or a card can name an anchor; scroll to it once the section exists.
   useEffect(() => {
     if (!location.hash) return;
-    document.getElementById(decodeURIComponent(location.hash.slice(1)))?.scrollIntoView();
+    const target = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+    if (target && typeof target.scrollIntoView === 'function') target.scrollIntoView();
   }, [location.hash]);
 
   return (
@@ -93,6 +96,7 @@ export function FiaIndex({ useRegistry }: { useRegistry: RegistryHook }) {
         {anySynthetic && <SyntheticBanner />}
         <PublishedNote state={published} failure={failure} fixtures={fixtures} />
         <RejectedPackages rejected={reg.rejected} />
+        <LinkRegisterIssues issues={reg.linkIssues} />
 
         <header className="mb-8 max-w-3xl">
           <span className="mb-3 block font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{COPY.section}</span>
@@ -100,6 +104,9 @@ export function FiaIndex({ useRegistry }: { useRegistry: RegistryHook }) {
           <h1 className="font-display text-3xl font-bold leading-tight text-foreground md:text-4xl">{COPY.title}</h1>
           <p className="mt-3 text-base leading-relaxed text-muted-foreground md:text-lg">{COPY.subhead}</p>
         </header>
+        <div className="-mt-4 mb-8">
+          <StagePills groups={all} />
+        </div>
 
         <section aria-labelledby="fia-along-chain" className="mb-10 space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-3">

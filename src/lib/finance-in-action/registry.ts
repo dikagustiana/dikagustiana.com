@@ -18,7 +18,7 @@ import type { Depth, ModelStatus } from './constants';
 import { STATUSES } from './constants';
 import type { ModelPackage } from './contract/types';
 import type { IndustryLink } from './contract/links';
-import { validatePackage, type ValidationIssue } from './contract/validate';
+import { validateLinkRegister, validatePackage, type ValidationIssue } from './contract/validate';
 import { checkFormulas } from './model/checks';
 import { Workbook } from './model/workbook';
 import { CHAIN_POSITIONS, type ChainPosition } from './chain';
@@ -69,6 +69,8 @@ export interface Registry {
   companies: CompanyEntry[];
   subIndustries: SubIndustry[];
   links: IndustryLink[];
+  /** Link register entries that do not resolve against the loaded packages (PRD D-C1); ignored on screen. */
+  linkIssues: ValidationIssue[];
   company(ticker: string): CompanyEntry | undefined;
   subIndustry(code: string): SubIndustry | undefined;
   workbook(ticker: string): Workbook | undefined;
@@ -130,6 +132,7 @@ export function buildRegistry(src: RegistrySources, options: RegistryOptions = {
     companies,
     subIndustries: src.subIndustries,
     links: src.links,
+    linkIssues: validateLinkRegister(src.links, packages),
     company: (ticker) => companies.find((c) => c.ticker.toLowerCase() === ticker.toLowerCase()),
     subIndustry: (code) => src.subIndustries.find((s) => s.code === code),
     workbook: (ticker) => workbooks.get(ticker.toUpperCase()),

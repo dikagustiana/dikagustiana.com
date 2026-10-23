@@ -312,8 +312,8 @@ describe('the package rules beyond the schema', () => {
 });
 
 describe('the slate', () => {
-  it('lists PTBA, ITMG, INDY, ADRO, INTP, SMGR and BREN as not started, with no figures at all', () => {
-    expect(slate.companies.map((c) => c.ticker)).toEqual(['PTBA', 'ITMG', 'INDY', 'ADRO', 'INTP', 'SMGR', 'BREN']);
+  it('lists PTBA, ITMG, INDY, ADRO, INTP, SMGR, BREN and PGEO (D-M5, chain view) as not started, with no figures at all', () => {
+    expect(slate.companies.map((c) => c.ticker)).toEqual(['PTBA', 'ITMG', 'INDY', 'ADRO', 'INTP', 'SMGR', 'BREN', 'PGEO']);
     for (const c of slate.companies) {
       expect(c.status).toBe('not_started');
       expect(Object.keys(c).sort()).toEqual(['conditionIds', 'depth', 'name', 'status', 'subIndustry', 'ticker']);
@@ -325,6 +325,8 @@ describe('the slate', () => {
     expect(at('INDY')).toMatchObject({ subIndustry: 'A121', depth: 'executive', conditionIds: [3, 8] });
     expect(at('ADRO')).toMatchObject({ subIndustry: 'A121', depth: 'executive', conditionIds: [3, 9] });
     expect(at('BREN')).toMatchObject({ depth: 'executive', conditionIds: [4, 6] });
+    // D-M5 (chain view PRD, 22 Oct 2026): PGEO beside BREN on J411, so the peer band can be drawn.
+    expect(at('PGEO')).toMatchObject({ subIndustry: 'J411', status: 'not_started', depth: 'executive', conditionIds: [4, 6] });
     expect(subIndustries.find((s) => s.code === at('BREN')?.subIndustry)).toMatchObject({ chainStage: 'band-energy', unit: 'MWh' });
     const conditions = new Set(CONDITIONS.map((c) => c.number));
     for (const c of slate.companies) for (const n of c.conditionIds) expect(conditions.has(n), `${c.ticker} condition ${n}`).toBe(true);

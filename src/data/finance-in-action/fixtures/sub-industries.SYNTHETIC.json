@@ -14,5 +14,13 @@
     "unitNoun": "cement",
     "unit": "tonne",
     "note": "SYNTHETIC: one invented cement maker with volumes, and one whose volumes are not disclosed."
+  },
+  {
+    "code": "SYN-POWER",
+    "name": "Synthetic power generation (SYNTHETIC)",
+    "chainStage": "band-energy",
+    "unitNoun": "electricity",
+    "unit": "MWh",
+    "note": "SYNTHETIC: an energy-layer sub-industry with no company, so the cement makers' cost flow has a second upstream node that is not yet modelled."
   }
 ]

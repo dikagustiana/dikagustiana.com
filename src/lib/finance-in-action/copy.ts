@@ -57,6 +57,20 @@ export const COPY = {
   whatChanged: 'What changed',
   viewerOnly: 'Worked in the viewer only. Published models do not change.',
   expectedNotMeasured: 'expected, not measured',
+  measured: 'measured',
+  // Along the chain (chain view §3.4)
+  alongChainTitle: 'Along the chain',
+  upstream: 'Upstream',
+  thisStage: 'This stage',
+  downstream: 'Downstream',
+  layersGroup: 'Energy and logistics layers',
+  noUpstream: 'No upstream link in the register yet.',
+  noDownstream: 'No downstream link in the register yet.',
+  noLayerLink: 'No link to the energy or logistics layer in the register yet.',
+  noCompanies: 'No company on the slate here yet.',
+  openLink: 'Open the link card',
+  // Cost flow (chain view §3.5)
+  sankeyTitle: (noun: string) => `Where a unit of ${noun} goes`,
   publishedFailed: 'Published models could not be read, so only the preview companies are shown. The reason:',
   publishedLoading: 'Reading the published models…',
   // Production (VITE_FIA_LIVE): no fixture stands in, so each failure is a sentence of its own.

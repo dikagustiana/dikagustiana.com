@@ -24,3 +24,20 @@ export function RejectedPackages({ rejected }: { rejected: { ticker: string; iss
     </div>
   );
 }
+
+/** Link register entries that do not resolve (PRD D-C1): listed here, ignored on the page. */
+export function LinkRegisterIssues({ issues }: { issues: ValidationIssue[] }) {
+  if (!issues.length) return null;
+  return (
+    <div role="note" className="mb-6 rounded-md border border-dashed border-foreground/40 bg-muted/60 px-4 py-3 text-sm text-foreground">
+      <p className="font-semibold">Ignored: a link register entry does not match a loaded model.</p>
+      <ul className="mt-2 list-disc space-y-1 pl-5">
+        {issues.map((i) => (
+          <li key={i.path}>
+            <span className="font-mono">{i.path}</span>: {i.message}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}

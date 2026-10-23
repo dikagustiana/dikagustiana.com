@@ -20,6 +20,13 @@ import { WorkpaperRecord } from '@/components/finance-in-action/viewer/model/Wor
 import { DownloadButton } from '@/components/finance-in-action/viewer/model/DownloadButton';
 import { PeriodSelect } from '@/components/finance-in-action/viewer/model/PeriodSelect';
 import { UnitEconomics } from '@/components/finance-in-action/viewer/model/UnitEconomics';
+import { CompanyRailNav } from '@/components/finance-in-action/viewer/model/CompanyRail';
+import { KeyFigures } from '@/components/finance-in-action/viewer/model/KeyFigures';
+import { ModelCard } from '@/components/finance-in-action/viewer/model/ModelCard';
+import { AlongTheChain } from '@/components/finance-in-action/viewer/model/AlongTheChain';
+import { CostSankey } from '@/components/finance-in-action/viewer/model/CostSankey';
+import { LinkCard } from '@/components/finance-in-action/viewer/links/LinkCard';
+import { keyFigures } from '@/lib/finance-in-action/keyFigures';
 import { UELineDetail } from '@/components/finance-in-action/viewer/model/UELineDetail';
 import { DriverTree } from '@/components/finance-in-action/viewer/model/DriverTree';
 import { CellEditor } from '@/components/finance-in-action/viewer/model/CellEditor';
@@ -86,6 +93,15 @@ export function FiaModelPage({ pkg, reg }: { pkg: ModelPackage; reg: Registry })
   const [uePeriod, setUePeriod] = useState(() => latestReported(pkg, pkg.unitEconomics.periods) ?? pkg.meta.asOf.fullStatementsTo);
   const ue = useMemo(() => unitEconomicsAt(view.wb, view.values, uePeriod), [view.wb, view.values, uePeriod]);
   const noVolume = useMemo(() => noVolumeAnywhere(view.wb, view.values), [view.wb, view.values]);
+  const figures = useMemo(() => keyFigures(view.wb, view.values), [view.wb, view.values]);
+  const [chainLinkId, setChainLinkId] = useState<string | null>(null);
+  const chainLink = chainLinkId ? reg.links.find((l) => l.id === chainLinkId) ?? null : null;
+  // A link opened from the cost flow, below, is shown in "Along the chain": bring it into view.
+  useEffect(() => {
+    if (!chainLinkId) return;
+    const card = document.getElementById('links');
+    if (card && typeof card.scrollIntoView === 'function') card.scrollIntoView({ block: 'start' });
+  }, [chainLinkId]);
 
   const { meta } = pkg;
   const sub = reg.subIndustry(meta.subIndustry);
@@ -153,10 +169,13 @@ export function FiaModelPage({ pkg, reg }: { pkg: ModelPackage; reg: Registry })
     >
       <SEO title={`${meta.name}: model`} description={`${meta.name}, ${subName}: the operation rebuilt from its filings.`} noindex />
       <div className="container max-w-7xl px-4 py-8 sm:px-8">
-        <div className="xl:grid xl:grid-cols-[minmax(0,1fr)_22rem] xl:items-start xl:gap-8">
+        <div className="md:grid md:grid-cols-[11rem_minmax(0,1fr)] md:items-start md:gap-6">
+        <CompanyRailNav reg={reg} pkg={pkg} />
+        <div className="min-w-0 xl:grid xl:grid-cols-[minmax(0,1fr)_22rem] xl:items-start xl:gap-8">
           <div className="min-w-0">
-            <ModelHeader pkg={pkg} reg={reg} lens={lens} onLens={setLens} download={<DownloadButton view={view} />} />
+            <ModelHeader pkg={pkg} reg={reg} lens={lens} onLens={setLens} />
             <ProvenanceNote provenance={meta.provenance} />
+            <KeyFigures set={figures} />
 
             <Section
               id="fia-drivers"
@@ -190,6 +209,15 @@ export function FiaModelPage({ pkg, reg }: { pkg: ModelPackage; reg: Registry })
               )}
             </Section>
 
+            <Section id="fia-along-chain" title={COPY.alongChainTitle}>
+              <AlongTheChain reg={reg} pkg={pkg} onOpenLink={setChainLinkId} />
+              {chainLink && (
+                <div className="mt-6">
+                  <LinkCard key={chainLink.id} reg={reg} link={chainLink} onClose={() => setChainLinkId(null)} />
+                </div>
+              )}
+            </Section>
+
             <Section id="fia-unit-economics" title={`Unit economics, per ${pkg.unitEconomics.unit} sold`}>
               <UnitEconomics
                 view={view}
@@ -203,6 +231,11 @@ export function FiaModelPage({ pkg, reg }: { pkg: ModelPackage; reg: Registry })
               />
             </Section>
 
+            {/* Directly after the waterfall, on the waterfall's own period (chain view §3.5). */}
+            <Section id="fia-cost-flow" title={COPY.sankeyTitle(sub?.unitNoun ?? pkg.unitEconomics.unit)}>
+              <CostSankey reg={reg} pkg={pkg} ue={ue} onlyMessage={noVolume} onOpenLink={setChainLinkId} />
+            </Section>
+
             <Section id="fia-peers" title={`Where ${meta.ticker} sits in ${subName}`}>
               <PeerBand metrics={peers} ticker={meta.ticker} subIndustryName={subName} publishedCount={publishedPeers(reg, pkg).length} />
             </Section>
@@ -211,15 +244,16 @@ export function FiaModelPage({ pkg, reg }: { pkg: ModelPackage; reg: Registry })
               <ConditionPanel pkg={pkg} subIndustry={sub} />
             </Section>
 
-            <Section
+            <ModelCard
               id="fia-model"
-              title={COPY.theModel}
-              aside={
-                view.edits.length ? (
-                  <button type="button" onClick={view.reset} className="min-h-11 text-sm text-accent underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-                    {COPY.reset}
-                  </button>
-                ) : undefined
+              onReset={view.edits.length ? view.reset : undefined}
+              download={<DownloadButton view={view} />}
+              inspector={
+                <Inspector view={view}>
+                  <UELineDetail view={view} ue={ue} />
+                  <ChainBreadcrumb view={view} />
+                  <WhatChanged view={view} />
+                </Inspector>
               }
             >
               <ModelGrid
@@ -232,7 +266,7 @@ export function FiaModelPage({ pkg, reg }: { pkg: ModelPackage; reg: Registry })
                   editor: (key, close) => <CellEditor view={view} cellKey={key} close={close} />,
                 }}
               />
-            </Section>
+            </ModelCard>
 
             <Section id="fia-workpaper" title={COPY.workpaper}>
               <WorkpaperRecord pkg={pkg} />
@@ -243,6 +277,7 @@ export function FiaModelPage({ pkg, reg }: { pkg: ModelPackage; reg: Registry })
             <ChainBreadcrumb view={view} />
             <WhatChanged view={view} />
           </Inspector>
+        </div>
         </div>
       </div>
     </PageLayout>

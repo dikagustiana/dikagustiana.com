@@ -6,14 +6,19 @@
  *
  * All per-unit money is handled in rupiah per base unit (per tonne), so two
  * packages that keep their rows at different scales still meet on one scale.
+ * A package that reports in another currency (US$) is not converted: the
+ * viewer holds no exchange rate, so its per-unit money here is missing.
  */
 import type { ModelPackage } from './contract/types';
 import { splitRowRef } from './contract/types';
 import { isMeasured, type IndustryLink } from './contract/links';
-import { unitScale } from './unitEconomics';
+import { parseMoney, unitScale, volumeFactor } from './unitEconomics';
 
-const MONEY_TO_RP: Record<string, number> = { Rp: 1, 'Rp thousand': 1e3, 'Rp mn': 1e6, 'Rp million': 1e6, 'Rp bn': 1e9, 'Rp billion': 1e9 };
-const VOLUME_TO_BASE: Record<string, number> = { t: 1, tonne: 1, tonnes: 1, kt: 1e3, Mt: 1e6 };
+/** Rupiah per one of `unit`, or undefined for an unrecognised or non-rupiah unit. */
+function rupiahFactor(unit: string): number | undefined {
+  const m = parseMoney(unit);
+  return m && m.currency === 'Rp' ? m.magnitude : undefined;
+}
 
 function stored(pkg: ModelPackage, rowRef: string, periodId: string): { value: number | null; unit: string } {
   const r = splitRowRef(rowRef);
@@ -27,8 +32,8 @@ function stored(pkg: ModelPackage, rowRef: string, periodId: string): { value: n
 export function perUnitRp(pkg: ModelPackage, rowRef: string, periodId: string): number | null {
   const v = stored(pkg, rowRef, periodId);
   const vol = stored(pkg, pkg.unitEconomics.denominatorRowRef, periodId);
-  const m = MONEY_TO_RP[v.unit];
-  const b = VOLUME_TO_BASE[vol.unit];
+  const m = rupiahFactor(v.unit);
+  const b = volumeFactor(vol.unit);
   if (v.value === null || vol.value === null || vol.value === 0 || !m || !b) return null;
   return (v.value * m) / (vol.value * b);
 }
@@ -137,6 +142,6 @@ export function displayScale(pkg: ModelPackage | null): { divisor: number; label
   const v = revenue ? stored(pkg, revenue.rowRef, pkg.periods[0].id) : { unit: '' };
   const vol = stored(pkg, pkg.unitEconomics.denominatorRowRef, pkg.periods[0].id);
   const scale = unitScale(v.unit, vol.unit);
-  const base = (MONEY_TO_RP[v.unit] ?? 1) / (VOLUME_TO_BASE[vol.unit] ?? 1) / scale.multiplier;
+  const base = (parseMoney(v.unit)?.magnitude ?? 1) / (volumeFactor(vol.unit) ?? 1) / scale.multiplier;
   return { divisor: base, label: scale.label };
 }

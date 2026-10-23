@@ -1,5 +1,5 @@
 {
-  "about": "The companies planned for the first models. Names and tickers only: no figures. Depth and condition links follow the owner's mockup (fsre-skills docs/company-models/mockup/Main.dc.html); INDY, ADRO and BREN follow owner decisions D6 and D7 of 22 October 2026 (docs/company-models/two-gates/PRD.md).",
+  "about": "The companies planned for the first models. Names and tickers only: no figures. Depth and condition links follow the owner's mockup (fsre-skills docs/company-models/mockup/Main.dc.html); INDY, ADRO and BREN follow owner decisions D6 and D7 of 22 October 2026 (docs/company-models/two-gates/PRD.md); PGEO, BREN's pair on the energy layer so the peer band can be drawn, follows owner decision D-M5 of 22 October 2026 (docs/company-models/chain-view/PRD.md).",
   "companies": [
     { "ticker": "PTBA", "name": "Bukit Asam", "subIndustry": "A121", "status": "not_started", "depth": "executive", "conditionIds": [3] },
     { "ticker": "ITMG", "name": "Indo Tambangraya Megah", "subIndustry": "A121", "status": "not_started", "depth": "executive", "conditionIds": [3] },
@@ -7,6 +7,7 @@
     { "ticker": "ADRO", "name": "Alamtri Resources Indonesia", "subIndustry": "A121", "status": "not_started", "depth": "executive", "conditionIds": [3, 9] },
     { "ticker": "INTP", "name": "Indocement Tunggal Prakarsa", "subIndustry": "B121", "status": "not_started", "depth": "executive", "conditionIds": [1] },
     { "ticker": "SMGR", "name": "Semen Indonesia", "subIndustry": "B121", "status": "not_started", "depth": "institutional", "conditionIds": [1, 6] },
-    { "ticker": "BREN", "name": "Barito Renewables Energy", "subIndustry": "J411", "status": "not_started", "depth": "executive", "conditionIds": [4, 6] }
+    { "ticker": "BREN", "name": "Barito Renewables Energy", "subIndustry": "J411", "status": "not_started", "depth": "executive", "conditionIds": [4, 6] },
+    { "ticker": "PGEO", "name": "Pertamina Geothermal Energy", "subIndustry": "J411", "status": "not_started", "depth": "executive", "conditionIds": [4, 6] }
   ]
 }

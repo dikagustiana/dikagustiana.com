@@ -16,6 +16,7 @@ import { BandHit } from './BandHit';
 import { JointHit } from './JointHit';
 import { LayerSwitch } from './LayerSwitch';
 import { ShiftMark } from './ShiftMark';
+import { StageModelsHit } from './StageModelsHit';
 
 export function ChainPlateWide() {
   return (
@@ -234,6 +235,13 @@ export function ChainPlateWide() {
       <LayerSwitch id="band-energy" x={149} y={719} />
       <LayerSwitch id="band-governance" x={817} y={753} />
       <LayerSwitch id="band-regulation" x={149} y={787} />
+      <StageModelsHit id="stage-biological" x={176} y={138} width={132} height={77} />
+      <StageModelsHit id="stage-extraction" x={176} y={352} width={132} height={58} />
+      <StageModelsHit id="stage-processing" x={483} y={246} width={132} height={58} />
+      <StageModelsHit id="stage-packaging" x={844} y={96} width={176} height={58} />
+      <StageModelsHit id="stage-manufacturing" x={844} y={246} width={176} height={58} />
+      <StageModelsHit id="stage-consumption" x={1424} y={155} width={163} height={240} />
+      <StageModelsHit id="stage-recovery" x={1424} y={429} width={163} height={44} />
     </g>
     <g className="cp-mark-layer">
       <g className="cp-marks cp-marks--reindustrialisation">
@@ -437,6 +445,13 @@ export function ChainPlateCompact() {
       <LayerSwitch id="band-energy" x={127} y={664} />
       <LayerSwitch id="band-governance" x={575} y={698} />
       <LayerSwitch id="band-regulation" x={127} y={732} />
+      <StageModelsHit id="stage-biological" x={162} y={177} width={132} height={77} />
+      <StageModelsHit id="stage-extraction" x={162} y={336} width={132} height={58} />
+      <StageModelsHit id="stage-processing" x={330} y={271} width={132} height={58} />
+      <StageModelsHit id="stage-packaging" x={610} y={171} width={176} height={58} />
+      <StageModelsHit id="stage-manufacturing" x={610} y={271} width={176} height={58} />
+      <StageModelsHit id="stage-consumption" x={1013} y={271} width={143} height={58} />
+      <StageModelsHit id="stage-recovery" x={1013} y={381} width={143} height={39} />
     </g>
     <g className="cp-mark-layer">
       <g className="cp-marks cp-marks--reindustrialisation">
