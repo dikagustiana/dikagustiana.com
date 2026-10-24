@@ -22,9 +22,11 @@ interface Props {
   onError: (message: string) => void;
   /** "Page 3 of 58", for the reader's bar. */
   onStatus: (label: string) => void;
+  /** The page on screen, for the text view to open at its chapter. */
+  onPage?: (page: number) => void;
 }
 
-export default function PdfReader({ url, title, slug, onError, onStatus }: Props) {
+export default function PdfReader({ url, title, slug, onError, onStatus, onPage }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const [doc, setDoc] = useState<PDFDocumentProxy | null>(null);
@@ -63,8 +65,9 @@ export default function PdfReader({ url, title, slug, onError, onStatus }: Props
   useEffect(() => {
     if (!total) return;
     onStatus(`Page ${page} of ${total}`);
+    onPage?.(page);
     writePosition(slug, String(page));
-  }, [page, total, slug, onStatus]);
+  }, [page, total, slug, onStatus, onPage]);
 
   useEffect(() => {
     if (!doc || !box.w || !box.h || !canvasRef.current) return;

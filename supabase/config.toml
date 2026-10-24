@@ -2,7 +2,13 @@
 # The old ref (rhwzvgklasvitocbbhvi) is a deleted project.
 project_id = "asypkbkiebjvvpimewfp"
 
-# Three edge functions. `book-file` (2026-10-24) signs short-lived R2 URLs for
+# Four edge functions. `book-ask` (library phase 2, docs/prd/library-phase-2
+# §4) answers a margin question on a free book from its chapter, with the
+# owner's Claude API key (ANTHROPIC_API_KEY) and a daily cap
+# (BOOK_ASK_DAILY_USD); it reads the book's row as the caller, the book's
+# extracted text from R2 (text/<book id>/, signed with _shared/r2.ts, the same
+# R2_* secrets as book-file), and its one privileged call writes
+# book_ask_usage through service-role-only functions. `book-file` (2026-10-24) signs short-lived R2 URLs for
 # the Books page's files (supabase/functions/book-file/, docs/books/R2-RUNBOOK.md);
 # like link-preview it reads as the caller, with no privileged client.
 # `toolkit-file` (2026-10-24) does the same for /finance/toolkits
@@ -11,8 +17,8 @@ project_id = "asypkbkiebjvvpimewfp"
 # `link-preview` (2026-09-27). It resolves a pasted URL to
 # plain-text card metadata at authoring time, for admins only; see
 # supabase/functions/link-preview/ and docs/DECISIONS.md, "Link previews:
-# server-resolved, metadata only". Nothing in the app calls an AI provider, so
-# there is no gateway URL or key to configure.
+# server-resolved, metadata only". book-ask is the one function that calls an
+# AI provider (Claude), through its own secret; there is no gateway.
 #
 # Before it there were none. `council-review` was removed on 2026-08-01 with
 # the Writing Council (design archived at docs/archive/COUNCIL_DESIGN.md). Its
@@ -36,4 +42,7 @@ verify_jwt = true
 verify_jwt = true
 
 [functions.toolkit-file]
+verify_jwt = true
+
+[functions.book-ask]
 verify_jwt = true

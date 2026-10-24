@@ -15,6 +15,7 @@ const { invoke, signedMock } = vi.hoisted(() => ({ invoke: vi.fn(), signedMock: 
 vi.mock('@/integrations/supabase/client', () => ({ supabase: { functions: { invoke } } }));
 vi.mock('@/components/layouts/PageLayout', () => ({ PageLayout: ({ children }: { children: ReactNode }) => <div>{children}</div> }));
 vi.mock('@/components/SEO', () => ({ SEO: ({ title }: { title: string }) => <meta data-seo-title={title} /> }));
+vi.mock('@/contexts/AuthContext', () => ({ useAuth: () => ({ isAdmin: false, user: null }) }));
 vi.mock('@/components/books/reader/PdfReader', () => ({
   default: ({ url, title, slug, onStatus }: { url: string; title: string; slug: string; onStatus: (s: string) => void }) => (
     <div data-testid="pdf" data-url={url} data-slug={slug}>

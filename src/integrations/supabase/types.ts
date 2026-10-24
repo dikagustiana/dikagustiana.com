@@ -59,6 +59,27 @@ export type Database = {
         }
         Relationships: []
       }
+      book_ask_usage: {
+        Row: {
+          day: string
+          questions: number
+          usd_cents: number
+          visitor_hash: string
+        }
+        Insert: {
+          day: string
+          questions?: number
+          usd_cents?: number
+          visitor_hash: string
+        }
+        Update: {
+          day?: string
+          questions?: number
+          usd_cents?: number
+          visitor_hash?: string
+        }
+        Relationships: []
+      }
       book_citations: {
         Row: {
           book_id: string

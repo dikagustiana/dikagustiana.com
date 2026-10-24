@@ -9,15 +9,28 @@
  * book's cover page (library phase 2); F or ⛶ asks the browser for true full screen, where the browser supports it (not an iPhone).
  * A book that is not there, or not free, says so with a way back. Not indexed: the book's page is its cover,
  * /books-academia/:slug.
+ *
+ * Margin questions (library phase 2, docs/prd/library-phase-2 §3): a free book whose text has been extracted
+ * (ai_ready, with paragraphs) gets a Text button that shows the chapter on screen as numbered paragraphs.
+ * Selecting text there offers Ask; the question opens a margin (AskMargin.tsx) to the right of the page, below
+ * it on a phone, and each [¶n] in the answer takes the reader to that paragraph. Leaving the text view opens
+ * the PDF at the page of the paragraph last gone to. A paid book never reaches the reader; a book without
+ * extracted text shows neither Text nor Ask. Esc closes the margin first, then the reader.
  */
 import { lazy, Suspense, useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Download, Loader2, Maximize, Minimize, X } from 'lucide-react';
+import { BookText, Download, FileText, Loader2, Maximize, Minimize, X } from 'lucide-react';
 import { SEO } from '@/components/SEO';
 import { Button } from '@/components/ui/button';
+import { AskMargin } from '@/components/books/reader/AskMargin';
+import { TextView } from '@/components/books/reader/TextView';
+import { useAuth } from '@/contexts/AuthContext';
+import { useChapter, useChapterAtPage, useChapterRange, useReaderBook } from '@/hooks/queries/useBookText';
+import type { AskSelection } from '@/lib/bookAsk';
 import { signedBookUrl } from '@/lib/bookFile';
-import { isTypingTarget, readerKind, titleFromFilename } from '@/lib/bookReader';
+import { isTypingTarget, readerKind, titleFromFilename, writePosition } from '@/lib/bookReader';
+import { cn } from '@/lib/utils';
 
 const PdfReader = lazy(() => import('@/components/books/reader/PdfReader'));
 const EpubReader = lazy(() => import('@/components/books/reader/EpubReader'));
@@ -46,6 +59,47 @@ export default function BookReader() {
   const title = result?.ok ? titleFromFilename(result.filename, slug) : slug;
   const bookUrl = `/books-academia/${encodeURIComponent(slug)}`;
 
+  // Margin questions: only a free book with extracted text.
+  const { isAdmin } = useAuth();
+  const readerBook = useReaderBook(slug).data ?? null;
+  const askable = readerBook?.access === 'free' && readerBook.ai_ready ? readerBook.id : undefined;
+  const range = useChapterRange(askable).data ?? null;
+  const [mode, setMode] = useState<'page' | 'text'>('page');
+  const [page, setPage] = useState<number | null>(null);
+  const [chapter, setChapter] = useState<number | null>(null);
+  const [asking, setAsking] = useState<AskSelection | null>(null);
+  const [target, setTarget] = useState<{ para: number; nonce: number } | null>(null);
+  const atPage = useChapterAtPage(askable, mode === 'text' && chapter === null ? (page ?? 1) : null);
+  // The text opens at the chapter of the page on screen (an EPUB's at its first chapter).
+  const shownChapter = chapter ?? (atPage.isLoading ? null : (atPage.data ?? range?.first ?? null));
+  const text = useChapter(askable, mode === 'text' ? shownChapter : null);
+  const isPdf = result?.ok ? readerKind(result.contentType, result.filename) === 'pdf' : false;
+  const onPage = useCallback((p: number) => setPage(p), []);
+  const panelOpen = useRef(false);
+  panelOpen.current = !!asking;
+
+  const toText = () => {
+    setChapter(null);
+    setMode('text');
+  };
+  const toPages = () => {
+    // The PDF opens where the reader last went in the text.
+    const para = target && text.data?.find((p) => p.para === target.para);
+    if (isPdf && para) writePosition(slug, String(para.page));
+    setMode('page');
+    setAsking(null);
+  };
+  const cite = (para: number) => {
+    setMode('text');
+    if (chapter === null && shownChapter !== null) setChapter(shownChapter);
+    setTarget({ para, nonce: Date.now() });
+  };
+  const goChapter = (n: number) => {
+    if (!range) return;
+    setChapter(Math.min(range.last, Math.max(range.first, n)));
+    setTarget(null);
+  };
+
   // The page under the reader does not scroll while it is open.
   useEffect(() => {
     const was = document.body.style.overflow;
@@ -69,6 +123,10 @@ export default function BookReader() {
   // Esc closes the reader (in browser full screen the browser takes Esc first, to leave full screen); F toggles it.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && panelOpen.current) {
+        setAsking(null);
+        return;
+      }
       if (isTypingTarget(e)) return;
       if (e.key === 'Escape' && !document.fullscreenElement) navigate(bookUrl);
       else if ((e.key === 'f' || e.key === 'F') && canFull) {
@@ -105,6 +163,20 @@ export default function BookReader() {
         <p className="sr-only shrink-0 text-sm text-neutral-400 sm:not-sr-only" aria-live="polite">
           {status}
         </p>
+        {result?.ok && askable && range && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className={barButton}
+            onClick={mode === 'text' ? toPages : toText}
+            aria-pressed={mode === 'text'}
+            title={mode === 'text' ? 'Back to the pages' : 'Read as text, and ask in the margin'}
+          >
+            {mode === 'text' ? <FileText className="h-4 w-4 sm:mr-2" aria-hidden="true" /> : <BookText className="h-4 w-4 sm:mr-2" aria-hidden="true" />}
+            <span className="sr-only sm:not-sr-only">{mode === 'text' ? 'Pages' : 'Text'}</span>
+          </Button>
+        )}
         {result?.ok && (
           <Button type="button" variant="ghost" size="sm" className={barButton} onClick={download} title="Download">
             <Download className="h-4 w-4 sm:mr-2" aria-hidden="true" />
@@ -118,7 +190,7 @@ export default function BookReader() {
         )}
       </header>
 
-      <main className="relative min-h-0 flex-1 p-2 sm:p-4">
+      <main className={cn('relative min-h-0 flex-1 p-2 sm:p-4', asking && 'flex flex-col gap-2 sm:gap-4 md:flex-row')}>
         {signed.isLoading ? (
           <Centered>
             <Loader2 className="h-6 w-6 animate-spin text-neutral-400" aria-hidden="true" />
@@ -141,6 +213,39 @@ export default function BookReader() {
               Try again
             </Button>
           </Centered>
+        ) : mode === 'text' && askable && range && shownChapter === null ? (
+          <Centered>
+            <Loader2 className="h-6 w-6 animate-spin text-neutral-400" aria-hidden="true" />
+            <span className="sr-only">Loading</span>
+          </Centered>
+        ) : mode === 'text' && askable && range && shownChapter !== null ? (
+          <>
+            <div className={cn('min-h-0', asking ? 'flex-1 md:min-w-0' : 'h-full')}>
+              <TextView
+                chapter={shownChapter}
+                range={range}
+                paragraphs={text.data}
+                loading={text.isLoading}
+                onChapter={goChapter}
+                quoted={asking ? { from: asking.para_from, to: asking.para_to } : null}
+                target={target}
+                onAsk={setAsking}
+              />
+            </div>
+            {asking && (
+              <div className="h-[45%] min-h-0 shrink-0 md:h-full md:w-96">
+                <AskMargin
+                  bookId={askable}
+                  chapter={shownChapter}
+                  selection={asking}
+                  owner={isAdmin}
+                  inChapter={(n) => !!text.data?.some((p) => p.para === n)}
+                  onCite={cite}
+                  onClose={() => setAsking(null)}
+                />
+              </div>
+            )}
+          </>
         ) : (
           <Suspense
             fallback={
@@ -152,7 +257,7 @@ export default function BookReader() {
             {readerKind(result.contentType, result.filename) === 'epub' ? (
               <EpubReader url={result.url} title={title} slug={slug} onError={onError} onStatus={setStatus} />
             ) : (
-              <PdfReader url={result.url} title={title} slug={slug} onError={onError} onStatus={setStatus} />
+              <PdfReader url={result.url} title={title} slug={slug} onError={onError} onStatus={setStatus} onPage={onPage} />
             )}
           </Suspense>
         )}
