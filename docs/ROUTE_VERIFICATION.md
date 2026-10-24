@@ -169,9 +169,23 @@ applied. What was run, on branch `feat/finance-restructure`:
 | `/finance/toolkits` | dev server with the toolkit tables mocked; `finance-restructure.spec.ts`; `toolkits.test.tsx` | empty state; after a mocked publish, one card with `xlsx · v1.0 · updated 24 Oct 2026`, its module, `Download driver-tree-v1.0.xlsx`; a v1 download after v2 asks for and receives v1 (stand-in bucket) |
 | `/admin/toolkits` | dev server with auth mocked as admin; `finance-restructure.spec.ts`; `toolkits.test.tsx` | Publish disabled until every field and both attestations; the database's refusal shown when it says no |
 
-Screenshots: `docs/prd/finance-restructure/screenshots/after/`. Still owed once the
-migrations are applied and `toolkit-file` is deployed: the publish-gate refusal on the real
-database, and a real v1 link answering 200 after v2.
+Screenshots: `docs/prd/finance-restructure/screenshots/after/`.
+
+Production, 2026-10-24, after `20261024170000_toolkits` and `20261024170200_fia_slate_status`
+were applied and `toolkit-file` (new) and `book-file` (v2, on `_shared/r2.ts`) deployed:
+
+- `supabase/tests/toolkits.sql` 24/24 and `supabase/tests/fia_slate_status.sql` 8/8 on the
+  production database, rolled back.
+- As a temporary admin, a publish with `verified_model: false` through the Data API:
+  `400 {"code":"23514", ... violates check constraint "toolkits_publish_checks"}`.
+- v1.0 then v2.0 uploaded to R2 through `toolkit-file`; a second upload of 1.0 answered 409
+  `exists`. As anon, the v1.0 link answered `200`, `Content-Disposition: attachment;
+  filename="qa-toolkit-test-v1.0.xlsx"`, body v1.0; the latest answered v2.0.
+- R2 CORS preflight for PUT from `https://dikagustiana.com` and `https://www.dikagustiana.com`: 204.
+- `book-file` v2 answered as v1 did (404 unknown slug, 401 upload as anon, a real book's
+  download 200/206 with the same Content-Disposition).
+- The QA files stay in R2 (`toolkits/qa-toolkit-test/1.0/…`, `…/2.0/…`): no function deletes
+  a toolkit file, by design.
 
 ## Method
 
