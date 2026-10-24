@@ -224,6 +224,13 @@
   h1, h2, h3, h4, h5, h6 {
     @apply font-display font-semibold tracking-tight;
   }
+
+  /* A Finance in Action model page has one typeface (docs/prd/2026-10-fia-fixes
+     item 1): its headings take the sans face, as essay section headings do.
+     Scoped to the viewer; Spectral stays for essay titles elsewhere. */
+  .fia-viewer :is(h1, h2, h3, h4, h5, h6) {
+    @apply font-sans tracking-normal;
+  }
 }
 
 @layer utilities {

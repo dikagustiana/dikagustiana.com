@@ -26,7 +26,7 @@ export const COMPANY_TABS_LABEL = 'Companies in this stage';
 /** Two letters of the ticker, in a square: a mark of the company that is not its logo. */
 function Monogram({ ticker }: { ticker: string }) {
   return (
-    <span aria-hidden="true" className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-border bg-muted font-mono text-[11px] font-semibold text-foreground">
+    <span aria-hidden="true" className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-border bg-muted text-[11px] font-semibold text-foreground">
       {ticker.slice(0, MONOGRAM_LETTERS)}
     </span>
   );
@@ -37,7 +37,7 @@ function Tab({ company: c, current, search }: { company: CompanyEntry; current: 
     <>
       <Monogram ticker={c.ticker} />
       <span className="flex flex-col leading-tight">
-        <span className="font-mono text-sm font-semibold">{c.ticker}</span>
+        <span className="text-sm font-semibold tracking-normal">{c.ticker}</span>
         <StatusMark status={c.status} className="text-[11px]" />
       </span>
       <span className="sr-only">, {c.name}</span>

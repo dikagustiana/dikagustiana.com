@@ -82,7 +82,7 @@ export function Section({ id, title, aside, children }: { id: string; title: str
   return (
     <section aria-labelledby={id} className="mb-12 scroll-mt-24">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-border pb-2">
-        <h2 id={id} className="scroll-mt-24 text-xl font-semibold text-foreground">
+        <h2 id={id} className="scroll-mt-24 font-sans text-xl font-semibold tracking-normal text-foreground">
           {title}
         </h2>
         {aside}
@@ -242,7 +242,7 @@ export function FiaModelPage({ pkg, reg }: { pkg: ModelPackage; reg: Registry })
       ]}
     >
       <SEO title={`${meta.name}: model`} description={`${meta.name}, ${subName}: the operation rebuilt from its filings.`} noindex />
-      <div className="container max-w-7xl px-4 pb-8 pt-1 sm:px-8">
+      <div className="fia-viewer container max-w-7xl px-4 pb-8 pt-1 font-sans sm:px-8">
         <div className="mb-1 space-y-1">
           <StagePills groups={groups} mode="link" currentPosition={meta.chainStage} />
           <CompanyTabs reg={reg} pkg={pkg} />

@@ -68,7 +68,7 @@ export function PeerBand({
                 {m.points.map((p) => (
                   <li key={p.ticker}>
                     <span className={cn('mr-1 inline-block h-3 w-0 border-l-2 align-middle', p.self ? 'border-solid border-foreground' : 'border-dashed border-foreground/70')} />
-                    <span className="font-mono">{p.ticker}</span> {formatForRow(p.value, row)}
+                    <span className="font-semibold">{p.ticker}</span> {formatForRow(p.value, row)}
                   </li>
                 ))}
                 <li className="text-muted-foreground">

@@ -8,7 +8,7 @@ export function WorkpaperRecord({ pkg }: { pkg: ModelPackage }) {
   return (
     <dl className="grid gap-x-6 gap-y-3 text-sm sm:grid-cols-[12rem_minmax(0,1fr)]">
       <dt className="font-medium text-muted-foreground">Model version</dt>
-      <dd className="font-mono text-foreground">{meta.version}</dd>
+      <dd className="tabular-nums text-foreground">{meta.version}</dd>
       <dt className="font-medium text-muted-foreground">Prepared by</dt>
       <dd className="text-foreground">{workpaper.preparedBy ?? 'Not stated'}</dd>
       {workpaper.gates.map((g) => {

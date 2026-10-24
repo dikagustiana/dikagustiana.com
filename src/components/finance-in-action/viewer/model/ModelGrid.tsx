@@ -103,8 +103,8 @@ const STICK_A = 'sticky left-[var(--fia-col-num)] w-[var(--fia-col-a)] min-w-[va
 /** Column B, frozen from a small tablet up. */
 const STICK_B = 'sm:sticky sm:left-[calc(var(--fia-col-num)+var(--fia-col-a))] sm:w-[var(--fia-col-b)] sm:min-w-[var(--fia-col-b)] sm:max-w-[var(--fia-col-b)]';
 const HEAD_TOP = 'sticky top-[var(--fia-letters-h)]';
-const LETTER = 'h-[var(--fia-letters-h)] whitespace-nowrap px-1 text-center font-mono text-[11px] font-normal leading-none';
-const NUMBER = 'px-1 text-center font-mono text-[11px]';
+const LETTER = 'h-[var(--fia-letters-h)] whitespace-nowrap px-1 text-center text-[11px] font-normal leading-none tabular-nums';
+const NUMBER = 'px-1 text-center text-[11px] tabular-nums';
 const ON = 'bg-secondary text-foreground';
 /** A total's rule over its row, drawn inside the cells so the row keeps its height. */
 const TOTAL_RULE = 'shadow-[inset_0_1px_0_hsl(var(--foreground)/0.4)]';
@@ -263,7 +263,7 @@ const ChecksRowView = memo(function ChecksRowView({
                 cell.value !== undefined ? 'justify-end' : 'justify-start',
                 ROW_H,
                 FOCUS,
-                goes && 'font-mono text-accent underline-offset-2 hover:underline',
+                goes && 'tabular-nums text-accent underline-offset-2 hover:underline',
                 col.id === 'status' && check.status === 'differs' && 'font-semibold',
                 selected && 'ring-2 ring-inset ring-ring',
               )}

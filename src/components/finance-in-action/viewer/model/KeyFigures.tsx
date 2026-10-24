@@ -24,7 +24,7 @@ function Card({ figure: f }: { figure: KeyFigure }) {
       </span>
       <span className="flex min-w-0 flex-wrap items-baseline gap-x-1.5 leading-6">
         {f.state === 'ok' ? (
-          <span className="shrink-0 font-display text-lg font-semibold tabular-nums text-foreground">{formatNumber(f.value, f.decimals)}</span>
+          <span className="shrink-0 text-lg font-semibold tabular-nums text-foreground">{formatNumber(f.value, f.decimals)}</span>
         ) : (
           <span className="truncate text-sm font-medium text-foreground">{KEY_FIGURE_WORDS[f.state]}</span>
         )}
