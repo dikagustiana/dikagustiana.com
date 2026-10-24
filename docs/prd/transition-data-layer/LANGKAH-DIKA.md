@@ -5,13 +5,13 @@ akses produksi, key, atau keputusan editorial kamu. Urutan: 1 → 2 → 3 → 4 
 
 ## 1. Migration (Supabase SQL Editor)
 
-1. Buka https://supabase.com/dashboard/project/asypkbkiebjvvpimewfp/sql/new
-2. Jalankan tiga file ini **berurutan**, masing-masing: salin seluruh isi, tempel, **Run**:
-   - `supabase/migrations/20261024120000_transition_data_layer.sql`
-   - `supabase/migrations/20261024120100_transition_data_layer_seed.sql`
-   - `supabase/migrations/20261024120200_transition_macro_assumptions.sql`
+**Status 24 Okt 2026:** bagian 1 (9 tabel, enum, helper, RLS terkunci tanpa policy) sudah
+diterapkan Claude lewat konektor (migration `transition_data_layer_1_tables`). Sisanya tertahan
+karena permintaan konfirmasi konektor tidak sampai ke layar.
 
-   Hasil yang benar: "Success. No rows returned".
+1. Buka https://supabase.com/dashboard/project/asypkbkiebjvvpimewfp/sql/new
+2. Salin **seluruh** isi `docs/prd/transition-data-layer/JALANKAN-INI.sql`, tempel, **Run**.
+   Hasil yang benar: "Success. No rows returned". Satu transaksi: kalau gagal, tidak ada yang berubah.
 3. Uji: salin isi `supabase/tests/transition_data_layer.sql`, Run. Baris terakhir harus
    **"65 passed, 0 failed"**. Semua yang ditulis tes ini dibatalkan (ROLLBACK).
 
