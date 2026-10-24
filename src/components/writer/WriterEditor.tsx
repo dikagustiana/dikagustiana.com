@@ -39,6 +39,7 @@ import { useEssayAutosave, useDraftRecovery } from '@/hooks/useEssayAutosave';
 import { tiptapJsonToHtml } from '@/lib/tiptap/serialize';
 import { resolvePresentation, type EssayPresentation } from '@/lib/presentation';
 import { NEXT_BIG_THING_THEMES } from '@/config/nextBigThingThemes';
+import { FOUNDATIONS_PARTS, FOUNDATIONS_SECTION, foundationsPartName } from '@/config/foundationsOfKnowing';
 
 interface WriterEditorProps {
   section: string;
@@ -71,6 +72,8 @@ const DEFAULT_AUTHOR = 'Dika Gustiana';
 
 const PHASE_OPTIONS: Record<string, { id: string; label: string }[]> = {
   'next-big-thing': [...NEXT_BIG_THING_THEMES],
+  // Foundations of Knowing: the ten parts, named as the category rows are.
+  [FOUNDATIONS_SECTION]: FOUNDATIONS_PARTS.map((p) => ({ id: p.id, label: foundationsPartName(p) })),
   'green-transition': [
     { id: 'where-we-are-now', label: 'Where We Are Now' },
     { id: 'challenges-ahead', label: 'Challenges Ahead' },
@@ -152,9 +155,17 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
   // The Next Big Thing offers only the themes the site lists (nextBigThingThemes.ts): a retired theme's
   // category row (Society, Governance; docs/prd/2026-10-fia-fixes item 13) stays in the database but is
   // not offered, unless it is the essay's own, so an old essay still opens and saves.
+  // Foundations of Knowing offers its ten parts the same way (foundationsOfKnowing.ts): the part picker
+  // is the category select, and nothing outside the ten is offered unless the essay already carries it.
   const categories = useMemo(() => {
-    if (section !== 'next-big-thing') return sectionCategories;
-    const live = new Set(NEXT_BIG_THING_THEMES.map((t) => `next-big-thing-${t.id}`));
+    const liveSlugs =
+      section === 'next-big-thing'
+        ? NEXT_BIG_THING_THEMES.map((t) => `next-big-thing-${t.id}`)
+        : section === FOUNDATIONS_SECTION
+          ? FOUNDATIONS_PARTS.map((p) => `${FOUNDATIONS_SECTION}-${p.id}`)
+          : null;
+    if (!liveSlugs) return sectionCategories;
+    const live = new Set(liveSlugs);
     return sectionCategories.filter((c) => live.has(c.slug) || c.id === categoryId);
   }, [section, sectionCategories, categoryId]);
   const [author, setAuthor] = useState(DEFAULT_AUTHOR);

@@ -98,13 +98,13 @@ export function WriterList({ section }: WriterListProps) {
     'next-big-thing': 'The Next Big Thing',
     'green-transition': 'Green Transition',
     finance: 'Finance',
-    'critical-thinking': 'Critical Thinking',
+    'critical-thinking': 'Foundations of Knowing',
   };
   const sectionPathMap: Record<string, string> = {
     'next-big-thing': '/the-next-big-thing',
     'green-transition': '/green-transition',
     finance: '/finance',
-    'critical-thinking': '/critical-thinking-research',
+    'critical-thinking': '/foundations-of-knowing',
   };
   const sectionLabel = sectionLabelMap[section] || section;
   const sectionPath = sectionPathMap[section] || `/${section}`;

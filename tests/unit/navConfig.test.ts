@@ -23,7 +23,6 @@ import {
   financeItems,
   accountingItems,
   greenTransitionItems,
-  developmentFinanceItems,
   learningItems,
   nextBigThingItems,
 } from '@/config/navConfig';
@@ -58,10 +57,10 @@ const ALL_ITEMS = [
   ...financeItems,
   ...accountingItems,
   ...greenTransitionItems,
-  ...developmentFinanceItems,
   ...learningItems,
   ...nextBigThingItems,
   ...navSections.filter(s => s.path).map(s => ({ label: s.label, path: s.path! })),
+  ...navSections.filter(s => !s.items && s.basePath).map(s => ({ label: s.label, path: s.basePath! })),
 ];
 
 describe('navConfig', () => {
@@ -90,6 +89,13 @@ describe('navConfig', () => {
     const labels = navSections.map(s => s.label);
     expect(labels).toContain('Green Transition');
     expect(labels).not.toContain('The Green Transition');
+  });
+
+  it('puts Foundations of Knowing right of Home, and drops Development Finance (2026-10-24)', () => {
+    const labels = navSections.map(s => s.label);
+    expect(labels.slice(0, 2)).toEqual(['Home', 'Foundations of Knowing']);
+    expect(labels).not.toContain('Development Finance');
+    expect(learningItems.map(i => i.label)).toEqual(['Books', 'IELTS']);
   });
 
   it('has no About door (owner decision D4(a), 2026-10-10)', () => {

@@ -1,4 +1,5 @@
 import { NEXT_BIG_THING_THEMES, nextBigThingThemePath } from './nextBigThingThemes';
+import { FOUNDATIONS_LABEL, FOUNDATIONS_PATH } from './foundationsOfKnowing';
 
 export interface NavItem {
   label: string;
@@ -56,15 +57,11 @@ export const greenTransitionItems: NavItem[] = [
   { label: 'Climate Finance', path: '/green-transition/climate-finance' },
 ];
 
-export const developmentFinanceItems: NavItem[] = [
-  { label: 'Sovereign Wealth Funds', path: '/development-finance/sovereign-wealth-funds' },
-  { label: 'Multilateral Development Banks', path: '/development-finance/multilateral-development-banks' },
-  { label: 'Blended Finance', path: '/development-finance/blended-finance' },
-  { label: 'Indonesia\'s Capital Architecture', path: '/development-finance/indonesia-capital-architecture' },
-];
-
+/**
+ * Critical Thinking left this menu on 2026-10-24: renamed Foundations of
+ * Knowing, it is a door of its own, second in the row (docs/prd/foundations-of-knowing).
+ */
 export const learningItems: NavItem[] = [
-  { label: 'Critical Thinking', path: '/critical-thinking-research' },
   { label: 'Books', path: '/books-academia' },
   { label: 'IELTS', path: '/english-ielts' },
 ];
@@ -85,6 +82,13 @@ export const navSections: NavSection[] = [
    * Home, and removed that from Home on 11 October 2026.
    */
   { label: 'Home', path: '/' },
+  /**
+   * Foundations of Knowing sits right of Home, before the disciplines: the
+   * section argues that the foundations come first. A plain link — the ten
+   * parts are on its page. basePath only, so every page under it marks it
+   * active, in the drawer as on the row.
+   */
+  { label: FOUNDATIONS_LABEL, basePath: FOUNDATIONS_PATH },
   {
     label: 'Accounting',
     basePath: '/accounting',
@@ -107,12 +111,6 @@ export const navSections: NavSection[] = [
     label: 'The Next Big Thing',
     basePath: '/the-next-big-thing',
     items: nextBigThingItems,
-  },
-  {
-    label: 'Development Finance',
-    basePath: '/development-finance',
-    items: developmentFinanceItems,
-    essaySection: 'development-finance',
   },
   {
     label: 'Learning',

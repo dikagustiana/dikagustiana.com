@@ -167,7 +167,7 @@ describe('NavDropdown under a keyboard', () => {
     mount(<NavDropdown label="Learning" items={learningItems} width="w-48" />);
     screen.getByRole('button', { name: 'Learning' }).focus();
     await user.keyboard('{Enter}');
-    expect(item('Critical Thinking')).toHaveFocus();
+    expect(item('Books')).toHaveFocus();
   });
 
   it('keeps Escape: closes and returns focus to the chevron', async () => {

@@ -92,11 +92,6 @@ export function essayUrl(essay: EssayUrlInput): string | null {
       return `/green-transition/${p}/${slug}`;
     }
 
-    case 'development-finance':
-      return phase
-        ? `/development-finance/${phase}/${slug}`
-        : universalEssayUrl(slug);
-
     case 'next-big-thing':
       // Three segments, like every other placed section: the theme (the
       // category, with the section prefix stripped — 'technology', 'economy',
@@ -113,8 +108,11 @@ export function essayUrl(essay: EssayUrlInput): string | null {
 
     case 'critical-thinking':
     case 'critical-thinking-research':
-      // Route is /critical-thinking-research/:phase/:essayId
-      return `/critical-thinking-research/${phase || 'clarify'}/${slug}`;
+      // Foundations of Knowing: the slug stayed, the address moved
+      // (/critical-thinking-research/* redirects). The part, cached as
+      // `phase`, is the second segment; an essay with no part has no part
+      // page to sit under, so it takes the universal route.
+      return phase ? `/foundations-of-knowing/${phase}/${slug}` : universalEssayUrl(slug);
 
     case 'accounting': {
       // Accounting essays resolve to their FSLI or consolidation page rather

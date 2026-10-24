@@ -10,13 +10,14 @@ import { NEXT_BIG_THING_THEMES } from '@/config/nextBigThingThemes';
 describe('derivePhase', () => {
   it('strips the section prefix from a category slug', () => {
     expect(derivePhase('green-transition', 'green-transition-where-we-are-now')).toBe('where-we-are-now');
-    expect(derivePhase('critical-thinking', 'critical-thinking-clarify')).toBe('clarify');
+    expect(derivePhase('critical-thinking', 'critical-thinking-before-we-go-far')).toBe('before-we-go-far');
   });
   it('maps the live next-big-thing category slugs to the theme ids the reader filters on', () => {
     // Written out, not derived: these are the category rows in the database the site offers. Society and
     // Governance still have rows, retired on 2026-10-24 (nextBigThingThemes.ts), and still derive.
     for (const retired of ['society', 'governance']) expect(derivePhase('next-big-thing', `next-big-thing-${retired}`)).toBe(retired);
-    const themes = ['technology', 'economy', 'environment', 'growth'];
+    // development-finance: the former section, a theme since 2026-10-24 (migration 20261024185538).
+    const themes = ['technology', 'economy', 'environment', 'growth', 'development-finance'];
     for (const theme of themes) {
       expect(derivePhase('next-big-thing', `next-big-thing-${theme}`)).toBe(theme);
     }
@@ -129,16 +130,14 @@ describe('buildCanonicalUrl — placement maps to the real public route', () => 
     ).toBe('/green-transition/future/g');
   });
 
-  it('development-finance includes the phase segment (was previously dropped)', () => {
+  it('critical-thinking → /foundations-of-knowing/:part/:slug', () => {
     expect(
-      buildCanonicalUrl({ sectionSlug: 'development-finance', slug: 'swf', categorySlug: 'sovereign-wealth-funds' }),
-    ).toBe('/development-finance/sovereign-wealth-funds/swf');
+      buildCanonicalUrl({ sectionSlug: 'critical-thinking', slug: 'c', categorySlug: 'critical-thinking-evidence-and-sources' }),
+    ).toBe('/foundations-of-knowing/evidence-and-sources/c');
   });
 
-  it('critical-thinking → /critical-thinking-research/:phase/:slug', () => {
-    expect(
-      buildCanonicalUrl({ sectionSlug: 'critical-thinking', slug: 'c', categorySlug: 'critical-thinking-analyze' }),
-    ).toBe('/critical-thinking-research/analyze/c');
+  it('critical-thinking with no part → the universal route (agrees with essayUrl)', () => {
+    expect(buildCanonicalUrl({ sectionSlug: 'critical-thinking', slug: 'c' })).toBe('/essays/c');
   });
 
   it('next-big-thing with a category → /the-next-big-thing/:theme/:slug (agrees with essayUrl)', () => {
@@ -165,6 +164,6 @@ describe('the retired Next Big Thing themes (docs/prd/2026-10-fia-fixes item 13)
     const ids = NEXT_BIG_THING_THEMES.map((t) => t.id as string);
     expect(ids).not.toContain('society');
     expect(ids).not.toContain('governance');
-    expect(ids).toEqual(['technology', 'economy', 'environment', 'growth']);
+    expect(ids).toEqual(['technology', 'economy', 'environment', 'growth', 'development-finance']);
   });
 });

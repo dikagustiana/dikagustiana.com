@@ -8,8 +8,8 @@ import {
   greenTransitionItems,
   learningItems,
   nextBigThingItems,
-  developmentFinanceItems,
 } from '@/config/navConfig';
+import { FOUNDATIONS_LABEL, FOUNDATIONS_PATH } from '@/config/foundationsOfKnowing';
 import { useNavSectionCollapsed } from '@/hooks/useNavSectionCollapsed';
 
 export function MainNav() {
@@ -47,6 +47,9 @@ export function MainNav() {
       >
         Home
       </Link>
+
+      {/* Right of Home, before the disciplines (navConfig). */}
+      {sectionLink(FOUNDATIONS_LABEL, FOUNDATIONS_PATH)}
 
       {isAdmin && (
         <Link
@@ -89,20 +92,9 @@ export function MainNav() {
       <NavDropdown
         label="The Next Big Thing"
         items={nextBigThingItems}
-        width="w-44"
+        width="w-52"
         basePath="/the-next-big-thing"
       />
-
-      {isCollapsed({ essaySection: 'development-finance' }) ? (
-        sectionLink('Development Finance', '/development-finance')
-      ) : (
-        <NavDropdown
-          label="Development Finance"
-          items={developmentFinanceItems}
-          width="w-72"
-          basePath="/development-finance"
-        />
-      )}
 
       <NavDropdown label="Learning" items={learningItems} width="w-48" align="end" />
 

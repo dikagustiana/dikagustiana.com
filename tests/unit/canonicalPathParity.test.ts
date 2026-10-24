@@ -51,11 +51,6 @@ describe('canonicalPath ≡ essayUrl (non-accounting sections)', () => {
       .toBe('/green-transition/now/my-essay');
   });
 
-  it('development-finance: phase and no phase', () => {
-    expectParity({ section: 'development-finance', phase: 'sovereign-wealth-funds' });
-    expectParity({ section: 'development-finance', phase: null });
-  });
-
   it('next-big-thing: theme and the two-segment resolver shape', () => {
     expectParity({ section: 'next-big-thing', phase: 'economy' });
     expectParity({ section: 'next-big-thing', phase: null });
@@ -63,9 +58,12 @@ describe('canonicalPath ≡ essayUrl (non-accounting sections)', () => {
       .toBe('/the-next-big-thing/my-essay');
   });
 
-  it('critical-thinking: phase defaults to clarify on both sides', () => {
-    expectParity({ section: 'critical-thinking', phase: 'clarify' });
+  it('critical-thinking: the part is the second segment; no part, the universal route', () => {
+    expectParity({ section: 'critical-thinking', phase: 'knowing' });
+    expectParity({ section: 'critical-thinking', phase: null });
     expectParity({ section: 'critical-thinking-research', phase: null });
+    expect(canonicalPath(row({ section: 'critical-thinking', phase: 'knowing' })))
+      .toBe('/foundations-of-knowing/knowing/my-essay');
   });
 
   it('unknown section: universal route on both sides', () => {

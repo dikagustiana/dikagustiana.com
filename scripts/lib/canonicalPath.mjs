@@ -36,8 +36,6 @@ export function canonicalPath(row) {
       const short = { 'where-we-are-now': 'now', 'challenges-ahead': 'gaps', 'pathways-forward': 'future' };
       return row.phase ? `/green-transition/${short[row.phase] ?? row.phase}/${row.slug}` : `/essays/${row.slug}`;
     }
-    case 'development-finance':
-      return row.phase ? `/development-finance/${row.phase}/${row.slug}` : `/essays/${row.slug}`;
     case 'next-big-thing':
       // Theme (the category, cached as phase) is the third segment; a
       // theme-less essay keeps the two-segment resolver shape, which renders
@@ -45,7 +43,8 @@ export function canonicalPath(row) {
       return row.phase ? `/the-next-big-thing/${row.phase}/${row.slug}` : `/the-next-big-thing/${row.slug}`;
     case 'critical-thinking':
     case 'critical-thinking-research':
-      return `/critical-thinking-research/${row.phase || 'clarify'}/${row.slug}`;
+      // Foundations of Knowing; mirrors essayUrl's critical-thinking branch.
+      return row.phase ? `/foundations-of-knowing/${row.phase}/${row.slug}` : `/essays/${row.slug}`;
     case 'accounting':
       // One exception: an essay of the consolidation series sits on a topic
       // of its own (topic = its slug), so /accounting/consolidation/<slug>

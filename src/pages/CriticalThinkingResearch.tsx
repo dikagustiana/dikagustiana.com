@@ -2,36 +2,27 @@ import { Link } from 'react-router-dom';
 import { PageLayout } from '@/components/layouts/PageLayout';
 import { PAGE_COLUMN } from '@/components/layouts/pageColumn';
 import { SEO } from '@/components/SEO';
-import { useSectionPhaseCounts } from '@/hooks/queries/useSectionPhaseCounts';
-import { sectionStanding } from '@/lib/sectionStanding';
+import { ErrorState, LoadingState } from '@/components/states';
+import { CURRICULUM_CONTRACT } from '@/data/curriculumContract';
+import { countByPart, useFoundationsEssays } from '@/hooks/queries/useFoundationsEssays';
+import {
+  FOUNDATIONS_LABEL,
+  FOUNDATIONS_PARTS,
+  foundationsPartPath,
+} from '@/config/foundationsOfKnowing';
 
-// The order is the order of work, so it is kept; it is not numbered, because
-// the rows are pages to visit, not steps on this page.
-const phases = [
-  {
-    id: 'clarify',
-    title: 'Clarify',
-    description: 'What exactly is the problem? What are you assuming? What do you actually know vs. believe?',
-  },
-  {
-    id: 'analyze',
-    title: 'Analyze',
-    description: 'What evidence exists? Who produced it? What are their incentives? What contradicts your hypothesis?',
-  },
-  {
-    id: 'construct',
-    title: 'Construct',
-    description: 'What argument can you build? What are the weakest points? What would change your mind?',
-  },
-  {
-    id: 'apply',
-    title: 'Apply',
-    description: 'What action follows from your conclusion? What will you measure? When will you know if you were wrong?',
-  },
-];
-
+/**
+ * Foundations of Knowing — the section page (/foundations-of-knowing): the map
+ * of the ten parts. The file keeps its Critical Thinking name: the section's
+ * slug is still `critical-thinking`, and only its display name moved. Each row links to its part and
+ * says how much of it is written, counted over every planned essay (drafts
+ * included), the way a Finance track counts its modules.
+ */
 export default function CriticalThinkingResearch() {
-  const { data: counts, isSuccess: countsLoaded } = useSectionPhaseCounts();
+  const { data: essays, isLoading, isError, refetch } = useFoundationsEssays();
+  const counts = countByPart(essays);
+  const total = essays?.length ?? 0;
+  const published = essays?.filter((e) => e.published).length ?? 0;
 
   return (
     <PageLayout
@@ -39,41 +30,54 @@ export default function CriticalThinkingResearch() {
       width="reading"
       breadcrumbs={[
         { label: 'Home', path: '/' },
-        { label: 'Critical Thinking' }
+        { label: FOUNDATIONS_LABEL },
       ]}
     >
       <SEO
-        title="Critical Thinking"
-        description="Four phases of working through a question: Clarify, Analyze, Construct, Apply."
+        title={FOUNDATIONS_LABEL}
+        description="Ten parts, from what it means to know something to strategic finance as applied judgment."
       />
 
       <div className={`${PAGE_COLUMN.reading} py-8`}>
-        <div>
-          <h1 className="text-3xl md:text-4xl font-display font-bold mb-8">
-            Critical Thinking
-          </h1>
+        <h1 className="text-3xl md:text-4xl font-display font-bold mb-4">{FOUNDATIONS_LABEL}</h1>
+        <p className="mb-8 text-sm text-muted-foreground">
+          {total > 0 ? `${published} of ${total} essays published. ` : ''}
+          {CURRICULUM_CONTRACT.standfirst}
+        </p>
 
-          <ul className="divide-y divide-border border-y border-border">
-            {phases.map((phase) => (
-              <li key={phase.id}>
-                <Link
-                  to={`/critical-thinking-research/${phase.id}`}
-                  className="group flex flex-col gap-1 py-5 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4"
-                >
-                  <span>
-                    <span className="block text-lg font-display font-semibold text-foreground group-hover:text-accent transition-colors">
-                      {phase.title}
+        {isLoading ? (
+          <LoadingState />
+        ) : isError ? (
+          <ErrorState
+            title="Couldn't load the parts"
+            message="The essays could not be fetched just now. This is a temporary failure, not an empty section."
+            onRetry={() => refetch()}
+          />
+        ) : (
+          <ol className="divide-y divide-border border-y border-border">
+            {FOUNDATIONS_PARTS.map((part) => {
+              const c = counts[part.id] ?? { total: 0, published: 0 };
+              return (
+                <li key={part.id}>
+                  <Link
+                    to={foundationsPartPath(part.id)}
+                    className="group grid grid-cols-[4.5rem_1fr] items-baseline gap-x-3 gap-y-1 py-5 sm:grid-cols-[4.5rem_1fr_auto] sm:gap-4"
+                  >
+                    <span className="text-xs font-mono uppercase tracking-wide text-muted-foreground tabular-nums">
+                      Part {part.number}
                     </span>
-                    <span className="mt-1 block text-sm text-muted-foreground">{phase.description}</span>
-                  </span>
-                  <span className="shrink-0 text-xs font-mono text-muted-foreground sm:text-right">
-                    {sectionStanding(countsLoaded, counts?.['critical-thinking']?.[phase.id])}
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
+                    <span className="text-lg font-display font-semibold text-foreground group-hover:text-accent transition-colors">
+                      {part.label}
+                    </span>
+                    <span className="col-start-2 text-xs font-mono text-muted-foreground tabular-nums sm:col-start-auto sm:text-right">
+                      {c.total > 0 ? `${c.published} of ${c.total} published` : 'Nothing planned yet'}
+                    </span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ol>
+        )}
       </div>
     </PageLayout>
   );

@@ -1,5 +1,11 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "redirects": [
+    { "source": "/critical-thinking-research", "destination": "/foundations-of-knowing", "statusCode": 301 },
+    { "source": "/critical-thinking-research/:path*", "destination": "/foundations-of-knowing/:path*", "statusCode": 301 },
+    { "source": "/development-finance", "destination": "/the-next-big-thing?theme=development-finance", "statusCode": 301 },
+    { "source": "/development-finance/:path*", "destination": "/the-next-big-thing?theme=development-finance", "statusCode": 301 }
+  ],
   "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }],
   "headers": [
     {

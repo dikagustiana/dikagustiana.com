@@ -39,9 +39,8 @@ what an editor must set so that clicking a leaf opens the right essay.
 | **Accounting → FSLI** | `/accounting/fsli/:slug` (leaf), essays under it | `fsli_slug` = `fsli_pages.slug` | `essays.eq(fsli_slug, slug)` |
 | **Accounting → Consolidation** | `/accounting/consolidation/:topic` | `section='accounting'`, `topic` (enum slug) | `essays.eq(section,'accounting').eq(topic, …)` |
 | **Green Transition** | `/green-transition/:phase/:slug` | `section='green-transition'`, `phase` (full DB value e.g. `where-we-are-now`), optional `category_id` | phase page filters by `phase`; essay by global `slug` |
-| **Development Finance** | `/development-finance/:phase/:slug` | `section='development-finance'`, `phase` (matches URL slug) | `essays.eq(section).eq(phase)` |
-| **Critical Thinking** | `/critical-thinking-research/:phase/:essayId` | `section='critical-thinking'`, `phase` ∈ {clarify,analyze,construct,apply}, `slug` | `:essayId` is actually the **slug** |
-| **The Next Big Thing** | `/the-next-big-thing/:slug` | `section='next-big-thing'`, `phase` (topic), optional `category_id` | feed by `section` + topic(`phase`); essay by `slug` |
+| **Foundations of Knowing** (was Critical Thinking; 2026-10-24) | `/foundations-of-knowing/:part/:slug` (old `/critical-thinking-research/*` → 301) | `section='critical-thinking'` (slug unchanged), `phase` = one of the ten part ids in `src/config/foundationsOfKnowing.ts`, set by the category `critical-thinking-<part>` | section and part pages read `essay_structure` (drafts listed, inert); essay by global `slug` |
+| **The Next Big Thing** (Development Finance is its theme `development-finance` since 2026-10-24; `/development-finance/*` → 301 to `?theme=development-finance`) | `/the-next-big-thing/:slug` | `section='next-big-thing'`, `phase` (topic), optional `category_id` | feed by `section` + topic(`phase`); essay by `slug` |
 | **Books** | `/books/:category/:bookId/read` | `books_uploads.category`, file metadata | `books_uploads.eq(category)` / `.eq(id)` |
 
 **Every section also resolves the leaf essay by a globally-unique `essays.slug`.** `slug` is

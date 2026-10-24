@@ -11,6 +11,7 @@ import { lazy, Suspense } from "react";
 import { LoadingState } from "@/components/states";
 import { Analytics } from "@vercel/analytics/react";
 import { RETIRED_ESSAY_REDIRECTS } from "@/config/retiredEssaySlugs";
+import { nextBigThingThemePath } from "@/config/nextBigThingThemes";
 
 // Pages — lazy-loaded so each route ships its own chunk and heavy libraries
 // (editor, charts, math) only download when a route that needs them is visited.
@@ -18,9 +19,6 @@ const Index = lazy(() => import("./pages/Index"));
 const Auth = lazy(() => import("./pages/Auth"));
 const Accounting = lazy(() => import("./pages/Accounting"));
 const NotFound = lazy(() => import("./pages/NotFound"));
-const DevelopmentFinance = lazy(() => import("./pages/DevelopmentFinance"));
-const DevelopmentFinancePhase = lazy(() => import("./pages/DevelopmentFinancePhase"));
-const DevelopmentFinanceEssayPage = lazy(() => import("./pages/DevelopmentFinanceEssayPage"));
 const ClimateFinance = lazy(() => import("./pages/ClimateFinance"));
 
 // FSLI
@@ -42,10 +40,12 @@ const GreenTransitionTracker = lazy(() => import("./pages/GreenTransitionTracker
 const GreenTransitionCurrentCondition = lazy(() => import("./pages/GreenTransitionCurrentCondition"));
 const TransitionChartDetail = lazy(() => import("./pages/TransitionChartDetail"));
 
-// Learning
+// Foundations of Knowing (the critical-thinking section; the files keep its slug's name)
 const CriticalThinkingResearch = lazy(() => import("./pages/CriticalThinkingResearch"));
 const CriticalThinkingPhase = lazy(() => import("./pages/CriticalThinkingPhase"));
 const CriticalThinkingEssay = lazy(() => import("./pages/CriticalThinkingEssay"));
+
+// Learning
 const BooksAcademia = lazy(() => import("./pages/BooksAcademia"));
 const BookReader = lazy(() => import("./pages/BookReader"));
 const BooksCategoryRedirect = lazy(() => import("./pages/BookRedirects").then((m) => ({ default: m.BooksCategoryRedirect })));
@@ -163,6 +163,18 @@ const TransitionChartRedirect = () => {
   return <Navigate to={slug ? `/green-transition/tracker/chart/${slug}` : '/green-transition/tracker'} replace />;
 };
 
+// Critical Thinking became Foundations of Knowing (docs/prd/foundations-of-knowing):
+// the old address keeps its segments under the new root. A retired phase
+// (clarify, analyze, …) then lands on the section page, which the part page
+// does for any part it does not know.
+const CriticalThinkingLegacyRedirect = () => {
+  const { phase, essayId } = useParams();
+  const to = ['/foundations-of-knowing', phase, essayId].filter(Boolean).join('/');
+  return <Navigate to={to} replace />;
+};
+
+const DEVELOPMENT_FINANCE_THEME_PATH = nextBigThingThemePath('development-finance');
+
 const RouteFallback = () => (
   <div className="flex items-center justify-center min-h-screen">
     <LoadingState />
@@ -256,21 +268,30 @@ const App = () => (
             <Route path="/green-transition/:phase" element={<GreenTransitionPhase />} />
             <Route path="/green-transition/:phase/:slug" element={<GreenTransitionEssayPage />} />
 
-            {/* Development Finance */}
-            <Route path="/development-finance" element={<DevelopmentFinance />} />
-            <Route path="/development-finance/:phase" element={<DevelopmentFinancePhase />} />
-            <Route path="/development-finance/:phase/:slug" element={<DevelopmentFinanceEssayPage />} />
+            {/* Development Finance is a theme of The Next Big Thing now
+                (docs/prd/foundations-of-knowing). Every old address lands on
+                that theme. vercel.json answers these with a 301 before the app
+                loads; these routes are the same rule for in-app navigation and
+                for any host that does not read vercel.json. */}
+            <Route path="/development-finance" element={<Navigate to={DEVELOPMENT_FINANCE_THEME_PATH} replace />} />
+            <Route path="/development-finance/:phase" element={<Navigate to={DEVELOPMENT_FINANCE_THEME_PATH} replace />} />
+            <Route path="/development-finance/:phase/:slug" element={<Navigate to={DEVELOPMENT_FINANCE_THEME_PATH} replace />} />
 
             {/* Legacy Masyarakat Baru routes */}
-            <Route path="/masyarakat-baru" element={<Navigate to="/critical-thinking-research" replace />} />
+            <Route path="/masyarakat-baru" element={<Navigate to="/foundations-of-knowing" replace />} />
             <Route path="/masyarakat-baru/english-ielts" element={<Navigate to="/english-ielts" replace />} />
             <Route path="/masyarakat-baru/books-academia" element={<Navigate to="/books-academia" replace />} />
-            <Route path="/masyarakat-baru/critical-thinking-research" element={<Navigate to="/critical-thinking-research" replace />} />
+            <Route path="/masyarakat-baru/critical-thinking-research" element={<Navigate to="/foundations-of-knowing" replace />} />
 
-            {/* Critical Thinking */}
-            <Route path="/critical-thinking-research" element={<CriticalThinkingResearch />} />
-            <Route path="/critical-thinking-research/:phase" element={<CriticalThinkingPhase />} />
-            <Route path="/critical-thinking-research/:phase/:essayId" element={<CriticalThinkingEssay />} />
+            {/* Foundations of Knowing (section slug: critical-thinking) */}
+            <Route path="/foundations-of-knowing" element={<CriticalThinkingResearch />} />
+            <Route path="/foundations-of-knowing/:part" element={<CriticalThinkingPhase />} />
+            <Route path="/foundations-of-knowing/:phase/:essayId" element={<CriticalThinkingEssay />} />
+            {/* The old address, segment for segment. 301 in vercel.json; these
+                are the in-app fallback, as above. */}
+            <Route path="/critical-thinking-research" element={<Navigate to="/foundations-of-knowing" replace />} />
+            <Route path="/critical-thinking-research/:phase" element={<CriticalThinkingLegacyRedirect />} />
+            <Route path="/critical-thinking-research/:phase/:essayId" element={<CriticalThinkingLegacyRedirect />} />
 
             {/* Books */}
             <Route path="/books-academia" element={<BooksAcademia />} />
