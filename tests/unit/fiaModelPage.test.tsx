@@ -8,13 +8,13 @@ import userEvent from '@testing-library/user-event';
 import { makeQueryResult } from './helpers/renderWithProviders';
 import { renderFiaPage } from './helpers/renderFiaPage';
 
-const { fromMock } = vi.hoisted(() => ({ fromMock: vi.fn() }));
+const { fromMock, sessionRef } = vi.hoisted(() => ({ fromMock: vi.fn(), sessionRef: { current: null as unknown } }));
 vi.mock('@/integrations/supabase/client', () => ({
   supabase: {
     from: (...a: unknown[]) => fromMock(...a),
     auth: {
       onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
-      getSession: async () => ({ data: { session: null } }),
+      getSession: async () => ({ data: { session: sessionRef.current } }),
       signOut: async () => ({ error: null }),
     },
   },
@@ -31,9 +31,16 @@ const at = (ticker: string, query = '') =>
   renderFiaPage(<FiaModelRoute />, { path: '/finance/finance-in-action/:modelSlug', url: `/finance/finance-in-action/${ticker}${query}` });
 
 beforeEach(() => {
+  sessionRef.current = null;
   fromMock.mockReset();
   fromMock.mockImplementation(() => makeQueryResult(null));
 });
+
+/** Signed in as an admin: a session, and user_roles answering "admin" (AuthContext's own check). */
+function asAdmin() {
+  sessionRef.current = { access_token: 't', user: { id: 'admin-user' } };
+  fromMock.mockImplementation((table: string) => makeQueryResult(table === 'user_roles' ? { role: 'admin' } : null));
+}
 
 describe('the model page header', () => {
   it('names the company and ticker, its sub-industry, pair, quarters and status', async () => {
@@ -193,9 +200,19 @@ describe('The model grid and the inspector', () => {
     expect(screen.getByRole('button', { name: /^Realised price per tonne, Q2 24/ })).toHaveFocus();
   });
 
-  it('records the workpaper, keeping a pass with an escalation apart', async () => {
+  it('shows a reader no workpaper record, nor its anchor (item 8)', async () => {
+    at('xcoa');
+    await screen.findByRole('heading', { level: 2, name: COPY.howItMakesMoney });
+    expect(screen.queryByText(COPY.workpaper)).toBeNull();
+    expect(document.querySelector('a[href="#fia-workpaper"]')).toBeNull();
+    expect(document.body).not.toHaveTextContent('XCOA-2025Q4-r1-SYNTHETIC');
+  });
+
+  it('records the workpaper for an admin, keeping a pass with an escalation apart', async () => {
+    asAdmin();
     at('xcoa');
     const section = (await screen.findByRole('heading', { level: 2, name: COPY.workpaper })).closest('section')!;
+    expect(document.querySelector('a[href="#fia-workpaper"]')).not.toBeNull();
     expect(section).toHaveTextContent('XCOA-2025Q4-r1-SYNTHETIC');
     expect(section).toHaveTextContent('Passed with an open escalation');
     expect(section).toHaveTextContent('Owner (SYNTHETIC), 2026-01-15');

@@ -22,6 +22,8 @@ import { ConditionPanel } from '@/components/finance-in-action/viewer/model/Cond
 import { CellLegend, ModelGrid, type GridPlace } from '@/components/finance-in-action/viewer/model/ModelGrid';
 import { Inspector } from '@/components/finance-in-action/viewer/model/Inspector';
 import { WorkpaperRecord } from '@/components/finance-in-action/viewer/model/WorkpaperRecord';
+import { AdminOnly } from '@/components/auth/AdminOnly';
+import { useAuth } from '@/contexts/AuthContext';
 import { DownloadButton } from '@/components/finance-in-action/viewer/model/DownloadButton';
 import { PeriodSelect } from '@/components/finance-in-action/viewer/model/PeriodSelect';
 import { UnitEconomics } from '@/components/finance-in-action/viewer/model/UnitEconomics';
@@ -99,6 +101,7 @@ export function FiaModelPage({ pkg, reg }: { pkg: ModelPackage; reg: Registry })
   const lens = params.get(MODEL_PARAM.lens) === 'on';
   const view = useModelView(pkg, lens);
   const rates = useFxRates();
+  const { isAdmin, isLoading: authLoading } = useAuth();
   const setLens = (on: boolean) => {
     const next = new URLSearchParams(params);
     if (on) next.set(MODEL_PARAM.lens, 'on');
@@ -228,7 +231,8 @@ export function FiaModelPage({ pkg, reg }: { pkg: ModelPackage; reg: Registry })
     { id: 'fia-cost-flow', title: COPY.sankeyTitle(sub?.unitNoun ?? pkg.unitEconomics.unit) },
     { id: 'fia-along-chain', title: COPY.alongChainTitle },
     { id: 'fia-why', title: COPY.whyThisLinkMatters },
-    { id: 'fia-workpaper', title: COPY.workpaper },
+    // The workpaper record is written for the builder: an admin sees it, and its anchor (item 8).
+    ...(isAdmin && !authLoading ? [{ id: 'fia-workpaper', title: COPY.workpaper }] : []),
   ];
   const title = (id: string) => sections.find((x) => x.id === id)!.title;
 
@@ -405,9 +409,11 @@ export function FiaModelPage({ pkg, reg }: { pkg: ModelPackage; reg: Registry })
           <ConditionPanel pkg={pkg} subIndustry={sub} />
         </Section>
 
-        <Section id="fia-workpaper" title={title('fia-workpaper')}>
-          <WorkpaperRecord pkg={pkg} />
-        </Section>
+        <AdminOnly>
+          <Section id="fia-workpaper" title={COPY.workpaper}>
+            <WorkpaperRecord pkg={pkg} />
+          </Section>
+        </AdminOnly>
       </div>
     </PageLayout>
   );

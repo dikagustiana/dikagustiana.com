@@ -120,7 +120,6 @@ describe('the page order (R3)', () => {
       '#fia-cost-flow',
       '#fia-along-chain',
       '#fia-why',
-      '#fia-workpaper',
     ]);
     let last: Node = card;
     for (const a of anchors) {
