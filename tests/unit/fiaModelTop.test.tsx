@@ -68,7 +68,8 @@ describe('the company tabs (sheet-first PRD R1.2, K5)', () => {
     const rail = companyRail(reg, pkg('SCEM'));
     expect(tickers).toEqual([...rail.sameSubIndustry, ...rail.restOfStage].map((c) => c.ticker));
     expect(tickers.slice(0, 2)).toEqual(['SCEM', 'XCEM']);
-    expect(tickers.slice(2).sort()).toEqual(['INTP', 'SMGR']);
+    // B121's two, then the factory's planned steelmakers (B144) and basic chemical makers (B111).
+    expect(tickers.slice(2).sort()).toEqual(['ESSA', 'GDST', 'INTP', 'KRAS', 'SMGR', 'TPIA']);
     expect(within(nav).getByRole('list', { name: reg.subIndustry(pkg('SCEM').meta.subIndustry)!.name })).toBeInTheDocument();
     expect(within(nav).getByRole('list', { name: COPY.elsewhereInStage })).toBeInTheDocument();
   });
@@ -83,7 +84,7 @@ describe('the company tabs (sheet-first PRD R1.2, K5)', () => {
     expect(within(nav).getByRole('link', { name: /XCEM/ })).toHaveAccessibleName(/Example Cement Co/);
     expect(within(nav).queryByRole('link', { name: /INTP/ })).toBeNull();
     // Status as a glyph plus a word.
-    expect(within(nav).getAllByText('Not started')).toHaveLength(2);
+    expect(within(nav).getAllByText('Not started')).toHaveLength(6);
   });
 
   it('keep Connections on from one company to the next', async () => {

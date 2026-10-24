@@ -279,6 +279,16 @@ describe('the package rules beyond the schema', () => {
     expect(CHAIN_POSITION_IDS).toEqual(expect.arrayContaining(['band-energy', 'band-logistics']));
   });
 
+  it('accept the distributor and modern trade nodes as a chain position (FIA factory v1, X5), and no other node', () => {
+    expect(CHAIN_POSITION_IDS).toEqual(expect.arrayContaining(['node-distributor', 'node-retail-modern']));
+    expect(CHAIN_POSITION_IDS.filter((id) => id.startsWith('node-'))).toEqual(['node-distributor', 'node-retail-modern']);
+    const pkg = clone(byTicker.XCOA);
+    pkg.meta.chainStage = 'node-retail-modern';
+    expect(validatePackage(pkg).map((i) => i.message).join()).not.toMatch(/chain map stage/);
+    pkg.meta.chainStage = 'node-wholesaler';
+    expect(validatePackage(pkg).map((i) => i.message).join()).toMatch(/not a chain map stage/);
+  });
+
   it('reject a row with the wrong number of cells, and an unresolved row reference', () => {
     const pkg = clone(byTicker.XCOA);
     pkg.sheets[0].rows[0].cells.pop();
@@ -312,8 +322,20 @@ describe('the package rules beyond the schema', () => {
 });
 
 describe('the slate', () => {
-  it('lists PTBA, ITMG, INDY, ADRO, INTP, SMGR, BREN and PGEO (D-M5, chain view) as not started, with no figures at all', () => {
-    expect(slate.companies.map((c) => c.ticker)).toEqual(['PTBA', 'ITMG', 'INDY', 'ADRO', 'INTP', 'SMGR', 'BREN', 'PGEO']);
+  it('lists PTBA, ITMG, INDY, ADRO, INTP, SMGR, BREN and PGEO (D-M5, chain view), then the FIA factory’s 32 (spec v1, A1), as not started, with no figures at all', () => {
+    expect(slate.companies.slice(0, 8).map((c) => c.ticker)).toEqual(['PTBA', 'ITMG', 'INDY', 'ADRO', 'INTP', 'SMGR', 'BREN', 'PGEO']);
+    const factory = slate.companies.slice(8);
+    expect(factory).toHaveLength(32);
+    // Two per sub-industry, sixteen sub-industries, each listed by the section.
+    const bySub = new Map<string, string[]>();
+    for (const c of factory) bySub.set(c.subIndustry, [...(bySub.get(c.subIndustry) ?? []), c.ticker]);
+    expect(bySub.size).toBe(16);
+    for (const [code, tickers] of bySub) {
+      expect(tickers, code).toHaveLength(2);
+      expect(subIndustries.some((s) => s.code === code), code).toBe(true);
+    }
+    expect(bySub.get('D113')).toEqual(['AMRT', 'MPPA']);
+    expect(new Set(slate.companies.map((c) => c.ticker)).size).toBe(slate.companies.length);
     for (const c of slate.companies) {
       expect(c.status).toBe('not_started');
       expect(Object.keys(c).sort()).toEqual(['conditionIds', 'depth', 'name', 'status', 'subIndustry', 'ticker']);

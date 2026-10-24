@@ -26,7 +26,7 @@ import { linksFrom, linksTo, placeLinks } from '@/lib/finance-in-action/links';
 import type { IndustryLink } from '@/lib/finance-in-action/contract/links';
 import type { Registry } from '@/lib/finance-in-action/registry';
 import { COPY } from '@/lib/finance-in-action/copy';
-import { chainMapHref, positionAnchor, subIndustryAnchor } from '@/lib/finance-in-action/chain';
+import { chainMapHref, positionAnchor, subIndustryAnchor, type ChainPosition } from '@/lib/finance-in-action/chain';
 import { conditionsUsed } from '@/lib/finance-in-action/conditions';
 import { groupAlongChain, type CompanyEntry, type PositionGroup } from '@/lib/finance-in-action/registry';
 import type { RegistryHook } from '@/lib/finance-in-action/registryState';
@@ -66,12 +66,13 @@ export function FiaIndex({ useRegistry }: { useRegistry: RegistryHook }) {
     [reg, query, condition],
   );
   const conditions = useMemo(() => conditionsUsed(reg.companies.map((c) => c.conditionIds)), [reg]);
-  const stages = all.filter((g) => g.position.kind === 'stage');
+  // The stages and the distribution and retail nodes share the strip's columns; the layers run under them.
+  const stages = all.filter((g) => g.position.kind !== 'layer');
   const drawn = useMemo(() => placeLinks(reg, stages.map((g) => g.position.id)), [reg, stages]);
   const openLink = (id: string) => update({ [PARAM.lens]: 'on', [PARAM.link]: id });
   const layers = all.filter((g) => g.position.kind === 'layer');
-  // Every stage and layer has a section, so every stage pill has somewhere to go.
-  const sections = filtered;
+  // Every stage, node and layer has a section, so every stage pill has somewhere to go.
+  const sections = useMemo(() => groupSections(filtered), [filtered]);
   const anySynthetic = reg.companies.some((c) => c.synthetic);
   const filtering = query.trim() !== '' || condition !== ALL;
 
@@ -143,13 +144,36 @@ export function FiaIndex({ useRegistry }: { useRegistry: RegistryHook }) {
         </section>
 
         <div className="space-y-10">
-          {sections.map((g) => (
-            <PositionSection key={g.position.id} group={g} filtering={filtering} lens={lens} reg={reg} onLink={openLink} />
-          ))}
+          {sections.map((s) =>
+            s.group ? (
+              <section key={s.group.id} id={s.group.id} aria-labelledby={`${s.group.id}-heading`} className="scroll-mt-24 space-y-6">
+                <h2 id={`${s.group.id}-heading`} className="border-b border-border pb-2 text-lg font-semibold text-foreground">
+                  {s.group.label}
+                </h2>
+                {s.members.map((g) => (
+                  <PositionSection key={g.position.id} group={g} filtering={filtering} lens={lens} reg={reg} onLink={openLink} nested />
+                ))}
+              </section>
+            ) : (
+              <PositionSection key={s.members[0].position.id} group={s.members[0]} filtering={filtering} lens={lens} reg={reg} onLink={openLink} />
+            ),
+          )}
         </div>
       </div>
     </PageLayout>
   );
+}
+
+/** The index's sections: one per position, the nodes of one group gathered under that group's heading. */
+function groupSections(groups: PositionGroup[]): { group: ChainPosition['group']; members: PositionGroup[] }[] {
+  const out: { group: ChainPosition['group']; members: PositionGroup[] }[] = [];
+  for (const g of groups) {
+    const group = g.position.group;
+    const last = out[out.length - 1];
+    if (group && last?.group?.id === group.id) last.members.push(g);
+    else out.push({ group, members: [g] });
+  }
+  return out;
 }
 
 function LinkMentions({ reg, code, onLink }: { reg: Registry; code: string; onLink: (id: string) => void }) {
@@ -181,19 +205,27 @@ function PositionSection({
   lens,
   reg,
   onLink,
+  nested = false,
 }: {
   group: PositionGroup;
   filtering: boolean;
   lens: boolean;
   reg: Registry;
   onLink: (id: string) => void;
+  /** Inside a group's section: one heading level down. */
+  nested?: boolean;
 }) {
   const headingId = `${positionAnchor(group.position.id)}-heading`;
+  const Heading = nested ? 'h3' : 'h2';
+  const SubHeading = nested ? 'h4' : 'h3';
   return (
     <section id={positionAnchor(group.position.id)} aria-labelledby={headingId} className="scroll-mt-24">
-      <h2 id={headingId} className="mb-3 border-b border-border pb-2 text-lg font-semibold text-foreground">
+      <Heading
+        id={headingId}
+        className={nested ? 'mb-3 font-mono text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground' : 'mb-3 border-b border-border pb-2 text-lg font-semibold text-foreground'}
+      >
         {group.position.label}
-      </h2>
+      </Heading>
       {group.subIndustries.length === 0 ? (
         <p className="text-sm italic text-muted-foreground">{COPY.noModels}</p>
       ) : (
@@ -201,9 +233,9 @@ function PositionSection({
           {group.subIndustries.map(({ subIndustry, companies }) => (
             <div key={subIndustry.code} id={subIndustryAnchor(subIndustry.code)} className="scroll-mt-24">
               <div className="mb-2">
-                <h3 className="text-base font-semibold text-foreground">
+                <SubHeading className="text-base font-semibold text-foreground">
                   {subIndustry.name} <span className="font-mono text-xs font-normal text-muted-foreground">{subIndustry.code}</span>
-                </h3>
+                </SubHeading>
                 <p className="text-sm text-muted-foreground">{subIndustry.note}</p>
                 {lens && <LinkMentions reg={reg} code={subIndustry.code} onLink={onLink} />}
               </div>

@@ -61,7 +61,7 @@ describe('the stage doors, worked', () => {
     expect(doors.get('stage-extraction')).toEqual({
       href: '/finance/finance-in-action#stage-stage-extraction',
       text: '2 models',
-      name: 'Geological extraction: 6 company models in Finance in Action, 2 published',
+      name: 'Geological extraction: 12 company models in Finance in Action, 2 published',
     });
   });
 

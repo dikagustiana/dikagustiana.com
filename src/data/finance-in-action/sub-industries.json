@@ -22,5 +22,133 @@
     "unitNoun": "electricity",
     "unit": "MWh",
     "note": "Power producers, geothermal among them: plant availability, the steam or fuel that drives the turbines and the tariff in the power purchase agreement set the margin on a megawatt-hour."
+  },
+  {
+    "code": "B146",
+    "name": "Diversified metals and minerals",
+    "chainStage": "stage-extraction",
+    "unitNoun": "nickel (contained)",
+    "unit": "tonne",
+    "note": "Nickel miners and smelters: ore grade, the power and reductant a smelter burns and the form sold, matte, ferronickel or mixed hydroxide, set the cost of a tonne of nickel contained."
+  },
+  {
+    "code": "B144",
+    "name": "Iron and steel",
+    "chainStage": "stage-processing",
+    "unitNoun": "steel",
+    "unit": "tonne",
+    "note": "Steelmakers: scrap, slab or iron ore bought in, the energy a furnace and a rolling mill draw and the run rate of the mill set the cost of a tonne of steel."
+  },
+  {
+    "code": "J113",
+    "name": "Marine ports and services",
+    "chainStage": "band-logistics",
+    "unitNoun": "port throughput",
+    "unit": "unit handled",
+    "note": "Port and marine-service operators: the vehicles, containers or vessel movements handled, the tariff on each and the fixed cost of berths, tugs and crews set the margin on a unit handled."
+  },
+  {
+    "code": "D232",
+    "name": "Plantations and crops",
+    "chainStage": "stage-biological",
+    "unitNoun": "crude palm oil",
+    "unit": "tonne",
+    "note": "Oil palm planters: mature hectares, the fresh fruit bunches each hectare yields, the oil extraction rate at the mill and the palm oil price set the margin on a tonne of crude palm oil."
+  },
+  {
+    "code": "D222",
+    "name": "Processed foods",
+    "chainStage": "stage-manufacturing",
+    "unitNoun": "packaged food",
+    "unit": "tonne",
+    "note": "Packaged food makers: wheat, palm oil, sugar and packaging bought in, the brand's price and the reach of distribution set the margin on what leaves the factory."
+  },
+  {
+    "code": "D112",
+    "name": "Food retail and distributors",
+    "chainStage": "node-distributor",
+    "unitNoun": "distributed goods",
+    "unit": "TBD",
+    "note": "Food distributors: goods bought from principals, the spread on resale, the trucks and cold storage that move them and the days of credit given to outlets set the margin on what is distributed."
+  },
+  {
+    "code": "D113",
+    "name": "Supermarkets and convenience stores",
+    "chainStage": "node-retail-modern",
+    "unitNoun": "store",
+    "unit": "store",
+    "note": "Modern grocers: stores open, sales per store, the gross margin on the shelf and the rent and staff each store carries set the margin on a store."
+  },
+  {
+    "code": "A111",
+    "name": "Oil and gas production and refinery",
+    "chainStage": "stage-extraction",
+    "unitNoun": "oil and gas",
+    "unit": "boe",
+    "note": "Oil and gas producers: barrels of oil equivalent lifted, the realised oil and gas price and the cash cost of lifting each barrel set the margin on a barrel of oil equivalent."
+  },
+  {
+    "code": "B111",
+    "name": "Basic chemicals",
+    "chainStage": "stage-processing",
+    "unitNoun": "chemicals",
+    "unit": "tonne",
+    "note": "Basic chemical makers: naphtha or gas feedstock, the spread of product prices over the cost of that feedstock and the run rate of the cracker or ammonia plant set the margin on a tonne."
+  },
+  {
+    "code": "B131",
+    "name": "Containers and packaging",
+    "chainStage": "stage-packaging",
+    "unitNoun": "packaging",
+    "unit": "tonne",
+    "note": "Packaging makers: recovered paper, pulp or polymer resin bought in, the energy a mill or a line burns and its run rate set the cost of a tonne of packaging."
+  },
+  {
+    "code": "A132",
+    "name": "Oil, gas and coal equipment and services",
+    "chainStage": "stage-extraction",
+    "unitNoun": "overburden removed",
+    "unit": "bcm",
+    "note": "Mining contractors: the overburden moved for the mine owners, the rate per bank cubic metre and the fuel, tyres and fleet each metre wears set the margin on a bcm."
+  },
+  {
+    "code": "D311",
+    "name": "Tobacco",
+    "chainStage": "stage-manufacturing",
+    "unitNoun": "cigarettes",
+    "unit": "million sticks",
+    "note": "Cigarette makers: sticks sold, the excise each stick carries for the state, tobacco and clove leaf bought in and the brand's price set the margin on a million sticks."
+  },
+  {
+    "code": "F121",
+    "name": "Healthcare providers",
+    "chainStage": "stage-consumption",
+    "unitNoun": "hospital care",
+    "unit": "inpatient day",
+    "note": "Hospital groups: beds in service, how many are occupied and the revenue per occupied bed, against doctors, staff and medicines, set the margin on an inpatient day."
+  },
+  {
+    "code": "K211",
+    "name": "Logistics and deliveries",
+    "chainStage": "band-logistics",
+    "unitNoun": "container freight",
+    "unit": "TEU",
+    "note": "Container shipping and logistics groups: boxes carried, the freight rate on each and the fuel, charter and port charges of the fleet set the margin on a TEU."
+  },
+  {
+    "code": "A112",
+    "name": "Oil and gas storage and distribution",
+    "chainStage": "band-energy",
+    "unitNoun": "gas and fuel",
+    "unit": "TBD",
+    "note": "Gas and fuel distributors: gas or fuel bought in, the regulated or contracted margin on resale and the pipelines, tanks and trucks that carry it set the margin on what is delivered."
+  },
+  {
+    "code": "J112",
+    "name": "Highways and railtracks",
+    "chainStage": "band-logistics",
+    "unitNoun": "toll road traffic",
+    "unit": "vehicle transaction",
+    "note": "Toll road operators: vehicles through the gates, the average tariff each pays and the upkeep and financing of the road set the margin on a vehicle transaction."
   }
 ]

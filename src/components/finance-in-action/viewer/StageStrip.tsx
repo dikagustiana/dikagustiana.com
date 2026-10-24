@@ -1,6 +1,7 @@
 /**
- * "Models along the chain": one card per chain stage, in the chain map's
- * reading order, joined by plain connectors, then the two spanning layers as
+ * "Models along the chain": one card per chain stage and per distribution or
+ * retail node (captioned with its group), in the chain map's reading order,
+ * joined by plain connectors, then the two spanning layers as
  * full-width bands (brief §5.1). With the Connections lens on, the link layer
  * under the cards draws the register's links between their stages (§5.2).
  *
@@ -57,7 +58,14 @@ export function StageStrip({
                       empty ? 'border-dashed border-border bg-background' : 'border-foreground/30 bg-card',
                     )}
                   >
-                    <span className="text-sm font-semibold leading-snug text-foreground">{g.position.label}</span>
+                    <span className="text-sm font-semibold leading-snug text-foreground">
+                      {g.position.group && (
+                        <span className="mb-1 block font-mono text-[10px] font-normal uppercase tracking-[0.12em] text-muted-foreground">
+                          {g.position.group.label}
+                        </span>
+                      )}
+                      {g.position.label}
+                    </span>
                     <span className="mt-2 text-xs text-muted-foreground">{countsLine(g)}</span>
                     {published && <span className="text-xs text-muted-foreground">{published}</span>}
                   </a>

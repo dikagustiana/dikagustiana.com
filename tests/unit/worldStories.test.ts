@@ -39,9 +39,9 @@ describe('the stories (PRD v2 §3.10, D2)', () => {
   it('reads the rupiah upstream, against the goods, with the banks lit beside it; a measured hop says so', async () => {
     const { handle } = await mountWorld();
     const s = storyById('rupiah-upstream')!;
-    handle.setFlowWeights([{ from: 'E711', to: 'D113', cls: 'measured-light' }]);
+    handle.setFlowWeights([{ from: 'D112', to: 'D113', cls: 'measured-light' }]);
     const hops = handle.lightStory(s);
-    expect(hops[0]).toMatchObject({ from: 'D113', to: 'E711', goods: 'none', measured: true });
+    expect(hops[0]).toMatchObject({ from: 'D113', to: 'D112', goods: 'none', measured: true });
     expect(hops.slice(1).every((h) => !h.measured)).toBe(true);
     expect(window.world!.chain()).toContain('G111');
     expect(window.world!.chainDrawn().measured).toBe(1);
@@ -54,7 +54,7 @@ describe('the stories (PRD v2 §3.10, D2)', () => {
     handle.setFlowWeights([{ from: 'D232', to: 'D222', cls: 'measured-heavy' }]);
     expect(handle.storyHops().map((h) => h.measured)).toEqual([true, false, false]);
     expect(window.world!.chainDrawn().measured).toBe(1);
-    expect(window.world!.chain()).toEqual(expect.arrayContaining(['D232', 'D222', 'E711', 'D113']));
+    expect(window.world!.chain()).toEqual(expect.arrayContaining(['D232', 'D222', 'D112', 'D113']));
   });
 
   it('gives way to a selection’s chain, and clearing the story then leaves that chain lit; a hop button frames its hop', async () => {

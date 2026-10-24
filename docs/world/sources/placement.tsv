@@ -15,7 +15,7 @@ B131	estate-manufacturing	packaging-plant	manufacturing	stage-packaging	PROC	pro
 B141	estate-primary	process-plant	processing	stage-processing	PROC	proposed	aluminium smelter (Appendix A: steel and aluminium in primary processing)
 B142	ring-geological	pit	origins	stage-extraction	MINE	proposed	copper mining
 B143	ring-geological	pit	origins	stage-extraction	MINE	proposed	gold mining
-B144	estate-primary	process-plant	processing	stage-processing	PROC	proposed	steel works
+B144	estate-primary	process-plant	processing	stage-processing	PROC	proposed	steel works; FIA factory v1: the link from B146 is weak, since the listed steelmakers make carbon steel (caveat on the nickel story)
 B145	ring-geological	pit	origins	stage-extraction	MINE	proposed	precious metals and minerals mining
 B146	ring-geological	pit	origins	stage-extraction	MINE	proposed	other metals and minerals mining (nickel among them)
 B147	ring-geological	depot	origins	stage-extraction	MINE	proposed	mining equipment and services yard
@@ -31,7 +31,7 @@ C142	estate-manufacturing	factory	manufacturing	stage-manufacturing	PROC	propose
 C143	estate-manufacturing	factory	manufacturing	stage-manufacturing	PROC	proposed	industrial machinery
 C211	gateway	depot	distribution	node-trader	DIST	proposed	trading of industrial goods: the trader at the gateway (Appendix A)
 C221	town-business	office-tower	enabling	flow-info-demand	SERVICE	proposed	commercial printing, as a business service; the chain has no printing node
-C222	recovery	recycling-plant	use-recovery	stage-recovery	PROC	proposed	environmental and facilities services: the recovery yard
+C222	recovery	recycling-plant	use-recovery	stage-recovery	PROC	proposed	environmental and facilities services: the recovery yard; FIA factory v1: left empty in Finance in Action, no listed company with modelable disclosure (HYGN and MHKI are micro caps)
 C223	town-business	office-tower	enabling	flow-info-demand	SERVICE	proposed	office supplies, in the business district (Appendix A)
 C224	town-business	office-tower	enabling	flow-info-demand	SERVICE	proposed	business support services
 C231	town-business	office-tower	enabling	flow-info-demand	SERVICE	proposed	personnel services
@@ -73,7 +73,7 @@ E612	town-services	office-tower	enabling	flow-info-demand	SERVICE	proposed	broad
 E613	town-services	office-tower	enabling	flow-info-demand	SERVICE	proposed	cable and satellite
 E614	town-services	office-tower	enabling	flow-info-demand	SERVICE	proposed	publishing
 E621	town-services	cinema	use-recovery	stage-consumption	SERVICE	proposed	entertainment and film
-E711	town-distribution	depot	distribution	node-distributor	DIST	proposed	consumer-goods distributors
+E711	town-distribution	depot	distribution	node-distributor	DIST	proposed	consumer-goods distributors; FIA factory v1: not modelled; D112 takes its place in the palm, well-to-shelf and rupiah-upstream stories
 E721	town-retail	shop	distribution	node-retail-ecommerce	DIST	proposed	internet and homeshop retail (first-party e-commerce)
 E731	town-retail	department-store	distribution	node-retail-modern	DIST	proposed	department stores
 E741	town-retail	shop	distribution	node-retail-modern	DIST	proposed	apparel retail
