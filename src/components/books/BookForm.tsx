@@ -173,7 +173,7 @@ export function BookForm({ open, book, shelves, defaultShelfId, takenSlugs, next
             <Field id={id('title')} label="Title" error={shown('title')}>
               <Input id={id('title')} value={d.title} onChange={(e) => onTitle(e.target.value)} onBlur={() => touch('title')} aria-invalid={!!shown('title')} required />
             </Field>
-            <Field id={id('slug')} label="Slug" error={shown('slug')} hint="The book's address: /books-academia?book=…">
+            <Field id={id('slug')} label="Slug" error={shown('slug')} hint="The book's address: /books-academia/…">
               <Input
                 id={id('slug')}
                 value={d.slug}

@@ -1,9 +1,9 @@
 /**
  * Books on shelves (site cleanup 2026-10, PRD §D): the pure part of the hooks (grouping, the save rules the
  * database also checks, the excerpt, the slug), then the public page over a mocked data hook (library phase
- * 2: spines on shelves, the arrow keys along a shelf, a spine opening the dialog that the URL names, Read and
- * Download for a free book and Buy for a paid one, a deep link, the sorts, the empty and error states, the
- * credit), then the old addresses landing on their shelf and book.
+ * 2: spines on shelves, the arrow keys along a shelf, a spine opening its cover page and the dialog's old
+ * address sent there, the sorts, the empty and error states, the credit), then the old addresses landing on
+ * their shelf and book. The cover page itself: tests/unit/coverPage.test.tsx.
  */
 import type { ReactNode } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -139,7 +139,13 @@ describe('the Books page', () => {
   const shelves = withSpines(groupShelves(SHELVES, BOOKS, true), SHELVES);
 
   const renderPage = (url = '/books-academia') => {
-    const router = createMemoryRouter([{ path: '/books-academia', element: <BooksAcademia /> }], { initialEntries: [url] });
+    const router = createMemoryRouter(
+      [
+        { path: '/books-academia', element: <BooksAcademia /> },
+        { path: '/books-academia/:slug', element: <p>cover page</p> },
+      ],
+      { initialEntries: [url] },
+    );
     render(<RouterProvider router={router} />);
     return router;
   };
@@ -197,37 +203,13 @@ describe('the Books page', () => {
     expect(first).toHaveFocus();
   });
 
-  it('opens a book in a dialog the URL names, with Download for a free book and its licence, and closes it', async () => {
+  it("opens a book on its cover page, and sends the dialog's old address there too", async () => {
     const router = renderPage();
     await userEvent.click(spine(/^Valuation/));
-    expect(new URLSearchParams(router.state.location.search).get('book')).toBe('valuation');
-    expect(router.state.historyAction).toBe('REPLACE');
-    const dialog = await screen.findByRole('dialog');
-    expect(within(dialog).getByRole('heading', { name: 'Valuation' })).toBeInTheDocument();
-    expect(within(dialog).getByText('A. Damodaran · 2012 · Corporate Finance')).toBeInTheDocument();
-    expect(within(dialog).getByRole('link', { name: 'Read' })).toHaveAttribute('href', '/books-academia/valuation/read');
-    expect(within(dialog).getByRole('button', { name: /Download PDF/ })).toBeEnabled();
-    expect(within(dialog).getByText('License: CC BY 4.0')).toBeInTheDocument();
-    const synopsis = dialog.querySelector('[data-synopsis]')!;
-    expect(synopsis.innerHTML).toContain('<strong>firm</strong>');
-    expect(synopsis.innerHTML).not.toContain('script');
-    expect(document.querySelector('meta[data-seo-title]')).toHaveAttribute('data-seo-title', 'Valuation');
-
-    await userEvent.keyboard('{Escape}');
-    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
-    expect(new URLSearchParams(router.state.location.search).has('book')).toBe(false);
-  });
-
-  it('opens a paid book from a deep link, with Buy opening the purchase URL in a new tab and no download', async () => {
-    renderPage('/books-academia?book=advanced-accounting');
-    const dialog = await screen.findByRole('dialog');
-    const buy = within(dialog).getByRole('link', { name: 'Buy Advanced Accounting (opens in a new tab)' });
-    expect(buy).toHaveAttribute('href', 'https://example.com/buy');
-    expect(buy).toHaveAttribute('target', '_blank');
-    expect(buy).toHaveAttribute('rel', 'noopener noreferrer');
-    expect(within(dialog).queryByRole('button', { name: /Download/ })).toBeNull();
-    expect(within(dialog).queryByRole('link', { name: 'Read' })).toBeNull();
-    expect(within(dialog).queryByText(/License/)).toBeNull();
+    expect(router.state.location.pathname).toBe('/books-academia/valuation');
+    const old = renderPage('/books-academia?book=advanced-accounting');
+    expect(old.state.location.pathname).toBe('/books-academia/advanced-accounting');
+    expect(old.state.historyAction).toBe('REPLACE');
   });
 
   it('re-files the books by year and by author, the sort in the URL', async () => {
@@ -272,6 +254,7 @@ describe('the old Books addresses', () => {
         { path: '/books/:category', element: <BooksCategoryRedirect /> },
         { path: '/books/:category/:bookId/read', element: <BookRedirect /> },
         { path: '/books-academia', element: <p>books page</p> },
+        { path: '/books-academia/:slug', element: <p>books page</p> },
       ],
       { initialEntries: [url] },
     );
@@ -288,7 +271,7 @@ describe('the old Books addresses', () => {
 
   it('sends /books/:category/:id/read to its book, or to its shelf when the book is not found', async () => {
     useBookByIdMock.mockReturnValue({ data: { id: 'x1', slug: 'valuation' }, isLoading: false, isError: false });
-    expect(await land('/books/corporate-finance/x1/read')).toBe('/books-academia?book=valuation');
+    expect(await land('/books/corporate-finance/x1/read')).toBe('/books-academia/valuation');
     useBookByIdMock.mockReturnValue({ data: null, isLoading: false, isError: false });
     expect(await land('/books/corporate-finance/x2/read')).toBe('/books-academia?shelf=corporate-finance');
   });

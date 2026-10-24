@@ -59,6 +59,36 @@ export type Database = {
         }
         Relationships: []
       }
+      book_citations: {
+        Row: {
+          book_id: string
+          essay_id: string
+        }
+        Insert: {
+          book_id: string
+          essay_id: string
+        }
+        Update: {
+          book_id?: string
+          essay_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "book_citations_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "books_uploads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "book_citations_essay_id_fkey"
+            columns: ["essay_id"]
+            isOneToOne: false
+            referencedRelation: "essays"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       book_shelves: {
         Row: {
           created_at: string
@@ -99,12 +129,14 @@ export type Database = {
           id: string
           license_note: string | null
           mime_type: string | null
+          page_count: number | null
           published: boolean
           purchase_url: string | null
           shelf_id: string | null
           size_bytes: number | null
           slug: string
           sort_order: number
+          spine_color: string | null
           synopsis_excerpt: string | null
           synopsis_html: string | null
           synopsis_json: Json | null
@@ -126,12 +158,14 @@ export type Database = {
           id?: string
           license_note?: string | null
           mime_type?: string | null
+          page_count?: number | null
           published?: boolean
           purchase_url?: string | null
           shelf_id?: string | null
           size_bytes?: number | null
           slug: string
           sort_order?: number
+          spine_color?: string | null
           synopsis_excerpt?: string | null
           synopsis_html?: string | null
           synopsis_json?: Json | null
@@ -153,12 +187,14 @@ export type Database = {
           id?: string
           license_note?: string | null
           mime_type?: string | null
+          page_count?: number | null
           published?: boolean
           purchase_url?: string | null
           shelf_id?: string | null
           size_bytes?: number | null
           slug?: string
           sort_order?: number
+          spine_color?: string | null
           synopsis_excerpt?: string | null
           synopsis_html?: string | null
           synopsis_json?: Json | null

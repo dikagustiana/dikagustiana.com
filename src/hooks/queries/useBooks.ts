@@ -19,6 +19,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import type { Json } from '@/integrations/supabase/types';
 import { logAuditEvent } from '@/lib/auditLog';
+import { essayUrl, essayUrlInputFromRow } from '@/lib/essayUrl';
 import { removeBookFile, uploadBookFile } from '@/lib/bookFile';
 import { SPINE_COLOR_SHAPE, spineColor, spineHeight, spineInk, spineWidth } from '@/lib/spines';
 
@@ -270,6 +271,65 @@ export const useShelfBooks = () =>
       const all = (shelves.data ?? []) as Shelf[];
       return withSpines(groupShelves(all, (books.data ?? []) as unknown as Book[], true), all);
     },
+  });
+
+export interface BookWithShelf {
+  book: ShelfBook;
+  shelf: Shelf | null;
+}
+
+/**
+ * One book by its slug, for its cover page (library phase 2, step 2), with its shelf and spine; null when RLS
+ * hides it (unpublished, removed) or there is none. The row is also matched here, not only by the query.
+ */
+export const useBook = (slug: string | undefined) =>
+  useQuery({
+    queryKey: ['books', 'book', slug],
+    queryFn: async (): Promise<BookWithShelf | null> => {
+      const [shelves, rows] = await Promise.all([
+        supabase.from('book_shelves').select(SHELF_COLUMNS).order('sort_order'),
+        supabase.from('books_uploads').select(`${BOOK_COLUMNS}, page_count, spine_color`).eq('slug', slug!).is('deleted_at', null).limit(1),
+      ]);
+      if (shelves.error) throw shelves.error;
+      if (rows.error) throw rows.error;
+      const row = ((rows.data ?? []) as unknown as Book[]).find((b) => b.slug === slug && !b.deleted_at);
+      if (!row) return null;
+      const all = (shelves.data ?? []) as Shelf[];
+      const shelf = all.find((s) => s.id === row.shelf_id) ?? null;
+      const [placed] = withSpines([{ ...(shelf ?? { id: '', slug: '', name: '', sort_order: 0 }), books: [row] }], all);
+      return { book: placed.books[0], shelf };
+    },
+    enabled: !!slug,
+    retry: false,
+  });
+
+export interface CitingEssay {
+  title: string;
+  href: string | null;
+}
+
+/**
+ * The published essays whose references name a book (book_citations, rebuilt by
+ * scripts/books/rebuild-citations.ts), in title order. A failed read, or the table not there yet, is an empty
+ * list: "Cited by" is an extra, never an error on the cover page.
+ */
+export const useCitedBy = (bookId: string | undefined) =>
+  useQuery({
+    queryKey: ['books', 'cited-by', bookId],
+    queryFn: async (): Promise<CitingEssay[]> => {
+      const { data, error } = await supabase
+        .from('book_citations')
+        .select('book_id, essays(slug, title, section, phase, finance_section, fsli_slug, topic, finance_modules(slug, track_slug))')
+        .eq('book_id', bookId!);
+      if (error) return [];
+      type Row = { book_id: string; essays: (Parameters<typeof essayUrlInputFromRow>[0] & { title: string | null }) | null };
+      return ((data ?? []) as unknown as Row[])
+        .filter((r) => r.book_id === bookId && r.essays?.slug)
+        .map((r) => ({ title: r.essays!.title ?? r.essays!.slug!, href: essayUrl(essayUrlInputFromRow(r.essays!)) }))
+        .sort((a, b) => a.title.localeCompare(b.title));
+    },
+    enabled: !!bookId,
+    retry: false,
   });
 
 /** /admin/books: every shelf, every live book. */

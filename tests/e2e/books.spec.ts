@@ -5,17 +5,16 @@ import { BOOKS, SHELVES, fullLibrary } from './libraryFixtures';
 /**
  * /books-academia on the production bundle (library phase 2, docs/prd/library-phase-2; before it, site cleanup
  * 2026-10, PRD §D), with every Supabase call answered in the test: the empty state; spines on shelves, walked
- * by keyboard; a spine opening the dialog the URL names, with Download and Buy; the full shelf of two hundred
- * books drawn plank by plank; reduced motion; the old /books/… addresses; and the page at 390 px.
+ * by keyboard; a spine opening its cover page, with Read and Download or Buy; the full shelf of two hundred
+ * books drawn plank by plank; reduced motion; the old addresses; and the pages at 390 px.
  */
 
-async function open(page: Page, url = '/books-academia', tables: Record<string, unknown[]> = { book_shelves: SHELVES, books_uploads: BOOKS }) {
+async function open(page: Page, url = '/books-academia', tables: Record<string, unknown[]> = { book_shelves: SHELVES, books_uploads: BOOKS }, h1 = 'Books') {
   await mockSupabase(page, { tables });
   await page.route('**/fonts.googleapis.com/**', (r) => r.fulfill({ status: 200, body: '' }));
   await page.route('**/fonts.gstatic.com/**', (r) => r.abort());
   await page.goto(url);
-  // By role it is hidden while a linked book's dialog is open, so by tag.
-  await expect(page.locator('main h1')).toHaveText('Books');
+  await expect(page.locator('main h1')).toHaveText(h1);
 }
 
 const spines = (page: Page) => page.locator('[data-spine]');
@@ -44,22 +43,27 @@ test.describe('the Books page at 1440', () => {
     await page.keyboard.press('ArrowLeft');
     await expect(first).toBeFocused();
     await page.keyboard.press('Enter');
-    await expect(page).toHaveURL(/[?&]book=open-corporate-finance$/);
-    const dialog = page.getByRole('dialog');
-    await expect(dialog.getByRole('heading', { name: 'Open Corporate Finance' })).toBeVisible();
-    await expect(dialog.getByText('A. Author · 2023 · Corporate Finance')).toBeVisible();
-    await expect(dialog.getByText('License: CC BY 4.0')).toBeVisible();
-    await expect(dialog.getByRole('button', { name: /Download PDF/ })).toBeVisible();
+    await expect(page).toHaveURL(/\/books-academia\/open-corporate-finance$/);
+    await expect(page.getByRole('heading', { level: 1, name: 'Open Corporate Finance' })).toBeVisible();
+    await expect(page.getByText('A. Author · 2023 · Corporate Finance')).toBeVisible();
+    await expect(page.getByText('License: CC BY 4.0')).toBeVisible();
+    await expect(page.getByRole('button', { name: /Download PDF/ })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Read' })).toHaveAttribute('href', '/books-academia/open-corporate-finance/read');
     await expect(page).toHaveTitle(/Open Corporate Finance/);
-    await page.keyboard.press('Escape');
-    await expect(dialog).toHaveCount(0);
-    await expect(page).not.toHaveURL(/book=/);
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', /\/books-academia\/open-corporate-finance$/);
+    await page.goBack();
 
     await page.getByRole('button', { name: /^Valuation/ }).click();
-    const buy = page.getByRole('dialog').getByRole('link', { name: 'Buy Valuation (opens in a new tab)' });
+    const buy = page.getByRole('link', { name: 'Buy Valuation (opens in a new tab)' });
     await expect(buy).toHaveAttribute('href', 'https://example.com/valuation');
     await expect(buy).toHaveAttribute('target', '_blank');
-    await expect(page.getByRole('dialog').getByRole('button', { name: /Download/ })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: /Download/ })).toHaveCount(0);
+    await expect(page.getByRole('link', { name: 'Read' })).toHaveCount(0);
+  });
+
+  test("the dialog's old address lands on the cover page", async ({ page }) => {
+    await open(page, '/books-academia?book=advanced-accounting', undefined, 'Advanced Accounting');
+    await expect(page).toHaveURL(/\/books-academia\/advanced-accounting$/);
   });
 
   test('two hundred books: only the planks on screen are drawn, and the walk along a shelf scrolls to the next plank', async ({ page }) => {
@@ -125,15 +129,17 @@ test.describe('the Books page at 1440', () => {
 test.describe('the Books page at 390', () => {
   test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
 
-  test('spines on one plank, a full-screen dialog, and no sideways scroll', async ({ page }) => {
+  test('spines on one plank, the cover above the title, and no sideways scroll', async ({ page }) => {
     await open(page);
     await expect(spines(page)).toHaveCount(3);
     const [a, b] = [(await spines(page).nth(0).boundingBox())!, (await spines(page).nth(1).boundingBox())!];
     expect(b.x).toBeGreaterThan(a.x + a.width - 1);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
     await spines(page).nth(0).click();
-    const dialog = page.getByRole('dialog');
-    await expect.poll(async () => Math.round((await dialog.boundingBox())?.width ?? 0)).toBe(390);
-    await expect.poll(async () => Math.round((await dialog.boundingBox())?.height ?? 0)).toBe(844);
+    const title = page.getByRole('heading', { level: 1, name: 'Open Corporate Finance' });
+    await expect(title).toBeVisible();
+    const cover = (await page.locator('[data-cover]').boundingBox())!;
+    expect(cover.y + cover.height).toBeLessThanOrEqual((await title.boundingBox())!.y);
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
   });
 });

@@ -6,8 +6,9 @@
  * The file is in a private bucket; the `book-file` edge function signs an hour's URL for whoever RLS lets see
  * the book (a published, live book, or any book for the admin), and the reader streams from it: pdf.js for a
  * PDF, epub.js for an EPUB, each in its own chunk so the shelves never load either. Esc or ✕ goes back to the
- * book's dialog; F or ⛶ asks the browser for true full screen, where the browser supports it (not an iPhone).
- * A book that is not there, or not free, says so with a way back. Not indexed: the book's page is its dialog.
+ * book's cover page (library phase 2); F or ⛶ asks the browser for true full screen, where the browser supports it (not an iPhone).
+ * A book that is not there, or not free, says so with a way back. Not indexed: the book's page is its cover,
+ * /books-academia/:slug.
  */
 import { lazy, Suspense, useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
@@ -43,7 +44,7 @@ export default function BookReader() {
   });
   const result = signed.data;
   const title = result?.ok ? titleFromFilename(result.filename, slug) : slug;
-  const bookUrl = `/books-academia?book=${encodeURIComponent(slug)}`;
+  const bookUrl = `/books-academia/${encodeURIComponent(slug)}`;
 
   // The page under the reader does not scroll while it is open.
   useEffect(() => {

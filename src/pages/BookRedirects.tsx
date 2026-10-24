@@ -1,6 +1,6 @@
 /**
  * The old Books addresses (PRD D8), kept working: /books/:category lands on its shelf,
- * /books/:category/:bookId/read on its book's dialog. A category is a shelf's slug (the shelves migration
+ * /books/:category/:bookId/read on its book's cover page (library phase 2). A category is a shelf's slug (the shelves migration
  * made one shelf per category, under the category's slug). A book id that no longer resolves lands on its
  * shelf instead.
  */
@@ -19,6 +19,6 @@ export function BookRedirect() {
   const { category, bookId } = useParams();
   const { data, isLoading, isError } = useBookById(bookId);
   if (isLoading) return <LoadingState />;
-  if (data && !isError) return <Navigate to={`/books-academia?book=${encodeURIComponent(data.slug)}`} replace />;
+  if (data && !isError) return <Navigate to={`/books-academia/${encodeURIComponent(data.slug)}`} replace />;
   return <Navigate to={shelfUrl(category)} replace />;
 }

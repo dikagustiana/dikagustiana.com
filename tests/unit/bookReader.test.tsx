@@ -1,5 +1,5 @@
 /**
- * Reading a free book (docs/books/R2-RUNBOOK.md): the dialog's Download asking for a signed URL when pressed
+ * Reading a free book (docs/books/R2-RUNBOOK.md): the cover page's Download (library phase 2; before it, the dialog's) asking for a signed URL when pressed
  * and saying so when it cannot have one; the reader page choosing pdf.js or epub.js from the signed file,
  * offering Download, and saying plainly when the book is not there; the key and page rules the readers use;
  * the client's handling of the function's answers. pdf.js and epub.js themselves are not run in jsdom.
@@ -39,11 +39,11 @@ import {
   turnFor,
   writePosition,
 } from '@/lib/bookReader';
-import { BookDialog } from '@/components/books/BookDialog';
+import { CoverPage } from '@/components/books/CoverPage';
 import BookReader from '@/pages/BookReader';
 import { TurnZones } from '@/components/books/reader/TurnZones';
 import { useSwipe } from '@/components/books/reader/useSwipe';
-import type { Book } from '@/hooks/queries/useBooks';
+import { withSpines, type Book } from '@/hooks/queries/useBooks';
 
 const SIGNED = { ok: true, url: 'https://acct.r2.cloudflarestorage.com/dg-books-public/files/open/1-o.pdf?X-Amz-Signature=x', contentType: 'application/pdf', filename: 'Open Finance.pdf' };
 
@@ -195,11 +195,12 @@ const free: Book = {
   size_bytes: 4, cover_path: null, synopsis_json: null, synopsis_html: null, synopsis_excerpt: null, sort_order: 0, published: true, deleted_at: null,
 };
 
-describe('the dialog', () => {
+describe("the cover page's Download", () => {
+  const shelf = { id: 's', slug: 'finance', name: 'Finance', sort_order: 0 };
   const renderDialog = () =>
     render(
       <MemoryRouter>
-        <BookDialog book={free} shelfName="Finance" onClose={() => undefined} />
+        <CoverPage book={withSpines([{ ...shelf, books: [free] }], [shelf])[0].books[0]} shelf={shelf} citedBy={[]} />
       </MemoryRouter>,
     );
 
@@ -231,7 +232,7 @@ describe('the reader page', () => {
         <MemoryRouter initialEntries={[`/books-academia/${slug}/read`]}>
           <Routes>
             <Route path="/books-academia/:slug/read" element={<BookReader />} />
-            <Route path="/books-academia" element={<Where />} />
+            <Route path="/books-academia/:slug" element={<Where />} />
           </Routes>
         </MemoryRouter>
       </QueryClientProvider>,
@@ -247,7 +248,7 @@ describe('the reader page', () => {
     expect(container.querySelector('[data-reader]')).toHaveClass('fixed', 'inset-0');
     expect(document.body.style.overflow).toBe('hidden');
     expect(screen.getByRole('heading', { level: 1, name: 'Open Finance' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Close the reader' })).toHaveAttribute('href', '/books-academia?book=open');
+    expect(screen.getByRole('link', { name: 'Close the reader' })).toHaveAttribute('href', '/books-academia/open');
     await userEvent.click(screen.getByRole('button', { name: 'report' }));
     // One live status, read out at every width (visually hidden on a phone, never removed or aria-hidden).
     const live = container.querySelectorAll('[aria-live]');
@@ -260,12 +261,12 @@ describe('the reader page', () => {
     expect(assign).toHaveBeenCalledWith('https://r2.example/dl');
   });
 
-  it('closes on Esc to the book, and lets the page scroll again', async () => {
+  it("closes on Esc to the book's cover page, and lets the page scroll again", async () => {
     invoke.mockResolvedValueOnce({ data: SIGNED, error: null });
     renderReader();
     await screen.findByTestId('pdf');
     await userEvent.keyboard('{Escape}');
-    expect(await screen.findByTestId('where')).toHaveTextContent('/books-academia?book=open');
+    expect(await screen.findByTestId('where')).toHaveTextContent('/books-academia/open');
     expect(document.body.style.overflow).toBe('');
   });
 

@@ -4,21 +4,19 @@
  *
  * One run of spines per shelf, in the shelves' order, each under its name and count (Shelf.tsx); a sort
  * control re-files the same books by year (a run per decade) or by author (a run per initial). The sort is in
- * the URL, ?sort=year|author, the default (by shelf) leaving it out. A spine opens its book's dialog, which the
- * URL names, /books-academia?book=<slug> (D3, X5): opening it replaces the URL's entry rather than adding one,
- * and closing it takes the parameter away. ?shelf=<slug> brings that shelf into view (the old /books/:category
- * links land there, D8). Only shelves holding a published book are shown (D7); private (unpublished) books
+ * the URL, ?sort=year|author, the default (by shelf) leaving it out. A spine opens its book's cover page,
+ * /books-academia/<slug> (library phase 2, step 2); the dialog's old address, ?book=<slug>, lands there too.
+ * ?shelf=<slug> brings that shelf into view (the old /books/:category links land there, D8). Only shelves holding a published book are shown (D7); private (unpublished) books
  * never reach a reader, by RLS. With none, the page says so quietly, and the admin gets a link to add one.
  *
  * The page's foot credits Gloss, whose library the shelf is adapted from, with permission (§4, Credit).
  */
 import { useCallback, useMemo } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { PageLayout } from '@/components/layouts/PageLayout';
 import { PAGE_COLUMN } from '@/components/layouts/pageColumn';
 import { SEO } from '@/components/SEO';
 import { ErrorState, LoadingState } from '@/components/states';
-import { BookDialog } from '@/components/books/BookDialog';
 import { Shelf } from '@/components/books/Shelf';
 import { useAuth } from '@/contexts/AuthContext';
 import { useShelfBooks, type Book } from '@/hooks/queries/useBooks';
@@ -31,21 +29,13 @@ const GLOSS_URL = 'https://github.com/Nutlope/gloss';
 export default function BooksAcademia() {
   const { data: shelves, isLoading, error, refetch } = useShelfBooks();
   const { isAdmin } = useAuth();
+  const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
   const shelfParam = params.get('shelf');
   const bookParam = params.get('book');
   const sort = parseSort(params.get('sort'));
 
   const groups = useMemo(() => (shelves ? groupBooks(shelves, sort) : []), [shelves, sort]);
-
-  const found = useMemo(() => {
-    if (!shelves || !bookParam) return null;
-    for (const s of shelves) {
-      const b = s.books.find((x) => x.slug === bookParam);
-      if (b) return { book: b, shelf: s };
-    }
-    return null;
-  }, [shelves, bookParam]);
 
   const setParam = useCallback(
     (key: string, value: string | null) =>
@@ -60,16 +50,16 @@ export default function BooksAcademia() {
       ),
     [setParams],
   );
-  const openBook = useCallback((book: Book) => setParam('book', book.slug), [setParam]);
-  const closeBook = useCallback(() => setParam('book', null), [setParam]);
+  const openBook = useCallback((book: Book) => navigate(`/books-academia/${encodeURIComponent(book.slug)}`), [navigate]);
   const setSort = (s: ShelfSort) => setParam('sort', s === 'shelf' ? null : s);
 
-  const book = found?.book ?? null;
   const count = shelves?.reduce((n, s) => n + s.books.length, 0) ?? 0;
+
+  if (bookParam) return <Navigate to={`/books-academia/${encodeURIComponent(bookParam)}`} replace />;
 
   return (
     <PageLayout width="wide" breadcrumbs={[{ label: 'Home', path: '/' }, { label: 'Books' }]}>
-      <SEO title={book ? (book.title ?? 'Books') : 'Books'} description={book?.synopsis_excerpt ?? DESCRIPTION} />
+      <SEO title="Books" description={DESCRIPTION} />
 
       <div className={`${PAGE_COLUMN.wide} py-8`}>
         <h1 className="mb-4 font-display text-3xl font-bold md:text-4xl">Books</h1>
@@ -110,7 +100,7 @@ export default function BooksAcademia() {
                 {count} {count === 1 ? 'book' : 'books'}
               </span>
             </div>
-            <Shelf groups={groups} onOpen={openBook} scrollTo={sort === 'shelf' ? (shelfParam ?? found?.shelf.slug ?? null) : null} />
+            <Shelf groups={groups} onOpen={openBook} scrollTo={sort === 'shelf' ? shelfParam : null} />
           </>
         ) : (
           <>
@@ -131,8 +121,6 @@ export default function BooksAcademia() {
           by Hassan El Mghari, with permission.
         </p>
       </div>
-
-      <BookDialog book={book} shelfName={found?.shelf.name ?? null} onClose={closeBook} />
     </PageLayout>
   );
 }
