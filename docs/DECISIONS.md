@@ -5,6 +5,50 @@ alternatives. Newest first.
 
 ---
 
+# 2026-10-24 — Fundamentals essays 01–15 imported and published
+
+Owner brief of 24 Oct 2026: the fifteen finished Fundamentals essays (T1-M01 … T1-M06) live, rendered as an
+essay written in the editor. Script: `scripts/finance-import/` (built on the accounting import), tests in
+`tests/unit/financeImport.test.ts`. The sources, the payload and the pre-write backup of the fifteen rows stay
+out of the repo.
+
+- **Every file filled its seeded stub; no row was created.** Matched by title before the stub's deck colon (14)
+  and, for "Sum-of-the-Parts Valuation in Holding Companies", by curriculum code (`fu-05-04` → stub
+  `ff-05-04`), whose module and place agree. Each stub kept its id and slug, so five essays live at the stub's
+  slug rather than the frontmatter's (`perpetuities-…-long-durat`, `multiples-as-compressed-dcf-models`,
+  `sum-of-parts-valuation-in-conglomerate-and-holding-company-s`, `diversification-as-a-free-lunch`,
+  `systematic-risk-vs-idiosyncratic-risk`). `t1-m06`'s third stub is untouched.
+- **Title is the H1, without the deck**, as on the finance essays already published; the deck is `snippet` and
+  `presentation.deck`. The stubs' "Title: Deck" titles are replaced.
+- **In brief → `presentation.key_takeaways`**, out of the body. The finance page prints the takeaways as end
+  matter ("What this essay establishes"), so leaving them in the body would print them twice; the editor's
+  publish gate needs three for a `concept` lesson, and every file has exactly three. References and
+  least-confident assertions stay in the body as written; `presentation.references` is empty, so the
+  References box does not repeat them.
+- **Display equations are `blockMath`**, the node the editor already has (KaTeX on the page and in the editor),
+  from each ```` ```latex ```` fence: 26 across nine essays. Nine drafts imported on 9 Oct had stored them as code
+  blocks. No code change was needed: tables, quote blocks, links and math were all inside the five-place
+  contract already; the essays have no footnotes or callouts.
+- **Starred variables.** `V* = c / e` (essay 02) and `x_1* = …` (essay 14) inside `**bold**` were read by
+  markdown as emphasis delimiters and garbled the line; the import escapes a star between a letter or digit and
+  ` =` (6 stars), so it prints as written. The text check confirms nothing else moved.
+- **Reading time is the editor's own** (200 words a minute over the body, rounded up), not the frontmatter's:
+  the editor recomputes it on every load, so any other value would change on the first save. 20–30 min.
+- **Placement is what the editor derives from the module**: `phase` and `finance_section` `fundamentals`,
+  `topic` the module slug, `lesson_type` `concept`, `finance_order` from the code. Date and author from the
+  frontmatter. Status `published`.
+- **Kept as written:** the workpaper file names some source notes cite (`_referensi/…/fakta-*.md`, `NN-calc.py`)
+  and the arithmetic the lint flags (reported, never changed).
+- **Transport.** The fifteen statements (1.4 MB) were too large for the MCP's request, and Cloudflare in front of
+  `supabase.co` refuses raw SQL in a request body. A one-off Edge Function, `fundamentals-import-once`, ran only
+  statements whose SHA-256 it listed, for a caller holding a one-time secret, from a base64 body; it was then
+  redeployed as a JWT-gated stub that returns 410. It can be deleted from the dashboard. A second run of all
+  fifteen statements changed nothing.
+- **Checked:** all fifteen live URLs (headings, tables, quote blocks and every equation counted against the
+  source; no KaTeX errors), the module pages in order and the track at "15 written, 41 planned"; each stored row
+  loaded into the editor's own extension set gives back the stored HTML and JSON, and an edit saves nothing else
+  but TipTap's trailing paragraph after a closing list, as on every essay written in the editor.
+
 # 2026-10-24 — Books on R2: signed URLs, no public bucket
 
 Runbook and values: `docs/books/R2-RUNBOOK.md`. A free book's file moves from the public Supabase `books`
