@@ -71,7 +71,7 @@ Reading column measured at 1440 / 1920 / 2560 / 390 px with Playwright: offset o
 | Admin, writer, settings, debug, KawasanPage | admin / tools | dashboards | no | — |
 | BookReader, BooksList | /books/… | removed in WP4 (redirects) | — | — |
 
-After the change every `reading`/`wide` page measures a centre offset of **0 px** and the breadcrumb's left edge equals the h1's at 1440, 1920, 2560 and 390 px.
+Before/after screenshots and measurements for all of them are in `before/` and `after/` (`measure-*.json`; `MORE=1` set in `shots.cjs` for the second set). After the change every `reading`/`wide` page measures a centre offset of **0 px** and the breadcrumb's left edge equals the h1's at 1440, 1920, 2560 and 390 px.
 
 ## 5. Essays (C)
 

@@ -2,7 +2,15 @@
 const { chromium } = require('playwright');
 const [base, out, label] = process.argv.slice(2);
 const fs = require('fs'); fs.mkdirSync(out, { recursive: true });
-const pages = [
+const pages = process.env.MORE ? [
+  ['finance', '/finance'],
+  ['finance-in-motion', '/finance/capital-allocation'],
+  ['finance-in-action', '/finance/finance-in-action'],
+  ['development-finance', '/development-finance'],
+  ['green-transition', '/green-transition'],
+  ['next-big-thing', '/the-next-big-thing'],
+  ['consolidation-topic', '/accounting/consolidation/psak-principles'],
+] : [
   ['consolidated', '/accounting/consolidated-reporting'],
   ['books', '/books-academia'],
   ['critical-thinking', '/critical-thinking-research'],
@@ -68,6 +76,6 @@ const widths = [1440, 1920, 2560, 390];
     await ctx.close();
   }
   await b.close();
-  fs.writeFileSync(`${out}/measure-${label}.json`, JSON.stringify(report, null, 1));
+  fs.writeFileSync(`${out}/measure-${label}${process.env.MORE ? '-more' : ''}.json`, JSON.stringify(report, null, 1));
   for (const r of report) console.log(r.name.padEnd(18), String(r.w).padEnd(5), 'col', r.colLeft, r.colRight, 'off', r.centreOff, 'h1', r.h1Left, 'crumb', r.crumbLeft);
 })();

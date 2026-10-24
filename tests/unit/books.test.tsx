@@ -31,7 +31,7 @@ vi.mock('@/contexts/AuthContext', () => ({
   AuthProvider: ({ children }: { children: ReactNode }) => children,
 }));
 
-import { bookErrors, excerptOf, groupShelves, slugify } from '@/hooks/queries/useBooks';
+import { SLUG_SHAPE, bookErrors, excerptOf, groupShelves, removedSlug, slugify } from '@/hooks/queries/useBooks';
 import BooksAcademia from '@/pages/BooksAcademia';
 import { BookRedirect, BooksCategoryRedirect } from '@/pages/BookRedirects';
 import { OPEN_SHELVES_KEY } from '@/lib/books';
@@ -129,6 +129,9 @@ describe('the books data', () => {
     expect(long.endsWith('word…')).toBe(true);
     expect(slugify('Valuation: Measuring & Managing (7th ed.)')).toBe('valuation-measuring-managing-7th-ed');
     expect(slugify('Économie verte')).toBe('economie-verte');
+    // A removed book frees its slug, and keeps one the database accepts.
+    expect(removedSlug('valuation', 1_700_000_000_000)).toBe('valuation-removed-loyw3v28');
+    expect(SLUG_SHAPE.test(removedSlug('valuation'))).toBe(true);
   });
 });
 

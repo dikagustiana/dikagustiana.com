@@ -264,11 +264,16 @@ export const useSaveShelf = () => {
   });
 };
 
-/** Only an empty shelf can go; the database refuses one that holds a book (ON DELETE RESTRICT). */
+/**
+ * Only an empty shelf can go; the database refuses one that holds a book (ON DELETE RESTRICT). Books removed
+ * earlier (soft-deleted) still name the shelf, so they let go of it first.
+ */
 export const useDeleteShelf = () => {
   const done = useInvalidate();
   return useMutation({
     mutationFn: async (s: Shelf) => {
+      const { error: release } = await supabase.from('books_uploads').update({ shelf_id: null }).eq('shelf_id', s.id).not('deleted_at', 'is', null);
+      if (release) throw release;
       const { error } = await supabase.from('book_shelves').delete().eq('id', s.id);
       if (error) throw error;
       await logAuditEvent({ action: 'delete', table_name: 'book_shelves', record_id: s.id, record_title: s.name });
@@ -294,12 +299,18 @@ export const useReorderBooks = () => {
   return useMutation({ mutationFn: reorder('books_uploads'), onSuccess: done });
 };
 
+/** The slug a removed book keeps, so its own slug is free for a new book (the slug is unique over every row). */
+export const removedSlug = (slug: string, now: number = Date.now()) => `${slug}-removed-${now.toString(36)}`.slice(-100).replace(/^-+/, '');
+
 /** Soft delete: the row stays, with deleted_at, out of every reader's sight; its objects stay too. */
 export const useDeleteBook = () => {
   const done = useInvalidate();
   return useMutation({
     mutationFn: async (b: Pick<Book, 'id' | 'title' | 'slug'>) => {
-      const { error } = await supabase.from('books_uploads').update({ deleted_at: new Date().toISOString(), published: false }).eq('id', b.id);
+      const { error } = await supabase
+        .from('books_uploads')
+        .update({ deleted_at: new Date().toISOString(), published: false, slug: removedSlug(b.slug) })
+        .eq('id', b.id);
       if (error) throw error;
       await logAuditEvent({ action: 'delete', table_name: 'books_uploads', record_id: b.id, record_title: b.title ?? b.slug });
     },
