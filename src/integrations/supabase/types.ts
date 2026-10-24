@@ -59,53 +59,121 @@ export type Database = {
         }
         Relationships: []
       }
+      book_shelves: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          slug: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          slug: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          slug?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       books_uploads: {
         Row: {
+          access: string
           author: string | null
           category: string
           cover_path: string | null
           deleted_at: string | null
-          filename: string
-          filepath: string
+          filename: string | null
+          filepath: string | null
           id: string
+          license_note: string | null
           mime_type: string | null
+          published: boolean
+          purchase_url: string | null
+          shelf_id: string | null
           size_bytes: number | null
+          slug: string
+          sort_order: number
+          synopsis_excerpt: string | null
+          synopsis_html: string | null
+          synopsis_json: Json | null
           title: string | null
+          updated_at: string
           uploaded_at: string
           uploaded_by: string | null
           year: number | null
         }
         Insert: {
+          access?: string
           author?: string | null
-          category: string
+          category?: string
           cover_path?: string | null
           deleted_at?: string | null
-          filename: string
-          filepath: string
+          filename?: string | null
+          filepath?: string | null
           id?: string
+          license_note?: string | null
           mime_type?: string | null
+          published?: boolean
+          purchase_url?: string | null
+          shelf_id?: string | null
           size_bytes?: number | null
+          slug: string
+          sort_order?: number
+          synopsis_excerpt?: string | null
+          synopsis_html?: string | null
+          synopsis_json?: Json | null
           title?: string | null
+          updated_at?: string
           uploaded_at?: string
           uploaded_by?: string | null
           year?: number | null
         }
         Update: {
+          access?: string
           author?: string | null
           category?: string
           cover_path?: string | null
           deleted_at?: string | null
-          filename?: string
-          filepath?: string
+          filename?: string | null
+          filepath?: string | null
           id?: string
+          license_note?: string | null
           mime_type?: string | null
+          published?: boolean
+          purchase_url?: string | null
+          shelf_id?: string | null
           size_bytes?: number | null
+          slug?: string
+          sort_order?: number
+          synopsis_excerpt?: string | null
+          synopsis_html?: string | null
+          synopsis_json?: Json | null
           title?: string | null
+          updated_at?: string
           uploaded_at?: string
           uploaded_by?: string | null
           year?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "books_uploads_shelf_id_fkey"
+            columns: ["shelf_id"]
+            isOneToOne: false
+            referencedRelation: "book_shelves"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       categories: {
         Row: {

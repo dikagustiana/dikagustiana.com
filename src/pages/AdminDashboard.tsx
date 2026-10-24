@@ -101,7 +101,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <Card className="group hover:shadow-md transition-shadow cursor-pointer border-2 border-transparent hover:border-accent">
             <Link to="/admin/writer/new">
               <CardContent className="p-6 flex items-center gap-4">
@@ -139,6 +139,20 @@ export default function AdminDashboard() {
                 <div>
                   <h3 className="font-semibold text-lg">Audit Log</h3>
                   <p className="text-sm text-muted-foreground">Who edited what, and when</p>
+                </div>
+              </CardContent>
+            </Link>
+          </Card>
+
+          <Card className="group hover:shadow-md transition-shadow cursor-pointer">
+            <Link to="/admin/books">
+              <CardContent className="p-6 flex items-center gap-4">
+                <div className="p-3 rounded-full bg-muted text-foreground group-hover:bg-muted/80 transition-colors">
+                  <BookOpen className="h-6 w-6" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-lg">Books</h3>
+                  <p className="text-sm text-muted-foreground">Shelves, books, synopses</p>
                 </div>
               </CardContent>
             </Link>

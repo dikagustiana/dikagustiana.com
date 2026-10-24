@@ -236,3 +236,35 @@ export function getBriefExtensions(options: { placeholder?: string } = {}) {
     }),
   ];
 }
+
+/**
+ * A book's synopsis (site cleanup 2026-10, PRD D5): a RESTRICTION of the essay schema, as the Brief's is,
+ * with lists added. Paragraphs, bold, italic, bullet and numbered lists, links, hard breaks; nothing else.
+ * Every node and mark it can produce is already in the essay schema and in sanitizeHtml's allow-list, so the
+ * synopsis adds no rendering surface.
+ */
+export function getSynopsisExtensions(options: { placeholder?: string } = {}) {
+  const kit = StarterKit.configure({
+    heading: false,
+    blockquote: false,
+    code: false,
+    codeBlock: false,
+    horizontalRule: false,
+    strike: false,
+    underline: false,
+    link: {
+      openOnClick: false,
+      HTMLAttributes: { class: LINK_CLASS },
+    },
+    dropcursor: false,
+    gapcursor: false,
+  });
+  if (!options.placeholder) return [kit];
+  return [
+    kit,
+    Placeholder.configure({
+      placeholder: options.placeholder,
+      emptyEditorClass: 'is-editor-empty',
+    }),
+  ];
+}

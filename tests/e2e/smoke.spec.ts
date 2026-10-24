@@ -34,7 +34,7 @@ const PUBLIC_ROUTES: { path: string; name: string }[] = [
   { path: '/critical-thinking-research', name: 'Critical thinking' },
   { path: '/books-academia', name: 'Books academia' },
   { path: '/books/categories', name: 'Books categories (redirects to /books-academia)' },
-  { path: '/books/economics', name: 'Books list' },
+  { path: '/books/economics', name: 'Books list (redirects to its shelf on /books-academia)' },
   { path: '/english-ielts', name: 'English IELTS' },
   { path: '/the-next-big-thing', name: 'The next big thing' },
   { path: '/this-route-does-not-exist', name: '404 NotFound' },

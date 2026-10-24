@@ -9,7 +9,7 @@ vi.mock('@/integrations/supabase/client', () => ({
   supabase: { from: (...a: unknown[]) => fromMock(...a) },
 }));
 
-import { useBooks } from '@/hooks/queries/useBooks';
+import { useShelves } from '@/hooks/queries/useBooks';
 import { useSelectedEssays } from '@/hooks/queries/useSelectedEssays';
 
 function wrapper() {
@@ -19,10 +19,14 @@ function wrapper() {
   );
 }
 
+const shelfRow = { id: 's1', slug: 'economics', name: 'Economics', sort_order: 0 };
 const bookRow = {
   id: 'b1',
-  category: 'economics',
-  filepath: 'x/y.pdf',
+  slug: 'the-wealth-of-nations',
+  shelf_id: 's1',
+  access: 'free',
+  license_note: 'Public domain',
+  filepath: 'files/the-wealth-of-nations/1-y.pdf',
   filename: 'y.pdf',
   mime_type: 'application/pdf',
   title: 'The Wealth of Nations',
@@ -30,26 +34,28 @@ const bookRow = {
   cover_path: null,
   size_bytes: 1234,
   year: 1776,
-  uploaded_at: '2026-01-01T00:00:00Z',
-  uploaded_by: null,
+  sort_order: 0,
+  published: true,
+  deleted_at: null,
 };
 
 beforeEach(() => fromMock.mockReset());
 
-describe('useBooks', () => {
-  it('returns rows from books_uploads', async () => {
-    fromMock.mockReturnValue(makeQueryResult([bookRow]));
-    const { result } = renderHook(() => useBooks({ category: 'economics' }), { wrapper: wrapper() });
+describe('useShelves', () => {
+  it('returns the shelves from book_shelves with their books from books_uploads', async () => {
+    fromMock.mockImplementation((table: string) => makeQueryResult(table === 'book_shelves' ? [shelfRow] : [bookRow]));
+    const { result } = renderHook(() => useShelves(), { wrapper: wrapper() });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(fromMock).toHaveBeenCalledWith('book_shelves');
     expect(fromMock).toHaveBeenCalledWith('books_uploads');
     expect(result.current.data).toHaveLength(1);
-    expect(result.current.data?.[0].title).toBe('The Wealth of Nations');
+    expect(result.current.data?.[0].books[0].title).toBe('The Wealth of Nations');
   });
 
   it('surfaces query errors', async () => {
     fromMock.mockReturnValue(makeQueryResult(null, { message: 'boom' }));
-    const { result } = renderHook(() => useBooks(), { wrapper: wrapper() });
+    const { result } = renderHook(() => useShelves(), { wrapper: wrapper() });
     await waitFor(() => expect(result.current.isError).toBe(true));
   });
 });
