@@ -61,3 +61,27 @@ test('the peer columns hold numbers for PTBA, converted to US dollars, with the 
   // The grouped bar draws all four companies, ADRO darkest and first.
   await expect(page.locator('[data-fia-grouped-bar]')).toContainText('ADRO, INDY, ITMG, PTBA');
 });
+
+// docs/prd/finance-restructure §1 C, D: the model page names the conditions it exhibits, and each
+// condition page lists the companies exhibiting it, over the same four published packages.
+test('ADRO names its conditions on one line: "Conditions present: 03 Commodity Windfall · 09 Strategic Downstreaming"', async ({ page }) => {
+  await open(page);
+  const line = page.locator('#fia-conditions');
+  await expect(line).toContainText('Conditions present: 03 Commodity Windfall · 09 Strategic Downstreaming');
+  await expect(line.getByRole('link', { name: '03 Commodity Windfall' })).toHaveAttribute('href', '/finance/finance-in-action/capital-in-motion/commodity-windfall');
+  await expect(line.getByRole('link', { name: '09 Strategic Downstreaming' })).toHaveAttribute('href', '/finance/finance-in-action/capital-in-motion/strategic-downstreaming');
+});
+
+test('03 Commodity Windfall lists ADRO, INDY, ITMG and PTBA; a card opens the model at its Conditions line', async ({ page }) => {
+  await mockSupabase(page, { tables: { model_packages: packages, fx_rates: FX_RATES } });
+  await page.route('**/fonts.googleapis.com/**', (r) => r.fulfill({ status: 200, body: '' }));
+  await page.route('**/fonts.gstatic.com/**', (r) => r.abort());
+  await page.goto('/finance/finance-in-action/capital-in-motion/commodity-windfall');
+  const block = page.locator('[data-condition-companies]');
+  await expect(block.getByRole('heading', { name: 'Companies exhibiting this condition' })).toBeVisible();
+  await expect(block.getByRole('link')).toHaveCount(4);
+  await expect(block.locator('a > span:first-child')).toHaveText(['ADRO', 'INDY', 'ITMG', 'PTBA']);
+  await block.getByRole('link', { name: /ADRO/ }).click();
+  await expect(page).toHaveURL('/finance/finance-in-action/adro#fia-conditions');
+  await expect(page.locator('#fia-conditions')).toBeInViewport();
+});

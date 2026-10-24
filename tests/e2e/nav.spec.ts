@@ -24,7 +24,7 @@ import { mockSupabase } from './mockSupabase';
  */
 const DROPDOWNS = [
   { label: 'Accounting', trigger: 'link', last: 'Statutory Reporting', url: '/accounting/statutory-reporting' },
-  { label: 'Finance', trigger: 'link', last: 'Finance in Action', url: '/finance/finance-in-action' },
+  { label: 'Finance', trigger: 'link', last: 'Toolkits', url: '/finance/toolkits' },
   { label: 'The Next Big Thing', trigger: 'link', last: 'Growth', url: '/the-next-big-thing?theme=growth' },
   // No landing page: the label is itself the menu button.
   { label: 'Learning', trigger: 'button', last: 'IELTS', url: '/english-ielts' },

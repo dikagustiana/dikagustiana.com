@@ -26,11 +26,17 @@ vi.mock('@/lib/finance-in-action/published', async (importOriginal) => {
 });
 
 import CapitalConditionDetail from '@/pages/CapitalConditionDetail';
-import { COMPANIES_EXHIBITING } from '@/components/finance-in-action/viewer/ConditionCompanies';
+import { COMPANIES_EXHIBITING, ConditionCompanies } from '@/components/finance-in-action/viewer/ConditionCompanies';
 import { COPY } from '@/lib/finance-in-action/copy';
+import { CONDITIONS } from '@/data/capitalConditions';
 
+/**
+ * The page mounts the block only in a build with the viewer (__FIA_LIVE__ or
+ * __FIA_PREVIEW__); vitest builds with both false, so the block is rendered
+ * here as the page renders it, under the condition's own address.
+ */
 const at = (slug: string) =>
-  renderFiaPage(<CapitalConditionDetail />, {
+  renderFiaPage(<ConditionCompanies number={CONDITIONS.find((c) => c.id === slug)!.number} />, {
     path: '/finance/finance-in-action/capital-in-motion/:conditionSlug',
     url: `/finance/finance-in-action/capital-in-motion/${slug}`,
   });
@@ -39,6 +45,17 @@ const block = async () => {
   const h = await screen.findByRole('heading', { level: 2, name: COMPANIES_EXHIBITING });
   return h.closest('section') as HTMLElement;
 };
+
+describe('the condition page in a build without the viewer', () => {
+  it('draws no company block (the viewer is compiled out of such a build)', async () => {
+    renderFiaPage(<CapitalConditionDetail />, {
+      path: '/finance/finance-in-action/capital-in-motion/:conditionSlug',
+      url: '/finance/finance-in-action/capital-in-motion/commodity-windfall',
+    });
+    await screen.findByRole('heading', { level: 1 });
+    expect(screen.queryByRole('heading', { name: COMPANIES_EXHIBITING })).toBeNull();
+  });
+});
 
 describe('Companies exhibiting this condition', () => {
   it('03 Commodity Windfall lists the four coal companies, each card to its model at the Conditions line', async () => {

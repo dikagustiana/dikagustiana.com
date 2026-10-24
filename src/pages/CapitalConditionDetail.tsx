@@ -6,6 +6,7 @@
  * Narrative longform layout — reads as a flowing essay, not a database record.
  */
 
+import { lazy, Suspense } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { PageLayout } from '@/components/layouts/PageLayout';
@@ -18,7 +19,18 @@ import {
 } from '@/data/capitalConditions';
 import { CAPITAL_IN_MOTION_PATH, conditionHref } from '@/lib/finance-in-action/conditions';
 import { INDEX_PATH } from '@/lib/finance-in-action/routes';
-import { ConditionCompanies } from '@/components/finance-in-action/viewer/ConditionCompanies';
+
+/**
+ * "Companies exhibiting this condition" reads the published model packages
+ * through the Finance in Action viewer's registry, which exists only in the
+ * builds that have the viewer (__FIA_LIVE__, production; __FIA_PREVIEW__).
+ * Without either flag the section is the legacy index and the viewer is
+ * compiled out (scripts/assert-no-synthetic.mjs), so the block is too.
+ */
+const ConditionCompanies =
+  __FIA_LIVE__ || __FIA_PREVIEW__
+    ? lazy(() => import('@/components/finance-in-action/viewer/ConditionCompanies').then((m) => ({ default: m.ConditionCompanies })))
+    : null;
 
 /** "an operational", "a balance sheet": the layer labels start with either. */
 function withArticle(word: string): string {
@@ -150,7 +162,11 @@ export default function CapitalConditionDetail() {
         )}
 
         {/* Fed by the published packages' conditionIds (docs/prd/finance-restructure §1 C). */}
-        <ConditionCompanies number={condition.number} />
+        {ConditionCompanies && (
+          <Suspense fallback={null}>
+            <ConditionCompanies number={condition.number} />
+          </Suspense>
+        )}
 
         {/* Prev / Next */}
         <div className="mt-16 pt-6 border-t border-border flex items-center justify-between">
