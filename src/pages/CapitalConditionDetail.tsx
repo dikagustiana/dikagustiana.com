@@ -18,6 +18,7 @@ import {
 } from '@/data/capitalConditions';
 import { CAPITAL_IN_MOTION_PATH, conditionHref } from '@/lib/finance-in-action/conditions';
 import { INDEX_PATH } from '@/lib/finance-in-action/routes';
+import { ConditionCompanies } from '@/components/finance-in-action/viewer/ConditionCompanies';
 
 /** "an operational", "a balance sheet": the layer labels start with either. */
 function withArticle(word: string): string {
@@ -147,6 +148,9 @@ export default function CapitalConditionDetail() {
             </div>
           </>
         )}
+
+        {/* Fed by the published packages' conditionIds (docs/prd/finance-restructure §1 C). */}
+        <ConditionCompanies number={condition.number} />
 
         {/* Prev / Next */}
         <div className="mt-16 pt-6 border-t border-border flex items-center justify-between">
