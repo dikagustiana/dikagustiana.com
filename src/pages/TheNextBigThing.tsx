@@ -4,13 +4,29 @@ import { EditorialFeed } from '@/components/editorial';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { PenLine } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { useEffect } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { essayUrl } from '@/lib/essayUrl';
 import { nextBigThingItems } from '@/config/navConfig';
 import { NEXT_BIG_THING_THEMES } from '@/config/nextBigThingThemes';
 
 export default function TheNextBigThing() {
   const { isAdmin } = useAuth();
+  // A theme the site no longer lists (?theme=society, ?theme=governance, or any other) is ignored: the
+  // param is dropped, in place, and the page shows every essay (docs/prd/2026-10-fia-fixes item 13).
+  const [params, setParams] = useSearchParams();
+  const theme = params.get('theme');
+  useEffect(() => {
+    if (theme === null || NEXT_BIG_THING_THEMES.some((t) => t.id === theme)) return;
+    setParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        next.delete('theme');
+        return next;
+      },
+      { replace: true },
+    );
+  }, [theme, setParams]);
 
   // One canonical builder — the local `/the-next-big-thing/${slug}` copy this
   // replaced was a second URL convention, and it flattened the theme out of

@@ -124,7 +124,7 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
   const { data: sections = [] } = useWriterSections();
   const sectionObj = sections.find(s => s.slug === section);
   const sectionId = sectionObj?.id || '';
-  const { data: categories = [] } = useWriterCategories(sectionId || undefined);
+  const { data: sectionCategories = [] } = useWriterCategories(sectionId || undefined);
   const { data: allFinanceModules = [] } = useAllFinanceModules();
   // FSLI line items for accounting placement. FSLI prose is authored HERE —
   // as essays with fsli_slug — never edited inline on the public page.
@@ -149,6 +149,14 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
   const [slug, setSlug] = useState('');
   const [phase, setPhase] = useState(searchParams.get('phase') || '');
   const [categoryId, setCategoryId] = useState('');
+  // The Next Big Thing offers only the themes the site lists (nextBigThingThemes.ts): a retired theme's
+  // category row (Society, Governance; docs/prd/2026-10-fia-fixes item 13) stays in the database but is
+  // not offered, unless it is the essay's own, so an old essay still opens and saves.
+  const categories = useMemo(() => {
+    if (section !== 'next-big-thing') return sectionCategories;
+    const live = new Set(NEXT_BIG_THING_THEMES.map((t) => `next-big-thing-${t.id}`));
+    return sectionCategories.filter((c) => live.has(c.slug) || c.id === categoryId);
+  }, [section, sectionCategories, categoryId]);
   const [author, setAuthor] = useState(DEFAULT_AUTHOR);
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [readTime, setReadTime] = useState('');

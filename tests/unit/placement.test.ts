@@ -12,9 +12,11 @@ describe('derivePhase', () => {
     expect(derivePhase('green-transition', 'green-transition-where-we-are-now')).toBe('where-we-are-now');
     expect(derivePhase('critical-thinking', 'critical-thinking-clarify')).toBe('clarify');
   });
-  it('maps the six live next-big-thing category slugs to the theme ids the reader filters on', () => {
-    // Written out, not derived: these are the category rows in the database.
-    const themes = ['technology', 'economy', 'society', 'environment', 'governance', 'growth'];
+  it('maps the live next-big-thing category slugs to the theme ids the reader filters on', () => {
+    // Written out, not derived: these are the category rows in the database the site offers. Society and
+    // Governance still have rows, retired on 2026-10-24 (nextBigThingThemes.ts), and still derive.
+    for (const retired of ['society', 'governance']) expect(derivePhase('next-big-thing', `next-big-thing-${retired}`)).toBe(retired);
+    const themes = ['technology', 'economy', 'environment', 'growth'];
     for (const theme of themes) {
       expect(derivePhase('next-big-thing', `next-big-thing-${theme}`)).toBe(theme);
     }
@@ -155,5 +157,14 @@ describe('buildCanonicalUrl — placement maps to the real public route', () => 
 
   it('returns empty string without a slug', () => {
     expect(buildCanonicalUrl({ sectionSlug: 'finance', slug: '' })).toBe('');
+  });
+});
+
+describe('the retired Next Big Thing themes (docs/prd/2026-10-fia-fixes item 13)', () => {
+  it('are not listed anywhere the site derives its themes from', () => {
+    const ids = NEXT_BIG_THING_THEMES.map((t) => t.id as string);
+    expect(ids).not.toContain('society');
+    expect(ids).not.toContain('governance');
+    expect(ids).toEqual(['technology', 'economy', 'environment', 'growth']);
   });
 });
