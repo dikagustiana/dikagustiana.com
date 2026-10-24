@@ -40,6 +40,7 @@ import { tiptapJsonToHtml } from '@/lib/tiptap/serialize';
 import { resolvePresentation, type EssayPresentation } from '@/lib/presentation';
 import { NEXT_BIG_THING_THEMES } from '@/config/nextBigThingThemes';
 import { FOUNDATIONS_PARTS, FOUNDATIONS_SECTION, foundationsPartName } from '@/config/foundationsOfKnowing';
+import { FOUNDATIONS_ESSAYS_KEY } from '@/hooks/queries/useFoundationsEssays';
 
 interface WriterEditorProps {
   section: string;
@@ -611,6 +612,7 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
       }
       await queryClient.invalidateQueries({ queryKey: ['finance-module-lesson-counts'] });
       await queryClient.invalidateQueries({ queryKey: ['essays-by-module-id'] });
+      await queryClient.invalidateQueries({ queryKey: FOUNDATIONS_ESSAYS_KEY });
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       toast({

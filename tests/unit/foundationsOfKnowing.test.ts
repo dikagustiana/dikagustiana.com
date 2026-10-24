@@ -13,6 +13,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { FOUNDATIONS_PARTS, foundationsPartName } from '@/config/foundationsOfKnowing';
 import { NEXT_BIG_THING_THEMES, nextBigThingThemeDescription } from '@/config/nextBigThingThemes';
+import { FOUNDATIONS_ESSAYS_KEY } from '@/hooks/queries/useFoundationsEssays';
 
 const MIGRATION = readFileSync(
   join(__dirname, '../../supabase/migrations/20261024185538_foundations_of_knowing.sql'),
@@ -50,6 +51,17 @@ describe('Foundations of Knowing parts', () => {
     perPart.forEach((rows, n) => {
       expect(rows.map((r) => r.sortOrder)).toEqual(rows.map((_, i) => n * 100 + i + 1));
     });
+  });
+});
+
+describe('the pages after an admin change', () => {
+  it("read under the ['essays'] prefix the content mutations invalidate", () => {
+    // useUnifiedContent's publish/unpublish/archive/restore/delete invalidate
+    // ['essays']; a key outside it kept a published essay "Planned" for up to
+    // staleTime (Codex review of PR #88).
+    expect(FOUNDATIONS_ESSAYS_KEY[0]).toBe('essays');
+    const writer = readFileSync(join(__dirname, '../../src/components/writer/WriterEditor.tsx'), 'utf8');
+    expect(writer).toContain('invalidateQueries({ queryKey: FOUNDATIONS_ESSAYS_KEY })');
   });
 });
 

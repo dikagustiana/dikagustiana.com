@@ -23,9 +23,17 @@ export interface FoundationsEssayRow {
   read_time: string | null;
 }
 
+/**
+ * Under the ['essays'] prefix on purpose: the admin content mutations
+ * (useUnifiedContent: publish, unpublish, archive, restore, delete) invalidate
+ * ['essays'], and the writer's save invalidates this key itself, so a change
+ * shows on the section and part pages at once rather than after staleTime.
+ */
+export const FOUNDATIONS_ESSAYS_KEY = ['essays', 'foundations-of-knowing'] as const;
+
 export const useFoundationsEssays = () =>
   useQuery({
-    queryKey: ['foundations-essays'],
+    queryKey: FOUNDATIONS_ESSAYS_KEY,
     staleTime: 2 * 60 * 1000,
     queryFn: async (): Promise<FoundationsEssayRow[]> => {
       const { data, error } = await supabase
