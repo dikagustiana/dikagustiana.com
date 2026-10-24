@@ -42,7 +42,6 @@ export const COPY = {
   whyThisLinkMatters: 'Why this link matters',
   theModel: 'The model',
   workpaper: 'Workpaper record',
-  peerEmpty: 'The band appears once two companies in this sub-industry are published.',
   noComparator: 'no comparator',
   // Unit economics
   ueIntro: (units: string) =>
@@ -110,7 +109,6 @@ export const COPY = {
   legend: { sourced: 'Sourced', formula: 'Formula', assumption: 'Assumption', missing: 'Not disclosed' } as Record<string, string>,
   onThisPage: 'On this page',
   unitEconomicsTitle: (unit: string) => `Unit economics, per ${unit} sold`,
-  whereItSits: (ticker: string, subIndustry: string) => `Where ${ticker} sits in ${subIndustry}`,
   // Production (VITE_FIA_LIVE): no fixture stands in, so each failure is a sentence of its own.
   liveNotAvailable: 'The published models are not available yet, so the companies below are listed as planned.',
   liveRefused: 'The published models could not be read: access was refused.',

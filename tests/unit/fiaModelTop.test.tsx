@@ -119,7 +119,6 @@ describe('the page order (R3)', () => {
       '#fia-unit-economics',
       '#fia-cost-flow',
       '#fia-along-chain',
-      '#fia-peers',
       '#fia-why',
       '#fia-workpaper',
     ]);

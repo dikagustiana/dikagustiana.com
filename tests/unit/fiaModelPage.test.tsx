@@ -103,20 +103,13 @@ describe('How the business makes money', () => {
   });
 });
 
-describe('the peer band', () => {
-  it('draws the band from the two published companies, with this company and its pair', async () => {
+describe('the peer band (docs/prd/2026-10-fia-fixes item 6)', () => {
+  it('is gone, section and anchor: the grouped bar under unit economics compares the companies', async () => {
     at('xcoa');
-    const section = (await screen.findByRole('heading', { level: 2, name: /Where XCOA sits/ })).closest('section')!;
-    expect(section).toHaveTextContent('range of the 2 published companies');
-    expect(section).toHaveTextContent('the dashed marker SCOA');
-    expect(within(section).getAllByText('XCOA').length).toBeGreaterThan(0);
-  });
-
-  it('shows the empty state with fewer than two published companies (constraint 11)', async () => {
-    at('scem');
-    const section = (await screen.findByRole('heading', { level: 2, name: /Where SCEM sits/ })).closest('section')!;
-    expect(section).toHaveTextContent(COPY.peerEmpty);
-    expect(section.querySelector('[aria-hidden="true"].relative')).toBeNull();
+    await screen.findByRole('heading', { level: 2, name: COPY.howItMakesMoney });
+    expect(screen.queryByRole('heading', { level: 2, name: /Where XCOA sits/ })).toBeNull();
+    expect(document.getElementById('fia-peers')).toBeNull();
+    expect(document.querySelector('a[href="#fia-peers"]')).toBeNull();
   });
 });
 

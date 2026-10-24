@@ -18,7 +18,6 @@ import { StagePills } from '@/components/finance-in-action/viewer/StagePills';
 import { CompanyTabs } from '@/components/finance-in-action/viewer/model/CompanyTabs';
 import { CompanyBar } from '@/components/finance-in-action/viewer/model/CompanyBar';
 import { DriverRow } from '@/components/finance-in-action/viewer/model/DriverRow';
-import { PeerBand } from '@/components/finance-in-action/viewer/model/PeerBand';
 import { ConditionPanel } from '@/components/finance-in-action/viewer/model/ConditionPanel';
 import { CellLegend, ModelGrid, type GridPlace } from '@/components/finance-in-action/viewer/model/ModelGrid';
 import { Inspector } from '@/components/finance-in-action/viewer/model/Inspector';
@@ -56,7 +55,6 @@ import type { IndustryLink } from '@/lib/finance-in-action/contract/links';
 import { COPY } from '@/lib/finance-in-action/copy';
 import { positionOf } from '@/lib/finance-in-action/chain';
 import { linksFrom } from '@/lib/finance-in-action/links';
-import { peerBand, publishedPeers } from '@/lib/finance-in-action/peers';
 import { useFxRates } from '@/lib/finance-in-action/useFxRates';
 import { latestReported, quarterPeriods, periodById } from '@/lib/finance-in-action/model/periods';
 import { noVolumeAnywhere, unitEconomicsAt } from '@/lib/finance-in-action/unitEconomics';
@@ -149,8 +147,6 @@ export function FiaModelPage({ pkg, reg }: { pkg: ModelPackage; reg: Registry })
     return map;
   }, [reg, pkg, meta.subIndustry]);
 
-  const peers = useMemo(() => peerBand(reg, pkg, rates), [reg, pkg, rates]);
-
   // With the lens on, a selection brings the tree and the waterfall to its
   // period, so its precedents and dependents can be marked in all three.
   useEffect(() => {
@@ -228,7 +224,6 @@ export function FiaModelPage({ pkg, reg }: { pkg: ModelPackage; reg: Registry })
     { id: 'fia-unit-economics', title: COPY.unitEconomicsTitle(pkg.unitEconomics.unit) },
     { id: 'fia-cost-flow', title: COPY.sankeyTitle(sub?.unitNoun ?? pkg.unitEconomics.unit) },
     { id: 'fia-along-chain', title: COPY.alongChainTitle },
-    { id: 'fia-peers', title: COPY.whereItSits(meta.ticker, subName) },
     { id: 'fia-why', title: COPY.whyThisLinkMatters },
     { id: 'fia-workpaper', title: COPY.workpaper },
   ];
@@ -387,10 +382,6 @@ export function FiaModelPage({ pkg, reg }: { pkg: ModelPackage; reg: Registry })
               <LinkCard key={chainLink.id} reg={reg} link={chainLink} onClose={() => setChainLinkId(null)} />
             </div>
           )}
-        </Section>
-
-        <Section id="fia-peers" title={title('fia-peers')}>
-          <PeerBand metrics={peers} ticker={meta.ticker} subIndustryName={subName} publishedCount={publishedPeers(reg, pkg).length} />
         </Section>
 
         <Section id="fia-why" title={title('fia-why')}>
