@@ -39,7 +39,6 @@ export const COPY = {
   download: 'Download .xlsx',
   downloading: 'Preparing the workbook…',
   howItMakesMoney: 'How the business makes money',
-  whyThisLinkMatters: 'Why this link matters',
   theModel: 'The model',
   workpaper: 'Workpaper record',
   noComparator: 'no comparator',

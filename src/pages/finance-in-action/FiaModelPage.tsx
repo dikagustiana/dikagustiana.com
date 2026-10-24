@@ -230,7 +230,6 @@ export function FiaModelPage({ pkg, reg }: { pkg: ModelPackage; reg: Registry })
     { id: 'fia-unit-economics', title: COPY.unitEconomicsTitle(pkg.unitEconomics.unit) },
     { id: 'fia-cost-flow', title: COPY.sankeyTitle(sub?.unitNoun ?? pkg.unitEconomics.unit) },
     { id: 'fia-along-chain', title: COPY.alongChainTitle },
-    { id: 'fia-why', title: COPY.whyThisLinkMatters },
     // The workpaper record is written for the builder: an admin sees it, and its anchor (item 8).
     ...(isAdmin && !authLoading ? [{ id: 'fia-workpaper', title: COPY.workpaper }] : []),
   ];
@@ -405,15 +404,14 @@ export function FiaModelPage({ pkg, reg }: { pkg: ModelPackage; reg: Registry })
           )}
         </Section>
 
-        <Section id="fia-why" title={title('fia-why')}>
-          <ConditionPanel pkg={pkg} subIndustry={sub} />
-        </Section>
-
         <AdminOnly>
           <Section id="fia-workpaper" title={COPY.workpaper}>
             <WorkpaperRecord pkg={pkg} />
           </Section>
         </AdminOnly>
+
+        {/* After the last section, before the footer (item 9). */}
+        <ConditionPanel pkg={pkg} subIndustry={sub} />
       </div>
     </PageLayout>
   );

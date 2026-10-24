@@ -120,15 +120,21 @@ describe('the peer band (docs/prd/2026-10-fia-fixes item 6)', () => {
   });
 });
 
-describe('Why this link matters', () => {
-  it('quotes the condition and its rule from section 05, the model’s line, and the chain map link', async () => {
+describe('Related reading (docs/prd/2026-10-fia-fixes item 9)', () => {
+  it('names each condition in one line, links it, keeps the chain map link, and drops the rule and the note', async () => {
     at('xcoa');
     const condition = getConditionByNumber(3)!;
-    const section = (await screen.findByRole('heading', { level: 2, name: COPY.whyThisLinkMatters })).closest('section')!;
-    expect(within(section).getByRole('link', { name: `Capital in Motion 03: ${condition.title}` })).toHaveAttribute('href', `/finance/capital-allocation/${condition.id}`);
-    expect(section).toHaveTextContent(condition.rule);
-    expect(section).toHaveTextContent('This model supplies the per-tonne economics');
-    expect(within(section).getByRole('link', { name: /Show coal on the chain map/ })).toHaveAttribute('href', '/?distance=finance&node=extraction');
+    await screen.findByRole('heading', { level: 2, name: COPY.howItMakesMoney });
+    const related = document.querySelector('[data-fia-related]') as HTMLElement;
+    expect(related).toHaveTextContent(`Related reading: Capital in Motion 03 · ${condition.title}`);
+    expect(within(related).getByRole('link', { name: `Capital in Motion 03 · ${condition.title}` })).toHaveAttribute('href', `/finance/capital-allocation/${condition.id}`);
+    expect(within(related).getByRole('link', { name: /Show coal on the chain map/ })).toHaveAttribute('href', '/?distance=finance&node=extraction');
+    expect(document.body).not.toHaveTextContent(condition.rule);
+    expect(document.body).not.toHaveTextContent('This model supplies the per-tonne economics');
+    expect(screen.queryByRole('heading', { name: 'Why this link matters' })).toBeNull();
+    // After the last section.
+    const sections = document.querySelectorAll('section[aria-labelledby]');
+    expect(sections[sections.length - 1].compareDocumentPosition(related) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 });
 
