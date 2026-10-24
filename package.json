@@ -24,7 +24,8 @@
     "build:workbook": "node --experimental-strip-types scripts/consolidation/build-workbook.ts",
     "sanitize:workbook": "node --experimental-strip-types scripts/consolidation/sanitize-workbook.ts",
     "build:poster": "node --experimental-strip-types scripts/world/render-poster.mjs",
-    "test:e2e:world": "playwright test -c playwright.world.config.ts"
+    "test:e2e:world": "playwright test -c playwright.world.config.ts",
+    "test:e2e:fia": "playwright test -c playwright.fia.config.ts"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.11",
@@ -79,6 +80,7 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
     "@babel/parser": "7.29.9",
     "@babel/traverse": "7.29.8",
     "@eslint/js": "^9.32.0",
