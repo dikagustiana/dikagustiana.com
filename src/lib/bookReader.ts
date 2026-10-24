@@ -31,3 +31,43 @@ export function isTypingTarget(e: Pick<KeyboardEvent, 'altKey' | 'ctrlKey' | 'me
 
 /** "Valuation.pdf" → "Valuation": the title the function names the file after. */
 export const titleFromFilename = (name: string, fallback: string) => name.replace(/\.(pdf|epub)$/i, '').trim() || fallback;
+
+/** The scale that fits a whole page inside the stage, as a Kindle shows one page at a time. */
+export function fitScale(pageW: number, pageH: number, boxW: number, boxH: number): number {
+  if (pageW <= 0 || pageH <= 0 || boxW <= 0 || boxH <= 0) return 1;
+  return Math.min(boxW / pageW, boxH / pageH);
+}
+
+/** A horizontal swipe of at least 50 px that is more sideways than up or down: left is forward. */
+export function swipeStep(dx: number, dy: number): -1 | 0 | 1 {
+  if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy) * 1.5) return 0;
+  return dx < 0 ? 1 : -1;
+}
+
+/**
+ * Where the reader left a book, per browser (a PDF page number, or an EPUB location). Storage may be missing
+ * or refuse; the book then opens at its start, as on a first visit.
+ */
+export const positionKey = (slug: string) => `books.reader.position.${slug}`;
+
+export function readPosition(slug: string): string | null {
+  try {
+    return window.localStorage.getItem(positionKey(slug));
+  } catch {
+    return null;
+  }
+}
+
+export function writePosition(slug: string, value: string): void {
+  try {
+    window.localStorage.setItem(positionKey(slug), value);
+  } catch {
+    // A convenience; without storage the place lasts the visit.
+  }
+}
+
+/** A stored PDF page, held to the book; 1 when there is none or it is not a page. */
+export function storedPage(raw: string | null, total: number): number {
+  const n = raw ? Number.parseInt(raw, 10) : NaN;
+  return Number.isFinite(n) ? clampPage(n, total) : 1;
+}

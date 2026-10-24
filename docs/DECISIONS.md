@@ -32,6 +32,14 @@ in place: `/books-academia/<slug>/read`, pdf.js for a PDF, epub.js for an EPUB.
   epub.js unpacks.
 - **Copyright rule unchanged:** a free book needs a file and a `license_note`; commercial books are paid,
   link only.
+- **The reader is an e-reader, not a page (owner, same day).** Read opens the book across the whole window:
+  - no site header or footer, one page fitted to the screen on a dark ground, and a thin bar;
+  - pages turn by arrows, by a press on either half, or by a swipe;
+  - ⛶ / F for the browser's full screen where it has one (not on an iPhone), and ✕ / Esc back to the dialog;
+  - the place is kept per browser.
+
+  Rejected: forcing browser full screen on Read. Browsers allow it only from a direct press, and it hides the
+  way out from someone who did not ask for it.
 
 ---
 

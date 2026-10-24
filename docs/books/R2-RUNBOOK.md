@@ -25,9 +25,14 @@ dashboard by the owner.
   Supabase `books` bucket.
 - `books_uploads.file_store` is `'r2'` for every new upload and `'supabase'`
   for rows stored before R2. The function serves both.
-- Reader: `/books-academia/<slug>/read` uses pdf.js for PDFs (range requests, so
-  page 1 shows before the whole file arrives) and epub.js for EPUBs. Arrow keys
-  and Page Up/Down turn pages.
+- Reader: `/books-academia/<slug>/read` fills the window like an e-reader, one
+  page fitted to the screen on a dark ground, with a thin bar for the title,
+  page, Download, full screen (⛶ or F) and close (✕ or Esc).
+  - PDFs use pdf.js with range requests, so page 1 shows before the whole file
+    arrives. EPUBs use epub.js.
+  - Pages turn with the arrow keys, Page Up/Down, a press on either half of the
+    page, or a swipe.
+  - The place reached is kept per browser, and the book reopens there.
 - Copyright rule unchanged: a `free` book needs a file **and** a `license_note`.
   Commercial books are `paid` (purchase link only, no file).
 
@@ -121,10 +126,16 @@ What each rule is for:
    ```
    503 `not_configured` means the secrets are missing (back to step 2).
 7. Merge; Vercel deploys `main`.
-8. Live check: add one open-licensed free book in `/admin/books`. Then check
-   `file_store = 'r2'`, a `read` returning 200 with a URL, `curl -sI <url>`
-   returning 200 `application/pdf`, a `Range: bytes=0-1023` request returning
-   206, and the reader showing page 1 and turning pages with the arrow keys.
+8. Live check: add one open-licensed free book in `/admin/books`. Then check:
+   - `file_store = 'r2'`;
+   - a `read` returns 200 with a URL;
+   - `curl -s -D - -o /dev/null "<url>"` gives 200 and `application/pdf`;
+   - `curl -s -o /dev/null -w "%{http_code}\n" -H "Range: bytes=0-1023" "<url>"` gives 206;
+   - the reader shows page 1 and turns pages with the arrow keys.
+
+   Use a GET for the check, not `curl -sI`. The signed URL is signed for GET
+   only, so a HEAD request (`-I`) is refused with 403. That is the signature
+   doing its job: browsers, pdf.js and Download all use GET.
 
 ## Rollback
 
