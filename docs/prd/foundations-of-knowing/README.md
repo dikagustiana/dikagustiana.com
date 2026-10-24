@@ -43,11 +43,11 @@ straight through without stopping at each one.
 
 ## Not done, and why
 
-- **The manifesto is unchanged.** The PRD left it as "[ISI SENDIRI]" ("fill it in yourself"), and
-  only the owner can write it. It still reads "Critical thinking is pattern recognition applied
-  to claims. It is trainable." No page renders it, because the manifesto banner was retired.
-  When the text is ready:
-  `UPDATE public.sections SET manifesto = '<text>' WHERE slug = 'critical-thinking';`
+- **The manifesto was set afterwards.** The PRD left it as "[ISI SENDIRI]" ("fill it in
+  yourself"), and only the owner can write it, so the first migration kept the old one. The owner
+  then chose "How we know comes before what we know. Every discipline on this site rests on it."
+  It was applied by migration `20261024195621_foundations_of_knowing_manifesto`. No page renders
+  it, because the manifesto banner was retired.
 - **No agent pipeline to update.** The PRD names `critical-thinking-researcher` and a checker
   with phase validation. Neither exists in this repository (searched for `researcher`, `checker`,
   `.claude/agents`). If they live elsewhere, their phase list is `FOUNDATIONS_PARTS` here.

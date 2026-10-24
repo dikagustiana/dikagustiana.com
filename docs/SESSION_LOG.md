@@ -68,9 +68,12 @@ evidence: `docs/prd/foundations-of-knowing/README.md`.
   `/critical-thinking-research/*` and `/development-finance/*` in `vercel.json`, plus the same
   rules as in-app `<Navigate>`s. The writer's part picker. The Development Finance theme. The
   three Development Finance pages deleted.
-- **Owner, open:** the manifesto. It is unchanged, because the PRD's text was "[ISI SENDIRI]".
-  The one-line UPDATE is in the README. After deploy, also check one 301 on production, e.g.
-  `curl -sI https://www.dikagustiana.com/development-finance`.
+- **Merged** as PR #88 (`11f28bd`); the production deploy is READY on the apex and `www`.
+- **Manifesto** set afterwards to the owner's choice, by migration
+  `20261024195621_foundations_of_knowing_manifesto`.
+- **Owner, open:** check one 301 on production, e.g.
+  `curl -sI https://www.dikagustiana.com/development-finance`. The sandbox could not reach the
+  site to check it.
 
 ## 2026-09-28 (WO-R05 session) — every essay gets its own share card, and a sitemap and a feed; the rebuild is staged, not applied
 
