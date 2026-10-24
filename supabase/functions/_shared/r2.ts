@@ -28,6 +28,8 @@ export interface PresignInput {
   now: Date;
   /** Extra signed query parameters, e.g. response-content-disposition. */
   query?: Record<string, string>;
+  /** 'https' always for R2; 'http' only for a local S3-compatible store in tests (R2_ENDPOINT). */
+  protocol?: 'https' | 'http';
 }
 
 const enc = new TextEncoder();
@@ -84,7 +86,7 @@ export async function presign(p: PresignInput): Promise<string> {
   key = await hmac(key, 'aws4_request');
   const signature = hex(await hmac(key, stringToSign));
 
-  return `https://${p.host}${canonicalPath}?${canonicalQuery}&X-Amz-Signature=${signature}`;
+  return `${p.protocol ?? 'https'}://${p.host}${canonicalPath}?${canonicalQuery}&X-Amz-Signature=${signature}`;
 }
 
 /** The four Edge Function secrets every R2 caller needs. */
@@ -93,6 +95,11 @@ export interface R2Config {
   bucket: string;
   keyId: string;
   secret: string;
+  /**
+   * Optional, never set in production: an S3-compatible endpoint (e.g. http://127.0.0.1:9100, a MinIO in a
+   * test stack) in place of <account>.r2.cloudflarestorage.com. The signing is the same.
+   */
+  endpoint?: string;
 }
 
 export const r2FromEnv = (get: (name: string) => string | undefined): R2Config => ({
@@ -100,6 +107,7 @@ export const r2FromEnv = (get: (name: string) => string | undefined): R2Config =
   bucket: get('R2_BUCKET') ?? '',
   keyId: get('R2_ACCESS_KEY_ID') ?? '',
   secret: get('R2_SECRET_ACCESS_KEY') ?? '',
+  endpoint: get('R2_ENDPOINT') || undefined,
 });
 
 export const r2Configured = (r2: R2Config) => !!(r2.account && r2.bucket && r2.keyId && r2.secret);
@@ -115,7 +123,8 @@ export const signR2 = (
 ) =>
   presign({
     method,
-    host: `${r2.account}.r2.cloudflarestorage.com`,
+    host: r2.endpoint ? new URL(r2.endpoint).host : `${r2.account}.r2.cloudflarestorage.com`,
+    protocol: r2.endpoint && new URL(r2.endpoint).protocol === 'http:' ? 'http' : 'https',
     path: `/${r2.bucket}/${key}`,
     region: 'auto',
     service: 's3',

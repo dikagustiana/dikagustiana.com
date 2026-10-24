@@ -119,6 +119,7 @@ export type Database = {
       books_uploads: {
         Row: {
           access: string
+          ai_ready: boolean
           author: string | null
           category: string
           cover_path: string | null
@@ -148,6 +149,7 @@ export type Database = {
         }
         Insert: {
           access?: string
+          ai_ready?: boolean
           author?: string | null
           category?: string
           cover_path?: string | null
@@ -177,6 +179,7 @@ export type Database = {
         }
         Update: {
           access?: string
+          ai_ready?: boolean
           author?: string | null
           category?: string
           cover_path?: string | null

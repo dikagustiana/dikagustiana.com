@@ -20,6 +20,7 @@
     "build:fia-fixtures": "vite-node scripts/fia/build-synthetic-fixtures.ts",
     "books:spines": "vite-node scripts/books/spine-metrics.ts",
     "books:citations": "vite-node scripts/books/rebuild-citations.ts",
+    "books:extract": "vite-node scripts/books/extract-paragraphs.ts",
     "check:world": "node scripts/world/check-engine.mjs",
     "build:registry": "node --experimental-strip-types scripts/world/build-registry.ts",
     "build:layout": "node --experimental-strip-types scripts/world/build-layout.ts",

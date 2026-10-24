@@ -2,16 +2,18 @@
  * What the library scripts share (scripts/books: spine-metrics, extract-paragraphs, rebuild-citations;
  * docs/prd/library-phase-2): the settings, a service-role client, and a book's file as bytes.
  *
+ * The extracted text goes to R2 (extract-paragraphs.ts), never to the database.
+ *
  * Settings come from .env.local in the folder the command runs in (parsed as scripts/fia/db.ts parses it),
  * else from the environment:
  *   SUPABASE_URL                 the project's URL
  *   SUPABASE_SERVICE_ROLE_KEY    the service-role key: these scripts write rows readers may not (page_count,
- *                                spine_color, book_paragraphs, book_citations); RLS lets only the admin and
+ *                                spine_color, ai_ready, book_citations); RLS lets only the admin and
  *                                the service role write them
  *   R2_ACCOUNT_ID, R2_BUCKET, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY
- *                                the private bucket's credentials, for a file on R2 (file_store = 'r2'); the
- *                                GET URL is signed by supabase/functions/_shared/r2.ts, the same signer the
- *                                book-file edge function uses
+ *                                the private bucket's credentials, for a file on R2 (file_store = 'r2') and
+ *                                for the extracted text (text/<book id>/); every URL is signed by
+ *                                supabase/functions/_shared/r2.ts, the same signer the edge functions use
  * Nothing here prints a value from them.
  */
 import fs from 'node:fs';
