@@ -1,7 +1,8 @@
 import { defineConfig, devices } from '@playwright/test';
 
 /**
- * The Finance in Action preview's browser suite (tests/e2e/fia-sheet-first.spec.ts,
+ * The Finance in Action preview's browser suite (tests/e2e/fia-sheet-first.spec.ts
+ * and tests/e2e/fia-adro-sections.spec.ts,
  * docs/company-models/sheet-first PRD K1, K2, K6 to K9): the same premise as
  * playwright.config.ts (a real production bundle pointed at a dead Supabase
  * URL, every call intercepted in-test), built with VITE_FIA_PREVIEW=true, the
@@ -18,7 +19,8 @@ process.env.VITE_FIA_PREVIEW = 'true';
 
 export default defineConfig({
   testDir: './tests/e2e',
-  testMatch: /fia-sheet-first\.spec\.ts/,
+  // docs/prd/2026-10-fia-fixes §4 adds the ADRO page's own spec, over the published coal packages.
+  testMatch: /(fia-sheet-first|fia-adro-sections)\.spec\.ts/,
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: 0,
