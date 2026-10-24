@@ -43,8 +43,13 @@ describe('the model page header', () => {
     for (const l of screen.getAllByRole('link', { name: 'Synthetic coal mining (SYNTHETIC)' })) {
       expect(l).toHaveAttribute('href', '/finance/finance-in-action#sub-SYN-COAL');
     }
-    expect(screen.getByRole('link', { name: 'Sample Coal Co (SYNTHETIC) (SCOA)' })).toHaveAttribute('href', '/finance/finance-in-action/scoa');
-    expect(screen.getByText('Q4 25; full statements to Q4 25')).toBeInTheDocument();
+    // The pair is a company tab (sheet-first PRD R1.2), so the bar does not name it again.
+    const tabs = screen.getByRole('navigation', { name: 'Companies in this stage' });
+    expect(within(tabs).getByRole('link', { name: /^SCOA.*Sample Coal Co \(SYNTHETIC\)$/ })).toHaveAttribute('href', '/finance/finance-in-action/scoa');
+    expect(screen.queryByText(COPY.pairedWith)).toBeNull();
+    // The quarters, the filings and the currency in one sentence (sheet-first PRD R1.3).
+    const facts = document.querySelector('[data-fia-facts]')!;
+    expect(facts).toHaveTextContent(/^\d+ filings, Q1 24 to Q4 25; full statements to Q4 25; reported in rupiah\.$/);
     expect(screen.getAllByText('Published').length).toBeGreaterThan(0);
     expect(screen.getByRole('switch')).toHaveAttribute('aria-checked', 'false');
   });
@@ -53,7 +58,7 @@ describe('the model page header', () => {
     at('xcem');
     await screen.findByRole('heading', { level: 1 });
     expect(screen.getByText(`YCEM, ${COPY.notYetModelled}`)).toBeInTheDocument();
-    // The header's pair and the company rail (chain view §3.2) both link to it.
+    // The company bar's pair and the company tabs (sheet-first PRD R1.2) both link to it.
     for (const l of screen.getAllByRole('link', { name: /Sample Cement Co/ })) expect(l).toHaveAttribute('href', '/finance/finance-in-action/scem');
   });
 
@@ -128,13 +133,17 @@ describe('Why this link matters', () => {
 });
 
 describe('The model grid and the inspector', () => {
-  it('has three tabs, one active, the cell legend and the convention once', async () => {
+  it('has the three sheets and Checks as tabs, Model active, the cell legend in words and the convention once', async () => {
     at('xcoa');
     const tabs = await screen.findAllByRole('tab');
-    expect(tabs.map((t) => t.textContent)).toEqual(['Reported', 'Model', 'Assumptions']);
-    expect(tabs.filter((t) => t.getAttribute('aria-selected') === 'true')).toHaveLength(1);
+    expect(tabs.map((t) => t.textContent)).toEqual(['Model', 'Reported', 'Assumptions', 'Checks']);
+    expect(tabs.filter((t) => t.getAttribute('aria-selected') === 'true').map((t) => t.textContent)).toEqual(['Model']);
     const legend = screen.getByRole('list', { name: 'Cell legend' });
-    for (const k of CELL_KINDS) expect(legend).toHaveTextContent(k.label);
+    for (const k of CELL_KINDS) {
+      expect(legend).toHaveTextContent(COPY.legend[k.id]);
+      expect(legend).toHaveTextContent(k.means);
+    }
+    expect(legend).toHaveTextContent('Not disclosed');
     expect(screen.getAllByText((_, el) => el?.tagName === 'P' && !!el.textContent?.includes(NUMBER_CONVENTION))).toHaveLength(1);
   });
 

@@ -63,12 +63,32 @@ export const WATERFALL = {
 /** Room either side of a peer band, as a share of its width. */
 export const PEER_PAD = 0.25;
 
-/** How many items a list shows before it says "and N more". */
+/**
+ * How many items a list shows before it says "and N more"; and the model
+ * grid's bounds (sheet-first PRD R2.5, D-S7): its zoom, in per cent, and how
+ * many columns before the latest reported quarter it opens on.
+ */
 export const LIMITS = {
   rejectedIssues: 5,
   inspectorSources: 4,
   changes: 24,
+  zoomMin: 70,
+  zoomMax: 150,
+  zoomStep: 10,
+  zoomDefault: 100,
+  openColumnsBefore: 3,
+  /** How long the formula bar waits for the selection to settle before it is read out, in ms. */
+  announceDelay: 400,
 } as const;
+
+/** Letters of a ticker in a company tab's monogram, where an issuer's logo would be (sheet-first PRD D-S8). */
+export const MONOGRAM_LETTERS = 2;
+
+/** From this width the model card opens with its inspector beside the grid (sheet-first PRD D-S6). */
+export const INSPECTOR_OPEN_FROM = '(min-width: 1440px)';
+
+/** The figures the cell legend shows as its samples: a figure and a rate, in the house format. */
+export const LEGEND_SAMPLE = { figure: 1234, rate: 0.08 } as const;
 
 /** A selected line is drawn this many times thicker. */
 export const EMPHASIS = 2;

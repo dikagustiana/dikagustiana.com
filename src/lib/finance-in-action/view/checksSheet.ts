@@ -145,3 +145,15 @@ export function goTo(wb: Workbook, text: string, current: ViewSheetId, checkCoun
   if (r < 0 || r >= checkCount || c < 0 || c >= CHECK_COLUMNS.length) return { ok: false, reason: 'outside' };
   return { ok: true, sheet: CHECKS_SHEET.id, r, c };
 }
+
+/** The order the sheet tabs stand in: the model first, as the page opens on it (PRD R2.4). */
+const TAB_ORDER: SheetId[] = ['model', 'reported', 'assumptions'];
+
+/** The sheets the grid can show, in tab order: the package's own, then Checks. */
+export function viewSheets(pkg: ModelPackage): { id: ViewSheetId; label: string; means: string }[] {
+  const own = TAB_ORDER.flatMap((id) => {
+    const s = byId(SHEETS, id);
+    return s && pkg.sheets.some((x) => x.id === id) ? [{ id: s.id as ViewSheetId, label: s.label as string, means: s.means as string }] : [];
+  });
+  return [...own, { id: CHECKS_SHEET.id, label: CHECKS_SHEET.label, means: CHECKS_SHEET.means }];
+}

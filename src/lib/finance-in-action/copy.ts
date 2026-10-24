@@ -74,11 +74,11 @@ export const COPY = {
   publishedFailed: 'Published models could not be read, so only the preview companies are shown. The reason:',
   publishedLoading: 'Reading the published models…',
   // The sheet-first model page (docs/company-models/sheet-first, DESIGN §6)
-  companyTabs: 'Companies in this stage',
   elsewhereInStage: 'Elsewhere in this stage',
   companyFacts: (filings: number, from: string, to: string, fullTo: string, currency: string | null) =>
     `${filings} ${filings === 1 ? 'filing' : 'filings'}, ${from} to ${to}; full statements to ${fullTo}${currency ? `; reported in ${currency}` : ''}.`,
   pairedWith: 'Paired with',
+  currencyWords: { Rp: 'rupiah', 'US$': 'US dollars' } as Record<string, string>,
   formulaBar: 'Formula bar',
   nameBox: 'Cell address',
   nameBoxNoCell: (typed: string) => `No cell at ${typed}. Use a value cell such as C5.`,
@@ -102,7 +102,12 @@ export const COPY = {
   checksNone: 'This model carries no tie-out yet.',
   checksHeader: { check: 'Check', unit: 'Unit', cell: 'Cell', model: 'In the model', filed: 'As filed', difference: 'Difference', status: 'Status', source: 'Filed in' },
   checksGap: 'Gap row of the model',
+  checksGoTo: 'go to the cell',
+  /** The cell legend's words (DESIGN §6): each beside a sample figure, never colour alone. */
+  legend: { sourced: 'Sourced', formula: 'Formula', assumption: 'Assumption', missing: 'Not disclosed' } as Record<string, string>,
   onThisPage: 'On this page',
+  unitEconomicsTitle: (unit: string) => `Unit economics, per ${unit} sold`,
+  whereItSits: (ticker: string, subIndustry: string) => `Where ${ticker} sits in ${subIndustry}`,
   // Production (VITE_FIA_LIVE): no fixture stands in, so each failure is a sentence of its own.
   liveNotAvailable: 'The published models are not available yet, so the companies below are listed as planned.',
   liveRefused: 'The published models could not be read: access was refused.',

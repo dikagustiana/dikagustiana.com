@@ -1,12 +1,13 @@
 /** Shown whenever a package is not from filings: one sentence on where its figures come from (brief §5.3). */
 import { PROVENANCES, byId, type Provenance } from '@/lib/finance-in-action/constants';
+import { cn } from '@/lib/utils';
 
-export function ProvenanceNote({ provenance }: { provenance: Provenance }) {
+export function ProvenanceNote({ provenance, className }: { provenance: Provenance; className?: string }) {
   if (provenance === 'filings') return null;
   const note = byId(PROVENANCES, provenance)?.note;
   if (!note) return null;
   return (
-    <p role="note" className="mb-8 rounded-md border border-dashed border-foreground/40 bg-muted/60 px-4 py-3 text-sm text-foreground">
+    <p role="note" className={cn('mb-8 rounded-md border border-dashed border-foreground/40 bg-muted/60 px-4 py-3 text-sm text-foreground', className)}>
       {note}
     </p>
   );
