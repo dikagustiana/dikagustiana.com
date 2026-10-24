@@ -4,6 +4,12 @@
  *   npx vite-node scripts/content/strip-lecture-notes.ts                 dry run against the database
  *   npx vite-node scripts/content/strip-lecture-notes.ts -- --apply      backup, then write, in one transaction
  *   npx vite-node scripts/content/strip-lecture-notes.ts -- --from <rows.json>   dry run against a dump
+ *   npx vite-node scripts/content/strip-lecture-notes.ts -- --from <rows.json> --sql <dir>
+ *       also writes the change as SQL files to paste into the Supabase SQL editor, for an owner without a
+ *       terminal: apply-NN.sql (each one transaction, each row updated only if its updated_at is still the
+ *       dump's, so a row saved since is refused, not overwritten; one `migration` revision per essay),
+ *       restore-NN.sql (the dump's rows back, one `rollback` revision each) and verify.sql (what still
+ *       mentions the notes, drafts included).
  *
  * The database is the one in .env.local (SUPABASE_DB_URL and SUPABASE_DB_PASSWORD, as for the fia scripts;
  * scripts/fia/db.ts). Nothing here prints a secret, and nothing here holds a key.
@@ -136,6 +142,13 @@ async function main() {
   console.log(`${done.length} essays change; diff written to ${diffFile}`);
   if (problems.length) console.log(`\n${problems.length} problem(s):\n  ${problems.join('\n  ')}`);
 
+  const sqlDir = arg('--sql');
+  if (sqlDir) {
+    if (problems.length) throw new Error('no SQL written: fix the problems above first');
+    writeSql(sqlDir, done);
+    console.log(`SQL written to ${sqlDir}`);
+  }
+
   if (!apply) return;
   if (problems.length) throw new Error('not applied: fix the problems above first (nothing was written)');
   if (!client) throw new Error('no database');
@@ -186,6 +199,69 @@ async function main() {
   console.log(`verify: ${left} essays mention the lecture notes; ${unsynced} changed essays out of sync; ${cites} citation problems`);
   if (left || unsynced || cites) throw new Error('verification failed: restore with scripts/content/restore-from-backup.ts ' + backupFile);
   void secrets;
+}
+
+/** A dollar-quoted literal whose tag does not occur in the text. */
+function dollar(text: string, base: string): string {
+  let tag = base;
+  for (let i = 0; text.includes(`$${tag}$`); i++) tag = `${base}${i}`;
+  return `$${tag}$${text}$${tag}$`;
+}
+
+const SQL_BATCH_BYTES = 450_000;
+
+function writeSql(dir: string, done: { row: Row; result: import('./lectureNotes').EssayResult; html: string }[]) {
+  mkdirSync(dir, { recursive: true });
+  const batches = (rows: string[]) => {
+    const out: string[][] = [[]];
+    let size = 0;
+    for (const r of rows) {
+      if (size + r.length > SQL_BATCH_BYTES && out[out.length - 1].length) {
+        out.push([]);
+        size = 0;
+      }
+      out[out.length - 1].push(r);
+      size += r.length;
+    }
+    return out;
+  };
+  const statement = (id: string, slug: string, updatedAt: string | null, content: string | null, json: unknown, presentation: unknown, kind: 'migration' | 'rollback', summary: string) => `
+-- ${slug}
+UPDATE public.essays
+   SET content = ${content === null ? 'NULL' : dollar(content, 'c')},
+       content_json = ${dollar(JSON.stringify(json), 'j')}::jsonb,
+       presentation = ${dollar(JSON.stringify(presentation ?? null), 'p')}::jsonb,
+       updated_at = now()
+ WHERE id = '${id}'${updatedAt ? ` AND updated_at = '${updatedAt}'::timestamptz` : ''};
+INSERT INTO public.essay_revisions (essay_id, revision_no, change_type, title, snippet, content_json, status, change_summary, changed_by)
+SELECT e.id, coalesce((SELECT max(x.revision_no) FROM public.essay_revisions x WHERE x.essay_id = e.id), 0) + 1, '${kind}',
+       e.title, e.snippet, e.content_json, e.status, ${dollar(summary, 's')}, null
+  FROM public.essays e WHERE e.id = '${id}';
+`;
+  const wrap = (body: string[], n: number, total: number, ids: string[], what: string) =>
+    `-- ${what}, part ${n} of ${total}. Paste ALL of this into the Supabase SQL editor and Run.\n` +
+    `-- One transaction: if any essay was edited since the snapshot, nothing in this part is written.\n` +
+    `BEGIN;\n${body.join('')}\n` +
+    `DO $chk$ BEGIN\n  IF (SELECT count(*) FROM public.essays WHERE id IN (${ids.map((i) => `'${i}'`).join(', ')}) AND updated_at = now()) <> ${ids.length} THEN\n` +
+    `    RAISE EXCEPTION 'Not written: an essay in this part was changed after the snapshot. Nothing in this part was saved.';\n  END IF;\nEND $chk$;\n` +
+    `COMMIT;\n`;
+
+  const apply = done.map((d) => ({ id: d.row.id, sql: statement(d.row.id, d.row.slug, d.row.updated_at, d.html, d.result.doc, d.result.presentation, 'migration', CHANGE_SUMMARY) }));
+  const restore = done.map((d) => ({ id: d.row.id, sql: statement(d.row.id, d.row.slug, null, d.row.content, d.row.content_json, d.row.presentation, 'rollback', 'Restored from the snapshot taken before the lecture-notes removal') }));
+  for (const [name, list, what] of [['apply', apply, 'Lecture-notes removal'], ['restore', restore, 'Undo of the lecture-notes removal']] as const) {
+    const parts = batches(list.map((x) => x.sql));
+    let k = 0;
+    parts.forEach((part, i) => {
+      const ids = list.slice(k, k + part.length).map((x) => x.id);
+      k += part.length;
+      writeFileSync(join(dir, `${name}-${String(i + 1).padStart(2, '0')}.sql`), wrap(part, i + 1, parts.length, ids, what));
+    });
+  }
+  writeFileSync(
+    join(dir, 'verify.sql'),
+    `-- After every apply part: the essays (drafts included) that still mention the lecture notes. Expected: no rows.\n` +
+      `SELECT slug, section, status FROM public.essays\n WHERE content ~* 'lecture note|Rumpun Akuntansi|AKL\\s*[–-]\\s*Chapter'\n    OR content_json::text ~* 'lecture note|Rumpun Akuntansi|AKL\\s*[–-]\\s*Chapter'\n    OR presentation::text ~* 'lecture note|Rumpun Akuntansi|AKL\\s*[–-]\\s*Chapter'\n ORDER BY slug;\n`,
+  );
 }
 
 function renderDiff(done: { row: Row; result: import('./lectureNotes').EssayResult; soft: string[] }[], problems: string[], source: string): string {
