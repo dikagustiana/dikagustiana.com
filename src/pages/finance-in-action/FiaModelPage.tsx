@@ -27,6 +27,8 @@ import { DownloadButton } from '@/components/finance-in-action/viewer/model/Down
 import { PeriodSelect } from '@/components/finance-in-action/viewer/model/PeriodSelect';
 import { UnitEconomics } from '@/components/finance-in-action/viewer/model/UnitEconomics';
 import { KeyFigures } from '@/components/finance-in-action/viewer/model/KeyFigures';
+import { ValueChain } from '@/components/finance-in-action/viewer/model/ValueChain';
+import { valueChain } from '@/lib/finance-in-action/valueChain';
 import { ModelCard } from '@/components/finance-in-action/viewer/model/ModelCard';
 import { FormulaBar } from '@/components/finance-in-action/viewer/model/FormulaBar';
 import { SheetTabs } from '@/components/finance-in-action/viewer/model/SheetTabs';
@@ -108,6 +110,9 @@ export function FiaModelPage({ pkg, reg }: { pkg: ModelPackage; reg: Registry })
   const ue = useMemo(() => unitEconomicsAt(view.wb, view.values, uePeriod), [view.wb, view.values, uePeriod]);
   const noVolume = useMemo(() => noVolumeAnywhere(view.wb, view.values), [view.wb, view.values]);
   const figures = useMemo(() => keyFigures(view.wb, view.values), [view.wb, view.values]);
+  // The value chain and the cost flow read one period, quarters and years alike; it opens on the key figures' period.
+  const [flowPeriod, setFlowPeriod] = useState(() => figures.periodId);
+  const chain = useMemo(() => valueChain(view.wb, view.values, flowPeriod), [view.wb, view.values, flowPeriod]);
   const groups = useMemo(() => groupAlongChain(reg), [reg]);
   const [chainLinkId, setChainLinkId] = useState<string | null>(null);
   const chainLink = chainLinkId ? reg.links.find((l) => l.id === chainLinkId) ?? null : null;
@@ -313,12 +318,24 @@ export function FiaModelPage({ pkg, reg }: { pkg: ModelPackage; reg: Registry })
         <Section
           id="fia-drivers"
           title={title('fia-drivers')}
-          aside={<PeriodSelect label="Quarter" periods={quarterPeriods(pkg)} value={treePeriod} onChange={setTreePeriod} />}
+          aside={
+            chain && !lens ? (
+              <PeriodSelect label="Period" periods={pkg.periods} value={flowPeriod} onChange={setFlowPeriod} />
+            ) : (
+              <PeriodSelect label="Quarter" periods={quarterPeriods(pkg)} value={treePeriod} onChange={setTreePeriod} />
+            )
+          }
         >
-          <p className="mb-3 text-sm text-muted-foreground">
-            {treePeriod === meta.asOf.fullStatementsTo ? `${treeLabel}, the latest quarter with full statements.` : `${treeLabel}.`} Each figure has
-            the same quarter a year earlier beneath it.
-          </p>
+          {chain && !lens ? (
+            <p className="mb-3 text-sm text-muted-foreground">
+              {chain.period?.label ?? flowPeriod}.{chain.priorPeriod ? ' Each figure has the same period a year earlier beneath it.' : ''}
+            </p>
+          ) : (
+            <p className="mb-3 text-sm text-muted-foreground">
+              {treePeriod === meta.asOf.fullStatementsTo ? `${treeLabel}, the latest quarter with full statements.` : `${treeLabel}.`} Each figure has
+              the same quarter a year earlier beneath it.
+            </p>
+          )}
           {lens ? (
             <div className="space-y-3">
               <div className="flex flex-wrap items-center justify-between gap-3">
@@ -337,6 +354,8 @@ export function FiaModelPage({ pkg, reg }: { pkg: ModelPackage; reg: Registry })
               <LensLegend />
               <DriverTree view={view} periodId={treePeriod} decorate={decorate} />
             </div>
+          ) : chain ? (
+            <ValueChain chain={chain} view={view} decorate={decorate} />
           ) : (
             <DriverRow view={view} periodId={treePeriod} feeds={feeds} reg={reg} decorate={decorate} />
           )}
