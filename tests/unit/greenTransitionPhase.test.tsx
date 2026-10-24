@@ -117,3 +117,17 @@ describe('green transition essay siblings', () => {
     expect(calls.some(([m, args]) => m === 'eq' && args[0] === 'category_id')).toBe(false);
   });
 });
+
+describe('the section has no landing page (docs/prd/2026-10-fia-fixes item 12)', () => {
+  it('carries the section introduction under the tabs on Where We Are Now, and only there; its breadcrumb is plain text', async () => {
+    fromMock.mockImplementation(() => recordingBuilder([], []));
+    const { unmount } = renderAt('/green-transition/now');
+    expect(await screen.findByText(/How Indonesia's energy transition gets paid for/)).toBeInTheDocument();
+    // Nothing links to the landing that is gone: the breadcrumb names the section as text, the back link opens /now.
+    expect(document.querySelector('a[href="/green-transition"]')).toBeNull();
+    unmount();
+    renderAt('/green-transition/gaps');
+    await waitFor(() => expect(fromMock).toHaveBeenCalled());
+    expect(screen.queryByText(/How Indonesia's energy transition gets paid for/)).toBeNull();
+  });
+});

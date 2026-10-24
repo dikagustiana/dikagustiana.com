@@ -44,7 +44,7 @@ export default function GreenTransitionTracker() {
       role="economist"
       breadcrumbs={[
         { label: 'Home', path: '/' },
-        { label: 'Green Transition', path: '/green-transition' },
+        { label: 'Green Transition' },
         { label: 'Transition Tracker' },
       ]}
       subNav={{ tabs: GREEN_TRANSITION_TABS }}

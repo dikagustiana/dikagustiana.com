@@ -36,7 +36,7 @@ export function Footer() {
             <ul className="space-y-2 text-sm">
               <li><Link to="/accounting" className="text-muted-foreground hover:text-foreground transition-colors">Accounting</Link></li>
               <li><Link to="/finance" className="text-muted-foreground hover:text-foreground transition-colors">Finance</Link></li>
-              <li><Link to="/green-transition" className="text-muted-foreground hover:text-foreground transition-colors">Green Transition</Link></li>
+              <li><Link to="/green-transition/now" className="text-muted-foreground hover:text-foreground transition-colors">Green Transition</Link></li>
               <li><Link to="/the-next-big-thing" className="text-muted-foreground hover:text-foreground transition-colors">The Next Big Thing</Link></li>
               <li><Link to="/development-finance" className="text-muted-foreground hover:text-foreground transition-colors">Development Finance</Link></li>
             </ul>

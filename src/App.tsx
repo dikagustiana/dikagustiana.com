@@ -17,7 +17,6 @@ import { RETIRED_ESSAY_REDIRECTS } from "@/config/retiredEssaySlugs";
 const Index = lazy(() => import("./pages/Index"));
 const Auth = lazy(() => import("./pages/Auth"));
 const Accounting = lazy(() => import("./pages/Accounting"));
-const GreenTransition = lazy(() => import("./pages/GreenTransition"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const DevelopmentFinance = lazy(() => import("./pages/DevelopmentFinance"));
 const DevelopmentFinancePhase = lazy(() => import("./pages/DevelopmentFinancePhase"));
@@ -239,7 +238,8 @@ const App = () => (
             <Route path="/finance-workspace" element={<RequireAdmin><FinanceWorkspace /></RequireAdmin>} />
 
             {/* Green Transition */}
-            <Route path="/green-transition" element={<GreenTransition />} />
+            {/* The landing is gone (docs/prd/2026-10-fia-fixes item 12): the section opens on its first phase, replacing the entry so Back does not bounce. */}
+            <Route path="/green-transition" element={<Navigate to="/green-transition/now" replace />} />
             <Route path="/green-transition/climate-finance" element={<ClimateFinance />} />
             <Route path="/green-transition/climate-finance/:slug" element={<GreenTransitionEssayPage />} />
             <Route path="/green-transition/tracker" element={<GreenTransitionTracker />} />

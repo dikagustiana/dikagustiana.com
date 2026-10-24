@@ -1,3 +1,7 @@
+/** The section's introduction, under the tabs on /green-transition/now (the landing page it stood on is gone). */
+export const GREEN_TRANSITION_INTRO =
+  "How Indonesia's energy transition gets paid for: who carries the cost, who captures the return, and which constraint actually binds on a given asset.";
+
 export const GREEN_TRANSITION_TABS = [
   { label: 'Where We Are Now', path: '/green-transition/now' },
   { label: 'Challenges Ahead', path: '/green-transition/gaps' },

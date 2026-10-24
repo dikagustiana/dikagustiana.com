@@ -52,7 +52,7 @@ export default function GreenTransitionCurrentCondition() {
       role="economist"
       breadcrumbs={[
         { label: 'Home', path: '/' },
-        { label: 'Green Transition', path: '/green-transition' },
+        { label: 'Green Transition' },
         { label: 'Current condition' },
       ]}
       subNav={{ tabs: GREEN_TRANSITION_TABS }}

@@ -97,6 +97,8 @@ export const navSections: NavSection[] = [
   },
   {
     label: 'Green Transition',
+    // The section has no landing page (item 12): its link opens the first phase; basePath still marks it active.
+    path: '/green-transition/now',
     basePath: '/green-transition',
     items: greenTransitionItems,
     essaySection: 'green-transition',

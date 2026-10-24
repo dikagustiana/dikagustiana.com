@@ -90,7 +90,7 @@ export function MobileNav() {
                         {/* Clickable section label — navigates to landing page */}
                         {section.basePath ? (
                           <Link
-                            to={section.basePath}
+                            to={section.path ?? section.basePath}
                             onClick={() => setIsOpen(false)}
                             className="flex flex-1 min-h-[44px] items-center py-3 px-4 text-left font-medium hover:bg-secondary rounded-l-lg transition-colors"
                           >

@@ -4,7 +4,7 @@ import { SEO } from '@/components/SEO';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { Plus } from 'lucide-react';
-import { GREEN_TRANSITION_TABS } from '@/data/greenTransitionTabs';
+import { GREEN_TRANSITION_INTRO, GREEN_TRANSITION_TABS } from '@/data/greenTransitionTabs';
 
 // Map URL slugs to database phase values
 const phaseMapping: Record<string, string> = {
@@ -61,12 +61,12 @@ export default function GreenTransitionPhase() {
       role="economist"
       breadcrumbs={[
         { label: 'Home', path: '/' },
-        { label: 'Green Transition', path: '/green-transition' },
+        { label: 'Green Transition' },
         { label: details?.title || 'Phase' }
       ]}
       subNav={{
         tabs: GREEN_TRANSITION_TABS,
-        backLink: { label: 'Green Transition', path: '/green-transition' },
+        backLink: { label: 'Green Transition', path: '/green-transition/now' },
       }}
     >
       <SEO
@@ -84,6 +84,12 @@ export default function GreenTransitionPhase() {
             <p className="text-muted-foreground max-w-2xl italic">
               {details?.coreQuestion}
             </p>
+            {/* The section's own introduction, from the landing it replaces (item 12). */}
+            {phase === 'now' && (
+              <p className="mt-3 max-w-2xl text-base leading-relaxed text-muted-foreground" data-section-intro>
+                {GREEN_TRANSITION_INTRO}
+              </p>
+            )}
           </div>
 
           {isAdmin && (
