@@ -119,9 +119,6 @@ describe('the page order (R3)', () => {
       '#fia-unit-economics',
       '#fia-cost-flow',
       '#fia-along-chain',
-      '#fia-peers',
-      '#fia-why',
-      '#fia-workpaper',
     ]);
     let last: Node = card;
     for (const a of anchors) {
@@ -227,7 +224,7 @@ describe('the formula bar and the name box (R2.2, K3, K4)', () => {
   it('shows the selected cell’s address and its formula as the package holds it, and lights its letter and number', async () => {
     const user = userEvent.setup();
     at('xcoa');
-    await user.click(await screen.findByRole('button', { name: /^Revenue, FY 25: 7\.270, Formula/ }));
+    await user.click(await screen.findByRole('button', { name: /^Revenue, FY 25: 7,270, Formula/ }));
     expect(nameBox()).toHaveValue('MODEL!K4');
     const formula = pkg('XCOA').sheets.find((x) => x.id === 'model')!.rows.find((r) => r.id === 'revenue')!.cells[8].formula!;
     expect(formulaBar()).toHaveTextContent(formula);
@@ -250,14 +247,14 @@ describe('the formula bar and the name box (R2.2, K3, K4)', () => {
     await user.click(nameBox());
     await user.keyboard('reported!c2{Enter}');
     expect(screen.getByRole('tab', { name: 'Reported' })).toHaveAttribute('aria-selected', 'true');
-    expect(screen.getByRole('button', { name: /^Revenue, Q1 24: 1\.600, Sourced/ })).toHaveFocus();
-    expect(formulaBar()).toHaveTextContent('1.600, from SYNTHETIC interim financial statements Q1 24, p. 12');
+    expect(screen.getByRole('button', { name: /^Revenue, Q1 24: 1,600, Sourced/ })).toHaveFocus();
+    expect(formulaBar()).toHaveTextContent('1,600, from SYNTHETIC interim financial statements Q1 24, p. 12');
   });
 
   it('says why an address names no value cell, and leaves the selection and the focus where they were', async () => {
     const user = userEvent.setup();
     at('xcoa');
-    await user.click(await screen.findByRole('button', { name: /^Revenue, FY 25: 7\.270, Formula/ }));
+    await user.click(await screen.findByRole('button', { name: /^Revenue, FY 25: 7,270, Formula/ }));
     await user.click(nameBox());
     await user.keyboard('A5{Enter}');
     expect(screen.getByRole('alert')).toHaveTextContent(COPY.nameBoxNotValue('A5', 'label'));
@@ -268,7 +265,7 @@ describe('the formula bar and the name box (R2.2, K3, K4)', () => {
     expect(screen.getByRole('alert')).toHaveTextContent('No cell at Q99. Use a value cell such as C5.');
     await user.keyboard('{Escape}');
     expect(nameBox()).toHaveValue('MODEL!K4');
-    expect(screen.getByRole('button', { name: /^Revenue, FY 25: 7\.270, Formula/ }).closest('td')).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByRole('button', { name: /^Revenue, FY 25: 7,270, Formula/ }).closest('td')).toHaveAttribute('aria-selected', 'true');
   });
 
   it('edits an assumption from the bar, and the model recalculates', async () => {
@@ -309,7 +306,7 @@ describe('the grid from the keyboard (K7)', () => {
   it('moves between the sheet tabs with the arrows, and a new sheet opens with nothing selected', async () => {
     const user = userEvent.setup();
     at('xcoa');
-    await user.click(await screen.findByRole('button', { name: /^Revenue, FY 25: 7\.270, Formula/ }));
+    await user.click(await screen.findByRole('button', { name: /^Revenue, FY 25: 7,270, Formula/ }));
     const model = screen.getByRole('tab', { name: 'Model' });
     model.focus();
     await user.keyboard('{ArrowRight}');
@@ -343,7 +340,7 @@ describe('zoom, the status line and the inspector’s switch (R2.5, R2.6, D-S6)'
   it('counts what feeds the selection and what it feeds with Connections on', async () => {
     const user = userEvent.setup();
     at('xcoa', '?connections=on');
-    await user.click(await screen.findByRole('button', { name: /^Revenue, FY 25: 7\.270, Formula/ }));
+    await user.click(await screen.findByRole('button', { name: /^Revenue, FY 25: 7,270, Formula/ }));
     expect(statusLine()).toHaveTextContent(/Revenue, FY 25 · Model sheet · ▲ \d+ feed it · ▼ \d+ fed by it/);
   });
 
@@ -379,7 +376,7 @@ describe('the Checks sheet (D-S4)', () => {
     await user.click(within(grid).getByRole('button', { name: /^Revenue, FY 25, Cell: REPORTED!K2, go to the cell$/ }));
     expect(screen.getByRole('tab', { name: 'Reported' })).toHaveAttribute('aria-selected', 'true');
     expect(nameBox()).toHaveValue('REPORTED!K2');
-    expect(screen.getByRole('button', { name: /^Revenue, FY 25: 7\.270, Sourced/ })).toHaveFocus();
+    expect(screen.getByRole('button', { name: /^Revenue, FY 25: 7,270, Sourced/ })).toHaveFocus();
   });
 });
 

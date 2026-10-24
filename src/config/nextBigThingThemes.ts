@@ -14,13 +14,16 @@
  * therefore two edits: an entry here, and a category row (a migration) with
  * the next sort_order. tests/unit/placement.test.ts ties its slug loop to this
  * array's length so the two cannot silently disagree.
+ *
+ * Society and Governance were retired on 2026-10-24 (docs/prd/2026-10-fia-fixes
+ * item 13): their one essay moved to Growth (migration
+ * 20261024150100_nbt_retire_society_governance). Their category rows stay in
+ * the database, unoffered: the writer lists only the themes here.
  */
 export const NEXT_BIG_THING_THEMES = [
   { id: 'technology', label: 'Technology' },
   { id: 'economy', label: 'Economy' },
-  { id: 'society', label: 'Society' },
   { id: 'environment', label: 'Environment' },
-  { id: 'governance', label: 'Governance' },
   // Curation: entries built around someone else's post, with the commentary
   // as the substance. Last on purpose — category sort_order 6.
   { id: 'growth', label: 'Growth' },

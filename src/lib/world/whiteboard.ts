@@ -10,7 +10,9 @@ import type { ModelPackage } from '@/lib/finance-in-action/contract/types';
 import { Workbook } from '@/lib/finance-in-action/model/workbook';
 import { latestReported } from '@/lib/finance-in-action/model/periods';
 import { unitEconomicsAt, extent } from '@/lib/finance-in-action/unitEconomics';
-import { formatForRow, formatNumber } from '@/lib/finance-in-action/format';
+import { house } from '@/lib/finance-in-action/format';
+
+const { formatForRow, formatNumber } = house;
 import { COMPARATOR_HEADING, worldPeerBand } from '@/lib/world/peerBand';
 import type { WhiteboardContent } from '@/world/data/types';
 

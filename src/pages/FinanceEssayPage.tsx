@@ -238,6 +238,8 @@ export default function FinanceEssayPage() {
     getEssayUrl,
     currentEssayId: essay.id,
     section: 'finance' as const,
+    // Item 10: the VERIFIED / UNAVAILABLE notes are the builder's; a reader does not see them.
+    hideReferenceAnnotations: !isAdmin,
   };
 
   if (isLongform) {

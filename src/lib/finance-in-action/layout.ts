@@ -124,3 +124,11 @@ export const SANKEY = {
   ribbonOpacity: 0.35,
   hatch: 6,
 } as const;
+
+/** The grouped bar under the unit-economics table (docs/prd/2026-10-fia-fixes item 4). */
+export const GROUPED_BAR = {
+  /** Fixed neutral shades by position, darkest first; the subject always takes the first. */
+  shades: ['bg-foreground', 'bg-foreground/55', 'bg-foreground/35', 'bg-foreground/20'],
+  /** Decimals of the value labels: per-unit money to one place, the strip ratio to two. */
+  moneyDecimals: 1,
+};

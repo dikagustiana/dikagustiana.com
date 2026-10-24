@@ -30,16 +30,17 @@ export const COPY = {
   notStartedNoPage: 'Planned; no model yet.',
   notYetModelled: 'not yet modelled',
   notAvailable: 'not yet available',
+  notComparable: 'not comparable',
+  fxCaption: (ticker: string, period: string, rate: string) => `${ticker} converted at BI JISDOR ${period} average ${rate} IDR/USD.`,
+  fxMissing: (ticker: string, period: string) => `${ticker} reports in rupiah and no BI JISDOR rate is loaded for ${period}, so its figures are not compared.`,
   feeds: 'Feeds',
   fedBy: 'Fed by',
   // Model page
   download: 'Download .xlsx',
   downloading: 'Preparing the workbook…',
   howItMakesMoney: 'How the business makes money',
-  whyThisLinkMatters: 'Why this link matters',
   theModel: 'The model',
   workpaper: 'Workpaper record',
-  peerEmpty: 'The band appears once two companies in this sub-industry are published.',
   noComparator: 'no comparator',
   // Unit economics
   ueIntro: (units: string) =>
@@ -71,6 +72,7 @@ export const COPY = {
   openLink: 'Open the link card',
   // Cost flow (chain view §3.5)
   sankeyTitle: (noun: string) => `Where a unit of ${noun} goes`,
+  flowNotDisclosed: (period: string) => `The income statement is not disclosed in full for ${period}.`,
   publishedFailed: 'Published models could not be read, so only the preview companies are shown. The reason:',
   publishedLoading: 'Reading the published models…',
   // The sheet-first model page (docs/company-models/sheet-first, DESIGN §6)
@@ -107,7 +109,6 @@ export const COPY = {
   legend: { sourced: 'Sourced', formula: 'Formula', assumption: 'Assumption', missing: 'Not disclosed' } as Record<string, string>,
   onThisPage: 'On this page',
   unitEconomicsTitle: (unit: string) => `Unit economics, per ${unit} sold`,
-  whereItSits: (ticker: string, subIndustry: string) => `Where ${ticker} sits in ${subIndustry}`,
   // Production (VITE_FIA_LIVE): no fixture stands in, so each failure is a sentence of its own.
   liveNotAvailable: 'The published models are not available yet, so the companies below are listed as planned.',
   liveRefused: 'The published models could not be read: access was refused.',

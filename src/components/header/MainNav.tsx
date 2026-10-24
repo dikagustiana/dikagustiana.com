@@ -19,9 +19,9 @@ export function MainNav() {
 
   // A dropdown over a section with no published essay is a plain link to its
   // landing page (navConfig: NavSection.essaySection).
-  const sectionLink = (label: string, basePath: string) => (
+  const sectionLink = (label: string, basePath: string, href: string = basePath) => (
     <Link
-      to={basePath}
+      to={href}
       className={cn('nav-link', location.pathname.startsWith(basePath) && 'nav-link-active')}
     >
       {label}
@@ -75,13 +75,14 @@ export function MainNav() {
       />
 
       {isCollapsed({ essaySection: 'green-transition' }) ? (
-        sectionLink('Green Transition', '/green-transition')
+        sectionLink('Green Transition', '/green-transition', '/green-transition/now')
       ) : (
         <NavDropdown
           label="Green Transition"
           items={greenTransitionItems}
           width="w-56"
           basePath="/green-transition"
+          href="/green-transition/now"
         />
       )}
 

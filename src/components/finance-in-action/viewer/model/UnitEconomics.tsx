@@ -14,10 +14,14 @@ import type { ModelPackage, UELine } from '@/lib/finance-in-action/contract/type
 import { COPY } from '@/lib/finance-in-action/copy';
 import { decimalsFor, formatForRow, formatNumber, isRatioRow } from '@/lib/finance-in-action/format';
 import { PERCENT, WATERFALL } from '@/lib/finance-in-action/layout';
-import { sourcedInputs, summariseSources } from '@/lib/finance-in-action/model/explain';
+import { abbreviateSources, sourcedInputs, summariseSources } from '@/lib/finance-in-action/model/explain';
 import { periodById } from '@/lib/finance-in-action/model/periods';
 import type { Registry } from '@/lib/finance-in-action/registry';
-import { PER_UNIT_DECIMALS, barValue, extent, perUnitInPackage, plural, sameBasis, type UEBar, type UEView } from '@/lib/finance-in-action/unitEconomics';
+import { PER_UNIT_DECIMALS, barValue, extent, plural, type UEBar, type UEView } from '@/lib/finance-in-action/unitEconomics';
+import { currencyOf, groupedBars, peerFigure } from '@/lib/finance-in-action/canonical';
+import { publishedPeers } from '@/lib/finance-in-action/peers';
+import { GroupedBar } from './GroupedBar';
+import { COMPARISON_CURRENCY, fxCaption, type FxRate } from '@/lib/finance-in-action/fx';
 import { cn } from '@/lib/utils';
 import { PeriodSelect } from './PeriodSelect';
 import type { ModelView } from './useModelView';
@@ -53,6 +57,7 @@ export function UnitEconomics({
   decorate,
   barNote,
   onlyMessage = false,
+  rates = [],
 }: {
   view: ModelView;
   reg: Registry;
@@ -65,6 +70,8 @@ export function UnitEconomics({
   barNote?: (bar: UEBar) => ReactNode;
   /** No period has a volume: show the one line and nothing else (constraint 9). */
   onlyMessage?: boolean;
+  /** JISDOR rates (fx.ts): a peer reporting in rupiah is compared in US dollars. */
+  rates?: FxRate[];
 }) {
   const { pkg, wb } = view;
   const units = plural(pkg.unitEconomics.unit);
@@ -78,6 +85,11 @@ export function UnitEconomics({
   const periodLabel = periodById(pkg, periodId)?.label ?? periodId;
   const denomCell = ue.denominator.key ? wb.cell(ue.denominator.key) : undefined;
   const openLine = ue.bars.find((b) => b.line.id === driverOf)?.line;
+  const own = currencyOf(pkg);
+  /** A peer drawn in another currency than its own: the caption names the rate. */
+  const converted = pairs.filter((p) => p.pkg && currencyOf(p.pkg) && currencyOf(p.pkg) !== own && currencyOf(p.pkg) !== COMPARISON_CURRENCY);
+  const peerCurrency = (peer: ModelPackage) => (currencyOf(peer) === own ? own : COMPARISON_CURRENCY);
+  const bars = useMemo(() => groupedBars(pkg, publishedPeers(reg, pkg), periodId, rates), [pkg, reg, periodId, rates]);
 
   if (onlyMessage) {
     return (
@@ -226,18 +238,20 @@ export function UnitEconomics({
                     {ue.scale.label} per {pkg.unitEconomics.unit}
                   </th>
                   <th scope="col" className="px-3 py-2 font-semibold">Physical driver</th>
-                  <th scope="col" className="px-3 py-2 font-semibold">Source</th>
                   {pairs.map((p) => (
                     <th key={p.ticker} scope="col" className="px-3 py-2 text-right font-semibold">
-                      {p.ticker} per {pkg.unitEconomics.unit}
+                      {p.ticker}
+                      {p.pkg && peerCurrency(p.pkg) !== own ? `, ${peerCurrency(p.pkg)}` : ''} per {pkg.unitEconomics.unit}
                     </th>
                   ))}
+                  <th scope="col" className="px-3 py-2 font-semibold">Source</th>
                 </tr>
               </thead>
               <tbody>
                 {ue.bars.map((bar) => {
                   const row = wb.row(bar.line.rowRef);
-                  const docs = bar.line.role === 'subtotal' ? [] : summariseSources(sourcedInputs(wb, bar.key));
+                  const inputs = bar.line.role === 'subtotal' ? [] : sourcedInputs(wb, bar.key);
+                  const reducesRow = bar.line.role === 'cost' || bar.line.role === 'unsplit';
                   const deco = decorate?.(bar.key) ?? null;
                   return (
                     <tr
@@ -258,23 +272,28 @@ export function UnitEconomics({
                           {bar.line.label}
                         </button>
                       </th>
-                      <td className="px-3 py-2 text-right">{row ? formatForRow(bar.total, row) : '—'}</td>
+                      <td className="px-3 py-2 text-right">{row && bar.total !== null ? formatForRow(reducesRow ? -bar.total : bar.total, row) : '—'}</td>
                       <td className="px-3 py-2 text-right">{barValue(bar)}</td>
                       <td className="px-3 py-2 text-muted-foreground">
                         {bar.line.role === 'unsplit' ? `Remainder: ${bar.line.contains?.join(', ')}` : bar.line.driver?.description ?? (bar.line.role === 'subtotal' ? 'Subtotal' : '–')}
                       </td>
-                      <td className="px-3 py-2 text-muted-foreground">
-                        {bar.line.role === 'subtotal' ? 'Worked from the lines above' : docs.length ? docs.join('; ') : 'Worked in the model'}
-                      </td>
                       {pairs.map((p) => {
-                        const v = p.pkg && p.pkg.meta.status === 'published' && sameBasis(pkg, p.pkg, bar.line.id) ? perUnitInPackage(p.pkg, bar.line.id, periodId) : null;
+                        const modelled = !!p.pkg && p.pkg.meta.status === 'published';
+                        const v = modelled ? peerFigure(pkg, bar.line, p.pkg!, periodId, rates).value : null;
                         const reduces = bar.line.role === 'cost' || bar.line.role === 'unsplit';
                         return (
                           <td key={p.ticker} className="px-3 py-2 text-right">
-                            {v === null ? <span className="text-muted-foreground">{COPY.notYetModelled}</span> : formatNumber(reduces ? -v : v, PER_UNIT_DECIMALS)}
+                            {v === null ? (
+                              <span className="text-muted-foreground">{modelled ? COPY.notComparable : COPY.notYetModelled}</span>
+                            ) : (
+                              formatNumber(reduces ? -v : v, PER_UNIT_DECIMALS)
+                            )}
                           </td>
                         );
                       })}
+                      <td className="px-3 py-2 text-xs text-muted-foreground" title={inputs.length ? summariseSources(inputs).join('; ') : undefined}>
+                        {bar.line.role === 'subtotal' ? 'Worked from the lines above' : inputs.length ? abbreviateSources(inputs) : 'Worked in the model'}
+                      </td>
                     </tr>
                   );
                 })}
@@ -287,16 +306,27 @@ export function UnitEconomics({
                   </td>
                   <td className="px-3 py-2" />
                   <td className="px-3 py-2" />
-                  <td className="px-3 py-2 text-muted-foreground">
-                    {ue.denominator.key ? summariseSources(sourcedInputs(wb, ue.denominator.key)).join('; ') || (denomCell?.kind ?? '') : ''}
-                  </td>
                   {pairs.map((p) => (
                     <td key={p.ticker} className="px-3 py-2" />
                   ))}
+                  <td
+                    className="px-3 py-2 text-xs text-muted-foreground"
+                    title={ue.denominator.key ? summariseSources(sourcedInputs(wb, ue.denominator.key)).join('; ') || undefined : undefined}
+                  >
+                    {ue.denominator.key ? abbreviateSources(sourcedInputs(wb, ue.denominator.key)) || (denomCell?.kind ?? '') : ''}
+                  </td>
                 </tr>
               </tbody>
             </table>
           </div>
+          {bars && <GroupedBar bars={bars} periodId={periodId} periodLabel={periodLabel} rates={rates} />}
+          {/* The grouped bar names the rate itself; without it, the table does. */}
+          {!bars &&
+            converted.map((p) => (
+            <p key={p.ticker} className="text-xs text-muted-foreground" data-fia-fx-caption>
+              {fxCaption(p.ticker, currencyOf(p.pkg!) ?? '', periodId, periodLabel, rates)}
+            </p>
+          ))}
         </>
       )}
     </div>

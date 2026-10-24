@@ -22,7 +22,10 @@ import { useModelView } from '@/components/finance-in-action/viewer/model/useMod
 import { decoration } from '@/lib/finance-in-action/view/decorate';
 import { latestReported } from '@/lib/finance-in-action/model/periods';
 import { unitEconomicsAt, noVolumeAnywhere } from '@/lib/finance-in-action/unitEconomics';
-import { formatForRow, formatNumber, decimalsFor } from '@/lib/finance-in-action/format';
+import { decimalsFor, house } from '@/lib/finance-in-action/format';
+
+// The world keeps the site's older number convention (format.ts `house`); the section moved to en-US.
+const { formatForRow, formatNumber } = house;
 import { modelPath } from '@/lib/finance-in-action/routes';
 import { isMeasured } from '@/lib/finance-in-action/contract/links';
 import { REGISTRY, subIndustryByCode } from '@/lib/world/registry/subindustries.generated';

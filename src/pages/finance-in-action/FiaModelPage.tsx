@@ -18,15 +18,18 @@ import { StagePills } from '@/components/finance-in-action/viewer/StagePills';
 import { CompanyTabs } from '@/components/finance-in-action/viewer/model/CompanyTabs';
 import { CompanyBar } from '@/components/finance-in-action/viewer/model/CompanyBar';
 import { DriverRow } from '@/components/finance-in-action/viewer/model/DriverRow';
-import { PeerBand } from '@/components/finance-in-action/viewer/model/PeerBand';
 import { ConditionPanel } from '@/components/finance-in-action/viewer/model/ConditionPanel';
 import { CellLegend, ModelGrid, type GridPlace } from '@/components/finance-in-action/viewer/model/ModelGrid';
 import { Inspector } from '@/components/finance-in-action/viewer/model/Inspector';
 import { WorkpaperRecord } from '@/components/finance-in-action/viewer/model/WorkpaperRecord';
+import { AdminOnly } from '@/components/auth/AdminOnly';
+import { useAuth } from '@/contexts/AuthContext';
 import { DownloadButton } from '@/components/finance-in-action/viewer/model/DownloadButton';
 import { PeriodSelect } from '@/components/finance-in-action/viewer/model/PeriodSelect';
 import { UnitEconomics } from '@/components/finance-in-action/viewer/model/UnitEconomics';
 import { KeyFigures } from '@/components/finance-in-action/viewer/model/KeyFigures';
+import { ValueChain } from '@/components/finance-in-action/viewer/model/ValueChain';
+import { valueChain } from '@/lib/finance-in-action/valueChain';
 import { ModelCard } from '@/components/finance-in-action/viewer/model/ModelCard';
 import { FormulaBar } from '@/components/finance-in-action/viewer/model/FormulaBar';
 import { SheetTabs } from '@/components/finance-in-action/viewer/model/SheetTabs';
@@ -35,6 +38,8 @@ import { StatusLine } from '@/components/finance-in-action/viewer/model/StatusLi
 import { SectionNav } from '@/components/finance-in-action/viewer/model/SectionNav';
 import { AlongTheChain } from '@/components/finance-in-action/viewer/model/AlongTheChain';
 import { CostSankey } from '@/components/finance-in-action/viewer/model/CostSankey';
+import { FlowSankey } from '@/components/finance-in-action/viewer/model/FlowSankey';
+import { flowSankey, hasFlowMap } from '@/lib/finance-in-action/flowSankey';
 import { LinkCard } from '@/components/finance-in-action/viewer/links/LinkCard';
 import { keyFigures } from '@/lib/finance-in-action/keyFigures';
 import { UELineDetail } from '@/components/finance-in-action/viewer/model/UELineDetail';
@@ -54,7 +59,7 @@ import type { IndustryLink } from '@/lib/finance-in-action/contract/links';
 import { COPY } from '@/lib/finance-in-action/copy';
 import { positionOf } from '@/lib/finance-in-action/chain';
 import { linksFrom } from '@/lib/finance-in-action/links';
-import { peerBand, publishedPeers } from '@/lib/finance-in-action/peers';
+import { useFxRates } from '@/lib/finance-in-action/useFxRates';
 import { latestReported, quarterPeriods, periodById } from '@/lib/finance-in-action/model/periods';
 import { noVolumeAnywhere, unitEconomicsAt } from '@/lib/finance-in-action/unitEconomics';
 import { groupAlongChain, type Registry } from '@/lib/finance-in-action/registry';
@@ -79,9 +84,9 @@ function LensLegend() {
 
 export function Section({ id, title, aside, children }: { id: string; title: string; aside?: ReactNode; children: ReactNode }) {
   return (
-    <section aria-labelledby={id} className="mb-12 scroll-mt-24">
+    <section aria-labelledby={id} className="mb-12 scroll-mt-32">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-border pb-2">
-        <h2 id={id} className="scroll-mt-24 text-xl font-semibold text-foreground">
+        <h2 id={id} className="scroll-mt-32 font-sans text-xl font-semibold tracking-normal text-foreground">
           {title}
         </h2>
         {aside}
@@ -95,6 +100,8 @@ export function FiaModelPage({ pkg, reg }: { pkg: ModelPackage; reg: Registry })
   const [params, setParams] = useSearchParams();
   const lens = params.get(MODEL_PARAM.lens) === 'on';
   const view = useModelView(pkg, lens);
+  const rates = useFxRates();
+  const { isAdmin, isLoading: authLoading } = useAuth();
   const setLens = (on: boolean) => {
     const next = new URLSearchParams(params);
     if (on) next.set(MODEL_PARAM.lens, 'on');
@@ -106,6 +113,10 @@ export function FiaModelPage({ pkg, reg }: { pkg: ModelPackage; reg: Registry })
   const ue = useMemo(() => unitEconomicsAt(view.wb, view.values, uePeriod), [view.wb, view.values, uePeriod]);
   const noVolume = useMemo(() => noVolumeAnywhere(view.wb, view.values), [view.wb, view.values]);
   const figures = useMemo(() => keyFigures(view.wb, view.values), [view.wb, view.values]);
+  // The value chain and the cost flow read one period, quarters and years alike; it opens on the key figures' period.
+  const [flowPeriod, setFlowPeriod] = useState(() => figures.periodId);
+  const chain = useMemo(() => valueChain(view.wb, view.values, flowPeriod), [view.wb, view.values, flowPeriod]);
+  const flow = useMemo(() => (hasFlowMap(pkg) ? flowSankey(view.wb, view.values, flowPeriod) : null), [pkg, view.wb, view.values, flowPeriod]);
   const groups = useMemo(() => groupAlongChain(reg), [reg]);
   const [chainLinkId, setChainLinkId] = useState<string | null>(null);
   const chainLink = chainLinkId ? reg.links.find((l) => l.id === chainLinkId) ?? null : null;
@@ -141,8 +152,6 @@ export function FiaModelPage({ pkg, reg }: { pkg: ModelPackage; reg: Registry })
     if (node && out.length) map.set(node.id, out);
     return map;
   }, [reg, pkg, meta.subIndustry]);
-
-  const peers = useMemo(() => peerBand(reg, pkg), [reg, pkg]);
 
   // With the lens on, a selection brings the tree and the waterfall to its
   // period, so its precedents and dependents can be marked in all three.
@@ -221,9 +230,8 @@ export function FiaModelPage({ pkg, reg }: { pkg: ModelPackage; reg: Registry })
     { id: 'fia-unit-economics', title: COPY.unitEconomicsTitle(pkg.unitEconomics.unit) },
     { id: 'fia-cost-flow', title: COPY.sankeyTitle(sub?.unitNoun ?? pkg.unitEconomics.unit) },
     { id: 'fia-along-chain', title: COPY.alongChainTitle },
-    { id: 'fia-peers', title: COPY.whereItSits(meta.ticker, subName) },
-    { id: 'fia-why', title: COPY.whyThisLinkMatters },
-    { id: 'fia-workpaper', title: COPY.workpaper },
+    // The workpaper record is written for the builder: an admin sees it, and its anchor (item 8).
+    ...(isAdmin && !authLoading ? [{ id: 'fia-workpaper', title: COPY.workpaper }] : []),
   ];
   const title = (id: string) => sections.find((x) => x.id === id)!.title;
 
@@ -240,7 +248,7 @@ export function FiaModelPage({ pkg, reg }: { pkg: ModelPackage; reg: Registry })
       ]}
     >
       <SEO title={`${meta.name}: model`} description={`${meta.name}, ${subName}: the operation rebuilt from its filings.`} noindex />
-      <div className="container max-w-7xl px-4 pb-8 pt-1 sm:px-8">
+      <div className="fia-viewer container max-w-7xl px-4 pb-8 pt-1 font-sans sm:px-8">
         <div className="mb-1 space-y-1">
           <StagePills groups={groups} mode="link" currentPosition={meta.chainStage} />
           <CompanyTabs reg={reg} pkg={pkg} />
@@ -311,12 +319,24 @@ export function FiaModelPage({ pkg, reg }: { pkg: ModelPackage; reg: Registry })
         <Section
           id="fia-drivers"
           title={title('fia-drivers')}
-          aside={<PeriodSelect label="Quarter" periods={quarterPeriods(pkg)} value={treePeriod} onChange={setTreePeriod} />}
+          aside={
+            chain && !lens ? (
+              <PeriodSelect label="Period" periods={pkg.periods} value={flowPeriod} onChange={setFlowPeriod} />
+            ) : (
+              <PeriodSelect label="Quarter" periods={quarterPeriods(pkg)} value={treePeriod} onChange={setTreePeriod} />
+            )
+          }
         >
-          <p className="mb-3 text-sm text-muted-foreground">
-            {treePeriod === meta.asOf.fullStatementsTo ? `${treeLabel}, the latest quarter with full statements.` : `${treeLabel}.`} Each figure has
-            the same quarter a year earlier beneath it.
-          </p>
+          {chain && !lens ? (
+            <p className="mb-3 text-sm text-muted-foreground">
+              {chain.period?.label ?? flowPeriod}.{chain.priorPeriod ? ' Each figure has the same period a year earlier beneath it.' : ''}
+            </p>
+          ) : (
+            <p className="mb-3 text-sm text-muted-foreground">
+              {treePeriod === meta.asOf.fullStatementsTo ? `${treeLabel}, the latest quarter with full statements.` : `${treeLabel}.`} Each figure has
+              the same quarter a year earlier beneath it.
+            </p>
+          )}
           {lens ? (
             <div className="space-y-3">
               <div className="flex flex-wrap items-center justify-between gap-3">
@@ -335,6 +355,8 @@ export function FiaModelPage({ pkg, reg }: { pkg: ModelPackage; reg: Registry })
               <LensLegend />
               <DriverTree view={view} periodId={treePeriod} decorate={decorate} />
             </div>
+          ) : chain ? (
+            <ValueChain chain={chain} view={view} decorate={decorate} />
           ) : (
             <DriverRow view={view} periodId={treePeriod} feeds={feeds} reg={reg} decorate={decorate} />
           )}
@@ -350,12 +372,27 @@ export function FiaModelPage({ pkg, reg }: { pkg: ModelPackage; reg: Registry })
             onlyMessage={noVolume}
             decorate={decorate}
             barNote={barNote}
+            rates={rates}
           />
         </Section>
 
-        {/* Directly after the waterfall, on the waterfall's own period (chain view §3.5). */}
-        <Section id="fia-cost-flow" title={title('fia-cost-flow')}>
-          <CostSankey reg={reg} pkg={pkg} ue={ue} onlyMessage={noVolume} onOpenLink={setChainLinkId} />
+        {/* A mapped company: the full flow, on the value chain's period (item 5); else the per-unit flow on the waterfall's (chain view §3.5). */}
+        <Section
+          id="fia-cost-flow"
+          title={title('fia-cost-flow')}
+          aside={flow && !chain ? <PeriodSelect label="Period" periods={pkg.periods} value={flowPeriod} onChange={setFlowPeriod} /> : undefined}
+        >
+          {flow ? (
+            flow.available ? (
+              <FlowSankey model={flow} periodLabel={periodById(pkg, flowPeriod)?.label ?? flowPeriod} title={title('fia-cost-flow')} />
+            ) : (
+              <p className="rounded-md border border-dashed border-border px-4 py-6 text-center text-sm font-medium text-foreground" role="status" data-sankey-unavailable>
+                {COPY.flowNotDisclosed(periodById(pkg, flowPeriod)?.label ?? flowPeriod)}
+              </p>
+            )
+          ) : (
+            <CostSankey reg={reg} pkg={pkg} ue={ue} onlyMessage={noVolume} onOpenLink={setChainLinkId} />
+          )}
         </Section>
 
         <Section id="fia-along-chain" title={title('fia-along-chain')}>
@@ -367,17 +404,14 @@ export function FiaModelPage({ pkg, reg }: { pkg: ModelPackage; reg: Registry })
           )}
         </Section>
 
-        <Section id="fia-peers" title={title('fia-peers')}>
-          <PeerBand metrics={peers} ticker={meta.ticker} subIndustryName={subName} publishedCount={publishedPeers(reg, pkg).length} />
-        </Section>
+        <AdminOnly>
+          <Section id="fia-workpaper" title={COPY.workpaper}>
+            <WorkpaperRecord pkg={pkg} />
+          </Section>
+        </AdminOnly>
 
-        <Section id="fia-why" title={title('fia-why')}>
-          <ConditionPanel pkg={pkg} subIndustry={sub} />
-        </Section>
-
-        <Section id="fia-workpaper" title={title('fia-workpaper')}>
-          <WorkpaperRecord pkg={pkg} />
-        </Section>
+        {/* After the last section, before the footer (item 9). */}
+        <ConditionPanel pkg={pkg} subIndustry={sub} />
       </div>
     </PageLayout>
   );

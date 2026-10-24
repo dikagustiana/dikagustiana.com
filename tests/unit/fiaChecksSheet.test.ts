@@ -26,8 +26,8 @@ describe('checksRows', () => {
     expect(revenue.unit).toBe('Rp bn');
     expect(revenue.cells.map((c) => c.text)).toEqual([
       'REPORTED!K2',
-      '7.270',
-      '7.270',
+      '7,270',
+      '7,270',
       '0',
       'Agrees',
       'SYNTHETIC IDX XBRL instance FY 25, syn:Revenue',

@@ -35,8 +35,8 @@ export function CompanyBar({ pkg, reg, lens, onLens }: { pkg: ModelPackage; reg:
       <div className="flex flex-wrap items-center gap-x-4">
         <div className="min-w-[min(100%,20rem)] flex-1">
           <div className="flex flex-wrap items-center gap-x-3">
-            <h1 className="font-display text-xl font-bold leading-6 text-foreground">
-              {meta.name} <span className="font-mono text-base font-semibold text-muted-foreground">{meta.ticker}</span>
+            <h1 className="text-xl font-semibold leading-6 text-foreground">
+              {meta.name} <span className="text-base font-semibold tracking-normal text-muted-foreground">{meta.ticker}</span>
             </h1>
             {meta.provenance === 'synthetic' && <SyntheticBadge />}
           </div>

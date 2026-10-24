@@ -8,13 +8,13 @@ import userEvent from '@testing-library/user-event';
 import { makeQueryResult } from './helpers/renderWithProviders';
 import { renderFiaPage } from './helpers/renderFiaPage';
 
-const { fromMock } = vi.hoisted(() => ({ fromMock: vi.fn() }));
+const { fromMock, sessionRef } = vi.hoisted(() => ({ fromMock: vi.fn(), sessionRef: { current: null as unknown } }));
 vi.mock('@/integrations/supabase/client', () => ({
   supabase: {
     from: (...a: unknown[]) => fromMock(...a),
     auth: {
       onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
-      getSession: async () => ({ data: { session: null } }),
+      getSession: async () => ({ data: { session: sessionRef.current } }),
       signOut: async () => ({ error: null }),
     },
   },
@@ -31,9 +31,16 @@ const at = (ticker: string, query = '') =>
   renderFiaPage(<FiaModelRoute />, { path: '/finance/finance-in-action/:modelSlug', url: `/finance/finance-in-action/${ticker}${query}` });
 
 beforeEach(() => {
+  sessionRef.current = null;
   fromMock.mockReset();
   fromMock.mockImplementation(() => makeQueryResult(null));
 });
+
+/** Signed in as an admin: a session, and user_roles answering "admin" (AuthContext's own check). */
+function asAdmin() {
+  sessionRef.current = { access_token: 't', user: { id: 'admin-user' } };
+  fromMock.mockImplementation((table: string) => makeQueryResult(table === 'user_roles' ? { role: 'admin' } : null));
+}
 
 describe('the model page header', () => {
   it('names the company and ticker, its sub-industry, pair, quarters and status', async () => {
@@ -91,8 +98,8 @@ describe('How the business makes money', () => {
     const items = within(section).getAllByRole('listitem');
     expect(items).toHaveLength(pkg.driverTree.nodes.length);
     expect(items[0]).toHaveTextContent('Tonnes sold');
-    expect(items[0]).toHaveTextContent('2,80');
-    expect(items[0]).toHaveTextContent('Q4 24: 2,40');
+    expect(items[0]).toHaveTextContent('2.80');
+    expect(items[0]).toHaveTextContent('Q4 24: 2.40');
   });
 
   it('puts "Feeds X" on the node a register link leaves from', async () => {
@@ -103,32 +110,31 @@ describe('How the business makes money', () => {
   });
 });
 
-describe('the peer band', () => {
-  it('draws the band from the two published companies, with this company and its pair', async () => {
+describe('the peer band (docs/prd/2026-10-fia-fixes item 6)', () => {
+  it('is gone, section and anchor: the grouped bar under unit economics compares the companies', async () => {
     at('xcoa');
-    const section = (await screen.findByRole('heading', { level: 2, name: /Where XCOA sits/ })).closest('section')!;
-    expect(section).toHaveTextContent('range of the 2 published companies');
-    expect(section).toHaveTextContent('the dashed marker SCOA');
-    expect(within(section).getAllByText('XCOA').length).toBeGreaterThan(0);
-  });
-
-  it('shows the empty state with fewer than two published companies (constraint 11)', async () => {
-    at('scem');
-    const section = (await screen.findByRole('heading', { level: 2, name: /Where SCEM sits/ })).closest('section')!;
-    expect(section).toHaveTextContent(COPY.peerEmpty);
-    expect(section.querySelector('[aria-hidden="true"].relative')).toBeNull();
+    await screen.findByRole('heading', { level: 2, name: COPY.howItMakesMoney });
+    expect(screen.queryByRole('heading', { level: 2, name: /Where XCOA sits/ })).toBeNull();
+    expect(document.getElementById('fia-peers')).toBeNull();
+    expect(document.querySelector('a[href="#fia-peers"]')).toBeNull();
   });
 });
 
-describe('Why this link matters', () => {
-  it('quotes the condition and its rule from section 05, the model’s line, and the chain map link', async () => {
+describe('Related reading (docs/prd/2026-10-fia-fixes item 9)', () => {
+  it('names each condition in one line, links it, keeps the chain map link, and drops the rule and the note', async () => {
     at('xcoa');
     const condition = getConditionByNumber(3)!;
-    const section = (await screen.findByRole('heading', { level: 2, name: COPY.whyThisLinkMatters })).closest('section')!;
-    expect(within(section).getByRole('link', { name: `Capital in Motion 03: ${condition.title}` })).toHaveAttribute('href', `/finance/capital-allocation/${condition.id}`);
-    expect(section).toHaveTextContent(condition.rule);
-    expect(section).toHaveTextContent('This model supplies the per-tonne economics');
-    expect(within(section).getByRole('link', { name: /Show coal on the chain map/ })).toHaveAttribute('href', '/?distance=finance&node=extraction');
+    await screen.findByRole('heading', { level: 2, name: COPY.howItMakesMoney });
+    const related = document.querySelector('[data-fia-related]') as HTMLElement;
+    expect(related).toHaveTextContent(`Related reading: Capital in Motion 03 · ${condition.title}`);
+    expect(within(related).getByRole('link', { name: `Capital in Motion 03 · ${condition.title}` })).toHaveAttribute('href', `/finance/capital-allocation/${condition.id}`);
+    expect(within(related).getByRole('link', { name: /Show coal on the chain map/ })).toHaveAttribute('href', '/?distance=finance&node=extraction');
+    expect(document.body).not.toHaveTextContent(condition.rule);
+    expect(document.body).not.toHaveTextContent('This model supplies the per-tonne economics');
+    expect(screen.queryByRole('heading', { name: 'Why this link matters' })).toBeNull();
+    // After the last section.
+    const sections = document.querySelectorAll('section[aria-labelledby]');
+    expect(sections[sections.length - 1].compareDocumentPosition(related) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 });
 
@@ -158,11 +164,11 @@ describe('The model grid and the inspector', () => {
   it('opens the inspector on a formula cell, in words and with values', async () => {
     const user = userEvent.setup();
     at('xcoa');
-    await user.click(await screen.findByRole('button', { name: /^Revenue, FY 25: 7\.270, Formula/ }));
+    await user.click(await screen.findByRole('button', { name: /^Revenue, FY 25: 7,270, Formula/ }));
     const inspector = screen.getByRole('complementary', { name: 'Inspector' });
     expect(inspector).toHaveTextContent('Revenue, FY 25');
     expect(inspector).toHaveTextContent('the sum of Revenue, Q1 25 to Q4 25');
-    expect(inspector).toHaveTextContent('= the sum of 1.540, 1.680, 1.950, 2.100');
+    expect(inspector).toHaveTextContent('= the sum of 1,540, 1,680, 1,950, 2,100');
     // The sources are found through the graph, back to the reported quarters.
     expect(inspector).toHaveTextContent(
       'Example Coal Co (SYNTHETIC), SYNTHETIC interim financial statements Q4 25, Q4 25, note 24, page 12, XBRL concept syn:Revenue',
@@ -173,7 +179,7 @@ describe('The model grid and the inspector', () => {
     const user = userEvent.setup();
     at('xcoa');
     await user.click(await screen.findByRole('tab', { name: 'Reported' }));
-    await user.click(screen.getByRole('button', { name: /^Revenue, FY 25: 7\.270, Sourced/ }));
+    await user.click(screen.getByRole('button', { name: /^Revenue, FY 25: 7,270, Sourced/ }));
     const inspector = screen.getByRole('complementary', { name: 'Inspector' });
     expect(inspector).toHaveTextContent('Agrees.');
     await user.click(screen.getByRole('button', { name: /^Cost of revenue, FY 25: .*Sourced/ }));
@@ -200,9 +206,19 @@ describe('The model grid and the inspector', () => {
     expect(screen.getByRole('button', { name: /^Realised price per tonne, Q2 24/ })).toHaveFocus();
   });
 
-  it('records the workpaper, keeping a pass with an escalation apart', async () => {
+  it('shows a reader no workpaper record, nor its anchor (item 8)', async () => {
+    at('xcoa');
+    await screen.findByRole('heading', { level: 2, name: COPY.howItMakesMoney });
+    expect(screen.queryByText(COPY.workpaper)).toBeNull();
+    expect(document.querySelector('a[href="#fia-workpaper"]')).toBeNull();
+    expect(document.body).not.toHaveTextContent('XCOA-2025Q4-r1-SYNTHETIC');
+  });
+
+  it('records the workpaper for an admin, keeping a pass with an escalation apart', async () => {
+    asAdmin();
     at('xcoa');
     const section = (await screen.findByRole('heading', { level: 2, name: COPY.workpaper })).closest('section')!;
+    expect(document.querySelector('a[href="#fia-workpaper"]')).not.toBeNull();
     expect(section).toHaveTextContent('XCOA-2025Q4-r1-SYNTHETIC');
     expect(section).toHaveTextContent('Passed with an open escalation');
     expect(section).toHaveTextContent('Owner (SYNTHETIC), 2026-01-15');

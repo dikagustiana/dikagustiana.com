@@ -117,7 +117,7 @@ describe('the index with the lens on', () => {
     renderUnmeasured('?connections=on');
     const region = await screen.findByRole('region', { name: /Chain stages/ });
     expect(within(region).getByRole('button', { name: 'Coal production to Construction materials: expected, not measured' })).toBeInTheDocument();
-    expect(within(region).getByRole('button', { name: /Synthetic coal mining \(SYNTHETIC\) to Synthetic cement \(SYNTHETIC\): cost share 12,0%, demand share 25,0%/ })).toBeInTheDocument();
+    expect(within(region).getByRole('button', { name: /Synthetic coal mining \(SYNTHETIC\) to Synthetic cement \(SYNTHETIC\): cost share 12.0%, demand share 25.0%/ })).toBeInTheDocument();
     const dashed = region.querySelectorAll('svg path[stroke-dasharray]');
     expect(dashed).toHaveLength(1);
     const solid = Array.from(region.querySelectorAll('svg g path')) as SVGPathElement[];
@@ -151,7 +151,7 @@ describe('the index with the lens on', () => {
     expect(isMeasured({ ...seed, demandShare: { ...seed.demandShare!, source: ' ' } })).toBe(false);
     renderIndex('?connections=on');
     const region = await screen.findByRole('region', { name: /Chain stages/ });
-    expect(within(region).getByRole('button', { name: 'Coal production to Construction materials: cost share 35,4%, demand share 3,6%' })).toBeInTheDocument();
+    expect(within(region).getByRole('button', { name: 'Coal production to Construction materials: cost share 35.4%, demand share 3.6%' })).toBeInTheDocument();
     expect(within(region).queryByRole('button', { name: /expected, not measured/ })).toBeNull();
     expect(region.querySelectorAll('svg path[stroke-dasharray]')).toHaveLength(0);
     const solid = Array.from(region.querySelectorAll('svg g path')) as SVGPathElement[];
@@ -163,8 +163,8 @@ describe('the index with the lens on', () => {
   it('opens the real link’s card with its sourced weights, and "not yet available" wherever a package is missing, nothing invented', async () => {
     renderIndex('?connections=on&link=coal-to-cement');
     const card = await screen.findByRole('region', { name: /Coal production to Construction materials: Coal burnt as kiln fuel/ });
-    expect(card).toHaveTextContent('Disclosed: 35,4% of cement cost of revenue, FY25. Source: PT Semen Indonesia');
-    expect(card).toHaveTextContent('3,6% of coal sales volume, FY25. Source: Direktorat Jenderal Mineral dan Batubara');
+    expect(card).toHaveTextContent('Disclosed: 35.4% of cement cost of revenue, FY25. Source: PT Semen Indonesia');
+    expect(card).toHaveTextContent('3.6% of coal sales volume, FY25. Source: Direktorat Jenderal Mineral dan Batubara');
     expect(card).toHaveTextContent(seed.caveat!);
     expect(card).toHaveTextContent('Worked here: not yet available');
     expect(within(card).getAllByText('not yet measured')).toHaveLength(2);
@@ -181,16 +181,16 @@ describe('the index with the lens on', () => {
     const user = userEvent.setup();
     renderIndex('?connections=on&link=syn-coal-to-cement');
     const card = await screen.findByRole('region', { name: /Synthetic coal mining \(SYNTHETIC\) to Synthetic cement/ });
-    expect(card).toHaveTextContent('Disclosed: 12,0% of cement cost of revenue, FY25');
-    expect(card).toHaveTextContent('Worked here: 17,2% (SCOA revenue per tonne × intensity ÷ SCEM cost of revenue per tonne, FY 25)');
-    expect(card).toHaveTextContent('Difference from the disclosed figure: +5,2 pp');
-    expect(card).toHaveTextContent('60,0%, range 40,0% to 80,0%, over 8 quarters');
+    expect(card).toHaveTextContent('Disclosed: 12.0% of cement cost of revenue, FY25');
+    expect(card).toHaveTextContent('Worked here: 17.2% (SCOA revenue per tonne × intensity ÷ SCEM cost of revenue per tonne, FY 25)');
+    expect(card).toHaveTextContent('Difference from the disclosed figure: +5.2 pp');
+    expect(card).toHaveTextContent('60.0%, range 40.0% to 80.0%, over 8 quarters');
     const split = within(card).getByRole('table');
-    expect(split).toHaveTextContent('Cement price per tonne877,1');
-    expect(split).toHaveTextContent('Coal burnt or used: coal price per tonne × intensity78,2');
-    expect(split).toHaveTextContent('Cement producer\'s margin per tonne355,0');
+    expect(split).toHaveTextContent('Cement price per tonne877.1');
+    expect(split).toHaveTextContent('Coal burnt or used: coal price per tonne × intensity78.2');
+    expect(split).toHaveTextContent('Cement producer\'s margin per tonne355.0');
     await user.type(within(card).getByLabelText('Change in the coal price, %'), '10');
-    expect(within(card).getByRole('status')).toHaveTextContent('Cement gross margin, SCEM: (0,6 pp)');
+    expect(within(card).getByRole('status')).toHaveTextContent('Cement gross margin, SCEM: (0.6 pp)');
   });
 
   it('puts "Feeds X" and "Fed by Y" on the sub-industries, opening the card', async () => {

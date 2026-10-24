@@ -49,12 +49,12 @@ function Companies({ list }: { list: CompanyEntry[] }) {
               to={modelPath(c.ticker)}
               className="inline-flex min-h-11 items-center gap-2 rounded-md border border-border px-3 text-sm text-foreground hover:border-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-              <span className="font-mono font-semibold">{c.ticker}</span>
+              <span className="font-semibold tracking-normal">{c.ticker}</span>
               <StatusMark status={c.status} className="text-xs" />
             </Link>
           ) : (
             <span className="inline-flex min-h-11 items-center gap-2 rounded-md border border-dashed border-border px-3 text-sm text-foreground">
-              <span className="font-mono font-semibold">{c.ticker}</span>
+              <span className="font-semibold tracking-normal">{c.ticker}</span>
               <StatusMark status={c.status} className="text-xs" />
               <span className="text-xs text-muted-foreground">{COPY.notYetModelled}</span>
             </span>
@@ -72,7 +72,7 @@ function Neighbour({ n, onOpenLink }: { n: ChainNeighbour; onOpenLink: (id: stri
       <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
         <p className="text-sm font-semibold text-foreground">
           {n.direction === 'upstream' ? `${COPY.fedBy} ${name}` : `${COPY.feeds} ${name}`}{' '}
-          <span className="font-mono text-xs font-normal text-muted-foreground">{n.code}</span>
+          <span className="text-xs font-normal text-muted-foreground">{n.code}</span>
         </p>
         <LinkState measured={n.measured} />
       </div>

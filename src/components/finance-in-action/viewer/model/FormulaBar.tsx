@@ -60,7 +60,7 @@ function NameBox({ address, onGo }: { address: string; onGo: (typed: string) => 
         onBlur={reset}
         onKeyDown={onKeyDown}
         className={cn(
-          'h-11 w-28 min-w-0 border-r border-border bg-transparent px-2 font-mono text-xs font-semibold text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:w-36',
+          'h-11 w-28 min-w-0 border-r border-border bg-transparent px-2 text-xs font-semibold tabular-nums text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:w-36',
           error && 'text-destructive',
         )}
       />
@@ -119,7 +119,7 @@ export function FormulaBar({
   return (
     <div role="group" aria-label={COPY.formulaBar} className="relative flex min-h-11 items-stretch border-y border-border bg-background text-[13px]">
       <NameBox address={address} onGo={onGo} />
-      <span aria-hidden="true" className="hidden flex-none items-center border-r border-border px-2.5 font-serif italic text-muted-foreground lg:flex">
+      <span aria-hidden="true" className="hidden flex-none items-center border-r border-border px-2.5 italic text-muted-foreground lg:flex">
         fx
       </span>
       {edit && editing ? (

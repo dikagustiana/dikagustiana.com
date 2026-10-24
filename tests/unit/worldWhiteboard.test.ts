@@ -15,7 +15,9 @@ import { LAYOUT } from '@/world/placement/layout.generated';
 import { REGISTRY } from '@/lib/world/registry/subindustries.generated';
 import { LABEL_CHARS, shortLabel, whiteboardFor } from '@/lib/world/whiteboard';
 import { NO_MODEL_NOTE } from '@/world/engine/whiteboard';
-import { formatNumber } from '@/lib/finance-in-action/format';
+import { house } from '@/lib/finance-in-action/format';
+
+const { formatNumber } = house;
 import fixture from '@/data/finance-in-action/fixtures/XCEM.SYNTHETIC.json';
 
 const pkg = fixture as unknown as ModelPackage;

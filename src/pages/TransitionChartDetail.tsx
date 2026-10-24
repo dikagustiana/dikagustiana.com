@@ -83,7 +83,7 @@ export default function TransitionChartDetail() {
       role="economist"
       breadcrumbs={[
         { label: 'Home', path: '/' },
-        { label: 'Green Transition', path: '/green-transition' },
+        { label: 'Green Transition' },
         { label: 'Transition Tracker', path: '/green-transition/tracker' },
         { label: chart?.title ?? 'Chart' },
       ]}

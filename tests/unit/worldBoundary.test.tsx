@@ -13,7 +13,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactElement } from 'react';
 import type { ModelPackage } from '@/lib/finance-in-action/contract/types';
-import { formatDelta, formatNumber, formatPercent } from '@/lib/finance-in-action/format';
+import { formatDelta, formatNumber, formatPercent, HOUSE } from '@/lib/finance-in-action/format';
 import fixture from '@/data/finance-in-action/fixtures/XCEM.SYNTHETIC.json';
 import { isMeasured, type IndustryLink } from '@/lib/finance-in-action/contract/links';
 import links from '@/data/finance-in-action/links.json';
@@ -47,10 +47,10 @@ function mount(ui: ReactElement) {
 beforeEach(() => { writes.count = 0; resetPublishedIndex(); HTMLCanvasElement.prototype.getContext = (() => null) as unknown as HTMLCanvasElement['getContext']; });
 afterEach(() => { vi.restoreAllMocks(); document.body.innerHTML = ''; });
 
-/** Every figure a package can put on screen, as the house formatter writes it. */
+/** Every figure a package can put on screen, as the formatter writes it: the world's own (HOUSE) or the section's viewer it embeds (en-US). */
 function allowedFigures(pkg: ModelPackage): Set<string> {
   const out = new Set<string>();
-  const add = (v: number | null | undefined) => { if (v === null || v === undefined) return; for (const d of [0, 1, 2]) { out.add(formatNumber(v, d)); out.add(formatDelta(v, d)); } out.add(formatPercent(v, 1)); out.add(formatPercent(v, 0)); out.add(formatNumber(v * 100, 1) + '%'); out.add(String(v)); };
+  const add = (v: number | null | undefined) => { if (v === null || v === undefined) return; for (const loc of [undefined, HOUSE]) { for (const d of [0, 1, 2]) { out.add(formatNumber(v, d, loc)); out.add(formatDelta(v, d, loc)); } out.add(formatPercent(v, 1, loc)); out.add(formatPercent(v, 0, loc)); out.add(formatNumber(v * 100, 1, loc) + '%'); } out.add(String(v)); };
   for (const s of pkg.sheets) for (const r of s.rows) for (const c of r.cells) add(c.value);
   for (const p of pkg.periods) for (const t of p.label.match(/\d+/g) ?? []) out.add(t);
   for (const t of `${pkg.meta.asOf.latestQuarter} ${pkg.meta.asOf.fullStatementsTo} ${pkg.meta.version}`.match(/\d+/g) ?? []) out.add(t);
@@ -85,7 +85,7 @@ describe('the data boundary', () => {
     const board = await screen.findByRole('dialog', { name: 'Board: SMGR' });
     await waitFor(() => expect(board).toHaveTextContent('No model yet'));
     // A measured link's sourced weights belong to the link register, not to the company: the board may show them, and nothing else.
-    const linkWeights = new Set((links as IndustryLink[]).filter(isMeasured).flatMap((l) => [l.costShare!.value, l.demandShare!.value]).map((v) => formatNumber(v * 100, 1) + '%'));
+    const linkWeights = new Set((links as IndustryLink[]).filter(isMeasured).flatMap((l) => [l.costShare!.value, l.demandShare!.value]).map((v) => formatNumber(v * 100, 1, HOUSE) + '%'));
     expect(figuresIn(board.textContent ?? '').filter((t) => !linkWeights.has(t))).toEqual([]);
     expect(writes.count).toBe(0);
   }, 15000);

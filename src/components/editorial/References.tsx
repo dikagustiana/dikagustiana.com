@@ -1,5 +1,6 @@
 import { ExternalLink, BookOpen } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { publicReferences } from '@/lib/editorial/referenceAnnotations';
 
 interface Reference {
   label: string;
@@ -9,12 +10,20 @@ interface Reference {
 interface ReferencesProps {
   references: (string | Reference)[];
   className?: string;
+  /**
+   * For a reader, not an admin (docs/prd/2026-10-fia-fixes item 10): drop the
+   * VERIFIED / UNVERIFIED / UNAVAILABLE / MISNUMBERED notes, and an UNAVAILABLE
+   * reference the body does not cite. `citedIndexes` are the body's citations.
+   */
+  hideAnnotations?: boolean;
+  citedIndexes?: Set<number>;
 }
 
-export function References({ references, className }: ReferencesProps) {
-  if (!references || references.length === 0) return null;
+export function References({ references, className, hideAnnotations = false, citedIndexes }: ReferencesProps) {
+  const shown = hideAnnotations ? publicReferences(references ?? [], citedIndexes ?? new Set()) : references;
+  if (!shown || shown.length === 0) return null;
 
-  const normalizedRefs = references.map(ref => 
+  const normalizedRefs = shown.map(ref =>
     typeof ref === 'string' ? { label: ref } : ref
   );
 

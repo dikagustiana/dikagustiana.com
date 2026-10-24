@@ -14,6 +14,8 @@ interface NavDropdownProps {
   width?: string;
   /** When set, clicking the label navigates here. */
   basePath?: string;
+  /** Where the label itself goes, when not to basePath (a section with no landing page). */
+  href?: string;
   /**
    * Which edge of the label the panel lines up with. The last menu in the row
    * takes 'end': its panel is wider than its label, and lined up from the
@@ -37,7 +39,7 @@ export const NAV_DROPDOWN_CLOSE_DELAY_MS = 150;
  */
 let closeOpenMenu: (() => void) | null = null;
 
-export function NavDropdown({ label, items, width = 'w-56', basePath, align = 'start' }: NavDropdownProps) {
+export function NavDropdown({ label, items, width = 'w-56', basePath, href, align = 'start' }: NavDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -209,7 +211,7 @@ export function NavDropdown({ label, items, width = 'w-56', basePath, align = 's
       >
         {basePath ? (
           <Link
-            to={basePath}
+            to={href ?? basePath}
             className="hover:text-header-foreground transition-colors"
             onClick={close}
           >

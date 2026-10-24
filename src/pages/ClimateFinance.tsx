@@ -55,12 +55,12 @@ export default function ClimateFinance() {
       role="economist"
       breadcrumbs={[
         { label: 'Home', path: '/' },
-        { label: 'Green Transition', path: '/green-transition' },
+        { label: 'Green Transition' },
         { label: 'Climate Finance' },
       ]}
       subNav={{
         tabs: GREEN_TRANSITION_TABS,
-        backLink: { label: 'Green Transition', path: '/green-transition' },
+        backLink: { label: 'Green Transition', path: '/green-transition/now' },
       }}
     >
       <SEO

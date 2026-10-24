@@ -154,3 +154,33 @@ export function summariseSources(inputs: SourcedInput[]): string[] {
     return [g.title, range, g.note ? `note ${g.note}` : null].filter(Boolean).join(', ');
   });
 }
+
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+/** A statement by the month it closes: three months are a first quarter, six a half year, nine nine months, twelve a year. */
+const SPAN: Record<number, string> = { 3: 'Q1', 6: 'H1', 9: '9M', 12: 'FY' };
+const YEAR_DIGITS = 2;
+
+/** A document's short name from the first date in its title: "… 31 March 2026 and …" is "Q1 26". Null when it names none. */
+export function documentShort(document: string): string | null {
+  const m = new RegExp(`\\b\\d{1,2} (${MONTHS.join('|')}) (\\d{4})\\b`).exec(document);
+  if (!m) return null;
+  const span = SPAN[MONTHS.indexOf(m[1]) + 1];
+  return span ? `${span} ${m[2].slice(-YEAR_DIGITS)}` : null;
+}
+
+/**
+ * The sources of a figure in a table cell's width (docs/prd/2026-10-fia-fixes
+ * item 4): each document by its short name and the note read, in the order
+ * they are first read, `Q1 26 n.26 · H1 26 n.27 · 9M 25 n.27 · FY 25 n.27`.
+ * The full names go in the cell's title (summariseSources).
+ */
+export function abbreviateSources(inputs: SourcedInput[]): string {
+  const out: string[] = [];
+  for (const i of inputs) {
+    const s = i.source;
+    const short = documentShort(s.document) ?? (s.document.endsWith(s.period) ? s.period : s.document);
+    const item = s.note ? `${short} n.${s.note}` : short;
+    if (!out.includes(item)) out.push(item);
+  }
+  return out.join(' · ');
+}

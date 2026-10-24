@@ -13,7 +13,7 @@ export function SyntheticBanner({ text = COPY.syntheticBanner }: { text?: string
 
 export function SyntheticBadge() {
   return (
-    <span className="inline-flex items-center rounded border border-dashed border-foreground/50 px-1.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-foreground">
+    <span className="inline-flex items-center rounded border border-dashed border-foreground/50 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-foreground">
       {COPY.syntheticBadge}
     </span>
   );

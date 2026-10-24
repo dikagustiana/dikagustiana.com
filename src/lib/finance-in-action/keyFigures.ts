@@ -14,7 +14,7 @@
 import type { ModelPackage } from './contract/types';
 import { splitRowRef } from './contract/types';
 import { isNum, type Value } from './engine/engine';
-import { latestReported, periodById, quarterPeriods, yearAgo } from './model/periods';
+import { latestReported, periodById, yearAgo } from './model/periods';
 import type { Workbook } from './model/workbook';
 import { denominatorState, noVolumeAnywhere, PER_UNIT_DECIMALS, plural, unitEconomicsAt, type UEView } from './unitEconomics';
 import { decimalsFor, formatPercent } from './format';
@@ -61,18 +61,33 @@ export interface KeyFigureSet {
 const num = (v: Value | undefined): number | null => (isNum(v) ? v : null);
 
 /**
- * The period the cards read: the latest reported quarter with note-level
- * detail, so the same quarter a year earlier exists to compare with; else the
- * latest reported period with detail; else, without unit economics, the
- * latest quarter with full statements.
+ * The period the cards read: the latest reported period, by the date it ends,
+ * that has a volume (docs/prd/2026-10-fia-fixes, defaults: ADRO's quarters
+ * carry no volume after 4Q 24, so its cards read FY 25, not the stale
+ * quarter); else, without unit economics, the latest quarter with full
+ * statements. The period's label is on every card.
  */
 export function keyFigurePeriod(wb: Workbook, values: Map<string, Value>): string {
   const pkg = wb.pkg;
   const ids = pkg.unitEconomics.periods;
   if (!ids.length || noVolumeAnywhere(wb, values)) return pkg.meta.asOf.fullStatementsTo;
-  const quarters = new Set(quarterPeriods(pkg).map((p) => p.id));
-  const reportedQuarters = ids.filter((id) => quarters.has(id) && periodById(pkg, id)?.forecast === false);
-  return reportedQuarters[reportedQuarters.length - 1] ?? latestReported(pkg, ids) ?? pkg.meta.asOf.fullStatementsTo;
+  const withVolume = ids.filter((id) => periodById(pkg, id)?.forecast === false && denominatorState(wb, values, id).ok);
+  if (!withVolume.length) return latestReported(pkg, ids) ?? pkg.meta.asOf.fullStatementsTo;
+  // The latest end; on a tie (FY 25 and 4Q 25 end together) the quarter, which has a year-ago quarter to compare with.
+  const isQuarter = (id: string) => periodById(pkg, id)?.kind === 'quarter';
+  return withVolume.reduce((best, id) => {
+    const d = periodEnd(id) - periodEnd(best);
+    return d > 0 || (d === 0 && isQuarter(id) && !isQuarter(best)) ? id : best;
+  });
+}
+
+/** A period id's end as a month count: `25Q3` is September 2025, `FY25` December 2025; unknown ids sort first. */
+export function periodEnd(id: string): number {
+  const q = /^(\d{2})Q([1-4])E?$/.exec(id);
+  if (q) return (2000 + Number(q[1])) * 12 + Number(q[2]) * 3;
+  const fy = /^FY(\d{2})E?$/.exec(id);
+  if (fy) return (2000 + Number(fy[1])) * 12 + 12;
+  return -1;
 }
 
 /** A change as a fraction; none against a base at or below zero, where a percentage misleads. */
