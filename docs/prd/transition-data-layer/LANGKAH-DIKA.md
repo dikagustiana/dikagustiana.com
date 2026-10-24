@@ -5,9 +5,11 @@ akses produksi, key, atau keputusan editorial kamu. Urutan: 1 → 2 → 3 → 4 
 
 ## 1. Migration (Supabase SQL Editor)
 
-**Status 24 Okt 2026:** bagian 1 (9 tabel, enum, helper, RLS terkunci tanpa policy) sudah
-diterapkan Claude lewat konektor (migration `transition_data_layer_1_tables`). Sisanya tertahan
-karena permintaan konfirmasi konektor tidak sampai ke layar.
+**Status 24 Okt 2026: SELESAI.** Bagian 1 diterapkan Claude lewat konektor (migration
+`transition_data_layer_1_tables`); sisanya dijalankan Dika lewat `JALANKAN-INI.sql` di SQL Editor
+("Success. No rows returned"). Diverifikasi lewat konektor: 9 tabel, 8 view, 10 fungsi, 27 policy,
+seed lengkap, anon hanya membaca view, service role tidak bisa menulis `ds_observation`.
+Yang tersisa di langkah ini hanya tes (langkah 3), opsional.
 
 1. Buka https://supabase.com/dashboard/project/asypkbkiebjvvpimewfp/sql/new
 2. Salin **seluruh** isi `docs/prd/transition-data-layer/JALANKAN-INI.sql`, tempel, **Run**.

@@ -17,7 +17,7 @@ What is built and proven in the repository, and what still needs a person, a key
 
 | Item | State |
 |---|---|
-| Migration: tables, enums, views, RLS | **Written and tested** on Postgres 16 with the Supabase harness: `20261024120000_transition_data_layer.sql`. **Not applied to production.** |
+| Migration: tables, enums, views, RLS | **Applied to production on 24 October 2026**: part 1 through the connector (`transition_data_layer_1_tables`, version 20261024061020; the probe is 20261024060849), the gate, views, grants, seed and macro assumptions through `JALANKAN-INI.sql` in the SQL editor (not in the migration list, as with the Books migration). Verified by catalog and privilege queries; the advisors flag only the intended definer views and admin-checked RPCs. A no-op `transition_data_layer_probe` entry (it re-set `public`'s default schema comment) is in the list from testing the connector. |
 | `ds_publish_series()` with R1–R8, writing `ds_check` | **Done**, plus R0 and the GATE row (D7). `supabase/tests/transition_data_layer.sql`: **65 passed, 0 failed**, one rolled-back transaction. |
 | `ember.py`, `imf_sdmx.py` with tests on recorded answers | **Done.** IMF recorded; Ember constructed from its spec (fixtures README). 18 Python tests, in CI. |
 | `transition-fetch.yml` | **Done.** Weekly, Monday 02:13 WIB, plus manual by source and series. |
