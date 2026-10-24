@@ -41,7 +41,7 @@ globalThis.ResizeObserver ??= class {
 
 const book: Book = {
   id: 'b1', slug: 'valuation', title: 'Valuation', author: null, year: null, shelf_id: 's1', access: 'paid', purchase_url: 'https://example.com',
-  license_note: null, filepath: null, filename: null, mime_type: null, size_bytes: null, cover_path: null, synopsis_json: null, synopsis_html: null,
+  license_note: null, filepath: null, file_store: 'r2', filename: null, mime_type: null, size_bytes: null, cover_path: null, synopsis_json: null, synopsis_html: null,
   synopsis_excerpt: null, sort_order: 0, published: false, deleted_at: null,
 };
 shelvesData.current = [
