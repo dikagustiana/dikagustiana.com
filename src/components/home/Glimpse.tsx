@@ -45,6 +45,8 @@ import { monthYear } from '@/lib/formatDate';
 import { REDUCED_MOTION_QUERY, prefersReducedMotion } from '@/lib/motion';
 import { sectionLabel } from '@/lib/sectionLabels';
 import { cn } from '@/lib/utils';
+import { Link } from 'react-router-dom';
+import { AdminOnly } from '@/components/auth/AdminOnly';
 import './glimpse.css';
 
 /**
@@ -328,9 +330,17 @@ export function Glimpse({ essays, isLoading }: GlimpseProps) {
     <section aria-labelledby="glimpse-heading" className="border-b border-border py-12">
       <div className="container">
         <div className="mb-6 flex items-end justify-between gap-4">
-          <h2 ref={heading} id="glimpse-heading" className="text-xl font-display font-semibold text-foreground">
-            Glimpse
-          </h2>
+          <div className="flex items-baseline gap-3">
+            <h2 ref={heading} id="glimpse-heading" className="text-xl font-display font-semibold text-foreground">
+              Glimpse
+            </h2>
+            {/* The order is set in Admin → Content (docs/prd/2026-10-fia-fixes item 11); an admin reaches it from here. */}
+            <AdminOnly>
+              <Link to="/admin/content#homepage-order" className="text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline" data-glimpse-edit-order>
+                Edit order
+              </Link>
+            </AdminOnly>
+          </div>
           <div className="flex shrink-0 gap-2">
             {/* At every width: a phone has the swipe as well. */}
             {(canPrev || canNext) && (

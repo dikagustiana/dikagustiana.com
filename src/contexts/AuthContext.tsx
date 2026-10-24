@@ -128,3 +128,8 @@ export function useAuth() {
   }
   return context;
 }
+
+/** The auth state, or undefined outside an AuthProvider: for a block that only adds something for an admin and is otherwise nothing. */
+export function useOptionalAuth() {
+  return useContext(AuthContext);
+}

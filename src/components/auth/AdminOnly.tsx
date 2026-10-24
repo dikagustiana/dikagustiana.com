@@ -6,10 +6,10 @@
  * read, nothing is rendered either.
  */
 import type { ReactNode } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useOptionalAuth } from '@/contexts/AuthContext';
 
 export function AdminOnly({ children }: { children: ReactNode }) {
-  const { isAdmin, isLoading } = useAuth();
-  if (isLoading || !isAdmin) return null;
+  const auth = useOptionalAuth();
+  if (!auth || auth.isLoading || !auth.isAdmin) return null;
   return <>{children}</>;
 }
