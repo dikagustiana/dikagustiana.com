@@ -3724,3 +3724,25 @@ arbitrary essay speak for the whole page (last writer wins); writing it at
 wrong, so those rows are skipped and NAMED in the build log, along with any
 two essays that collide on one path (which fails the build). Page-level
 cards for the FSLI surfaces are separate work on a separate object.
+
+## 2026-10-24 — Damodaran, *Applied Corporate Finance*: the latest edition, checked against Wiley
+
+Checked before touching the Finance essays' reference annotations
+(docs/prd/2026-10-fia-fixes item 10). Wiley's own product page,
+https://www.wiley.com/en-us/Applied+Corporate+Finance%2C+4th+Edition-p-9781118808931,
+read on 2026-10-24, lists *Applied Corporate Finance, 4th Edition*, Aswath
+Damodaran: paperback ISBN 978-1-118-80893-1 (October 2014, 656 pages), e-book
+ISBN 978-1-119-08187-6 (August 2015). The page names no later edition, and a
+web search found no fifth edition from any bookseller or library catalogue
+(the most recent listed anywhere is the 4th; Wiley-VCH lists the same ISBN,
+January 2015).
+
+So the 4th edition is the latest. The essays cite "4th ed., Wiley (© 2015)",
+which is right. The note in "The objective function of the firm" that says
+"The framework specifies the 5th edition; MISNUMBERED, since the 4th edition
+is the latest in use" is correct about the 4th and describes a framework
+error; two other essays say the framework's "5e" was corrected to 4e in
+framework v2.1. These notes are annotations: from item 10 on, a reader does not
+see them and an admin does. No stored text was changed, because the PRD's
+non-goals keep essay bodies as they are; no separate "benchmark note" naming
+the edition was found in the repository to align.

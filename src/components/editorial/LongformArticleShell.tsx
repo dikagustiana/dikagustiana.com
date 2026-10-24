@@ -16,6 +16,7 @@ import { ArticleBody } from './ArticleBody';
 import { BriefToggle, type EssayView } from './BriefToggle';
 import { parseBriefDoc, isEmptyBrief } from '@/lib/brief';
 import { contentToHtml } from '@/lib/tiptap/serialize';
+import { citedIndexes, publicReferencesHtml } from '@/lib/editorial/referenceAnnotations';
 import { KeyTakeaways } from './KeyTakeaways';
 import { References } from './References';
 import { AuthorBox } from './AuthorBox';
@@ -47,6 +48,13 @@ export interface LongformArticleShellProps {
   brief?: unknown;
   keyTakeaways?: string[];
   references?: (string | { label: string; url?: string })[];
+  /**
+   * A reader, not an admin, on a page that hides reference annotations
+   * (docs/prd/2026-10-fia-fixes item 10; the Finance essay page sets it): the
+   * body's reference list and `references` lose their VERIFIED / UNAVAILABLE
+   * / UNVERIFIED / MISNUMBERED notes. What is stored does not change.
+   */
+  hideReferenceAnnotations?: boolean;
   authorBio?: string | null;
   previous?: { slug: string; title: string } | null;
   next?: { slug: string; title: string } | null;
@@ -82,11 +90,12 @@ export function LongformArticleShell({
   readTime,
   heroImage,
   heroCaption,
-  content,
-  htmlContent,
+  content: storedContent,
+  htmlContent: storedHtml,
   brief,
   keyTakeaways,
   references,
+  hideReferenceAnnotations = false,
   authorBio,
   previous,
   next,
@@ -94,6 +103,10 @@ export function LongformArticleShell({
   currentEssayId,
   section,
 }: LongformArticleShellProps) {
+  // Item 10: a reader's body and reference list carry no annotations; an admin's carry everything.
+  const content = useMemo(() => (hideReferenceAnnotations ? publicReferencesHtml(storedContent) : storedContent), [storedContent, hideReferenceAnnotations]);
+  const htmlContent = useMemo(() => (hideReferenceAnnotations && storedHtml ? publicReferencesHtml(storedHtml) : storedHtml), [storedHtml, hideReferenceAnnotations]);
+  const cited = useMemo(() => citedIndexes(content), [content]);
   const showUpdated = useMemo(() => {
     if (!updatedAt || !createdAt) return false;
     const diffDays =
@@ -219,7 +232,7 @@ export function LongformArticleShell({
           )}
 
           {references && references.length > 0 && (
-            <References references={references} />
+            <References references={references} hideAnnotations={hideReferenceAnnotations} citedIndexes={cited} />
           )}
 
           {author && <AuthorBox name={author} bio={authorBio} />}
