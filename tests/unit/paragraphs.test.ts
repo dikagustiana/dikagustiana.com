@@ -21,7 +21,7 @@ import {
   splitParagraphs,
   type TextLine,
 } from '../../scripts/books/paragraphs';
-import { CHAPTERS } from '../fixtures/books/makeFixtures';
+import { CHAPTERS } from '../fixtures/books/ledgersText';
 
 const fixture = (name: string) => new Uint8Array(fs.readFileSync(path.join(__dirname, '../fixtures/books', name)));
 

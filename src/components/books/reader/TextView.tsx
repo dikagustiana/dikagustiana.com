@@ -64,14 +64,22 @@ export function TextView({ chapter, range, paragraphs, loading, onChapter, quote
       setPending(null);
       return;
     }
-    const a = paraOf(sel.anchorNode, root);
-    const b = paraOf(sel.focusNode, root);
+    const r = sel.getRangeAt(0);
+    const a = paraOf(r.startContainer, root);
+    let b = paraOf(r.endContainer, root);
+    // A selection that ends at the very start of a paragraph (a triple click, a drag to the line below) has
+    // not taken any of it.
+    if (a !== null && b !== null && b > a) {
+      const head = document.createRange();
+      head.setStart(root.querySelector(`#para-${b}`)!, 0);
+      head.setEnd(r.endContainer, r.endOffset);
+      if (!head.toString().replace(/¶\d+/, '').trim()) b -= 1;
+    }
     const text = sel.toString().replace(/¶\d+/g, '').replace(/\s+/g, ' ').trim().slice(0, SELECTION_CAP);
     if (a === null || b === null || !text) {
       setPending(null);
       return;
     }
-    const r = sel.getRangeAt(0);
     const rects = typeof r.getClientRects === 'function' ? r.getClientRects() : null;
     const end = rects?.[rects.length - 1] ?? (typeof r.getBoundingClientRect === 'function' ? r.getBoundingClientRect() : { right: 0, bottom: 0 });
     const box = root.getBoundingClientRect();

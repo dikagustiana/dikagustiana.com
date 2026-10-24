@@ -126,7 +126,7 @@ export function AskMargin({ bookId, chapter, selection, owner, inChapter, onCite
             disabled={outOfQuestions}
             className="w-full resize-none rounded-md border border-white/15 bg-neutral-900 px-3 py-2 font-sans text-sm text-neutral-100 placeholder:text-neutral-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
           />
-          <Button type="submit" size="sm" className="mt-2" disabled={!question.trim() || state === 'asking' || outOfQuestions} aria-busy={state === 'asking'}>
+          <Button type="submit" size="sm" className="mt-2 bg-amber-400 text-neutral-900 hover:bg-amber-300" disabled={!question.trim() || state === 'asking' || outOfQuestions} aria-busy={state === 'asking'}>
             {state === 'asking' && <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />}
             Ask
           </Button>
