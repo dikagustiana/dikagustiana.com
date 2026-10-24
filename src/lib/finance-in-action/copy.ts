@@ -73,6 +73,7 @@ export const COPY = {
   openLink: 'Open the link card',
   // Cost flow (chain view §3.5)
   sankeyTitle: (noun: string) => `Where a unit of ${noun} goes`,
+  flowNotDisclosed: (period: string) => `The income statement is not disclosed in full for ${period}.`,
   publishedFailed: 'Published models could not be read, so only the preview companies are shown. The reason:',
   publishedLoading: 'Reading the published models…',
   // The sheet-first model page (docs/company-models/sheet-first, DESIGN §6)

@@ -36,6 +36,8 @@ import { StatusLine } from '@/components/finance-in-action/viewer/model/StatusLi
 import { SectionNav } from '@/components/finance-in-action/viewer/model/SectionNav';
 import { AlongTheChain } from '@/components/finance-in-action/viewer/model/AlongTheChain';
 import { CostSankey } from '@/components/finance-in-action/viewer/model/CostSankey';
+import { FlowSankey } from '@/components/finance-in-action/viewer/model/FlowSankey';
+import { flowSankey, hasFlowMap } from '@/lib/finance-in-action/flowSankey';
 import { LinkCard } from '@/components/finance-in-action/viewer/links/LinkCard';
 import { keyFigures } from '@/lib/finance-in-action/keyFigures';
 import { UELineDetail } from '@/components/finance-in-action/viewer/model/UELineDetail';
@@ -111,6 +113,7 @@ export function FiaModelPage({ pkg, reg }: { pkg: ModelPackage; reg: Registry })
   // The value chain and the cost flow read one period, quarters and years alike; it opens on the key figures' period.
   const [flowPeriod, setFlowPeriod] = useState(() => figures.periodId);
   const chain = useMemo(() => valueChain(view.wb, view.values, flowPeriod), [view.wb, view.values, flowPeriod]);
+  const flow = useMemo(() => (hasFlowMap(pkg) ? flowSankey(view.wb, view.values, flowPeriod) : null), [pkg, view.wb, view.values, flowPeriod]);
   const groups = useMemo(() => groupAlongChain(reg), [reg]);
   const [chainLinkId, setChainLinkId] = useState<string | null>(null);
   const chainLink = chainLinkId ? reg.links.find((l) => l.id === chainLinkId) ?? null : null;
@@ -370,9 +373,23 @@ export function FiaModelPage({ pkg, reg }: { pkg: ModelPackage; reg: Registry })
           />
         </Section>
 
-        {/* Directly after the waterfall, on the waterfall's own period (chain view §3.5). */}
-        <Section id="fia-cost-flow" title={title('fia-cost-flow')}>
-          <CostSankey reg={reg} pkg={pkg} ue={ue} onlyMessage={noVolume} onOpenLink={setChainLinkId} />
+        {/* A mapped company: the full flow, on the value chain's period (item 5); else the per-unit flow on the waterfall's (chain view §3.5). */}
+        <Section
+          id="fia-cost-flow"
+          title={title('fia-cost-flow')}
+          aside={flow && !chain ? <PeriodSelect label="Period" periods={pkg.periods} value={flowPeriod} onChange={setFlowPeriod} /> : undefined}
+        >
+          {flow ? (
+            flow.available ? (
+              <FlowSankey model={flow} periodLabel={periodById(pkg, flowPeriod)?.label ?? flowPeriod} title={title('fia-cost-flow')} />
+            ) : (
+              <p className="rounded-md border border-dashed border-border px-4 py-6 text-center text-sm font-medium text-foreground" role="status" data-sankey-unavailable>
+                {COPY.flowNotDisclosed(periodById(pkg, flowPeriod)?.label ?? flowPeriod)}
+              </p>
+            )
+          ) : (
+            <CostSankey reg={reg} pkg={pkg} ue={ue} onlyMessage={noVolume} onOpenLink={setChainLinkId} />
+          )}
         </Section>
 
         <Section id="fia-along-chain" title={title('fia-along-chain')}>
