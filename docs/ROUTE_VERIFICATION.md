@@ -91,10 +91,15 @@ Converted to `.maybeSingle()` across seven query modules.
 | `/accounting/statutory-reporting` | StatutoryReporting | — | public | OK (3294) | OK (3301) | OK (3334) | ok | OK |
 | `/accounting/consolidation/:topic` | ConsolidationDetail | essays | public | OK (665) | OK (672) | OK (705) | ok | OK |
 | `/finance` | FinanceLanding | finance_* | public | OK (1179) | OK (1186) | OK (1219) | ok | OK |
-| `/finance/finance-in-motion` | FinanceInMotion | — | public | OK (6308) | OK (6315) | OK (6348) | ok | OK |
-| `/finance/capital-in-motion/:conditionSlug` | CapitalConditionDetail | — | public | OK (482) | OK (489) | OK (522) | ok | OK |
+| `/finance/finance-in-motion` | Navigate (replace) → `/finance/finance-in-action/capital-in-motion` | — | public | redirect | redirect | redirect | — | Redirect since 2026-10-24 (finance restructure); the row's sweep figures were FinanceInMotion's and are retired. Verified by `tests/e2e/finance-restructure.spec.ts` and `tests/unit/capitalInMotionRoutes.test.tsx` |
+| `/finance/capital-in-motion/:conditionSlug` | Navigate (replace) → `/finance/finance-in-action/capital-in-motion/:conditionSlug` | — | public | redirect | redirect | redirect | — | Redirect, slug, query and fragment kept (2026-10-24). Verified as above |
 | `/finance/finance-in-action` | FinanceInActionIndex | finance_* | public | OK (642) | OK (649) | OK (682) | ok | OK |
 | `/finance/finance-in-action/:modelSlug` | FinanceModelDetail | finance_* | public | OK (494) | OK (501) | OK (534) | ok | OK |
+| `/finance/finance-in-action/capital-in-motion` | FinanceInMotion | — | public | see below | see below | see below | — | New 2026-10-24; see "Finance restructure" |
+| `/finance/finance-in-action/capital-in-motion/:conditionSlug` | CapitalConditionDetail | `fia.model_packages` (with `VITE_FIA_LIVE`) | public | see below | see below | see below | — | New 2026-10-24; see "Finance restructure" |
+| `/finance/capital-allocation` | Navigate (replace) → `/finance/finance-in-action/capital-in-motion` | — | public | redirect | redirect | redirect | — | Redirect since 2026-10-24; see "Finance restructure" |
+| `/finance/capital-allocation/:conditionSlug` | Navigate (replace) → `/finance/finance-in-action/capital-in-motion/:conditionSlug` | — | public | redirect | redirect | redirect | — | Redirect since 2026-10-24; see "Finance restructure" |
+| `/finance/toolkits` | ToolkitsPage | `toolkits`, `toolkit_versions`, `finance_modules` (migration pending) | public | see below | see below | see below | — | New 2026-10-24; see "Finance restructure" |
 | `/finance/:track` | FinanceTrackIndex | finance_* | public | OK (1364) | OK (1371) | OK (1404) | ok | OK |
 | `/finance/:track/:moduleSlug` | FinanceModulePage | essays, finance_* | public | OK (1018) | OK (1025) | OK (1437) | ok | OK |
 | `/finance/:track/:moduleSlug/:essaySlug` | FinanceEssayPage | essays, finance_* | public | OK (454) | OK (23435) | OK (23468) | ok | OK |
@@ -143,8 +148,44 @@ Converted to `.maybeSingle()` across seven query modules.
 | `/admin/writer/:section/list` | RequireAdmin | — | admin | OK (507) | OK (1941) | OK (37297) | ok | OK — gated correctly |
 | `/admin/writer/:section/:slug` | RequireAdmin | — | admin | OK (507) | OK (1941) | OK (44713) | ok | OK — gated correctly |
 | `/admin/content/:id` | RequireAdmin | — | admin | OK (507) | OK (1941) | OK (21745) | ok | OK — gated correctly |
+| `/admin/toolkits` | RequireAdmin → AdminToolkits | `toolkits`, `toolkit_versions`, `finance_modules` (migration pending) | admin | see below | see below | see below | — | New 2026-10-24; see "Finance restructure" |
 | `/the-next-big-thing` | TheNextBigThing | — | public | OK (1107) | OK (1114) | OK (1157) | ok | OK |
 | `/the-next-big-thing/:slug` | NextBigThingEssayPage | essays | public | 404 | 404 | 404 | ok | OK — 404 by design |
+
+## Finance restructure (2026-10-24, docs/prd/finance-restructure)
+
+Not a live three-identity sweep: the `toolkits` tables, `fia.slate_progress` and the
+`toolkit-file` function are not in production until their migrations are approved and
+applied. What was run, on branch `feat/finance-restructure`:
+
+| route | how verified | result |
+|---|---|---|
+| `/finance` | dev server (`VITE_FIA_LIVE=true`) reading production as anon; `tests/e2e/finance-restructure.spec.ts`; `tests/unit/financeLandingSection06.test.tsx` | six cards: 01–04 tracks, 05 Finance in Action (sub-entries Capital in Motion, Company models), 06 Toolkits; every card link resolves; no Capital Allocation card |
+| `/finance/finance-in-action` | dev server, live; `tests/unit/conditionIndex.test.tsx`, `fiaCoverage.test.tsx` | subsection A (21 conditions; 03 lists ADRO, INDY, ITMG, PTBA) then B (company models with the coverage line: A121 4 of 4, B121 2 of 2, J411 2 of 2 modelled) |
+| `/finance/finance-in-action/capital-in-motion` | `capitalInMotionRoutes.test.tsx`; e2e redirects | the 21 conditions; cards open the new detail address |
+| `/finance/finance-in-action/capital-in-motion/:conditionSlug` | dev server, live (`commodity-windfall`); `fia-adro-sections.spec.ts` (FIA config); `conditionCompanies.test.tsx` | "Companies exhibiting this condition": ADRO, INDY, ITMG, PTBA, each to `/finance/finance-in-action/<ticker>#fia-conditions`. In a build with neither FIA flag the block is compiled out with the viewer |
+| `/finance/finance-in-action/:modelSlug` | dev server, live (`adro`); `fia-adro-sections.spec.ts`; `fiaModelPage.test.tsx` | "Conditions present: 03 Commodity Windfall · 09 Strategic Downstreaming", at `#fia-conditions` |
+| `/finance/capital-allocation`, `/finance/capital-allocation/:conditionSlug`, `/finance/capital-in-motion/:conditionSlug`, `/finance/finance-in-motion` | `finance-restructure.spec.ts` (Back returns to the page before: a replace, not a push); dev server | land on the new addresses |
+| `/finance/toolkits` | dev server with the toolkit tables mocked; `finance-restructure.spec.ts`; `toolkits.test.tsx` | empty state; after a mocked publish, one card with `xlsx · v1.0 · updated 24 Oct 2026`, its module, `Download driver-tree-v1.0.xlsx`; a v1 download after v2 asks for and receives v1 (stand-in bucket) |
+| `/admin/toolkits` | dev server with auth mocked as admin; `finance-restructure.spec.ts`; `toolkits.test.tsx` | Publish disabled until every field and both attestations; the database's refusal shown when it says no |
+
+Screenshots: `docs/prd/finance-restructure/screenshots/after/`.
+
+Production, 2026-10-24, after `20261024170000_toolkits` and `20261024170200_fia_slate_status`
+were applied and `toolkit-file` (new) and `book-file` (v2, on `_shared/r2.ts`) deployed:
+
+- `supabase/tests/toolkits.sql` 24/24 and `supabase/tests/fia_slate_status.sql` 8/8 on the
+  production database, rolled back.
+- As a temporary admin, a publish with `verified_model: false` through the Data API:
+  `400 {"code":"23514", ... violates check constraint "toolkits_publish_checks"}`.
+- v1.0 then v2.0 uploaded to R2 through `toolkit-file`; a second upload of 1.0 answered 409
+  `exists`. As anon, the v1.0 link answered `200`, `Content-Disposition: attachment;
+  filename="qa-toolkit-test-v1.0.xlsx"`, body v1.0; the latest answered v2.0.
+- R2 CORS preflight for PUT from `https://dikagustiana.com` and `https://www.dikagustiana.com`: 204.
+- `book-file` v2 answered as v1 did (404 unknown slug, 401 upload as anon, a real book's
+  download 200/206 with the same Content-Disposition).
+- The QA files stay in R2 (`toolkits/qa-toolkit-test/1.0/…`, `…/2.0/…`): no function deletes
+  a toolkit file, by design.
 
 ## Method
 

@@ -1,9 +1,14 @@
 /**
- * AWS Signature Version 4, query-string form (a presigned URL), on WebCrypto
- * alone, so it runs unchanged in Deno (the edge function) and in Node (the
- * unit tests, tests/unit/bookFile.test.ts, which check it against AWS's own
- * published example). R2 speaks the S3 API at
+ * Cloudflare R2 for the edge functions that sign URLs into the private bucket
+ * (book-file, toolkit-file): AWS Signature Version 4, query-string form (a
+ * presigned URL), on WebCrypto alone, so it runs unchanged in Deno (the edge
+ * functions) and in Node (the unit tests, tests/unit/bookFile.test.ts, which
+ * check it against AWS's own published example). R2 speaks the S3 API at
  * https://<account>.r2.cloudflarestorage.com with region "auto".
+ *
+ * Moved here from book-file/sigv4.ts (docs/prd/finance-restructure §4,
+ * Storage). Nothing in this file reads the environment: each function passes
+ * its own `Deno.env.get` to r2FromEnv, so the tests import it as they are.
  *
  * Only `host` is signed and the payload is UNSIGNED-PAYLOAD: the URL is the
  * whole credential, short-lived, for one method on one object.
@@ -81,3 +86,42 @@ export async function presign(p: PresignInput): Promise<string> {
 
   return `https://${p.host}${canonicalPath}?${canonicalQuery}&X-Amz-Signature=${signature}`;
 }
+
+/** The four Edge Function secrets every R2 caller needs. */
+export interface R2Config {
+  account: string;
+  bucket: string;
+  keyId: string;
+  secret: string;
+}
+
+export const r2FromEnv = (get: (name: string) => string | undefined): R2Config => ({
+  account: get('R2_ACCOUNT_ID') ?? '',
+  bucket: get('R2_BUCKET') ?? '',
+  keyId: get('R2_ACCESS_KEY_ID') ?? '',
+  secret: get('R2_SECRET_ACCESS_KEY') ?? '',
+});
+
+export const r2Configured = (r2: R2Config) => !!(r2.account && r2.bucket && r2.keyId && r2.secret);
+
+/** A presigned URL for one method on one object of the bucket, signed now. */
+export const signR2 = (
+  r2: R2Config,
+  method: PresignInput['method'],
+  key: string,
+  expires: number,
+  query?: Record<string, string>,
+  now: Date = new Date(),
+) =>
+  presign({
+    method,
+    host: `${r2.account}.r2.cloudflarestorage.com`,
+    path: `/${r2.bucket}/${key}`,
+    region: 'auto',
+    service: 's3',
+    accessKeyId: r2.keyId,
+    secretAccessKey: r2.secret,
+    expires,
+    now,
+    query,
+  });

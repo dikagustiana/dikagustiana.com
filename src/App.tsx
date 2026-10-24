@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation, useParams } from "
 import { HelmetProvider } from "react-helmet-async";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { RequireAdmin } from "@/components/auth/RequireAdmin";
+import { CAPITAL_IN_MOTION_PATH, conditionHref } from "@/lib/finance-in-action/conditions";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { lazy, Suspense } from "react";
 import { LoadingState } from "@/components/states";
@@ -60,12 +61,14 @@ const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const AdminAuditLog = lazy(() => import("./pages/AdminAuditLog"));
 const AdminBooks = lazy(() => import("./pages/AdminBooks"));
 const AdminTransitionData = lazy(() => import("./pages/AdminTransitionData"));
+const AdminToolkits = lazy(() => import("./pages/AdminToolkits"));
 const TheNextBigThing = lazy(() => import("./pages/TheNextBigThing"));
 const NextBigThingEssayPage = lazy(() => import("./pages/NextBigThingEssayPage"));
 const FinanceTrackChild = lazy(() => import("./pages/FinanceTrackChild"));
 const FinanceLanding = lazy(() => import("./pages/FinanceLanding"));
 const FinanceInMotion = lazy(() => import("./pages/FinanceInMotion"));
 const CapitalConditionDetail = lazy(() => import("./pages/CapitalConditionDetail"));
+const ToolkitsPage = lazy(() => import("./pages/ToolkitsPage"));
 const FinanceTrackIndex = lazy(() => import("./pages/FinanceTrackIndex"));
 // Kawasan Industri (docs/world/PRD-kawasan-industri.md). __WORLD_KAWASAN__ is a
 // compile-time constant like __FIA_PREVIEW__: unset, the route is the 404 page
@@ -120,15 +123,19 @@ const FourSegmentEssayRedirect = () => {
   return <Navigate to={essaySlug ? `/essays/${essaySlug}` : '/finance'} replace />;
 };
 
-// Capital in Motion moved from /finance/capital-in-motion/:conditionSlug to sit
-// under its section, /finance/capital-allocation/:conditionSlug. A bare
-// <Navigate to="…/:conditionSlug"> would send the literal ":conditionSlug",
-// so the param is carried across here.
+// Capital in Motion moved from /finance/capital-in-motion/:conditionSlug to
+// /finance/capital-allocation/:conditionSlug, and on 24 October 2026 under
+// Finance in Action, /finance/finance-in-action/capital-in-motion/:conditionSlug
+// (docs/prd/finance-restructure §1 C). Every old address lands on the new one,
+// replacing the history entry. A bare <Navigate to="…/:conditionSlug"> would
+// send the literal ":conditionSlug", so the param is carried across here, and
+// the path is built by conditionHref, the one place it is.
 const CapitalConditionLegacyRedirect = () => {
   const { conditionSlug } = useParams();
+  const { search, hash } = useLocation();
   return (
     <Navigate
-      to={conditionSlug ? `/finance/capital-allocation/${conditionSlug}` : '/finance/capital-allocation'}
+      to={{ pathname: conditionSlug ? conditionHref(conditionSlug) : CAPITAL_IN_MOTION_PATH, search, hash }}
       replace
     />
   );
@@ -199,10 +206,11 @@ const App = () => (
 
             {/* Finance */}
             <Route path="/finance" element={<FinanceLanding />} />
-            <Route path="/finance/capital-allocation" element={<FinanceInMotion />} />
-            <Route path="/finance/capital-allocation/:conditionSlug" element={<CapitalConditionDetail />} />
             <Route path="/finance/finance-in-action" element={<FinanceInActionIndex />} />
+            <Route path="/finance/finance-in-action/capital-in-motion" element={<FinanceInMotion />} />
+            <Route path="/finance/finance-in-action/capital-in-motion/:conditionSlug" element={<CapitalConditionDetail />} />
             <Route path="/finance/finance-in-action/:modelSlug" element={<FinanceModelDetail />} />
+            <Route path="/finance/toolkits" element={<ToolkitsPage />} />
             <Route path="/finance/kawasan" element={<KawasanPage />} />
             <Route path="/finance/kawasan/:ticker" element={<KawasanPage />} />
             <Route path="/finance/:track" element={<FinanceTrackIndex />} />
@@ -216,7 +224,9 @@ const App = () => (
             <Route path="/finance/:track/:moduleSlug/:essaySlug" element={<FourSegmentEssayRedirect />} />
 
             {/* Legacy redirects */}
-            <Route path="/finance/finance-in-motion" element={<Navigate to="/finance/capital-allocation" replace />} />
+            <Route path="/finance/finance-in-motion" element={<CapitalConditionLegacyRedirect />} />
+            <Route path="/finance/capital-allocation" element={<CapitalConditionLegacyRedirect />} />
+            <Route path="/finance/capital-allocation/:conditionSlug" element={<CapitalConditionLegacyRedirect />} />
             <Route path="/finance/capital-in-motion/:conditionSlug" element={<CapitalConditionLegacyRedirect />} />
             <Route path="/finance-101" element={<Navigate to="/finance" replace />} />
             <Route path="/finance-101/financial-analytics" element={<Navigate to="/finance/analytics" replace />} />
@@ -294,6 +304,7 @@ const App = () => (
             <Route path="/admin/audit-log" element={<RequireAdmin><AdminAuditLog /></RequireAdmin>} />
             <Route path="/admin/books" element={<RequireAdmin><AdminBooks /></RequireAdmin>} />
             <Route path="/admin/transition-data" element={<RequireAdmin><AdminTransitionData /></RequireAdmin>} />
+            <Route path="/admin/toolkits" element={<RequireAdmin><AdminToolkits /></RequireAdmin>} />
 
             {/* Canonical Writer Studio — single editor for all essays */}
             <Route path="/admin/writer/:id" element={

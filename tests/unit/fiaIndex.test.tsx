@@ -30,6 +30,10 @@ import { STATUSES } from '@/lib/finance-in-action/constants';
 import { STAGES } from '@/data/industryChain';
 
 const INDEX = '/finance/finance-in-action';
+/** The tickers the company lists show (not subsection A, not the coverage tracker). */
+const listed = () => [...document.querySelectorAll('[data-fia-companies] > li > span:first-child')].map((s) => s.textContent);
+const companyRow = (ticker: string) =>
+  [...document.querySelectorAll<HTMLElement>('[data-fia-companies] > li')].find((li) => li.querySelector('span')?.textContent === ticker)!;
 const renderIndex = (query = '') => renderFiaPage(<FiaIndexPage />, { path: INDEX, url: `${INDEX}${query}` });
 
 beforeEach(() => {
@@ -110,9 +114,9 @@ describe('the preview index, lens off', () => {
     expect(xcoa).toHaveTextContent('As of Q4 25');
     expect(xcoa).toHaveTextContent('Executive');
     expect(xcoa).toHaveTextContent('SYNTHETIC');
-    expect(within(xcoa).getByRole('link', { name: /Capital in Motion 03/ })).toHaveAttribute('href', '/finance/capital-allocation/commodity-windfall');
+    expect(within(xcoa).getByRole('link', { name: /Capital in Motion 03/ })).toHaveAttribute('href', '/finance/finance-in-action/capital-in-motion/commodity-windfall');
 
-    const ptba = screen.getByText('PTBA').closest('li')!;
+    const ptba = companyRow('PTBA');
     expect(ptba).toHaveTextContent('Bukit Asam');
     expect(ptba).toHaveTextContent('Not started');
     expect(within(ptba).queryByRole('link', { name: /Bukit Asam/ })).toBeNull();
@@ -123,17 +127,18 @@ describe('the preview index, lens off', () => {
     const user = userEvent.setup();
     renderIndex();
     await user.type(await screen.findByLabelText(COPY.findCompany), 'sample coal');
-    expect(screen.getByText('SCOA')).toBeInTheDocument();
-    expect(screen.queryByText('XCOA')).toBeNull();
-    expect(screen.queryByText('PTBA')).toBeNull();
+    // The filters act on the company lists of subsection B; subsection A and the coverage tracker list every company.
+    expect(listed()).toContain('SCOA');
+    expect(listed()).not.toContain('XCOA');
+    expect(listed()).not.toContain('PTBA');
     expect(screen.getAllByText(COPY.noMatches).length).toBeGreaterThan(0);
   });
 
   it('filters by Capital in Motion condition, from the address', async () => {
     renderIndex('?condition=6');
     await screen.findByRole('heading', { level: 1, name: COPY.title });
-    expect(screen.getByText('XCEM')).toBeInTheDocument();
-    expect(screen.getByText('SMGR')).toBeInTheDocument();
-    for (const t of ['XCOA', 'SCOA', 'SCEM', 'PTBA', 'ITMG', 'INTP']) expect(screen.queryByText(t)).toBeNull();
+    expect(listed()).toContain('XCEM');
+    expect(listed()).toContain('SMGR');
+    for (const t of ['XCOA', 'SCOA', 'SCEM', 'PTBA', 'ITMG', 'INTP']) expect(listed()).not.toContain(t);
   });
 });

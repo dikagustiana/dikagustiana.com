@@ -3,7 +3,7 @@
  * AWS's published example, then the request rules, object keys, file names and Content-Disposition.
  */
 import { describe, expect, it } from 'vitest';
-import { amzDate, presign, uriEncode } from '../../supabase/functions/book-file/sigv4';
+import { amzDate, presign, uriEncode } from '../../supabase/functions/_shared/r2';
 import {
   FILE_MAX_BYTES,
   KEY_SHAPE,

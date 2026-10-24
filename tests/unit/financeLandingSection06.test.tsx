@@ -1,8 +1,11 @@
 /**
- * Section 06 on the /finance landing (site sweep October 2026, PRD R5.1 and
- * R5.6). The landing draws one numbered card per finance_sections row;
- * migration 20261010110000_finance_section_06 adds Finance in Action as the
- * sixth. These render the REAL route table (App.tsx), as
+ * The six cards on the /finance landing (docs/prd/finance-restructure §1 A,
+ * §3, 24 October 2026): the four tracks from finance_sections, then
+ * 05 Finance in Action with its two sub-entries and 06 Toolkits. It replaced
+ * the October sweep's card per row, which drew Capital Allocation as 05 and,
+ * once migration 20261010110000_finance_section_06 is applied, Finance in
+ * Action as 06; those two rows are no longer drawn as tracks, whichever side
+ * of that migration the database is on. These render the REAL route table (App.tsx), as
  * capitalInMotionRoutes.test does, so the card's link and the page it lands
  * on are the ones a reader gets.
  *
@@ -105,9 +108,10 @@ function renderAt(path: string) {
 async function cards() {
   await screen.findByRole('heading', { level: 1, name: 'Finance' });
   const main = screen.getByRole('main');
-  await within(main).findByRole('heading', { level: 3, name: 'Finance in Action' });
-  return [...main.querySelectorAll('a')].filter((a) => a.querySelector('h3'));
+  await within(main).findByRole('heading', { level: 3, name: 'Toolkits' });
+  return [...main.querySelectorAll<HTMLElement>('[data-finance-card]')];
 }
+const card = async (title: string) => (await cards()).find((c) => c.querySelector('h3')?.textContent === title)!;
 
 beforeEach(() => {
   fromMock.mockReset();
@@ -126,35 +130,60 @@ describe('the row the migration inserts', () => {
   });
 });
 
-describe('section 06 on /finance', () => {
-  it('draws six cards in sort order, numbered 01 to 06', async () => {
+describe('the six cards on /finance', () => {
+  it('draws the four tracks, then 05 Finance in Action and 06 Toolkits; Capital Allocation is not a card', async () => {
     renderAt('/finance');
     const found = await cards();
-    expect(found.map((a) => a.querySelector('h3')?.textContent)).toEqual(SECTIONS.map((s) => s.title));
-    expect(found.map((a) => a.querySelector('span')?.textContent)).toEqual(['01', '02', '03', '04', '05', '06']);
+    expect(found.map((c) => c.querySelector('h3')?.textContent)).toEqual([
+      'Fundamentals', 'Strategic Finance', 'Planning & Forecasting', 'Financial Analytics', 'Finance in Action', 'Toolkits',
+    ]);
+    expect(found.map((c) => c.querySelector('span')?.textContent)).toEqual(['01', '02', '03', '04', '05', '06']);
+    expect(within(screen.getByRole('main')).queryByText('Capital Allocation')).not.toBeInTheDocument();
   });
 
-  it('numbers the Finance in Action card 06 and links it to /finance/finance-in-action', async () => {
+  it('gives 05 and 06 the PRD copy, and no "Start here" chip', async () => {
     renderAt('/finance');
-    const card = (await cards()).find((a) => a.querySelector('h3')?.textContent === 'Finance in Action')!;
-    expect(card).toHaveAttribute('href', FIA);
-    expect(within(card).getByText('06')).toBeInTheDocument();
-    expect(within(card).getByText(COPY.seoDescription)).toBeInTheDocument();
+    const fia = await card('Finance in Action');
+    const toolkits = await card('Toolkits');
+    expect(fia).toHaveTextContent('The theory at company scale: twenty-one conditions, and the IDX companies where they are happening now.');
+    expect(toolkits).toHaveTextContent('The working files behind the essays. Download, open, use.');
+    expect(fia).not.toHaveTextContent(/start here/i);
+    expect(toolkits).not.toHaveTextContent(/start here/i);
+    expect(await card('Fundamentals')).toHaveTextContent(/start here/i);
+  });
+
+  it('05 links the index, Capital in Motion and the company models; 06 links the toolkits', async () => {
+    renderAt('/finance');
+    const fia = await card('Finance in Action');
+    expect(within(fia).getByRole('link', { name: 'Finance in Action' })).toHaveAttribute('href', FIA);
+    expect(within(fia).getByRole('link', { name: 'Capital in Motion' })).toHaveAttribute('href', `${FIA}/capital-in-motion`);
+    expect(within(fia).getByRole('link', { name: 'Company models' })).toHaveAttribute('href', `${FIA}#company-models`);
+    expect(await card('Toolkits')).toHaveAttribute('href', '/finance/toolkits');
   });
 
   it('opens the Finance in Action page, not a track index', async () => {
     renderAt('/finance');
-    const card = (await cards()).find((a) => a.querySelector('h3')?.textContent === 'Finance in Action')!;
-    await userEvent.click(card);
+    await userEvent.click(within(await card('Finance in Action')).getByRole('link', { name: 'Finance in Action' }));
     expect(await screen.findByRole('heading', { level: 1, name: 'Finance in Action' })).toBeInTheDocument();
     expect(window.location.pathname).toBe(FIA);
     // The h1 alone cannot tell the pages apart (the control below). Tests
     // build with both Finance in Action flags off, so App picks the legacy
     // index: its models line is drawn, the track index's curriculum note is
-    // not. The live index (__FIA_LIVE__) is fiaLive.test's, and the phase F
-    // screenshots show App choosing it in a VITE_FIA_LIVE=true build.
+    // not. The live index (__FIA_LIVE__) is fiaLive.test's.
     expect(screen.getByText(/models available/)).toBeInTheDocument();
     expect(screen.queryByText(CURRICULUM_CONTRACT.note)).not.toBeInTheDocument();
+  });
+
+  it('every card resolves to a page: no card is a 404', async () => {
+    renderAt('/finance');
+    const hrefs = (await cards()).flatMap((c) => [...c.querySelectorAll('a')].map((a) => a.getAttribute('href')!));
+    const APP = readFileSync(join(__dirname, '../../src/App.tsx'), 'utf8');
+    const routes = [...APP.matchAll(/<Route path="([^"]+)"/g)].map((m) => ({ path: m[1] }));
+    for (const href of new Set(hrefs)) {
+      const m = matchRoutes(routes, href.split('#')[0]);
+      expect(m?.[m.length - 1].route.path, href).not.toBe('*');
+      expect(m, href).not.toBeNull();
+    }
   });
 
   it('control: a track index at the same address draws the same h1, with the curriculum note and no models line', async () => {

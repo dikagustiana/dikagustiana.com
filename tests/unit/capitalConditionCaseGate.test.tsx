@@ -42,7 +42,7 @@ beforeEach(() => {
 describe('SHOW_CASE_COMPANIES = true', () => {
   it('restores the "observed in the case of" clause in The Situation', async () => {
     const c = CONDITIONS[0];
-    window.history.pushState({}, '', `/finance/capital-allocation/${c.id}`);
+    window.history.pushState({}, '', `/finance/finance-in-action/capital-in-motion/${c.id}`);
     render(<App />);
     await screen.findByRole('heading', { level: 1, name: c.title });
 
@@ -56,7 +56,7 @@ describe('SHOW_CASE_COMPANIES = true', () => {
 
   it('still keeps the company out of the SEO tags', async () => {
     const c = CONDITIONS[0];
-    window.history.pushState({}, '', `/finance/capital-allocation/${c.id}`);
+    window.history.pushState({}, '', `/finance/finance-in-action/capital-in-motion/${c.id}`);
     render(<App />);
     await screen.findByRole('heading', { level: 1, name: c.title });
     await waitFor(() => expect(document.title).toContain(c.title));

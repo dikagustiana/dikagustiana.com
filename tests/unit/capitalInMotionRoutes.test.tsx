@@ -1,8 +1,10 @@
 /**
- * Capital in Motion lives at /finance/capital-allocation.
+ * Capital in Motion lives at /finance/finance-in-action/capital-in-motion
+ * (docs/prd/finance-restructure §1 C, 24 October 2026).
  *
  * It started life at /finance/finance-in-motion and /finance/capital-in-motion/:slug,
- * while the Capital Allocation card on /finance linked to an empty track index.
+ * then sat at /finance/capital-allocation[/:slug]; every one of those redirects,
+ * replacing the history entry.
  * These render the REAL route table (App.tsx), not a copy of it, so a rename of a
  * path in either direction fails here.
  *
@@ -39,7 +41,8 @@ vi.mock('@vercel/analytics/react', () => ({ Analytics: () => null }));
 import App from '@/App';
 import { CONDITIONS, CONDITION_ORDER, SHOW_CASE_COMPANIES, getLayerLabel } from '@/data/capitalConditions';
 
-const INDEX = '/finance/capital-allocation';
+const INDEX = '/finance/finance-in-action/capital-in-motion';
+const OLD = '/finance/capital-allocation';
 const detail = (id: string) => `${INDEX}/${id}`;
 
 /** Condition ids in the order the index lists them (and prev/next walks them). */
@@ -65,7 +68,7 @@ beforeEach(() => {
   fromMock.mockImplementation(() => makeQueryResult([]));
 });
 
-describe('Capital in Motion at /finance/capital-allocation', () => {
+describe('Capital in Motion at /finance/finance-in-action/capital-in-motion', () => {
   it('ships 21 conditions with the case gate closed', () => {
     expect(CONDITIONS).toHaveLength(21);
     expect(CONDITION_ORDER).toHaveLength(21);
@@ -105,7 +108,7 @@ describe('Capital in Motion at /finance/capital-allocation', () => {
     expect(crumbs.map((a) => a.getAttribute('href'))).toContain(INDEX);
   });
 
-  it('previous and next stay under /finance/capital-allocation', async () => {
+  it('previous and next stay under the new address', async () => {
     const [, second, third] = ORDERED;
     renderAt(detail(second.id));
     await h1(second.title);
@@ -159,6 +162,28 @@ describe('legacy URLs still arrive', () => {
     expect(window.location.pathname).toBe(INDEX);
   });
 
+  it('/finance/capital-allocation redirects to the index, replacing the history entry', async () => {
+    renderAt(OLD);
+    const before = window.history.length;
+    expect(await h1('Capital in Motion')).toBeInTheDocument();
+    expect(window.location.pathname).toBe(INDEX);
+    expect(window.history.length).toBe(before);
+  });
+
+  it('/finance/capital-allocation/:slug redirects and keeps the slug and the fragment', async () => {
+    const c = ORDERED[2];
+    renderAt(`${OLD}/${c.id}#top`);
+    expect(await h1(c.title)).toBeInTheDocument();
+    expect(window.location.pathname).toBe(detail(c.id));
+    expect(window.location.hash).toBe('#top');
+  });
+
+  it('an old address with an unknown slug lands on the new "not found", not on a track page', async () => {
+    renderAt(`${OLD}/no-such-condition`);
+    expect(await screen.findByText('Condition not found.')).toBeInTheDocument();
+    expect(window.location.pathname).toBe(detail('no-such-condition'));
+  });
+
   it('/finance/capital-in-motion/:slug redirects and keeps the slug', async () => {
     const c = ORDERED[5];
     renderAt(`/finance/capital-in-motion/${c.id}`);
@@ -178,9 +203,22 @@ describe('route ranking', () => {
     return m?.[m.length - 1].route.path;
   };
 
-  it('static capital-allocation routes outrank /finance/:track and /finance/:track/:slug', () => {
+  it('the static Capital in Motion routes outrank /finance/finance-in-action/:modelSlug and the track routes', () => {
     expect(winner(INDEX)).toBe(INDEX);
     expect(winner(detail('x'))).toBe(`${INDEX}/:conditionSlug`);
+    expect(winner('/finance/finance-in-action/adro')).toBe('/finance/finance-in-action/:modelSlug');
+  });
+
+  it('the old capital-allocation addresses are redirects, not the track route', () => {
+    expect(winner(OLD)).toBe(OLD);
+    expect(winner(`${OLD}/x`)).toBe(`${OLD}/:conditionSlug`);
+    expect(APP).toMatch(/<Route path="\/finance\/capital-allocation" element={<CapitalConditionLegacyRedirect \/>} \/>/);
+    expect(APP).toMatch(/<Route path="\/finance\/capital-allocation\/:conditionSlug" element={<CapitalConditionLegacyRedirect \/>} \/>/);
+  });
+
+  it('the toolkits page is its own route, not a track', () => {
+    expect(winner('/finance/toolkits')).toBe('/finance/toolkits');
+    expect(winner('/admin/toolkits')).toBe('/admin/toolkits');
   });
 
   it('other tracks still resolve to the track routes', () => {

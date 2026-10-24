@@ -120,14 +120,16 @@ describe('the peer band (docs/prd/2026-10-fia-fixes item 6)', () => {
   });
 });
 
-describe('Related reading (docs/prd/2026-10-fia-fixes item 9)', () => {
-  it('names each condition in one line, links it, keeps the chain map link, and drops the rule and the note', async () => {
+describe('Conditions present (docs/prd/finance-restructure §1 D; was Related reading, 2026-10-fia-fixes item 9)', () => {
+  it('names each condition in one line, links it into Capital in Motion, keeps the chain map link, and drops the rule and the note', async () => {
     at('xcoa');
     const condition = getConditionByNumber(3)!;
     await screen.findByRole('heading', { level: 2, name: COPY.howItMakesMoney });
     const related = document.querySelector('[data-fia-related]') as HTMLElement;
-    expect(related).toHaveTextContent(`Related reading: Capital in Motion 03 · ${condition.title}`);
-    expect(within(related).getByRole('link', { name: `Capital in Motion 03 · ${condition.title}` })).toHaveAttribute('href', `/finance/capital-allocation/${condition.id}`);
+    expect(related).toHaveTextContent(`Conditions present: 03 ${condition.title}`);
+    expect(related).not.toHaveTextContent('Related reading');
+    expect(related.id).toBe('fia-conditions');
+    expect(within(related).getByRole('link', { name: `03 ${condition.title}` })).toHaveAttribute('href', `/finance/finance-in-action/capital-in-motion/${condition.id}`);
     expect(within(related).getByRole('link', { name: /Show coal on the chain map/ })).toHaveAttribute('href', '/?distance=finance&node=extraction');
     expect(document.body).not.toHaveTextContent(condition.rule);
     expect(document.body).not.toHaveTextContent('This model supplies the per-tonne economics');
