@@ -5,6 +5,38 @@ alternatives. Newest first.
 
 ---
 
+# 2026-10-24 — Finance in Action: the model page, sheet first (D-S1 to D-S9)
+
+Spec: `docs/company-models/sheet-first/` (PRD, ARCHITECTURE, DESIGN, PLAN), approved by the owner on
+24 October 2026; the report is `report.md` beside them. The model page now opens on the model: stage pills,
+company tabs, a low company bar and the key figures, then "The model" card on the first screen at 1440×900,
+with at least fifteen rows of the grid; the explaining sections follow it.
+
+- **D-S1, D-S2.** The model page only; the index is unchanged. The site's tokens and type; the site is light
+  only (2026-10-09), so there is no dark variant to check.
+- **D-S3, density by pointer.** A `pointer-fine` screen (`(pointer: fine)`) in `tailwind.config.ts`: grid rows
+  are 28px under a mouse or a trackpad, rule included, and a 44px target under a finger; never under 24px at any
+  zoom. Every control outside the grid stays 44px, the name box included.
+- **D-S4, a Checks sheet.** Read-only, worked from every cell's `tieOut` and every cell of a `gap_*` row
+  (`view/checksSheet.ts`), never stored in a package; the download writes the same table as a Checks worksheet
+  at the same addresses. A gap row agrees within the package's rounding tolerance. No fixture carries a gap
+  row yet.
+- **D-S5, D-S8.** No section bands and no issuer logos: a ticker monogram stands where a logo would.
+- **D-S6, the inspector in the card.** From 1280px it sits beside the grid and folds away; it opens folded
+  below 1440px. Narrower, it is the bottom panel it was. The page's second inspector column is gone.
+- **D-S7, opening position.** The grid opens with the latest reported quarter and the forecast in view, three
+  quarters before it where there is room; where there is not, the forecast wins over the earlier quarters.
+- **D-S9.** The five key-figure roles, in one low row from 1024px.
+- **Addresses are the workbook's.** Column letters, row numbers and the name box come from `ADDRESSING`
+  (`view/sheetAddress.ts`); the formula bar shows a formula exactly as the package and the .xlsx hold it.
+- **Tabs in reading order.** Model, Reported, Assumptions, Checks (PRD R2.4), under the grid; the export keeps
+  its own order. A new tab clears the selection.
+- **The company rail and the model header are gone**, replaced by `CompanyTabs` (same order, the address's
+  query carried, so Connections stays on) and `CompanyBar`. A pair company the tabs list is not named again in
+  the bar.
+
+---
+
 # 2026-10-22 — Finance in Action: the chain view (PRD D-M1 to D-C2, all defaults accepted)
 
 Spec: `docs/company-models/chain-view/` (PRD, PLAN, PROMPT-site, PROMPT-model). On 22 October 2026 the owner
