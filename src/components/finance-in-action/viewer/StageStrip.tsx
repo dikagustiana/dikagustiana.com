@@ -5,7 +5,8 @@
  * under the cards draws the register's links between their stages (§5.2).
  *
  * The strip scrolls inside its own box on a narrow screen rather than pushing
- * the page sideways.
+ * the page sideways, with no scrollbar and a fade at the right edge while
+ * there is more (docs/prd/2026-10-fia-fixes item 2).
  */
 import type { ReactNode } from 'react';
 import type { PositionGroup } from '@/lib/finance-in-action/registry';
@@ -13,6 +14,7 @@ import { positionAnchor } from '@/lib/finance-in-action/chain';
 import { countsLine, publishedLine } from '@/lib/finance-in-action/counts';
 import { STRIP_MIN_COLUMN } from '@/lib/finance-in-action/layout';
 import { cn } from '@/lib/utils';
+import { useScrollFade } from './model/useScrollFade';
 
 export function StageStrip({
   stages,
@@ -25,10 +27,12 @@ export function StageStrip({
   linkLayer?: ReactNode;
 }) {
   const columns = `repeat(${stages.length}, minmax(${STRIP_MIN_COLUMN}, 1fr))`;
+  const { ref, faded } = useScrollFade<HTMLDivElement>();
   return (
     <div className="space-y-3">
       <div
-        className="overflow-x-auto rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        ref={ref}
+        className={cn('fia-scroll-row rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring', faded && 'fia-fade-right')}
         tabIndex={0}
         role="region"
         aria-label="Chain stages, scrolls sideways"

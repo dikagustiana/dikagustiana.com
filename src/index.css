@@ -231,6 +231,20 @@
   .fia-viewer :is(h1, h2, h3, h4, h5, h6) {
     @apply font-sans tracking-normal;
   }
+
+  /* A sideways-scrolling row of Finance in Action (item 2): it scrolls, with
+     no scrollbar; .fia-fade-right fades its last 48px while there is more. */
+  .fia-scroll-row {
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .fia-scroll-row::-webkit-scrollbar {
+    display: none;
+  }
+  .fia-fade-right {
+    -webkit-mask-image: linear-gradient(to right, black calc(100% - 48px), transparent);
+    mask-image: linear-gradient(to right, black calc(100% - 48px), transparent);
+  }
 }
 
 @layer utilities {

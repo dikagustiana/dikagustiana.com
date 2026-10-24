@@ -80,9 +80,9 @@ function LensLegend() {
 
 export function Section({ id, title, aside, children }: { id: string; title: string; aside?: ReactNode; children: ReactNode }) {
   return (
-    <section aria-labelledby={id} className="mb-12 scroll-mt-24">
+    <section aria-labelledby={id} className="mb-12 scroll-mt-32">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-border pb-2">
-        <h2 id={id} className="scroll-mt-24 font-sans text-xl font-semibold tracking-normal text-foreground">
+        <h2 id={id} className="scroll-mt-32 font-sans text-xl font-semibold tracking-normal text-foreground">
           {title}
         </h2>
         {aside}
