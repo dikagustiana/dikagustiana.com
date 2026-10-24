@@ -2,9 +2,11 @@
 # The old ref (rhwzvgklasvitocbbhvi) is a deleted project.
 project_id = "asypkbkiebjvvpimewfp"
 
-# Two edge functions. `book-file` (2026-10-24) signs short-lived R2 URLs for
+# Three edge functions. `book-file` (2026-10-24) signs short-lived R2 URLs for
 # the Books page's files (supabase/functions/book-file/, docs/books/R2-RUNBOOK.md);
 # like link-preview it reads as the caller, with no privileged client.
+# `toolkit-file` (2026-10-24) does the same for /finance/toolkits
+# (docs/prd/finance-restructure); both sign with supabase/functions/_shared/r2.ts.
 #
 # `link-preview` (2026-09-27). It resolves a pasted URL to
 # plain-text card metadata at authoring time, for admins only; see
@@ -31,4 +33,7 @@ project_id = "asypkbkiebjvvpimewfp"
 verify_jwt = true
 
 [functions.book-file]
+verify_jwt = true
+
+[functions.toolkit-file]
 verify_jwt = true

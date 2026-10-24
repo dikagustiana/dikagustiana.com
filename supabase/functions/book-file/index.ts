@@ -22,7 +22,7 @@
  * all four every action answers 503 not_configured.
  */
 
-import { presign } from './sigv4.ts';
+import { r2Configured, r2FromEnv, signR2 } from '../_shared/r2.ts';
 import {
   READ_TTL_SECONDS,
   WRITE_TTL_SECONDS,
@@ -48,13 +48,8 @@ function publicApiKey(): string {
 }
 const API_KEY = publicApiKey();
 
-const R2 = {
-  account: Deno.env.get('R2_ACCOUNT_ID') ?? '',
-  bucket: Deno.env.get('R2_BUCKET') ?? '',
-  keyId: Deno.env.get('R2_ACCESS_KEY_ID') ?? '',
-  secret: Deno.env.get('R2_SECRET_ACCESS_KEY') ?? '',
-};
-const configured = () => !!(R2.account && R2.bucket && R2.keyId && R2.secret);
+const R2 = r2FromEnv((name) => Deno.env.get(name));
+const configured = () => r2Configured(R2);
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -70,18 +65,7 @@ function json(status: number, body: unknown): Response {
 }
 
 const sign = (method: 'GET' | 'PUT' | 'DELETE', key: string, expires: number, query?: Record<string, string>) =>
-  presign({
-    method,
-    host: `${R2.account}.r2.cloudflarestorage.com`,
-    path: `/${R2.bucket}/${key}`,
-    region: 'auto',
-    service: 's3',
-    accessKeyId: R2.keyId,
-    secretAccessKey: R2.secret,
-    expires,
-    now: new Date(),
-    query,
-  });
+  signR2(R2, method, key, expires, query);
 
 /** Headers that make PostgREST and Auth act as the caller: their JWT, or anon. */
 const asCaller = (token: string | undefined): Record<string, string> =>
