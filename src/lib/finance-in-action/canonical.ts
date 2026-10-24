@@ -365,3 +365,69 @@ export function peerFigure(subject: ModelPackage, line: UELine, peer: ModelPacka
   if (!unlisted || !conv || subject.meta.subIndustry !== peer.meta.subIndustry || subject.unitEconomics.unit !== peer.unitEconomics.unit) return { value: null, currency: null };
   return { value: perUnitInPackage(peer, line.id, periodId, conv.convert), currency: conv.currency };
 }
+
+/** The groups of the grouped bar under the unit-economics table, in the PRD's order. */
+export const BAR_GROUPS: Canonical[] = ['revenue', 'mining', 'freight', 'royalty', 'processing', 'da', 'gross_profit', 'strip_ratio'];
+
+export interface BarCompany {
+  ticker: string;
+  self: boolean;
+  /** The package's own currency, when it is not the comparison's. */
+  converted: string | null;
+}
+
+export interface BarGroup {
+  canonical: Canonical;
+  label: string;
+  /** "US$ per tonne", or "x" for the strip ratio. */
+  unit: string;
+  /** Costs are drawn as lengths and labelled in brackets. */
+  reduces: boolean;
+  /** One per company, in the companies' order; null leaves a gap, never a zero. */
+  values: (number | null)[];
+}
+
+export interface GroupedBars {
+  companies: BarCompany[];
+  groups: BarGroup[];
+}
+
+const REDUCES = new Set<Canonical>(['mining', 'processing', 'freight', 'royalty', 'da', 'other_cost']);
+
+/** A company's figure in US dollars per unit (the strip ratio as stored), or null. */
+export function usdPerUnit(pkg: ModelPackage, c: Canonical, periodId: string, rates: FxRate[]): number | null {
+  const own = perUnitOwn(pkg, c, periodId);
+  if (c === 'strip_ratio' || own === null) return own;
+  const currency = currencyOf(pkg);
+  if (!currency) return null;
+  return currency === COMPARISON_CURRENCY ? own : toUsd(own, currency, periodId, rates);
+}
+
+/**
+ * The subject and the published companies of its sub-industry, side by side
+ * per canonical line, in US dollars per unit (docs/prd/2026-10-fia-fixes item
+ * 4). The companies are in ticker order, the same on every page of the
+ * sub-industry; a group no company carries is left out, and a company without
+ * the line is a gap. Null when fewer
+ * than two companies can be drawn.
+ */
+export function groupedBars(subject: ModelPackage, published: ModelPackage[], periodId: string, rates: FxRate[]): GroupedBars | null {
+  const all = [subject, ...published.filter((p) => p.meta.ticker !== subject.meta.ticker && p.meta.subIndustry === subject.meta.subIndustry && p.unitEconomics.unit === subject.unitEconomics.unit)];
+  const pkgs = all.filter((p) => companyMap(p) || p.unitEconomics.lines.some((l) => l.canonical)).sort((a, b) => a.meta.ticker.localeCompare(b.meta.ticker));
+  if (pkgs.length < 2 || !pkgs.includes(subject)) return null;
+  const unit = subject.unitEconomics.unit;
+  const groups: BarGroup[] = [];
+  for (const c of BAR_GROUPS) {
+    const values = pkgs.map((p) => usdPerUnit(p, c, periodId, rates));
+    if (values.every((v) => v === null)) continue;
+    groups.push({ canonical: c, label: CANONICAL_LABEL[c], unit: c === 'strip_ratio' ? 'x' : `${COMPARISON_CURRENCY} per ${unit}`, reduces: REDUCES.has(c), values });
+  }
+  if (!groups.length) return null;
+  return {
+    companies: pkgs.map((p) => {
+      const currency = currencyOf(p);
+      return { ticker: p.meta.ticker, self: p.meta.ticker === subject.meta.ticker, converted: currency && currency !== COMPARISON_CURRENCY ? currency : null };
+    }),
+    groups,
+  };
+}

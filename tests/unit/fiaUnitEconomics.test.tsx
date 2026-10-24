@@ -170,10 +170,12 @@ describe('the unit economics section', () => {
     const table = within(section).getByRole('table');
     expect(within(table).getByRole('columnheader', { name: 'SCOA per tonne' })).toBeInTheDocument();
     const contractor = within(table).getByRole('rowheader', { name: 'Mining contractor services' }).closest('tr')!;
-    expect(contractor).toHaveTextContent('2,400(240.0)Cost per bcm × overburden removedSYNTHETIC interim financial statements, Q1 25 to Q4 25, note 25(280.0)');
+    // Item 4 (docs/prd/2026-10-fia-fixes): costs in brackets in both money columns, the pair before the source, the source abbreviated with its full names in the title.
+    expect(contractor).toHaveTextContent('(2,400)(240.0)Cost per bcm × overburden removed(280.0)Q1 25 n.25 · Q2 25 n.25 · Q3 25 n.25 · Q4 25 n.25');
+    expect(contractor.lastElementChild).toHaveAttribute('title', 'SYNTHETIC interim financial statements, Q1 25 to Q4 25, note 25');
     const rows = within(table).getAllByRole('row');
     expect(rows[rows.length - 1]).toHaveTextContent('Divided by coal sales volume10.0 Mt');
-    expect(rows[rows.length - 1]).toHaveTextContent('SYNTHETIC quarterly operating update, Q1 25 to Q4 25');
+    expect(rows[rows.length - 1].lastElementChild).toHaveAttribute('title', 'SYNTHETIC quarterly operating update, Q1 25 to Q4 25');
   });
 
   it('says where the lines come from when they are not from filings', async () => {

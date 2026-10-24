@@ -132,3 +132,42 @@ describe('the key-figure period', () => {
     expect(periodEnd('H1 26')).toBe(-1);
   });
 });
+
+describe('the source column, abbreviated (item 4)', () => {
+  it('names each document by the month it closes, and the note', async () => {
+    const { abbreviateSources, documentShort } = await import('@/lib/finance-in-action/model/explain');
+    expect(documentShort('Interim Consolidated Financial Statements 31 March 2026 and 31 December 2025')).toBe('Q1 26');
+    expect(documentShort('Consolidated Financial Statements 31 December 2025 and 2024')).toBe('FY 25');
+    expect(documentShort('Alamtri Resources Indonesia FY25 Public Expose')).toBeNull();
+    const at = (document: string, period: string, note?: string) => ({ key: '', label: '', period: '', source: { issuer: 'ADRO', document, period, note } });
+    expect(
+      abbreviateSources([
+        at('Interim Consolidated Financial Statements 31 March 2026 and 31 December 2025', 'Q1 2025 (comparative)', '26'),
+        at('Interim Consolidated Financial Statements 30 June 2026 and 31 December 2025', 'H1 2025 (comparative)', '27'),
+        at('Interim Consolidated Financial Statements 30 September 2025 and 31 December 2024', '9M 2025', '27'),
+        at('Consolidated Financial Statements 31 December 2025 and 2024', 'FY 2025', '27'),
+        at('Consolidated Financial Statements 31 December 2025 and 2024', 'FY 2025', '27'),
+      ]),
+    ).toBe('Q1 26 n.26 · H1 26 n.27 · 9M 25 n.27 · FY 25 n.27');
+  });
+});
+
+describe('the grouped bar (item 4)', () => {
+  it('ADRO and its three peers in ticker order, PTBA converted, a gap where a company has no line', async () => {
+    const { groupedBars } = await import('@/lib/finance-in-action/canonical');
+    const b = groupedBars(pkg('ADRO'), PKGS, 'FY25', RATES)!;
+    expect(b.companies.map((c) => [c.ticker, c.self, c.converted])).toEqual([
+      ['ADRO', true, null],
+      ['INDY', false, null],
+      ['ITMG', false, null],
+      ['PTBA', false, 'Rp'],
+    ]);
+    expect(b.groups.map((g) => g.canonical)).toEqual(['revenue', 'mining', 'freight', 'royalty', 'processing', 'da', 'gross_profit', 'strip_ratio']);
+    const mining = b.groups.find((g) => g.canonical === 'mining')!;
+    expect(mining.values[1]).toBeNull();
+    expect(mining.values[3]).toBeCloseTo((12_982_411 + 3_713_992) / 45.43 / 16_000, 6);
+    expect(b.groups.find((g) => g.canonical === 'strip_ratio')!.unit).toBe('x');
+    // Without a rate PTBA is a gap, never its rupiah figure.
+    expect(groupedBars(pkg('ADRO'), PKGS, 'FY25', [])!.groups[0].values[3]).toBeNull();
+  });
+});
