@@ -27,6 +27,7 @@ import type {
   TieOutStatus,
   UELineRole,
 } from '../constants';
+import type { Canonical } from '../canonical';
 
 export type { CellKind, Depth, GateStatus, ModelStatus, PeriodKind, Provenance, RowStyle, SheetId, TieOutStatus, UELineRole };
 
@@ -150,6 +151,13 @@ export interface UELine {
   driver?: UEDriver;
   /** Role 'unsplit' only: what sits inside it. */
   contains?: string[];
+  /**
+   * PROPOSED (docs/prd/2026-10-fia-fixes item 4): the line's identity across
+   * companies (canonical.ts). Not yet in model-package.schema.json, which
+   * fia.contract_schema holds verbatim; the published packages resolve it
+   * through canonical.ts instead.
+   */
+  canonical?: Canonical;
 }
 
 export interface UnitEconomics {

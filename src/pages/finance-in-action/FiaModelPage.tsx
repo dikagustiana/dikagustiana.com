@@ -352,6 +352,7 @@ export function FiaModelPage({ pkg, reg }: { pkg: ModelPackage; reg: Registry })
             onlyMessage={noVolume}
             decorate={decorate}
             barNote={barNote}
+            rates={rates}
           />
         </Section>
 

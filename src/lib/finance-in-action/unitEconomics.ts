@@ -173,8 +173,17 @@ export function extent(bars: UEBar[]): { lo: number; hi: number } {
   return { lo: Math.min(0, ...ends), hi: Math.max(0, ...ends) };
 }
 
-/** A line's per-unit value in another package, read from its stored rows, or null. */
-export function perUnitInPackage(pkg: ModelPackage, lineId: string, periodId: string): number | null {
+/**
+ * A line's per-unit value in another package, read from its stored rows, or
+ * null. `convert` turns the package's own currency into the comparison's
+ * (canonical.ts `comparable`); without it the value is in the package's own.
+ */
+export function perUnitInPackage(
+  pkg: ModelPackage,
+  lineId: string,
+  periodId: string,
+  convert: (value: number | null, periodId: string) => number | null = (v) => v,
+): number | null {
   const ue = pkg.unitEconomics;
   const line = ue.lines.find((l) => l.id === lineId);
   const pi = pkg.periods.findIndex((p) => p.id === periodId);
@@ -188,16 +197,7 @@ export function perUnitInPackage(pkg: ModelPackage, lineId: string, periodId: st
   const vol = read(ue.denominatorRowRef);
   const v = read(line.rowRef);
   if (vol.value === null || vol.value === 0 || v.value === null || !v.row || !vol.row) return null;
-  return (v.value / vol.value) * unitScale(v.row.unit, vol.row.unit).multiplier;
-}
-
-/** Two packages are on the same basis when they divide by the same unit and share the line. */
-export function sameBasis(a: ModelPackage, b: ModelPackage, lineId: string): boolean {
-  return (
-    a.unitEconomics.unit === b.unitEconomics.unit &&
-    a.unitEconomics.basisLabel === b.unitEconomics.basisLabel &&
-    b.unitEconomics.lines.some((l) => l.id === lineId)
-  );
+  return convert((v.value / vol.value) * unitScale(v.row.unit, vol.row.unit).multiplier, periodId);
 }
 
 /** Per-unit figures are shown to one decimal; they are worked in full precision. */

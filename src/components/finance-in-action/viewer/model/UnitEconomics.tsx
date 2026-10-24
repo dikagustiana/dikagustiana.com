@@ -17,7 +17,9 @@ import { PERCENT, WATERFALL } from '@/lib/finance-in-action/layout';
 import { sourcedInputs, summariseSources } from '@/lib/finance-in-action/model/explain';
 import { periodById } from '@/lib/finance-in-action/model/periods';
 import type { Registry } from '@/lib/finance-in-action/registry';
-import { PER_UNIT_DECIMALS, barValue, extent, perUnitInPackage, plural, sameBasis, type UEBar, type UEView } from '@/lib/finance-in-action/unitEconomics';
+import { PER_UNIT_DECIMALS, barValue, extent, plural, type UEBar, type UEView } from '@/lib/finance-in-action/unitEconomics';
+import { currencyOf, peerFigure } from '@/lib/finance-in-action/canonical';
+import { COMPARISON_CURRENCY, fxCaption, type FxRate } from '@/lib/finance-in-action/fx';
 import { cn } from '@/lib/utils';
 import { PeriodSelect } from './PeriodSelect';
 import type { ModelView } from './useModelView';
@@ -53,6 +55,7 @@ export function UnitEconomics({
   decorate,
   barNote,
   onlyMessage = false,
+  rates = [],
 }: {
   view: ModelView;
   reg: Registry;
@@ -65,6 +68,8 @@ export function UnitEconomics({
   barNote?: (bar: UEBar) => ReactNode;
   /** No period has a volume: show the one line and nothing else (constraint 9). */
   onlyMessage?: boolean;
+  /** JISDOR rates (fx.ts): a peer reporting in rupiah is compared in US dollars. */
+  rates?: FxRate[];
 }) {
   const { pkg, wb } = view;
   const units = plural(pkg.unitEconomics.unit);
@@ -78,6 +83,10 @@ export function UnitEconomics({
   const periodLabel = periodById(pkg, periodId)?.label ?? periodId;
   const denomCell = ue.denominator.key ? wb.cell(ue.denominator.key) : undefined;
   const openLine = ue.bars.find((b) => b.line.id === driverOf)?.line;
+  const own = currencyOf(pkg);
+  /** A peer drawn in another currency than its own: the caption names the rate. */
+  const converted = pairs.filter((p) => p.pkg && currencyOf(p.pkg) && currencyOf(p.pkg) !== own && currencyOf(p.pkg) !== COMPARISON_CURRENCY);
+  const peerCurrency = (peer: ModelPackage) => (currencyOf(peer) === own ? own : COMPARISON_CURRENCY);
 
   if (onlyMessage) {
     return (
@@ -229,7 +238,8 @@ export function UnitEconomics({
                   <th scope="col" className="px-3 py-2 font-semibold">Source</th>
                   {pairs.map((p) => (
                     <th key={p.ticker} scope="col" className="px-3 py-2 text-right font-semibold">
-                      {p.ticker} per {pkg.unitEconomics.unit}
+                      {p.ticker}
+                      {p.pkg && peerCurrency(p.pkg) !== own ? `, ${peerCurrency(p.pkg)}` : ''} per {pkg.unitEconomics.unit}
                     </th>
                   ))}
                 </tr>
@@ -267,11 +277,16 @@ export function UnitEconomics({
                         {bar.line.role === 'subtotal' ? 'Worked from the lines above' : docs.length ? docs.join('; ') : 'Worked in the model'}
                       </td>
                       {pairs.map((p) => {
-                        const v = p.pkg && p.pkg.meta.status === 'published' && sameBasis(pkg, p.pkg, bar.line.id) ? perUnitInPackage(p.pkg, bar.line.id, periodId) : null;
+                        const modelled = !!p.pkg && p.pkg.meta.status === 'published';
+                        const v = modelled ? peerFigure(pkg, bar.line, p.pkg!, periodId, rates).value : null;
                         const reduces = bar.line.role === 'cost' || bar.line.role === 'unsplit';
                         return (
                           <td key={p.ticker} className="px-3 py-2 text-right">
-                            {v === null ? <span className="text-muted-foreground">{COPY.notYetModelled}</span> : formatNumber(reduces ? -v : v, PER_UNIT_DECIMALS)}
+                            {v === null ? (
+                              <span className="text-muted-foreground">{modelled ? COPY.notComparable : COPY.notYetModelled}</span>
+                            ) : (
+                              formatNumber(reduces ? -v : v, PER_UNIT_DECIMALS)
+                            )}
                           </td>
                         );
                       })}
@@ -297,6 +312,11 @@ export function UnitEconomics({
               </tbody>
             </table>
           </div>
+          {converted.map((p) => (
+            <p key={p.ticker} className="text-xs text-muted-foreground" data-fia-fx-caption>
+              {fxCaption(p.ticker, currencyOf(p.pkg!) ?? '', periodId, periodLabel, rates)}
+            </p>
+          ))}
         </>
       )}
     </div>
