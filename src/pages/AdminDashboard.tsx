@@ -19,6 +19,7 @@ import {
   ArrowRight,
   PenLine,
   LineChart,
+  FileSpreadsheet,
 } from 'lucide-react';
 
 export default function AdminDashboard() {
@@ -154,6 +155,20 @@ export default function AdminDashboard() {
                 <div>
                   <h3 className="font-semibold text-lg">Books</h3>
                   <p className="text-sm text-muted-foreground">Shelves, books, synopses</p>
+                </div>
+              </CardContent>
+            </Link>
+          </Card>
+
+          <Card className="group hover:shadow-md transition-shadow cursor-pointer">
+            <Link to="/admin/toolkits">
+              <CardContent className="p-6 flex items-center gap-4">
+                <div className="p-3 rounded-full bg-muted text-foreground group-hover:bg-muted/80 transition-colors">
+                  <FileSpreadsheet className="h-6 w-6" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-lg">Toolkits</h3>
+                  <p className="text-sm text-muted-foreground">Upload, attest and publish template files</p>
                 </div>
               </CardContent>
             </Link>

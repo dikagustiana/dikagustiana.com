@@ -60,12 +60,14 @@ const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const AdminAuditLog = lazy(() => import("./pages/AdminAuditLog"));
 const AdminBooks = lazy(() => import("./pages/AdminBooks"));
 const AdminTransitionData = lazy(() => import("./pages/AdminTransitionData"));
+const AdminToolkits = lazy(() => import("./pages/AdminToolkits"));
 const TheNextBigThing = lazy(() => import("./pages/TheNextBigThing"));
 const NextBigThingEssayPage = lazy(() => import("./pages/NextBigThingEssayPage"));
 const FinanceTrackChild = lazy(() => import("./pages/FinanceTrackChild"));
 const FinanceLanding = lazy(() => import("./pages/FinanceLanding"));
 const FinanceInMotion = lazy(() => import("./pages/FinanceInMotion"));
 const CapitalConditionDetail = lazy(() => import("./pages/CapitalConditionDetail"));
+const ToolkitsPage = lazy(() => import("./pages/ToolkitsPage"));
 const FinanceTrackIndex = lazy(() => import("./pages/FinanceTrackIndex"));
 // Kawasan Industri (docs/world/PRD-kawasan-industri.md). __WORLD_KAWASAN__ is a
 // compile-time constant like __FIA_PREVIEW__: unset, the route is the 404 page
@@ -203,6 +205,7 @@ const App = () => (
             <Route path="/finance/capital-allocation/:conditionSlug" element={<CapitalConditionDetail />} />
             <Route path="/finance/finance-in-action" element={<FinanceInActionIndex />} />
             <Route path="/finance/finance-in-action/:modelSlug" element={<FinanceModelDetail />} />
+            <Route path="/finance/toolkits" element={<ToolkitsPage />} />
             <Route path="/finance/kawasan" element={<KawasanPage />} />
             <Route path="/finance/kawasan/:ticker" element={<KawasanPage />} />
             <Route path="/finance/:track" element={<FinanceTrackIndex />} />
@@ -294,6 +297,7 @@ const App = () => (
             <Route path="/admin/audit-log" element={<RequireAdmin><AdminAuditLog /></RequireAdmin>} />
             <Route path="/admin/books" element={<RequireAdmin><AdminBooks /></RequireAdmin>} />
             <Route path="/admin/transition-data" element={<RequireAdmin><AdminTransitionData /></RequireAdmin>} />
+            <Route path="/admin/toolkits" element={<RequireAdmin><AdminToolkits /></RequireAdmin>} />
 
             {/* Canonical Writer Studio — single editor for all essays */}
             <Route path="/admin/writer/:id" element={

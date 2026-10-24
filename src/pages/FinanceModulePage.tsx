@@ -24,6 +24,28 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { sanitizeHtml } from '@/lib/sanitizeHtml';
 import { EssayEditLink, essayEditorUrl } from '@/components/EssayEditLink';
+import { TOOLKITS_PATH, toolkitAnchor, useModuleToolkits } from '@/hooks/queries/useToolkits';
+
+// ── Toolkit line (docs/prd/finance-restructure §1 E, §4 "Module link") ───────
+
+/** "Toolkit: <title> · v1.2" under the module header, for each published toolkit from this module. */
+function ModuleToolkits({ moduleId }: { moduleId: string }) {
+  const { data } = useModuleToolkits(moduleId);
+  if (!data?.length) return null;
+  return (
+    <div className="-mt-4 mb-8 space-y-1 text-sm text-muted-foreground" data-module-toolkits>
+      {data.map((t) => (
+        <p key={t.id}>
+          Toolkit:{' '}
+          <Link to={`${TOOLKITS_PATH}#${toolkitAnchor(t.slug)}`} className="underline-offset-4 hover:text-foreground hover:underline">
+            {t.title}
+          </Link>{' '}
+          · v{t.toolkit_versions[0].version}
+        </p>
+      ))}
+    </div>
+  );
+}
 
 // ── Essay listing sub-component ──────────────────────────────────────────────
 
@@ -236,6 +258,8 @@ export default function FinanceModulePage() {
           thesis={module.thesis}
           sortOrder={module.sort_order}
         />
+
+        <ModuleToolkits moduleId={module.id} />
 
         {module.framing_content ? (
           <div
