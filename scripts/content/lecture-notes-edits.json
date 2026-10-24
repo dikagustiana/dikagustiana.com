@@ -374,6 +374,17 @@
    ]
   },
   {
+   "slug": "due-from-government-underlift-vat-and-other-receivables",
+   "edits": [
+    {
+     "deleteBlock": "Owner's study notes, \"Inter 2 - Chapter 18 - Revenue Recognition.pdf\""
+    },
+    {
+     "deleteBlock": "Summary of the notes, _referensi/rumpun-akuntansi-keuangan/02-inter-ta.md, flag"
+    }
+   ]
+  },
+  {
    "slug": "due-from-government-underlifting-dmo-fees",
    "edits": [
     {
@@ -648,6 +659,36 @@
    ]
   },
   {
+   "slug": "inventories-net-upstream-materials-and-spares-superseded",
+   "edits": [
+    {
+     "find": "The owner's notes list purchase price, import duties",
+     "replace": "That covers purchase price, import duties"
+    },
+    {
+     "find": "The owner's notes give two methods.",
+     "replace": "There are two methods."
+    },
+    {
+     "find": "The owner's notes write it as NRV = selling price",
+     "replace": "As a formula, NRV = selling price"
+    },
+    {
+     "find": "The owner's notes book it as a debit to the allowance",
+     "replace": "It is booked as a debit to the allowance"
+    },
+    {
+     "deleteBlock": "\"Inter 1 - Chapter 8 - Valuation of Inventory Cost Basic Approach.pdf\""
+    },
+    {
+     "deleteBlock": "\"Inter 1 - Chapter 9 - Inventories Addition Valuation Issues.pdf\""
+    },
+    {
+     "deleteBlock": "Summary of the notes, _referensi/rumpun-akuntansi-keuangan/02-inter-ta.md, entries"
+    }
+   ]
+  },
+  {
    "slug": "investment-properties-definition-models-transfers",
    "edits": [
     {
@@ -708,6 +749,22 @@
     {
      "find": "Textbooks the lecture notes summarise: Kieso",
      "replace": "Textbooks: Kieso"
+    }
+   ]
+  },
+  {
+   "slug": "long-term-investments-splitting-a-fall",
+   "edits": [
+    {
+     "find": "The study notes show a subsidiary as a long-term investment, which holds only in the parent's separate statements.",
+     "replace": "A subsidiary appears as a long-term investment only in the parent's separate statements."
+    },
+    {
+     "find": "The notes impair amortised-cost debt only after a loss event;",
+     "replace": "An older approach impaired amortised-cost debt only after a loss event;"
+    },
+    {
+     "deleteBlock": "\"Inter 2 - Chapter 17 - Investment.pdf\" (C:\\Users"
     }
    ]
   },
@@ -1001,6 +1058,18 @@
    ]
   },
   {
+   "slug": "restricted-cash-abandonment-fund-and-debt-reserve",
+   "edits": [
+    {
+     "find": "Under PSAK 237, as in the owner's study notes, the present value",
+     "replace": "Under PSAK 237, the present value"
+    },
+    {
+     "deleteBlock": "\"Inter 2 - Chapter 13 - Current Liabilities.pdf\""
+    }
+   ]
+  },
+  {
    "slug": "restricted-cash-access-test-classification-and-funds",
    "edits": [
     {
@@ -1201,6 +1270,14 @@
    ]
   },
   {
+   "slug": "right-of-use-assets-reading-a-fall",
+   "edits": [
+    {
+     "deleteBlock": "Owner's study notes, Rumpun Akuntansi Keuangan, summary at"
+    }
+   ]
+  },
+  {
    "slug": "share-capital-contributed-capital-and-common-control",
    "edits": [
     {
@@ -1311,6 +1388,24 @@
     {
      "deleteBlock": "The lecture notes have no chapter on cash and receivables",
      "note": "Its point (sections 1, 3, 6, 7 follow Kieso's order) is already stated in the Kieso item."
+    }
+   ]
+  },
+  {
+   "slug": "trade-receivables-upstream-expected-credit-losses",
+   "edits": [
+    {
+     "find": "The owner's notes teach this with a crude cargo sold for a four-year non-interest-bearing note, recognised at present value with the difference earned as interest each year.",
+     "replace": "For example (illustration), a crude cargo sold for a four-year non-interest-bearing note is recognised at present value, with the difference earned as interest each year."
+    },
+    {
+     "deleteBlock": "\"Inter 2 - Chapter 18 - Revenue Recognition.pdf\""
+    },
+    {
+     "deleteBlock": "\"Inter 2 - Chapter 17 - Investment.pdf\", section A"
+    },
+    {
+     "deleteBlock": "Summary of the notes, _referensi/rumpun-akuntansi-keuangan/02-inter-ta.md. NOTES. Confirms"
     }
    ]
   }

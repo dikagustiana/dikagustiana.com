@@ -1,5 +1,7 @@
 # Langkah yang Dika jalankan (site cleanup 2026-10)
 
+**Status 24 Okt 2026:** langkah 1 (migration Books) sudah dijalankan Dika; langkah 2 (esai) sudah diterapkan oleh Claude lewat konektor Supabase — 42 esai (36 published + 6 archived), backup `backups/essays-lecture-notes-20261024T032453Z.json`. Tinggal langkah 3.
+
 Urutannya: 1 → 2 → 3. Jangan merge PR #80 sebelum langkah 1 selesai, karena halaman Books akan error tanpa tabel barunya.
 
 ## 1. Migration Books (Supabase SQL Editor)

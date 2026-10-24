@@ -10,6 +10,8 @@
  *       dump's, so a row saved since is refused, not overwritten; one `migration` revision per essay),
  *       restore-NN.sql (the dump's rows back, one `rollback` revision each) and verify.sql (what still
  *       mentions the notes, drafts included).
+ *   … --json <file>   also writes the changed rows (id, expected updated_at, content, content_json,
+ *                     presentation) as JSON, to stage them for a server-side apply.
  *
  * The database is the one in .env.local (SUPABASE_DB_URL and SUPABASE_DB_PASSWORD, as for the fia scripts;
  * scripts/fia/db.ts). Nothing here prints a secret, and nothing here holds a key.
@@ -142,6 +144,12 @@ async function main() {
   console.log(`${done.length} essays change; diff written to ${diffFile}`);
   if (problems.length) console.log(`\n${problems.length} problem(s):\n  ${problems.join('\n  ')}`);
 
+  const jsonOut = arg('--json');
+  if (jsonOut) {
+    if (problems.length) throw new Error('no JSON written: fix the problems above first');
+    writeFileSync(jsonOut, JSON.stringify(done.map((d) => ({ id: d.row.id, slug: d.row.slug, expected_updated_at: d.row.updated_at, content: d.html, content_json: d.result.doc, presentation: d.result.presentation }))));
+    console.log(`changed rows written to ${jsonOut}`);
+  }
   const sqlDir = arg('--sql');
   if (sqlDir) {
     if (problems.length) throw new Error('no SQL written: fix the problems above first');

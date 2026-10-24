@@ -1,4 +1,4 @@
--- Undo of the lecture-notes removal, part 1 of 10. Paste ALL of this into the Supabase SQL editor and Run.
+-- Undo of the lecture-notes removal, part 1 of 11. Paste ALL of this into the Supabase SQL editor and Run.
 -- One transaction: if any essay was edited since the snapshot, nothing in this part is written.
 BEGIN;
 
