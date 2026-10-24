@@ -130,6 +130,8 @@ const CASES: Record<string, string> = {
   codeBlock: '<pre><code>const x = 1;</code></pre>',
   superSub: '<p>x<sup>2</sup> and H<sub>2</sub>O</p>',
   inlineCode: '<p>Mixing <code>WACC</code> into prose.</p>',
+  // A Transition Tracker chart, stored as its slug (chartEmbed.ts).
+  chartEmbed: '<figure data-type="chart-embed" data-chart-slug="coal-share" class="chart-embed">Chart: coal-share</figure>',
   table:
     '<table><tbody><tr><th colspan="1" rowspan="1"><p>H</p></th></tr>' +
     '<tr><td colspan="1" rowspan="1"><p>C</p></td></tr></tbody></table>',

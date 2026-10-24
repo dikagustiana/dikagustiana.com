@@ -40,6 +40,8 @@ const ALLOWED_ATTR = [
   'data-latex',
   // Footnote marker: the note text. Numbering is positional, never stored.
   'data-footnote',
+  // Transition Tracker chart embed: the chart's slug, nothing else.
+  'data-chart-slug',
   // Blockquote display variant ('pull'), and inline colour/highlight/align —
   // see the style hook below.
   'data-variant',

@@ -1,0 +1,22 @@
+{
+ "_note": "CONSTRUCTED from Ember OpenAPI v1's response shape, placeholder values; not a recorded answer (README.md).",
+ "stats": {},
+ "data": [
+  {
+   "entity": "Indonesia",
+   "entity_code": "IDN",
+   "date": "2025-01",
+   "series": "Solar",
+   "is_aggregate_series": false,
+   "capacity_gw": 1.1
+  },
+  {
+   "entity": "Indonesia",
+   "entity_code": "IDN",
+   "date": "2025-02-01",
+   "series": "Solar",
+   "is_aggregate_series": false,
+   "capacity_gw": 1.2
+  }
+ ]
+}

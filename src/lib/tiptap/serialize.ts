@@ -12,6 +12,7 @@ import type { JSONContent } from '@tiptap/core';
 import type { FigureBlockData } from '@/components/editorial/FigureBlock';
 import { attrJsonAttribute } from './attrJson';
 import { linkCardMarkup, normalizeLinkCard } from './linkCardData';
+import { normalizeChartSlug } from './chartEmbedData';
 
 // ---------------------------------------------------------------------------
 // Format detection
@@ -203,6 +204,13 @@ function renderNode(node: JSONContent): string {
         `<a href="${escapeHtml(card.url)}" target="_blank" rel="noopener noreferrer" ` +
         `data-type="link-card" data-link-card="${data}" class="link-card">${visible}</a>`
       );
+    }
+
+    // The slug only; the page draws the chart from the tracker's views.
+    case 'chartEmbed': {
+      const slug = normalizeChartSlug(node.attrs?.slug);
+      if (!slug) return '';
+      return `<figure data-type="chart-embed" data-chart-slug="${slug}" class="chart-embed">Chart: ${slug}</figure>`;
     }
 
     case 'image': {
@@ -404,6 +412,10 @@ function blockMarkdown(node: JSONContent): string {
       // "[Title](url) — Author · Source · Date".
       const [title, ...rest] = linkCardMarkup(card);
       return `[${title.text}](${card.url})${rest.map(piece => piece.text).join('')}`;
+    }
+    case 'chartEmbed': {
+      const slug = normalizeChartSlug(node.attrs?.slug);
+      return slug ? `[Chart: ${slug}](/green-transition/tracker/chart/${slug})` : '';
     }
     case 'table': {
       const rows = (node.content ?? []).map(row =>

@@ -35,6 +35,7 @@ import { transformPastedHTML } from '@/lib/tiptap/pasteFromWord';
 import { FigureUploader } from './FigureUploader';
 import { FigureBlockData } from './FigureBlock';
 import { LinkCardDialog } from './LinkCardDialog';
+import { ChartPickerDialog } from './ChartPickerDialog';
 import { InsertMenuButton } from './InsertMenuButton';
 import { MathDialog, type MathDialogState } from './toolbar/MathDialog';
 import { FootnoteDialog, type FootnoteDialogState } from './toolbar/FootnoteDialog';
@@ -170,6 +171,7 @@ export function EssayEditor({
 }: EssayEditorProps) {
   const [showFigureUploader, setShowFigureUploader] = useState(false);
   const [showLinkCard, setShowLinkCard] = useState(false);
+  const [showChartPicker, setShowChartPicker] = useState(false);
   const [mathState, setMathState] = useState<MathDialogState | null>(null);
   const [footnoteState, setFootnoteState] = useState<FootnoteDialogState | null>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
@@ -182,6 +184,7 @@ export function EssayEditor({
 
   const openFigureUploader = useCallback(() => setShowFigureUploader(true), []);
   const openLinkCard = useCallback(() => setShowLinkCard(true), []);
+  const openChartPicker = useCallback(() => setShowChartPicker(true), []);
   const openMathInsert = useCallback(() => setMathState({ latex: '', display: true }), []);
   const openMathEdit = useCallback(
     (params: { pos: number; latex: string; display: boolean }) => setMathState(params),
@@ -209,8 +212,9 @@ export function EssayEditor({
       onInsertLinkCard: openLinkCard,
       onInsertMath: openMathInsert,
       onInsertFootnote: insertFootnoteFlow,
+      onInsertChart: openChartPicker,
     }),
-    [openFigureUploader, openLinkCard, openMathInsert, insertFootnoteFlow],
+    [openFigureUploader, openLinkCard, openMathInsert, insertFootnoteFlow, openChartPicker],
   );
 
   // Rebuilding the extension list would tear down and recreate the editor,
@@ -341,6 +345,7 @@ export function EssayEditor({
         onInsertLinkCard={openLinkCard}
         onInsertMath={openMathInsert}
         onInsertFootnote={insertFootnoteFlow}
+        onInsertChart={openChartPicker}
       />
 
       {/* Contextual: table actions are meaningless outside a table, and a row
@@ -378,6 +383,12 @@ export function EssayEditor({
         open={showLinkCard}
         onOpenChange={setShowLinkCard}
         onInsert={handleInsertLinkCard}
+      />
+
+      <ChartPickerDialog
+        open={showChartPicker}
+        onOpenChange={setShowChartPicker}
+        onInsert={(slug) => editor?.chain().focus().insertChartEmbed(slug).run()}
       />
 
       {editor && <MathDialog editor={editor} state={mathState} onClose={() => setMathState(null)} />}
