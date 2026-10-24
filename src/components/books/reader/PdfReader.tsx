@@ -55,6 +55,11 @@ export default function PdfReader({ url, title, onError }: Props) {
     let task: RenderTask | null = null;
     let live = true;
     setDrawing(true);
+    // A page that will not load or draw (a range request failing mid-read) goes to the page's error state
+    // and its retry; a render cancelled by the next page turn is not a failure.
+    const fail = (e: unknown) => {
+      if (live && (e as { name?: string } | null)?.name !== 'RenderingCancelledException') onError('This page could not be shown.');
+    };
     doc.getPage(page).then((p) => {
       if (!live || !canvasRef.current) return;
       const base = p.getViewport({ scale: 1 });
@@ -66,16 +71,13 @@ export default function PdfReader({ url, title, onError }: Props) {
       canvas.style.width = `${Math.floor(view.width / ratio)}px`;
       canvas.style.height = `${Math.floor(view.height / ratio)}px`;
       task = p.render({ canvas, viewport: view });
-      task.promise.then(
-        () => live && setDrawing(false),
-        () => undefined,
-      );
-    });
+      task.promise.then(() => live && setDrawing(false), fail);
+    }, fail);
     return () => {
       live = false;
       task?.cancel();
     };
-  }, [doc, page, width]);
+  }, [doc, page, width, onError]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
