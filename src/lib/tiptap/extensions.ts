@@ -33,6 +33,7 @@ import TextAlign from '@tiptap/extension-text-align';
 import { BlockMath, InlineMath } from '@tiptap/extension-mathematics';
 import { FigureExtension } from '@/components/editorial/FigureExtension';
 import { LinkCardExtension } from './linkCard';
+import { ChartEmbedExtension } from './chartEmbed';
 import { Callout } from './callout';
 import { Footnote, type FootnoteOptions } from './footnote';
 import { ImageUpload, type ImageUploadOptions } from './imageUpload';
@@ -147,6 +148,9 @@ function baseExtensions(interactive: EditorExtensionOptions | null) {
 
     // Link preview card. Client-side, no iframe — see linkCard.ts.
     LinkCardExtension,
+
+    // A live Transition Tracker chart, stored as its slug — see chartEmbed.ts.
+    ChartEmbedExtension,
 
     Table.configure({ resizable: !!interactive, allowTableNodeSelection: true }),
     TableRow,

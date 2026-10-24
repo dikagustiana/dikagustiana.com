@@ -5,7 +5,8 @@ finance curriculum (sections → modules → essays) authored through an in-app 
 pages are anonymous-readable; authoring is admin-only.
 
 - **Frontend:** Vite 5 · React 18 · TypeScript 5.8 · Tailwind 3 · shadcn/ui · React Router 6 ·
-  TanStack Query 5 · TipTap 3 · Recharts · Zod · DOMPurify · KaTeX
+  TanStack Query 5 · TipTap 3 · Zod · DOMPurify · KaTeX (charts are hand-drawn SVG,
+  `src/components/transition/`)
 - **Backend:** Supabase (Postgres + Auth + Storage) via `@supabase/supabase-js`, one edge
   function (`link-preview`, which resolves a pasted URL to plain-text link-card metadata
   for the editor)
@@ -118,4 +119,8 @@ migration history and must not be deleted.
 - `src/lib/tiptap/` — the editor's node schema (`extensions.ts`) and HTML serialization (`serialize.ts`)
 - `supabase/functions/link-preview/` — the one edge function (admin-only link-card metadata)
 - `scripts/prerender.mjs`, `scripts/lib/` — the build's post-step: pre-rendered essay pages, share cards, sitemap and feed
+- `pipelines/transition/` — the transition data layer's fetcher (Python, standard library only):
+  IMF SDMX 3.0 and Ember adaptors, run weekly by `.github/workflows/transition-fetch.yml`, staging
+  values that only `ds_publish_series()` / `ds_run_publish_gate()` can publish. Plan, decisions,
+  the tested API contract and the owner's steps: `docs/prd/transition-data-layer/`
 - `docs/` — schema plan, decisions, session log, and per-session reports

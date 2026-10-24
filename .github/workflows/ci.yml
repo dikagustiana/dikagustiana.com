@@ -42,6 +42,10 @@ jobs:
       # python3, nothing installed. A test module that fails to import is an
       # error here, and since Python 3.12 a run that finds no tests exits 5.
       - run: python3 -m unittest discover -s scripts/tests -v
+      # The transition data layer's fetcher (pipelines/transition): its
+      # adaptors against recorded IMF answers, and its registry against the
+      # seed migration. Standard library only, like the checker above.
+      - run: python3 -m unittest discover -s pipelines/transition/tests -t . -v
       # The extracted PHE FY2024 statements, proven against their own
       # arithmetic and PRD §A6's golden table (golden.json beside them).
       - run: python3 scripts/fs_check.py data/fs/phe/fy2024/statements.json --failures-only

@@ -41,6 +41,7 @@ const GreenTransitionPhase = lazy(() => import("./pages/GreenTransitionPhase"));
 const GreenTransitionEssayPage = lazy(() => import("./pages/GreenTransitionEssayPage"));
 const GreenTransitionTracker = lazy(() => import("./pages/GreenTransitionTracker"));
 const GreenTransitionCurrentCondition = lazy(() => import("./pages/GreenTransitionCurrentCondition"));
+const TransitionChartDetail = lazy(() => import("./pages/TransitionChartDetail"));
 
 // Learning
 const CriticalThinkingResearch = lazy(() => import("./pages/CriticalThinkingResearch"));
@@ -59,6 +60,7 @@ const AdminContent = lazy(() => import("./pages/AdminContent"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const AdminAuditLog = lazy(() => import("./pages/AdminAuditLog"));
 const AdminBooks = lazy(() => import("./pages/AdminBooks"));
+const AdminTransitionData = lazy(() => import("./pages/AdminTransitionData"));
 const TheNextBigThing = lazy(() => import("./pages/TheNextBigThing"));
 const NextBigThingEssayPage = lazy(() => import("./pages/NextBigThingEssayPage"));
 const FinanceTrackChild = lazy(() => import("./pages/FinanceTrackChild"));
@@ -154,6 +156,14 @@ const TrackerIssueRedirect = () => {
   return <Navigate to={{ pathname: '/green-transition/tracker', hash }} replace />;
 };
 
+// The transition data layer's PRD names /transition/tracker; the tracker
+// lives under its section, so the short address forwards there, a chart's
+// address to the chart's page (docs/prd/transition-data-layer, D1).
+const TransitionChartRedirect = () => {
+  const { slug } = useParams();
+  return <Navigate to={slug ? `/green-transition/tracker/chart/${slug}` : '/green-transition/tracker'} replace />;
+};
+
 const RouteFallback = () => (
   <div className="flex items-center justify-center min-h-screen">
     <LoadingState />
@@ -233,6 +243,9 @@ const App = () => (
             <Route path="/green-transition/climate-finance" element={<ClimateFinance />} />
             <Route path="/green-transition/climate-finance/:slug" element={<GreenTransitionEssayPage />} />
             <Route path="/green-transition/tracker" element={<GreenTransitionTracker />} />
+            <Route path="/green-transition/tracker/chart/:slug" element={<TransitionChartDetail />} />
+            <Route path="/transition/tracker" element={<Navigate to="/green-transition/tracker" replace />} />
+            <Route path="/transition/tracker/:slug" element={<TransitionChartRedirect />} />
             <Route path="/green-transition/tracker/archive" element={<Navigate to="/green-transition/tracker" replace />} />
             <Route path="/green-transition/tracker/:issueSlug/:sectionKey/:entrySlug" element={<Navigate to="/green-transition/tracker" replace />} />
             <Route path="/green-transition/tracker/:issueSlug" element={<TrackerIssueRedirect />} />
@@ -280,6 +293,7 @@ const App = () => (
             <Route path="/admin/content" element={<RequireAdmin><AdminContent /></RequireAdmin>} />
             <Route path="/admin/audit-log" element={<RequireAdmin><AdminAuditLog /></RequireAdmin>} />
             <Route path="/admin/books" element={<RequireAdmin><AdminBooks /></RequireAdmin>} />
+            <Route path="/admin/transition-data" element={<RequireAdmin><AdminTransitionData /></RequireAdmin>} />
 
             {/* Canonical Writer Studio — single editor for all essays */}
             <Route path="/admin/writer/:id" element={

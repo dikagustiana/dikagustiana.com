@@ -1,0 +1,101 @@
+{
+ "_note": "CONSTRUCTED from Ember OpenAPI v1's response shape, placeholder values; not a recorded answer (README.md).",
+ "stats": {
+  "number_of_records": 6,
+  "rate_limit": {
+   "limit": "placeholder"
+  }
+ },
+ "data": [
+  {
+   "entity": "Indonesia",
+   "entity_code": "IDN",
+   "is_aggregate_entity": false,
+   "date": "2023",
+   "series": "Coal",
+   "is_aggregate_series": false,
+   "generation_twh": 200.0,
+   "share_of_generation_pct": 60.5
+  },
+  {
+   "entity": "Indonesia",
+   "entity_code": "IDN",
+   "is_aggregate_entity": false,
+   "date": "2023",
+   "series": "Solar",
+   "is_aggregate_series": false,
+   "generation_twh": 1.25,
+   "share_of_generation_pct": 0.4
+  },
+  {
+   "entity": "Indonesia",
+   "entity_code": "IDN",
+   "is_aggregate_entity": false,
+   "date": "2023",
+   "series": "Gas",
+   "is_aggregate_series": false,
+   "generation_twh": 50,
+   "share_of_generation_pct": 15.1
+  },
+  {
+   "entity": "Indonesia",
+   "entity_code": "IDN",
+   "is_aggregate_entity": false,
+   "date": "2023",
+   "series": "Fossil",
+   "is_aggregate_series": true,
+   "generation_twh": 250,
+   "share_of_generation_pct": 75.6
+  },
+  {
+   "entity": "Indonesia",
+   "entity_code": "IDN",
+   "is_aggregate_entity": false,
+   "date": "2024",
+   "series": "Coal",
+   "is_aggregate_series": false,
+   "generation_twh": 200.0,
+   "share_of_generation_pct": 60.5
+  },
+  {
+   "entity": "Indonesia",
+   "entity_code": "IDN",
+   "is_aggregate_entity": false,
+   "date": "2024",
+   "series": "Solar",
+   "is_aggregate_series": false,
+   "generation_twh": 1.25,
+   "share_of_generation_pct": 0.4
+  },
+  {
+   "entity": "Indonesia",
+   "entity_code": "IDN",
+   "is_aggregate_entity": false,
+   "date": "2024",
+   "series": "Gas",
+   "is_aggregate_series": false,
+   "generation_twh": 50,
+   "share_of_generation_pct": 15.1
+  },
+  {
+   "entity": "Indonesia",
+   "entity_code": "IDN",
+   "is_aggregate_entity": false,
+   "date": "2024",
+   "series": "Fossil",
+   "is_aggregate_series": true,
+   "generation_twh": 250,
+   "share_of_generation_pct": 75.6
+  },
+  {
+   "entity": "Indonesia",
+   "entity_code": "IDN",
+   "is_aggregate_entity": false,
+   "date": "2022",
+   "series": "Wind",
+   "is_aggregate_series": false,
+   "generation_twh": null,
+   "share_of_generation_pct": null
+  }
+ ]
+}

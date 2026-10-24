@@ -20,6 +20,7 @@ import {
   Link2,
   Sigma,
   MessageSquareQuote,
+  LineChart,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -48,6 +49,8 @@ export interface InsertMenuOptions {
   onInsertMath?: () => void;
   /** Inserts a footnote marker and opens its edit dialog. */
   onInsertFootnote?: () => void;
+  /** Opens the Transition Tracker chart picker. */
+  onInsertChart?: () => void;
 }
 
 /** Clear the `/query` text before acting, so the command never leaves it behind. */
@@ -86,6 +89,21 @@ export function buildInsertItems(options: InsertMenuOptions = {}): InsertMenuIte
       run: (editor, range) => {
         chainAt(editor, range).run();
         options.onInsertLinkCard?.();
+      },
+    });
+  }
+
+  if (options.onInsertChart) {
+    items.push({
+      id: 'chart',
+      title: 'Tracker chart',
+      hint: 'A live, sourced chart from the Transition Tracker',
+      icon: LineChart,
+      keywords: ['chart', 'tracker', 'data', 'series', 'graph', 'transition'],
+      isNew: true,
+      run: (editor, range) => {
+        chainAt(editor, range).run();
+        options.onInsertChart?.();
       },
     });
   }

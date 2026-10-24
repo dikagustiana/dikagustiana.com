@@ -18,7 +18,7 @@
  * editor — the project's signature failure.
  */
 
-import { ReactNode, useEffect, useMemo, useState } from 'react';
+import { ReactNode, Suspense, lazy, useEffect, useMemo, useState } from 'react';
 import { LinkableHeading, type LinkableHeadingLevel } from './LinkableHeading';
 import { FigureBlock, FigureBlockData } from './FigureBlock';
 import { LinkCardBlock } from './LinkCardBlock';
@@ -26,6 +26,19 @@ import { cn } from '@/lib/utils';
 import { parseTiptapJson, isLegacyHtmlContent } from '@/lib/tiptap/serialize';
 import { parseAttrJson } from '@/lib/tiptap/attrJson';
 import { linkCardFromElement, normalizeLinkCard } from '@/lib/tiptap/linkCardData';
+import { normalizeChartSlug } from '@/lib/tiptap/chartEmbedData';
+
+// Lazy: an essay with no chart downloads none of the chart code.
+const ChartEmbed = lazy(() => import('@/components/transition/ChartEmbed'));
+
+function ChartEmbedBlock({ slug }: { slug: string }) {
+  if (!slug) return null;
+  return (
+    <Suspense fallback={<div className="my-10 h-72 w-full rounded-md bg-muted/40" aria-hidden="true" />}>
+      <ChartEmbed slug={slug} />
+    </Suspense>
+  );
+}
 import type { JSONContent } from '@tiptap/core';
 import type { CSSProperties } from 'react';
 
@@ -348,6 +361,9 @@ function renderJsonNode(
       return <LinkCardBlock key={key} data={card} />;
     }
 
+    case 'chartEmbed':
+      return <ChartEmbedBlock key={key} slug={normalizeChartSlug(node.attrs?.slug)} />;
+
     case 'image': {
       const src = String(node.attrs?.src ?? '');
       if (!src) return null;
@@ -445,6 +461,10 @@ function renderLegacyHtml(htmlContent: string, ctx: RenderCtx): ReactNode {
     if (tagName === 'figure' && element.getAttribute('data-type') === 'figure-block') {
       const figureData = parseAttrJson<FigureBlockData>(element.getAttribute('data-figure'));
       return figureData ? <FigureBlock key={key} data={figureData} /> : null;
+    }
+
+    if (tagName === 'figure' && element.getAttribute('data-type') === 'chart-embed') {
+      return <ChartEmbedBlock key={key} slug={normalizeChartSlug(element.getAttribute('data-chart-slug'))} />;
     }
 
     if (/^h[1-6]$/.test(tagName)) {

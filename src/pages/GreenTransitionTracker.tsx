@@ -10,13 +10,16 @@ import { TRACKER_QUARTERS, TRACKER_STANDFIRST, numberSources } from '@/lib/track
 import { SectorRegister } from '@/components/tracker/SectorRegister';
 import { IssueSection } from '@/components/tracker/IssueSection';
 import { SourceList } from '@/components/tracker/SourceList';
+import { ChainSection } from '@/components/transition/ChainSection';
+import { useChain, useChartModels } from '@/hooks/queries/useTransition';
 
 /**
  * Indonesia Green Transition Tracker: the per-sector data appendix to the
  * current-condition essay series (PRD Part B, D5).
  *
  * Top to bottom, as PRD §B5 orders it: title and standfirst, one status line,
- * the sector register, the two quarters as short essays (newest first), and
+ * the chain of sourced charts once any is published (the transition data
+ * layer, docs/prd/transition-data-layer), the sector register, the two quarters as short essays (newest first), and
  * the numbered sources. Every finding is a `tracker_entry` row, sourced to a
  * primary document and signed off (docs/spec/tracker_sources.md). The
  * standfirst and the two issue titles are the only copy written here, and
@@ -27,6 +30,8 @@ import { SourceList } from '@/components/tracker/SourceList';
  */
 export default function GreenTransitionTracker() {
   const { data: entries, isLoading, isError, refetch } = useTrackerEntries();
+  const chain = useChain();
+  const transition = useChartModels();
   useFragmentOnArrival();
 
   const rows = entries ?? [];
@@ -64,6 +69,12 @@ export default function GreenTransitionTracker() {
               </Link>
             </p>
           </header>
+
+          {/* The sourced series, by link of the chain. Shown once a chart is
+              published; until then the page is the register alone. */}
+          {transition.charts.length > 0 && (chain.data?.length ?? 0) > 0 && (
+            <ChainSection chain={chain.data ?? []} charts={transition.charts} status={transition.status} entries={rows} />
+          )}
 
           {isLoading ? (
             <div className="space-y-3" aria-busy="true" aria-label="Loading the register">

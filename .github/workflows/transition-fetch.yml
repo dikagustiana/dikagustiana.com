@@ -1,0 +1,84 @@
+# The transition data layer's fetcher (docs/prd/transition-data-layer).
+#
+# Weekly, Monday 02:13 WIB (Sunday 19:13 UTC): pull every API series of each
+# source, stage it, and call ds_run_publish_gate. The gate publishes only
+# what passes R0–R8; an R7 warning (a revision above the series' threshold)
+# waits in staging for an admin at /admin/transition-data. A failed series
+# turns the run red and never changes published data.
+#
+# A new WEO edition (April and October) is picked up by the next weekly run;
+# to take it the day it is released, run this workflow by hand with
+# source = imf and, optionally, series = imf.weo.idn.gdp_growth.
+#
+# REQUIRED SECRETS (GitHub → Settings → Secrets and variables → Actions):
+#   VITE_SUPABASE_URL          the project URL (shared with backup.yml)
+#   SUPABASE_SERVICE_ROLE_KEY  service-role key (shared with backup.yml). The
+#                              migration limits it to staging and the run log.
+#   EMBER_API_KEY              Ember's free key (ember-energy.org/data/api).
+#                              It travels in the request URL; the fetcher never
+#                              prints a URL with it.
+name: Transition data fetch
+
+on:
+  schedule:
+    - cron: '13 19 * * 0'
+  workflow_dispatch:
+    inputs:
+      source:
+        description: 'Source to pull'
+        type: choice
+        options: [all, ember, imf]
+        default: all
+      series:
+        description: 'One series id only (optional)'
+        type: string
+        required: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: transition-fetch
+  cancel-in-progress: false
+
+jobs:
+  fetch:
+    strategy:
+      fail-fast: false
+      matrix:
+        source: [ember, imf]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      # A step's if, not the job's: the job's cannot read the matrix.
+      - name: Refuse to run without the secrets
+        if: github.event_name == 'schedule' || inputs.source == 'all' || inputs.source == matrix.source
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          EMBER_API_KEY: ${{ secrets.EMBER_API_KEY }}
+          SOURCE: ${{ matrix.source }}
+        run: |
+          missing=""
+          [ -z "$VITE_SUPABASE_URL" ] && missing="$missing VITE_SUPABASE_URL"
+          [ -z "$SUPABASE_SERVICE_ROLE_KEY" ] && missing="$missing SUPABASE_SERVICE_ROLE_KEY"
+          [ "$SOURCE" = ember ] && [ -z "$EMBER_API_KEY" ] && missing="$missing EMBER_API_KEY"
+          if [ -n "$missing" ]; then
+            echo "::error::Missing secret(s):$missing. Nothing was fetched."
+            exit 1
+          fi
+      - name: Fetch, stage and run the gate
+        if: github.event_name == 'schedule' || inputs.source == 'all' || inputs.source == matrix.source
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          EMBER_API_KEY: ${{ secrets.EMBER_API_KEY }}
+          SERIES: ${{ inputs.series }}
+        run: |
+          set -euo pipefail
+          args=(--source "${{ matrix.source }}")
+          if [ -n "${SERIES:-}" ]; then
+            case "$SERIES" in "${{ matrix.source }}".*) args+=(--series "$SERIES") ;; *) echo "skip: $SERIES is not ${{ matrix.source }}"; exit 0 ;; esac
+          fi
+          python3 -m pipelines.transition.fetch "${args[@]}"
