@@ -2,7 +2,7 @@
  * Books on shelves (site cleanup 2026-10, PRD §D): the pure part of the hooks (grouping, the save rules the
  * database also checks, the excerpt, the slug), then the public page over a mocked data hook (shelves that
  * open and close, the first open on a first visit and the reader's choice remembered, a card opening the
- * dialog that the URL names, Download for a free book and Buy for a paid one, a deep link, the empty
+ * dialog that the URL names, Read and Download for a free book and Buy for a paid one, a deep link, the empty
  * state), then the old addresses landing on their shelf and book.
  */
 import type { ReactNode } from 'react';
@@ -47,6 +47,7 @@ const book = (over: Partial<Book>): Book => ({
   purchase_url: null,
   license_note: 'CC BY 4.0',
   filepath: 'files/b/1-b.pdf',
+  file_store: 'r2',
   filename: 'b.pdf',
   mime_type: 'application/pdf',
   size_bytes: 10,
@@ -204,9 +205,9 @@ describe('the Books page', () => {
     const dialog = await screen.findByRole('dialog');
     expect(within(dialog).getByRole('heading', { name: 'Valuation' })).toBeInTheDocument();
     expect(within(dialog).getByText('A. Damodaran · 2012 · Corporate Finance')).toBeInTheDocument();
-    const download = within(dialog).getByRole('link', { name: /Download PDF/ });
-    expect(download).toHaveAttribute('download');
-    expect(download.getAttribute('href')).toContain('files/b/1-b.pdf');
+    // Read opens the in-page reader; Download asks for a signed URL when pressed (bookReader.test.tsx).
+    expect(within(dialog).getByRole('link', { name: 'Read' })).toHaveAttribute('href', '/books-academia/valuation/read');
+    expect(within(dialog).getByRole('button', { name: /Download PDF/ })).toBeEnabled();
     expect(within(dialog).getByText('License: CC BY 4.0')).toBeInTheDocument();
     // The synopsis is the owner's HTML through the sanitiser.
     const synopsis = dialog.querySelector('[data-synopsis]')!;
@@ -227,7 +228,8 @@ describe('the Books page', () => {
     expect(buy).toHaveAttribute('target', '_blank');
     expect(buy).toHaveAttribute('rel', 'noopener noreferrer');
     expect(buy).toHaveTextContent('Buy ↗');
-    expect(within(dialog).queryByRole('link', { name: /Download/ })).toBeNull();
+    expect(within(dialog).queryByRole('button', { name: /Download/ })).toBeNull();
+    expect(within(dialog).queryByRole('link', { name: 'Read' })).toBeNull();
     expect(within(dialog).queryByText(/License/)).toBeNull();
     // Behind the modal dialog the page is hidden from the accessibility tree; its shelf is open.
     await waitFor(() => expect(screen.getByRole('button', { name: /^Accounting/, hidden: true })).toHaveAttribute('aria-expanded', 'true'));

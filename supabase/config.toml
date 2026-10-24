@@ -2,7 +2,11 @@
 # The old ref (rhwzvgklasvitocbbhvi) is a deleted project.
 project_id = "asypkbkiebjvvpimewfp"
 
-# One edge function: `link-preview` (2026-09-27). It resolves a pasted URL to
+# Two edge functions. `book-file` (2026-10-24) signs short-lived R2 URLs for
+# the Books page's files (supabase/functions/book-file/, docs/books/R2-RUNBOOK.md);
+# like link-preview it reads as the caller, with no privileged client.
+#
+# `link-preview` (2026-09-27). It resolves a pasted URL to
 # plain-text card metadata at authoring time, for admins only; see
 # supabase/functions/link-preview/ and docs/DECISIONS.md, "Link previews:
 # server-resolved, metadata only". Nothing in the app calls an AI provider, so
@@ -24,4 +28,7 @@ project_id = "asypkbkiebjvvpimewfp"
 # token against public.user_roles and constructs no privileged client at all.
 
 [functions.link-preview]
+verify_jwt = true
+
+[functions.book-file]
 verify_jwt = true

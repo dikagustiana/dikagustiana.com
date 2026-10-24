@@ -93,6 +93,7 @@ export type Database = {
           category: string
           cover_path: string | null
           deleted_at: string | null
+          file_store: string
           filename: string | null
           filepath: string | null
           id: string
@@ -119,6 +120,7 @@ export type Database = {
           category?: string
           cover_path?: string | null
           deleted_at?: string | null
+          file_store?: string
           filename?: string | null
           filepath?: string | null
           id?: string
@@ -145,6 +147,7 @@ export type Database = {
           category?: string
           cover_path?: string | null
           deleted_at?: string | null
+          file_store?: string
           filename?: string | null
           filepath?: string | null
           id?: string
