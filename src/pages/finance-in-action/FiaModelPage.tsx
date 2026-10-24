@@ -55,6 +55,7 @@ import { COPY } from '@/lib/finance-in-action/copy';
 import { positionOf } from '@/lib/finance-in-action/chain';
 import { linksFrom } from '@/lib/finance-in-action/links';
 import { peerBand, publishedPeers } from '@/lib/finance-in-action/peers';
+import { useFxRates } from '@/lib/finance-in-action/useFxRates';
 import { latestReported, quarterPeriods, periodById } from '@/lib/finance-in-action/model/periods';
 import { noVolumeAnywhere, unitEconomicsAt } from '@/lib/finance-in-action/unitEconomics';
 import { groupAlongChain, type Registry } from '@/lib/finance-in-action/registry';
@@ -95,6 +96,7 @@ export function FiaModelPage({ pkg, reg }: { pkg: ModelPackage; reg: Registry })
   const [params, setParams] = useSearchParams();
   const lens = params.get(MODEL_PARAM.lens) === 'on';
   const view = useModelView(pkg, lens);
+  const rates = useFxRates();
   const setLens = (on: boolean) => {
     const next = new URLSearchParams(params);
     if (on) next.set(MODEL_PARAM.lens, 'on');
@@ -142,7 +144,7 @@ export function FiaModelPage({ pkg, reg }: { pkg: ModelPackage; reg: Registry })
     return map;
   }, [reg, pkg, meta.subIndustry]);
 
-  const peers = useMemo(() => peerBand(reg, pkg), [reg, pkg]);
+  const peers = useMemo(() => peerBand(reg, pkg, rates), [reg, pkg, rates]);
 
   // With the lens on, a selection brings the tree and the waterfall to its
   // period, so its precedents and dependents can be marked in all three.
