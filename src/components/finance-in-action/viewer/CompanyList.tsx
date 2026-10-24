@@ -14,7 +14,7 @@ import { SyntheticBadge } from './SyntheticBanner';
 
 export function CompanyList({ companies }: { companies: CompanyEntry[] }) {
   return (
-    <ul className="divide-y divide-border border-y border-border">
+    <ul className="divide-y divide-border border-y border-border" data-fia-companies>
       {companies.map((c) => (
         <CompanyRow key={c.ticker} company={c} />
       ))}

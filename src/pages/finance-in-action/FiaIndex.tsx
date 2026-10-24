@@ -37,6 +37,9 @@ import { PublishedNote } from '@/components/finance-in-action/viewer/PublishedNo
 import { ConditionList } from '@/components/finance-in-action/viewer/ConditionList';
 import { companiesByCondition } from '@/lib/finance-in-action/conditionIndex';
 import { COMPANY_MODELS_ANCHOR } from '@/lib/finance-in-action/routes';
+import { CoverageLine } from '@/components/finance-in-action/viewer/CoverageLine';
+import { coverageOf, type Coverage } from '@/lib/finance-in-action/coverage';
+import { useSlateProgress } from '@/lib/finance-in-action/slateProgress';
 
 export const PARAM = { query: 'q', condition: 'condition', lens: 'connections', link: 'link' } as const;
 
@@ -73,6 +76,12 @@ export function FiaIndex({ useRegistry }: { useRegistry: RegistryHook }) {
   );
   const conditions = useMemo(() => conditionsUsed(reg.companies.map((c) => c.conditionIds)), [reg]);
   const byCondition = useMemo(() => companiesByCondition(reg), [reg]);
+  // The coverage tracker counts every company of a sub-industry, whatever the filters show.
+  const progress = useSlateProgress();
+  const coverage = useMemo(
+    () => new Map(reg.subIndustries.map((s) => [s.code, coverageOf(reg.companies.filter((c) => c.subIndustry === s.code), progress)])),
+    [reg, progress],
+  );
   const stages = all.filter((g) => g.position.kind === 'stage');
   const drawn = useMemo(() => placeLinks(reg, stages.map((g) => g.position.id)), [reg, stages]);
   const openLink = (id: string) => update({ [PARAM.lens]: 'on', [PARAM.link]: id });
@@ -162,7 +171,7 @@ export function FiaIndex({ useRegistry }: { useRegistry: RegistryHook }) {
 
           <div className="space-y-10">
             {sections.map((g) => (
-              <PositionSection key={g.position.id} group={g} filtering={filtering} lens={lens} reg={reg} onLink={openLink} />
+              <PositionSection key={g.position.id} group={g} filtering={filtering} lens={lens} reg={reg} onLink={openLink} coverage={coverage} />
             ))}
           </div>
         </section>
@@ -200,12 +209,14 @@ function PositionSection({
   lens,
   reg,
   onLink,
+  coverage,
 }: {
   group: PositionGroup;
   filtering: boolean;
   lens: boolean;
   reg: Registry;
   onLink: (id: string) => void;
+  coverage: Map<string, Coverage>;
 }) {
   const headingId = `${positionAnchor(group.position.id)}-heading`;
   return (
@@ -231,6 +242,7 @@ function PositionSection({
               ) : (
                 <p className="text-sm italic text-muted-foreground">{filtering ? COPY.noMatches : COPY.noModels}</p>
               )}
+              {coverage.get(subIndustry.code) && <CoverageLine coverage={coverage.get(subIndustry.code)!} />}
             </div>
           ))}
         </div>
