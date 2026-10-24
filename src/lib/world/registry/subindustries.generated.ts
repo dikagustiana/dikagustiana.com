@@ -41,19 +41,19 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "ticker": "MEDC",
         "name": "Medco Energi Internasional Tbk",
         "status": "proposed",
-        "reason": "earliest-listed issuer in the sub-industry (IPO 12 October 1994): the longest run of filings to model",
+        "reason": "FIA factory pair (spec v1, decision A3 of 25 October 2026): chosen for disclosure and size; neither company consolidates the other",
         "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
         "does": "Explores for and produces oil and natural gas, and holds interests in power generation and in copper and gold mining.",
         "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
-        "ticker": "SUGI",
-        "name": "Sugih Energy Tbk",
+        "ticker": "ENRG",
+        "name": "Energi Mega Persada Tbk",
         "status": "proposed",
-        "reason": "earliest-listed issuer in the sub-industry (IPO 19 June 2002): the longest run of filings to model",
+        "reason": "FIA factory pair (spec v1, decision A3 of 25 October 2026): chosen for disclosure and size; neither company consolidates the other",
         "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
-        "does": "Holds interests in oil and gas exploration and production blocks.",
-        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report; its current business to be confirmed"
+        "does": "Explores for and produces oil and natural gas from blocks in Indonesia.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "MINE",
@@ -89,19 +89,19 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
     },
     "companies": [
       {
-        "ticker": "MTFN",
-        "name": "Capitalinc Investment Tbk",
+        "ticker": "PGAS",
+        "name": "Perusahaan Gas Negara (Persero) Tbk",
         "status": "proposed",
-        "reason": "earliest-listed issuer in the sub-industry (IPO 16 April 1990): the longest run of filings to model",
+        "reason": "FIA factory pair (spec v1, decision A3 of 25 October 2026): chosen for disclosure and size; neither company consolidates the other",
         "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
-        "does": "Holds investments in oil and gas exploration and production.",
-        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report; its current business to be confirmed"
+        "does": "Transmits and distributes natural gas through its pipelines, and holds oil and gas production and LNG businesses.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "AKRA",
         "name": "AKR Corporindo Tbk",
         "status": "proposed",
-        "reason": "earliest-listed issuer in the sub-industry (IPO 3 October 1994): the longest run of filings to model",
+        "reason": "FIA factory pair (spec v1, decision A3 of 25 October 2026): chosen for disclosure and size; neither company consolidates the other",
         "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
         "does": "Distributes fuel and basic chemicals from its own tank terminals, and develops an industrial estate with a port.",
         "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
@@ -293,22 +293,22 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
     },
     "companies": [
       {
+        "ticker": "DOID",
+        "name": "BUMA Internasional Grup Tbk",
+        "status": "proposed",
+        "reason": "FIA factory pair (spec v1, decision A3 of 25 October 2026): chosen for disclosure and size; neither company consolidates the other",
+        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
+        "does": "Removes overburden and mines coal under contract for mine owners.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report; its current business to be confirmed"
+      },
+      {
         "ticker": "PTRO",
         "name": "Petrosea Tbk",
         "status": "proposed",
-        "reason": "earliest-listed issuer in the sub-industry (IPO 21 May 1990): the longest run of filings to model",
+        "reason": "FIA factory pair (spec v1, decision A3 of 25 October 2026): chosen for disclosure and size; neither company consolidates the other",
         "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
         "does": "Provides mining contracting, engineering and construction services to miners and the oil and gas industry.",
         "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
-      },
-      {
-        "ticker": "ITMA",
-        "name": "Sumber Energi Andalan Tbk",
-        "status": "proposed",
-        "reason": "earliest-listed issuer in the sub-industry (IPO 10 December 1990): the longest run of filings to model",
-        "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
-        "does": "Holds investments in coal mining services.",
-        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report; its current business to be confirmed"
       }
     ],
     "archetypeFallback": "MINE",
@@ -437,21 +437,21 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
     },
     "companies": [
       {
-        "ticker": "UNIC",
-        "name": "Unggul Indah Cahaya Tbk",
+        "ticker": "TPIA",
+        "name": "Chandra Asri Pacific Tbk",
         "status": "proposed",
-        "reason": "earliest-listed issuer in the sub-industry (IPO 6 November 1989): the longest run of filings to model",
+        "reason": "FIA factory pair (spec v1, decision A3 of 25 October 2026): chosen for disclosure and size; neither company consolidates the other",
         "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
-        "does": "Produces alkylbenzene, the base chemical for detergents.",
-        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
+        "does": "Makes olefins and polyolefins at a naphtha cracker, and holds energy and infrastructure businesses.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report; its current business to be confirmed"
       },
       {
-        "ticker": "INCI",
-        "name": "Intanwijaya Internasional Tbk",
+        "ticker": "ESSA",
+        "name": "ESSA Industries Indonesia Tbk",
         "status": "proposed",
-        "reason": "earliest-listed issuer in the sub-industry (IPO 24 July 1990): the longest run of filings to model",
+        "reason": "FIA factory pair (spec v1, decision A3 of 25 October 2026): chosen for disclosure and size; neither company consolidates the other",
         "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
-        "does": "Produces formaldehyde and the resins used in wood panels and adhesives.",
+        "does": "Makes ammonia from natural gas, and processes gas into liquefied petroleum gas.",
         "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
@@ -641,21 +641,21 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
     },
     "companies": [
       {
-        "ticker": "BRNA",
-        "name": "Berlina Tbk",
+        "ticker": "FASW",
+        "name": "Fajar Surya Wisesa Tbk",
         "status": "proposed",
-        "reason": "earliest-listed issuer in the sub-industry (IPO 6 November 1989): the longest run of filings to model",
+        "reason": "FIA factory pair (spec v1, decision A3 of 25 October 2026): chosen for disclosure and size; neither company consolidates the other",
         "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
-        "does": "Makes plastic packaging: bottles, tubes and containers for makers of consumer goods.",
+        "does": "Makes containerboard from recovered paper, and corrugated boxes.",
         "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
-        "ticker": "TRST",
-        "name": "Trias Sentosa Tbk",
+        "ticker": "IGAR",
+        "name": "Champion Pacific Indonesia Tbk",
         "status": "proposed",
-        "reason": "earliest-listed issuer in the sub-industry (IPO 2 July 1990): the longest run of filings to model",
+        "reason": "FIA factory pair (spec v1, decision A3 of 25 October 2026): chosen for disclosure and size; neither company consolidates the other",
         "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
-        "does": "Produces plastic films for flexible packaging.",
+        "does": "Makes plastic and laminated packaging for food, medicine and other goods.",
         "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
@@ -845,28 +845,28 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
     },
     "companies": [
       {
-        "ticker": "CTBN",
-        "name": "Citra Tubindo Tbk",
+        "ticker": "KRAS",
+        "name": "Krakatau Steel (Persero) Tbk",
         "status": "proposed",
-        "reason": "earliest-listed issuer in the sub-industry (IPO 28 November 1989): the longest run of filings to model",
+        "reason": "FIA factory pair (spec v1, decision A3 of 25 October 2026): chosen for disclosure and size; neither company consolidates the other",
         "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
-        "does": "Makes and threads steel pipes for oil and gas wells.",
+        "does": "Makes and rolls steel into hot- and cold-rolled coil, and runs industrial estate, port and utility businesses.",
         "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
-        "ticker": "LMSH",
-        "name": "Lionmesh Prima Tbk",
+        "ticker": "GDST",
+        "name": "Gunawan Dianjaya Steel Tbk",
         "status": "proposed",
-        "reason": "earliest-listed issuer in the sub-industry (IPO 4 June 1990): the longest run of filings to model",
+        "reason": "FIA factory pair (spec v1, decision A3 of 25 October 2026): chosen for disclosure and size; neither company consolidates the other",
         "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
-        "does": "Makes welded steel wire mesh for concrete construction.",
+        "does": "Rolls steel plate and coil.",
         "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "PROC",
     "review": {
       "placedBy": "proposed",
-      "note": "steel works"
+      "note": "steel works; FIA factory v1: the link from B146 is weak, since the listed steelmakers make carbon steel (caveat on the nickel story)"
     }
   },
   {
@@ -931,18 +931,18 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "ticker": "INCO",
         "name": "Vale Indonesia Tbk",
         "status": "proposed",
-        "reason": "earliest-listed issuer in the sub-industry (IPO 16 May 1990): the longest run of filings to model",
+        "reason": "FIA factory pair (spec v1, decision A3 of 25 October 2026): chosen for disclosure and size; neither company consolidates the other",
         "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
         "does": "Mines nickel ore and smelts it into nickel matte.",
         "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
-        "ticker": "TINS",
-        "name": "Timah (Persero) Tbk",
+        "ticker": "NCKL",
+        "name": "Trimegah Bangun Persada Tbk",
         "status": "proposed",
-        "reason": "earliest-listed issuer in the sub-industry (IPO 19 October 1995): the longest run of filings to model",
+        "reason": "FIA factory pair (spec v1, decision A3 of 25 October 2026): chosen for disclosure and size; neither company consolidates the other",
         "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
-        "does": "Mines and smelts tin and sells refined tin.",
+        "does": "Mines nickel ore and processes it into ferronickel and mixed hydroxide precipitate.",
         "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
@@ -1578,7 +1578,7 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
     "archetypeFallback": "PROC",
     "review": {
       "placedBy": "proposed",
-      "note": "environmental and facilities services: the recovery yard"
+      "note": "environmental and facilities services: the recovery yard; FIA factory v1: left empty in Finance in Action, no listed company with modelable disclosure (HYGN and MHKI are micro caps)"
     }
   },
   {
@@ -1914,22 +1914,22 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
     },
     "companies": [
       {
-        "ticker": "WICO",
-        "name": "Wicaksana Overseas International Tbk",
+        "ticker": "DMND",
+        "name": "Diamond Food Indonesia Tbk",
         "status": "proposed",
-        "reason": "earliest-listed issuer in the sub-industry (IPO 8 August 1994): the longest run of filings to model",
+        "reason": "FIA factory pair (spec v1, decision A3 of 25 October 2026): chosen for disclosure and size; neither company consolidates the other",
         "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
-        "does": "Distributes food and consumer goods to retailers.",
+        "does": "Makes and distributes dairy, frozen and other foods to retailers and food service.",
         "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
-        "ticker": "PCAR",
-        "name": "Prima Cakrawala Abadi Tbk",
+        "ticker": "BUAH",
+        "name": "Segar Kumala Indonesia Tbk",
         "status": "proposed",
-        "reason": "earliest-listed issuer in the sub-industry (IPO 29 December 2017): the longest run of filings to model",
+        "reason": "FIA factory pair (spec v1, decision A3 of 25 October 2026): chosen for disclosure and size; neither company consolidates the other",
         "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
-        "does": "Processes and distributes crab meat and seafood.",
-        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report; its current business to be confirmed"
+        "does": "Imports and distributes fresh fruit to modern retailers and traditional markets.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "DIST",
@@ -1965,19 +1965,19 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
     },
     "companies": [
       {
-        "ticker": "HERO",
-        "name": "DFI Retail Nusantara Tbk",
+        "ticker": "AMRT",
+        "name": "Sumber Alfaria Trijaya Tbk",
         "status": "proposed",
-        "reason": "earliest-listed issuer in the sub-industry (IPO 21 August 1989): the longest run of filings to model",
+        "reason": "FIA factory pair (spec v1, decision A3 of 25 October 2026): chosen for disclosure and size; neither company consolidates the other",
         "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
-        "does": "Runs supermarkets, health and beauty stores and home furnishing stores.",
+        "does": "Runs minimarkets under the Alfamart banner.",
         "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "MPPA",
         "name": "Matahari Putra Prima Tbk",
         "status": "proposed",
-        "reason": "earliest-listed issuer in the sub-industry (IPO 21 December 1992): the longest run of filings to model",
+        "reason": "FIA factory pair (spec v1, decision A3 of 25 October 2026): chosen for disclosure and size; neither company consolidates the other",
         "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
         "does": "Runs hypermarkets and supermarkets.",
         "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
@@ -2169,19 +2169,19 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
     },
     "companies": [
       {
-        "ticker": "TGKA",
-        "name": "Tigaraksa Satria Tbk",
+        "ticker": "ICBP",
+        "name": "Indofood CBP Sukses Makmur Tbk",
         "status": "proposed",
-        "reason": "earliest-listed issuer in the sub-industry (IPO 11 June 1990): the longest run of filings to model",
+        "reason": "FIA factory pair (spec v1, decision A3 of 25 October 2026): chosen for disclosure and size; neither company consolidates the other",
         "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
-        "does": "Distributes consumer products and makes infant nutrition products.",
-        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report; its current business to be confirmed"
+        "does": "Makes instant noodles, dairy products, snacks, seasonings and other packaged foods and drinks.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
         "ticker": "MYOR",
         "name": "Mayora Indah Tbk",
         "status": "proposed",
-        "reason": "earliest-listed issuer in the sub-industry (IPO 4 July 1990): the longest run of filings to model",
+        "reason": "FIA factory pair (spec v1, decision A3 of 25 October 2026): chosen for disclosure and size; neither company consolidates the other",
         "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
         "does": "Makes biscuits, confectionery, coffee and other packaged foods and drinks.",
         "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
@@ -2271,21 +2271,21 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
     },
     "companies": [
       {
-        "ticker": "UNSP",
-        "name": "Bakrie Sumatera Plantations Tbk",
+        "ticker": "AALI",
+        "name": "Astra Agro Lestari Tbk",
         "status": "proposed",
-        "reason": "earliest-listed issuer in the sub-industry (IPO 6 March 1990): the longest run of filings to model",
+        "reason": "FIA factory pair (spec v1, decision A3 of 25 October 2026): chosen for disclosure and size; neither company consolidates the other",
         "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
-        "does": "Grows oil palm and rubber and processes them into palm oil and rubber.",
+        "does": "Grows oil palm and mills the fruit into crude palm oil and kernels.",
         "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
-        "ticker": "SMAR",
-        "name": "Sinar Mas Agro Resources and Technology Tbk",
+        "ticker": "LSIP",
+        "name": "PP London Sumatra Indonesia Tbk",
         "status": "proposed",
-        "reason": "earliest-listed issuer in the sub-industry (IPO 20 November 1992): the longest run of filings to model",
+        "reason": "FIA factory pair (spec v1, decision A3 of 25 October 2026): chosen for disclosure and size; neither company consolidates the other",
         "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
-        "does": "Grows oil palm and refines palm oil into cooking oil, margarine and fats.",
+        "does": "Grows oil palm and rubber and mills the fruit into crude palm oil.",
         "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
@@ -2325,7 +2325,7 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "ticker": "HMSP",
         "name": "Hanjaya Mandala Sampoerna Tbk",
         "status": "proposed",
-        "reason": "earliest-listed issuer in the sub-industry (IPO 15 August 1990): the longest run of filings to model",
+        "reason": "FIA factory pair (spec v1, decision A3 of 25 October 2026): chosen for disclosure and size; neither company consolidates the other",
         "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
         "does": "Makes and sells cigarettes.",
         "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
@@ -2334,7 +2334,7 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
         "ticker": "GGRM",
         "name": "Gudang Garam Tbk",
         "status": "proposed",
-        "reason": "earliest-listed issuer in the sub-industry (IPO 27 August 1990): the longest run of filings to model",
+        "reason": "FIA factory pair (spec v1, decision A3 of 25 October 2026): chosen for disclosure and size; neither company consolidates the other",
         "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
         "does": "Makes and sells clove cigarettes.",
         "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
@@ -3607,7 +3607,7 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
     "archetypeFallback": "DIST",
     "review": {
       "placedBy": "proposed",
-      "note": "consumer-goods distributors"
+      "note": "consumer-goods distributors; FIA factory v1: not modelled; D112 takes its place in the palm, well-to-shelf and rupiah-upstream stories"
     }
   },
   {
@@ -4049,21 +4049,21 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
     },
     "companies": [
       {
-        "ticker": "SRAJ",
-        "name": "Sejahteraraya Anugrahjaya Tbk",
+        "ticker": "MIKA",
+        "name": "Mitra Keluarga Karyasehat Tbk",
         "status": "proposed",
-        "reason": "earliest-listed issuer in the sub-industry (IPO 11 April 2011): the longest run of filings to model",
+        "reason": "FIA factory pair (spec v1, decision A3 of 25 October 2026): chosen for disclosure and size; neither company consolidates the other",
         "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
-        "does": "Runs hospitals.",
+        "does": "Runs private hospitals and clinics.",
         "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
-        "ticker": "SAME",
-        "name": "Sarana Meditama Metropolitan Tbk",
+        "ticker": "SILO",
+        "name": "Siloam International Hospitals Tbk",
         "status": "proposed",
-        "reason": "earliest-listed issuer in the sub-industry (IPO 11 January 2013): the longest run of filings to model",
+        "reason": "FIA factory pair (spec v1, decision A3 of 25 October 2026): chosen for disclosure and size; neither company consolidates the other",
         "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
-        "does": "Runs hospitals.",
+        "does": "Runs a network of private hospitals and clinics.",
         "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
@@ -5266,22 +5266,22 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
     },
     "companies": [
       {
-        "ticker": "CMNP",
-        "name": "Citra Marga Nusaphala Persada Tbk",
+        "ticker": "JSMR",
+        "name": "Jasa Marga (Persero) Tbk",
         "status": "proposed",
-        "reason": "earliest-listed issuer in the sub-industry (IPO 10 January 1995): the longest run of filings to model",
+        "reason": "FIA factory pair (spec v1, decision A3 of 25 October 2026): chosen for disclosure and size; neither company consolidates the other",
         "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
-        "does": "Builds and runs toll roads.",
+        "does": "Builds and operates toll roads.",
         "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
-        "ticker": "META",
-        "name": "Nusantara Infrastructure Tbk",
+        "ticker": "CMNP",
+        "name": "Citra Marga Nusaphala Persada Tbk",
         "status": "proposed",
-        "reason": "earliest-listed issuer in the sub-industry (IPO 18 July 2001): the longest run of filings to model",
+        "reason": "FIA factory pair (spec v1, decision A3 of 25 October 2026): chosen for disclosure and size; neither company consolidates the other",
         "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
-        "does": "Invests in and runs toll roads and other infrastructure.",
-        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report; its current business to be confirmed"
+        "does": "Builds and runs toll roads.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "ASSET",
@@ -5317,21 +5317,21 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
     },
     "companies": [
       {
-        "ticker": "KARW",
-        "name": "Meratus Jasa Prima Tbk",
+        "ticker": "IPCC",
+        "name": "Indonesia Kendaraan Terminal Tbk",
         "status": "proposed",
-        "reason": "earliest-listed issuer in the sub-industry (IPO 20 December 1994): the longest run of filings to model",
+        "reason": "FIA factory pair (spec v1, decision A3 of 25 October 2026): chosen for disclosure and size; neither company consolidates the other",
         "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
-        "does": "Provides port and stevedoring services.",
-        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report; its current business to be confirmed"
+        "does": "Operates vehicle terminals in ports, handling cars and heavy equipment shipped in and out.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
-        "ticker": "PORT",
-        "name": "Nusantara Pelabuhan Handal Tbk",
+        "ticker": "IPCM",
+        "name": "Jasa Armada Indonesia Tbk",
         "status": "proposed",
-        "reason": "earliest-listed issuer in the sub-industry (IPO 16 March 2017): the longest run of filings to model",
+        "reason": "FIA factory pair (spec v1, decision A3 of 25 October 2026): chosen for disclosure and size; neither company consolidates the other",
         "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
-        "does": "Runs container terminals and port services.",
+        "does": "Provides marine services in ports: pilotage, towage and mooring of vessels.",
         "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
@@ -5854,22 +5854,22 @@ export const SUB_INDUSTRIES: readonly SubIndustry[] = [
     },
     "companies": [
       {
-        "ticker": "BLTA",
-        "name": "Berlian Laju Tanker Tbk",
+        "ticker": "SMDR",
+        "name": "Samudera Indonesia Tbk",
         "status": "proposed",
-        "reason": "earliest-listed issuer in the sub-industry (IPO 26 March 1990): the longest run of filings to model",
+        "reason": "FIA factory pair (spec v1, decision A3 of 25 October 2026): chosen for disclosure and size; neither company consolidates the other",
         "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
-        "does": "Carries oil, gas and chemicals by tanker.",
+        "does": "Runs container shipping, port and logistics services.",
         "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       },
       {
-        "ticker": "MIRA",
-        "name": "Mitra International Resources Tbk",
+        "ticker": "TMAS",
+        "name": "Temas Tbk",
         "status": "proposed",
-        "reason": "earliest-listed issuer in the sub-industry (IPO 30 January 1997): the longest run of filings to model",
+        "reason": "FIA factory pair (spec v1, decision A3 of 25 October 2026): chosen for disclosure and size; neither company consolidates the other",
         "source": "https://lembarsaham.com/daftar-emiten/industrial/<code>/ (lembarsaham.com (secondary; mirrors the exchange's classification of each issuer), fetched 2026-10-08)",
-        "does": "Provides logistics and transport services.",
-        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report; its current business to be confirmed"
+        "does": "Runs domestic container shipping and related logistics.",
+        "doesSource": "drafted by the agent from the issuer’s public profile, to be checked against its latest annual report"
       }
     ],
     "archetypeFallback": "DIST",

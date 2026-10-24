@@ -24,7 +24,7 @@ vi.mock('@vercel/analytics/react', () => ({ Analytics: () => null }));
 
 import App from '@/App';
 import FiaIndexPage from '@/pages/finance-in-action/FiaIndexPage';
-import { CHAIN_STAGES, SPANNING_LAYERS, positionAnchor } from '@/lib/finance-in-action/chain';
+import { ALONG_THE_CHAIN, CHAIN_NODES, CHAIN_STAGES, DISTRIBUTION_GROUP, SPANNING_LAYERS, positionAnchor } from '@/lib/finance-in-action/chain';
 import { COPY } from '@/lib/finance-in-action/copy';
 import { STATUSES } from '@/lib/finance-in-action/constants';
 import { STAGES } from '@/data/industryChain';
@@ -57,12 +57,14 @@ describe('the preview index, lens off', () => {
     expect(screen.getByRole('note')).toHaveTextContent('SYNTHETIC');
   });
 
-  it('draws one card per chain-map stage, in the map’s order, then the two spanning layers', async () => {
+  it('draws one card per chain-map stage and distribution or retail node, in the map’s order, then the two spanning layers', async () => {
     renderIndex();
     const region = await screen.findByRole('region', { name: /Chain stages/ });
     const cards = within(region).getAllByRole('listitem');
-    expect(cards.map((li) => within(li).getByRole('link').firstChild?.textContent)).toEqual(CHAIN_STAGES.map((s) => s.label));
+    // A node's card carries its group's caption above its own name.
+    expect(cards.map((li) => within(li).getByRole('link').firstChild?.textContent)).toEqual(ALONG_THE_CHAIN.map((p) => `${p.group?.label ?? ''}${p.label}`));
     expect(CHAIN_STAGES).toHaveLength(STAGES.length);
+    expect(ALONG_THE_CHAIN).toHaveLength(STAGES.length + CHAIN_NODES.length);
     for (const layer of SPANNING_LAYERS) {
       // The stage pills (chain view §3.1) name the layers too; the strip's band is the link outside them.
       const band = screen.getAllByRole('link', { name: new RegExp(layer.label) }).filter((a) => !a.closest('nav'));
@@ -72,11 +74,34 @@ describe('the preview index, lens off', () => {
     expect(SPANNING_LAYERS.map((l) => l.label)).toEqual(['Energy', 'Logistics and warehousing']);
   });
 
+  it('puts the distributor and modern trade between finished-goods manufacturing and consumption, in one Distribution and retail section', async () => {
+    renderIndex();
+    await screen.findByRole('region', { name: /Chain stages/ });
+    const ids = ALONG_THE_CHAIN.map((p) => p.id);
+    expect(ids.slice(ids.indexOf('stage-manufacturing'), ids.indexOf('stage-consumption') + 1)).toEqual([
+      'stage-manufacturing',
+      'node-distributor',
+      'node-retail-modern',
+      'stage-consumption',
+    ]);
+    const group = document.getElementById(DISTRIBUTION_GROUP.id)!;
+    expect(group.tagName).toBe('SECTION');
+    expect(within(group).getByRole('heading', { level: 2, name: DISTRIBUTION_GROUP.label })).toBeInTheDocument();
+    for (const node of CHAIN_NODES) {
+      const section = document.getElementById(positionAnchor(node.id))!;
+      expect(group.contains(section), node.id).toBe(true);
+      expect(within(section).getByRole('heading', { level: 3, name: node.label })).toBeInTheDocument();
+    }
+    expect(positionAnchor('node-distributor')).toBe('node-node-distributor');
+    expect(within(document.getElementById(positionAnchor('node-distributor'))!).getByRole('heading', { level: 4, name: /Food retail and distributors/ })).toBeInTheDocument();
+    expect(within(document.getElementById(positionAnchor('node-retail-modern'))!).getByRole('heading', { level: 4, name: /Supermarkets and convenience stores/ })).toBeInTheDocument();
+  });
+
   it('counts sub-industries and companies on each stage card', async () => {
     renderIndex();
     const region = await screen.findByRole('region', { name: /Chain stages/ });
     const extraction = within(region).getByRole('link', { name: /Geological extraction/ });
-    expect(extraction).toHaveTextContent('2 sub-industries, 6 companies'); // A121: PTBA, ITMG, INDY, ADRO planned; the two SYNTHETIC coal fixtures
+    expect(extraction).toHaveTextContent('5 sub-industries, 12 companies'); // A121: PTBA, ITMG, INDY, ADRO planned; B146, A111, A132: the factory's six planned; the two SYNTHETIC coal fixtures
     expect(extraction).toHaveTextContent('2 published');
     expect(within(region).getByRole('link', { name: /Recovery/ })).toHaveTextContent(COPY.noModels);
   });

@@ -54,7 +54,7 @@ export const STORIES: readonly Story[] = [
       "B111",
       "B131",
       "D222",
-      "E711",
+      "D112",
       "D113",
       "C222",
       "B111"
@@ -79,7 +79,7 @@ export const STORIES: readonly Story[] = [
     "hops": [
       "D232",
       "D222",
-      "E711",
+      "D112",
       "D113"
     ],
     "goods": [
@@ -94,7 +94,7 @@ export const STORIES: readonly Story[] = [
   {
     "id": "nickel",
     "title": "Nickel",
-    "standfirst": "Ore leaves the pit for the smelter and the metal leaves by ship; beside it the raw-export road carries ore out unprocessed.",
+    "standfirst": "Ore leaves the pit for the smelter and the metal leaves by ship; beside it the raw-export road carries ore out unprocessed. The listed steelmakers roll carbon steel, so the step from nickel into steel is a weak one.",
     "hops": [
       "B146",
       "B144",
@@ -114,7 +114,7 @@ export const STORIES: readonly Story[] = [
     "standfirst": "A shopper's rupiah goes back up the chain: the shelf pays the distributor, the distributor the food factory, the factory the plantation, and the banks lend at each step.",
     "hops": [
       "D113",
-      "E711",
+      "D112",
       "D222",
       "D232"
     ],

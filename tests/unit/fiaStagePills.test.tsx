@@ -70,8 +70,8 @@ describe('the stage pills', () => {
       expect(a).toHaveTextContent(p.label);
       expect(a).toHaveTextContent(pillCountLine(counts.get(p.id)!));
     });
-    // The four real coal companies are planned; the two synthetic miners are published.
-    expect(within(nav).getByRole('link', { name: /Geological extraction/ })).toHaveTextContent(/6 · 2 published/);
+    // The four real coal companies and the factory's six (B146, A111, A132) are planned; the two synthetic miners are published.
+    expect(within(nav).getByRole('link', { name: /Geological extraction/ })).toHaveTextContent(/12 · 2 published/);
   });
 
   it('go to the section and mark the pill as the current location', async () => {

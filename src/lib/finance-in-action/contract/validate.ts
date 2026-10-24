@@ -10,7 +10,7 @@
  * The viewer runs this on every package before rendering it; a package with
  * issues is not shown, the issues are.
  */
-import { BANDS, STAGES } from '@/data/industryChain';
+import { BANDS, NODES, RETAIL, STAGES } from '@/data/industryChain';
 import { CONDITIONS } from '@/data/capitalConditions';
 import { splitRowRef, type Cell, type ModelPackage, type Row, type UELine } from './types';
 import type { IndustryLink } from './links';
@@ -23,8 +23,17 @@ export interface ValidationIssue {
 /** The two spanning layers a package may sit on instead of a stage. */
 export const SPANNING_LAYER_IDS = ['band-energy', 'band-logistics'] as const;
 
+/**
+ * The chain map nodes a package may sit on: the distributor and the modern
+ * trade retail format, drawn on the index as one "Distribution and retail"
+ * group between finished-goods manufacturing and consumption (FIA factory
+ * spec v1, X5).
+ */
+export const CHAIN_NODE_IDS = ['node-distributor', 'node-retail-modern'] as const;
+
 export const CHAIN_POSITION_IDS: readonly string[] = [
   ...STAGES.map((s) => s.id),
+  ...[...NODES, ...RETAIL].filter((n) => (CHAIN_NODE_IDS as readonly string[]).includes(n.id)).map((n) => n.id),
   ...BANDS.filter((b) => (SPANNING_LAYER_IDS as readonly string[]).includes(b.id)).map((b) => b.id),
 ];
 
