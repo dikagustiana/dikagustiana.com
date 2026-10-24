@@ -24,6 +24,8 @@ describe('the site chrome', () => {
     const links = within(nav).getAllByRole('link');
     expect(links[0]).toHaveTextContent('Home');
     expect(links[0]).toHaveAttribute('href', '/');
+    expect(links[1]).toHaveTextContent('Foundations of Knowing');
+    expect(links[1]).toHaveAttribute('href', '/foundations-of-knowing');
     expect(within(nav).queryByRole('link', { name: 'About' })).toBeNull();
   });
 
@@ -35,11 +37,11 @@ describe('the site chrome', () => {
     );
     const sections = screen.getByRole('heading', { name: 'Sections' }).nextElementSibling as HTMLElement;
     expect(within(sections).getAllByRole('link').map((a) => a.textContent)).toEqual([
+      'Foundations of Knowing',
       'Accounting',
       'Finance',
       'Green Transition',
       'The Next Big Thing',
-      'Development Finance',
     ]);
     expect(screen.queryByRole('link', { name: 'About' })).toBeNull();
   });

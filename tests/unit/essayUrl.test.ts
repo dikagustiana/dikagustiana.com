@@ -66,11 +66,6 @@ describe('essayUrl — every branch resolves to a real route', () => {
       expected: '/green-transition/gaps/g2',
     },
     {
-      name: 'development finance',
-      input: { slug: 'd1', section: 'development-finance', phase: 'blended' },
-      expected: '/development-finance/blended/d1',
-    },
-    {
       name: 'next big thing with a theme: three segments, the editorial equivalent of /finance/:track/:slug',
       input: { slug: 'n1', section: 'next-big-thing', phase: 'technology' },
       expected: '/the-next-big-thing/technology/n1',
@@ -81,9 +76,14 @@ describe('essayUrl — every branch resolves to a real route', () => {
       expected: '/the-next-big-thing/n1',
     },
     {
-      name: 'critical thinking with phase',
-      input: { slug: 'c1', section: 'critical-thinking', phase: 'clarify' },
-      expected: '/critical-thinking-research/clarify/c1',
+      name: 'foundations of knowing (section critical-thinking) with its part',
+      input: { slug: 'c1', section: 'critical-thinking', phase: 'logic' },
+      expected: '/foundations-of-knowing/logic/c1',
+    },
+    {
+      name: 'foundations of knowing with no part falls to the universal route',
+      input: { slug: 'c2', section: 'critical-thinking' },
+      expected: '/essays/c2',
     },
     {
       name: 'accounting FSLI',

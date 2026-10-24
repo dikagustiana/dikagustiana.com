@@ -97,13 +97,11 @@ export function buildCanonicalUrl(input: PlacementInput): string {
       const phase = derivePhase(sectionSlug, input.categorySlug) || 'general';
       return `/green-transition/${phase}/${slug}`;
     }
-    case 'development-finance': {
-      const phase = derivePhase(sectionSlug, input.categorySlug) || 'general';
-      return `/development-finance/${phase}/${slug}`;
-    }
     case 'critical-thinking': {
-      const phase = derivePhase(sectionSlug, input.categorySlug) || 'clarify';
-      return `/critical-thinking-research/${phase}/${slug}`;
+      // Foundations of Knowing: the part is the second segment. Kept in
+      // lockstep with src/lib/essayUrl.ts.
+      const phase = derivePhase(sectionSlug, input.categorySlug);
+      return phase ? `/foundations-of-knowing/${phase}/${slug}` : `/essays/${slug}`;
     }
     case 'next-big-thing': {
       // Kept in lockstep with src/lib/essayUrl.ts: the theme (category slug

@@ -10,16 +10,23 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Badge } from '@/components/ui/badge';
 import { EssayEditLink } from '@/components/EssayEditLink';
 import { sanitizeHtml } from '@/lib/sanitizeHtml';
+import { essayUrl } from '@/lib/essayUrl';
+import {
+  FOUNDATIONS_LABEL,
+  FOUNDATIONS_PATH,
+  FOUNDATIONS_SECTION,
+  foundationsPart,
+  foundationsPartPath,
+} from '@/config/foundationsOfKnowing';
 
-const phaseNames: Record<string, string> = {
-  'clarify': 'Clarify',
-  'analyze': 'Analyze',
-  'construct': 'Construct',
-  'apply': 'Apply',
-};
-
+/** A Foundations of Knowing essay, /foundations-of-knowing/:phase/:essayId (the param is the slug). */
 export default function CriticalThinkingEssay() {
   const { phase, essayId } = useParams<{ phase: string; essayId: string }>();
+  const part = foundationsPart(phase);
+  const partCrumb = part
+    ? { label: `Part ${part.number}`, path: foundationsPartPath(part.id) }
+    : { label: 'Part', path: FOUNDATIONS_PATH };
+  const partHome = part ? foundationsPartPath(part.id) : FOUNDATIONS_PATH;
   const { isAdmin } = useAuth();
   const { data: essay, isLoading, error, refetch } = useEssay(essayId || '');
 
@@ -33,8 +40,8 @@ export default function CriticalThinkingEssay() {
         role="educator"
         breadcrumbs={[
           { label: 'Home', path: '/' },
-          { label: 'Critical Thinking', path: '/critical-thinking-research' },
-          { label: phase ? phaseNames[phase] : 'Phase', path: `/critical-thinking-research/${phase}` },
+          { label: FOUNDATIONS_LABEL, path: FOUNDATIONS_PATH },
+          partCrumb,
           { label: 'Loading...' }
         ]}
       >
@@ -59,14 +66,21 @@ export default function CriticalThinkingEssay() {
   if (essay) {
     const isPublished = essay.status === 'published';
     if (!isPublished && !isAdmin) {
-      // Draft accessed by non-admin - redirect to phase page
-      return <Navigate to={`/critical-thinking-research/${phase}`} replace />;
+      // Draft accessed by non-admin - redirect to its part
+      return <Navigate to={partHome} replace />;
     }
   }
 
   // Essay not found
   if (!essay) {
-    return <Navigate to={`/critical-thinking-research/${phase}`} replace />;
+    return <Navigate to={partHome} replace />;
+  }
+
+  // One address per essay: a slug reached under another part (or another
+  // section's slug typed here) goes to the URL the essay actually owns.
+  const canonical = essayUrl({ slug: essay.slug, section: essay.section, phase: essay.phase });
+  if (canonical && canonical !== `${FOUNDATIONS_PATH}/${phase}/${essayId}`) {
+    return <Navigate to={canonical} replace />;
   }
 
   const title = essay?.title || formatTitle(essayId || '');
@@ -77,14 +91,14 @@ export default function CriticalThinkingEssay() {
       role="educator"
       breadcrumbs={[
         { label: 'Home', path: '/' },
-        { label: 'Critical Thinking', path: '/critical-thinking-research' },
-        { label: phase ? phaseNames[phase] : 'Phase', path: `/critical-thinking-research/${phase}` },
+        { label: FOUNDATIONS_LABEL, path: FOUNDATIONS_PATH },
+        partCrumb,
         { label: title }
       ]}
     >
       <SEO
         title={title}
-        description={essay?.snippet || 'Critical thinking essay on rigorous analysis methods.'}
+        description={essay?.snippet || `${FOUNDATIONS_LABEL}${part ? `, Part ${part.number}: ${part.label}` : ''}.`}
         type="article"
         author={essay?.author || 'Dika Gustiana'}
         // The og:image the prerender wrote into this page's raw HTML.
@@ -99,7 +113,7 @@ export default function CriticalThinkingEssay() {
                 {title}
               </h1>
               {/* Was an "Edit" button with no handler. Renders for admins only. */}
-              <EssayEditLink slug={essay.slug} section={essay.section ?? 'critical-thinking'} />
+              <EssayEditLink slug={essay.slug} section={essay.section ?? FOUNDATIONS_SECTION} />
             </div>
             
             {essay?.snippet && (

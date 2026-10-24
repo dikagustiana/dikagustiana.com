@@ -54,7 +54,7 @@ const sectionLabels: Record<string, string> = {
   'green-transition': 'Green Transition',
   finance: 'Finance',
   accounting: 'Accounting',
-  'critical-thinking': 'Critical Thinking',
+  'critical-thinking': 'Foundations of Knowing',
   books: 'Books',
   ielts: 'IELTS',
   tools: 'Tools',
@@ -82,7 +82,7 @@ const allSections = [
   { slug: 'finance', name: 'Finance' },
   { slug: 'green-transition', name: 'Green Transition' },
   { slug: 'next-big-thing', name: 'Next Big Thing' },
-  { slug: 'critical-thinking', name: 'Critical Thinking' },
+  { slug: 'critical-thinking', name: 'Foundations of Knowing' },
   { slug: 'books', name: 'Books' },
   { slug: 'ielts', name: 'IELTS' },
 ];

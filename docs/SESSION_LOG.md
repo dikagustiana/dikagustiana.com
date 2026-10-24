@@ -56,6 +56,22 @@ Owner items still pending:
 - the three decisions from the auth tab-focus session (listed in that entry);
 - WO-R05's three open decisions (listed in its entry).
 
+## 2026-10-24 (Foundations of Knowing session) — Critical Thinking renamed and seeded; Development Finance folded into The Next Big Thing
+
+Owner's PRD: `docs/prd/foundations-of-knowing/PRD.md`; what shipped, the deviations and the
+evidence: `docs/prd/foundations-of-knowing/README.md`.
+- **Applied:** migration `20261024185538_foundations_of_knowing`. It adds `essay_structure.phase`
+  and `.sort_order`, 10 part categories, the `next-big-thing-development-finance` category, renames
+  `sections.name`, and inserts 56 draft stubs (2/6/5/6/7/5/7/6/6/6). It was dry-run in a
+  rolled-back transaction first and verified after.
+- **Code:** `/foundations-of-knowing` (section, part, essay), second in the nav. 301s from
+  `/critical-thinking-research/*` and `/development-finance/*` in `vercel.json`, plus the same
+  rules as in-app `<Navigate>`s. The writer's part picker. The Development Finance theme. The
+  three Development Finance pages deleted.
+- **Owner, open:** the manifesto. It is unchanged, because the PRD's text was "[ISI SENDIRI]".
+  The one-line UPDATE is in the README. After deploy, also check one 301 on production, e.g.
+  `curl -sI https://www.dikagustiana.com/development-finance`.
+
 ## 2026-09-28 (WO-R05 session) — every essay gets its own share card, and a sitemap and a feed; the rebuild is staged, not applied
 
 Branch `claude/wo-r05-share-cards-rebuild`, base `main` @ `85cdf51`. **Merged into `main` as

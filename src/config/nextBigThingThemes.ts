@@ -25,9 +25,24 @@ export const NEXT_BIG_THING_THEMES = [
   { id: 'economy', label: 'Economy' },
   { id: 'environment', label: 'Environment' },
   // Curation: entries built around someone else's post, with the commentary
-  // as the substance. Last on purpose — category sort_order 6.
+  // as the substance. Category sort_order 6.
   { id: 'growth', label: 'Growth' },
+  // Was its own section until 2026-10-24 (docs/prd/foundations-of-knowing);
+  // its old addresses redirect here. Category sort_order 7. The description
+  // is the old section page's, shown when the feed is filtered to the theme.
+  {
+    id: 'development-finance',
+    label: 'Development Finance',
+    description:
+      'How public capital is deployed, at scale, to shape economies. Sovereign funds, multilateral lenders, blended finance, and the infrastructure of development.',
+  },
 ] as const;
+
+/** The theme's own line under the page heading, when it has one. */
+export const nextBigThingThemeDescription = (id: string | null): string | null => {
+  const theme = NEXT_BIG_THING_THEMES.find((t) => t.id === id);
+  return theme && 'description' in theme ? theme.description : null;
+};
 
 export type NextBigThingThemeId = (typeof NEXT_BIG_THING_THEMES)[number]['id'];
 

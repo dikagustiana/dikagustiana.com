@@ -16,7 +16,7 @@ vi.mock('@/contexts/AuthContext', () => ({
 }));
 
 import GreenTransitionEssayPage from '@/pages/GreenTransitionEssayPage';
-import DevelopmentFinanceEssayPage from '@/pages/DevelopmentFinanceEssayPage';
+import CriticalThinkingEssay from '@/pages/CriticalThinkingEssay';
 
 /**
  * An address must not assert an intellectual home the essay does not have.
@@ -82,7 +82,7 @@ function renderAt(path: string, element: ReactNode) {
         <Routes>
           <Route path="/green-transition/climate-finance/:slug" element={element} />
           <Route path="/green-transition/:phase/:slug" element={element} />
-          <Route path="/development-finance/:phase/:slug" element={element} />
+          <Route path="/foundations-of-knowing/:phase/:essayId" element={element} />
           <Route path="/essays/:slug" element={<div>universal route</div>} />
           <Route path="*" element={<div>elsewhere</div>} />
         </Routes>
@@ -137,16 +137,22 @@ describe('green transition essay ownership', () => {
   });
 });
 
-describe('development finance essay ownership', () => {
-  it('redirects a wrong-phase address', async () => {
-    fromMock.mockReturnValue(
-      builderFor(row({ section: 'development-finance', phase: 'blended-finance' })),
-    );
-    renderAt('/development-finance/sovereign-wealth-funds/a-real-essay', <DevelopmentFinanceEssayPage />);
+// Development Finance became a theme of The Next Big Thing on 2026-10-24
+// (docs/prd/foundations-of-knowing); its essay page, and the test of it, are
+// gone. Foundations of Knowing's essay page holds the same rule.
+describe('foundations of knowing essay ownership', () => {
+  it('renders at the address the essay owns', async () => {
+    fromMock.mockReturnValue(builderFor(row({ section: 'critical-thinking', phase: 'logic' })));
+    renderAt('/foundations-of-knowing/logic/a-real-essay', <CriticalThinkingEssay />);
+    await waitFor(() => expect(screen.getAllByText('A Real Essay').length).toBeGreaterThan(0));
+    expect(screen.getByTestId('path')).toHaveTextContent('/foundations-of-knowing/logic/a-real-essay');
+  });
+
+  it('redirects a wrong-part address to the part the essay is in', async () => {
+    fromMock.mockReturnValue(builderFor(row({ section: 'critical-thinking', phase: 'logic' })));
+    renderAt('/foundations-of-knowing/argument/a-real-essay', <CriticalThinkingEssay />);
     await waitFor(() =>
-      expect(screen.getByTestId('path')).toHaveTextContent(
-        '/development-finance/blended-finance/a-real-essay',
-      ),
+      expect(screen.getByTestId('path')).toHaveTextContent('/foundations-of-knowing/logic/a-real-essay'),
     );
   });
 });
@@ -154,14 +160,14 @@ describe('development finance essay ownership', () => {
 describe('no generated link carries an undefined segment', () => {
   const SRC = [
     'src/pages/GreenTransitionEssayPage.tsx',
-    'src/pages/DevelopmentFinanceEssayPage.tsx',
+    'src/pages/CriticalThinkingEssay.tsx',
   ].map((f) => [f, readFileSync(f, 'utf-8')] as const);
 
   it('never interpolates a route param straight into an essay path', () => {
     for (const [file, src] of SRC) {
       // `${phase}` inside a path literal is the exact shape that produced
       // /green-transition/undefined/<slug> on a route with no :phase segment.
-      expect(src, file).not.toMatch(/`\/(green-transition|development-finance)\/\$\{phase/);
+      expect(src, file).not.toMatch(/`\/(green-transition|foundations-of-knowing)\/\$\{phase/);
     }
   });
 });

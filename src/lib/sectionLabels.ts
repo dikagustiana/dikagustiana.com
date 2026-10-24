@@ -12,8 +12,8 @@ export const SECTION_LABELS: Record<string, string> = {
   'green-transition': 'Green Transition',
   'next-big-thing': 'The Next Big Thing',
   'development-finance': 'Development Finance',
-  'critical-thinking': 'Critical Thinking',
-  'critical-thinking-research': 'Critical Thinking',
+  'critical-thinking': 'Foundations of Knowing',
+  'critical-thinking-research': 'Foundations of Knowing',
 };
 
 /** The label, or the slug itself when the section is one this map has not met. */

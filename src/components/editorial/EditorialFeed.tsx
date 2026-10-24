@@ -174,7 +174,7 @@ export function EditorialFeed({ section, topics = [], getEssayUrl }: EditorialFe
           {/* Topic filter */}
           {topics.length > 0 && (
             <Select value={selectedTopic} onValueChange={setSelectedTopic}>
-              <SelectTrigger className="w-[140px]">
+              <SelectTrigger className="w-[190px]">
                 <SelectValue placeholder="Topic" />
               </SelectTrigger>
               <SelectContent>
@@ -240,7 +240,8 @@ export function EditorialFeed({ section, topics = [], getEssayUrl }: EditorialFe
                   <div className="flex items-center gap-2 mb-2">
                     {essay.phase && (
                       <Badge variant="secondary" className="text-xs capitalize">
-                        {essay.phase}
+                        {/* The theme's label; the raw id read "development-finance". */}
+                        {topics.find((t) => t.id === essay.phase)?.label ?? essay.phase}
                       </Badge>
                     )}
                     {isAdmin && essay.status !== 'published' && (

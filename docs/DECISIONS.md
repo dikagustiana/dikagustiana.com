@@ -3746,3 +3746,25 @@ framework v2.1. These notes are annotations: from item 10 on, a reader does not
 see them and an admin does. No stored text was changed, because the PRD's
 non-goals keep essay bodies as they are; no separate "benchmark note" naming
 the edition was found in the repository to align.
+
+## 2026-10-24 — Foundations of Knowing: drafts' part and order become public; Development Finance becomes a theme
+
+docs/prd/foundations-of-knowing. Critical Thinking is renamed **Foundations of
+Knowing** for display only (the slug `critical-thinking` stays, so nothing keyed
+on it moves), sits right of Home in the nav, and holds 56 planned essays in ten
+parts. Two decisions with reach beyond the section:
+
+1. **`essay_structure` exposes `phase` and `sort_order`.** The part pages list
+   drafts to every reader, as the Finance tracks do, and a reader reaches a
+   draft only through this view. Both columns are placement and ordering, inside
+   the line the 2026-08-03 entry draws (title, deck, slug, author, module
+   reference, ordering, published flag). Bodies stay out of the view.
+2. **Development Finance is a theme of The Next Big Thing, not a section.** It
+   had no essays. Its pages are deleted and its addresses answer 301 to
+   `/the-next-big-thing?theme=development-finance` (vercel.json, with the same
+   rule in App.tsx for in-app navigation and any other host).
+
+The parts are categories (`critical-thinking-<part>`), because the writer places
+an essay by category and `essays.category_id` is NOT NULL. One constant,
+`src/config/foundationsOfKnowing.ts`, is the parts' order and names, and a unit
+test ties it to the migration's seed.

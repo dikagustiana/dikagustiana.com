@@ -8,7 +8,7 @@ import { useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { essayUrl } from '@/lib/essayUrl';
 import { nextBigThingItems } from '@/config/navConfig';
-import { NEXT_BIG_THING_THEMES } from '@/config/nextBigThingThemes';
+import { NEXT_BIG_THING_THEMES, nextBigThingThemeDescription } from '@/config/nextBigThingThemes';
 
 export default function TheNextBigThing() {
   const { isAdmin } = useAuth();
@@ -27,6 +27,7 @@ export default function TheNextBigThing() {
       { replace: true },
     );
   }, [theme, setParams]);
+  const themeDescription = nextBigThingThemeDescription(theme);
 
   // One canonical builder — the local `/the-next-big-thing/${slug}` copy this
   // replaced was a second URL convention, and it flattened the theme out of
@@ -66,6 +67,11 @@ export default function TheNextBigThing() {
         <p className="mb-2 max-w-2xl text-base text-muted-foreground leading-relaxed">
           Essays that reason through big structural shifts while they are still taking shape.
         </p>
+        {themeDescription && (
+          <p className="mt-4 max-w-2xl border-l-2 border-border pl-4 text-sm text-muted-foreground leading-relaxed">
+            {themeDescription}
+          </p>
+        )}
       </div>
 
       {/* Main Content */}

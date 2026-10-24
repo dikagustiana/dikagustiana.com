@@ -20,8 +20,8 @@ export function parseEssayishPath(pathname: string): { slug: string | null; trac
   if (parts.length === 0) return { slug: null, track: null };
 
   const ESSAY_ROOTS = new Set([
-    'essays', 'finance', 'green-transition', 'development-finance',
-    'the-next-big-thing', 'critical-thinking-research', 'finance-101',
+    'essays', 'finance', 'green-transition',
+    'the-next-big-thing', 'foundations-of-knowing', 'finance-101',
   ]);
   if (!ESSAY_ROOTS.has(parts[0])) return { slug: null, track: null };
 

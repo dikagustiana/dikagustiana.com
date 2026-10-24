@@ -10,10 +10,43 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.5"
+    PostgrestVersion: "14.15"
   }
   public: {
     Tables: {
+      _wp3_stage: {
+        Row: {
+          content: string
+          content_json: Json
+          essay_id: string
+          expected_updated_at: string
+          id: number
+          md5: string
+          presentation: Json | null
+          token: string
+        }
+        Insert: {
+          content: string
+          content_json: Json
+          essay_id: string
+          expected_updated_at: string
+          id?: number
+          md5: string
+          presentation?: Json | null
+          token: string
+        }
+        Update: {
+          content?: string
+          content_json?: Json
+          essay_id?: string
+          expected_updated_at?: string
+          id?: number
+          md5?: string
+          presentation?: Json | null
+          token?: string
+        }
+        Relationships: []
+      }
       admin_audit_log: {
         Row: {
           action: string
@@ -225,6 +258,502 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      ds_chain: {
+        Row: {
+          chain_link: Database["public"]["Enums"]["ds_chain_link"]
+          question: string
+          sort_order: number
+          status_text: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          chain_link: Database["public"]["Enums"]["ds_chain_link"]
+          question: string
+          sort_order: number
+          status_text?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          chain_link?: Database["public"]["Enums"]["ds_chain_link"]
+          question?: string
+          sort_order?: number
+          status_text?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      ds_chart: {
+        Row: {
+          annotation_sectors: Database["public"]["Enums"]["tracker_sector"][]
+          chain_link: Database["public"]["Enums"]["ds_chain_link"]
+          chart_type: Database["public"]["Enums"]["ds_chart_type"]
+          created_at: string
+          published: boolean
+          slug: string
+          sort_order: number
+          subtitle: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          annotation_sectors?: Database["public"]["Enums"]["tracker_sector"][]
+          chain_link: Database["public"]["Enums"]["ds_chain_link"]
+          chart_type: Database["public"]["Enums"]["ds_chart_type"]
+          created_at?: string
+          published?: boolean
+          slug: string
+          sort_order?: number
+          subtitle?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          annotation_sectors?: Database["public"]["Enums"]["tracker_sector"][]
+          chain_link?: Database["public"]["Enums"]["ds_chain_link"]
+          chart_type?: Database["public"]["Enums"]["ds_chart_type"]
+          created_at?: string
+          published?: boolean
+          slug?: string
+          sort_order?: number
+          subtitle?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      ds_chart_series: {
+        Row: {
+          chart_slug: string
+          label: string
+          members: string[] | null
+          role: string
+          series_id: string
+          sort_order: number
+        }
+        Insert: {
+          chart_slug: string
+          label: string
+          members?: string[] | null
+          role?: string
+          series_id: string
+          sort_order?: number
+        }
+        Update: {
+          chart_slug?: string
+          label?: string
+          members?: string[] | null
+          role?: string
+          series_id?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ds_chart_series_chart_slug_fkey"
+            columns: ["chart_slug"]
+            isOneToOne: false
+            referencedRelation: "ds_chart"
+            referencedColumns: ["slug"]
+          },
+          {
+            foreignKeyName: "ds_chart_series_chart_slug_fkey"
+            columns: ["chart_slug"]
+            isOneToOne: false
+            referencedRelation: "v_chart_catalog"
+            referencedColumns: ["chart_slug"]
+          },
+          {
+            foreignKeyName: "ds_chart_series_series_id_fkey"
+            columns: ["series_id"]
+            isOneToOne: false
+            referencedRelation: "ds_series"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ds_chart_series_series_id_fkey"
+            columns: ["series_id"]
+            isOneToOne: false
+            referencedRelation: "v_series_status"
+            referencedColumns: ["series_id"]
+          },
+        ]
+      }
+      ds_check: {
+        Row: {
+          actual: string | null
+          detail: string
+          expected: string | null
+          id: number
+          passed: boolean
+          rule_id: string
+          run_at: string
+          series_id: string
+          severity: string
+          stage_token: string
+        }
+        Insert: {
+          actual?: string | null
+          detail: string
+          expected?: string | null
+          id?: never
+          passed: boolean
+          rule_id: string
+          run_at: string
+          series_id: string
+          severity: string
+          stage_token: string
+        }
+        Update: {
+          actual?: string | null
+          detail?: string
+          expected?: string | null
+          id?: never
+          passed?: boolean
+          rule_id?: string
+          run_at?: string
+          series_id?: string
+          severity?: string
+          stage_token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ds_check_series_id_fkey"
+            columns: ["series_id"]
+            isOneToOne: false
+            referencedRelation: "ds_series"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ds_check_series_id_fkey"
+            columns: ["series_id"]
+            isOneToOne: false
+            referencedRelation: "v_series_status"
+            referencedColumns: ["series_id"]
+          },
+        ]
+      }
+      ds_fetch_run: {
+        Row: {
+          error: string | null
+          finished_at: string | null
+          git_sha: string | null
+          id: string
+          rows_staged: number
+          run_url: string | null
+          source_id: string
+          started_at: string
+          status: string
+        }
+        Insert: {
+          error?: string | null
+          finished_at?: string | null
+          git_sha?: string | null
+          id?: string
+          rows_staged?: number
+          run_url?: string | null
+          source_id: string
+          started_at?: string
+          status?: string
+        }
+        Update: {
+          error?: string | null
+          finished_at?: string | null
+          git_sha?: string | null
+          id?: string
+          rows_staged?: number
+          run_url?: string | null
+          source_id?: string
+          started_at?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ds_fetch_run_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "ds_source"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ds_fetch_run_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "v_series_status"
+            referencedColumns: ["source_id"]
+          },
+        ]
+      }
+      ds_observation: {
+        Row: {
+          entered_by: string | null
+          fetch_run_id: string | null
+          ingest: string
+          is_projection: boolean
+          member: string
+          period_label: string | null
+          period_start: string
+          published_at: string
+          retrieved_at: string
+          series_id: string
+          source_code: string | null
+          source_locator: string | null
+          source_url: string
+          unit: string
+          value: number
+          vintage: string
+          vintage_date: string | null
+        }
+        Insert: {
+          entered_by?: string | null
+          fetch_run_id?: string | null
+          ingest: string
+          is_projection?: boolean
+          member?: string
+          period_label?: string | null
+          period_start: string
+          published_at?: string
+          retrieved_at: string
+          series_id: string
+          source_code?: string | null
+          source_locator?: string | null
+          source_url: string
+          unit: string
+          value: number
+          vintage: string
+          vintage_date?: string | null
+        }
+        Update: {
+          entered_by?: string | null
+          fetch_run_id?: string | null
+          ingest?: string
+          is_projection?: boolean
+          member?: string
+          period_label?: string | null
+          period_start?: string
+          published_at?: string
+          retrieved_at?: string
+          series_id?: string
+          source_code?: string | null
+          source_locator?: string | null
+          source_url?: string
+          unit?: string
+          value?: number
+          vintage?: string
+          vintage_date?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ds_observation_fetch_run_id_fkey"
+            columns: ["fetch_run_id"]
+            isOneToOne: false
+            referencedRelation: "ds_fetch_run"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ds_observation_series_id_fkey"
+            columns: ["series_id"]
+            isOneToOne: false
+            referencedRelation: "ds_series"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ds_observation_series_id_fkey"
+            columns: ["series_id"]
+            isOneToOne: false
+            referencedRelation: "v_series_status"
+            referencedColumns: ["series_id"]
+          },
+        ]
+      }
+      ds_observation_stage: {
+        Row: {
+          entered_by: string | null
+          fetch_run_id: string | null
+          id: number
+          ingest: string
+          is_projection: boolean
+          member: string
+          period_label: string | null
+          period_start: string
+          retrieved_at: string
+          series_id: string
+          source_code: string | null
+          source_locator: string | null
+          source_url: string | null
+          stage_token: string
+          staged_at: string
+          unit: string | null
+          value: number
+          vintage: string
+        }
+        Insert: {
+          entered_by?: string | null
+          fetch_run_id?: string | null
+          id?: never
+          ingest: string
+          is_projection?: boolean
+          member?: string
+          period_label?: string | null
+          period_start: string
+          retrieved_at?: string
+          series_id: string
+          source_code?: string | null
+          source_locator?: string | null
+          source_url?: string | null
+          stage_token: string
+          staged_at?: string
+          unit?: string | null
+          value: number
+          vintage: string
+        }
+        Update: {
+          entered_by?: string | null
+          fetch_run_id?: string | null
+          id?: never
+          ingest?: string
+          is_projection?: boolean
+          member?: string
+          period_label?: string | null
+          period_start?: string
+          retrieved_at?: string
+          series_id?: string
+          source_code?: string | null
+          source_locator?: string | null
+          source_url?: string | null
+          stage_token?: string
+          staged_at?: string
+          unit?: string | null
+          value?: number
+          vintage?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ds_observation_stage_fetch_run_id_fkey"
+            columns: ["fetch_run_id"]
+            isOneToOne: false
+            referencedRelation: "ds_fetch_run"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ds_observation_stage_series_id_fkey"
+            columns: ["series_id"]
+            isOneToOne: false
+            referencedRelation: "ds_series"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ds_observation_stage_series_id_fkey"
+            columns: ["series_id"]
+            isOneToOne: false
+            referencedRelation: "v_series_status"
+            referencedColumns: ["series_id"]
+          },
+        ]
+      }
+      ds_series: {
+        Row: {
+          chain_link: Database["public"]["Enums"]["ds_chain_link"]
+          created_at: string
+          definition_note: string
+          frequency: Database["public"]["Enums"]["ds_frequency"]
+          id: string
+          ingest: string
+          is_projection: boolean
+          r7_threshold: number
+          review_due: string | null
+          source_code: string
+          source_id: string
+          source_url: string
+          status: string
+          title_en: string
+          title_id: string
+          unit: string
+          updated_at: string
+        }
+        Insert: {
+          chain_link: Database["public"]["Enums"]["ds_chain_link"]
+          created_at?: string
+          definition_note: string
+          frequency: Database["public"]["Enums"]["ds_frequency"]
+          id: string
+          ingest: string
+          is_projection?: boolean
+          r7_threshold?: number
+          review_due?: string | null
+          source_code: string
+          source_id: string
+          source_url: string
+          status?: string
+          title_en: string
+          title_id: string
+          unit: string
+          updated_at?: string
+        }
+        Update: {
+          chain_link?: Database["public"]["Enums"]["ds_chain_link"]
+          created_at?: string
+          definition_note?: string
+          frequency?: Database["public"]["Enums"]["ds_frequency"]
+          id?: string
+          ingest?: string
+          is_projection?: boolean
+          r7_threshold?: number
+          review_due?: string | null
+          source_code?: string
+          source_id?: string
+          source_url?: string
+          status?: string
+          title_en?: string
+          title_id?: string
+          unit?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ds_series_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "ds_source"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ds_series_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "v_series_status"
+            referencedColumns: ["source_id"]
+          },
+        ]
+      }
+      ds_source: {
+        Row: {
+          access: string
+          created_at: string
+          homepage_url: string
+          id: string
+          license: string
+          name: string
+        }
+        Insert: {
+          access: string
+          created_at?: string
+          homepage_url: string
+          id: string
+          license: string
+          name: string
+        }
+        Update: {
+          access?: string
+          created_at?: string
+          homepage_url?: string
+          id?: string
+          license?: string
+          name?: string
+        }
+        Relationships: []
       }
       essay_revisions: {
         Row: {
@@ -847,6 +1376,7 @@ export type Database = {
       fsli_pages: {
         Row: {
           category: string | null
+          covered_by_slug: string | null
           created_at: string
           id: string
           is_component: boolean | null
@@ -861,6 +1391,7 @@ export type Database = {
         }
         Insert: {
           category?: string | null
+          covered_by_slug?: string | null
           created_at?: string
           id?: string
           is_component?: boolean | null
@@ -875,6 +1406,7 @@ export type Database = {
         }
         Update: {
           category?: string | null
+          covered_by_slug?: string | null
           created_at?: string
           id?: string
           is_component?: boolean | null
@@ -887,7 +1419,15 @@ export type Database = {
           title?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fsli_pages_covered_by_slug_fkey"
+            columns: ["covered_by_slug"]
+            isOneToOne: false
+            referencedRelation: "fsli_pages"
+            referencedColumns: ["slug"]
+          },
+        ]
       }
       fsli_sections: {
         Row: {
@@ -990,6 +1530,97 @@ export type Database = {
         }
         Relationships: []
       }
+      toolkit_versions: {
+        Row: {
+          changelog: string | null
+          file_key: string
+          id: string
+          published_at: string
+          sha256: string
+          size_bytes: number
+          toolkit_id: string
+          version: string
+        }
+        Insert: {
+          changelog?: string | null
+          file_key: string
+          id?: string
+          published_at?: string
+          sha256: string
+          size_bytes: number
+          toolkit_id: string
+          version: string
+        }
+        Update: {
+          changelog?: string | null
+          file_key?: string
+          id?: string
+          published_at?: string
+          sha256?: string
+          size_bytes?: number
+          toolkit_id?: string
+          version?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "toolkit_versions_toolkit_id_fkey"
+            columns: ["toolkit_id"]
+            isOneToOne: false
+            referencedRelation: "toolkits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      toolkits: {
+        Row: {
+          checks: Json
+          created_at: string
+          created_by: string | null
+          format: string
+          id: string
+          module_id: string
+          purpose: string
+          slug: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          checks?: Json
+          created_at?: string
+          created_by?: string | null
+          format?: string
+          id?: string
+          module_id: string
+          purpose: string
+          slug: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          checks?: Json
+          created_at?: string
+          created_by?: string | null
+          format?: string
+          id?: string
+          module_id?: string
+          purpose?: string
+          slug?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "toolkits_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "finance_modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tracker_entry: {
         Row: {
           created_at: string
@@ -1062,11 +1693,13 @@ export type Database = {
           id: string | null
           lesson_type: Database["public"]["Enums"]["lesson_type_enum"] | null
           module_id: string | null
+          phase: string | null
           published: boolean | null
           read_time: string | null
           section: string | null
           slug: string | null
           snippet: string | null
+          sort_order: number | null
           title: string | null
         }
         Insert: {
@@ -1075,11 +1708,13 @@ export type Database = {
           id?: string | null
           lesson_type?: never
           module_id?: string | null
+          phase?: string | null
           published?: boolean | null
           read_time?: never
           section?: string | null
           slug?: string | null
           snippet?: string | null
+          sort_order?: number | null
           title?: string | null
         }
         Update: {
@@ -1088,11 +1723,13 @@ export type Database = {
           id?: string | null
           lesson_type?: never
           module_id?: string | null
+          phase?: string | null
           published?: boolean | null
           read_time?: never
           section?: string | null
           slug?: string | null
           snippet?: string | null
+          sort_order?: number | null
           title?: string | null
         }
         Relationships: [
@@ -1105,8 +1742,343 @@ export type Database = {
           },
         ]
       }
+      v_chain: {
+        Row: {
+          chain_link: Database["public"]["Enums"]["ds_chain_link"] | null
+          question: string | null
+          sort_order: number | null
+          status_text: string | null
+          title: string | null
+        }
+        Insert: {
+          chain_link?: Database["public"]["Enums"]["ds_chain_link"] | null
+          question?: string | null
+          sort_order?: number | null
+          status_text?: string | null
+          title?: string | null
+        }
+        Update: {
+          chain_link?: Database["public"]["Enums"]["ds_chain_link"] | null
+          question?: string | null
+          sort_order?: number | null
+          status_text?: string | null
+          title?: string | null
+        }
+        Relationships: []
+      }
+      v_chart_catalog: {
+        Row: {
+          annotation_sectors:
+            | Database["public"]["Enums"]["tracker_sector"][]
+            | null
+          chain_link: Database["public"]["Enums"]["ds_chain_link"] | null
+          chart_slug: string | null
+          chart_sort: number | null
+          chart_type: Database["public"]["Enums"]["ds_chart_type"] | null
+          chart_updated_at: string | null
+          frequency: Database["public"]["Enums"]["ds_frequency"] | null
+          is_projection: boolean | null
+          label: string | null
+          members: string[] | null
+          role: string | null
+          series_id: string | null
+          series_sort: number | null
+          series_title: string | null
+          source_code: string | null
+          source_name: string | null
+          subtitle: string | null
+          title: string | null
+          unit: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ds_chart_series_series_id_fkey"
+            columns: ["series_id"]
+            isOneToOne: false
+            referencedRelation: "ds_series"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ds_chart_series_series_id_fkey"
+            columns: ["series_id"]
+            isOneToOne: false
+            referencedRelation: "v_series_status"
+            referencedColumns: ["series_id"]
+          },
+        ]
+      }
+      v_chart_data: {
+        Row: {
+          chart_slug: string | null
+          is_projection: boolean | null
+          label: string | null
+          member: string | null
+          period_label: string | null
+          period_start: string | null
+          retrieved_at: string | null
+          role: string | null
+          series_id: string | null
+          series_sort: number | null
+          source_code: string | null
+          source_locator: string | null
+          source_url: string | null
+          unit: string | null
+          value: number | null
+          vintage: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ds_chart_series_chart_slug_fkey"
+            columns: ["chart_slug"]
+            isOneToOne: false
+            referencedRelation: "ds_chart"
+            referencedColumns: ["slug"]
+          },
+          {
+            foreignKeyName: "ds_chart_series_chart_slug_fkey"
+            columns: ["chart_slug"]
+            isOneToOne: false
+            referencedRelation: "v_chart_catalog"
+            referencedColumns: ["chart_slug"]
+          },
+          {
+            foreignKeyName: "ds_chart_series_series_id_fkey"
+            columns: ["series_id"]
+            isOneToOne: false
+            referencedRelation: "ds_series"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ds_chart_series_series_id_fkey"
+            columns: ["series_id"]
+            isOneToOne: false
+            referencedRelation: "v_series_status"
+            referencedColumns: ["series_id"]
+          },
+        ]
+      }
+      v_chart_usage: {
+        Row: {
+          chart_slug: string | null
+          essay_slug: string | null
+          essay_title: string | null
+        }
+        Relationships: []
+      }
+      v_macro_editions: {
+        Row: {
+          edition: string | null
+          last_actual_year: number | null
+          last_year: number | null
+          published_at: string | null
+        }
+        Relationships: []
+      }
+      v_series_history: {
+        Row: {
+          ingest: string | null
+          is_projection: boolean | null
+          member: string | null
+          period_label: string | null
+          period_start: string | null
+          published_at: string | null
+          retrieved_at: string | null
+          series_id: string | null
+          source_code: string | null
+          source_locator: string | null
+          source_url: string | null
+          unit: string | null
+          value: number | null
+          vintage: string | null
+          vintage_date: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ds_observation_series_id_fkey"
+            columns: ["series_id"]
+            isOneToOne: false
+            referencedRelation: "ds_series"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ds_observation_series_id_fkey"
+            columns: ["series_id"]
+            isOneToOne: false
+            referencedRelation: "v_series_status"
+            referencedColumns: ["series_id"]
+          },
+        ]
+      }
+      v_series_latest: {
+        Row: {
+          ingest: string | null
+          is_projection: boolean | null
+          member: string | null
+          period_label: string | null
+          period_start: string | null
+          retrieved_at: string | null
+          series_id: string | null
+          source_code: string | null
+          source_locator: string | null
+          source_url: string | null
+          unit: string | null
+          value: number | null
+          vintage: string | null
+          vintage_date: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ds_observation_series_id_fkey"
+            columns: ["series_id"]
+            isOneToOne: false
+            referencedRelation: "ds_series"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ds_observation_series_id_fkey"
+            columns: ["series_id"]
+            isOneToOne: false
+            referencedRelation: "v_series_status"
+            referencedColumns: ["series_id"]
+          },
+        ]
+      }
+      v_series_status: {
+        Row: {
+          chain_link: Database["public"]["Enums"]["ds_chain_link"] | null
+          definition_note: string | null
+          first_period: string | null
+          frequency: Database["public"]["Enums"]["ds_frequency"] | null
+          ingest: string | null
+          is_projection: boolean | null
+          last_check_at: string | null
+          last_check_failed: number | null
+          last_check_rules: number | null
+          last_check_warned: number | null
+          last_period: string | null
+          last_retrieved_at: string | null
+          latest_vintage: string | null
+          n_values: number | null
+          review_due: string | null
+          series_id: string | null
+          series_url: string | null
+          source_code: string | null
+          source_homepage: string | null
+          source_id: string | null
+          source_license: string | null
+          source_name: string | null
+          title_en: string | null
+          title_id: string | null
+          unit: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      _export_accounting_20261012: {
+        Args: { p_token: string; p_what: string }
+        Returns: Json
+      }
+      _import_accounting_essays_20261012: {
+        Args: { p_rows: Json; p_token: string }
+        Returns: {
+          action: string
+          essay_id: string
+          revision_no: number
+          slug: string
+        }[]
+      }
+      _wp3_export: { Args: { t: string }; Returns: Json[] }
+      _wp3_export_ids: { Args: { t: string }; Returns: Json[] }
+      ds__gate: {
+        Args: {
+          p_confirm_warnings: boolean
+          p_series_id: string
+          p_stage_token: string
+        }
+        Returns: {
+          failed: number
+          published: boolean
+          rows_published: number
+          rows_unchanged: number
+          rules: number
+          run_at: string
+          warnings: number
+        }[]
+      }
+      ds_macro_assumptions: {
+        Args: { p_edition: string }
+        Returns: {
+          edition: string
+          indicator: string
+          is_projection: boolean
+          n_months: number
+          series_id: string
+          source_code: string
+          unit: string
+          value: number
+          vintage: string
+          year: number
+        }[]
+      }
+      ds_on_grid: {
+        Args: {
+          p_frequency: Database["public"]["Enums"]["ds_frequency"]
+          p_period: string
+        }
+        Returns: boolean
+      }
+      ds_preview_stage: {
+        Args: { p_series_id: string; p_stage_token: string }
+        Returns: {
+          actual: string
+          detail: string
+          expected: string
+          passed: boolean
+          rule_id: string
+          severity: string
+        }[]
+      }
+      ds_publish_series: {
+        Args: {
+          p_confirm_warnings?: boolean
+          p_series_id: string
+          p_stage_token: string
+        }
+        Returns: {
+          failed: number
+          published: boolean
+          rows_published: number
+          rows_unchanged: number
+          rules: number
+          run_at: string
+          warnings: number
+        }[]
+      }
+      ds_run_publish_gate: {
+        Args: { p_series_id: string; p_stage_token: string }
+        Returns: {
+          failed: number
+          published: boolean
+          rows_published: number
+          rows_unchanged: number
+          rules: number
+          run_at: string
+          warnings: number
+        }[]
+      }
+      ds_stage_checks: {
+        Args: { p_series_id: string; p_stage_token: string }
+        Returns: {
+          actual: string
+          detail: string
+          expected: string
+          passed: boolean
+          rule_id: string
+          severity: string
+        }[]
+      }
+      ds_vintage_date: { Args: { p_vintage: string }; Returns: string }
       fs_publish_period: {
         Args: { p_period_id: string }
         Returns: {
@@ -1149,6 +2121,21 @@ export type Database = {
     Enums: {
       app_role: "admin" | "user"
       content_status_enum: "draft" | "tone_pending" | "published" | "archived"
+      ds_chain_link:
+        | "policy"
+        | "infrastructure"
+        | "finance"
+        | "transition"
+        | "carbon_price"
+        | "macro"
+      ds_chart_type:
+        | "line"
+        | "bar"
+        | "stacked_bar"
+        | "step"
+        | "dot_whisker"
+        | "timeline"
+      ds_frequency: "A" | "Q" | "M" | "event"
       lesson_type_enum:
         | "concept"
         | "framework"
@@ -1295,6 +2282,23 @@ export const Constants = {
     Enums: {
       app_role: ["admin", "user"],
       content_status_enum: ["draft", "tone_pending", "published", "archived"],
+      ds_chain_link: [
+        "policy",
+        "infrastructure",
+        "finance",
+        "transition",
+        "carbon_price",
+        "macro",
+      ],
+      ds_chart_type: [
+        "line",
+        "bar",
+        "stacked_bar",
+        "step",
+        "dot_whisker",
+        "timeline",
+      ],
+      ds_frequency: ["A", "Q", "M", "event"],
       lesson_type_enum: [
         "concept",
         "framework",
