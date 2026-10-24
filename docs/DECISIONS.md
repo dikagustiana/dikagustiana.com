@@ -5,6 +5,44 @@ alternatives. Newest first.
 
 ---
 
+# 2026-10-24 — Books on R2: signed URLs, no public bucket
+
+Runbook and values: `docs/books/R2-RUNBOOK.md`. A free book's file moves from the public Supabase `books`
+bucket to the Cloudflare R2 bucket `dg-books-public`, whose public access stays **off**. The page reads it
+in place: `/books-academia/<slug>/read`, pdf.js for a PDF, epub.js for an EPUB.
+
+- **One gate, the existing one.** The `book-file` edge function signs a one-hour GET URL for a book that
+  PostgREST returns *to the caller's own token*, so RLS (published and live for readers, everything for the
+  admin) decides who may open a file. That is the same rule the shelves already use. Upload and remove
+  are admin-only, checked the way link-preview checks: the caller's own `user_roles` row. `verify_jwt =
+  true`; no service-role client. A publishable key is never forwarded as a Bearer token, only a JWT.
+- **URLs, not bytes.** The function never proxies the file. The browser talks to R2 directly with range
+  requests, so a 50 MB PDF opens at page 1 without the edge function's memory or time limits in the way.
+  Uploads are a 10-minute presigned PUT, straight from the admin's browser.
+- **SigV4 by hand, on WebCrypto.** About 60 lines, tested against AWS's published presigned-URL example.
+  It saves pulling the AWS SDK into Deno for three verbs.
+- **Additive schema.** `books_uploads.file_store` (`'supabase'` for rows stored before R2, `'r2'` for new
+  ones) lets both stores serve until any old file is moved. Nothing else in the schema changes.
+- **Rejected:** a public R2 bucket or custom domain. It would be simpler, but every file would be a
+  standing link anyone could hotlink or scrape, and unpublishing a book would not withdraw it.
+  Also rejected: streaming through the function, which is bound by edge-function limits and pays for
+  every byte twice.
+- **CSP** (still Report-Only): `connect-src` adds `https://*.r2.cloudflarestorage.com`. `worker-src 'self'
+  blob:` covers the pdf.js worker. `blob:` in `style-src` and `font-src` covers the stylesheets and fonts
+  epub.js unpacks.
+- **Copyright rule unchanged:** a free book needs a file and a `license_note`; commercial books are paid,
+  link only.
+- **The reader is an e-reader, not a page (owner, same day).** Read opens the book across the whole window:
+  - no site header or footer, one page fitted to the screen on a dark ground, and a thin bar;
+  - pages turn by arrows, by a press on either half, or by a swipe;
+  - ⛶ / F for the browser's full screen where it has one (not on an iPhone), and ✕ / Esc back to the dialog;
+  - the place is kept per browser.
+
+  Rejected: forcing browser full screen on Read. Browsers allow it only from a direct press, and it hides the
+  way out from someone who did not ask for it.
+
+---
+
 # 2026-10-24 — Finance in Action: the model page, sheet first (D-S1 to D-S9)
 
 Spec: `docs/company-models/sheet-first/` (PRD, ARCHITECTURE, DESIGN, PLAN), approved by the owner on

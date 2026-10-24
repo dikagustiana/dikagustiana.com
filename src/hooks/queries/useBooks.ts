@@ -8,16 +8,21 @@
  * (table and bucket); the checks here are courtesy, so a form can say what is wrong before the database
  * refuses it.
  *
- * Storage layout in `books`: files/<slug>/<timestamp>-<safe-name>.pdf|epub and
- * covers/<slug>/<timestamp>.<ext>. An upload whose row write fails is removed again (the object would be
- * orphaned); a file or cover replaced by a save is removed once the row no longer points at it.
+ * Storage: a book's file goes to the private R2 bucket through the `book-file` edge function
+ * (src/lib/bookFile.ts; docs/books/R2-RUNBOOK.md), key files/<slug>/<timestamp>-<safe-name>.pdf|epub, and
+ * the row says so with file_store = 'r2'. Rows stored before R2 keep file_store = 'supabase', their file in
+ * the public `books` bucket. Covers stay in `books`: covers/<slug>/<timestamp>.<ext>. An upload whose row
+ * write fails is removed again (the object would be orphaned); a file or cover replaced by a save is removed
+ * once the row no longer points at it.
  */
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import type { Json } from '@/integrations/supabase/types';
 import { logAuditEvent } from '@/lib/auditLog';
+import { removeBookFile, uploadBookFile } from '@/lib/bookFile';
 
 export type BookAccess = 'free' | 'paid';
+export type FileStore = 'supabase' | 'r2';
 
 export interface Shelf {
   id: string;
@@ -37,6 +42,8 @@ export interface Book {
   purchase_url: string | null;
   license_note: string | null;
   filepath: string | null;
+  /** Where filepath points: the public `books` bucket (before R2) or R2. */
+  file_store: FileStore;
   filename: string | null;
   mime_type: string | null;
   size_bytes: number | null;
@@ -56,7 +63,7 @@ export interface ShelfWithBooks extends Shelf {
 const BUCKET = 'books';
 const SHELF_COLUMNS = 'id, slug, name, sort_order';
 const BOOK_COLUMNS =
-  'id, slug, title, author, year, shelf_id, access, purchase_url, license_note, filepath, filename, mime_type, size_bytes, cover_path, synopsis_json, synopsis_html, synopsis_excerpt, sort_order, published, deleted_at';
+  'id, slug, title, author, year, shelf_id, access, purchase_url, license_note, filepath, file_store, filename, mime_type, size_bytes, cover_path, synopsis_json, synopsis_html, synopsis_excerpt, sort_order, published, deleted_at';
 
 export const COVER_MAX_BYTES = 2 * 1024 * 1024;
 export const FILE_MAX_BYTES = 50 * 1024 * 1024;
@@ -174,14 +181,6 @@ const extOf = (f: File, fallback: string) => (/\.([a-z0-9]+)$/i.exec(f.name)?.[1
 export function publicUrl(path: string | null | undefined): string | null {
   if (!path) return null;
   return supabase.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
-}
-
-/** The free book's file, saved under its title when downloaded. */
-export function downloadUrl(book: Pick<Book, 'filepath' | 'title' | 'slug' | 'filename'>): string | null {
-  if (!book.filepath) return null;
-  const ext = /\.([a-z0-9]+)$/i.exec(book.filepath)?.[1] ?? 'pdf';
-  const name = `${(book.title ?? book.slug).replace(/[\\/:*?"<>|]+/g, ' ').trim() || book.slug}.${ext}`;
-  return supabase.storage.from(BUCKET).getPublicUrl(book.filepath, { download: name }).data.publicUrl;
 }
 
 // ---------------------------------------------------------------------------
@@ -333,6 +332,7 @@ export const useSaveBook = () => {
   return useMutation({
     mutationFn: async ({ draft: d, shelfSlug, sortOrder }: SaveBookInput) => {
       const uploaded: string[] = [];
+      const uploadedR2: string[] = [];
       const stamp = Date.now();
       const put = async (path: string, file: File) => {
         const { error } = await supabase.storage.from(BUCKET).upload(path, file, { cacheControl: '31536000', upsert: false, contentType: file.type || undefined });
@@ -341,13 +341,14 @@ export const useSaveBook = () => {
       };
       try {
         let filepath = d.access === 'free' ? d.filepath : null;
+        let fileStore: FileStore | null = null;
         let filename: string | null = null;
         let mime: string | null = null;
         let size: number | null = null;
         if (d.access === 'free' && d.file) {
-          const safe = d.file.name.replace(/\.[^.]+$/, '').replace(/[^\w.-]+/g, '_').slice(0, 80) || 'book';
-          filepath = `files/${d.slug}/${stamp}-${safe}.${extOf(d.file, 'pdf')}`;
-          await put(filepath, d.file);
+          filepath = await uploadBookFile(d.slug, d.file);
+          uploadedR2.push(filepath);
+          fileStore = 'r2';
           filename = d.file.name;
           mime = d.file.type || null;
           size = d.file.size;
@@ -369,6 +370,7 @@ export const useSaveBook = () => {
           purchase_url: d.access === 'paid' ? d.purchase_url.trim() : null,
           license_note: d.access === 'free' ? d.license_note.trim() : null,
           filepath,
+          ...(fileStore ? { file_store: fileStore } : {}),
           ...(d.access === 'paid' ? { filename: null, mime_type: null, size_bytes: null } : {}),
           ...(filename ? { filename, mime_type: mime, size_bytes: size } : {}),
           cover_path: cover,
@@ -377,11 +379,11 @@ export const useSaveBook = () => {
           synopsis_excerpt: excerptOf(d.synopsis_html),
           published: d.published,
         };
-        type Stored = { filepath: string | null; cover_path: string | null };
+        type Stored = { filepath: string | null; file_store: FileStore; cover_path: string | null };
         let previous: Stored | null = null;
         let id = d.id;
         if (d.id) {
-          const { data: before, error: readError } = await supabase.from('books_uploads').select('filepath, cover_path').eq('id', d.id).single();
+          const { data: before, error: readError } = await supabase.from('books_uploads').select('filepath, file_store, cover_path').eq('id', d.id).single();
           if (readError) throw readError;
           previous = before as Stored;
           const { error } = await supabase.from('books_uploads').update(row).eq('id', d.id);
@@ -396,12 +398,17 @@ export const useSaveBook = () => {
           if (error) throw error;
           id = (data as { id: string }).id;
         }
-        const stale = [previous?.filepath, previous?.cover_path].filter((p): p is string => !!p && p !== row.filepath && p !== row.cover_path);
-        if (stale.length) await supabase.storage.from(BUCKET).remove(stale);
+        // The row is written; leftovers are only tidied, so a failed removal does not fail the save.
+        const staleFile = previous?.filepath && previous.filepath !== row.filepath ? previous.filepath : null;
+        const staleCover = previous?.cover_path && previous.cover_path !== row.cover_path ? previous.cover_path : null;
+        if (staleFile && previous?.file_store === 'r2') await removeBookFile(staleFile).catch(() => undefined);
+        const staleBucket = [staleFile && previous?.file_store !== 'r2' ? staleFile : null, staleCover].filter((p): p is string => !!p);
+        if (staleBucket.length) await supabase.storage.from(BUCKET).remove(staleBucket);
         await logAuditEvent({ action: d.id ? 'update' : 'create', table_name: 'books_uploads', record_id: id, record_title: row.title });
         return id!;
       } catch (e) {
         if (uploaded.length) await supabase.storage.from(BUCKET).remove(uploaded);
+        await Promise.all(uploadedR2.map((k) => removeBookFile(k).catch(() => undefined)));
         throw e;
       }
     },

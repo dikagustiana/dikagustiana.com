@@ -48,6 +48,7 @@ const CriticalThinkingResearch = lazy(() => import("./pages/CriticalThinkingRese
 const CriticalThinkingPhase = lazy(() => import("./pages/CriticalThinkingPhase"));
 const CriticalThinkingEssay = lazy(() => import("./pages/CriticalThinkingEssay"));
 const BooksAcademia = lazy(() => import("./pages/BooksAcademia"));
+const BookReader = lazy(() => import("./pages/BookReader"));
 const BooksCategoryRedirect = lazy(() => import("./pages/BookRedirects").then((m) => ({ default: m.BooksCategoryRedirect })));
 const BookRedirect = lazy(() => import("./pages/BookRedirects").then((m) => ({ default: m.BookRedirect })));
 const EnglishIelts = lazy(() => import("./pages/EnglishIelts"));
@@ -273,6 +274,7 @@ const App = () => (
 
             {/* Books */}
             <Route path="/books-academia" element={<BooksAcademia />} />
+            <Route path="/books-academia/:slug/read" element={<BookReader />} />
             {/* Retired 9 Oct 2026 (an orphan index with its own taxonomy). Without
                 this the URL fell through to /books/:category as an empty
                 "Categories" shelf. */}
