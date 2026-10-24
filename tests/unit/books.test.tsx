@@ -1,25 +1,25 @@
 /**
  * Books on shelves (site cleanup 2026-10, PRD §D): the pure part of the hooks (grouping, the save rules the
- * database also checks, the excerpt, the slug), then the public page over a mocked data hook (shelves that
- * open and close, the first open on a first visit and the reader's choice remembered, a card opening the
- * dialog that the URL names, Read and Download for a free book and Buy for a paid one, a deep link, the empty
- * state), then the old addresses landing on their shelf and book.
+ * database also checks, the excerpt, the slug), then the public page over a mocked data hook (library phase
+ * 2: spines on shelves, the arrow keys along a shelf, a spine opening the dialog that the URL names, Read and
+ * Download for a free book and Buy for a paid one, a deep link, the sorts, the empty and error states, the
+ * credit), then the old addresses landing on their shelf and book.
  */
 import type { ReactNode } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
-import type { Book, BookDraft, Shelf, ShelfWithBooks } from '@/hooks/queries/useBooks';
+import type { Book, BookDraft, Shelf } from '@/hooks/queries/useBooks';
 
-const { useShelvesMock, useBookByIdMock, auth } = vi.hoisted(() => ({
-  useShelvesMock: vi.fn(),
+const { useShelfBooksMock, useBookByIdMock, auth } = vi.hoisted(() => ({
+  useShelfBooksMock: vi.fn(),
   useBookByIdMock: vi.fn(),
   auth: { isAdmin: false },
 }));
 vi.mock('@/hooks/queries/useBooks', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@/hooks/queries/useBooks')>()),
-  useShelves: useShelvesMock,
+  useShelfBooks: useShelfBooksMock,
   useBookById: useBookByIdMock,
 }));
 vi.mock('@/components/layouts/PageLayout', () => ({
@@ -31,10 +31,9 @@ vi.mock('@/contexts/AuthContext', () => ({
   AuthProvider: ({ children }: { children: ReactNode }) => children,
 }));
 
-import { SLUG_SHAPE, bookErrors, excerptOf, groupShelves, removedSlug, slugify } from '@/hooks/queries/useBooks';
+import { SLUG_SHAPE, bookErrors, excerptOf, groupShelves, removedSlug, slugify, withSpines } from '@/hooks/queries/useBooks';
 import BooksAcademia from '@/pages/BooksAcademia';
 import { BookRedirect, BooksCategoryRedirect } from '@/pages/BookRedirects';
-import { OPEN_SHELVES_KEY } from '@/lib/books';
 
 const book = (over: Partial<Book>): Book => ({
   id: over.slug ?? 'b',
@@ -137,79 +136,78 @@ describe('the books data', () => {
 });
 
 describe('the Books page', () => {
-  const shelves: ShelfWithBooks[] = groupShelves(SHELVES, BOOKS, true);
+  const shelves = withSpines(groupShelves(SHELVES, BOOKS, true), SHELVES);
 
   const renderPage = (url = '/books-academia') => {
     const router = createMemoryRouter([{ path: '/books-academia', element: <BooksAcademia /> }], { initialEntries: [url] });
     render(<RouterProvider router={router} />);
     return router;
   };
-  const shelfButton = (name: string) => screen.getByRole('button', { name: new RegExp(`^${name}`) });
+  const spine = (name: string | RegExp) => screen.getByRole('button', { name });
+  const shelfOf = (name: string) => screen.getByRole('list', { name });
 
   beforeEach(() => {
-    window.localStorage.clear();
     auth.isAdmin = false;
-    useShelvesMock.mockReturnValue({ data: shelves, isLoading: false, error: null, refetch: vi.fn() });
+    // The virtualiser scrolls the window; jsdom has no scrolling.
+    vi.spyOn(window, 'scrollTo').mockImplementation(() => undefined);
+    useShelfBooksMock.mockReturnValue({ data: shelves, isLoading: false, error: null, refetch: vi.fn() });
   });
   afterEach(() => vi.restoreAllMocks());
 
-  it('opens the first shelf on a first visit, the rest closed, and remembers what the reader opens and closes', async () => {
+  it("stands each shelf's published books as spines under its name and count, and credits Gloss", () => {
     renderPage();
-    await waitFor(() => expect(shelfButton('Corporate Finance')).toHaveAttribute('aria-expanded', 'true'));
-    expect(shelfButton('Accounting')).toHaveAttribute('aria-expanded', 'false');
-    expect(shelfButton('Corporate Finance')).toHaveTextContent('2 books');
-    expect(shelfButton('Accounting')).toHaveTextContent('1 book');
-    expect(screen.getByRole('button', { name: /Valuation/ })).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /Advanced Accounting/ })).toBeNull();
+    expect(screen.getByRole('heading', { name: 'Corporate Finance' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Accounting' })).toBeInTheDocument();
+    expect(within(shelfOf('Corporate Finance')).getAllByRole('button').map((b) => b.getAttribute('aria-label'))).toEqual([
+      'Open Finance',
+      'Valuation, A. Damodaran, 2012',
+    ]);
+    // A paid book says it is bought, not read, here.
+    expect(within(shelfOf('Accounting')).getByRole('button')).toHaveAccessibleName('Advanced Accounting, to buy');
+    expect(screen.getByText('3 books')).toBeInTheDocument();
     // Unpublished and removed books, and the empty shelf, are not there.
-    expect(screen.queryByText('Draft Book')).toBeNull();
-    expect(screen.queryByText('Gone')).toBeNull();
-    expect(screen.queryByText('Empty')).toBeNull();
-
-    await userEvent.click(shelfButton('Accounting'));
-    expect(shelfButton('Accounting')).toHaveAttribute('aria-expanded', 'true');
-    await userEvent.click(shelfButton('Corporate Finance'));
-    expect(shelfButton('Corporate Finance')).toHaveAttribute('aria-expanded', 'false');
-    expect(JSON.parse(window.localStorage.getItem(OPEN_SHELVES_KEY)!)).toEqual(['accounting']);
+    expect(screen.queryByRole('button', { name: /Draft Book/ })).toBeNull();
+    expect(screen.queryByRole('button', { name: /Gone/ })).toBeNull();
+    expect(screen.queryByRole('heading', { name: 'Empty' })).toBeNull();
+    const credit = document.querySelector('[data-credit]')!;
+    expect(credit).toHaveTextContent('Shelf and margin design adapted from Gloss by Hassan El Mghari, with permission.');
+    expect(within(credit as HTMLElement).getByRole('link', { name: 'Gloss' })).toHaveAttribute('href', 'https://github.com/Nutlope/gloss');
   });
 
-  it('opens the shelves the reader left open on the next visit', async () => {
-    window.localStorage.setItem(OPEN_SHELVES_KEY, JSON.stringify(['accounting']));
+  it('walks along a shelf with the arrow keys, Home and End, one tab stop per shelf', async () => {
     renderPage();
-    await waitFor(() => expect(shelfButton('Accounting')).toHaveAttribute('aria-expanded', 'true'));
-    expect(shelfButton('Corporate Finance')).toHaveAttribute('aria-expanded', 'false');
-  });
-
-  it('works when storage refuses', async () => {
-    vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
-      throw new Error('blocked');
-    });
-    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
-      throw new Error('blocked');
-    });
-    renderPage();
-    await waitFor(() => expect(shelfButton('Corporate Finance')).toHaveAttribute('aria-expanded', 'true'));
-    await userEvent.click(shelfButton('Accounting'));
-    expect(shelfButton('Accounting')).toHaveAttribute('aria-expanded', 'true');
+    const first = spine('Open Finance');
+    const second = spine(/^Valuation/);
+    expect(first).toHaveAttribute('tabindex', '0');
+    expect(second).toHaveAttribute('tabindex', '-1');
+    expect(spine(/^Advanced Accounting/)).toHaveAttribute('tabindex', '0');
+    first.focus();
+    await userEvent.keyboard('{ArrowRight}');
+    expect(second).toHaveFocus();
+    expect(second).toHaveAttribute('tabindex', '0');
+    expect(first).toHaveAttribute('tabindex', '-1');
+    // The end of a shelf stops there; it does not run on into the next.
+    await userEvent.keyboard('{ArrowRight}');
+    expect(second).toHaveFocus();
+    await userEvent.keyboard('{Home}');
+    expect(first).toHaveFocus();
+    await userEvent.keyboard('{End}');
+    expect(second).toHaveFocus();
+    await userEvent.keyboard('{ArrowLeft}');
+    expect(first).toHaveFocus();
   });
 
   it('opens a book in a dialog the URL names, with Download for a free book and its licence, and closes it', async () => {
     const router = renderPage();
-    const card = await screen.findByRole('button', { name: /Valuation/ });
-    expect(card).toHaveTextContent('A. Damodaran · 2012');
-    expect(card).toHaveTextContent('How to value a firm.');
-    expect(card).toHaveTextContent('Free');
-    await userEvent.click(card);
+    await userEvent.click(spine(/^Valuation/));
     expect(new URLSearchParams(router.state.location.search).get('book')).toBe('valuation');
     expect(router.state.historyAction).toBe('REPLACE');
     const dialog = await screen.findByRole('dialog');
     expect(within(dialog).getByRole('heading', { name: 'Valuation' })).toBeInTheDocument();
     expect(within(dialog).getByText('A. Damodaran · 2012 · Corporate Finance')).toBeInTheDocument();
-    // Read opens the in-page reader; Download asks for a signed URL when pressed (bookReader.test.tsx).
     expect(within(dialog).getByRole('link', { name: 'Read' })).toHaveAttribute('href', '/books-academia/valuation/read');
     expect(within(dialog).getByRole('button', { name: /Download PDF/ })).toBeEnabled();
     expect(within(dialog).getByText('License: CC BY 4.0')).toBeInTheDocument();
-    // The synopsis is the owner's HTML through the sanitiser.
     const synopsis = dialog.querySelector('[data-synopsis]')!;
     expect(synopsis.innerHTML).toContain('<strong>firm</strong>');
     expect(synopsis.innerHTML).not.toContain('script');
@@ -220,29 +218,34 @@ describe('the Books page', () => {
     expect(new URLSearchParams(router.state.location.search).has('book')).toBe(false);
   });
 
-  it('opens a paid book from a deep link, its shelf too, with Buy opening the purchase URL in a new tab and no download', async () => {
+  it('opens a paid book from a deep link, with Buy opening the purchase URL in a new tab and no download', async () => {
     renderPage('/books-academia?book=advanced-accounting');
     const dialog = await screen.findByRole('dialog');
     const buy = within(dialog).getByRole('link', { name: 'Buy Advanced Accounting (opens in a new tab)' });
     expect(buy).toHaveAttribute('href', 'https://example.com/buy');
     expect(buy).toHaveAttribute('target', '_blank');
     expect(buy).toHaveAttribute('rel', 'noopener noreferrer');
-    expect(buy).toHaveTextContent('Buy ↗');
     expect(within(dialog).queryByRole('button', { name: /Download/ })).toBeNull();
     expect(within(dialog).queryByRole('link', { name: 'Read' })).toBeNull();
     expect(within(dialog).queryByText(/License/)).toBeNull();
-    // Behind the modal dialog the page is hidden from the accessibility tree; its shelf is open.
-    await waitFor(() => expect(screen.getByRole('button', { name: /^Accounting/, hidden: true })).toHaveAttribute('aria-expanded', 'true'));
   });
 
-  it('opens the shelf a link names', async () => {
-    renderPage('/books-academia?shelf=accounting');
-    await waitFor(() => expect(shelfButton('Accounting')).toHaveAttribute('aria-expanded', 'true'));
-    expect(screen.queryByRole('dialog')).toBeNull();
+  it('re-files the books by year and by author, the sort in the URL', async () => {
+    const router = renderPage();
+    const sorts = screen.getByRole('radiogroup', { name: 'Sort by' });
+    expect(within(sorts).getByRole('radio', { name: 'Shelf' })).toHaveAttribute('aria-checked', 'true');
+    await userEvent.click(within(sorts).getByRole('radio', { name: 'Year' }));
+    expect(new URLSearchParams(router.state.location.search).get('sort')).toBe('year');
+    expect(screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent)).toEqual(['2010s', 'Undated']);
+    await userEvent.click(within(sorts).getByRole('radio', { name: 'Author' }));
+    expect(screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent)).toEqual(['D', 'Unknown author']);
+    await userEvent.click(within(sorts).getByRole('radio', { name: 'Shelf' }));
+    expect(new URLSearchParams(router.state.location.search).has('sort')).toBe(false);
+    expect(screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent)).toEqual(['Corporate Finance', 'Accounting']);
   });
 
   it('says quietly that the shelves are empty, and offers the admin a way to add a book', async () => {
-    useShelvesMock.mockReturnValue({ data: [], isLoading: false, error: null, refetch: vi.fn() });
+    useShelfBooksMock.mockReturnValue({ data: [], isLoading: false, error: null, refetch: vi.fn() });
     renderPage();
     expect(screen.getByText('No books on the shelves yet.')).toBeInTheDocument();
     expect(screen.queryByRole('link', { name: /Add a book/ })).toBeNull();
@@ -255,7 +258,7 @@ describe('the Books page', () => {
   });
 
   it('says the books could not load, not that there are none, when the read fails', () => {
-    useShelvesMock.mockReturnValue({ data: undefined, isLoading: false, error: new Error('down'), refetch: vi.fn() });
+    useShelfBooksMock.mockReturnValue({ data: undefined, isLoading: false, error: new Error('down'), refetch: vi.fn() });
     renderPage();
     expect(screen.getByText("Couldn't load the books")).toBeInTheDocument();
     expect(screen.queryByText('No books on the shelves yet.')).toBeNull();

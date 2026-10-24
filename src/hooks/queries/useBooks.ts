@@ -20,6 +20,7 @@ import { supabase } from '@/integrations/supabase/client';
 import type { Json } from '@/integrations/supabase/types';
 import { logAuditEvent } from '@/lib/auditLog';
 import { removeBookFile, uploadBookFile } from '@/lib/bookFile';
+import { SPINE_COLOR_SHAPE, spineColor, spineHeight, spineInk, spineWidth } from '@/lib/spines';
 
 export type BookAccess = 'free' | 'paid';
 export type FileStore = 'supabase' | 'r2';
@@ -60,6 +61,25 @@ export interface ShelfWithBooks extends Shelf {
   books: Book[];
 }
 
+/** A spine as the shelf draws it (src/lib/spines.ts). */
+export interface SpineMetrics {
+  h: number;
+  w: number;
+  color: string;
+  ink: string;
+}
+
+/** A book on the shelf: its row with page_count and spine_color (library phase 2), and its spine. */
+export interface ShelfBook extends Book {
+  page_count: number | null;
+  spine_color: string | null;
+  spine: SpineMetrics;
+}
+
+export interface ShelfWithSpines extends Shelf {
+  books: ShelfBook[];
+}
+
 const BUCKET = 'books';
 const SHELF_COLUMNS = 'id, slug, name, sort_order';
 const BOOK_COLUMNS =
@@ -85,6 +105,31 @@ export function groupShelves(shelves: Shelf[], books: Book[], readers: boolean):
   const live = books.filter((b) => !b.deleted_at && (!readers || b.published));
   const out = [...shelves].sort(byOrder).map((s) => ({ ...s, books: live.filter((b) => b.shelf_id === s.id).sort(byOrder) }));
   return readers ? out.filter((s) => s.books.length > 0) : out;
+}
+
+/**
+ * Spine metrics for the shelves' books. The colour is the stored one where there is one, else the same colour
+ * computed from the shelf's place among all shelves (`allShelves`, in any order) and the book's id.
+ */
+export function withSpines(
+  shelves: ShelfWithBooks[],
+  allShelves: Shelf[],
+): ShelfWithSpines[] {
+  const place = new Map([...allShelves].sort(byOrder).map((s, i) => [s.id, i]));
+  return shelves.map((s) => ({
+    ...s,
+    books: s.books.map((raw) => {
+      const b = raw as Book & { page_count?: number | null; spine_color?: string | null };
+      const stored = b.spine_color && SPINE_COLOR_SHAPE.test(b.spine_color) ? b.spine_color : null;
+      const color = stored ?? spineColor(place.get(s.id) ?? 0, b.id);
+      return {
+        ...b,
+        page_count: b.page_count ?? null,
+        spine_color: b.spine_color ?? null,
+        spine: { h: spineHeight(b.page_count), w: spineWidth(b.size_bytes), color, ink: spineInk(color) },
+      };
+    }),
+  }));
 }
 
 /** A slug from a title: lower case, ASCII letters and digits, single hyphens. */
@@ -206,6 +251,25 @@ export const useShelves = () =>
   useQuery({
     queryKey: ['books', 'shelves', 'readers'],
     queryFn: () => fetchAll(true),
+  });
+
+/**
+ * The shelf page (library phase 2): shelves holding a published book, each book with its spine. Reads the
+ * spine columns (page_count, spine_color) that useShelves does not.
+ */
+export const useShelfBooks = () =>
+  useQuery({
+    queryKey: ['books', 'shelves', 'spines'],
+    queryFn: async (): Promise<ShelfWithSpines[]> => {
+      const [shelves, books] = await Promise.all([
+        supabase.from('book_shelves').select(SHELF_COLUMNS).order('sort_order'),
+        supabase.from('books_uploads').select(`${BOOK_COLUMNS}, page_count, spine_color`).is('deleted_at', null).eq('published', true).order('sort_order'),
+      ]);
+      if (shelves.error) throw shelves.error;
+      if (books.error) throw books.error;
+      const all = (shelves.data ?? []) as Shelf[];
+      return withSpines(groupShelves(all, (books.data ?? []) as unknown as Book[], true), all);
+    },
   });
 
 /** /admin/books: every shelf, every live book. */
