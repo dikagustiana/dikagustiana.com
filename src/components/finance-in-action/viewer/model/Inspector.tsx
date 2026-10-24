@@ -4,8 +4,9 @@
  * document, period, note, page, XBRL concept). Later layers add the chain
  * breadcrumb and what changed below.
  *
- * On a wide screen it sits beside the page; on a narrow one it opens as a
- * panel along the bottom edge, with no animation, and closes with its button.
+ * From 1280px up it sits in the model card, beside the grid, while it is
+ * expanded (sheet-first PRD D-S6); narrower, it opens as a panel along the
+ * bottom edge, with no animation, and closes with its button.
  */
 import type { ReactNode } from 'react';
 import { X } from 'lucide-react';
@@ -19,18 +20,21 @@ import type { ModelView } from './useModelView';
 const SOURCES_SHOWN = LIMITS.inspectorSources;
 export const INSPECTOR_EMPTY = 'Select a cell, a node or a bar to see how it is built and where it comes from.';
 
-export function Inspector({ view, children }: { view: ModelView; children?: ReactNode }) {
+export function Inspector({ view, id, expanded = true, children }: { view: ModelView; id?: string; expanded?: boolean; children?: ReactNode }) {
   const key = view.selected;
   const open = !!key;
   return (
     <aside
+      id={id}
       aria-label="Inspector"
       className={cn(
         'border-border bg-popover text-popover-foreground',
         // Narrow screens: a panel on the bottom edge, only while something is selected.
         open ? 'fixed inset-x-0 bottom-0 z-40 max-h-[55vh] overflow-y-auto border-t p-4 shadow-lg' : 'hidden',
-        // Wide screens: beside the page, always there.
-        'xl:sticky xl:inset-auto xl:top-4 xl:z-auto xl:block xl:max-h-[calc(100vh-2rem)] xl:overflow-y-auto xl:rounded-md xl:border xl:p-4 xl:shadow-none',
+        // Wide screens: beside the grid in the card, while expanded.
+        expanded
+          ? 'xl:static xl:z-auto xl:block xl:max-h-[min(70vh,44rem)] xl:overflow-y-auto xl:border-l xl:border-t-0 xl:p-4 xl:shadow-none xl:group-data-[full-screen]:max-h-none'
+          : 'xl:hidden',
       )}
     >
       <div className="mb-3 flex items-start justify-between gap-3">

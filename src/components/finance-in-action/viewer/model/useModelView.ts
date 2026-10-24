@@ -101,20 +101,22 @@ export function useModelView(pkg: ModelPackage, lens = false): ModelView {
   const marks = useMemo(() => {
     if (!lens || !selected) return null;
     return {
+      selected,
       pre: new Set(wb.graph.precedents(selected, depth)),
       dep: new Set(wb.graph.dependents(selected, depth)),
     };
   }, [lens, selected, depth, wb]);
 
+  // Changes only with the marks, so with the lens off a new selection redraws nothing it marks.
   const markOf = useCallback(
     (key: string): LensRole | null => {
       if (!marks) return null;
-      if (key === selected) return 'selected';
+      if (key === marks.selected) return 'selected';
       if (marks.pre.has(key)) return 'precedent';
       if (marks.dep.has(key)) return 'dependent';
       return null;
     },
-    [marks, selected],
+    [marks],
   );
 
   const edits = useMemo<EditRecord[]>(

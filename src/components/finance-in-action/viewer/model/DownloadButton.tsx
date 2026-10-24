@@ -21,12 +21,12 @@ export function DownloadButton({ view }: { view: ModelView }) {
     }
   };
   return (
-    <span className="inline-flex flex-col items-end gap-1">
+    <span className="relative inline-flex">
       <Button type="button" onClick={onClick} disabled={state === 'busy'} className="h-11">
         <Download aria-hidden="true" />
         {state === 'busy' ? COPY.downloading : COPY.download}
       </Button>
-      <span role="status" className="text-xs text-destructive">
+      <span role="status" className="absolute right-0 top-full z-10 mt-1 w-max max-w-[16rem] text-right text-xs text-destructive">
         {state === 'failed' ? 'The workbook could not be built in this browser.' : ''}
       </span>
     </span>

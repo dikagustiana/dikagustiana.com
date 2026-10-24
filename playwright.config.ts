@@ -21,8 +21,9 @@ process.env.VITE_SUPABASE_PROJECT_ID = 'test';
 
 export default defineConfig({
   testDir: './tests/e2e',
-  // the world's spec needs a build with VITE_WORLD_KAWASAN=true: playwright.world.config.ts (npm run test:e2e:world)
-  testIgnore: /world\.spec\.ts/,
+  // the world's spec needs a build with VITE_WORLD_KAWASAN=true: playwright.world.config.ts (npm run test:e2e:world);
+  // Finance in Action's model page needs VITE_FIA_PREVIEW=true: playwright.fia.config.ts (npm run test:e2e:fia)
+  testIgnore: /(world|fia-sheet-first)\.spec\.ts/,
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: 0,
