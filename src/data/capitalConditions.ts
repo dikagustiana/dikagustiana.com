@@ -25,6 +25,13 @@ export interface CapitalCondition {
   quantitative: string;
   rule: string;
   hypotheticalModel?: HypotheticalModelRow[];
+  /**
+   * The Track 1-4 modules the condition rests on, as finance_modules slugs
+   * (t1-m14b, t4-m07), drawn as chips "T1 · M14B" on the Finance in Action
+   * index (docs/prd/finance-restructure §4). Empty until the owner fills it;
+   * the chip row is left out while it is.
+   */
+  modules?: string[];
   layer: 'operational' | 'balance-sheet' | 'portfolio' | 'transition' | 'valuation' | 'structural-transformation';
 }
 

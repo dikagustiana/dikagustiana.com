@@ -1,5 +1,8 @@
 /**
- * Finance in Action, section 06: the index (brief §5.1, §5.2).
+ * Finance in Action, section 06: the index (brief §5.1, §5.2), in two
+ * stacked subsections since docs/prd/finance-restructure §1 B: A, Capital in
+ * Motion (the 21 conditions with their modules and tagged companies,
+ * ConditionList), then B, Company models (the chain, as before).
  *
  * The page body. It takes its registry hook as a prop so that this module
  * imports no data: FiaIndexPage (preview, __FIA_PREVIEW__) hands it the
@@ -31,6 +34,9 @@ import { conditionsUsed } from '@/lib/finance-in-action/conditions';
 import { groupAlongChain, type CompanyEntry, type PositionGroup } from '@/lib/finance-in-action/registry';
 import type { RegistryHook } from '@/lib/finance-in-action/registryState';
 import { PublishedNote } from '@/components/finance-in-action/viewer/PublishedNote';
+import { ConditionList } from '@/components/finance-in-action/viewer/ConditionList';
+import { companiesByCondition } from '@/lib/finance-in-action/conditionIndex';
+import { COMPANY_MODELS_ANCHOR } from '@/lib/finance-in-action/routes';
 
 export const PARAM = { query: 'q', condition: 'condition', lens: 'connections', link: 'link' } as const;
 
@@ -66,6 +72,7 @@ export function FiaIndex({ useRegistry }: { useRegistry: RegistryHook }) {
     [reg, query, condition],
   );
   const conditions = useMemo(() => conditionsUsed(reg.companies.map((c) => c.conditionIds)), [reg]);
+  const byCondition = useMemo(() => companiesByCondition(reg), [reg]);
   const stages = all.filter((g) => g.position.kind === 'stage');
   const drawn = useMemo(() => placeLinks(reg, stages.map((g) => g.position.id)), [reg, stages]);
   const openLink = (id: string) => update({ [PARAM.lens]: 'on', [PARAM.link]: id });
@@ -104,49 +111,61 @@ export function FiaIndex({ useRegistry }: { useRegistry: RegistryHook }) {
           <h1 className="font-display text-3xl font-bold leading-tight text-foreground md:text-4xl">{COPY.title}</h1>
           <p className="mt-3 text-base leading-relaxed text-muted-foreground md:text-lg">{COPY.subhead}</p>
         </header>
-        <div className="-mt-4 mb-8">
-          <StagePills groups={all} />
-        </div>
 
-        <section aria-labelledby="fia-along-chain" className="mb-10 space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <h2 id="fia-along-chain" className="text-xl font-semibold text-foreground">
-              {COPY.alongTheChain}
+        {/* Subsection A, then B, on one scroll (docs/prd/finance-restructure §1 B, §3). */}
+        <ConditionList index={byCondition} />
+
+        <section id={COMPANY_MODELS_ANCHOR} aria-labelledby={`${COMPANY_MODELS_ANCHOR}-heading`} className="scroll-mt-24">
+          <div className="mb-6 border-b border-border pb-2">
+            <h2 id={`${COMPANY_MODELS_ANCHOR}-heading`} className="text-xl font-semibold text-foreground">
+              {COPY.companyModels}
             </h2>
-            <div className="flex flex-wrap items-center gap-4">
-              <Link
-                to={chainMapHref()}
-                className="inline-flex min-h-11 items-center text-sm text-accent underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                {COPY.openChainMap}
-              </Link>
-              <ConnectionsToggle on={lens} onChange={(on) => update({ [PARAM.lens]: on ? 'on' : null, [PARAM.link]: null })} />
-            </div>
           </div>
-          <StageStrip
-            stages={stages}
-            layers={layers}
-            linkLayer={lens ? <LinkLayer reg={reg} drawn={drawn} columns={stages.length} selected={linkId} onSelect={openLink} /> : undefined}
-          />
-          {lens && <LinkLegend />}
-          {link && <LinkCard key={link.id} reg={reg} link={link} onClose={() => update({ [PARAM.link]: null })} />}
-        </section>
+          <p className="mb-4 text-sm text-muted-foreground">{COPY.companyModelsIntro}</p>
+          <div className="mb-8">
+            <StagePills groups={all} />
+          </div>
 
-        <section aria-label="Filters" className="mb-8">
-          <IndexFilters
-            query={query}
-            onQuery={(q) => update({ [PARAM.query]: q || null })}
-            condition={condition}
-            onCondition={(c) => update({ [PARAM.condition]: c === ALL ? null : c })}
-            conditions={conditions}
-          />
-        </section>
+          <section aria-labelledby="fia-along-chain" className="mb-10 space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <h2 id="fia-along-chain" className="text-xl font-semibold text-foreground">
+                {COPY.alongTheChain}
+              </h2>
+              <div className="flex flex-wrap items-center gap-4">
+                <Link
+                  to={chainMapHref()}
+                  className="inline-flex min-h-11 items-center text-sm text-accent underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  {COPY.openChainMap}
+                </Link>
+                <ConnectionsToggle on={lens} onChange={(on) => update({ [PARAM.lens]: on ? 'on' : null, [PARAM.link]: null })} />
+              </div>
+            </div>
+            <StageStrip
+              stages={stages}
+              layers={layers}
+              linkLayer={lens ? <LinkLayer reg={reg} drawn={drawn} columns={stages.length} selected={linkId} onSelect={openLink} /> : undefined}
+            />
+            {lens && <LinkLegend />}
+            {link && <LinkCard key={link.id} reg={reg} link={link} onClose={() => update({ [PARAM.link]: null })} />}
+          </section>
 
-        <div className="space-y-10">
-          {sections.map((g) => (
-            <PositionSection key={g.position.id} group={g} filtering={filtering} lens={lens} reg={reg} onLink={openLink} />
-          ))}
-        </div>
+          <section aria-label="Filters" className="mb-8">
+            <IndexFilters
+              query={query}
+              onQuery={(q) => update({ [PARAM.query]: q || null })}
+              condition={condition}
+              onCondition={(c) => update({ [PARAM.condition]: c === ALL ? null : c })}
+              conditions={conditions}
+            />
+          </section>
+
+          <div className="space-y-10">
+            {sections.map((g) => (
+              <PositionSection key={g.position.id} group={g} filtering={filtering} lens={lens} reg={reg} onLink={openLink} />
+            ))}
+          </div>
+        </section>
       </div>
     </PageLayout>
   );

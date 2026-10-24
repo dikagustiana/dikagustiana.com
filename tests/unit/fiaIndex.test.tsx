@@ -123,17 +123,20 @@ describe('the preview index, lens off', () => {
     const user = userEvent.setup();
     renderIndex();
     await user.type(await screen.findByLabelText(COPY.findCompany), 'sample coal');
-    expect(screen.getByText('SCOA')).toBeInTheDocument();
-    expect(screen.queryByText('XCOA')).toBeNull();
-    expect(screen.queryByText('PTBA')).toBeNull();
-    expect(screen.getAllByText(COPY.noMatches).length).toBeGreaterThan(0);
+    // The filters act on subsection B, the company models; subsection A lists every condition's companies.
+    const models = within(document.getElementById('company-models')!);
+    expect(models.getByText('SCOA')).toBeInTheDocument();
+    expect(models.queryByText('XCOA')).toBeNull();
+    expect(models.queryByText('PTBA')).toBeNull();
+    expect(models.getAllByText(COPY.noMatches).length).toBeGreaterThan(0);
   });
 
   it('filters by Capital in Motion condition, from the address', async () => {
     renderIndex('?condition=6');
     await screen.findByRole('heading', { level: 1, name: COPY.title });
-    expect(screen.getByText('XCEM')).toBeInTheDocument();
-    expect(screen.getByText('SMGR')).toBeInTheDocument();
-    for (const t of ['XCOA', 'SCOA', 'SCEM', 'PTBA', 'ITMG', 'INTP']) expect(screen.queryByText(t)).toBeNull();
+    const models = within(document.getElementById('company-models')!);
+    expect(models.getByText('XCEM')).toBeInTheDocument();
+    expect(models.getByText('SMGR')).toBeInTheDocument();
+    for (const t of ['XCOA', 'SCOA', 'SCEM', 'PTBA', 'ITMG', 'INTP']) expect(models.queryByText(t)).toBeNull();
   });
 });

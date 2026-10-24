@@ -13,6 +13,15 @@ export const COPY = {
     "Each model rebuilds a listed company's operation from its own filings: volumes, capacity, cost per unit. Two companies per sub-industry, ordered along the chain from extraction to end users, so a weak link can be compared with its neighbours rather than guessed at.",
   seoTitle: 'Finance in Action',
   seoDescription: "Company models of IDX-listed companies, rebuilt from their own filings and ordered along the industry chain.",
+  // The index's two subsections (docs/prd/finance-restructure §1 B, §3)
+  capitalInMotion: 'Capital in Motion',
+  /** OWNER-REPLACEABLE: the PRD gives no intro line for subsection A. */
+  capitalInMotionIntro: 'Twenty-one conditions under which capital moves, the modules each rests on, and the companies where it shows now.',
+  openCapitalInMotion: 'Read the conditions',
+  noCompanyTagged: 'No company tagged yet',
+  companyModels: 'Company models',
+  /** OWNER-REPLACEABLE: the PRD gives no intro line for subsection B. */
+  companyModelsIntro: 'IDX companies rebuilt from their own filings, along the chain. Every company on the slate is listed, modelled or not.',
   alongTheChain: 'Models along the chain',
   openChainMap: 'Open the chain map',
   connectionsOn: 'Connections on',
