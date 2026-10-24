@@ -2,7 +2,8 @@
  * A book, opened (PRD D3; 03-DESIGN §5): cover, title, author · year · shelf, one primary action, the full
  * synopsis and, for a free book, the basis on which it is shared. Download saves the file from the `books`
  * bucket under the book's title; Buy opens the purchase URL in a new tab. The synopsis is the owner's HTML,
- * through the sanitiser essays use. On a phone the dialog fills the screen, cover above the title.
+ * through the sanitiser essays use. On a phone the dialog fills the screen, cover above the title. Mobile-first
+ * classes (base, then sm:), not max-sm:: the theme's raw `pointer-fine` screen turns Tailwind's max-* variants off.
  */
 import { Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -21,7 +22,7 @@ interface BookDialogProps {
 export function BookDialog({ book, shelfName, onClose }: BookDialogProps) {
   return (
     <Dialog open={!!book} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="flex max-h-[100dvh] max-w-2xl flex-col gap-0 overflow-hidden p-0 max-sm:h-[100dvh] max-sm:max-w-none max-sm:rounded-none max-sm:border-0">
+      <DialogContent className="flex h-[100dvh] max-h-[100dvh] max-w-none flex-col gap-0 overflow-hidden rounded-none border-0 p-0 sm:h-auto sm:max-w-2xl sm:rounded-lg sm:border">
         {book && <BookBody book={book} shelfName={shelfName} />}
       </DialogContent>
     </Dialog>
@@ -62,7 +63,7 @@ function BookBody({ book, shelfName }: { book: Book; shelfName: string | null })
       {synopsis && (
         <div
           data-synopsis
-          className="prose-editorial max-h-[60vh] overflow-y-auto font-serif text-[17px] leading-[1.6] text-foreground max-sm:max-h-none [&_a]:text-accent [&_a]:underline [&_li]:mb-1 [&_ol]:mb-4 [&_ol]:pl-6 [&_p]:mb-4 [&_ul]:mb-4 [&_ul]:pl-6"
+          className="prose-editorial font-serif text-[17px] leading-[1.6] text-foreground sm:max-h-[60vh] sm:overflow-y-auto [&_a]:text-accent [&_a]:underline [&_li]:mb-1 [&_ol]:mb-4 [&_ol]:pl-6 [&_p]:mb-4 [&_ul]:mb-4 [&_ul]:pl-6"
           dangerouslySetInnerHTML={{ __html: synopsis }}
         />
       )}
