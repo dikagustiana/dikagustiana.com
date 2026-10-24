@@ -6,11 +6,12 @@
  * Turning pages: the arrow keys and Page Up/Down; a press on the left or right half of the page; a swipe on a
  * touchscreen. The page reached is kept per browser, and the book opens there next time.
  */
-import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { GlobalWorkerOptions, getDocument, type PDFDocumentProxy, type RenderTask } from 'pdfjs-dist/legacy/build/pdf.mjs';
 import workerUrl from 'pdfjs-dist/legacy/build/pdf.worker.min.mjs?url';
-import { clampPage, fitScale, isTypingTarget, readPosition, storedPage, swipeStep, turnFor, writePosition } from '@/lib/bookReader';
+import { clampPage, fitScale, isTypingTarget, readPosition, storedPage, turnFor, writePosition } from '@/lib/bookReader';
 import { TurnZones } from './TurnZones';
+import { useSwipe } from './useSwipe';
 
 GlobalWorkerOptions.workerSrc = workerUrl;
 
@@ -108,20 +109,10 @@ export default function PdfReader({ url, title, slug, onError, onStatus }: Props
     return () => window.removeEventListener('keydown', onKey);
   }, [total]);
 
-  // A swipe on a touchscreen; a mouse press is a click on a turn zone instead.
-  const start = useRef<{ x: number; y: number } | null>(null);
-  const onPointerDown = (e: ReactPointerEvent) => {
-    start.current = e.pointerType === 'mouse' ? null : { x: e.clientX, y: e.clientY };
-  };
-  const onPointerUp = (e: ReactPointerEvent) => {
-    if (!start.current || !total) return;
-    const step = swipeStep(e.clientX - start.current.x, e.clientY - start.current.y);
-    start.current = null;
-    if (step) turn(step);
-  };
+  const swipe = useSwipe(turn, total > 0);
 
   return (
-    <div ref={stageRef} className="relative flex h-full w-full touch-pan-y items-center justify-center overflow-hidden" onPointerDown={onPointerDown} onPointerUp={onPointerUp}>
+    <div ref={stageRef} className="relative flex h-full w-full touch-pan-y items-center justify-center overflow-hidden" {...swipe}>
       <canvas
         ref={canvasRef}
         role="img"

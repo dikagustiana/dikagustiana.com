@@ -6,7 +6,7 @@
  */
 import type { ReactNode } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
@@ -41,6 +41,8 @@ import {
 } from '@/lib/bookReader';
 import { BookDialog } from '@/components/books/BookDialog';
 import BookReader from '@/pages/BookReader';
+import { TurnZones } from '@/components/books/reader/TurnZones';
+import { useSwipe } from '@/components/books/reader/useSwipe';
 import type { Book } from '@/hooks/queries/useBooks';
 
 const SIGNED = { ok: true, url: 'https://acct.r2.cloudflarestorage.com/dg-books-public/files/open/1-o.pdf?X-Amz-Signature=x', contentType: 'application/pdf', filename: 'Open Finance.pdf' };
@@ -119,6 +121,7 @@ describe('the e-reader rules', () => {
     expect(swipeStep(80, -10)).toBe(-1);
     expect(swipeStep(-30, 0)).toBe(0);
     expect(swipeStep(-80, 70)).toBe(0);
+    expect(swipeStep(NaN, 0)).toBe(0);
   });
 
   it('keeps the place per book and browser, held to the book, and works without storage', () => {
@@ -137,6 +140,52 @@ describe('the e-reader rules', () => {
     });
     expect(readPosition('open')).toBeNull();
     expect(() => writePosition('open', '3')).not.toThrow();
+  });
+});
+
+describe('a swipe over a turn zone', () => {
+  // jsdom has no PointerEvent; a MouseEvent carries the coordinates and pointerType a touch would.
+  beforeEach(() => {
+    if (typeof window.PointerEvent === 'undefined') {
+      class TestPointerEvent extends MouseEvent {
+        pointerType: string;
+        constructor(type: string, init: PointerEventInit = {}) {
+          super(type, init);
+          this.pointerType = init.pointerType ?? 'mouse';
+        }
+      }
+      vi.stubGlobal('PointerEvent', TestPointerEvent);
+    }
+  });
+  afterEach(() => vi.unstubAllGlobals());
+
+  const Stage = ({ onTurn }: { onTurn: (step: -1 | 1) => void }) => {
+    const swipe = useSwipe(onTurn);
+    return (
+      <div data-testid="stage" {...swipe}>
+        <TurnZones onTurn={onTurn} />
+      </div>
+    );
+  };
+
+  it('turns once: the click the swipe leaves behind is swallowed, and a tap or a key press still turns', async () => {
+    const onTurn = vi.fn();
+    render(<Stage onTurn={onTurn} />);
+    const next = screen.getByRole('button', { name: 'Next page' });
+    // A leftward swipe that starts and ends on the right half: forward once, not twice.
+    fireEvent.pointerDown(next, { pointerType: 'touch', clientX: 300, clientY: 100 });
+    fireEvent.pointerUp(next, { pointerType: 'touch', clientX: 200, clientY: 105 });
+    fireEvent.click(next);
+    expect(onTurn.mock.calls).toEqual([[1]]);
+    // A tap is a click.
+    fireEvent.pointerDown(next, { pointerType: 'touch', clientX: 300, clientY: 100 });
+    fireEvent.pointerUp(next, { pointerType: 'touch', clientX: 302, clientY: 100 });
+    fireEvent.click(next);
+    expect(onTurn.mock.calls).toEqual([[1], [1]]);
+    // The keyboard is untouched.
+    next.focus();
+    await userEvent.keyboard('{Enter}');
+    expect(onTurn.mock.calls).toEqual([[1], [1], [1]]);
   });
 });
 
@@ -200,7 +249,12 @@ describe('the reader page', () => {
     expect(screen.getByRole('heading', { level: 1, name: 'Open Finance' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Close the reader' })).toHaveAttribute('href', '/books-academia?book=open');
     await userEvent.click(screen.getByRole('button', { name: 'report' }));
-    expect(screen.getAllByText('Page 3 of 58').length).toBeGreaterThan(0);
+    // One live status, read out at every width (visually hidden on a phone, never removed or aria-hidden).
+    const live = container.querySelectorAll('[aria-live]');
+    expect(live).toHaveLength(1);
+    expect(live[0]).toHaveTextContent('Page 3 of 58');
+    expect(live[0]).not.toHaveClass('hidden');
+    expect(live[0].closest('[aria-hidden="true"]')).toBeNull();
     invoke.mockResolvedValueOnce({ data: { ...SIGNED, url: 'https://r2.example/dl' }, error: null });
     await userEvent.click(screen.getByRole('button', { name: 'Download' }));
     expect(assign).toHaveBeenCalledWith('https://r2.example/dl');

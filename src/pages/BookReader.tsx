@@ -100,7 +100,8 @@ export default function BookReader() {
           </Link>
         </Button>
         <h1 className="min-w-0 flex-1 truncate font-display text-base font-semibold sm:text-lg">{title}</h1>
-        <p className="hidden shrink-0 text-sm text-neutral-400 sm:block" aria-live="polite">
+        {/* The one live status: read out at every width, shown here from sm up; on a phone it is shown under the page. */}
+        <p className="sr-only shrink-0 text-sm text-neutral-400 sm:not-sr-only" aria-live="polite">
           {status}
         </p>
         {result?.ok && (

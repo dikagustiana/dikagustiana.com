@@ -4,10 +4,11 @@
  * the PDF reader: arrow keys and Page Up/Down (from the page and from inside the frame), a press on either
  * half, a swipe. The place reached is kept per browser as an EPUB location, and the book reopens there.
  */
-import { useEffect, useRef, type PointerEvent as ReactPointerEvent } from 'react';
+import { useEffect, useRef } from 'react';
 import ePub, { type Book as EpubBook, type Rendition } from 'epubjs';
-import { isTypingTarget, readPosition, swipeStep, turnFor, writePosition } from '@/lib/bookReader';
+import { isTypingTarget, readPosition, turnFor, writePosition } from '@/lib/bookReader';
 import { TurnZones } from './TurnZones';
+import { useSwipe } from './useSwipe';
 
 interface Props {
   url: string;
@@ -64,19 +65,10 @@ export default function EpubReader({ url, title, slug, onError, onStatus }: Prop
     return () => window.removeEventListener('keydown', onKey);
   }, []);
 
-  const start = useRef<{ x: number; y: number } | null>(null);
-  const onPointerDown = (e: ReactPointerEvent) => {
-    start.current = e.pointerType === 'mouse' ? null : { x: e.clientX, y: e.clientY };
-  };
-  const onPointerUp = (e: ReactPointerEvent) => {
-    if (!start.current) return;
-    const step = swipeStep(e.clientX - start.current.x, e.clientY - start.current.y);
-    start.current = null;
-    if (step) turn(step);
-  };
+  const swipe = useSwipe(turn);
 
   return (
-    <div className="relative flex h-full w-full touch-pan-y items-center justify-center" onPointerDown={onPointerDown} onPointerUp={onPointerUp}>
+    <div className="relative flex h-full w-full touch-pan-y items-center justify-center" {...swipe}>
       <div ref={boxRef} role="document" aria-label={title} className="h-full w-full max-w-3xl bg-white px-4 py-6 shadow-2xl sm:px-10" />
       <TurnZones onTurn={turn} />
     </div>
