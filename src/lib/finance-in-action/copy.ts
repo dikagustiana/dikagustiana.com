@@ -97,6 +97,11 @@ export const COPY = {
   hideInspector: 'Hide the inspector',
   inspector: 'Inspector',
   unitColumn: 'Each row carries its unit in column B.',
+  checks: 'Checks',
+  checksMeans: 'Each tie-out of the model to a filing: the cell, the figure as filed, the difference.',
+  checksNone: 'This model carries no tie-out yet.',
+  checksHeader: { check: 'Check', unit: 'Unit', cell: 'Cell', model: 'In the model', filed: 'As filed', difference: 'Difference', status: 'Status', source: 'Filed in' },
+  checksGap: 'Gap row of the model',
   onThisPage: 'On this page',
   // Production (VITE_FIA_LIVE): no fixture stands in, so each failure is a sentence of its own.
   liveNotAvailable: 'The published models are not available yet, so the companies below are listed as planned.',

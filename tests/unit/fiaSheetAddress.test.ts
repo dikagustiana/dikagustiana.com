@@ -23,6 +23,7 @@ import {
   keyFromAddress,
   parseTyped,
 } from '@/lib/finance-in-action/view/sheetAddress';
+import { checksAddress, checksRows, goTo } from '@/lib/finance-in-action/view/checksSheet';
 
 const reg = previewRegistry();
 const packages = reg.packages;
@@ -152,7 +153,7 @@ describe('the formula bar (K3)', () => {
 });
 
 describe('the exported workbook has the same addresses (K2)', () => {
-  it('holds each sampled cell at the address the grid shows, ten a sheet, on every sheet', async () => {
+  it('holds each sampled cell at the address the grid shows, ten a sheet, on every sheet, Checks included', async () => {
     for (const p of packages) {
       const { wb, values } = open(p);
       const book = await buildWorkbook({ pkg: p, wb, values, edits: [] }, {});
@@ -172,6 +173,18 @@ describe('the exported workbook has the same addresses (K2)', () => {
           expect(String(ws.getCell(`${a.col}${ADDRESSING.headerRow}`).value)).toContain(p.periods[wb.address(key)!.periodIndex].label);
         }
       }
+      const checks = checksRows(p, wb, values);
+      const ws = back.getWorksheet('Checks')!;
+      checks.forEach((check, r) => {
+        check.cells.forEach((c, ci) => {
+          const text = checksAddress(r, ci).split('!')[1];
+          const cell = ws.getCell(text);
+          if (c.formula) expect(`=${cell.formula}`).toBe(c.formula);
+          else expect(cell.value).toBe(c.value !== undefined ? c.value : c.text);
+          expect(goTo(wb, checksAddress(r, ci), 'model', checks.length)).toEqual({ ok: true, sheet: 'checks', r, c: ci });
+        });
+        expect(ws.getCell(`A${r + ADDRESSING.firstDataRow}`).value).toBe(check.label);
+      });
     }
   });
 });
