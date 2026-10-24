@@ -11,18 +11,22 @@
  * margin. Frozen panes wider than 60 % of the grid, or taller than half of it, are let go, as on a phone.
  *
  * One tab stop: the scroller is the grid, and aria-activedescendant names the selected cell, which is
- * always rendered. Arrows, Home, End, Ctrl+Home, Ctrl+End, Page Up and Page Down move the selection; Enter,
- * or a click on the selected cell, opens the inspector.
+ * always rendered. Arrows, Home, End, Ctrl+Home, Ctrl+End, Page Up and Page Down move the selection.
+ *
+ * No gridlines between cells (site cleanup 2026-10, A7): the cells sit on paper, and only the workbook's own
+ * borders (the rules under subtotals, the double rule under totals) are drawn. The headers keep their thin
+ * borders, so they read as the sheet's frame. Where the sheet is narrower than the view, the column letters
+ * run on to the edge, as Excel's do, rather than stopping at the sheet's last column (A10).
  */
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent, type MouseEvent, type ReactNode, type Ref } from 'react';
+import { useCallback, useLayoutEffect, useRef, useState, type CSSProperties, type KeyboardEvent, type MouseEvent, type ReactNode, type Ref } from 'react';
 import { colLetter } from '@/lib/finance-in-action/engine/address';
 import { WORKBOOK_COPY as COPY } from '@/lib/workbook/copy';
 import { formatCell } from '@/lib/workbook/format';
 import { contains, decodeA1, encodeA1, type Area } from '@/lib/workbook/refs';
-import { SPILL_MAX, indexAt, moveFrom, type Cell, type MoveKey, type SheetModel } from '@/lib/workbook/sheet';
+import { SPILL_MAX, colWidthPx, indexAt, moveFrom, type Cell, type MoveKey, type SheetModel } from '@/lib/workbook/sheet';
 import type { WorkbookStyle } from '@/lib/workbook/types';
 import { cn } from '@/lib/utils';
-import { LOOK, borderCss, kindOf, lookOf } from './look';
+import { borderCss, kindOf, lookOf } from './look';
 
 /** The column letters' band. */
 const HEAD_H = 22;
@@ -32,24 +36,19 @@ const FALLBACK_VIEW = { w: 960, h: 540 };
 const OVERSCAN = 160;
 /** Excel's indent step. */
 const INDENT_PX = 9;
+/** Lines between the cells: off by default (A7), kept as an option rather than deleted. */
 const GRIDLINE = 'border-b border-r border-border';
-
-export interface GridMarks {
-  /** Ranges the selected cell's formula reads on this sheet. */
-  precedents: Area[];
-  /** Cells on this sheet whose formulas read the selected cell. */
-  dependents: string[];
-}
+/** The width of a column letter shown past the sheet's last column: Excel's default column. */
+const FILL_COL_W = colWidthPx(8.43);
 
 interface SheetGridProps {
   id: string;
   model: SheetModel;
   styles: WorkbookStyle[];
   selected: Cell;
-  marks: GridMarks;
   onSelect: (cell: Cell) => void;
-  /** Enter, or a click on the selected cell. */
-  onActivate: () => void;
+  /** Lines between the cells; the workbook's own borders are drawn either way. */
+  gridlines?: boolean;
   gridRef?: Ref<HTMLDivElement>;
   className?: string;
 }
@@ -80,7 +79,7 @@ interface Pane {
   y0: number;
 }
 
-export function SheetGrid({ id, model, styles, selected, marks, onSelect, onActivate, gridRef, className }: SheetGridProps) {
+export function SheetGrid({ id, model, styles, selected, onSelect, gridlines = false, gridRef, className }: SheetGridProps) {
   const scroller = useRef<HTMLDivElement | null>(null);
   const [view, setView] = useState(FALLBACK_VIEW);
   const [scroll, setScroll] = useState({ left: 0, top: 0 });
@@ -124,6 +123,9 @@ export function SheetGrid({ id, model, styles, selected, marks, onSelect, onActi
   const { fc, fr, frozenW, frozenH, mainW, mainH } = frame(view.w, view.h);
   const sheetW = colLeft[lastCol + 1];
   const sheetH = rowTop[lastRow + 1];
+  // The view past the sheet's last column, filled with column letters as Excel fills it.
+  const fillW = Math.max(0, view.w - rowHeadW - sheetW);
+  const fillCols = Math.ceil(fillW / FILL_COL_W);
 
   const cols = span(colLeft, fc + 1, lastCol, frozenW + scroll.left - OVERSCAN, frozenW + scroll.left + mainW + OVERSCAN);
   const rows = span(rowTop, fr + 1, lastRow, frozenH + scroll.top - OVERSCAN, frozenH + scroll.top + mainH + OVERSCAN);
@@ -188,22 +190,17 @@ export function SheetGrid({ id, model, styles, selected, marks, onSelect, onActi
       if (to.col === selected.col && to.row === selected.row) return;
       keyed.current = true;
       onSelect(to);
-    } else if (e.key === 'Enter') {
-      e.preventDefault();
-      onActivate();
     }
   };
 
   const onClick = (e: MouseEvent<HTMLDivElement>) => {
     const a = (e.target as HTMLElement).closest<HTMLElement>('[data-a]')?.dataset.a;
     const at = a ? decodeA1(a) : null;
-    if (!at) return;
-    if (at.col === selected.col && at.row === selected.row) onActivate();
-    else onSelect(at);
+    if (!at || (at.col === selected.col && at.row === selected.row)) return;
+    onSelect(at);
   };
 
   const selectedA = encodeA1(selected.col, selected.row);
-  const dependents = useMemo(() => new Set(marks.dependents), [marks.dependents]);
 
   /** The pane's cells, row by row: every cell in view, a merge from its top-left, a label running on. */
   function cellsOf(p: Pane): ReactNode[] {
@@ -279,8 +276,8 @@ export function SheetGrid({ id, model, styles, selected, marks, onSelect, onActi
     if (style?.border?.top) box.borderTop = borderCss(style.border.top);
     if (style?.border?.bottom) box.borderBottom = borderCss(style.border.bottom);
     // A screen reader hears what the colours say: the cell's kind and the workbook's own red or blue type.
-    const kindWord = kind === 'formula' ? COPY.legendFormula : kind === 'error' ? COPY.legendError : kind === 'constant' && typeof cell?.v === 'number' ? COPY.legendConstant : null;
-    const colourWord = kind === 'error' ? null : style?.color === 'red' ? COPY.legendRed : style?.color === 'blue' ? COPY.legendBlue : null;
+    const kindWord = kind === 'formula' ? COPY.cellFormula : kind === 'error' ? COPY.cellError : kind === 'constant' && typeof cell?.v === 'number' ? COPY.cellConstant : null;
+    const colourWord = kind === 'error' ? null : style?.color === 'red' ? COPY.cellRed : style?.color === 'blue' ? COPY.cellBlue : null;
     const label = [a, text || COPY.empty, kindWord, colourWord].filter(Boolean).join(', ');
     return (
       <div
@@ -294,7 +291,7 @@ export function SheetGrid({ id, model, styles, selected, marks, onSelect, onActi
         data-kind={kind}
         className={cn(
           'absolute flex',
-          GRIDLINE,
+          gridlines && GRIDLINE,
           lookOf(cell, style),
           style?.bold && 'font-semibold',
           align?.vertical === 'top' ? 'items-start' : align?.vertical === 'middle' || align?.vertical === 'center' ? 'items-center' : 'items-end',
@@ -304,7 +301,7 @@ export function SheetGrid({ id, model, styles, selected, marks, onSelect, onActi
       >
         {text &&
           (spillTo ? (
-            // A label running on hides the gridlines it crosses, as Excel's does; it does not shrink to its cell.
+            // A label running on hides any gridlines it crosses, as Excel's does; it does not shrink to its cell.
             // A click on it beyond its own cell reaches the cell under the pointer, as in Excel.
             <span
               className="pointer-events-none relative z-[1] flex-none overflow-hidden whitespace-nowrap bg-popover pr-1"
@@ -319,7 +316,7 @@ export function SheetGrid({ id, model, styles, selected, marks, onSelect, onActi
     );
   }
 
-  /** The selection, the precedents and the dependents, over the pane's cells. */
+  /** The selection, over the pane's cells. */
   function overlaysOf(p: Pane): ReactNode[] {
     const out: ReactNode[] = [];
     const clip = (area: Area): CSSProperties | null => {
@@ -330,24 +327,6 @@ export function SheetGrid({ id, model, styles, selected, marks, onSelect, onActi
       if (top > bottom || left > right) return null;
       return { left: colLeft[left] - p.x0, top: rowTop[top] - p.y0, width: colLeft[right + 1] - colLeft[left], height: rowTop[bottom + 1] - rowTop[top] };
     };
-    marks.precedents.forEach((area, i) => {
-      const at = clip(area);
-      if (at)
-        out.push(
-          <div
-            key={`p${i}`}
-            aria-hidden="true"
-            data-precedent={encodeA1(area.left, area.top) + (area.bottom > area.top || area.right > area.left ? `:${encodeA1(area.right, area.bottom)}` : '')}
-            className={cn('pointer-events-none absolute z-[2] mix-blend-multiply', LOOK.precedent.className, LOOK.precedentOutline)}
-            style={at}
-          />,
-        );
-    });
-    for (const a of dependents) {
-      const at = decodeA1(a);
-      const style = at && clip({ top: at.row, left: at.col, bottom: at.row, right: at.col });
-      if (style) out.push(<div key={`d${a}`} aria-hidden="true" data-dependent={a} className={cn('pointer-events-none absolute z-[2] mix-blend-multiply', LOOK.dependent.className)} style={style} />);
-    }
     const sel = model.mergeOf.get(selectedA) ?? { top: selected.row, left: selected.col, bottom: selected.row, right: selected.col };
     if (inPane(p, sel.top, sel.left)) {
       const style = clip(sel);
@@ -445,7 +424,7 @@ export function SheetGrid({ id, model, styles, selected, marks, onSelect, onActi
         className,
       )}
     >
-      <div className="relative" style={{ width: rowHeadW + sheetW, height: HEAD_H + sheetH }}>
+      <div className="relative" style={{ width: rowHeadW + sheetW + fillW, height: HEAD_H + sheetH }}>
         {/* The column letters */}
         <div aria-hidden="true" className="sticky top-0 z-[6] flex" style={{ height: HEAD_H }}>
           <div className="sticky left-0 z-[2] flex-none border-b border-r border-border bg-background" style={{ width: rowHeadW }} />
@@ -455,6 +434,19 @@ export function SheetGrid({ id, model, styles, selected, marks, onSelect, onActi
           <div className="relative flex-none" style={{ width: sheetW - frozenW }}>
             {letters(cols, frozenW)}
           </div>
+          {fillCols > 0 && (
+            <div data-fill-columns={fillCols} className="relative flex-none overflow-hidden" style={{ width: fillW }}>
+              {Array.from({ length: fillCols }, (_, i) => (
+                <div
+                  key={i}
+                  className="absolute top-0 flex h-full items-center justify-center border-b border-r border-border bg-background text-[11px] text-muted-foreground"
+                  style={{ left: i * FILL_COL_W, width: FILL_COL_W }}
+                >
+                  {colLetter(lastCol + 1 + i)}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
         {/* The frozen rows */}
         {fr > 0 && (

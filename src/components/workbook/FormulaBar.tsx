@@ -1,11 +1,11 @@
 /**
  * The formula bar (PRD site sweep 2026-10, R4.3, R4.4), as the reference draws it: the name box, an italic
  * fx, then what the selected cell holds, a formula with its leading "=" as Excel shows it, or the value as
- * typed. Back returns from a jump (a precedent, a dependent, another sheet, a Go To) while there is one to
- * return from; the inspector's button stands at the end while the inspector is closed.
+ * typed. Back returns from a Go To while there is one to return from. The inspector and its button are gone
+ * (site cleanup 2026-10, A1).
  */
 import type { ReactNode } from 'react';
-import { ArrowLeft, PanelRightOpen } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { WORKBOOK_COPY as COPY } from '@/lib/workbook/copy';
 import { formulaBarText } from '@/lib/workbook/format';
 import type { WorkbookCell } from '@/lib/workbook/types';
@@ -17,14 +17,11 @@ interface FormulaBarProps {
   /** Where Back returns to, as Excel would write it; null when there is nothing to go back to. */
   backTo: string | null;
   onBack: () => void;
-  inspectorOpen: boolean;
-  inspectorId: string;
-  onOpenInspector: () => void;
 }
 
 const TOOL = 'inline-flex flex-none items-center gap-1.5 px-2.5 text-muted-foreground hover:bg-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring';
 
-export function FormulaBar({ nameBox, cell, backTo, onBack, inspectorOpen, inspectorId, onOpenInspector }: FormulaBarProps) {
+export function FormulaBar({ nameBox, cell, backTo, onBack }: FormulaBarProps) {
   const text = formulaBarText(cell);
   return (
     <div role="group" aria-label={COPY.formulaBar} className="flex min-h-9 items-stretch border-b border-border bg-popover text-[13px] [@media(pointer:coarse)]:min-h-11">
@@ -41,12 +38,6 @@ export function FormulaBar({ nameBox, cell, backTo, onBack, inspectorOpen, inspe
       <div data-formula-bar className="max-h-24 min-w-0 flex-1 overflow-y-auto whitespace-pre-wrap break-all px-2.5 py-2 leading-5 tabular-nums text-foreground">
         {text}
       </div>
-      {!inspectorOpen && (
-        <button type="button" onClick={onOpenInspector} aria-controls={inspectorId} aria-expanded={false} aria-label={COPY.openInspector} title={COPY.openInspector} className={cn(TOOL, 'border-l border-border')}>
-          <PanelRightOpen className="h-4 w-4" aria-hidden="true" />
-          <span className="hidden sm:inline">{COPY.inspector}</span>
-        </button>
-      )}
     </div>
   );
 }

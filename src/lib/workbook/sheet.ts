@@ -21,6 +21,27 @@ const DEFAULT_COL_WIDTH = 8.43;
 const DEFAULT_ROW_HEIGHT = 15;
 /** How many empty cells a label may run on into, as Excel lets it; bounds the grid's look-behind. */
 export const SPILL_MAX = 12;
+/**
+ * Empty columns the grid shows past the last one a label reaches, as Excel shows columns past the data, so
+ * the sheet does not end at the edge of its last label (site cleanup 2026-10, A10).
+ */
+export const TRAILING_COLS = 3;
+/**
+ * A label's width in the grid's 12 px type, estimated, for a label at the sheet's right edge: how many
+ * columns past the sheet it needs. Capitals are wider; bold a little wider again. Generous, so the estimate
+ * errs towards one more empty column rather than a cut label.
+ */
+const UPPER_PX = 8.5;
+const LOWER_PX = 7;
+const BOLD = 1.08;
+/** The cell's own padding, either side (SheetGrid). */
+const CELL_PAD_PX = 8;
+const INDENT_PX = 9;
+export const labelWidthPx = (text: string, bold = false): number => {
+  let w = 0;
+  for (const ch of text) w += ch >= 'A' && ch <= 'Z' ? UPPER_PX : LOWER_PX;
+  return Math.ceil(w * (bold ? BOLD : 1));
+};
 
 export const colWidthPx = (width: number): number => Math.round(width * PX_PER_CHAR * ZOOM);
 export const rowHeightPx = (points: number): number => Math.round(points * PX_PER_POINT * ZOOM);
@@ -34,10 +55,13 @@ export interface SheetModel {
   name: string;
   /**
    * The grid runs from A1 to the dimension's bottom-right, as Excel shows it, or further when a formula
-   * names a cell beyond it (the graph's used part), so a jump lands on that cell.
+   * names a cell beyond it (the graph's used part), so a jump lands on that cell; and to the right, past the
+   * last column a label at the sheet's edge runs on into, then TRAILING_COLS more.
    */
   lastCol: number;
   lastRow: number;
+  /** The last column of the sheet itself, before the columns its labels need: where End and Ctrl+End go. */
+  endCol: number;
   /** colLeft[c] is column c's left edge (1-based); colLeft[lastCol + 1] is the sheet's width. */
   colLeft: number[];
   /** rowTop[r] is row r's top edge; rowTop[lastRow + 1] is the sheet's height. */
@@ -69,7 +93,7 @@ const runsOn = (cell: WorkbookCell, style: WorkbookStyle | undefined): boolean =
 
 export function buildSheetModel(sheet: WorkbookSheet, styles: WorkbookStyle[], used?: Area): SheetModel {
   const end = decodeA1(sheet.dimension.split(':').pop() ?? '') ?? { col: 1, row: 1 };
-  const lastCol = Math.max(end.col, used?.right ?? 0);
+  const endCol = Math.max(end.col, used?.right ?? 0);
   const lastRow = Math.max(end.row, used?.bottom ?? 0);
 
   const widths = new Map<number, number>();
@@ -87,8 +111,7 @@ export function buildSheetModel(sheet: WorkbookSheet, styles: WorkbookStyle[], u
     if (r.hidden) hiddenRows.add(r.row);
   }
 
-  const colLeft = [0, 0];
-  for (let c = 1; c <= lastCol; c++) colLeft[c + 1] = colLeft[c] + colWidthPx(widths.get(c) ?? sheet.defaultColWidth ?? DEFAULT_COL_WIDTH);
+  const colPx = (c: number): number => colWidthPx(widths.get(c) ?? sheet.defaultColWidth ?? DEFAULT_COL_WIDTH);
   const rowTop = [0, 0];
   for (let r = 1; r <= lastRow; r++) rowTop[r + 1] = rowTop[r] + rowHeightPx(heights.get(r) ?? sheet.defaultRowHeight ?? DEFAULT_ROW_HEIGHT);
 
@@ -104,24 +127,38 @@ export function buildSheetModel(sheet: WorkbookSheet, styles: WorkbookStyle[], u
     for (let r = area.top; r <= area.bottom; r++) for (let c = area.left; c <= area.right; c++) mergeOf.set(encodeA1(c, r), area);
   }
 
+  // A label runs on into the empty cells to its right, as far as SPILL_MAX of them; within the sheet as far
+  // as they are empty, as before, and past the sheet's last column only as far as its text needs. A label in
+  // the last column (SOFP's English labels in P, 1.45 characters wide) used to stop there, cut.
   const spill = new Map<string, number>();
+  let reach = endCol;
   for (const cell of sheet.cells) {
-    if (mergeOf.has(cell.a) || !runsOn(cell, cell.s === undefined ? undefined : styles[cell.s])) continue;
+    const style = cell.s === undefined ? undefined : styles[cell.s];
+    if (mergeOf.has(cell.a) || !runsOn(cell, style)) continue;
     const at = decodeA1(cell.a)!;
+    const need = labelWidthPx(String(cell.v), style?.bold) + CELL_PAD_PX + (style?.align?.indent ?? 0) * INDENT_PX;
     let to = at.col;
-    while (to < lastCol && to - at.col < SPILL_MAX) {
+    let width = colPx(at.col);
+    while (to - at.col < SPILL_MAX) {
+      if (to >= endCol && width >= need) break;
       const next = encodeA1(to + 1, at.row);
       if (cells.get(next)?.v !== undefined || mergeOf.has(next)) break;
       to++;
+      width += colPx(to);
     }
     if (to > at.col) spill.set(cell.a, to);
+    if (to > reach) reach = to;
   }
+  const lastCol = reach + TRAILING_COLS;
+
+  const colLeft = [0, 0];
+  for (let c = 1; c <= lastCol; c++) colLeft[c + 1] = colLeft[c] + colPx(c);
 
   const freeze = {
     rows: Math.min(sheet.freeze?.rows ?? 0, lastRow),
     cols: Math.min(sheet.freeze?.cols ?? 0, lastCol),
   };
-  return { name: sheet.name, lastCol, lastRow, colLeft, rowTop, hiddenCols, hiddenRows, cells, merges, mergeOf, spill, freeze };
+  return { name: sheet.name, lastCol, lastRow, endCol, colLeft, rowTop, hiddenCols, hiddenRows, cells, merges, mergeOf, spill, freeze };
 }
 
 /**
@@ -159,7 +196,7 @@ export type MoveKey = 'ArrowUp' | 'ArrowDown' | 'ArrowLeft' | 'ArrowRight' | 'Ho
 /**
  * Where a key takes the selection. Arrows step one cell and step over a merge; Home and End go to the start
  * and end of the row; Ctrl+Home to the first cell past the frozen panes (A1 when nothing is frozen) and
- * Ctrl+End to the sheet's last cell; Page Up and Page Down move by `pageRows`.
+ * Ctrl+End to the sheet's last cell (endCol: not the empty columns shown past it); Page Up and Page Down move by `pageRows`.
  */
 export function moveFrom(model: SheetModel, at: Cell, key: MoveKey, pageRows = 20): Cell {
   const merge = model.mergeOf.get(encodeA1(at.col, at.row));
@@ -182,7 +219,7 @@ export function moveFrom(model: SheetModel, at: Cell, key: MoveKey, pageRows = 2
       to.col = 1;
       break;
     case 'End':
-      to.col = model.lastCol;
+      to.col = model.endCol;
       break;
     case 'PageUp':
       to.row = at.row - pageRows;
@@ -193,7 +230,7 @@ export function moveFrom(model: SheetModel, at: Cell, key: MoveKey, pageRows = 2
     case 'CtrlHome':
       return snap(model, { col: model.freeze.cols + 1, row: model.freeze.rows + 1 });
     case 'CtrlEnd':
-      return snap(model, { col: model.lastCol, row: model.lastRow });
+      return snap(model, { col: model.endCol, row: model.lastRow });
   }
   return snap(model, to);
 }
