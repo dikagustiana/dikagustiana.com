@@ -1,0 +1,1318 @@
+{
+ "essays": [
+  {
+   "slug": "accrued-expenses-received-not-invoiced",
+   "edits": [
+    {
+     "find": "The lecture notes for this chapter (Inter 2, Ch 13, following Kieso) define current liabilities by three traits:",
+     "replace": "Current liabilities have three traits:"
+    },
+    {
+     "find": "The notes illustrate this with a 12 percent note payable whose interest is accrued at each reporting date.",
+     "replace": "Interest on a 12 percent note payable, for instance, is accrued at each reporting date."
+    },
+    {
+     "find": "The notes show this with income tax, union dues and BPJS, Indonesia's social security contributions.",
+     "replace": "Typical examples are income tax, union dues and BPJS, Indonesia's social security contributions."
+    },
+    {
+     "deleteBlock": "Lecture notes this series follows, \"Inter 2 – Chapter 13"
+    },
+    {
+     "find": "chs. 3 and 13, the textbook the lecture notes summarise.",
+     "replace": "chs. 3 and 13."
+    }
+   ]
+  },
+  {
+   "slug": "advances-and-prepayments-deferral-and-classification",
+   "edits": [
+    {
+     "find": "Lecture notes this series follows, \"TA – Chapter 7 – Assets\" (Rumpun Akuntansi Keuangan): three characteristics of an asset drawn from the FASB (SFAC 6 para. 25), IASC and AASB definitions, control over ownership. NOTES. The notes name no author for these points and use the pre-2018 definition; this page adds the 2018 Conceptual Framework wording. The 1989 Framework's \"ownership is not essential\" wording VERIFIED (web, IFRS Foundation material quoting the Framework).",
+     "replace": "IASC Framework (1989), \"ownership is not essential\": VERIFIED (web, IFRS Foundation material quoting the Framework). FASB SFAC 6 para. 25 asset definition: NOT VERIFIED."
+    },
+    {
+     "deleteBlock": "Lecture notes, \"Inter 1 – Chapter 2 – Conceptual Framework\": accrual"
+    },
+    {
+     "deleteBlock": "Lecture notes, \"TA – Chapter 10 – Expenses\""
+    },
+    {
+     "deleteBlock": "Lecture notes, \"Inter 2 – Chapter 13 – Current Liabilities\": customer"
+    },
+    {
+     "find": "(Wiley), the text the TA notes are thought to follow; not cited",
+     "replace": "(Wiley); not cited"
+    }
+   ]
+  },
+  {
+   "slug": "business-combinations-acquisition-method-goodwill-common-control",
+   "edits": [
+    {
+     "find": "The lecture notes (AKL Chapter 1) list the motives, from cost savings to tax, and classify combinations as horizontal (same line of business), vertical and conglomerate (unrelated lines). Vertical integration joins different stages of one supply chain, a refinery buying its crude supplier, rather than firms in \"pasar yang berbeda\" (different markets), as the notes put it.",
+     "replace": "The motives for combining range from cost savings to tax, and combinations are classified as horizontal (same line of business), vertical and conglomerate (unrelated lines). Vertical integration joins different stages of one supply chain, a refinery buying its crude supplier."
+    },
+    {
+     "find": " The notes never define a business.",
+     "replace": ""
+    },
+    {
+     "find": "The notes' Pop Corporation example issues",
+     "replace": "For example (illustration), Pop Corporation issues"
+    },
+    {
+     "find": "The notes' example reaches the same result: the 80,000 consultant fee",
+     "replace": "In the Pop example the 80,000 consultant fee"
+    },
+    {
+     "find": "In the notes' Pam–Sun example",
+     "replace": "In the Pam–Sun example (illustration)"
+    },
+    {
+     "find": "Their allocation entry debits \"Building – net $850.000\", which is building 500,000 plus equipment 350,000. It balances, but",
+     "replace": "An allocation entry that debits a single \"Building – net\" of 850,000, building 500,000 plus equipment 350,000, balances, but"
+    },
+    {
+     "find": "The notes' two Pam–Sun cases, with",
+     "replace": "Two Pam–Sun cases (illustration), with"
+    },
+    {
+     "find": "The notes go straight to the gain; their Case 2 also assumes",
+     "replace": "Case 2 above assumes"
+    },
+    {
+     "find": "The notes for AKL Chapter 3 use an allocation schedule: price minus",
+     "replace": "An allocation schedule does this: price minus"
+    },
+    {
+     "deleteBlock": "The notes' schedules leave deferred tax out."
+    },
+    {
+     "find": "In the notes' Pam–Son case (90 percent for 10,200,000; identifiable net assets at fair value 7,000,000) the price is grossed up to an \"Implied fair value of sun ($10.200.000÷90%)\" of 11,333,333, so NCI is 1,133,333 and goodwill 4,333,333.",
+     "replace": "In the Pam–Son case (illustration: 90 percent for 10,200,000; identifiable net assets at fair value 7,000,000), grossing the price up to an implied fair value of Son (10,200,000 ÷ 90%) of 11,333,333 gives NCI of 1,133,333 and goodwill of 4,333,333."
+    },
+    {
+     "find": "The notes' allocation entry also omits Dr Goodwill 4,333,333; as printed it debits 1,400,000 and credits 5,733,333.",
+     "replace": "An allocation entry for the Pam–Son case must include Dr Goodwill 4,333,333; its other lines debit only 1,400,000 against credits of 5,733,333."
+    },
+    {
+     "find": "Push-down accounting, which ends the notes' Chapter 3, has no PSAK counterpart.",
+     "replace": "Push-down accounting has no PSAK counterpart."
+    },
+    {
+     "find": "In their example Pop pays",
+     "replace": "For example (illustration), Pop pays"
+    },
+    {
+     "deleteBlock": "Lecture notes this page follows, \"AKL – Chapter 1 – Business Combination\""
+    },
+    {
+     "find": "chs. 1 and 3, the textbook the notes summarise. Not on disk",
+     "replace": "chs. 1 and 3. Not on disk"
+    }
+   ]
+  },
+  {
+   "slug": "cash-and-cash-equivalents-definition-control-and-flows",
+   "edits": [
+    {
+     "find": "No lecture note in this series covers cash. The order follows Kieso",
+     "replace": "The order follows Kieso"
+    }
+   ]
+  },
+  {
+   "slug": "consolidated-cash-flows-and-mid-year-acquisitions",
+   "edits": [
+    {
+     "find": "The lecture notes' second approach, consolidating the full year",
+     "replace": "An older approach, consolidating the full year"
+    },
+    {
+     "find": "The lecture notes' second approach, consolidating the full year",
+     "replace": "An older approach, consolidating the full year",
+     "field": "presentation"
+    },
+    {
+     "find": "The order follows the lecture notes for AKL Chapter 4 (the cash flow part) and Chapter 8 (acquisitions during the period). ",
+     "replace": ""
+    },
+    {
+     "find": "The notes open the topic with the \"single concept\"",
+     "replace": "The topic opens with the \"single concept\""
+    },
+    {
+     "find": "gives the same answer as the notes' route, which derives the statement",
+     "replace": "gives the same answer as deriving the statement"
+    },
+    {
+     "find": "The notes' example is Pop Corporation and an 80 percent-owned subsidiary,",
+     "replace": "For example (illustration), take Pop Corporation and an 80 percent-owned subsidiary,"
+    },
+    {
+     "find": "The notes start from the controlling share and add the NCI share back, since it increases consolidated net assets \"persis seperti\" the controlling share.",
+     "replace": "The Beams layout starts from the controlling share and adds the NCI share back, since it increases consolidated net assets just as the controlling share does."
+    },
+    {
+     "find": "Notes (Beams)",
+     "replace": "Beams layout"
+    },
+    {
+     "find": "so the notes deduct the \"undistributed income\" of 5",
+     "replace": "so the reconciliation deducts the \"undistributed income\" of 5"
+    },
+    {
+     "find": "The notes leave a non-cash purchase undisclosed. Their balance sheets show",
+     "replace": "The example also holds a non-cash purchase. Pop's balance sheets show"
+    },
+    {
+     "find": "though the notes do not say so",
+     "replace": "though the statements do not say so"
+    },
+    {
+     "find": "The notes rebuild Pop's 2017 operating cash flow from the same statements.",
+     "replace": "Pop's 2017 operating cash flow can be rebuilt from the same statements."
+    },
+    {
+     "find": "Para. 34 permits financing or operating; the notes use financing",
+     "replace": "Para. 34 permits financing or operating; financing is used here"
+    },
+    {
+     "find": "The notes call it preacquisition earnings,",
+     "replace": "It is called preacquisition earnings,"
+    },
+    {
+     "find": "The notes' example has Pop buying 90 percent of Sun for 427,500 on 1 April 2016. (The notes write Son, Sun and Pam for the same companies, and the first column of their table reads \"Jan 1 – Mar 1\" where the quarter ends on 31 March.)",
+     "replace": "For example (illustration), Pop buys 90 percent of Sun for 427,500 on 1 April 2016."
+    },
+    {
+     "find": "The notes describe two ways to exclude preacquisition earnings:",
+     "replace": "There are two ways to exclude preacquisition earnings:"
+    },
+    {
+     "find": "They describe the second only in words; the column below is computed here from their data.",
+     "replace": "The column below computes the second."
+    },
+    {
+     "find": "The notes' own worksheet already follows approach 1, eliminating",
+     "replace": "The worksheet for this example follows approach 1, eliminating"
+    },
+    {
+     "find": "The notes measure NCI from 1 January, 10% × 470,000 plus 10% of the first quarter's profit, 49,500, and give NCI 10 percent of the full year's dividends, 5,000,",
+     "replace": "Measuring NCI from 1 January instead would give 10% × 470,000 plus 10% of the first quarter's profit, 49,500, and NCI 10 percent of the full year's dividends, 5,000,"
+    },
+    {
+     "find": "Notes' route: 49,500 + 7,500 − 5,000 = 52,000",
+     "replace": "From 1 January: 49,500 + 7,500 − 5,000 = 52,000"
+    },
+    {
+     "find": "The second entry corrects the notes, which print \"Dividend $18.000 / Investment in Son $49.500\". Pop received 90% × 30,000 = 27,000 after the acquisition, and the notes' own worksheet carries 27,000 and 40,500,",
+     "replace": "Pop received 90% × 30,000 = 27,000 after the acquisition, so the second entry carries 27,000 and 40,500,"
+    },
+    {
+     "find": "= 3,000, not the notes' 5,000",
+     "replace": "= 3,000, not the full year's 5,000"
+    },
+    {
+     "find": "The notes' Chapter 8 also lets a parent that sells 10 percent of a 90 percent subsidiary on 1 April record the sale as if it happened on 1 January.",
+     "replace": "Suppose (illustration) a parent sells 10 percent of a 90 percent subsidiary on 1 April; the sale cannot be recorded as if it happened on 1 January."
+    },
+    {
+     "deleteBlock": "Lecture notes this page follows: \"AKL – Chapter 4"
+    }
+   ]
+  },
+  {
+   "slug": "consolidation-worksheet-elimination-entries",
+   "edits": [
+    {
+     "find": "The lecture notes (AKL Chapter 4) assume the parent uses the equity method \"secara komplit\", the complete equity method.",
+     "replace": "This page assumes the parent uses the complete equity method."
+    },
+    {
+     "find": "The notes call their subsidiary \"Son\"; this page calls it Sub. ",
+     "replace": "The subsidiary is called Sub. "
+    },
+    {
+     "find": "The notes stack three parts",
+     "replace": "The worksheet stacks three parts"
+    },
+    {
+     "find": "The notes give six entries in a fixed order.",
+     "replace": "There are six entries, made in a fixed order."
+    },
+    {
+     "find": "The notes handle a cheque in transit the same way, with \"Cash $20.000 / Note receivable – Son $20.000\" ahead of the eliminations.",
+     "replace": "A cheque in transit is handled the same way, with an adjustment such as \"Cash 20,000 / Note receivable – Sub 20,000\" ahead of the eliminations."
+    },
+    {
+     "find": " The notes cover only the equity method; this section follows Beams and PSAK 227.",
+     "replace": " This section follows Beams and PSAK 227."
+    },
+    {
+     "find": "The notes state the same three-month limit but only require material intervening events to be disclosed; PSAK 110 requires adjustment.",
+     "replace": "PSAK 110 requires such events to be adjusted for, not merely disclosed."
+    },
+    {
+     "find": "; the notes advise checking each account one by one, but testing",
+     "replace": "; checking each account one by one works, but testing"
+    },
+    {
+     "find": "In the notes' own 2017 worksheet for Pam and Son, the equity elimination reads \"Retained earnings $50.000; Capital stock – son $250.000; Unamortized excess $150.000 / Investment in Son $360.000; Noncontrolling interest $40.000\". Debits are 450,000 and credits 400,000. Son's capital stock is 200,000; posted as written, the entry would leave the worksheet out by 50,000. The notes' worksheet itself uses 200,000.",
+     "replace": "For example (illustration), an equity elimination that reads \"Retained earnings 50,000; Capital stock – S 250,000; Unamortized excess 150,000 / Investment in S 360,000; Noncontrolling interest 40,000\" has debits of 450,000 and credits of 400,000. If S's capital stock is 200,000, the entry posted as written would leave the worksheet out by 50,000."
+    },
+    {
+     "find": "The notes' Chapter 3 balance-sheet elimination one year after acquisition reads \"Capital stock $60.000; Retained earnings $20.000; Goodwill $40.000 / Investment in son $108.000; Noncontrolling interest $12.000\". It balances at 120,000, but Son's year-end retained earnings are 40,000 and goodwill on the notes' own figures is 20,000. Goodwill is overstated by 20,000 and 20,000 of Son's retained earnings survive into the consolidated column.",
+     "replace": "For example (illustration), a balance-sheet elimination one year after acquisition that reads \"Capital stock 60,000; Retained earnings 20,000; Goodwill 40,000 / Investment in S 108,000; Noncontrolling interest 12,000\" balances at 120,000, but if S's year-end retained earnings are 40,000 and goodwill is 20,000, goodwill is overstated by 20,000 and 20,000 of S's retained earnings survive into the consolidated column."
+    },
+    {
+     "find": " (the second half of AKL Chapter 4)",
+     "replace": ""
+    },
+    {
+     "deleteBlock": "Lecture notes this page follows, \"AKL – Chapter 4"
+    },
+    {
+     "find": ", the textbook the notes summarise",
+     "replace": ""
+    }
+   ]
+  },
+  {
+   "slug": "corporate-dividend-taxes-receivable-current-tax-assets-and-refunds",
+   "edits": [
+    {
+     "find": "on accounting for income taxes, the textbook the lecture notes summarise; edition not checked.",
+     "replace": "on accounting for income taxes; edition not checked."
+    },
+    {
+     "deleteBlock": "Lecture notes this series follows, \"Inter 2 – Chapter 19"
+    },
+    {
+     "deleteBlock": "Lecture notes, \"Inter 2 – Chapter 13 – Current Liabilities\""
+    }
+   ]
+  },
+  {
+   "slug": "decommissioning-provision-psak-237-and-contingencies",
+   "edits": [
+    {
+     "find": "The lecture notes list six forms.",
+     "replace": "Kieso lists six forms."
+    },
+    {
+     "find": "In the notes' example a seller sells",
+     "replace": "For example (illustration), a seller sells"
+    },
+    {
+     "find": "so it is not a separate asset (the lecture notes, following Kieso).",
+     "replace": "so it is not a separate asset (following Kieso)."
+    },
+    {
+     "deleteBlock": "Lecture notes this series follows, \"Inter 2 – Chapter 13"
+    },
+    {
+     "find": ", the textbook the lecture notes follow.",
+     "replace": "."
+    }
+   ]
+  },
+  {
+   "slug": "deferred-revenue-contract-liabilities-take-or-pay",
+   "edits": [
+    {
+     "find": "The lecture note for Ch 13 records it the classic way: 10,000 received",
+     "replace": "Recorded the classic way, 10,000 received"
+    },
+    {
+     "find": "The same note keeps customer advances and deposits apart.",
+     "replace": "Customer advances and deposits are kept apart."
+    },
+    {
+     "find": "the five steps that open the lecture note for Inter 2 Ch 18.",
+     "replace": "the five steps of revenue recognition."
+    },
+    {
+     "find": "The lecture note for Ch 18 separates two kinds.",
+     "replace": "There are two kinds."
+    },
+    {
+     "find": "That is the lecture note's line between deposits and unearned revenue from section 1.",
+     "replace": "That is the line between deposits and unearned revenue drawn in section 1."
+    },
+    {
+     "deleteBlock": "Lecture notes this series follows, \"Inter 2 – Chapter 18"
+    },
+    {
+     "deleteBlock": "Lecture notes, \"Inter 2 – Chapter 13"
+    },
+    {
+     "find": "chs. 13 and 18, the textbook the lecture notes summarise.",
+     "replace": "chs. 13 and 18."
+    },
+    {
+     "find": "Ch 18's franchise section is the classic case.",
+     "replace": "Franchise fees are the classic case."
+    }
+   ]
+  },
+  {
+   "slug": "deferred-tax-assets-deductible-differences-and-recoverability",
+   "edits": [
+    {
+     "find": "The lecture notes this series follows illustrate it with an environmental clean-up.",
+     "replace": "An environmental clean-up illustrates it."
+    },
+    {
+     "find": ", the textbook the lecture notes summarise",
+     "replace": ""
+    },
+    {
+     "deleteBlock": "Lecture notes this series follows, \"Inter 2 – Chapter 19"
+    }
+   ]
+  },
+  {
+   "slug": "due-from-government-underlifting-dmo-fees",
+   "edits": [
+    {
+     "deleteBlock": "Lecture notes this series follows, \"Inter 2 – Chapter 18"
+    }
+   ]
+  },
+  {
+   "slug": "employee-benefits-liabilities-non-current-psak-219",
+   "edits": [
+    {
+     "find": "No lecture note in this series covers pensions; the owner's Intermediate 2 notes do not include Kieso's chapter on pensions and postretirement benefits, and the Ch 13 note (current liabilities) touches employee-related liabilities only. The page follows",
+     "replace": "The page follows"
+    },
+    {
+     "find": "NOTES — NONE EXISTS; TEXTBOOK — NOT OPENED.",
+     "replace": "TEXTBOOK — NOT OPENED."
+    }
+   ]
+  },
+  {
+   "slug": "finance-cost-and-finance-income-interest-presentation-coverage",
+   "edits": [
+    {
+     "find": "The lecture notes (in full dollars) make the point with a refinery bought for a zero-interest note: the buyer amortises the 805,103 gap between the note's face value and the refinery's fair value as interest expense, and \"bagi pihak penyerah kilang minyak, $805.103 akan diakui sebagai pendapatan bunga\" (Inter 2 Ch 14).",
+     "replace": "A refinery bought for a zero-interest note makes the point (in full dollars): the buyer amortises the 805,103 gap between the note's face value and the refinery's fair value as interest expense, and the party handing over the refinery recognises the same 805,103 as interest income."
+    },
+    {
+     "find": "The lecture notes' interest-bearing note shows both sides of this.",
+     "replace": "An interest-bearing note shows both sides of this."
+    },
+    {
+     "find": "The notes label 75,817 a \"premium\" and describe the factors as 8 percent and \"5%, ½ annualy\". The price is below face, so it is a discount, and 0.62092 and 3.79079 are the five-year annual factors at 10 percent. Their journal is right: interest expense",
+     "replace": "The price is below face, so the 75,817 is a discount, and 0.62092 and 3.79079 are the five-year annual factors at 10 percent. Interest expense"
+    },
+    {
+     "find": "The lecture notes' investor buys a ten-year Garuda bond",
+     "replace": "For example (illustration), an investor buys a ten-year Garuda bond"
+    },
+    {
+     "deleteBlock": "The notes multiply 10,000,000 × 0.41464 as 4,146,600"
+    },
+    {
+     "find": "The lecture notes' \"Alibaba\" write-down of 12,680, recognised once the loss has occurred, is the old incurred-loss model.",
+     "replace": "A write-down recognised only once the loss has occurred, such as an \"Alibaba\" write-down of 12,680 (illustration), is the old incurred-loss model."
+    },
+    {
+     "find": "The lecture notes put interest a trading company earns \"akibat dia nabung di bank\" in other income inside income from operations, with \"financing cost\" after it (Inter 1 Ch 4).",
+     "replace": "Kieso's multiple-step format puts interest a trading company earns on its bank savings in other income inside income from operations, with \"financing cost\" after it."
+    },
+    {
+     "find": "Kieso multiple-step (lecture notes)",
+     "replace": "Kieso multiple-step"
+    },
+    {
+     "deleteBlock": "Lecture notes this series follows, \"Inter 2 – Chapter 14"
+    },
+    {
+     "find": "chs. 4, 14 and 17, the textbook the lecture notes summarise.",
+     "replace": "chs. 4, 14 and 17."
+    }
+   ]
+  },
+  {
+   "slug": "fixed-assets-net-cost-depreciation-impairment",
+   "edits": [
+    {
+     "deleteBlock": "Lecture notes this series follows, \"Inter 1 – Chapter 10"
+    },
+    {
+     "find": "No lecture note in this series covers Kieso's chapter on depreciation, impairment and depletion (Intermediate Accounting IFRS edition, ch. 11). Sections 7–9 follow that chapter's order (depreciation methods, components, revisions, impairment and reversal, revaluation) and the standards. NOTES — NONE EXISTS.",
+     "replace": "Kieso's chapter on depreciation, impairment and depletion (Intermediate Accounting IFRS edition, ch. 11). Sections 7–9 follow that chapter's order (depreciation methods, components, revisions, impairment and reversal, revaluation) and the standards."
+    }
+   ]
+  },
+  {
+   "slug": "foreign-exchange-loss-net-functional-currency-monetary-items",
+   "edits": [
+    {
+     "find": "No owner's lecture note covers foreign currency. The order follows",
+     "replace": "The order follows"
+    }
+   ]
+  },
+  {
+   "slug": "impairment-non-financial-assets-psak-236",
+   "edits": [
+    {
+     "find": "No lecture note in this series covers impairment as a chapter. The owner's notes have no Kieso Ch 11 (depreciation, impairment and depletion); Inter 1 Ch 12 touches impairment of intangibles and goodwill only. The CA Review 2021 slides in the same folder (Ersa Tri Wahyuni) cover PSAK 48 with a goodwill-first allocation exercise, not used here as a source of examples. Sections 1–8 follow Kieso's impairment sections and the order of the standard. NOTES — NONE EXISTS.",
+     "replace": "Sections 1–8 follow Kieso's impairment sections and the order of the standard.",
+     "note": "Item kept for its Kieso statement; the course-notes and CA Review slides sentences removed."
+    }
+   ]
+  },
+  {
+   "slug": "intangible-assets-net-software-land-rights-goodwill",
+   "edits": [
+    {
+     "find": "The lecture notes, following Kieso, reduce this to four characteristics:",
+     "replace": "Kieso reduces this to four characteristics:"
+    },
+    {
+     "find": "The lecture notes, following Kieso, expense personnel and contract-service costs as incurred and record purchased R&D items at fair value. Under PSAK 238 both follow the phase,",
+     "replace": "Under PSAK 238 personnel and contract-service costs follow the phase,"
+    },
+    {
+     "find": "become inventory or fixed assets, as the notes say.",
+     "replace": "become inventory or fixed assets."
+    },
+    {
+     "find": "The notes let a self-developed trademark carry its attorney, registration, design, consulting and successful defence costs. PSAK 238.63 does not recognise an internally generated brand at all, so these costs are expensed.",
+     "replace": "PSAK 238.63 does not recognise an internally generated brand at all, so the attorney, registration, design, consulting and successful defence costs of a self-developed trademark are expensed."
+    },
+    {
+     "find": "The notes give geologists' work as an example of research,",
+     "replace": "Geologists' work is an example of research,"
+    },
+    {
+     "find": "The notes capitalise the cost of successfully defending a patent; under PSAK 238 a defence keeps existing benefits and is normally expensed.",
+     "replace": "Under PSAK 238 the cost of successfully defending a patent keeps existing benefits and is normally expensed."
+    },
+    {
+     "find": "The notes define the test against recoverable amount, but their patent example uses an appraised fair value.",
+     "replace": "The test is against recoverable amount, not an appraised fair value alone."
+    },
+    {
+     "find": "(illustration, in the structure of the lecture notes' example)",
+     "replace": "(illustration)"
+    },
+    {
+     "deleteBlock": "Lecture notes this series follows, \"Inter 1 – Chapter 12"
+    },
+    {
+     "find": "chapter on intangible assets, the textbook the notes summarise.",
+     "replace": "chapter on intangible assets."
+    }
+   ]
+  },
+  {
+   "slug": "intercompany-profit-in-inventory",
+   "edits": [
+    {
+     "find": "The lecture notes for AKL Chapter 5 justify the elimination by control over pricing, since the parent's management controls every intercompany transaction, \"termasuk otorisasi dan penentuan harga\" (including authorisation and pricing), and they treat the group as one reporting entity.",
+     "replace": "The usual justification is that the parent's management controls every intercompany transaction, including authorisation and pricing, and that the group is one reporting entity."
+    },
+    {
+     "find": ", so the notes debit the investment for a downstream sale.",
+     "replace": ", so for a downstream sale the investment is debited."
+    },
+    {
+     "find": "The notes give the proportional method as the GAAP approach and mention an alternative of charging upstream profit wholly to the parent, as for downstream.",
+     "replace": "Two methods are in use: the proportional method, and charging upstream profit wholly to the parent, as for downstream."
+    },
+    {
+     "find": "Proportional attribution is common, matches the notes and reflects",
+     "replace": "Proportional attribution is common and reflects"
+    },
+    {
+     "find": "which is why the notes call it a one-line consolidation",
+     "replace": "which is why it is called a one-line consolidation"
+    },
+    {
+     "find": "The notes put them first; the order changes no total.",
+     "replace": "They could equally come first; the order changes no total."
+    },
+    {
+     "find": "; the notes' upstream example does the same with 32,000 and 8,000 at 80 percent.",
+     "replace": "."
+    },
+    {
+     "find": "The lecture notes leave tax out; Beams treats consolidated income taxes in a later chapter that the notes do not cover.",
+     "replace": "Beams treats consolidated income taxes in a later chapter."
+    },
+    {
+     "find": "; the notes' alternative (all to the parent) is not ruled out",
+     "replace": "; the alternative (all to the parent) is not ruled out"
+    },
+    {
+     "deleteBlock": "Lecture notes this page follows, \"AKL – Chapter 5"
+    },
+    {
+     "find": ", the textbook the lecture notes summarise",
+     "replace": ""
+    }
+   ]
+  },
+  {
+   "slug": "intercompany-profit-plant-assets",
+   "edits": [
+    {
+     "find": "The lecture notes (AKL Chapter 6) start from the same point. A transfer",
+     "replace": "A transfer"
+    },
+    {
+     "find": "The notes call the equity method a \"one-line consolidation\" (AKL Chapter 2): it must",
+     "replace": "The equity method is a \"one-line consolidation\": it must"
+    },
+    {
+     "find": "The notes add \"paten yang memiliki masa manfaat yang tidak terbatas\" to this class, but a patent has a finite legal life.",
+     "replace": "A patent does not belong in this class, because it has a finite legal life."
+    },
+    {
+     "find": "The notes print the upstream entry \"Investment in Sun $18.000 / Noncontrolling interest share $2.000 / Land $20.000\" among the 2016 entries, introduced only by \"Apabila Pop memutuskan untuk menggunakan tanah tersebut\". It is the later-years entry: in the year of sale the gain is still in the income statement, and the notes' own 2016 worksheet debits \"Gain on sale\". The debit is also to the opening NCI balance, not to NCI share, which is the income-statement line.",
+     "replace": "In an upstream case with a 20,000 gain at 90 percent, the later-years entry is Dr Investment in S 18,000, Dr NCI 2,000 / Cr Land 20,000; in the year of sale the gain is still in the income statement, so that year's worksheet debits Gain on sale instead. The 2,000 goes to the opening NCI balance, not to NCI share, which is the income-statement line."
+    },
+    {
+     "find": "the piecemeal recognition of the notes and Beams.",
+     "replace": "the piecemeal recognition of Beams."
+    },
+    {
+     "find": "Entry (a) is the notes' net form.",
+     "replace": "Entry (a) is the net form."
+    },
+    {
+     "find": " The notes describe it in words but name no account for the 10,000 debit, which is Equipment.",
+     "replace": ""
+    },
+    {
+     "find": "The notes put this as \"unrealized profit yang harus dieleminasi juga sebesar kepemilikan parent\". That holds for the parent's equity-method income.",
+     "replace": "Elimination in proportion to the parent's ownership holds only for the parent's equity-method income."
+    },
+    {
+     "find": "The notes' upstream truck example gives 80% × 50,000 + 80% × 1,000 − 80% × 3,000 = 38,400 by the same formula. It lists the truck's remaining life as \"5 years\" but depreciates \"÷ 3 years\", and the investment reaches 80 percent of S's equity three years after the sale, so three years is the consistent figure.",
+     "replace": "In an upstream truck example (illustration), depreciated over a remaining life of three years, the same formula gives 80% × 50,000 + 80% × 1,000 − 80% × 3,000 = 38,400."
+    },
+    {
+     "find": "which is how the notes reconcile the investment in their combined example: 540,000",
+     "replace": "as the combined Pam–Sun example below shows: 540,000"
+    },
+    {
+     "find": "The notes' combined Pam–Sun example (three transfers at once) recomputes cleanly: income from Sun",
+     "replace": "The combined Pam–Sun example (illustration; three transfers at once) gives income from Sun"
+    },
+    {
+     "find": "= 52,600, NCI share 10% × 84,000 = 8,400. Its NCI entry is reversed. The notes write \"Noncontrolling interest $8.400 / Dividends $3.000 / Noncontrolling interest share $5.400\"; it should be Dr NCI share 8,400 / Cr Dividends 3,000; Cr NCI 5,400.",
+     "replace": "= 52,600 and NCI share 10% × 84,000 = 8,400. The NCI entry is Dr NCI share 8,400 / Cr Dividends 3,000; Cr NCI 5,400."
+    },
+    {
+     "find": "Deferred tax. The notes do not mention tax. The buyer's",
+     "replace": "Deferred tax. The buyer's"
+    },
+    {
+     "find": "The owner's notes have no AKL Chapter 7 (in Beams, Intercompany Profit Transactions — Bonds), so this section follows Beams and PSAK 109",
+     "replace": "This section follows Beams (ch. 7, Intercompany Profit Transactions — Bonds) and PSAK 109"
+    },
+    {
+     "deleteBlock": "Lecture notes this page follows, \"AKL – Chapter 6"
+    },
+    {
+     "find": "No owner's note exists for intercompany bonds (Beams Chapter 7 is missing from the set). Section 8 follows",
+     "replace": "Section 8 follows"
+    },
+    {
+     "find": "chs. 2, 4, 6, 7, the textbook the lecture notes summarise. Not on disk",
+     "replace": "chs. 2, 4, 6, 7. Not on disk"
+    }
+   ]
+  },
+  {
+   "slug": "inventories-net-upstream-materials-and-spares",
+   "edits": [
+    {
+     "deleteBlock": "Lecture notes this series follows, \"Inter 1 – Chapter 8"
+    },
+    {
+     "deleteBlock": "Lecture notes, \"Inter 1 – Chapter 9"
+    },
+    {
+     "find": ", the textbook the lecture notes summarise.",
+     "replace": "."
+    }
+   ]
+  },
+  {
+   "slug": "investment-properties-definition-models-transfers",
+   "edits": [
+    {
+     "find": "None of the lecture notes this series follows covers investment property. Sections follow",
+     "replace": "Sections follow"
+    },
+    {
+     "find": "Lecture notes, \"TA – Chapter 6 – Accounting Measurement Systems\" (Rumpun Akuntansi Keuangan; Godfrey, Hodgson, Tarca, Hamilton and Holmes, Accounting Theory): historical cost, Edwards and Bell's operating profit and holding gains, mixed measurement. NOTES.",
+     "replace": "Godfrey, J., Hodgson, A., Tarca, A., Hamilton, J. and Holmes, S., Accounting Theory (Wiley): historical cost, Edwards and Bell's operating profit and holding gains, mixed measurement. Not on disk; NOT VERIFIED."
+    }
+   ]
+  },
+  {
+   "slug": "long-term-bank-loans-non-current-amortised-cost-and-sukuk",
+   "edits": [
+    {
+     "find": "The lecture notes run the same calculation semi-annually for a Pertamina depot bond (face 2,500,000, 8 percent coupon, 10 percent market) and arrive at a discount of 311,154; with the correct annuity factor (12.46221, not 12.46621) it is 311,554.",
+     "replace": "Run semi-annually for a ten-year bond of face 2,500,000 with an 8 percent coupon and a 10 percent market rate (20 periods at 5 percent), the same calculation uses an annuity factor of 12.46221 and gives a discount of 311,554."
+    },
+    {
+     "find": "The lecture notes accrue three months of the depot bond (3/6 of the coupon and of the discount amortisation) but credit Cash; no cash moves at an accrual, so the credit is Interest payable.",
+     "replace": "Three months into a semi-annual period, 3/6 of the coupon and of the discount amortisation is accrued. No cash moves at an accrual, so the credit is Interest payable."
+    },
+    {
+     "find": "The lecture notes' restructuring example takes route B. Morgan National Bank cuts",
+     "replace": "For example (illustration), in a restructuring that takes route B, Morgan National Bank cuts"
+    },
+    {
+     "find": "The lecture notes' Edmond example blames the whole fall on credit risk yet credits income; under PSAK 109 all 20 would go to OCI.",
+     "replace": "Had the whole fall come from credit risk, all 20 would go to OCI under PSAK 109."
+    },
+    {
+     "find": "The notes say a parent need not consolidate a subsidiary owned below 50 percent. Under PSAK 110 (formerly PSAK 65, IFRS 10) control decides, whatever the shareholding.",
+     "replace": "Owning less than 50 percent does not by itself keep a subsidiary out: under PSAK 110 (formerly PSAK 65, IFRS 10) control decides, whatever the shareholding."
+    },
+    {
+     "deleteBlock": "Lecture notes this series follows, \"Inter 2 – Chapter 14"
+    },
+    {
+     "find": ", the textbook the lecture notes summarise",
+     "replace": ""
+    }
+   ]
+  },
+  {
+   "slug": "long-term-investments-classification-equity-method",
+   "edits": [
+    {
+     "find": "This reclassification adjustment (the notes' \"recycling\", their chapter's last topic) stops",
+     "replace": "This reclassification adjustment (\"recycling\") stops"
+    },
+    {
+     "deleteBlock": "Lecture notes this series follows, \"Inter 2 – Chapter 17"
+    },
+    {
+     "deleteBlock": "Lecture notes, \"AKL – Chapter 2 – Stock Investment\""
+    },
+    {
+     "find": "Textbooks the lecture notes summarise: Kieso",
+     "replace": "Textbooks: Kieso"
+    }
+   ]
+  },
+  {
+   "slug": "mutual-holdings-complex-group-structures",
+   "edits": [
+    {
+     "find": "Every other number is an illustration, or comes from the lecture notes' examples, labelled as such.",
+     "replace": "Every other number is an illustration, labelled as such."
+    },
+    {
+     "find": "The father–son–grandson chain of AKL Chapter 9, section A, is covered",
+     "replace": "The father–son–grandson chain is covered"
+    },
+    {
+     "find": "The notes' example (section B) has Pet owning 70 percent of Sal and 60 percent of Tai, and Sal owning 20 percent of Tai.",
+     "replace": "For example (illustration), Pet owns 70 percent of Sal and 60 percent of Tai, and Sal owns 20 percent of Tai."
+    },
+    {
+     "find": "In the notes, Pet's income from Sal is",
+     "replace": "In the Pet illustration, Pet's income from Sal is"
+    },
+    {
+     "find": "The first case in the notes (section C) is a subsidiary",
+     "replace": "The first case is a subsidiary"
+    },
+    {
+     "find": "In the notes' example Pam buys",
+     "replace": "For example (illustration), Pam buys"
+    },
+    {
+     "find": "The notes solve it with two equations.",
+     "replace": "Two equations solve it."
+    },
+    {
+     "find": "The notes reuse the same equations to put",
+     "replace": "The same equations put"
+    },
+    {
+     "find": "The notes' case (section D): Pam owns",
+     "replace": "For example (illustration), Pam owns"
+    },
+    {
+     "find": "The notes' goodwill is grossed up from the parent's price. The notes give goodwill of 25,000",
+     "replace": "In this illustration goodwill is grossed up from the parent's price, giving 25,000"
+    },
+    {
+     "deleteBlock": "Lecture notes this page follows, \"AKL – Chapter 9"
+    },
+    {
+     "find": " (corrections to AKL Chapters 3, 4, 5 and 8 already recorded there). NOTES (sibling essay).",
+     "replace": " (sibling essay)."
+    },
+    {
+     "find": ", the textbook the notes summarise.",
+     "replace": "."
+    }
+   ]
+  },
+  {
+   "slug": "non-controlling-interest-control-attribution-and-ownership-changes",
+   "edits": [
+    {
+     "find": "The lecture notes (AKL Chapter 3) explain why the group is reported as one entity. Separate legal companies",
+     "replace": "The group is reported as one entity because separate legal companies"
+    },
+    {
+     "find": "The notes date from the old PSAK 4 era and say control is usually obtained through \"hak mayoritas (lebih dari 50%)\", with exceptions for indirect holdings.",
+     "replace": "Under the old PSAK 4 regime, control was usually presumed from a majority of votes (more than 50 percent), with exceptions for indirect holdings."
+    },
+    {
+     "find": "The notes' PSAK 4 exclusions,",
+     "replace": "The old PSAK 4 exclusions,"
+    },
+    {
+     "find": "The notes first place NCI \"pada bagian sesi liabilities ... dibawah heading non current liabilities\" and then cite GAAP: NCI \"harus ditampilkan dalam balancesheet sebagai bagian yang terpisah dari komponen equity\", which can be misread as outside equity. The current rule puts it within equity,",
+     "replace": "It is not a non-current liability. Wording that shows NCI \"separately from the components of equity\" can be misread as placing it outside equity. The current rule puts it within equity,"
+    },
+    {
+     "find": "The lecture notes measure NCI by grossing up the price, as Beams does: \"Implied fair value of sun ($10.200.000÷90%)\", so NCI is 10 percent of that implied value.",
+     "replace": "Beams measures NCI by grossing up the price: a price of 10,200,000 for 90 percent implies a fair value of 10,200,000 ÷ 90%, and NCI is 10 percent of that implied value."
+    },
+    {
+     "find": "which the notes for AKL Chapter 5 allocate between parent and NCI",
+     "replace": "which are allocated between parent and NCI"
+    },
+    {
+     "find": "The worksheet entries follow the order in the notes for AKL Chapter 4, with",
+     "replace": "The worksheet entries run as follows, with"
+    },
+    {
+     "find": "The notes for AKL Chapter 8 state the same rule: if control is kept, the sale \"akan diperlukan sebagai equity transaction. Tidak ada gain or losses yang diakui.\" They record the difference in additional paid-in capital, a US practice.",
+     "replace": "US practice records the difference in additional paid-in capital."
+    },
+    {
+     "find": "The notes use a subsidiary with 10,000 shares and equity of 200,000, 80 percent held by the parent, issuing",
+     "replace": "For example (illustration), a subsidiary with 10,000 shares and equity of 200,000, 80 percent held by the parent, issues"
+    },
+    {
+     "find": "At 15 per share the notes find a decrease of 6,667.",
+     "replace": "At 15 per share the result is a decrease of 6,667."
+    },
+    {
+     "find": "The notes for AKL Chapter 8 give an example: 5 percent bought for 7,000",
+     "replace": "For example (illustration), a parent buys 5 percent for 7,000"
+    },
+    {
+     "find": "The notes write the calculation as \"($262.500 -$7.000 - $8.000)\", which does not give 11,250. The steps follow the notes in carrying the earlier 10 percent at cost and valuing it from the parent's price.",
+     "replace": "The steps carry the earlier 10 percent at cost and value it from the parent's price."
+    },
+    {
+     "find": "The notes give this formula under the heading \"Sale of an interest resulting in consolidation\"; the event is a deconsolidation.",
+     "replace": "The formula applies when control is lost, a deconsolidation."
+    },
+    {
+     "find": "The notes for AKL Chapter 9 recommend an allocation schedule worked from the bottom up:",
+     "replace": "An allocation schedule is worked from the bottom up:"
+    },
+    {
+     "find": "financing cash flows, as the notes for AKL Chapter 4 say.",
+     "replace": "financing cash flows."
+    },
+    {
+     "deleteBlock": "Lecture notes this page follows, \"AKL – Chapter 3"
+    },
+    {
+     "find": "chs. 3, 4, 5, 8, 9, the textbook the lecture notes summarise.",
+     "replace": "chs. 3, 4, 5, 8, 9."
+    }
+   ]
+  },
+  {
+   "slug": "oil-gas-properties-capitalised-cost-and-reserves",
+   "edits": [
+    {
+     "deleteBlock": "Lecture notes this series follows, \"Inter 1 – Chapter 10"
+    },
+    {
+     "deleteBlock": "Lecture notes, \"Inter 1 – Chapter 12"
+    },
+    {
+     "deleteBlock": "Lecture notes, \"Inter 2 – Chapter 13"
+    },
+    {
+     "find": "Lecture notes, \"Inter 1 – Chapter 2 – Conceptual Framework\" and \"TA – Chapter 7 – Assets\": matching, and control over ownership. NOTES. The TA note quotes the FASB, IASC and AASB asset definitions and names no author for the control point. The 1989 Framework's \"ownership is not essential\" wording VERIFIED (web, IFRS Foundation material quoting the Framework).",
+     "replace": "IASC Framework (1989), \"ownership is not essential\": VERIFIED (web, IFRS Foundation material quoting the Framework)."
+    },
+    {
+     "find": "; the textbook the notes above follow.",
+     "replace": "."
+    },
+    {
+     "find": "(Wiley), the text the TA notes are thought to follow; not cited",
+     "replace": "(Wiley); not cited"
+    }
+   ]
+  },
+  {
+   "slug": "other-comprehensive-income-recycling-translation-hedges",
+   "edits": [
+    {
+     "find": "The lecture notes on Kieso's chapter 4 open with the income statement's purpose, to evaluate past performance and predict future performance.",
+     "replace": "The income statement's purpose is to evaluate past performance and predict future performance."
+    },
+    {
+     "find": " (PSAK 201.10A), as the lecture notes on chapter 17 set out.",
+     "replace": " (PSAK 201.10A)."
+    },
+    {
+     "find": "The lecture notes on Kieso's chapter 17 introduce it with debt investments held to collect and sell, measured at fair value through OCI (FVOCI).",
+     "replace": "Debt investments held to collect and sell, measured at fair value through OCI (FVOCI), show how it works."
+    },
+    {
+     "find": "The lecture notes need three corrections here. Their recycling example for \"perusahaan Ali\" reads \"Fair value of portofilio : $34.000 / Less cost of portofolio : $34.000 / Unrealized gain : $4.000\"; the cost must be 30,000. Their Saratoga sale states a price of \"$95.000.000\" but debits cash of $98,500,000, and its entry (\"Cash $98.500.000 / Debt Investment $98.185.648,32 / Gain on sale of debt investment $314.351,68\") removes only the amortised cost, leaving both the fair value adjustment and the unrealised holding gain on the books. Under PSAK 109 the asset leaves at fair value and the gain is reclassified at the sale, as in the last journal above. And their FVOCI impairment example follows an incurred-loss model; under PSAK 109 the expected credit loss on FVOCI debt is charged to profit with the other side in OCI, so the asset stays at fair value (para. 5.5.2).",
+     "replace": "By contrast, a sale entry that reads \"Cash 98,500,000 / Debt investment 98,185,648.32 / Gain on sale of debt investment 314,351.68\" removes only the amortised cost, leaving both the fair value adjustment and the unrealised holding gain on the books. Under PSAK 109 the asset leaves at fair value and the gain is reclassified at the sale, as in the last journal above. Impairment of FVOCI debt follows the expected credit loss model, not an incurred-loss model: the expected credit loss is charged to profit with the other side in OCI, so the asset stays at fair value (para. 5.5.2)."
+    },
+    {
+     "find": "one of the components of equity in the lecture notes on Kieso's chapter 15. As those notes put it, the statement of changes in equity reconciles",
+     "replace": "one of the components of equity. The statement of changes in equity reconciles"
+    },
+    {
+     "find": "The lecture notes call these \"non-trading\" equity investments, held,",
+     "replace": "These are sometimes called \"non-trading\" equity investments, held,"
+    },
+    {
+     "deleteBlock": "Lecture notes, \"Inter 2 – Chapter 17 – Investment\""
+    },
+    {
+     "deleteBlock": "Lecture notes, \"Inter 1 – Chapter 4"
+    },
+    {
+     "find": "No owner's lecture note covers foreign currency translation; section 4 follows PSAK 221.",
+     "replace": "Section 4 follows PSAK 221."
+    }
+   ]
+  },
+  {
+   "slug": "other-taxes-receivable-current-vat-and-withholding",
+   "edits": [
+    {
+     "find": "The lecture notes, following Kieso's chapter on current liabilities, distinguish a tax on every sale from a tax on value added only.",
+     "replace": "Kieso's chapter on current liabilities distinguishes a sales tax from a tax on value added only.",
+     "note": "'tax on every sale' was the notes' wording that the ref corrected (fits a turnover tax); the next sentence gives the correct retail sales tax."
+    },
+    {
+     "find": "The retailer's entries, side by side, in the format of the lecture notes:",
+     "replace": "The retailer's entries, side by side:"
+    },
+    {
+     "find": "The lecture notes' version of this entry debits salaries and wages payable. The debit is the expense",
+     "replace": "The debit is the expense"
+    },
+    {
+     "deleteBlock": "Lecture notes this series follows, \"Inter 2 – Chapter 13 – Current Liabilities\""
+    },
+    {
+     "find": ", the textbook the lecture notes summarise.",
+     "replace": "."
+    }
+   ]
+  },
+  {
+   "slug": "production-expenses-structure-of-profit-or-loss",
+   "edits": [
+    {
+     "find": "The lecture notes on Kieso's chapter 4 give it three uses",
+     "replace": "It has three uses"
+    },
+    {
+     "find": "Expenses enter by three routes, as the theory notes on expenses set out: direct",
+     "replace": "Expenses enter by three routes: direct"
+    },
+    {
+     "find": "the notes stress quality of earnings, whether this year's profit is a guide to next year's; they treat smoothing as management's aim and warn that excessive earnings management lowers quality.",
+     "replace": "quality of earnings matters: whether this year's profit is a guide to next year's. Earnings smoothing is one aim of earnings management, and excessive earnings management lowers quality."
+    },
+    {
+     "find": "The notes give the formula as net income less preference dividends \"dibagi total outstanding share\"; the denominator is the weighted average",
+     "replace": "The formula is net income less preference dividends divided by the weighted average"
+    },
+    {
+     "find": "in three formats, which the lecture notes describe.",
+     "replace": "in three formats."
+    },
+    {
+     "find": "The multiple-step form in the lecture notes runs:",
+     "replace": "The classic multiple-step form runs:"
+    },
+    {
+     "find": "below gross profit, as in the notes, gross profit changes",
+     "replace": "below gross profit, as in the classic form, gross profit changes"
+    },
+    {
+     "find": "and the notes call it useful for evaluating",
+     "replace": "and it is useful for evaluating"
+    },
+    {
+     "find": "The lecture notes put other income and expense inside income from operations and say the IASB requires it (\"IASB menyaratkan\"). PSAK 201 contains no such requirement,",
+     "replace": "The classic multiple-step form puts other income and expense inside income from operations, but PSAK 201 does not require this,"
+    },
+    {
+     "find": "The notes' example of other income is \"interest revenue akibat dia nabung di bank\" for a trading company; under PSAK 118 that interest goes",
+     "replace": "A typical item of other income is interest revenue a trading company earns on its bank savings; under PSAK 118 that interest goes"
+    },
+    {
+     "find": "; the theory notes on expenses make the same point, that the framework \"tidak memisahkan biaya dengan rugi\".",
+     "replace": "; likewise, the framework does not separate expenses from losses."
+    },
+    {
+     "find": "The lecture notes place restructuring severance in other expense;",
+     "replace": "Restructuring severance is often placed in other expense;"
+    },
+    {
+     "find": ", the three cases the lecture notes list.",
+     "replace": "."
+    },
+    {
+     "find": "The notes call this \"interperiod tax allocation\"; the term for allocation within one period is intraperiod.",
+     "replace": "The term for allocation within one period is intraperiod."
+    },
+    {
+     "deleteBlock": "Lecture notes, \"Inter 1 – Chapter 4"
+    },
+    {
+     "deleteBlock": "Lecture notes, \"TA – Chapter 10"
+    },
+    {
+     "find": "ch. 4, the textbook the lecture notes summarise.",
+     "replace": "ch. 4."
+    }
+   ]
+  },
+  {
+   "slug": "restricted-cash-access-test-classification-and-funds",
+   "edits": [
+    {
+     "find": "No lecture note in this series covers cash or restricted cash. The order follows",
+     "replace": "The order follows"
+    }
+   ]
+  },
+  {
+   "slug": "retained-earnings-profit-allocation-and-dividends",
+   "edits": [
+    {
+     "find": "Earned capital is what the business generated and kept. The lecture notes call it \"earning capital\" and identify it with retained earnings.",
+     "replace": "Earned capital is what the business generated and kept: retained earnings."
+    },
+    {
+     "find": "The lecture notes give four reasons:",
+     "replace": "Four reasons are common:"
+    },
+    {
+     "find": "The notes put it as a test of financial condition:",
+     "replace": "The test is one of financial condition:"
+    },
+    {
+     "find": "For example, the lecture notes' company declares",
+     "replace": "For example (illustration), a company declares"
+    },
+    {
+     "find": "The notes debit an account called \"Dividend\";",
+     "replace": "The entries debit an account called \"Dividend\";"
+    },
+    {
+     "find": "The lecture notes follow Kieso. At declaration the asset is remeasured",
+     "replace": "In Kieso, at declaration the asset is remeasured"
+    },
+    {
+     "find": "The notes' example has securities with a book value of 1,250,000 and a fair value of 2,000,000, so a gain",
+     "replace": "For example (illustration), securities with a book value of 1,250,000 and a fair value of 2,000,000 give a gain"
+    },
+    {
+     "find": "Lecture notes (Kieso)",
+     "replace": "Kieso"
+    },
+    {
+     "find": "The lecture notes' example is a company that pays",
+     "replace": "For example (illustration), a company pays"
+    },
+    {
+     "find": "The lecture notes use the par method, as Kieso's IFRS edition does;",
+     "replace": "Kieso's IFRS edition uses the par method;"
+    },
+    {
+     "find": "The lecture notes add that many companies show",
+     "replace": "Many companies show"
+    },
+    {
+     "find": " (the lecture notes for Inter 2 Chapter 22 give the same three)",
+     "replace": ""
+    },
+    {
+     "find": "The lecture notes' version of this case is a Pertamina refinery whose 2019 depreciation of 250,000 was left out, with tax at 40 percent. They list \"Accumulated depreciation $250.000 decrease\", \"Deffered tax liability $100.000 Increase\" and \"Retained Earnings $150.000 Increase\" under the statement of financial position, and tax expense and net income as \"Increase\" under the income statement. Restating for the omitted depreciation does the opposite. Accumulated depreciation rises",
+     "replace": "For example (illustration), a refinery's 2019 depreciation of 250,000 was left out, with tax at 40 percent. Restating for the omitted depreciation, accumulated depreciation rises"
+    },
+    {
+     "find": " and net income and retained earnings fall by 150,000. Only \"Retained earnings ending balance $150.000 Decrease\" has the right sign.",
+     "replace": " and net income and retained earnings fall by 150,000."
+    },
+    {
+     "find": "In the notes' long-term contract example, moving",
+     "replace": "For example (illustration), moving"
+    },
+    {
+     "deleteBlock": "Lecture notes this series follows, \"Inter 2 – Chapter 15"
+    },
+    {
+     "deleteBlock": "Lecture notes, \"Inter 2 – Chapter 22"
+    },
+    {
+     "find": "chs. 15 and 22, the textbook the lecture notes summarise. Not on disk",
+     "replace": "chs. 15 and 22. Not on disk"
+    }
+   ]
+  },
+  {
+   "slug": "revenues-five-steps-psc-entitlement",
+   "edits": [
+    {
+     "find": "Examples taken from the lecture notes keep the notes' figures in full dollars, and",
+     "replace": "Some worked examples are in full dollars, and"
+    },
+    {
+     "find": "The older PSAK 23 definition in the lecture notes for Teori Akuntansi Ch 9, a gross inflow",
+     "replace": "The older PSAK 23 definition, a gross inflow"
+    },
+    {
+     "find": "The TA Ch 9 notes set out the older test, that revenue be realised or realisable and earned. The Inter 2 Ch 18 notes describe the asset-liability approach that replaced it,",
+     "replace": "The older test was that revenue be realised or realisable and earned. The asset-liability approach replaced it,"
+    },
+    {
+     "find": "The lecture notes use Airbus selling an aircraft to Garuda",
+     "replace": "For example (illustration), Airbus sells an aircraft to Garuda"
+    },
+    {
+     "find": "Their second case, a turbine",
+     "replace": "A second case, a turbine"
+    },
+    {
+     "find": "The lecture notes list four complications, and",
+     "replace": "Four complications arise, and"
+    },
+    {
+     "find": "The notes' example, a builder with a contract of 100,000 and a completion bonus of 50,000 that falls 10 percent for each week of delay, uses",
+     "replace": "For example (illustration), a builder with a contract of 100,000 and a completion bonus of 50,000 that falls 10 percent for each week of delay uses"
+    },
+    {
+     "find": "The notes' example has Pertamina selling a tanker",
+     "replace": "For example (illustration), Pertamina sells a tanker"
+    },
+    {
+     "find": "1,573,519, which the notes round to 1,573,520",
+     "replace": "1,573,519, rounded to 1,573,520"
+    },
+    {
+     "find": "such as the notes' shares received for consulting",
+     "replace": "such as shares received for consulting"
+    },
+    {
+     "find": "The notes' example sells a turbine, installation",
+     "replace": "For example (illustration), a seller sells a turbine, installation"
+    },
+    {
+     "find": "The notes place the turbine example under the residual heading, but it is the relative SSP method, since all three prices are observable.",
+     "replace": "The turbine example above uses the relative SSP method, not the residual approach, since all three prices are observable."
+    },
+    {
+     "find": " The notes' list of indicators ends with \"the company has received the asset\"; the standard means that the customer has accepted it.",
+     "replace": ""
+    },
+    {
+     "find": "The notes work Kieso's bridge contract of 4,500,000 with the cost-to-cost method.",
+     "replace": "Kieso's bridge contract of 4,500,000 shows the cost-to-cost method."
+    },
+    {
+     "find": "That is the notes' \"cost-recovery",
+     "replace": "That is the \"cost-recovery"
+    },
+    {
+     "find": "The notes' second loss case raises the 2020 estimate of cost to complete to 1,640,250,",
+     "replace": "Suppose instead that the 2020 estimate of cost to complete rises to 1,640,250,"
+    },
+    {
+     "find": "The notes stop at 161,000 and print 66½ percent in the label while computing with 64 percent. Kieso",
+     "replace": "Kieso"
+    },
+    {
+     "find": "Using the notes' camera example",
+     "replace": "Using a camera illustration"
+    },
+    {
+     "deleteBlock": "The notes reach the same net sales and cost by booking returns afterwards",
+     "note": "Described the notes' after-the-fact method, which the references corrected (returns are estimated at the sale)."
+    },
+    {
+     "find": "The notes' Morgan sells",
+     "replace": "For example (illustration), Morgan sells"
+    },
+    {
+     "find": "The notes recognise revenue once the goods cannot be sold elsewhere; PSAK 115 requires four conditions:",
+     "replace": "PSAK 115 requires four conditions before revenue is recognised:"
+    },
+    {
+     "find": "The notes' consignment example is the classic agent: Best Valve sells",
+     "replace": "A consignee is the classic agent: for example (illustration), Best Valve sells"
+    },
+    {
+     "deleteBlock": "Lecture notes this series follows, \"Inter 2 – Chapter 18"
+    },
+    {
+     "deleteBlock": "Lecture notes, \"TA – Chapter 9"
+    },
+    {
+     "find": ", the textbook the lecture notes summarise (bridge contract",
+     "replace": " (bridge contract"
+    }
+   ]
+  },
+  {
+   "slug": "right-of-use-assets-net-lessee-accounting",
+   "edits": [
+    {
+     "find": "No lecture note in this series covers leases (the Intermediate Accounting 2 notes stop short of Kieso's leases chapter). The page follows",
+     "replace": "The page follows"
+    },
+    {
+     "find": "NOTES — NONE EXISTS; TEXTBOOK",
+     "replace": "TEXTBOOK"
+    }
+   ]
+  },
+  {
+   "slug": "share-capital-contributed-capital-and-common-control",
+   "edits": [
+    {
+     "find": "The lecture notes split it by source:",
+     "replace": "By source, it splits into"
+    },
+    {
+     "find": "; this page also counts accumulated OCI there, which the notes do not.",
+     "replace": "; this page also counts accumulated OCI there."
+    },
+    {
+     "find": "; the notes add the pre-emptive right to new shares.",
+     "replace": "; textbooks also list a pre-emptive right to new shares."
+    },
+    {
+     "find": "The lecture notes also record an issue below par: \"Assets/service $40,000 / PIC – COMMON STOCK $10,000 / Common stock $50,000\". There is no Indonesian counterpart.",
+     "replace": "An issue below par, recorded for example (illustration) as \"Assets/service $40,000 / PIC – COMMON STOCK $10,000 / Common stock $50,000\", has no Indonesian counterpart."
+    },
+    {
+     "find": " (paras. 35A, 37), and the notes deduct them from paid-in capital.",
+     "replace": " (paras. 35A, 37)."
+    },
+    {
+     "find": "The lecture notes and Kieso record the asset",
+     "replace": "Kieso records the asset"
+    },
+    {
+     "find": "The notes' patent example needs one correction. In its third case, with an independent valuation of USD 125,000 for 10,000 shares of USD 10 par, the notes credit \"Share capital – ordinary $25.000\" and \"Share premium – ordinary $100.000\". Share capital",
+     "replace": "For example (illustration), a patent with an independent valuation of USD 125,000 is acquired for 10,000 shares of USD 10 par. Share capital"
+    },
+    {
+     "find": "The notes' \"no votes\" is a common feature, not a legal rule.",
+     "replace": "Having no votes is a common feature, not a legal rule."
+    },
+    {
+     "find": "The lecture notes record preference shares exactly like ordinary shares and only remark that redeemable ones resemble bonds. PSAK 232 decides",
+     "replace": "Redeemable preference shares resemble bonds, and PSAK 232 decides"
+    },
+    {
+     "find": "The notes say arrears \"akan dianggap sebagai utang dividend\" (will be treated as dividends payable). No liability",
+     "replace": "Arrears are not dividends payable. No liability"
+    },
+    {
+     "find": "The cost method, which both sets of lecture notes and most companies use,",
+     "replace": "The cost method, which most companies use,"
+    },
+    {
+     "find": " (Inter 1 Ch 13)",
+     "replace": ""
+    },
+    {
+     "deleteBlock": "Lecture notes this series follows, \"Inter 1 – Chapter 13"
+    },
+    {
+     "deleteBlock": "Lecture notes, \"Inter 2 – Chapter 15"
+    },
+    {
+     "find": ", the textbook the Inter 2 notes summarise",
+     "replace": ""
+    }
+   ]
+  },
+  {
+   "slug": "trade-payables-accounts-payable-and-supplier-finance",
+   "edits": [
+    {
+     "find": "The lecture notes define a current liability as one settled within a year",
+     "replace": "A common working definition of a current liability is one settled within a year"
+    },
+    {
+     "find": "The lecture notes tie recognition to the transfer of control.",
+     "replace": "Recognition follows the transfer of control."
+    },
+    {
+     "find": "The lecture notes record it in two ways.",
+     "replace": "It can be recorded in two ways."
+    },
+    {
+     "find": "the lecture notes' purchase of 10,000",
+     "replace": "a purchase of 10,000"
+    },
+    {
+     "find": "The lecture notes give two kinds.",
+     "replace": "There are two kinds."
+    },
+    {
+     "deleteBlock": "Lecture notes this series follows, \"Inter 2 – Chapter 13"
+    },
+    {
+     "find": ", the chapter the lecture notes summarise. Not on disk",
+     "replace": ". Not on disk"
+    }
+   ]
+  },
+  {
+   "slug": "trade-receivables-net-recognition-ecl-derecognition",
+   "edits": [
+    {
+     "find": "The lecture notes this series follows adapt Kieso's long case to a crude cargo sold on",
+     "replace": "For example (illustration), adapting Kieso's long case, a crude cargo is sold on"
+    },
+    {
+     "deleteBlock": "Lecture notes this series follows, \"Inter 2 – Chapter 18"
+    },
+    {
+     "deleteBlock": "Lecture notes, \"Inter 2 – Chapter 17"
+    },
+    {
+     "deleteBlock": "The lecture notes have no chapter on cash and receivables",
+     "note": "Its point (sections 1, 3, 6, 7 follow Kieso's order) is already stated in the Kieso item."
+    }
+   ]
+  }
+ ]
+}
