@@ -1,29 +1,35 @@
 /**
- * A PDF, one page at a time, drawn by pdf.js onto a canvas as wide as the column (sharp on a high-density
- * screen). The file is streamed from its signed URL with range requests, so the first page shows before
- * the whole book arrives. Arrow keys and Page Up/Down turn pages, as do the buttons.
+ * A PDF, one whole page at a time, as a Kindle shows it: pdf.js draws the page onto a canvas scaled to fit the
+ * stage's width and height (sharp on a high-density screen), on the reader's dark ground. The file is streamed
+ * from its signed URL with range requests, so the first page shows before the whole book arrives.
+ *
+ * Turning pages: the arrow keys and Page Up/Down; a press on the left or right half of the page; a swipe on a
+ * touchscreen. The page reached is kept per browser, and the book opens there next time.
  */
 import { useEffect, useRef, useState } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { GlobalWorkerOptions, getDocument, type PDFDocumentProxy, type RenderTask } from 'pdfjs-dist/legacy/build/pdf.mjs';
 import workerUrl from 'pdfjs-dist/legacy/build/pdf.worker.min.mjs?url';
-import { Button } from '@/components/ui/button';
-import { clampPage, isTypingTarget, turnFor } from '@/lib/bookReader';
+import { clampPage, fitScale, isTypingTarget, readPosition, storedPage, turnFor, writePosition } from '@/lib/bookReader';
+import { TurnZones } from './TurnZones';
+import { useSwipe } from './useSwipe';
 
 GlobalWorkerOptions.workerSrc = workerUrl;
 
 interface Props {
   url: string;
   title: string;
+  slug: string;
   onError: (message: string) => void;
+  /** "Page 3 of 58", for the reader's bar. */
+  onStatus: (label: string) => void;
 }
 
-export default function PdfReader({ url, title, onError }: Props) {
+export default function PdfReader({ url, title, slug, onError, onStatus }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const boxRef = useRef<HTMLDivElement>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
   const [doc, setDoc] = useState<PDFDocumentProxy | null>(null);
   const [page, setPage] = useState(1);
-  const [width, setWidth] = useState(0);
+  const [box, setBox] = useState({ w: 0, h: 0 });
   const [drawing, setDrawing] = useState(true);
   const total = doc?.numPages ?? 0;
 
@@ -31,27 +37,37 @@ export default function PdfReader({ url, title, onError }: Props) {
     const task = getDocument({ url, disableAutoFetch: true, rangeChunkSize: 1 << 20 });
     let live = true;
     task.promise.then(
-      (d) => live && setDoc(d),
+      (d) => {
+        if (!live) return;
+        setPage(storedPage(readPosition(slug), d.numPages));
+        setDoc(d);
+      },
       () => live && onError('The PDF could not be opened.'),
     );
     return () => {
       live = false;
       void task.destroy();
     };
-  }, [url, onError]);
+  }, [url, slug, onError]);
 
   useEffect(() => {
-    const box = boxRef.current;
-    if (!box) return;
-    const measure = () => setWidth(box.clientWidth);
+    const stage = stageRef.current;
+    if (!stage) return;
+    const measure = () => setBox({ w: stage.clientWidth, h: stage.clientHeight });
     measure();
     const ro = new ResizeObserver(measure);
-    ro.observe(box);
+    ro.observe(stage);
     return () => ro.disconnect();
   }, []);
 
   useEffect(() => {
-    if (!doc || !width || !canvasRef.current) return;
+    if (!total) return;
+    onStatus(`Page ${page} of ${total}`);
+    writePosition(slug, String(page));
+  }, [page, total, slug, onStatus]);
+
+  useEffect(() => {
+    if (!doc || !box.w || !box.h || !canvasRef.current) return;
     let task: RenderTask | null = null;
     let live = true;
     setDrawing(true);
@@ -63,8 +79,9 @@ export default function PdfReader({ url, title, onError }: Props) {
     doc.getPage(page).then((p) => {
       if (!live || !canvasRef.current) return;
       const base = p.getViewport({ scale: 1 });
+      const fit = fitScale(base.width, base.height, box.w, box.h);
       const ratio = window.devicePixelRatio || 1;
-      const view = p.getViewport({ scale: (width / base.width) * ratio });
+      const view = p.getViewport({ scale: fit * ratio });
       const canvas = canvasRef.current;
       canvas.width = Math.floor(view.width);
       canvas.height = Math.floor(view.height);
@@ -77,7 +94,9 @@ export default function PdfReader({ url, title, onError }: Props) {
       live = false;
       task?.cancel();
     };
-  }, [doc, page, width, onError]);
+  }, [doc, page, box, onError]);
+
+  const turn = (step: -1 | 1) => setPage((p) => clampPage(p + step, total));
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -90,29 +109,19 @@ export default function PdfReader({ url, title, onError }: Props) {
     return () => window.removeEventListener('keydown', onKey);
   }, [total]);
 
-  return (
-    <div>
-      <div ref={boxRef} className="relative w-full overflow-hidden rounded border border-border bg-white">
-        <canvas ref={canvasRef} role="img" aria-label={`${title}, page ${page}${total ? ` of ${total}` : ''}`} data-page={page} />
-        {(drawing || !doc) && <p className="absolute inset-x-0 top-4 text-center text-sm text-muted-foreground">Loading page…</p>}
-      </div>
-      <Pager page={page} total={total} onTurn={(step) => setPage((p) => clampPage(p + step, total))} />
-    </div>
-  );
-}
+  const swipe = useSwipe(turn, total > 0);
 
-export function Pager({ page, total, onTurn, label }: { page: number; total: number; onTurn: (step: -1 | 1) => void; label?: string }) {
   return (
-    <nav aria-label="Pages" className="mt-4 flex items-center justify-between gap-4">
-      <Button type="button" variant="outline" onClick={() => onTurn(-1)} disabled={total > 0 && page <= 1} aria-label="Previous page">
-        <ChevronLeft className="h-4 w-4" aria-hidden="true" />
-      </Button>
-      <p className="text-sm text-muted-foreground" aria-live="polite">
-        {label ?? (total ? `Page ${page} of ${total}` : 'Loading…')}
-      </p>
-      <Button type="button" variant="outline" onClick={() => onTurn(1)} disabled={total > 0 && page >= total} aria-label="Next page">
-        <ChevronRight className="h-4 w-4" aria-hidden="true" />
-      </Button>
-    </nav>
+    <div ref={stageRef} className="relative flex h-full w-full touch-pan-y items-center justify-center overflow-hidden" {...swipe}>
+      <canvas
+        ref={canvasRef}
+        role="img"
+        aria-label={`${title}, page ${page}${total ? ` of ${total}` : ''}`}
+        data-page={page}
+        className="bg-white shadow-2xl"
+      />
+      {(drawing || !doc) && <p className="absolute inset-x-0 top-1/2 text-center text-sm text-neutral-400">Loading page…</p>}
+      {total > 0 && <TurnZones onTurn={turn} atStart={page <= 1} atEnd={page >= total} />}
+    </div>
   );
 }

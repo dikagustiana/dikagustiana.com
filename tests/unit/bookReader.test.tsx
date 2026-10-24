@@ -6,22 +6,43 @@
  */
 import type { ReactNode } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
 
 const { invoke, signedMock } = vi.hoisted(() => ({ invoke: vi.fn(), signedMock: vi.fn() }));
 vi.mock('@/integrations/supabase/client', () => ({ supabase: { functions: { invoke } } }));
 vi.mock('@/components/layouts/PageLayout', () => ({ PageLayout: ({ children }: { children: ReactNode }) => <div>{children}</div> }));
 vi.mock('@/components/SEO', () => ({ SEO: ({ title }: { title: string }) => <meta data-seo-title={title} /> }));
-vi.mock('@/components/books/reader/PdfReader', () => ({ default: ({ url, title }: { url: string; title: string }) => <div data-testid="pdf" data-url={url}>{title}</div> }));
+vi.mock('@/components/books/reader/PdfReader', () => ({
+  default: ({ url, title, slug, onStatus }: { url: string; title: string; slug: string; onStatus: (s: string) => void }) => (
+    <div data-testid="pdf" data-url={url} data-slug={slug}>
+      {title}
+      <button type="button" onClick={() => onStatus('Page 3 of 58')}>report</button>
+    </div>
+  ),
+}));
 vi.mock('@/components/books/reader/EpubReader', () => ({ default: ({ url }: { url: string }) => <div data-testid="epub" data-url={url} /> }));
 
 import { READ_FALLBACK_MESSAGE, removeBookFile, signedBookUrl, uploadBookFile } from '@/lib/bookFile';
-import { clampPage, isTypingTarget, readerKind, titleFromFilename, turnFor } from '@/lib/bookReader';
+import {
+  clampPage,
+  fitScale,
+  isTypingTarget,
+  positionKey,
+  readPosition,
+  readerKind,
+  storedPage,
+  swipeStep,
+  titleFromFilename,
+  turnFor,
+  writePosition,
+} from '@/lib/bookReader';
 import { BookDialog } from '@/components/books/BookDialog';
 import BookReader from '@/pages/BookReader';
+import { TurnZones } from '@/components/books/reader/TurnZones';
+import { useSwipe } from '@/components/books/reader/useSwipe';
 import type { Book } from '@/hooks/queries/useBooks';
 
 const SIGNED = { ok: true, url: 'https://acct.r2.cloudflarestorage.com/dg-books-public/files/open/1-o.pdf?X-Amz-Signature=x', contentType: 'application/pdf', filename: 'Open Finance.pdf' };
@@ -88,6 +109,86 @@ describe('the reader rules', () => {
   });
 });
 
+describe('the e-reader rules', () => {
+  it('fits a whole page inside the stage, by whichever side is tighter', () => {
+    expect(fitScale(600, 800, 1200, 800)).toBe(1); // height-bound: a tall page on a wide screen
+    expect(fitScale(600, 800, 300, 2000)).toBe(0.5); // width-bound: a phone held upright
+    expect(fitScale(0, 800, 300, 400)).toBe(1);
+  });
+
+  it('turns on a sideways swipe of 50 px or more, left forward, and not on a scroll or a tap', () => {
+    expect(swipeStep(-80, 10)).toBe(1);
+    expect(swipeStep(80, -10)).toBe(-1);
+    expect(swipeStep(-30, 0)).toBe(0);
+    expect(swipeStep(-80, 70)).toBe(0);
+    expect(swipeStep(NaN, 0)).toBe(0);
+  });
+
+  it('keeps the place per book and browser, held to the book, and works without storage', () => {
+    window.localStorage.clear();
+    writePosition('open', '12');
+    expect(window.localStorage.getItem(positionKey('open'))).toBe('12');
+    expect(storedPage(readPosition('open'), 58)).toBe(12);
+    expect(storedPage(readPosition('open'), 10)).toBe(10);
+    expect(storedPage(null, 58)).toBe(1);
+    expect(storedPage('epubcfi(/6/4)', 58)).toBe(1);
+    vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+      throw new Error('blocked');
+    });
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new Error('blocked');
+    });
+    expect(readPosition('open')).toBeNull();
+    expect(() => writePosition('open', '3')).not.toThrow();
+  });
+});
+
+describe('a swipe over a turn zone', () => {
+  // jsdom has no PointerEvent; a MouseEvent carries the coordinates and pointerType a touch would.
+  beforeEach(() => {
+    if (typeof window.PointerEvent === 'undefined') {
+      class TestPointerEvent extends MouseEvent {
+        pointerType: string;
+        constructor(type: string, init: PointerEventInit = {}) {
+          super(type, init);
+          this.pointerType = init.pointerType ?? 'mouse';
+        }
+      }
+      vi.stubGlobal('PointerEvent', TestPointerEvent);
+    }
+  });
+  afterEach(() => vi.unstubAllGlobals());
+
+  const Stage = ({ onTurn }: { onTurn: (step: -1 | 1) => void }) => {
+    const swipe = useSwipe(onTurn);
+    return (
+      <div data-testid="stage" {...swipe}>
+        <TurnZones onTurn={onTurn} />
+      </div>
+    );
+  };
+
+  it('turns once: the click the swipe leaves behind is swallowed, and a tap or a key press still turns', async () => {
+    const onTurn = vi.fn();
+    render(<Stage onTurn={onTurn} />);
+    const next = screen.getByRole('button', { name: 'Next page' });
+    // A leftward swipe that starts and ends on the right half: forward once, not twice.
+    fireEvent.pointerDown(next, { pointerType: 'touch', clientX: 300, clientY: 100 });
+    fireEvent.pointerUp(next, { pointerType: 'touch', clientX: 200, clientY: 105 });
+    fireEvent.click(next);
+    expect(onTurn.mock.calls).toEqual([[1]]);
+    // A tap is a click.
+    fireEvent.pointerDown(next, { pointerType: 'touch', clientX: 300, clientY: 100 });
+    fireEvent.pointerUp(next, { pointerType: 'touch', clientX: 302, clientY: 100 });
+    fireEvent.click(next);
+    expect(onTurn.mock.calls).toEqual([[1], [1]]);
+    // The keyboard is untouched.
+    next.focus();
+    await userEvent.keyboard('{Enter}');
+    expect(onTurn.mock.calls).toEqual([[1], [1], [1]]);
+  });
+});
+
 const free: Book = {
   id: 'b1', slug: 'open', title: 'Open Finance', author: null, year: null, shelf_id: 's', access: 'free', purchase_url: null,
   license_note: 'CC BY 4.0', filepath: 'files/open/1-o.pdf', file_store: 'r2', filename: 'o.pdf', mime_type: 'application/pdf',
@@ -120,28 +221,71 @@ describe('the dialog', () => {
 });
 
 describe('the reader page', () => {
+  const Where = () => {
+    const l = useLocation();
+    return <p data-testid="where">{l.pathname + l.search}</p>;
+  };
   const renderReader = (slug = 'open') =>
     render(
       <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
         <MemoryRouter initialEntries={[`/books-academia/${slug}/read`]}>
           <Routes>
             <Route path="/books-academia/:slug/read" element={<BookReader />} />
+            <Route path="/books-academia" element={<Where />} />
           </Routes>
         </MemoryRouter>
       </QueryClientProvider>,
     );
 
-  it('opens a PDF in pdf.js from an inline signed URL, titled after the book, with Download and a way back', async () => {
+  it('opens a PDF in pdf.js, filling the window over the page, titled after the book, with where the reader is, Download and close', async () => {
     invoke.mockResolvedValueOnce({ data: SIGNED, error: null });
-    renderReader();
+    const { container } = renderReader();
     const pdf = await screen.findByTestId('pdf');
     expect(pdf).toHaveAttribute('data-url', SIGNED.url);
+    expect(pdf).toHaveAttribute('data-slug', 'open');
     expect(invoke).toHaveBeenCalledWith('book-file', { body: { action: 'read', slug: 'open', as: 'inline' } });
+    expect(container.querySelector('[data-reader]')).toHaveClass('fixed', 'inset-0');
+    expect(document.body.style.overflow).toBe('hidden');
     expect(screen.getByRole('heading', { level: 1, name: 'Open Finance' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /About this book/ })).toHaveAttribute('href', '/books-academia?book=open');
+    expect(screen.getByRole('link', { name: 'Close the reader' })).toHaveAttribute('href', '/books-academia?book=open');
+    await userEvent.click(screen.getByRole('button', { name: 'report' }));
+    // One live status, read out at every width (visually hidden on a phone, never removed or aria-hidden).
+    const live = container.querySelectorAll('[aria-live]');
+    expect(live).toHaveLength(1);
+    expect(live[0]).toHaveTextContent('Page 3 of 58');
+    expect(live[0]).not.toHaveClass('hidden');
+    expect(live[0].closest('[aria-hidden="true"]')).toBeNull();
     invoke.mockResolvedValueOnce({ data: { ...SIGNED, url: 'https://r2.example/dl' }, error: null });
     await userEvent.click(screen.getByRole('button', { name: 'Download' }));
     expect(assign).toHaveBeenCalledWith('https://r2.example/dl');
+  });
+
+  it('closes on Esc to the book, and lets the page scroll again', async () => {
+    invoke.mockResolvedValueOnce({ data: SIGNED, error: null });
+    renderReader();
+    await screen.findByTestId('pdf');
+    await userEvent.keyboard('{Escape}');
+    expect(await screen.findByTestId('where')).toHaveTextContent('/books-academia?book=open');
+    expect(document.body.style.overflow).toBe('');
+  });
+
+  it('asks the browser for full screen with F or the button, where the browser can, and offers none where it cannot', async () => {
+    const request = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(document, 'fullscreenEnabled', { configurable: true, value: true });
+    HTMLElement.prototype.requestFullscreen = request;
+    invoke.mockResolvedValueOnce({ data: SIGNED, error: null });
+    const first = renderReader();
+    await screen.findByTestId('pdf');
+    await userEvent.keyboard('f');
+    await userEvent.click(screen.getByRole('button', { name: 'Full screen' }));
+    expect(request).toHaveBeenCalledTimes(2);
+    first.unmount();
+
+    Object.defineProperty(document, 'fullscreenEnabled', { configurable: true, value: false });
+    invoke.mockResolvedValueOnce({ data: SIGNED, error: null });
+    renderReader();
+    await screen.findByTestId('pdf');
+    expect(screen.queryByRole('button', { name: 'Full screen' })).toBeNull();
   });
 
   it('opens an EPUB in epub.js', async () => {
