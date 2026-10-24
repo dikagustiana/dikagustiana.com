@@ -87,7 +87,7 @@ describe('unit economics worked from the rows', () => {
     expect(ue.bars[1]).toMatchObject({ from: ue.bars[0].to });
     expect(gp.from).toBe(0);
     expect(extent(ue.bars).lo).toBe(0);
-    expect(barValue(ue.bars[1])).toBe('(240,0)');
+    expect(barValue(ue.bars[1])).toBe('(240.0)');
   });
 
   it('stores nothing per unit: change a row and the figure follows', () => {
@@ -146,8 +146,8 @@ describe('the unit economics section', () => {
     at('xcoa');
     const section = await ueSection();
     const chart = within(section).getByRole('region', { name: /Unit economics chart/ });
-    expect(within(chart).getByRole('button', { name: 'Revenue: 727,0 Rp thousand per tonne' })).toHaveTextContent('727,0');
-    expect(within(chart).getByRole('button', { name: /^Mining contractor services: \(240,0\)/ })).toHaveTextContent('(240,0)');
+    expect(within(chart).getByRole('button', { name: 'Revenue: 727.0 Rp thousand per tonne' })).toHaveTextContent('727.0');
+    expect(within(chart).getByRole('button', { name: /^Mining contractor services: \(240.0\)/ })).toHaveTextContent('(240.0)');
     const remainder = within(chart).getByRole('button', { name: /^Not split in the note/ });
     expect(remainder.querySelector('.fia-hatch')).not.toBeNull();
     expect(chart).toHaveTextContent('Contains: Depreciation of mine assets');
@@ -160,8 +160,8 @@ describe('the unit economics section', () => {
     const section = await ueSection();
     await user.click(within(section).getByRole('button', { name: 'Cost per bcm × overburden removed' }));
     const inputs = within(section).getByRole('region', { name: /Driver inputs: Mining contractor services/ });
-    expect(inputs).toHaveTextContent('Contractor cost per bcm30,0Rp thousand per bcm');
-    expect(inputs).toHaveTextContent('Overburden removed80,0Mbcm');
+    expect(inputs).toHaveTextContent('Contractor cost per bcm30.0Rp thousand per bcm');
+    expect(inputs).toHaveTextContent('Overburden removed80.0Mbcm');
   });
 
   it('tables each line with its total, per unit, driver, source and the pair; the last row is the denominator', async () => {
@@ -170,9 +170,9 @@ describe('the unit economics section', () => {
     const table = within(section).getByRole('table');
     expect(within(table).getByRole('columnheader', { name: 'SCOA per tonne' })).toBeInTheDocument();
     const contractor = within(table).getByRole('rowheader', { name: 'Mining contractor services' }).closest('tr')!;
-    expect(contractor).toHaveTextContent('2.400(240,0)Cost per bcm × overburden removedSYNTHETIC interim financial statements, Q1 25 to Q4 25, note 25(280,0)');
+    expect(contractor).toHaveTextContent('2,400(240.0)Cost per bcm × overburden removedSYNTHETIC interim financial statements, Q1 25 to Q4 25, note 25(280.0)');
     const rows = within(table).getAllByRole('row');
-    expect(rows[rows.length - 1]).toHaveTextContent('Divided by coal sales volume10,0 Mt');
+    expect(rows[rows.length - 1]).toHaveTextContent('Divided by coal sales volume10.0 Mt');
     expect(rows[rows.length - 1]).toHaveTextContent('SYNTHETIC quarterly operating update, Q1 25 to Q4 25');
   });
 
@@ -186,10 +186,10 @@ describe('the unit economics section', () => {
     const user = userEvent.setup();
     at('xcoa');
     const section = await ueSection();
-    await user.click(within(section).getByRole('button', { name: /^Royalty: \(72,7\)/ }));
+    await user.click(within(section).getByRole('button', { name: /^Royalty: \(72.7\)/ }));
     const inspector = screen.getByRole('complementary', { name: 'Inspector' });
     expect(inspector).toHaveTextContent('Royalty, FY 25');
-    expect(inspector).toHaveTextContent('(72,7) Rp thousand per tonne: Royalty divided by coal sales volume.');
+    expect(inspector).toHaveTextContent('(72.7) Rp thousand per tonne: Royalty divided by coal sales volume.');
     expect(inspector).toHaveTextContent('Driver: Royalty rate × revenue');
   });
 

@@ -19,7 +19,9 @@
  * A figure is rounded as Excel rounds it before the formatter writes it (excelRound): on its 15-digit
  * decimal, half away from zero, where JavaScript's toFixed would round the binary value just below a half.
  */
-import { formatNumber, formatPercent } from '@/lib/finance-in-action/format';
+import { house } from '@/lib/finance-in-action/format';
+
+const { formatNumber, formatPercent } = house;
 import type { WorkbookCell } from './types';
 
 /**

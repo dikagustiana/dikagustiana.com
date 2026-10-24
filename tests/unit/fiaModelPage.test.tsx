@@ -91,8 +91,8 @@ describe('How the business makes money', () => {
     const items = within(section).getAllByRole('listitem');
     expect(items).toHaveLength(pkg.driverTree.nodes.length);
     expect(items[0]).toHaveTextContent('Tonnes sold');
-    expect(items[0]).toHaveTextContent('2,80');
-    expect(items[0]).toHaveTextContent('Q4 24: 2,40');
+    expect(items[0]).toHaveTextContent('2.80');
+    expect(items[0]).toHaveTextContent('Q4 24: 2.40');
   });
 
   it('puts "Feeds X" on the node a register link leaves from', async () => {
@@ -158,11 +158,11 @@ describe('The model grid and the inspector', () => {
   it('opens the inspector on a formula cell, in words and with values', async () => {
     const user = userEvent.setup();
     at('xcoa');
-    await user.click(await screen.findByRole('button', { name: /^Revenue, FY 25: 7\.270, Formula/ }));
+    await user.click(await screen.findByRole('button', { name: /^Revenue, FY 25: 7,270, Formula/ }));
     const inspector = screen.getByRole('complementary', { name: 'Inspector' });
     expect(inspector).toHaveTextContent('Revenue, FY 25');
     expect(inspector).toHaveTextContent('the sum of Revenue, Q1 25 to Q4 25');
-    expect(inspector).toHaveTextContent('= the sum of 1.540, 1.680, 1.950, 2.100');
+    expect(inspector).toHaveTextContent('= the sum of 1,540, 1,680, 1,950, 2,100');
     // The sources are found through the graph, back to the reported quarters.
     expect(inspector).toHaveTextContent(
       'Example Coal Co (SYNTHETIC), SYNTHETIC interim financial statements Q4 25, Q4 25, note 24, page 12, XBRL concept syn:Revenue',
@@ -173,7 +173,7 @@ describe('The model grid and the inspector', () => {
     const user = userEvent.setup();
     at('xcoa');
     await user.click(await screen.findByRole('tab', { name: 'Reported' }));
-    await user.click(screen.getByRole('button', { name: /^Revenue, FY 25: 7\.270, Sourced/ }));
+    await user.click(screen.getByRole('button', { name: /^Revenue, FY 25: 7,270, Sourced/ }));
     const inspector = screen.getByRole('complementary', { name: 'Inspector' });
     expect(inspector).toHaveTextContent('Agrees.');
     await user.click(screen.getByRole('button', { name: /^Cost of revenue, FY 25: .*Sourced/ }));

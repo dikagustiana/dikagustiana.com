@@ -11,7 +11,9 @@ import type { Registry as FiaRegistry } from '@/lib/finance-in-action/registry';
 import type { ModelPackage } from '@/lib/finance-in-action/contract/types';
 import type { FlowWeight, ModelStatus } from '@/world/data/types';
 import { isMeasured } from '@/lib/finance-in-action/contract/links';
-import { formatPercent } from '@/lib/finance-in-action/format';
+import { house } from '@/lib/finance-in-action/format';
+
+const { formatPercent } = house;
 
 export interface WorldData {
   state: 'loading' | 'ok' | 'outage';

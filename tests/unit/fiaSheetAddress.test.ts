@@ -142,7 +142,7 @@ describe('the formula bar (K3)', () => {
     const { wb, values } = open(p);
     expect(formulaBarContent(wb, 'reported!C2', values)).toEqual({
       kind: 'sourced',
-      text: '1.600, from SYNTHETIC interim financial statements Q1 24, p. 12',
+      text: '1,600, from SYNTHETIC interim financial statements Q1 24, p. 12',
       editable: false,
     });
     const assumption = formulaBarContent(wb, wb.keyOf('assumptions!price', '26Q2E')!, values)!;

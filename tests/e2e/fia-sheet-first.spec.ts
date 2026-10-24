@@ -23,10 +23,10 @@ import { mockSupabase } from './mockSupabase';
 
 const PAGE = '/finance/finance-in-action/xcoa';
 
-/** A figure as the page writes it: `1.234,5`, `(665)`, `15,5%` (a fraction). */
+/** A figure as the page writes it (en-US): `1,234.5`, `(665)`, `15.5%` (a fraction). */
 function houseNumber(text: string): number {
   const t = text.trim();
-  const n = Number(t.replace(/[()%\s]/g, '').replace(/\./g, '').replace(',', '.'));
+  const n = Number(t.replace(/[()%\s,]/g, ''));
   const signed = t.startsWith('(') ? -n : n;
   return t.endsWith('%') || t.endsWith('%)') ? signed / 100 : signed;
 }
@@ -252,7 +252,7 @@ test.describe('K8: axe', () => {
     await page.getByRole('button', { name: /^Cost of revenue, FY 25, Difference/ }).click();
     expect((await axe(page)).violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(' ')).join(', ')}`)).toEqual([]);
     await open(page, `${PAGE}?connections=on`);
-    await page.getByRole('button', { name: /^Revenue, FY 25: 7\.270, Formula/ }).click();
+    await page.getByRole('button', { name: /^Revenue, FY 25: 7,270, Formula/ }).click();
     expect((await axe(page)).violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(' ')).join(', ')}`)).toEqual([]);
   });
 });
@@ -269,7 +269,7 @@ test.describe('K9: no sideways scroll of the page', () => {
         const viewport = page.locator('[data-fia-grid]');
         expect(await viewport.evaluate((el) => el.scrollWidth > el.clientWidth)).toBe(true);
         // With a cell selected (the inspector opens along the bottom below 1280px) and with Connections on.
-        await page.getByRole('button', { name: /^Revenue, Q4 25: 2\.100, Formula/ }).click();
+        await page.getByRole('button', { name: /^Revenue, Q4 25: 2,100, Formula/ }).click();
         s = await sizes();
         expect(s.scroll).toBeLessThanOrEqual(s.client);
         await open(page, `${PAGE}?connections=on`);

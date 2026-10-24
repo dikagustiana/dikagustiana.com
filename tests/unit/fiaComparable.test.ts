@@ -121,3 +121,14 @@ describe('peerFigure: the peer columns of the unit-economics table', () => {
     expect(peerFigure(ptba, line(ptba, 'opex'), pkg('ITMG'), 'FY25', RATES).value).toBeNull();
   });
 });
+
+describe('the key-figure period', () => {
+  it('orders period ids by the month they end', async () => {
+    const { periodEnd } = await import('@/lib/finance-in-action/keyFigures');
+    expect(periodEnd('FY25')).toBe(periodEnd('25Q4'));
+    expect(periodEnd('26Q2')).toBeGreaterThan(periodEnd('FY25'));
+    expect(periodEnd('24Q4')).toBeLessThan(periodEnd('FY25'));
+    expect(periodEnd('26Q3E')).toBeGreaterThan(periodEnd('26Q2'));
+    expect(periodEnd('H1 26')).toBe(-1);
+  });
+});

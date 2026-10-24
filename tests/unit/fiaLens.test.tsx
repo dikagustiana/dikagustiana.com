@@ -90,8 +90,8 @@ describe('decorations', () => {
     expect(d?.className).toContain('bg-fia-changed');
     expect(d?.className).toContain('outline-fia-edited');
     expect(d?.className).toContain('fia-flash-1');
-    expect(d?.note).toBe('(6,00)');
-    expect(d?.label).toBe('changed by your edit, (6,00), edited by you');
+    expect(d?.note).toBe('(6.00)');
+    expect(d?.label).toBe('changed by your edit, (6.00), edited by you');
   });
 });
 
@@ -130,7 +130,7 @@ describe('the lens on the model page', () => {
     const chart = screen.getByRole('region', { name: /Unit economics chart, Q4 25/ });
     expect(within(chart).getByRole('button', { name: /^Revenue: .*feeds the selection/ })).toBeInTheDocument();
     expect(within(chart).getByRole('button', { name: /^Operating profit: .*fed by the selection/ })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /^Revenue, Q4 25: 2\.100, Formula, feeds the selection/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^Revenue, Q4 25: 2,100, Formula, feeds the selection/ })).toBeInTheDocument();
 
     await user.click(within(section).getByRole('button', { name: COPY.showFullChain }));
     expect(within(tree).getByRole('button', { name: /^Profit to owners: .*fed by the selection/ })).toBeInTheDocument();
@@ -172,10 +172,10 @@ describe('editing an assumption', () => {
     await editPrice(user, '650');
     expect(screen.getByRole('button', { name: /^Realised price per tonne, Q2 26E: 650, Assumption, .*edited by you/ })).toBeInTheDocument();
     await user.click(screen.getByRole('tab', { name: 'Model' }));
-    expect(screen.getByRole('button', { name: /^Revenue, Q2 26E: 1\.820, Formula, changed by your edit, \(196\)/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^Revenue, Q2 26E: 1,820, Formula, changed by your edit, \(196\)/ })).toBeInTheDocument();
     const changed = screen.getByRole('region', { name: COPY.whatChanged });
     expect(changed).toHaveTextContent('Your edit: Realised price per tonne, Q2 26E: 720 → 650');
-    expect(within(changed).getByRole('button', { name: 'Revenue, Q2 26E' }).closest('tr')).toHaveTextContent('(196)(70,0)');
+    expect(within(changed).getByRole('button', { name: 'Revenue, Q2 26E' }).closest('tr')).toHaveTextContent('(196)(70.0)');
     expect(screen.getAllByRole('button', { name: COPY.reset }).length).toBeGreaterThan(0);
   });
 
@@ -185,11 +185,11 @@ describe('editing an assumption', () => {
     await editPrice(user, '650');
     const drivers = (screen.getByRole('heading', { level: 2, name: COPY.howItMakesMoney })).closest('section')!;
     await user.selectOptions(within(drivers).getByLabelText('Quarter'), '26Q2E');
-    expect(within(drivers).getByRole('button', { name: /^Revenue: 1\.820, changed by your edit, \(196\)/ })).toBeInTheDocument();
+    expect(within(drivers).getByRole('button', { name: /^Revenue: 1,820, changed by your edit, \(196\)/ })).toBeInTheDocument();
     const ue = (screen.getByRole('heading', { level: 2, name: /Unit economics/ })).closest('section')!;
     await user.selectOptions(within(ue).getByLabelText('Period'), '26Q2E');
-    const bar = within(ue).getByRole('button', { name: /^Revenue: 650,0 Rp thousand per tonne, changed by your edit/ });
-    expect(bar.closest('li')).toHaveTextContent('(70,0)');
+    const bar = within(ue).getByRole('button', { name: /^Revenue: 650.0 Rp thousand per tonne, changed by your edit/ });
+    expect(bar.closest('li')).toHaveTextContent('(70.0)');
   });
 
   it('resets to the published model', async () => {
