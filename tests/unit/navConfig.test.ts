@@ -49,10 +49,9 @@ const FINANCE_TRACK_SLUGS = [
   'strategic-finance',
   'planning',
   'analytics',
-  'capital-allocation',
 ];
 /** Real named finance routes that are not tracks. */
-const FINANCE_NAMED_PAGES = ['finance-in-action', 'finance-in-motion'];
+const FINANCE_NAMED_PAGES = ['finance-in-action', 'toolkits'];
 
 const ALL_ITEMS = [
   ...financeItems,
@@ -107,19 +106,16 @@ describe('navConfig', () => {
     const trackPaths = financeItems
       .map(i => i.path.replace(/^\/finance\//, ''))
       .filter(seg => FINANCE_TRACK_SLUGS.includes(seg));
-    // All five tracks, in the landing page's order. capital-allocation was
-    // absent until 9 October 2026; its route renders the capital conditions,
-    // not an empty module index, and /finance already listed it.
-    expect(trackPaths).toEqual(['fundamentals', 'strategic-finance', 'planning', 'analytics', 'capital-allocation']);
+    // The four curriculum tracks, in the landing page's order.
+    expect(trackPaths).toEqual(['fundamentals', 'strategic-finance', 'planning', 'analytics']);
   });
 
-  it('calls the capital-allocation track by its page name, Capital in Motion', () => {
-    // Owner decision D6(a), 10 October 2026: one name. The page's SEO title is
-    // read from its source, so nav and page move together; the path keeps the
-    // slug, so the address does not change.
-    const page = readFileSync(join(__dirname, '../../src/pages/FinanceInMotion.tsx'), 'utf8');
-    const pageTitle = page.match(/<SEO\s+title="([^"]+)"/)?.[1];
-    expect(pageTitle).toBe('Capital in Motion');
-    expect(financeItems.find(i => i.path === '/finance/capital-allocation')?.label).toBe(pageTitle);
+  it('ends with Finance in Action and Toolkits, and no longer lists Capital in Motion (docs/prd/finance-restructure §4)', () => {
+    expect(financeItems.slice(-2)).toEqual([
+      { label: 'Finance in Action', path: '/finance/finance-in-action' },
+      { label: 'Toolkits', path: '/finance/toolkits' },
+    ]);
+    expect(financeItems.map(i => i.path)).not.toContain('/finance/capital-allocation');
+    expect(financeItems.map(i => i.label)).not.toContain('Capital in Motion');
   });
 });

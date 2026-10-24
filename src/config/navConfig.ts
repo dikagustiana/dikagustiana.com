@@ -28,25 +28,25 @@ export const accountingItems: NavItem[] = [
 
 /**
  * Track paths must use the SLUGS FROM `finance_sections` — fundamentals,
- * strategic-finance, planning, analytics, capital-allocation. The last was
- * left out "until it has modules", but its route is not a module index: it
- * renders the 21 capital conditions (FinanceInMotion), which /finance already
- * lists as the fifth track. Added 9 October 2026 so nav and landing agree.
- * Its label is the page's name, "Capital in Motion", not the slug's (owner
- * decision D6(a), 10 October 2026); the path keeps the slug, so the address
- * does not move. These used to say
+ * strategic-finance, planning, analytics. These used to say
  * `/finance/planning-forecasting` and `/finance/financial-analytics`: readable
  * labels, nonexistent tracks, and the two menu items rendered empty indexes
  * while the route sweep stayed green — it opened canonical URLs directly and
  * never clicked the nav. tests/unit/navConfig.test.ts now pins every path.
+ *
+ * Then the two pages of their own, as /finance shows them since 24 October
+ * 2026 (docs/prd/finance-restructure §1 A, §4): Finance in Action, which holds
+ * Capital in Motion and the company models, and Toolkits. The "Capital in
+ * Motion" entry (/finance/capital-allocation) was removed with the move; the
+ * old address redirects.
  */
 export const financeItems: NavItem[] = [
   { label: 'Fundamentals', path: '/finance/fundamentals' },
   { label: 'Strategic Finance', path: '/finance/strategic-finance' },
   { label: 'Planning & Forecasting', path: '/finance/planning' },
   { label: 'Financial Analytics', path: '/finance/analytics' },
-  { label: 'Capital in Motion', path: '/finance/capital-allocation' },
   { label: 'Finance in Action', path: '/finance/finance-in-action' },
+  { label: 'Toolkits', path: '/finance/toolkits' },
 ];
 
 export const greenTransitionItems: NavItem[] = [

@@ -10,7 +10,15 @@ const CODE_WIDTH = 2;
 export const conditionCode = (n: number): string => String(n).padStart(CODE_WIDTH, '0');
 export const conditionShort = (n: number): string => `Capital in Motion ${conditionCode(n)}`;
 export const conditionOf = (n: number): CapitalCondition | undefined => getConditionByNumber(n);
-export const conditionHref = (n: number): string => `/finance/capital-allocation/${getConditionByNumber(n)?.id ?? conditionCode(n)}`;
+/** Capital in Motion's index, under Finance in Action (docs/prd/finance-restructure §1 C). */
+export const CAPITAL_IN_MOTION_PATH = '/finance/finance-in-action/capital-in-motion';
+/**
+ * The one place a condition's address is built. A number resolves to the
+ * condition's slug; a string (a slug from an old address being forwarded) is
+ * used as given, so the detail page can say "not found" for one that is not.
+ */
+export const conditionHref = (n: number | string): string =>
+  `${CAPITAL_IN_MOTION_PATH}/${typeof n === 'string' ? n : getConditionByNumber(n)?.id ?? conditionCode(n)}`;
 
 /** The conditions a set of companies refers to, in number order. */
 export function conditionsUsed(lists: number[][]): CapitalCondition[] {

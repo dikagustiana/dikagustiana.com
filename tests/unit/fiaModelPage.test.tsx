@@ -127,7 +127,7 @@ describe('Related reading (docs/prd/2026-10-fia-fixes item 9)', () => {
     await screen.findByRole('heading', { level: 2, name: COPY.howItMakesMoney });
     const related = document.querySelector('[data-fia-related]') as HTMLElement;
     expect(related).toHaveTextContent(`Related reading: Capital in Motion 03 · ${condition.title}`);
-    expect(within(related).getByRole('link', { name: `Capital in Motion 03 · ${condition.title}` })).toHaveAttribute('href', `/finance/capital-allocation/${condition.id}`);
+    expect(within(related).getByRole('link', { name: `Capital in Motion 03 · ${condition.title}` })).toHaveAttribute('href', `/finance/finance-in-action/capital-in-motion/${condition.id}`);
     expect(within(related).getByRole('link', { name: /Show coal on the chain map/ })).toHaveAttribute('href', '/?distance=finance&node=extraction');
     expect(document.body).not.toHaveTextContent(condition.rule);
     expect(document.body).not.toHaveTextContent('This model supplies the per-tonne economics');

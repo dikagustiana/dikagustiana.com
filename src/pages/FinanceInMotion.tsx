@@ -1,5 +1,6 @@
 /**
- * FinanceInMotion — Section 05: Capital in Motion
+ * FinanceInMotion — Capital in Motion, under Finance in Action
+ * (/finance/finance-in-action/capital-in-motion; docs/prd/finance-restructure §1 C).
  * View 1: Clean continuous editorial list of all 21 conditions.
  *
  * The h1 and its subtitle lead straight into the list. The premise block that
@@ -14,6 +15,8 @@ import { PageLayout } from '@/components/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
 import { CapitalConditionCard } from '@/components/finance/CapitalConditionCard';
 import { CONDITIONS, LAYER_ORDER } from '@/data/capitalConditions';
+import { conditionHref } from '@/lib/finance-in-action/conditions';
+import { INDEX_PATH } from '@/lib/finance-in-action/routes';
 import { Separator } from '@/components/ui/separator';
 
 /** Flat ordered list matching the spec display order */
@@ -33,6 +36,7 @@ export default function FinanceInMotion() {
       breadcrumbs={[
         { label: 'Home', path: '/' },
         { label: 'Finance', path: '/finance' },
+        { label: 'Finance in Action', path: INDEX_PATH },
         { label: 'Capital in Motion' },
       ]}
     >
@@ -58,7 +62,7 @@ export default function FinanceInMotion() {
             <div key={condition.id}>
               <CapitalConditionCard
                 condition={condition}
-                onClick={() => navigate(`/finance/capital-allocation/${condition.id}`)}
+                onClick={() => navigate(conditionHref(condition.number))}
               />
               {i < orderedConditions.length - 1 && <Separator />}
             </div>

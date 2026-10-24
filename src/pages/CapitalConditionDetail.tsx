@@ -1,6 +1,7 @@
 /**
  * CapitalConditionDetail — View 2: Single condition detail page.
- * Route: /finance/capital-allocation/:conditionSlug
+ * Route: /finance/finance-in-action/capital-in-motion/:conditionSlug
+ * (docs/prd/finance-restructure §1 C; the old /finance/capital-allocation/… addresses redirect here).
  *
  * Narrative longform layout — reads as a flowing essay, not a database record.
  */
@@ -15,6 +16,8 @@ import {
   CONDITION_ORDER,
   SHOW_CASE_COMPANIES,
 } from '@/data/capitalConditions';
+import { CAPITAL_IN_MOTION_PATH, conditionHref } from '@/lib/finance-in-action/conditions';
+import { INDEX_PATH } from '@/lib/finance-in-action/routes';
 
 /** "an operational", "a balance sheet": the layer labels start with either. */
 function withArticle(word: string): string {
@@ -52,7 +55,8 @@ export default function CapitalConditionDetail() {
       breadcrumbs={[
         { label: 'Home', path: '/' },
         { label: 'Finance', path: '/finance' },
-        { label: 'Capital in Motion', path: '/finance/capital-allocation' },
+        { label: 'Finance in Action', path: INDEX_PATH },
+        { label: 'Capital in Motion', path: CAPITAL_IN_MOTION_PATH },
         { label: condition.title },
       ]}
     >
@@ -64,7 +68,7 @@ export default function CapitalConditionDetail() {
       <article className="max-w-[860px] mx-auto px-6 lg:px-16 py-16">
         {/* Back link */}
         <Link
-          to="/finance/capital-allocation"
+          to={CAPITAL_IN_MOTION_PATH}
           className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-12"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
@@ -148,7 +152,7 @@ export default function CapitalConditionDetail() {
         <div className="mt-16 pt-6 border-t border-border flex items-center justify-between">
           {prevCondition ? (
             <button
-              onClick={() => navigate(`/finance/capital-allocation/${prevCondition.id}`)}
+              onClick={() => navigate(conditionHref(prevCondition.number))}
               className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
@@ -159,7 +163,7 @@ export default function CapitalConditionDetail() {
           )}
           {nextCondition ? (
             <button
-              onClick={() => navigate(`/finance/capital-allocation/${nextCondition.id}`)}
+              onClick={() => navigate(conditionHref(nextCondition.number))}
               className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
               Next

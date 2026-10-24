@@ -110,7 +110,7 @@ describe('the preview index, lens off', () => {
     expect(xcoa).toHaveTextContent('As of Q4 25');
     expect(xcoa).toHaveTextContent('Executive');
     expect(xcoa).toHaveTextContent('SYNTHETIC');
-    expect(within(xcoa).getByRole('link', { name: /Capital in Motion 03/ })).toHaveAttribute('href', '/finance/capital-allocation/commodity-windfall');
+    expect(within(xcoa).getByRole('link', { name: /Capital in Motion 03/ })).toHaveAttribute('href', '/finance/finance-in-action/capital-in-motion/commodity-windfall');
 
     const ptba = screen.getByText('PTBA').closest('li')!;
     expect(ptba).toHaveTextContent('Bukit Asam');
