@@ -127,7 +127,26 @@ tanda lens, jadi memilih sel tanpa lens hanya merender ulang dua baris. Ukur ula
 | `checks-xcoa-1440.jpg` | Sheet Checks, selisih Cost of revenue FY 25 terpilih; inspector menunjukkan tie-out |
 | `fullscreen-scem-1440.jpg` | Full screen, `assumptions!M3` lewat kotak nama |
 
-## 8. Belum dikerjakan
+## 8. S11: production dengan paket PTBA (24 Okt 2026)
 
-- **S11** (setelah merge dan paket terbit lewat two-gates RUNBOOK): cek di production dengan paket asli, PTBA
-  dulu, termasuk K1 dan ukuran grid dengan nama dan jumlah periode asli. Butuh publish dari Dika.
+Dicek setelah merge `0c9e380` (PR #79), di `https://dikagustiana.com/finance/finance-in-action/ptba`, dengan
+paket PTBA yang terbit di `fia.model_packages` (bukan fixture). Chromium headless, skrip di luar repo yang
+menjalankan pemeriksaan yang sama dengan `fia-sheet-first.spec.ts`, diadaptasi ke label PTBA.
+
+| # | Hasil |
+|---|---|
+| K1 | **Lulus.** 1440×900: pill tahap, tab perusahaan (ADRO, INDY, ITMG, PTBA), baris perusahaan, kartu angka, toolbar, formula bar, dan 15 baris data grid terlihat; `scrollY` 0 |
+| D-S7 | **Lulus.** Grid terbuka di Q4 25, FY 25, Q1 26, Q2 26 (kuartal terakhir), Q3 26E, Q4 26E |
+| K2 | **Lulus.** 40 sel (10 per sheet: Model, Reported, Assumptions, Checks): alamat kotak nama, huruf kolom dan nomor baris yang disorot sama dengan sel di `.xlsx` hasil Download, yang memuat rumus atau angka yang sama. Dua sel kolom "As filed" di Checks (E16, E20) kosong di keduanya; layar menulisnya "—" |
+| K6 | **Lulus.** Pointer halus: setiap baris 28px. Emulasi sentuh (1024px): sel minimal 44px, tidak ada kontrol di luar grid di bawah 44×44px |
+| K8 | **Lulus.** axe (WCAG 2.0/2.1/2.2 A dan AA): 0 pelanggaran di Model, Checks, dan Connections on dengan sel terpilih |
+| K9 | **Lulus.** 360, 768, 1024, 1440: `scrollWidth = clientWidth`, juga dengan Connections on |
+| Checks | 41 pemeriksaan dari paket asli (fixture hanya 1–2) |
+
+**Ukuran grid PTBA** (11 periode): Reported 99 baris / 1.089 sel, Model 42 / 462, Assumptions 22 / 242,
+Checks 41 baris. Di bawah ambang 5.000 sel. Waktu dari klik sampai frame berikutnya, kasus terberat (Connections
+on, sheet Reported, 10 klik): median 42ms, maksimum 73ms; dengan CPU diperlambat 4× (perkiraan laptop
+menengah) median 152ms, maksimum 201ms. Virtualisasi belum perlu, tetapi maksimum di 4× sudah di ambang INP
+200ms: ukur ulang bila paket berikutnya jauh lebih panjang.
+
+Screenshot: `screenshots/prod-ptba-1440.jpg`, `screenshots/prod-ptba-360.jpg`.
