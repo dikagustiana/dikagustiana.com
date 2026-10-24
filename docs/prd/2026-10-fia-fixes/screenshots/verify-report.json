@@ -1,0 +1,35 @@
+{
+  "8-adro-anon-has-workpaper": false,
+  "8-adro-anon-has-version": false,
+  "7-adro-fx-caption": [
+    "PTBA reports in rupiah and no BI JISDOR rate is loaded for FY 25, so its figures are not compared."
+  ],
+  "6-adro-peer-section": false,
+  "9-adro-related": "Related reading: Capital in Motion 03 · Commodity Windfall | 09 · Strategic Downstreaming\n\nShow coal on the chain map (Geological extraction)",
+  "8-ptba-anon-has-workpaper": false,
+  "8-ptba-anon-has-version": false,
+  "7-ptba-fx-caption": [
+    "PTBA reports in rupiah and no BI JISDOR rate is loaded for Q2 26, so its figures are not compared."
+  ],
+  "6-ptba-peer-section": false,
+  "9-ptba-related": "Related reading: Capital in Motion 03 · Commodity Windfall\n\nShow coal on the chain map (Geological extraction)",
+  "8-adro-admin-has-workpaper": true,
+  "8-ptba-admin-has-workpaper": true,
+  "10-anon-VERIFIED": 0,
+  "10-anon-UNAVAILABLE": 0,
+  "10-anon-MISNUMBERED": 0,
+  "10-anon-brealey": false,
+  "10-admin-VERIFIED": 4,
+  "10-admin-UNAVAILABLE": 1,
+  "10-admin-MISNUMBERED": 1,
+  "10-admin-brealey": true,
+  "11-anon-edit-order": 0,
+  "11-admin-edit-order": 1,
+  "11-admin-panel": true,
+  "11-admin-handles": 3,
+  "12-after-goto": "/green-transition/now",
+  "12-intro": 1,
+  "12-after-back": "/finance",
+  "13-theme-society": "/the-next-big-thing",
+  "13-theme-governance": "/the-next-big-thing"
+}
