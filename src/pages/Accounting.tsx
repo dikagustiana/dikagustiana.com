@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { PageLayout } from '@/components/layouts/PageLayout';
+import { PAGE_COLUMN } from '@/components/layouts/pageColumn';
 import { SEO } from '@/components/SEO';
 import { useFsPeriods } from '@/hooks/queries/useFs';
 
@@ -40,6 +41,7 @@ export default function Accounting() {
 
   return (
     <PageLayout
+      width="reading"
       breadcrumbs={[{ label: 'Home', path: '/' }, { label: 'Accounting' }]}
     >
       <SEO
@@ -47,8 +49,8 @@ export default function Accounting() {
         description="Reference pages on financial-statement line items and on how group consolidation works under PSAK."
       />
 
-      <div className="py-8 container">
-        <div className="max-w-3xl">
+      <div className={`${PAGE_COLUMN.reading} py-8`}>
+        <div>
           <h1 className="text-3xl font-display font-bold mb-4">Accounting</h1>
           <p className="text-muted-foreground mb-8">
             Reference pages for the line items of a statement of financial position, and for how a

@@ -3,9 +3,11 @@ import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { Breadcrumb, BreadcrumbItem } from '@/components/Breadcrumb';
 import { SectionSubNav, SubNavTab } from '@/components/SectionSubNav';
+import { PAGE_COLUMN, type PageWidth } from './pageColumn';
 
 export type VoiceRole = 'manager' | 'economist' | 'educator' | 'coach' | 'hybrid';
 export type LayoutVariant = 'content' | 'dashboard' | 'essay' | 'tool';
+
 
 interface PageLayoutProps {
   children: ReactNode;
@@ -20,6 +22,8 @@ interface PageLayoutProps {
     backLink?: { label: string; path: string };
   };
   className?: string;
+  /** The column the breadcrumb sits in; the page's content uses PAGE_COLUMN[width] to match it. */
+  width?: PageWidth;
 }
 
 export function PageLayout({
@@ -29,6 +33,7 @@ export function PageLayout({
   breadcrumbs,
   subNav,
   className = '',
+  width = 'full',
 }: PageLayoutProps) {
   const getVariantStyles = () => {
     switch (variant) {
@@ -55,7 +60,7 @@ export function PageLayout({
 
       {breadcrumbs && breadcrumbs.length > 0 && (
         <div className="bg-muted/30 border-b border-border py-3">
-          <div className="container">
+          <div className={PAGE_COLUMN[width]}>
             <Breadcrumb items={breadcrumbs} />
           </div>
         </div>

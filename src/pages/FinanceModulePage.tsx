@@ -172,6 +172,7 @@ export default function FinanceModulePage() {
   if (isLoading) {
     return (
       <PageLayout
+        width="reading"
         role="manager"
         breadcrumbs={[
           { label: 'Home', path: '/' },
@@ -192,6 +193,7 @@ export default function FinanceModulePage() {
   if (!module) {
     return (
       <PageLayout
+        width="reading"
         role="manager"
         breadcrumbs={[
           { label: 'Home', path: '/' },
@@ -211,6 +213,7 @@ export default function FinanceModulePage() {
 
   return (
     <PageLayout
+      width="reading"
       role="manager"
       breadcrumbs={[
         { label: 'Home', path: '/' },

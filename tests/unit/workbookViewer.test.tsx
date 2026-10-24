@@ -1,10 +1,11 @@
 /**
- * The working paper viewer (PRD site sweep 2026-10, R4.3–R4.7) over a small workbook written here: the sheet
- * tabs, the formula bar and its name box, the grid's selection, outlines and keys, the inspector's chips and
- * jumps with Back, the URL that holds the place, an error cell, merged cells, the grid's window on a large
- * sheet, full screen and the copied address; then the page section, which fetches the JSON only near the
- * viewport and keeps the Method panel and the download when the viewer fails, and whose Method lists are held
- * to the committed JSON.
+ * The working paper viewer (PRD site sweep 2026-10, R4.3–R4.7; site cleanup 2026-10, A1–A11) over a small
+ * workbook written here: the sheet tabs, the formula bar and its name box, the grid's selection and keys, Go
+ * To with Back, the URL that holds the place, an error cell, merged cells, the grid's window on a large sheet,
+ * full screen with its one Exit control, and what is gone (the inspector, the legend, the precedent and
+ * dependent fills, the gridlines, Copy cell address, the download); then the page section, which fetches the
+ * JSON only near the viewport and says so when the viewer fails; then the committed SOFP sheet, whose English
+ * labels in column P run on past it.
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -15,8 +16,10 @@ import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import WorkbookViewer from '@/components/workbook/WorkbookViewer';
 import { WorkingPaperSection } from '@/components/workbook/WorkingPaperSection';
 import { WORKBOOK_COPY as COPY } from '@/lib/workbook/copy';
-import { ERROR_CELLS, EXCLUDED_SHEETS, WORKBOOK_JSON_URL } from '@/lib/workbook/method';
-import type { PublishedWorkbook, WorkbookCell } from '@/lib/workbook/types';
+import { WORKBOOK_JSON_URL } from '@/lib/workbook/load';
+import { buildRefGraph, decodeA1 } from '@/lib/workbook/refs';
+import { TRAILING_COLS, buildSheetModel, labelWidthPx } from '@/lib/workbook/sheet';
+import type { PublishedWorkbook } from '@/lib/workbook/types';
 
 const ACCOUNTING = '_(* #,##0_);_(* (#,##0);_(* "-"??_);_(@_)';
 
@@ -107,8 +110,12 @@ const cellAt = (a: string) => grid().querySelector<HTMLElement>(`[data-a="${a}"]
 const formulaBar = () => within(screen.getByRole('group', { name: COPY.formulaBar }));
 const barText = () => document.querySelector('[data-formula-bar]')?.textContent;
 const nameBox = () => screen.getByRole('textbox', { name: COPY.nameBox }) as HTMLInputElement;
-/** The inspector by its role and name while it is open; while it is closed the page has it, hidden. */
-const inspector = () => screen.queryByRole('complementary', { name: COPY.inspector }) ?? document.querySelector('aside')!;
+/** Types an address into the name box after Ctrl+G, and Enter. */
+const goTo = async (typed: string) => {
+  fireEvent.keyDown(grid(), { key: 'g', ctrlKey: true });
+  await userEvent.clear(nameBox());
+  await userEvent.type(nameBox(), `${typed}{Enter}`);
+};
 const place = (router: ReturnType<typeof renderViewer>['router']) => {
   const p = new URLSearchParams(router.state.location.search);
   return `${p.get('sheet')}!${p.get('cell')}`;
@@ -151,73 +158,59 @@ describe('the workbook viewer', () => {
     expect(barText()).toBe('Cash');
   });
 
-  it("outlines the selection's precedents on the sheet and tints its dependents", async () => {
+  it('draws no gridlines, no inspector, no legend and no precedent or dependent fills; the selection keeps its outline', async () => {
     renderViewer('/wp?sheet=Summary&cell=B4');
-    expect(grid().querySelector('[data-precedent="B2:B3"]')).not.toBeNull();
     expect(grid().querySelector('[data-selected="B4"]')).not.toBeNull();
-
+    const cells = grid().querySelectorAll<HTMLElement>('[role="gridcell"]');
+    expect(cells.length).toBeGreaterThan(10);
+    for (const c of cells) {
+      expect(c.className).not.toMatch(/\bborder-r\b/);
+      expect(c.className).not.toMatch(/\bborder-b\b/);
+    }
+    // The workbook's own borders are inline styles, not the gridline classes, and stay.
     await userEvent.click(cellAt('B2')!);
-    const dependents = [...grid().querySelectorAll('[data-dependent]')].map((d) => d.getAttribute('data-dependent'));
-    expect(dependents.sort()).toEqual(['B3', 'B4', 'B6']);
-    expect(grid().querySelectorAll('[data-precedent]')).toHaveLength(0);
+    expect(grid().querySelectorAll('[data-precedent], [data-dependent]')).toHaveLength(0);
+    expect(screen.queryByRole('complementary')).toBeNull();
+    expect(document.querySelector('aside')).toBeNull();
+    for (const gone of ['Inspector', 'Feeds the selection', 'Fed by the selection', 'from the workbook', 'hidden in the workbook', 'Copy cell address', 'Download .xlsx']) {
+      expect(screen.queryByText(gone)).toBeNull();
+    }
+    expect(screen.queryByRole('button', { name: /inspector/i })).toBeNull();
+    expect(screen.queryByRole('link')).toBeNull();
+    // Enter, or a click on the selected cell, opens nothing.
+    fireEvent.keyDown(grid(), { key: 'Enter' });
+    await userEvent.click(cellAt('B2')!);
+    expect(screen.queryByRole('complementary')).toBeNull();
   });
 
-  it('jumps across sheets from the inspector, and Back returns', async () => {
+  it('goes to a cell on another sheet with Go To, and Back returns', async () => {
     const { router } = renderViewer('/wp?sheet=Summary&cell=B5');
-    fireEvent.keyDown(grid(), { key: 'Enter' });
-    expect(inspector()).toBeVisible();
-    expect(within(inspector()).getByText("='Detail Sheet'!B2")).toBeInTheDocument();
-
-    await userEvent.click(within(inspector()).getByRole('button', { name: COPY.goTo("'Detail Sheet'!B2") }));
+    await goTo("'Detail Sheet'!B2");
     expect(screen.getAllByRole('tab')[1]).toHaveAttribute('aria-selected', 'true');
     expect(nameBox().value).toBe('B2');
-    // The button left with the old cell; the grid has the focus, so the keys go on moving the selection.
+    // The grid has the focus, so the keys go on moving the selection.
     expect(grid()).toHaveFocus();
     fireEvent.keyDown(document.activeElement!, { key: 'ArrowDown' });
     expect(nameBox().value).toBe('B3');
     fireEvent.keyDown(document.activeElement!, { key: 'ArrowUp' });
-    expect(place(router)).toBe('Detail Sheet!B2');
-    // The dependent on another sheet is not listed with this sheet's.
-    expect(within(inspector()).getByText(COPY.noDependents)).toBeInTheDocument();
+    await waitFor(() => expect(place(router)).toBe('Detail Sheet!B2'));
 
     await userEvent.click(formulaBar().getByRole('button', { name: COPY.backTo('Summary!B5') }));
     expect(nameBox().value).toBe('B5');
     await waitFor(() => expect(place(router)).toBe('Summary!B5'));
     expect(formulaBar().queryByRole('button', { name: /Back/ })).toBeNull();
-
-    // A precedent on a sheet D9 leaves out is named and said to be unpublished, not a button.
-    await userEvent.click(screen.getAllByRole('tab')[1]);
-    await userEvent.click(cellAt('B4')!);
-    expect(within(inspector()).getByText("'Hidden Sheet'!A1")).toBeInTheDocument();
-    expect(within(inspector()).getByText(COPY.notPublished)).toBeInTheDocument();
-
-    // A precedent on the same sheet is a chip that selects it.
-    await userEvent.click(screen.getAllByRole('tab')[0]);
-    expect(nameBox().value).toBe('B5');
-    await userEvent.click(cellAt('B4')!);
-    await userEvent.click(within(inspector()).getByRole('button', { name: /B2:B3/ }));
-    expect(nameBox().value).toBe('B2');
-    expect(grid()).toHaveFocus();
-    // And a dependent's chip.
-    await userEvent.click(within(inspector()).getByRole('button', { name: /B3/ }));
-    expect(nameBox().value).toBe('B3');
-    expect(grid()).toHaveFocus();
-    fireEvent.keyDown(document.activeElement!, { key: 'Escape' });
-    expect(inspector()).not.toBeVisible();
   });
 
-  it('jumps to a precedent past the last row with a value onto that cell, not the last row', async () => {
+  it('goes to a cell a formula names past the last row with a value onto that cell, not the last row', async () => {
     const { router } = renderViewer('/wp?sheet=Summary&cell=C7');
-    fireEvent.keyDown(grid(), { key: 'Enter' });
-    await userEvent.click(within(inspector()).getByRole('button', { name: COPY.goTo("'Detail Sheet'!C9") }));
+    await goTo("'Detail Sheet'!C9");
     expect(nameBox().value).toBe('C9');
     expect(cellAt('C9')).toHaveAttribute('aria-selected', 'true');
-    expect(within(inspector()).getByText(COPY.emptyCell)).toBeInTheDocument();
     expect(grid()).toHaveAttribute('aria-rowcount', '9');
-    expect(place(router)).toBe('Detail Sheet!C9');
+    await waitFor(() => expect(place(router)).toBe('Detail Sheet!C9'));
   });
 
-  it('moves with the arrows, Home and End, Ctrl+Home and Page Down; Enter opens the inspector and Esc closes it', () => {
+  it('moves with the arrows, Home and End, Ctrl+Home and Page Down', () => {
     renderViewer('/wp?sheet=Summary&cell=B3');
     const key = (k: string, extra: object = {}) => fireEvent.keyDown(grid(), { key: k, ...extra });
     key('ArrowDown');
@@ -239,12 +232,9 @@ describe('the workbook viewer', () => {
     expect(nameBox().value).toBe('A1');
     key('ArrowRight');
     expect(nameBox().value).toBe('D1');
-
-    expect(inspector()).not.toBeVisible();
-    key('Enter');
-    expect(inspector()).toBeVisible();
-    fireEvent.keyDown(grid(), { key: 'Escape' });
-    expect(inspector()).not.toBeVisible();
+    // End and Ctrl+End go to the sheet's own last column, not the empty ones shown past it.
+    key('End', { ctrlKey: true });
+    expect(nameBox().value).toBe('D8');
   });
 
   it('keeps up with a held arrow key, writing the URL at most every 300 ms, and moves on when the browser refuses a write', async () => {
@@ -319,7 +309,7 @@ describe('the workbook viewer', () => {
     renderViewer('/wp?sheet=detail%20sheet&cell=b3');
     expect(screen.getAllByRole('tab')[1]).toHaveAttribute('aria-selected', 'true');
     expect(nameBox().value).toBe('B3');
-    expect(screen.getByText("'Detail Sheet'!B3", { selector: '[data-inspector-address]' })).toBeInTheDocument();
+    expect(barText()).toBe('=Summary!B4');
   });
 
   it('opens the first sheet when the URL names none of its sheets, and snaps a cell inside a merge to its top-left', () => {
@@ -331,18 +321,17 @@ describe('the workbook viewer', () => {
     expect(parseFloat(merged.style.width)).toBeGreaterThan(parseFloat(cellAt('D1')!.style.width));
   });
 
-  it('shows an error cell in the error colours, as its code, with the error said in the inspector', async () => {
+  it('shows an error cell in the error colours, as its code, with the error said to a screen reader', () => {
     renderViewer('/wp?sheet=Summary&cell=B6');
     const cell = cellAt('B6')!;
     expect(cell).toHaveTextContent('#REF!');
     expect(cell).toHaveAttribute('data-kind', 'error');
     expect(cell.className).toContain('bg-wb-error-bg');
-    expect(cell).toHaveAttribute('aria-label', `B6, #REF!, ${COPY.legendError}`);
-    fireEvent.keyDown(grid(), { key: 'Enter' });
-    expect(within(inspector()).getByText(COPY.errorNote)).toBeInTheDocument();
+    expect(cell).toHaveAttribute('aria-label', `B6, #REF!, ${COPY.cellError}`);
+    expect(barText()).toBe('=#REF!+B2');
     // The workbook's red and blue type are kept and said.
     expect(cellAt('B5')!.className).toContain('text-wb-red');
-    expect(cellAt('B5')).toHaveAttribute('aria-label', expect.stringContaining(COPY.legendRed));
+    expect(cellAt('B5')).toHaveAttribute('aria-label', expect.stringContaining(COPY.cellRed));
     expect(cellAt('B7')!.className).toContain('text-wb-blue');
   });
 
@@ -355,32 +344,37 @@ describe('the workbook viewer', () => {
     expect(cellAt('AN200')).toHaveAttribute('aria-selected', 'true');
     expect(cellAt('A1')).toBeNull();
     expect(grid()).toHaveAttribute('aria-rowcount', '200');
-    expect(grid()).toHaveAttribute('aria-colcount', '40');
+    // AN is column 40; the grid shows TRAILING_COLS empty columns past it.
+    expect(grid()).toHaveAttribute('aria-colcount', String(40 + TRAILING_COLS));
   });
 
-  it("copies the selected cell's address as Excel writes it, and fills the page when the browser's full screen is not there", async () => {
-    const writeText = vi.fn().mockResolvedValue(undefined);
-    Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true });
+  it("has one control, Full screen; full screen fills the page where the browser's is not there, with only the tabs, the formula bar, the grid and Exit", async () => {
     renderViewer('/wp?sheet=Detail%20Sheet&cell=B2');
-    await userEvent.click(screen.getByRole('button', { name: COPY.copyAddress }));
-    expect(writeText).toHaveBeenCalledWith("'Detail Sheet'!B2");
-    expect(await screen.findByText(COPY.copied)).toBeInTheDocument();
+    const buttons = () => screen.getAllByRole('button').filter((b) => !b.closest('[role="tablist"]') && !b.closest('[role="group"]'));
+    expect(buttons().map((b) => b.textContent)).toEqual([COPY.fullScreen]);
+    expect(screen.queryByRole('link')).toBeNull();
 
-    const button = screen.getByRole('button', { name: COPY.fullScreen });
     const root = document.querySelector('[data-full-screen]')!;
-    await userEvent.click(button);
+    await userEvent.click(screen.getByRole('button', { name: COPY.fullScreen }));
     expect(root).toHaveAttribute('data-full-screen', 'page');
-    expect(button).toHaveAttribute('aria-pressed', 'true');
+    expect(root.className).toContain('fixed');
+    expect(screen.queryByRole('button', { name: COPY.fullScreen })).toBeNull();
+    const exit = screen.getByRole('button', { name: COPY.exitFullScreen });
+    expect(buttons()).toEqual([exit]);
+    // The exit control stands at the right end of the tabs row.
+    expect(exit.parentElement).toBe(screen.getByRole('tablist').parentElement!.parentElement);
+    expect(screen.getByRole('tablist')).toBeInTheDocument();
+    expect(screen.getByRole('group', { name: COPY.formulaBar })).toBeInTheDocument();
+    expect(grid()).toBeInTheDocument();
+
     fireEvent.keyDown(grid(), { key: 'Escape' });
     expect(root).toHaveAttribute('data-full-screen', 'off');
-    Reflect.deleteProperty(navigator, 'clipboard');
-  });
+    expect(screen.getByRole('button', { name: COPY.fullScreen })).toBeInTheDocument();
 
-  it('offers the owner\'s .xlsx under the name D11 gives it', () => {
-    renderViewer();
-    const link = screen.getByRole('link', { name: COPY.download });
-    expect(link).toHaveAttribute('download', 'pt-dummy-psak-338-working-paper.xlsx');
-    expect(link.getAttribute('href')).toMatch(/pt-dummy-psak-338.*\.xlsx$/);
+    // The Exit control leaves full screen too.
+    await userEvent.click(screen.getByRole('button', { name: COPY.fullScreen }));
+    await userEvent.click(screen.getByRole('button', { name: COPY.exitFullScreen }));
+    expect(root).toHaveAttribute('data-full-screen', 'off');
   });
 });
 
@@ -418,6 +412,7 @@ describe('the working paper section', () => {
     renderSection();
     expect(screen.getByRole('heading', { name: COPY.heading })).toBeInTheDocument();
     expect(screen.getByText(COPY.lede)).toBeInTheDocument();
+    expect(screen.getByText(COPY.disclaimer)).toBeInTheDocument();
     expect(screen.getByRole('status')).toHaveTextContent(COPY.loading);
     expect(fetchMock).not.toHaveBeenCalled();
     expect(observers[0].options?.rootMargin).toMatch(/px/);
@@ -446,28 +441,54 @@ describe('the working paper section', () => {
     }
   });
 
-  it('keeps the Method panel and the download when the workbook does not load, and says the viewer did not', async () => {
+  it('says the viewer did not load, and how to try again, when the workbook does not load; no Method, no download', async () => {
     fetchMock.mockResolvedValue(new Response('', { status: 500 }));
     renderSection('/accounting/consolidated-reporting?sheet=Summary');
     // A link to a sheet loads at once, without waiting for the viewport.
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
-    expect(await screen.findByRole('alert')).toHaveTextContent(COPY.failedTitle);
+    const alert = await screen.findByRole('alert');
+    expect(alert).toHaveTextContent(COPY.failedTitle);
+    expect(alert).toHaveTextContent(COPY.failedMessage);
     expect(screen.queryByRole('grid')).toBeNull();
+    expect(screen.queryByRole('heading', { name: 'Method' })).toBeNull();
+    expect(screen.queryByRole('link')).toBeNull();
+    expect(document.body.textContent).not.toMatch(/\.xlsx|Method|download/i);
+  });
+});
 
-    expect(screen.getByRole('heading', { name: COPY.method })).toBeInTheDocument();
-    expect(screen.getByText(COPY.methodCached)).toBeInTheDocument();
-    expect(screen.getByText(COPY.methodErrors(49), { exact: false })).toBeInTheDocument();
-    for (const s of EXCLUDED_SHEETS) expect(screen.getByText(s.name)).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: COPY.download })).toHaveAttribute('download', COPY.downloadName);
+describe('the committed working paper', () => {
+  const book = JSON.parse(
+    fs.readFileSync(path.resolve(__dirname, '../../public/consolidation/pt-dummy-psak-338.workbook.json'), 'utf8'),
+  ) as PublishedWorkbook;
+  const sofp = book.sheets.find((s) => s.name === 'SOFP')!;
+
+  it("runs SOFP's English labels in column P on past it, and the grid on past them (A10)", () => {
+    expect(sofp.dimension).toBe('A1:P81');
+    const graph = buildRefGraph(book);
+    const model = buildSheetModel(sofp, book.styles, graph.used.get('SOFP'));
+    expect(model.endCol).toBe(16);
+    const labels = sofp.cells.filter((c) => decodeA1(c.a)!.col === 16 && typeof c.v === 'string');
+    expect(labels.length).toBeGreaterThan(40);
+    let reach = 16;
+    for (const c of labels) {
+      const to = model.spill.get(c.a);
+      expect(to, `${c.a} runs on`).toBeGreaterThan(16);
+      // The room it runs into is at least the text's own width, so it is not cut.
+      const style = c.s === undefined ? undefined : book.styles[c.s];
+      const room = model.colLeft[to! + 1] - model.colLeft[16] - 4 - (style?.align?.indent ?? 0) * 9;
+      expect(room, `${c.a} "${c.v}"`).toBeGreaterThanOrEqual(labelWidthPx(String(c.v), style?.bold));
+      reach = Math.max(reach, to!);
+    }
+    expect(model.lastCol).toBe(reach + TRAILING_COLS);
   });
 
-  it('lists the sheets D9 leaves out and the error cells D8 keeps exactly as the committed JSON has them', () => {
-    const book = JSON.parse(
-      fs.readFileSync(path.resolve(__dirname, '../../public/consolidation/pt-dummy-psak-338.workbook.json'), 'utf8'),
-    ) as PublishedWorkbook;
-    expect(EXCLUDED_SHEETS).toEqual(book.excluded.map(({ name, reason }) => ({ name, reason })));
-    const errors = book.sheets.flatMap((s) => s.cells.filter((c: WorkbookCell) => c.t === 'e').map((c) => ({ sheet: s.name, code: String(c.v), a: c.a })));
-    expect(errors).toHaveLength(book.counts.errors);
-    expect(ERROR_CELLS.flatMap((g) => g.cells.map((a) => ({ sheet: g.sheet, code: g.code, a })))).toEqual(errors);
+  it('renders SOFP past column P in the viewer, the longest English label whole', () => {
+    const router = createMemoryRouter([{ path: '/wp', element: <WorkbookViewer book={book} /> }], { initialEntries: ['/wp?sheet=SOFP&cell=P70'] });
+    render(<RouterProvider router={router} />);
+    const cell = cellAt('P70')!;
+    expect(cell).toHaveTextContent('Capital proforma arising from restructuring under common control');
+    const span = cell.querySelector('span')!;
+    expect(parseFloat(span.style.maxWidth)).toBeGreaterThanOrEqual(labelWidthPx('Capital proforma arising from restructuring under common control'));
+    expect(Number(grid().getAttribute('aria-colcount'))).toBeGreaterThan(16 + TRAILING_COLS);
   });
 });

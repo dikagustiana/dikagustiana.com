@@ -38,6 +38,7 @@ export default function DevelopmentFinance() {
 
   return (
     <PageLayout
+      width="reading"
       breadcrumbs={[
         { label: 'Home', path: '/' },
         { label: 'Development Finance' },

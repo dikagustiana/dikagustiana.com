@@ -47,8 +47,8 @@ const CriticalThinkingResearch = lazy(() => import("./pages/CriticalThinkingRese
 const CriticalThinkingPhase = lazy(() => import("./pages/CriticalThinkingPhase"));
 const CriticalThinkingEssay = lazy(() => import("./pages/CriticalThinkingEssay"));
 const BooksAcademia = lazy(() => import("./pages/BooksAcademia"));
-const BooksList = lazy(() => import("./pages/BooksList"));
-const BookReader = lazy(() => import("./pages/BookReader"));
+const BooksCategoryRedirect = lazy(() => import("./pages/BookRedirects").then((m) => ({ default: m.BooksCategoryRedirect })));
+const BookRedirect = lazy(() => import("./pages/BookRedirects").then((m) => ({ default: m.BookRedirect })));
 const EnglishIelts = lazy(() => import("./pages/EnglishIelts"));
 
 // Admin
@@ -57,6 +57,7 @@ const DebugAuth = lazy(() => import("./pages/DebugAuth"));
 const AdminContent = lazy(() => import("./pages/AdminContent"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const AdminAuditLog = lazy(() => import("./pages/AdminAuditLog"));
+const AdminBooks = lazy(() => import("./pages/AdminBooks"));
 const TheNextBigThing = lazy(() => import("./pages/TheNextBigThing"));
 const NextBigThingEssayPage = lazy(() => import("./pages/NextBigThingEssayPage"));
 const FinanceTrackChild = lazy(() => import("./pages/FinanceTrackChild"));
@@ -263,8 +264,9 @@ const App = () => (
                 this the URL fell through to /books/:category as an empty
                 "Categories" shelf. */}
             <Route path="/books/categories" element={<Navigate to="/books-academia" replace />} />
-            <Route path="/books/:category" element={<BooksList />} />
-            <Route path="/books/:category/:bookId/read" element={<BookReader />} />
+            {/* The old category and reader pages land on their shelf or book (site cleanup 2026-10, D8). */}
+            <Route path="/books/:category" element={<BooksCategoryRedirect />} />
+            <Route path="/books/:category/:bookId/read" element={<BookRedirect />} />
 
             {/* English IELTS */}
             <Route path="/english-ielts" element={<EnglishIelts />} />
@@ -275,6 +277,7 @@ const App = () => (
             <Route path="/admin/dashboard" element={<RequireAdmin><AdminDashboard /></RequireAdmin>} />
             <Route path="/admin/content" element={<RequireAdmin><AdminContent /></RequireAdmin>} />
             <Route path="/admin/audit-log" element={<RequireAdmin><AdminAuditLog /></RequireAdmin>} />
+            <Route path="/admin/books" element={<RequireAdmin><AdminBooks /></RequireAdmin>} />
 
             {/* Canonical Writer Studio — single editor for all essays */}
             <Route path="/admin/writer/:id" element={

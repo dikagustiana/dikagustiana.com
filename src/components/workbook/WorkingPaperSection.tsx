@@ -1,12 +1,12 @@
 /**
- * The working paper's section of /accounting/consolidated-reporting (PRD site sweep 2026-10, R4.6, R4.7): the
- * heading, the owner's lede, the viewer and the Method panel.
+ * The working paper's section of /accounting/consolidated-reporting (PRD site sweep 2026-10, R4.6, R4.7; site
+ * cleanup 2026-10, A4, A11): the heading, the lede, one line saying the figures are dummy, and the viewer.
+ * The Method panel and its download are gone.
  *
  * Nothing of the viewer loads with the page. When the section comes within a screen of the viewport, its code
  * (its own chunk) and the workbook JSON (a file in public/, never in a bundle) are fetched together; a link
  * that names a sheet or a cell loads them at once, and opens the page at the viewer, not at the heading,
- * which on a phone would push the cell the link names below the fold. If either fails, the section says so,
- * and the Method panel and the .xlsx download, which depend on neither, are there as always.
+ * which on a phone would push the cell the link names below the fold. If either fails, the section says so.
  */
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
@@ -14,7 +14,6 @@ import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { WORKBOOK_COPY as COPY } from '@/lib/workbook/copy';
 import { loadWorkbook } from '@/lib/workbook/load';
 import type { PublishedWorkbook } from '@/lib/workbook/types';
-import { MethodPanel } from './MethodPanel';
 
 const loadViewer = () => import('./WorkbookViewer');
 const WorkbookViewer = lazy(loadViewer);
@@ -91,7 +90,8 @@ export function WorkingPaperSection() {
       <h2 id="working-paper" className="mb-1 text-2xl font-bold text-foreground">
         {COPY.heading}
       </h2>
-      <p className="mb-6 max-w-3xl text-sm text-muted-foreground">{COPY.lede}</p>
+      <p className="max-w-3xl text-sm text-muted-foreground">{COPY.lede}</p>
+      <p className="mb-6 mt-1 max-w-3xl text-xs text-muted-foreground">{COPY.disclaimer}</p>
       {/* scroll-mt-20: the site's fixed header is 64px. */}
       <div ref={anchor} data-workbook-viewer className="scroll-mt-20">
         {failed ? (
@@ -106,7 +106,6 @@ export function WorkingPaperSection() {
           <Loading />
         )}
       </div>
-      <MethodPanel />
     </section>
   );
 }

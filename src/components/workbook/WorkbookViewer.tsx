@@ -1,39 +1,37 @@
 /**
- * The PSAK 338 working paper as a workbook to inspect (PRD site sweep 2026-10, R4.3–R4.5): the sheet tabs,
- * the formula bar with its name box, the grid and the inspector, over the published JSON. Nothing is edited
- * and nothing recalculated; every figure is Excel's cached value.
+ * The PSAK 338 working paper as a workbook to read (PRD site sweep 2026-10, R4.3–R4.5; site cleanup 2026-10,
+ * A1–A9): the sheet tabs, the formula bar with its name box, and the grid, over the published JSON. Nothing
+ * is edited and nothing recalculated; every figure is Excel's cached value. The inspector, the legend, the
+ * precedent and dependent highlighting, Copy cell address and the download are gone.
  *
  * Where the reader is shows in the URL, `?sheet=Consol%20SoFP%2024&cell=D9`, so a cell can be linked to. The
  * viewer holds the place itself: it reads the URL when it opens and whenever the URL changes under it (the
  * browser's Back and Forward, a link), and writes it back at most every URL_EVERY_MS, because browsers
  * throttle history updates and a held arrow key would outrun them. A move within a sheet replaces the
  * entry; opening another sheet adds one, so the browser's Back returns to the sheet before. The viewer's
- * own Back returns from a jump: a precedent or dependent chip, a cross-sheet button, a Go To from the name
- * box.
+ * own Back returns from a Go To from the name box.
  *
- * Keys, with the focus anywhere in the viewer: Ctrl+G goes to the name box; Esc closes the inspector, or
- * leaves full screen where the browser's own full screen was not available. The grid's keys are its own
- * (./SheetGrid). Full screen uses the Fullscreen API on the viewer alone; the browser's F11 is left to the
- * browser and does not change the button's state, which follows the document's fullscreen element.
+ * Keys, with the focus anywhere in the viewer: Ctrl+G goes to the name box; Esc leaves full screen (the
+ * browser's own full screen leaves on Esc by itself). The grid's keys are its own (./SheetGrid). Full screen
+ * uses the Fullscreen API on the viewer alone, and fills the page where that is not available (a phone);
+ * either way only the tabs, the formula bar, the grid and the Exit control are on screen (A6). The browser's
+ * F11 is left to the browser and does not change the control's state, which follows the document's
+ * fullscreen element.
  *
  * The default export, so the page can load it as its own chunk.
  */
 import { useCallback, useEffect, useId, useMemo, useRef, useState, type KeyboardEvent } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { buildRefGraph, decodeA1, dependentsOf, encodeA1, precedentsOf, qualifiedRef } from '@/lib/workbook/refs';
+import { buildRefGraph, decodeA1, encodeA1, qualifiedRef } from '@/lib/workbook/refs';
 import { buildSheetModel, firstCell, readGoTo, snap, type Cell, type SheetModel } from '@/lib/workbook/sheet';
 import type { PublishedWorkbook, WorkbookSheet } from '@/lib/workbook/types';
 import { cn } from '@/lib/utils';
-import { CellInspector } from './CellInspector';
 import { FormulaBar } from './FormulaBar';
-import { Legend } from './Legend';
+import { FullScreenButton } from './FullScreenButton';
 import { NameBox } from './NameBox';
-import { SheetGrid, type GridMarks } from './SheetGrid';
+import { SheetGrid } from './SheetGrid';
 import { SheetTabs } from './SheetTabs';
-import { Toolbar } from './Toolbar';
 
-/** From this width the inspector stands beside the grid, and opens with the viewer. */
-const WIDE = '(min-width: 1024px)';
 /** How far the viewer's Back can go. */
 const BACK_MAX = 50;
 /**
@@ -54,9 +52,9 @@ type FullScreen = 'off' | 'browser' | 'page';
 
 export default function WorkbookViewer({ book }: { book: PublishedWorkbook }) {
   const uid = useId().replace(/:/g, '');
-  const ids = { tabs: `${uid}-tab`, panel: `${uid}-panel`, grid: `${uid}-grid`, inspector: `${uid}-inspector` };
+  const ids = { tabs: `${uid}-tab`, panel: `${uid}-panel`, grid: `${uid}-grid` };
 
-  // Read once per load: the references' graph and the sheets by name. Each sheet is laid out the first time
+  // Read once per load: the references' graph (for how far each sheet's formulas reach) and the sheets by name. Each sheet is laid out the first time
   // it is opened, and kept.
   const { graph, byName, names, models } = useMemo(
     () => ({
@@ -97,20 +95,17 @@ export default function WorkbookViewer({ book }: { book: PublishedWorkbook }) {
   const selected = snap(model, place.cell);
   const address = encodeA1(selected.col, selected.row);
   const cell = model.cells.get(address);
-  const style = cell?.s === undefined ? undefined : book.styles[cell.s];
 
   // Each sheet reopens where it was left, as Excel's do.
   const lastCell = useRef(new Map<string, Cell>());
   lastCell.current.set(sheet.name, selected);
 
   const [back, setBack] = useState<Place[]>([]);
-  const [open, setOpen] = useState(() => typeof window !== 'undefined' && typeof window.matchMedia === 'function' && window.matchMedia(WIDE).matches);
   const [fullScreen, setFullScreen] = useState<FullScreen>('off');
 
   const root = useRef<HTMLDivElement>(null);
   const grid = useRef<HTMLDivElement>(null);
   const nameBox = useRef<HTMLInputElement>(null);
-  const inspector = useRef<HTMLElement>(null);
 
   // The URL's place as the viewer last read or wrote it, as the URL spells it, and its sheet; the place
   // waiting to be written, and when the URL was last written.
@@ -190,10 +185,7 @@ export default function WorkbookViewer({ book }: { book: PublishedWorkbook }) {
     if (s && s.name !== sheet.name) show({ sheet: s.name, cell: lastCell.current.get(s.name) ?? firstCell(s, modelOf(s)) });
   };
 
-  /**
-   * A jump the viewer's Back returns from. The grid takes the focus, as after Back: the chip or button that
-   * asked for the jump leaves with the inspector's old cell, and the keys must still move the selection.
-   */
+  /** A jump the viewer's Back returns from (a Go To). The grid takes the focus, as after Back. */
   const jump = (name: string, to: Cell) => {
     const s = findSheet(name);
     if (!s) return;
@@ -218,17 +210,6 @@ export default function WorkbookViewer({ book }: { book: PublishedWorkbook }) {
     if (read.cell.col > m.lastCol || read.cell.row > m.lastRow) return false;
     jump(s.name, read.cell);
     return true;
-  };
-
-  const closeInspector = () => {
-    setOpen(false);
-    grid.current?.focus();
-  };
-
-  const openInspector = (focus: boolean) => {
-    setOpen(true);
-    // The panel is shown in this render's commit; focus it after.
-    if (focus) requestAnimationFrame(() => inspector.current?.focus());
   };
 
   // The button follows the document's fullscreen element, however full screen began or ended.
@@ -264,27 +245,12 @@ export default function WorkbookViewer({ book }: { book: PublishedWorkbook }) {
       e.preventDefault();
       nameBox.current?.focus();
       nameBox.current?.select();
-    } else if (e.key === 'Escape') {
-      if (open) {
-        e.preventDefault();
-        closeInspector();
-      } else if (fullScreen === 'page') {
-        e.preventDefault();
-        setFullScreen('off');
-      }
+    } else if (e.key === 'Escape' && fullScreen === 'page') {
+      e.preventDefault();
+      setFullScreen('off');
     }
   };
 
-  const precedents = precedentsOf(graph, sheet.name, address);
-  const marks: GridMarks = useMemo(
-    () => ({
-      precedents: precedentsOf(graph, sheet.name, address).filter((p) => p.local),
-      dependents: dependentsOf(graph, sheet.name, address)
-        .filter((d) => d.sheet === sheet.name)
-        .map((d) => d.a),
-    }),
-    [graph, sheet.name, address],
-  );
   const where = back[back.length - 1];
   const filled = fullScreen !== 'off';
 
@@ -293,18 +259,18 @@ export default function WorkbookViewer({ book }: { book: PublishedWorkbook }) {
       ref={root}
       onKeyDown={onKeyDown}
       data-full-screen={fullScreen}
-      className={cn(
-        // A wide screen sets the legend and the actions above the grid; a narrow one puts the actions first and
-        // the legend under the grid, so the grid is not a screen away.
-        'flex flex-col gap-3 text-foreground lg:grid lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start lg:gap-x-6',
-        filled && 'overflow-auto bg-background p-3 lg:grid-rows-[auto_minmax(0,1fr)]',
-        fullScreen === 'page' && 'fixed inset-0 z-50',
-      )}
+      className={cn('flex flex-col text-foreground', filled ? 'h-full gap-0 overflow-hidden bg-background p-2' : 'gap-3', fullScreen === 'page' && 'fixed inset-0 z-50')}
     >
-      <Legend className="order-3 lg:order-none" />
-      <Toolbar address={qualifiedRef(sheet.name, address)} fullScreen={filled} onFullScreen={toggleFullScreen} className="order-1 lg:order-none" />
-      <div className={cn('order-2 flex min-h-0 flex-col lg:order-none lg:col-span-2', filled && 'flex-1 lg:h-full')}>
-        <SheetTabs id={ids.tabs} sheets={names} active={sheet.name} controls={ids.panel} onSelect={openSheet} />
+      {!filled && (
+        <div className="flex justify-end">
+          <FullScreenButton fullScreen={false} onToggle={toggleFullScreen} />
+        </div>
+      )}
+      <div className={cn('flex min-h-0 flex-col', filled && 'flex-1')}>
+        <div className="flex items-end gap-2">
+          <SheetTabs id={ids.tabs} sheets={names} active={sheet.name} controls={ids.panel} onSelect={openSheet} className="flex-1" />
+          {filled && <FullScreenButton fullScreen onToggle={toggleFullScreen} className="mb-1" />}
+        </div>
         <div
           id={ids.panel}
           role="tabpanel"
@@ -316,35 +282,9 @@ export default function WorkbookViewer({ book }: { book: PublishedWorkbook }) {
             cell={cell}
             backTo={where ? qualifiedRef(where.sheet, encodeA1(where.cell.col, where.cell.row)) : null}
             onBack={goBack}
-            inspectorOpen={open}
-            inspectorId={ids.inspector}
-            onOpenInspector={() => openInspector(true)}
           />
           <div className={cn('flex min-h-0', filled ? 'flex-1' : 'h-[min(70vh,44rem)]')}>
-            <SheetGrid
-              id={ids.grid}
-              gridRef={grid}
-              model={model}
-              styles={book.styles}
-              selected={selected}
-              marks={marks}
-              onSelect={select}
-              onActivate={() => openInspector(false)}
-              className="min-w-0 flex-1"
-            />
-            <CellInspector
-              ref={inspector}
-              id={ids.inspector}
-              open={open}
-              sheet={sheet.name}
-              address={address}
-              cell={cell}
-              style={style}
-              precedents={precedents}
-              dependents={marks.dependents}
-              onGo={jump}
-              onClose={closeInspector}
-            />
+            <SheetGrid id={ids.grid} gridRef={grid} model={model} styles={book.styles} selected={selected} onSelect={select} className="min-w-0 flex-1" />
           </div>
         </div>
       </div>

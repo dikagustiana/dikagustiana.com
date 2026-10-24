@@ -1,5 +1,6 @@
 import { useParams } from 'react-router-dom';
 import { PageLayout } from '@/components/layouts/PageLayout';
+import { PAGE_COLUMN } from '@/components/layouts/pageColumn';
 import { SEO } from '@/components/SEO';
 import { ErrorState, LoadingState } from '@/components/states';
 import { useConsolidationSeries, useEssaysByTopic, type TopicEssay } from '@/hooks/queries/useEssays';
@@ -102,6 +103,7 @@ export default function ConsolidationDetail() {
 
   return (
     <PageLayout
+      width="reading"
       breadcrumbs={[
         { label: 'Home', path: '/' },
         { label: 'Accounting', path: '/accounting' },
@@ -114,8 +116,8 @@ export default function ConsolidationDetail() {
         description={description || 'Consolidated reporting under PSAK.'}
       />
 
-      <div className="container py-8">
-        <div className="max-w-3xl">
+      <div className={`${PAGE_COLUMN.reading} py-8`}>
+        <div>
           <h1 className="text-3xl md:text-4xl font-display font-bold mb-4">{title}</h1>
           {description && (
             <p className="text-lg text-muted-foreground mb-8">{description}</p>

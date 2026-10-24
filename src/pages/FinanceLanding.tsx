@@ -36,6 +36,7 @@ export default function FinanceLanding() {
 
   return (
     <PageLayout
+      width="reading"
       role="manager"
       breadcrumbs={[{ label: 'Home', path: '/' }, { label: 'Finance' }]}
     >

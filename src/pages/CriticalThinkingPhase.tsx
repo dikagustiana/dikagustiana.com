@@ -1,5 +1,6 @@
 import { useParams, Link } from 'react-router-dom';
 import { PageLayout } from '@/components/layouts/PageLayout';
+import { PAGE_COLUMN } from '@/components/layouts/pageColumn';
 import { SEO } from '@/components/SEO';
 import { useEssays } from '@/hooks/queries/useEssays';
 import { ErrorState, LoadingState } from '@/components/states';
@@ -35,6 +36,7 @@ export default function CriticalThinkingPhase() {
   return (
     <PageLayout
       variant="content"
+      width="reading"
       breadcrumbs={[
         { label: 'Home', path: '/' },
         { label: 'Critical Thinking', path: '/critical-thinking-research' },
@@ -46,8 +48,8 @@ export default function CriticalThinkingPhase() {
         description={details?.task || 'Critical thinking phase essays and resources.'}
       />
 
-      <div className="container py-8">
-        <div className="max-w-3xl">
+      <div className={`${PAGE_COLUMN.reading} py-8`}>
+        <div>
           <h1 className="text-3xl md:text-4xl font-display font-bold mb-4">
             {details?.title || 'Unknown phase'}
           </h1>

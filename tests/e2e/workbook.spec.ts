@@ -2,10 +2,11 @@ import { test, expect, type Locator, type Page } from '@playwright/test';
 import { mockSupabase } from './mockSupabase';
 
 /**
- * The PSAK 338 working paper viewer on /accounting/consolidated-reporting (PRD site sweep 2026-10, R4.8),
- * against the production bundle and the workbook JSON vite preview serves from public/. Every cell named
- * here is the committed workbook's own: Consol SoFP 24!D9 is =D114+D53; AF26 on the same sheet is
- * ='Elimination 2024'!G82; CF 23 Restated!O4 is one of D8's #REF! cells.
+ * The PSAK 338 working paper viewer on /accounting/consolidated-reporting (PRD site sweep 2026-10, R4.8; site
+ * cleanup 2026-10, A1–A11), against the production bundle and the workbook JSON vite preview serves from
+ * public/. Every cell named here is the committed workbook's own: Consol SoFP 24!D9 is =D114+D53; AF26 on the
+ * same sheet is ='Elimination 2024'!G82; CF 23 Restated!O4 is one of D8's #REF! cells; SOFP's column P holds
+ * its English labels, and its rows 22, 61 and 76 carry the workbook's own total rules.
  *
  * The click-to-inspect time (R4.7: under 50 ms) is measured in the page with performance.now(): a
  * MutationObserver on the formula bar is set up, the time taken, and the cell's click() dispatched (a
@@ -117,7 +118,7 @@ async function reveal(grid: Locator, a: string): Promise<Locator> {
 test.describe('the working paper viewer at 1440', () => {
   test.use({ viewport: { width: 1440, height: 900 } });
 
-  test(`${SOFP}!D9 shows =D114+D53 and outlines its two precedents`, async ({ page }) => {
+  test(`${SOFP}!D9 shows =D114+D53; nothing is outlined but the selection, and no inspector, legend or download is there`, async ({ page }) => {
     const { grid, errors } = await openViewer(page);
     await tab(page, SOFP).click();
     await expect(tab(page, SOFP)).toHaveAttribute('aria-selected', 'true');
@@ -126,35 +127,66 @@ test.describe('the working paper viewer at 1440', () => {
     await expect(nameBox(page)).toHaveValue('D9');
     await expect(formulaBar(page)).toHaveText('=D114+D53');
     await expect(cellIn(grid, 'D9')).toHaveAttribute('aria-selected', 'true');
+    await expect(grid.locator('[data-selected="D9"]')).toBeVisible();
     await expectColumnAligned(grid, 'D5', 'D20');
-    // The inspector lists the two, in the formula's order.
-    const inspector = page.getByRole('complementary', { name: 'Inspector' });
-    await expect(inspector.locator('[data-inspector-formula]')).toHaveText('=D114+D53');
-    await expect(inspector.locator('[data-chip]')).toHaveCount(2);
-    expect(await inspector.locator('[data-chip]').evaluateAll((els) => els.map((e) => e.getAttribute('data-chip')))).toEqual(['D114', 'D53']);
-
-    for (const a of ['D53', 'D114']) {
-      const cell = await reveal(grid, a);
-      const outline = grid.locator(`[data-precedent="${a}"]`);
-      await expect(outline).toHaveCount(1);
-      await expect(outline).toBeVisible();
-      expect(await outline.evaluate((e) => getComputedStyle(e).outlineStyle)).toBe('dashed');
-      // It lies over the precedent itself.
-      const [over, under] = [await outline.boundingBox(), await cell.boundingBox()];
-      expect(over && under && Math.abs(over.x - under.x) < 1 && Math.abs(over.y - under.y) < 1).toBe(true);
-    }
-    // Nothing else on the sheet is outlined: every outline from top to bottom, the precedents' column in view.
-    const seen = new Set<string>();
+    // No precedent or dependent fills, anywhere on the sheet.
     const { h, ch } = await grid.evaluate((el) => ({ h: el.scrollHeight, ch: el.clientHeight }));
     for (let top = 0; top <= h; top += ch / 2) {
       await grid.evaluate(scrollGrid, [0, top]);
-      for (const p of await grid.locator('[data-precedent]').evaluateAll((els) => els.map((e) => e.getAttribute('data-precedent')!))) seen.add(p);
+      await expect(grid.locator('[data-precedent], [data-dependent]')).toHaveCount(0);
     }
-    expect([...seen].sort()).toEqual(['D114', 'D53']);
+    // Gone from the page: the inspector, the legend, Copy cell address, the download and the Method section.
+    const section = page.locator('section[aria-labelledby="working-paper"]');
+    await expect(page.getByRole('complementary')).toHaveCount(0);
+    for (const gone of [/Inspector/, /Feeds the selection/, /Fed by the selection/, /Copy cell address/, /Download/, /\.xlsx/, /^Method$/]) {
+      await expect(section.getByText(gone)).toHaveCount(0);
+    }
+    await expect(section.getByRole('link')).toHaveCount(0);
+    await expect(section.getByText("Figures are dummy and do not represent any company's data.")).toBeVisible();
     expect(errors).toEqual([]);
   });
 
-  test(`a reference to '${ELIM}' jumps there and Back returns`, async ({ page }) => {
+  test('the cells have no gridlines; the workbook\'s own total rules stay (SOFP rows 22, 61, 76)', async ({ page }) => {
+    const { grid, errors } = await openViewer(page, '?sheet=SOFP&cell=J22');
+    const widths = await grid.locator('[role="gridcell"]').evaluateAll((els) =>
+      els.map((e) => {
+        const cs = getComputedStyle(e);
+        return { a: e.getAttribute('data-a'), right: cs.borderRightWidth, bottom: cs.borderBottomWidth, bottomStyle: cs.borderBottomStyle };
+      }),
+    );
+    expect(widths.length).toBeGreaterThan(50);
+    for (const w of widths) expect(w.right, `${w.a} has no gridline on its right`).toBe('0px');
+    const rule = (a: string) => widths.find((w) => w.a === a)!;
+    expect(rule('J22').bottomStyle).toBe('solid');
+    expect(rule('L22').bottomStyle).toBe('solid');
+    expect(rule('E12').bottom).toBe('0px');
+    for (const a of ['J61', 'N76']) {
+      await nameBox(page).fill(a);
+      await nameBox(page).press('Enter');
+      expect(await cellIn(grid, a).evaluate((e) => getComputedStyle(e).borderBottomStyle)).toBe('double');
+    }
+    expect(errors).toEqual([]);
+  });
+
+  test("SOFP's English labels in column P are readable whole, and the grid runs on past them", async ({ page }) => {
+    const { grid, errors } = await openViewer(page, '?sheet=SOFP&cell=P70');
+    const p70 = cellIn(grid, 'P70');
+    await expect(p70).toHaveText('Capital proforma arising from restructuring under common control');
+    await expect.poll(() => grid.evaluate(shownIn, 'P70')).toBe(true);
+    const span = p70.locator('span');
+    // Not cut: the text fits the room the label runs on into.
+    const fit = await span.evaluate((e) => ({ sw: e.scrollWidth, cw: e.clientWidth }));
+    expect(fit.sw).toBeLessThanOrEqual(fit.cw);
+    // Its neighbours, in view around it.
+    for (const a of ['P64', 'P66', 'P69', 'P72']) {
+      const cut = await cellIn(grid, a).locator('span').evaluate((e) => e.scrollWidth > e.clientWidth);
+      expect(cut, `${a} is not cut`).toBe(false);
+    }
+    expect(Number(await grid.getAttribute('aria-colcount'))).toBeGreaterThan(16);
+    expect(errors).toEqual([]);
+  });
+
+  test(`Go To '${ELIM}'!G82 jumps there and Back returns`, async ({ page }) => {
     const { grid, errors } = await openViewer(page);
     await tab(page, SOFP).click();
     const af26 = await reveal(grid, 'AF26');
@@ -162,7 +194,10 @@ test.describe('the working paper viewer at 1440', () => {
     await expect(nameBox(page)).toHaveValue('AF26');
     await expect(formulaBar(page)).toHaveText(`='${ELIM}'!G82`);
 
-    await page.getByRole('button', { name: `Go to '${ELIM}'!G82` }).click();
+    await page.keyboard.press('Control+g');
+    await expect(nameBox(page)).toBeFocused();
+    await nameBox(page).fill(`'${ELIM}'!G82`);
+    await nameBox(page).press('Enter');
     await expect(tab(page, ELIM)).toHaveAttribute('aria-selected', 'true');
     await expect(tab(page, SOFP)).toHaveAttribute('aria-selected', 'false');
     await expect(nameBox(page)).toHaveValue('G82');
@@ -249,7 +284,6 @@ test.describe('the working paper viewer at 1440', () => {
     await expect(nameBox(page)).toHaveValue('G82');
     await expect(formulaBar(page)).toHaveText("=-'Detail Elimination BS'!L12");
     await expect(cellIn(grid, 'G82')).toHaveAttribute('aria-selected', 'true');
-    await expect(page.getByRole('complementary', { name: 'Inspector' }).locator('[data-inspector-address]')).toHaveText(`'${ELIM}'!G82`);
     expect(errors).toEqual([]);
   });
 
@@ -271,8 +305,36 @@ test.describe('the working paper viewer at 1440', () => {
     expect(fill).not.toBe('rgba(0, 0, 0, 0)');
     expect(fill).not.toBe(await cellIn(grid, 'O5').evaluate((e) => getComputedStyle(e).backgroundColor));
     await expect(formulaBar(page)).toHaveText('=O97');
-    const inspector = page.getByRole('complementary', { name: 'Inspector' });
-    await expect(inspector).toContainText("Excel could not work this cell out; the error is the workbook's own");
+  });
+
+  test('full screen shows only the tabs, the formula bar, the grid and Exit', async ({ page }) => {
+    const { grid, errors } = await openViewer(page, `?sheet=${encodeURIComponent(SOFP)}&cell=D9`);
+    await page.getByRole('button', { name: 'Full screen' }).click();
+    const root = page.locator('[data-full-screen]');
+    await expect(root).not.toHaveAttribute('data-full-screen', 'off');
+    const exit = page.getByRole('button', { name: 'Exit full screen' });
+    await expect(exit).toBeVisible();
+    await expect(exit).toHaveText('Exit');
+    await expect(page.getByRole('button', { name: 'Full screen', exact: true })).toHaveCount(0);
+    // The viewer fills the screen.
+    const box = (await root.boundingBox())!;
+    expect(box.width).toBeCloseTo(1440, 0);
+    expect(box.height).toBeCloseTo(900, 0);
+    await expect(page.getByRole('tablist', { name: 'Sheets' })).toBeVisible();
+    await expect(formulaBar(page)).toBeVisible();
+    await expect(grid).toBeVisible();
+    // The exit control sits at the right end of the tabs row.
+    const [e, t] = [(await exit.boundingBox())!, (await page.getByRole('tablist', { name: 'Sheets' }).boundingBox())!];
+    expect(e.x).toBeGreaterThan(t.x + t.width - 1);
+    expect(e.x + e.width).toBeGreaterThan(1440 - 24);
+    // Nothing else of the page shows: what is at the screen's top-left and bottom-right is the viewer's.
+    for (const [x, y] of [[4, 4], [1436, 896], [720, 450]]) {
+      expect(await page.evaluate(([px, py]) => !!document.elementFromPoint(px, py)?.closest('[data-full-screen]'), [x, y])).toBe(true);
+    }
+    await exit.click();
+    await expect(root).toHaveAttribute('data-full-screen', 'off');
+    await expect(page.getByRole('button', { name: 'Full screen' })).toBeVisible();
+    expect(errors).toEqual([]);
   });
 
   test('the arrows move the selection', async ({ page }) => {
@@ -340,23 +402,11 @@ test.describe('the working paper viewer at 390', () => {
     await expect(formulaBar(page)).toHaveText(`='${ELIM}'!G82`);
   });
 
-  test('the inspector is a bottom sheet and the tabs scroll', async ({ page }) => {
+  test('there is no inspector; the tabs scroll, and a ▸ says more sheets lie past the edge', async ({ page }) => {
     const { grid, errors } = await openViewer(page, `?sheet=${encodeURIComponent(SOFP)}&cell=D9`);
-    const inspector = page.getByRole('complementary', { name: 'Inspector' });
-    // Closed until asked for, on a phone.
-    await expect(inspector).toBeHidden();
-    await page.getByRole('button', { name: 'Open the inspector' }).click();
-    await expect(inspector).toBeVisible();
-    expect(await inspector.evaluate((e) => getComputedStyle(e).position)).toBe('fixed');
-    const box = (await inspector.boundingBox())!;
-    expect(box.x).toBeCloseTo(0, 0);
-    expect(box.width).toBeCloseTo(390, 0);
-    expect(Math.round(box.y + box.height)).toBe(844);
-    expect(box.height).toBeLessThanOrEqual(844 * 0.55 + 1);
-    await expect(inspector.locator('[data-inspector-formula]')).toHaveText('=D114+D53');
-    await inspector.getByRole('button', { name: 'Close the inspector' }).click();
+    await expect(page.getByRole('complementary')).toHaveCount(0);
+    await expect(formulaBar(page)).toHaveText('=D114+D53');
     await expectColumnAligned(grid, 'D5', 'D20');
-    await expect(inspector).toBeHidden();
 
     // The tabs: wider than the strip, scrolled to show the open one, and scrollable.
     const strip = page.getByRole('tablist', { name: 'Sheets' });
@@ -365,7 +415,13 @@ test.describe('the working paper viewer at 390', () => {
     expect(s.overflow).toBe('auto');
     expect(s.left).toBeGreaterThan(0);
     await expect(tab(page, SOFP)).toBeInViewport({ ratio: 1 });
+    const more = page.getByRole('button', { name: 'Show more sheets' });
+    await expect(more).toBeVisible();
+    const before = await strip.evaluate((e) => e.scrollLeft);
+    await more.click();
+    await expect.poll(() => strip.evaluate((e) => e.scrollLeft)).toBeGreaterThan(before);
     await strip.evaluate((e) => e.scrollTo(e.scrollWidth, 0));
+    await expect(more).toHaveCount(0);
     await expect(tab(page, 'WP Investment')).toBeInViewport({ ratio: 0.95 });
     await tab(page, 'WP Investment').click();
     await expect(tab(page, 'WP Investment')).toHaveAttribute('aria-selected', 'true');
