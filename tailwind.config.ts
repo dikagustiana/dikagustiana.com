@@ -19,6 +19,11 @@ export default {
       },
     },
     extend: {
+      // A mouse or a trackpad: the model grid's rows close up to 28px, and
+      // stay 44px under a finger (sheet-first PRD D-S3).
+      screens: {
+        "pointer-fine": { raw: "(pointer: fine)" },
+      },
       fontFamily: {
         // Read from CSS custom properties so the family is defined once, in
         // src/index.css, and never named inside a component.

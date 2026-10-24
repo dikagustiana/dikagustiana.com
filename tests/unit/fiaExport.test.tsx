@@ -76,7 +76,7 @@ describe('colours', () => {
 describe('the exported workbook', () => {
   it('names its sheets and its file after the model version', async () => {
     const { back, pkg } = await roundTrip('XCOA');
-    expect(back.worksheets.map((w) => w.name)).toEqual(['Read me', 'Reported', 'Model', 'Assumptions', 'Unit economics']);
+    expect(back.worksheets.map((w) => w.name)).toEqual(['Read me', 'Reported', 'Model', 'Assumptions', 'Unit economics', 'Checks']);
     expect(exportFileName(pkg)).toBe('XCOA-2025Q4-r1-SYNTHETIC.xlsx');
     expect(back.getWorksheet('Read me')!.getCell('B4').value).toContain('SYNTHETIC');
   });

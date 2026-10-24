@@ -19,6 +19,7 @@ import type { Workbook } from '../model/workbook';
 import { periodColumn, rowNumber } from '../model/workbook';
 import { denominatorState, unitScale } from '../unitEconomics';
 import { colLetter } from '../engine/address';
+import { CHECKS_FIRST_COLUMN, CHECKS_SHEET, checksHeader, checksRows } from '../view/checksSheet';
 
 export interface ExportInput {
   pkg: ModelPackage;
@@ -247,6 +248,33 @@ function writeUnitEconomics(ws: Worksheet, input: ExportInput, sheetName: (id: s
   ws.getRow(denomAt).font = { italic: true };
 }
 
+/**
+ * The Checks sheet (sheet-first PRD D-S4), written from the table the grid
+ * draws, at the same addresses: the model's figure is a live formula over the
+ * checked cell, the rest the package's own figures and words.
+ */
+function writeChecks(ws: Worksheet, input: ExportInput) {
+  const { pkg, wb, values } = input;
+  const header = ws.getRow(ADDRESSING.headerRow);
+  checksHeader().forEach((h, i) => (header.getCell(ADDRESSING.labelColumn + i).value = h));
+  header.font = { bold: true };
+  ws.getColumn(ADDRESSING.labelColumn).width = WIDTH.label;
+  ws.getColumn(ADDRESSING.unitColumn).width = WIDTH.unit;
+  ws.views = [{ state: 'frozen', xSplit: ADDRESSING.unitColumn, ySplit: ADDRESSING.headerRow }];
+  checksRows(pkg, wb, values).forEach((check, ri) => {
+    const r = ws.getRow(rowNumber(ri));
+    r.getCell(ADDRESSING.labelColumn).value = check.label;
+    r.getCell(ADDRESSING.unitColumn).value = check.unit;
+    check.cells.forEach((c, ci) => {
+      const target = r.getCell(CHECKS_FIRST_COLUMN + ci);
+      ws.getColumn(CHECKS_FIRST_COLUMN + ci).width = ci === check.cells.length - 1 ? WIDTH.driver : WIDTH.period;
+      if (c.formula) target.value = { formula: c.formula.replace(/^=/, ''), result: c.value ?? undefined } as ExcelCell['value'];
+      else target.value = c.value !== undefined ? c.value : c.text;
+      if (c.value !== undefined) target.numFmt = numFmt({ unit: check.unit });
+    });
+  });
+}
+
 /** Builds the workbook. ExcelJS arrives here, on demand. */
 export async function buildWorkbook(input: ExportInput, palette: Palette = paletteFromDocument()): Promise<ExcelWorkbook> {
   const { default: ExcelJS } = await import('exceljs');
@@ -260,6 +288,7 @@ export async function buildWorkbook(input: ExportInput, palette: Palette = palet
     writeSheet(book.addWorksheet(s.label), input, s.id, palette);
   }
   writeUnitEconomics(book.addWorksheet('Unit economics'), input, sheetName);
+  writeChecks(book.addWorksheet(CHECKS_SHEET.label), input);
   return book;
 }
 
