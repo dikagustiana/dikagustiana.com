@@ -21,6 +21,7 @@ export default function TheNextBigThing() {
 
   return (
     <PageLayout
+      width="reading"
       breadcrumbs={[
         { label: 'Home', path: '/' },
         { label: 'The Next Big Thing' },

@@ -59,6 +59,7 @@ export default function FinanceInActionIndex() {
 
   return (
     <PageLayout
+      width="reading"
       role="manager"
       breadcrumbs={[
         { label: 'Home', path: '/' },

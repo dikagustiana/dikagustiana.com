@@ -28,6 +28,7 @@ export default function FinanceInMotion() {
 
   return (
     <PageLayout
+      width="reading"
       role="manager"
       breadcrumbs={[
         { label: 'Home', path: '/' },

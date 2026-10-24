@@ -284,6 +284,7 @@ function TrackContent({ track }: { track: string }) {
   return (
     <PageLayout
       role="manager"
+      width="reading"
       breadcrumbs={[
         { label: 'Home', path: '/' },
         { label: 'Finance', path: '/finance' },

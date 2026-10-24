@@ -1,14 +1,12 @@
 import { PageLayout } from '@/components/layouts/PageLayout';
+import { PAGE_COLUMN } from '@/components/layouts/pageColumn';
 import { SEO } from '@/components/SEO';
 import { ConceptPanel } from '@/components/consolidation/ConceptPanel';
 import { ConsolidationProcessStep } from '@/components/consolidation/ConsolidationProcessStep';
 import { Link } from 'react-router-dom';
 import { WorkingPaperSection } from '@/components/workbook/WorkingPaperSection';
-import { CONSOLIDATION_TOPICS } from '@/config/consolidationTopics';
-import { useTopicCounts } from '@/hooks/queries/useTopicCounts';
 import { useConsolidationSeries } from '@/hooks/queries/useEssays';
 import { essayUrl } from '@/lib/essayUrl';
-import { sectionStanding } from '@/lib/sectionStanding';
 
 const PROCESS_STEPS = [
   { title: 'Individual Books', description: 'Each entity maintains its own complete set of financials.' },
@@ -19,12 +17,12 @@ const PROCESS_STEPS = [
 ];
 
 export default function ConsolidatedReporting() {
-  const { data: topicCounts, isSuccess: countsLoaded } = useTopicCounts('accounting');
   const { data: series = [] } = useConsolidationSeries();
 
   return (
     <PageLayout
       variant="content"
+      width="wide"
       breadcrumbs={[
         { label: 'Home', path: '/' },
         { label: 'Accounting', path: '/accounting' },
@@ -32,8 +30,8 @@ export default function ConsolidatedReporting() {
       ]}
     >
       <SEO title="Consolidated Reporting" description="How a parent and its subsidiaries combine into one set of financial statements under PSAK — elimination entries, non-controlling interests, and control procedures." />
-      <div className="container py-8">
-        <div className="max-w-6xl mx-auto">
+      <div className={`${PAGE_COLUMN.wide} py-8`}>
+        <div>
 
           {/* ── SECTION 1 — Hero ── */}
           <section className="mb-14">
@@ -105,7 +103,7 @@ export default function ConsolidatedReporting() {
           {/* The consolidation series, in part order: each essay is its own
               page. Hidden until one is published. */}
           {series.length > 0 && (
-            <section className="mb-14 max-w-3xl">
+            <section className="mb-14">
               <h2 className="text-2xl font-bold text-foreground mb-4">Consolidation series</h2>
               <ol className="divide-y divide-border border-y border-border">
                 {series.map((essay) => (
@@ -126,30 +124,6 @@ export default function ConsolidatedReporting() {
               </ol>
             </section>
           )}
-
-          {/* The nine topic pages essays are placed on. They were reachable
-              only by typing the URL; listed here with what each holds. */}
-          <section className="mb-14 max-w-3xl">
-            <h2 className="text-2xl font-bold text-foreground mb-4">Topics</h2>
-            <ul className="divide-y divide-border border-y border-border">
-              {CONSOLIDATION_TOPICS.map((topic) => (
-                <li key={topic.slug}>
-                  <Link
-                    to={`/accounting/consolidation/${topic.slug}`}
-                    className="group flex flex-col gap-1 py-3 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4"
-                  >
-                    <span className="font-medium text-foreground group-hover:text-accent transition-colors">
-                      {topic.title}
-                    </span>
-                    <span className="shrink-0 text-xs font-mono text-muted-foreground sm:text-right">
-                      {sectionStanding(countsLoaded, topicCounts?.[topic.slug])}
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </section>
-
         </div>
       </div>
     </PageLayout>

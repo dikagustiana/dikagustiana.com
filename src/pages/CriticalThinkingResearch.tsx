@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { PageLayout } from '@/components/layouts/PageLayout';
+import { PAGE_COLUMN } from '@/components/layouts/pageColumn';
 import { SEO } from '@/components/SEO';
 import { useSectionPhaseCounts } from '@/hooks/queries/useSectionPhaseCounts';
 import { sectionStanding } from '@/lib/sectionStanding';
@@ -35,6 +36,7 @@ export default function CriticalThinkingResearch() {
   return (
     <PageLayout
       variant="content"
+      width="reading"
       breadcrumbs={[
         { label: 'Home', path: '/' },
         { label: 'Critical Thinking' }
@@ -45,8 +47,8 @@ export default function CriticalThinkingResearch() {
         description="Four phases of working through a question: Clarify, Analyze, Construct, Apply."
       />
 
-      <div className="container py-8">
-        <div className="max-w-3xl">
+      <div className={`${PAGE_COLUMN.reading} py-8`}>
+        <div>
           <h1 className="text-3xl md:text-4xl font-display font-bold mb-8">
             Critical Thinking
           </h1>

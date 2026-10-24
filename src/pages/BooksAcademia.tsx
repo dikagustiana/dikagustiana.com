@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { PageLayout } from '@/components/layouts/PageLayout';
+import { PAGE_COLUMN } from '@/components/layouts/pageColumn';
 import { SEO } from '@/components/SEO';
 import { useBookCategories } from '@/hooks/queries/useBooks';
 import { ErrorState, LoadingState } from '@/components/states';
@@ -12,6 +13,7 @@ export default function BooksAcademia() {
 
   return (
     <PageLayout
+      width="reading"
       breadcrumbs={[
         { label: 'Home', path: '/' },
         { label: 'Books' }
@@ -22,8 +24,8 @@ export default function BooksAcademia() {
         description="Books read for this site's work, by subject."
       />
 
-      <div className="container py-8">
-        <div className="max-w-3xl">
+      <div className={`${PAGE_COLUMN.reading} py-8`}>
+        <div>
           <h1 className="text-3xl md:text-4xl font-display font-bold mb-4">
             Books
           </h1>

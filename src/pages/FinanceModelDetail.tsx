@@ -67,6 +67,7 @@ export default function FinanceModelDetail() {
 
   return (
     <PageLayout
+      width="reading"
       role="manager"
       breadcrumbs={[
         { label: 'Home', path: '/' },

@@ -39,6 +39,7 @@ export default function GreenTransition() {
 
   return (
     <PageLayout
+      width="reading"
       breadcrumbs={[
         { label: 'Home', path: '/' },
         { label: 'Green Transition' },

@@ -1,4 +1,5 @@
 import { PageLayout } from '@/components/layouts/PageLayout';
+import { PAGE_COLUMN } from '@/components/layouts/pageColumn';
 import { SEO } from '@/components/SEO';
 
 // Each entry below is a recurring problem, not a step: the order carries no
@@ -24,10 +25,10 @@ const PROBLEMS = [
 
 export default function StatutoryReporting() {
   return (
-    <PageLayout variant="content" breadcrumbs={[{ label: 'Home', path: '/' }, { label: 'Accounting', path: '/accounting' }, { label: 'Statutory Reporting' }]}>
+    <PageLayout variant="content" width="reading" breadcrumbs={[{ label: 'Home', path: '/' }, { label: 'Accounting', path: '/accounting' }, { label: 'Statutory Reporting' }]}>
       <SEO title="Statutory Reporting" description="Why each legal entity in an Indonesian group files its own accounts, and where book and tax part." />
-      <div className="flex-1 container py-8">
-        <div className="max-w-3xl">
+      <div className={`flex-1 ${PAGE_COLUMN.reading} py-8`}>
+        <div>
           <h1 className="text-3xl md:text-4xl font-display font-bold mb-4">
             Statutory Reporting
           </h1>
