@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+# hermes-run "<agent>" "<task label>" -- <hermes command ...>
+# Wraps one Hermes run so the owner's island sees it (PROGRESS-PRD.md phase 19): reports start,
+# runs the command unchanged, then reports done/failed with token counts.
+#
+# Token counts come from the terminal {"type":"result"} line that Hermes writes with
+# `--format stream-json`; without that flag the run is still reported, with 0 tokens ("—").
+# The command's stdout is passed through untouched and also kept in ~/hermes/runs/<run-id>.out.
+#
+# Example:
+#   hermes-run "FSRE · sandbox" "fs-intake — UNVR FY2025" -- \
+#     hermes -p fsre-sandbox chat --query-file brief.txt --format stream-json
+set -uo pipefail
+
+[ $# -ge 4 ] && [ "$3" = "--" ] || { echo 'usage: hermes-run "<agent>" "<task>" -- <command ...>' >&2; exit 2; }
+export AGENT="$1" TASK="$2"; shift 3
+
+hook="$HOME/hermes/hooks/report_run.sh"
+runs="$HOME/hermes/runs"; mkdir -p "$runs"
+export RUN_ID="$(date -u +%Y%m%dT%H%M%SZ)-$(cat /proc/sys/kernel/random/uuid | cut -c1-8)"
+out="$runs/$RUN_ID.out"
+
+"$hook" start
+
+# A killed wrapper still ends the run as failed instead of leaving it "running" until it goes stale.
+finish() {
+  local rc=$1 result=""
+  result=$(grep -a '^{"type": *"result"' "$out" 2>/dev/null | tail -1)
+  if [ -n "$result" ]; then
+    export TOKENS_IN=$(jq -r '.tokens.input // 0' <<<"$result" 2>/dev/null || echo 0)
+    export TOKENS_OUT=$(jq -r '.tokens.output // 0' <<<"$result" 2>/dev/null || echo 0)
+    local rexit err
+    rexit=$(jq -r '.exit_code // 0' <<<"$result" 2>/dev/null || echo 0)
+    err=$(jq -r '.error // empty' <<<"$result" 2>/dev/null | head -1)
+    [ "$rc" -eq 0 ] && [ "$rexit" != "0" ] && rc=$rexit
+    [ -n "$err" ] && export ERROR="${err:0:300}"
+  fi
+  if [ "$rc" -eq 0 ]; then
+    export STATUS=done; unset ERROR
+  else
+    export STATUS=failed; export ERROR="${ERROR:-exit $rc}"
+  fi
+  "$hook" end
+}
+trap 'finish 130; exit 130' INT
+trap 'finish 143; exit 143' TERM HUP
+
+"$@" | tee "$out"
+rc=${PIPESTATUS[0]}
+trap - INT TERM HUP
+finish "$rc"
+exit "$rc"
