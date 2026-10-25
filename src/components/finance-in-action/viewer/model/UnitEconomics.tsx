@@ -18,7 +18,7 @@ import { abbreviateSources, sourcedInputs, summariseSources } from '@/lib/financ
 import { periodById } from '@/lib/finance-in-action/model/periods';
 import type { Registry } from '@/lib/finance-in-action/registry';
 import { PER_UNIT_DECIMALS, barValue, extent, plural, type UEBar, type UEView } from '@/lib/finance-in-action/unitEconomics';
-import { currencyOf, groupedBars, peerFigure } from '@/lib/finance-in-action/canonical';
+import { canonicalOf, currencyOf, groupedBars, peerFigure } from '@/lib/finance-in-action/canonical';
 import { publishedPeers } from '@/lib/finance-in-action/peers';
 import { GroupedBar } from './GroupedBar';
 import { COMPARISON_CURRENCY, fxCaption, type FxRate } from '@/lib/finance-in-action/fx';
@@ -279,11 +279,16 @@ export function UnitEconomics({
                       </td>
                       {pairs.map((p) => {
                         const modelled = !!p.pkg && p.pkg.meta.status === 'published';
-                        const v = modelled ? peerFigure(pkg, bar.line, p.pkg!, periodId, rates).value : null;
+                        // Lines that share one identity (PTBA's mining services and fuel are both "mining") take the peer's figure once, on the first of them.
+                        const c = canonicalOf(pkg, bar.line);
+                        const first = !c || ue.bars.find((b) => canonicalOf(pkg, b.line) === c)?.line.id === bar.line.id;
+                        const v = modelled && first ? peerFigure(pkg, bar.line, p.pkg!, periodId, rates).value : null;
                         const reduces = bar.line.role === 'cost' || bar.line.role === 'unsplit';
                         return (
                           <td key={p.ticker} className="px-3 py-2 text-right">
-                            {v === null ? (
+                            {modelled && !first ? (
+                              <span className="text-muted-foreground">{COPY.withLineAbove}</span>
+                            ) : v === null ? (
                               <span className="text-muted-foreground">{modelled ? COPY.notComparable : COPY.notYetModelled}</span>
                             ) : (
                               formatNumber(reduces ? -v : v, PER_UNIT_DECIMALS)
