@@ -56,6 +56,35 @@ Owner items still pending:
 - the three decisions from the auth tab-focus session (listed in that entry);
 - WO-R05's three open decisions (listed in its entry).
 
+## 2026-10-25 (FoK finance-layout session) — Foundations of Knowing laid out as a Finance track
+
+Branch `feat/fok-finance-layout`. Display only: no database write, no essay, title or slug changed.
+
+- **Shared components.** The track-index pieces of `FinanceTrackIndex.tsx` (header, collapsible
+  module row, essay row, the colon title split) moved to
+  `src/components/curriculum/CurriculumModules.tsx` and take their data from props: a padded
+  number label, a title, an optional one-line thesis, an optional anchor id, and essays whose
+  public `href` the page resolves. `SimpleModuleRow` (Finance only) stays in the Finance page.
+- **Finance is unchanged.** Before/after screenshots of Fundamentals and Strategic Finance,
+  collapsed and with a module open, desktop (1280) and phone (390), are pixel-identical (8/8).
+  Finance passes no thesis and no anchor, so its row takes the exact old markup path.
+- **/foundations-of-knowing** is one page of ten part rows (00–09, label, thesis from
+  `FOUNDATIONS_PARTS[].thesis`, "n of N published" counted from `essay_structure`), essays inside
+  in `sort_order`. Header: section name, `sections.manifesto`, "n written, m planned", the
+  curriculum note — as a Finance track's header. Stubs are inert, as in Finance; a published
+  essay links to `/foundations-of-knowing/:part/:slug`.
+- **/foundations-of-knowing/:part** renders the same page with that part open and scrolled under
+  the header (row id `part-<id>`). An unknown part still lands on the section page.
+  `CriticalThinkingPhase.tsx` is deleted; its route now renders `CriticalThinkingResearch`.
+- **The thesis on a phone** takes the row's full width under the title (two lines at most); from
+  `sm` up it sits under the title on one line.
+- Evidence: typecheck, eslint (0 errors), 1661 unit tests (new `tests/unit/curriculumModules.test.tsx`),
+  `npm run build`; a Playwright check of parts, labels, counts 2/6/5/6/7/5/7/6/6/6, toggle, deep
+  link, colon split, inert stubs, no horizontal overflow and no console errors, on both widths.
+  Screenshots: `docs/prd/foundations-of-knowing/shots/finance-layout-*.png`.
+- Note for local runs: with a real `.env` present, `tests/unit/fiaModelPage.test.tsx` fails one
+  case on `main` too; CI has no `.env`.
+
 ## 2026-10-24 (Foundations of Knowing session) — Critical Thinking renamed and seeded; Development Finance folded into The Next Big Thing
 
 Owner's PRD: `docs/prd/foundations-of-knowing/PRD.md`; what shipped, the deviations and the

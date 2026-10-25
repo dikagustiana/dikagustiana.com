@@ -42,7 +42,6 @@ const TransitionChartDetail = lazy(() => import("./pages/TransitionChartDetail")
 
 // Foundations of Knowing (the critical-thinking section; the files keep its slug's name)
 const CriticalThinkingResearch = lazy(() => import("./pages/CriticalThinkingResearch"));
-const CriticalThinkingPhase = lazy(() => import("./pages/CriticalThinkingPhase"));
 const CriticalThinkingEssay = lazy(() => import("./pages/CriticalThinkingEssay"));
 
 // Learning
@@ -285,7 +284,8 @@ const App = () => (
 
             {/* Foundations of Knowing (section slug: critical-thinking) */}
             <Route path="/foundations-of-knowing" element={<CriticalThinkingResearch />} />
-            <Route path="/foundations-of-knowing/:part" element={<CriticalThinkingPhase />} />
+            {/* A part opens its row on the section page (CriticalThinkingResearch). */}
+            <Route path="/foundations-of-knowing/:part" element={<CriticalThinkingResearch />} />
             <Route path="/foundations-of-knowing/:phase/:essayId" element={<CriticalThinkingEssay />} />
             {/* The old address, segment for segment. 301 in vercel.json; these
                 are the in-app fallback, as above. */}
