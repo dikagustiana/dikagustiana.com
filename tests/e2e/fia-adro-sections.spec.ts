@@ -11,7 +11,7 @@ import { fileURLToPath } from 'node:url';
  * mocked Data API like every other call (playwright.fia.config.ts).
  *
  * The JISDOR rate below is a TEST number, not Bank Indonesia's: it stands in
- * for fia.fx_rates, whose seed is pending, so PTBA's rupiah can be drawn.
+ * for fia.fx_rates, so the test does not depend on the seed in production.
  */
 
 const PAGE = '/finance/finance-in-action/adro';
