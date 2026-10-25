@@ -61,6 +61,8 @@ straight through without stopping at each one.
 - **Files kept, not renamed.** The PRD's hard rule allows deleting only Development Finance
   files. The new pages were therefore written into `CriticalThinkingResearch.tsx`,
   `CriticalThinkingPhase.tsx` and `CriticalThinkingEssay.tsx`. Their names follow the slug.
+  (2026-10-25: the part page was folded into the section page, which now opens and scrolls to
+  the part; `CriticalThinkingPhase.tsx` is gone. See SESSION_LOG.)
 - **Work branch.** The work went on the session's designated branch, not
   `feat/foundations-of-knowing`. A PR was opened and nothing was merged.
 
