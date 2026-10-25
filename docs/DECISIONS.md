@@ -5,6 +5,34 @@ alternatives. Newest first.
 
 ---
 
+# 2026-10-25 — Progress feed: two token-gated RPCs, no edge function
+
+Spec: `docs/progress-feed/PROGRESS-PRD.md` (phase 18). The owner's desktop island reads writing, FSRE
+and agent-run progress; the Hermes VPS reports agent runs. Migrations
+`20261025120000_progress_feed.sql` and `20261025120100_progress_feed_fixes.sql`, applied with
+`apply_migration` on 25 Oct.
+
+- **RPCs, not the PRD's edge functions.** The PRD asked for `progress-feed` and `agent-run-report` edge
+  functions with their own bearer tokens and a service-role client inside. Neither caller is a site
+  user, so those functions would need `verify_jwt = false` plus a service-role client, the combination
+  `supabase/config.toml` forbids. Instead `public.progress_feed()` (GET) and
+  `public.agent_run_report(run jsonb)` (POST) are `SECURITY DEFINER`, `search_path = ''`, executable by
+  `anon` only, and each starts with `progress.require_token`, which compares the SHA-256 of the
+  `x-progress-token` header with the stored hash and raises PT401 (HTTP 401) otherwise. Callers send
+  the publishable key on `apikey` and nothing else privileged.
+- **Unexposed schema.** `progress.agent_runs` and `progress.tokens` live in `progress`, which
+  PostgREST does not expose (PGRST106, measured) and on which `anon`/`authenticated` have no USAGE.
+  RLS is on, with no policies. Nothing new in `public` except the two functions.
+- **Tokens are hashes only.** `progress.tokens` holds `('feed', sha256)` and `('report', sha256)`;
+  the plaintext lives on the island (DPAPI-sealed) and in the VPS env file. Rotate with the insert …
+  on conflict in the migration header. The feed token cannot write and the report token cannot read.
+- **No essay body leaves the database.** Word counts are computed in SQL (tags stripped, whitespace
+  tokens). The feed carries titles, sections, statuses, counts and agent task labels.
+- **Rejected:** a third secret in Supabase function secrets (needs the dashboard, and the function
+  would still need a privileged client); exposing `progress` as a schema (RLS would be its only lock).
+
+---
+
 # 2026-10-24 — Books on R2: signed URLs, no public bucket
 
 Runbook and values: `docs/books/R2-RUNBOOK.md`. A free book's file moves from the public Supabase `books`
