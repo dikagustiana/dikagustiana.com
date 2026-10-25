@@ -160,9 +160,16 @@ const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 
 const SPAN: Record<number, string> = { 3: 'Q1', 6: 'H1', 9: '9M', 12: 'FY' };
 const YEAR_DIGITS = 2;
 
-/** A document's short name from the first date in its title: "… 31 March 2026 and …" is "Q1 26". Null when it names none. */
+/**
+ * A document's short name from the first date in its title, written day first
+ * ("… 31 March 2026 and …") or month first ("… as of June 30, 2026 …"): "Q1 26",
+ * "H1 26". Null when it names none.
+ */
 export function documentShort(document: string): string | null {
-  const m = new RegExp(`\\b\\d{1,2} (${MONTHS.join('|')}) (\\d{4})\\b`).exec(document);
+  const months = MONTHS.join('|');
+  const dayFirst = new RegExp(`\\b\\d{1,2} (${months}) (\\d{4})\\b`).exec(document);
+  const monthFirst = new RegExp(`\\b(${months}) \\d{1,2}, (\\d{4})\\b`).exec(document);
+  const m = [dayFirst, monthFirst].filter((x): x is RegExpExecArray => !!x).sort((a, b) => a.index - b.index)[0];
   if (!m) return null;
   const span = SPAN[MONTHS.indexOf(m[1]) + 1];
   return span ? `${span} ${m[2].slice(-YEAR_DIGITS)}` : null;

@@ -31,6 +31,7 @@ export const COPY = {
   notYetModelled: 'not yet modelled',
   notAvailable: 'not yet available',
   notComparable: 'not comparable',
+  withLineAbove: 'in the line above',
   fxCaption: (ticker: string, period: string, rate: string) => `${ticker} converted at BI JISDOR ${period} average ${rate} IDR/USD.`,
   fxMissing: (ticker: string, period: string) => `${ticker} reports in rupiah and no BI JISDOR rate is loaded for ${period}, so its figures are not compared.`,
   feeds: 'Feeds',

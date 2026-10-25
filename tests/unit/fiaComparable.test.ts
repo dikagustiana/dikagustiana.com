@@ -171,3 +171,11 @@ describe('the grouped bar (item 4)', () => {
     expect(groupedBars(pkg('ADRO'), PKGS, 'FY25', [])!.groups[0].values[3]).toBeNull();
   });
 });
+
+describe('the source column, month-first dates (PTBA\'s statements)', () => {
+  it('reads "as of June 30, 2026" as H1 26', async () => {
+    const { documentShort } = await import('@/lib/finance-in-action/model/explain');
+    expect(documentShort('Interim consolidated financial statements as of June 30, 2026 and for the six-month period then ended')).toBe('H1 26');
+    expect(documentShort('Consolidated financial statements as of December 31, 2025 and 2024')).toBe('FY 25');
+  });
+});
