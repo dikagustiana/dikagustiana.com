@@ -138,22 +138,25 @@ test.beforeEach(async ({ page }) => seed(page));
 /**
  * Thirty seconds, after the owner deleted the entrance that used to run them.
  *
- * The hero, its artwork and the argument block are gone from the top of the
- * landing page; the map is the first thing under the header, and the reader
- * goes deeper into a relation through the essays. So the thirty-second
- * journey is: meet the structure, pick something, land on a written piece.
- * The argument block, moved under the glimpse when About went (owner
- * decision D4(a), 2026-10-10), was removed from the homepage by owner
- * decision on 2026-10-11.
+ * The old hero, its artwork and the argument block are gone from the top of
+ * the landing page. Since 2026-10-29 the Weave Hero states the thesis in two
+ * lines and the map follows it directly; the reader goes deeper into a
+ * relation through the essays. So the thirty-second journey is: read the
+ * thesis, meet the structure, pick something, land on a written piece. The
+ * argument block, moved under the glimpse when About went (owner decision
+ * D4(a), 2026-10-10), was removed from the homepage by owner decision on
+ * 2026-10-11.
  */
-test('thirty seconds: the map is the entrance, and a completed piece is one click away', async ({ page }) => {
+test('thirty seconds: the thesis, then the map, and a completed piece is one click away', async ({ page }) => {
   await page.goto('/');
 
-  // Nothing precedes the map, and no call to action stands in front of it.
-  await expect(page.getByRole('heading', { name: 'The industry chain', exact: true })).toBeVisible();
+  // The hero's headline, then the map; no call to action stands between them.
+  await expect(page.getByRole('heading', { name: 'Spreading intelligence. Rebuilding manufacturing.', level: 1 })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'The industry chain', exact: true })).toBeAttached();
   await expect(page.getByRole('link', { name: /Start with the argument/i })).toHaveCount(0);
-  const first = page.locator('main :is(h1, h2, h3)').first();
-  expect(await first.textContent()).toBe('The industry chain');
+  const headings = page.locator('main :is(h1, h2, h3)');
+  expect(await headings.first().textContent()).toBe('Spreading intelligence. Rebuilding manufacturing.');
+  expect(await headings.nth(1).textContent()).toBe('The industry chain');
 
   const flagship = page
     .getByRole('link', { name: /Indonesia.s Reindustrialization Bet/i })
@@ -187,10 +190,12 @@ test('an old About link lands on the homepage, with the address and the fragment
   await page.goto('/about#industry-chain');
   await expect.poll(() => new URL(page.url()).pathname).toBe('/');
   expect(new URL(page.url()).hash).toBe('#industry-chain');
-  const heading = page.locator('#industry-chain h1');
+  // The map's title is an h2 under the hero's h1 (2026-10-29); the jump
+  // passes the hero and lands on the map.
+  const heading = page.locator('#industry-chain h2').first();
   await expect(heading).toBeInViewport();
   await expect
-    .poll(() => page.evaluate(() => document.querySelector('#industry-chain h1')!.getBoundingClientRect().top - document.querySelector('header')!.getBoundingClientRect().bottom))
+    .poll(() => page.evaluate(() => document.querySelector('#industry-chain h2')!.getBoundingClientRect().top - document.querySelector('header')!.getBoundingClientRect().bottom))
     .toBeGreaterThanOrEqual(0);
 });
 

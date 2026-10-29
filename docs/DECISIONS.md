@@ -5,6 +5,66 @@ alternatives. Newest first.
 
 ---
 
+# 2026-10-29 — The Weave Hero, Phase 1
+
+Spec: `docs/hero-weave-prd.md` (owner, 29 October 2026; Design and Architecture binding). The homepage now
+opens on a hero: the thesis on the left, "Spreading intelligence. Rebuilding manufacturing." over "Exploring
+how to accelerate both.", and on the right a woven cloth drawn as SVG, 14 navy warp threads (intelligence)
+and 6 terracotta weft threads (manufacturing) in plain weave, their loose ends moving. The verification,
+criterion by criterion, is `docs/hero-weave/verification.md`.
+
+- **The map is no longer the first thing on the page.** It follows the hero directly, and its title is an
+  `h2` under the hero's `h1` (`IndustryChainPreview`, both the schematic and the world slot). This
+  supersedes "nothing precedes the map" (2026-09-14 v5 and the 2026-10-11 entries); the owner's PRD
+  replaces it. Nothing else on the page moves.
+- **Files.** `src/components/hero/WeaveHero.tsx` (layout, copy, tokens, breakpoint switch) and
+  `src/components/hero/weave/`: `geometry.ts` and `motion.ts` pure and unit-tested, `rng.ts` (mulberry32),
+  `config.ts` (both compositions), `WeaveSvg.tsx` (one rAF loop writing only the loose paths' `d` and the
+  nodes' `cx`/`cy` through refs), `useAnimationGate.ts` (reduced motion, under 10% in view, hidden tab).
+  No animation or canvas library.
+- **The headline is wider than the PRD's 45%.** At the specified size, `clamp(2.25rem, 4.5vw, 4rem)` in
+  Source Serif 4, "Rebuilding manufacturing." is about 13em, some 58% of the width at 4.5vw (836px at 1440).
+  The PRD's two lines win: the block is as wide as its lines, and the composition is fitted to it
+  (`fitComposition`): anchored bottom-right, as large as the hero's height allows, allowed to run past the
+  right edge by up to 10% of the woven width, and scaled down before any thread comes within 40px (28px on
+  a tablet) of the text. At 1440 × 900 it is drawn at 0.84 px per unit, 93% of the hero's own 0.9, and
+  runs 50px past the right edge; at 1920 × 1080 and wider, at full scale. The tablet's "widens to 60%" is
+  met by the same rule: the block is its lines' width.
+- **The warps reach the top edge at every size.** When the fitted composition is shorter than the hero,
+  the loose warps are drawn on above the canvas (their motion at full amplitude there), so they still
+  enter from the hero's top edge.
+- **Weft weave entry at x = 990, not ≈ 1020.** The first warp stands at x = 1000; a weft woven only from
+  1020 would cross it while still loose. From 990, every crossing is a static one.
+- **Over-under** is the knot diagram the PRD gives. Each patch runs one unit past its background gap at
+  both ends, so the gap's anti-aliased edge never shows across the warp as a hairline. The weft's fibre is
+  its own path per weft, its dashes centred on a gap at the weave entry, so the woven and the loose fibre,
+  drawn away from that point in opposite directions, read as one dashed line.
+- **Dark values wait for the site's dark mode.** They are set with Tailwind's `dark:` variant, the site's
+  configured mechanism (`darkMode: ["class"]`), and the site is light only (2026-10-09): no element carries
+  `dark`, so readers see the light hero. Verified by setting the class by hand.
+- **Readable without JavaScript.** The app has no SSR, so `index.html` carries the headline and subline in
+  a `<noscript>` block styled from `src/index.css`. `index.html` is the shell of every route, so a reader
+  with JavaScript off sees it wherever they land (before, a blank page).
+- **Font.** `@fontsource/source-serif-4`, the latin 500 face only, imported at the top of `src/index.css`
+  (`--font-hero`, Tailwind `font-hero`) and preloaded in `index.html`; Vite rewrites the preload to the
+  same hashed file the `@font-face` names. The preload is in the shared shell, so other routes fetch the
+  21.5 KB file too.
+- **Mobile.** The PRD gives the 900 × 900 composition's purpose, not its numbers: 10 warps, 5 wefts, the
+  woven corner from (400, 380), free ends at y ≈ 120 and x ≈ 110, strokes about 1.5× the desktop's so they
+  read at a phone's scale (`config.ts`). The headline wraps there: at its 36px floor, two lines do not fit
+  a phone.
+- **Not checked against `docs/hero-reference.png`:** the image was neither in the repository nor in the
+  brief. The composition follows the written illustration spec.
+- **Branch.** The brief asked for `feat/weave-hero`; this session pushes only to its assigned branch,
+  `claude/sweet-feynman-irzrdh`.
+
+Tests: `tests/unit/weaveGeometry.test.ts` (15), `weaveMotion.test.ts` (7), `weaveHero.test.tsx` (8);
+`homePage.test.tsx` and `worldShell.test.tsx` updated for the hero first and the map's `h2`; e2e
+`journeys` and `chain` the same (the world spec's `h1` is the Kawasan page's own, untouched).
+`MIN_TESTS` 1654 → 1691.
+
+---
+
 # 2026-10-24 — Books on R2: signed URLs, no public bucket
 
 Runbook and values: `docs/books/R2-RUNBOOK.md`. A free book's file moves from the public Supabase `books`

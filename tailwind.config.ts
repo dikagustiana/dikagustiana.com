@@ -30,6 +30,7 @@ export default {
         sans: ["var(--font-sans)"],
         serif: ["var(--font-serif)"],
         display: ["var(--font-display)"],
+        hero: ["var(--font-hero)"],
       },
       colors: {
         border: "hsl(var(--border))",

@@ -42,7 +42,8 @@ describe('flag off', () => {
   it('is off in tests as in production, and the wrappers render the schematic with no world markup', () => {
     expect(WORLD_KAWASAN).toBe(false);
     mount(<IndustryChainPreview />);
-    expect(screen.getByRole('heading', { name: CHAIN_COPY.title, level: 1 })).toBeInTheDocument();
+    // an h2 under the homepage hero's h1 (2026-10-29)
+    expect(screen.getByRole('heading', { name: CHAIN_COPY.title, level: 2 })).toBeInTheDocument();
     expect(document.querySelector('[class*="world-"]')).toBeNull();
     expect(document.querySelector('canvas')).toBeNull();
     document.body.innerHTML = '';
