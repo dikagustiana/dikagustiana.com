@@ -1,0 +1,243 @@
+{
+  "ac1.js": {
+    "text": "Spreading intelligence. Rebuilding manufacturing.",
+    "h1Count": 1,
+    "userSelect": "auto",
+    "selected": "Spreading intelligence. Rebuilding manufacturing."
+  },
+  "ac1.noJs": {
+    "noscriptBlocks": 1,
+    "h1": "Spreading intelligence. Rebuilding manufacturing.",
+    "visible": true
+  },
+  "ac2": {
+    "looseWarps": 14,
+    "looseWefts": 6,
+    "wovenAndPatches": 10,
+    "uses": 12,
+    "nodes": 22
+  },
+  "ac3": {
+    "pathWritesPerSecond": 3840,
+    "wovenRegionPx": [
+      986,
+      520,
+      1440,
+      875
+    ],
+    "wovenChangedPixels": {
+      "changed": 0,
+      "total": 322340
+    },
+    "looseRegionChangedPixels": {
+      "changed": 57773,
+      "total": 486360
+    }
+  },
+  "ac3.seam": [
+    {
+      "warpsScanned": 11,
+      "backgroundPixelsOnWarpCentrelineThroughEntry": 0,
+      "weftsScanned": 6,
+      "backgroundPixelsAlongWeftThroughEntry": 0
+    },
+    {
+      "warpsScanned": 11,
+      "backgroundPixelsOnWarpCentrelineThroughEntry": 0,
+      "weftsScanned": 6,
+      "backgroundPixelsAlongWeftThroughEntry": 0
+    },
+    {
+      "warpsScanned": 11,
+      "backgroundPixelsOnWarpCentrelineThroughEntry": 0,
+      "weftsScanned": 6,
+      "backgroundPixelsAlongWeftThroughEntry": 0
+    },
+    {
+      "warpsScanned": 11,
+      "backgroundPixelsOnWarpCentrelineThroughEntry": 0,
+      "weftsScanned": 6,
+      "backgroundPixelsAlongWeftThroughEntry": 0
+    }
+  ],
+  "ac4": {
+    "visibleCrossings": 66,
+    "correct": 66,
+    "wrong": []
+  },
+  "ac5": {
+    "motionAttr": "still",
+    "writesIn2s": 0,
+    "screenshotsIdentical": true
+  },
+  "ac6": {
+    "running": 2304,
+    "fivePercentInView": {
+      "attr": "still",
+      "writes": 0
+    },
+    "fifteenPercentInView": {
+      "attr": "running",
+      "writes": 2304
+    },
+    "hiddenTab": {
+      "attr": "still",
+      "writes": 0
+    },
+    "visibleAgain": {
+      "attr": "running",
+      "writes": 2304
+    }
+  },
+  "ac7.cpu1x": {
+    "frames": 300,
+    "meanFrameMs": 16.62,
+    "fps": 60.2,
+    "p95FrameMs": 16.7,
+    "over20ms": 0,
+    "attributeWritesIn50ms": 192
+  },
+  "ac7.cpu4x": {
+    "frames": 300,
+    "meanFrameMs": 16.69,
+    "fps": 59.9,
+    "p95FrameMs": 16.7,
+    "over20ms": 1,
+    "attributeWritesIn50ms": 192
+  },
+  "ac7.mainThread.cpu4x": {
+    "seconds": 3.01,
+    "scriptMsPerSecond": 157.3,
+    "taskMsPerSecond": 472.3,
+    "layoutMsPerSecond": 21.4,
+    "styleMsPerSecond": 129.6
+  },
+  "ac8": [
+    {
+      "viewport": "360x740",
+      "layout": "stacked",
+      "scrollWidth": 360,
+      "minTextToThreadPx": 87.7
+    },
+    {
+      "viewport": "375x812",
+      "layout": "stacked",
+      "scrollWidth": 375,
+      "minTextToThreadPx": 139.9
+    },
+    {
+      "viewport": "414x896",
+      "layout": "stacked",
+      "scrollWidth": 414,
+      "minTextToThreadPx": 184.5
+    },
+    {
+      "viewport": "639x900",
+      "layout": "stacked",
+      "scrollWidth": 639,
+      "minTextToThreadPx": 102.6
+    },
+    {
+      "viewport": "640x900",
+      "layout": "side",
+      "scrollWidth": 640,
+      "minTextToThreadPx": 29
+    },
+    {
+      "viewport": "700x900",
+      "layout": "side",
+      "scrollWidth": 700,
+      "minTextToThreadPx": 30.1
+    },
+    {
+      "viewport": "768x1024",
+      "layout": "side",
+      "scrollWidth": 768,
+      "minTextToThreadPx": 32.5
+    },
+    {
+      "viewport": "820x1180",
+      "layout": "side",
+      "scrollWidth": 820,
+      "minTextToThreadPx": 34.2
+    },
+    {
+      "viewport": "844x390",
+      "layout": "side",
+      "scrollWidth": 844,
+      "minTextToThreadPx": 72.1
+    },
+    {
+      "viewport": "1000x800",
+      "layout": "side",
+      "scrollWidth": 1000,
+      "minTextToThreadPx": 30.8
+    },
+    {
+      "viewport": "1023x768",
+      "layout": "side",
+      "scrollWidth": 1023,
+      "minTextToThreadPx": 36.1
+    },
+    {
+      "viewport": "1024x768",
+      "layout": "side",
+      "scrollWidth": 1024,
+      "minTextToThreadPx": 44
+    },
+    {
+      "viewport": "1024x1366",
+      "layout": "side",
+      "scrollWidth": 1024,
+      "minTextToThreadPx": 49.7
+    },
+    {
+      "viewport": "1280x720",
+      "layout": "side",
+      "scrollWidth": 1280,
+      "minTextToThreadPx": 43.7
+    },
+    {
+      "viewport": "1280x1024",
+      "layout": "side",
+      "scrollWidth": 1280,
+      "minTextToThreadPx": 44.1
+    },
+    {
+      "viewport": "1366x768",
+      "layout": "side",
+      "scrollWidth": 1366,
+      "minTextToThreadPx": 43.6
+    },
+    {
+      "viewport": "1440x900",
+      "layout": "side",
+      "scrollWidth": 1440,
+      "minTextToThreadPx": 60.6
+    },
+    {
+      "viewport": "1536x864",
+      "layout": "side",
+      "scrollWidth": 1536,
+      "minTextToThreadPx": 44.1
+    },
+    {
+      "viewport": "1920x1080",
+      "layout": "side",
+      "scrollWidth": 1920,
+      "minTextToThreadPx": 107.9
+    },
+    {
+      "viewport": "2560x1440",
+      "layout": "side",
+      "scrollWidth": 2560,
+      "minTextToThreadPx": 221.3
+    },
+    {
+      "viewport": "1280x600",
+      "layout": "side",
+      "scrollWidth": 1280,
+      "minTextToThreadPx": 83.8
+    }
+  ]
+}

@@ -2,6 +2,7 @@ import { PageLayout } from '@/components/layouts/PageLayout';
 import { SEO } from '@/components/SEO';
 import { useSelectedEssays } from '@/hooks/queries/useSelectedEssays';
 import { IndustryChainPreview } from '@/components/industry-chain';
+import { WeaveHero } from '@/components/hero/WeaveHero';
 import { Glimpse } from '@/components/home/Glimpse';
 import { useFragmentOnArrival } from '@/hooks/useFragmentOnArrival';
 
@@ -29,9 +30,12 @@ const Index = () => {
         description="Finance, accounting, and green transition economics. Research and analysis by Dika Gustiana."
       />
 
-      {/* THE MAP IS THE PAGE. It is the first thing under the header, and
-          nothing precedes it: no hero, no artwork, no argument block, no
-          reading path, no opening case. A reader meets the structure of
+      {/* The Weave Hero (docs/hero-weave-prd.md, owner request 2026-10-29):
+          the thesis, and the cloth it is drawn as. It carries the page's h1,
+          so the map under it titles itself with an h2. */}
+      <WeaveHero />
+
+      {/* The map, directly under the hero. A reader meets the structure of
           economic activity, picks the relation that interests them, and goes
           to an essay for the depth. See docs/response-2026-09-14-v5/.
           With the world flag on (VITE_WORLD_KAWASAN) this slot is the
@@ -39,7 +43,8 @@ const Index = () => {
 
           What stood here before was moved under the glimpse first; the
           argument, its reading path and the revision of judgment were then
-          removed by owner decision on 2026-10-11 (docs/DECISIONS.md). */}
+          removed by owner decision on 2026-10-11 (docs/DECISIONS.md). Until
+          2026-10-29 nothing preceded the map. */}
       <IndustryChainPreview />
 
       {/* The glimpse: every published essay, the starred ones first in the

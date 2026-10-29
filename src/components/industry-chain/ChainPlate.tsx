@@ -210,11 +210,11 @@ export function ChainPlate({
   /** `preview` opens short and expands in place; `full` is the whole chain from the start. */
   variant?: 'full' | 'preview';
   /**
-   * The rank of the map's own title. On the landing page nothing precedes the
-   * map, so the map's title IS the page's main heading and this is `h1`;
-   * under a page's own heading (as on About, until the owner removed it) it
-   * stays `h2`. A prop rather than a guess, because the component cannot see
-   * what is above it.
+   * The rank of the map's own title: `h2` under a page's own heading, which
+   * is now everywhere it is mounted (the landing page's is the Weave Hero's,
+   * since 2026-10-29); `h1` where the map would be the page's main heading.
+   * A prop rather than a guess, because the component cannot see what is
+   * above it.
    */
   heading?: 'h1' | 'h2';
   /**
@@ -553,10 +553,9 @@ export function ChainPlate({
       data-isolate={isolate ? selected ?? undefined : undefined}
     >
       <header className="max-w-3xl">
-        {/* The map's own heading. On the landing page nothing precedes it, so
-            it is the page's h1; under a page's own heading it is an h2. A
-            title, not a hero: no artwork, no reserved empty space, no call
-            to action. */}
+        {/* The map's own heading: an h2 under the page's own (the landing
+            page's is the Weave Hero's). A title, not a hero: no artwork, no
+            reserved empty space, no call to action. */}
         <Heading className="font-display text-2xl font-semibold leading-tight tracking-tight text-foreground md:text-3xl [text-wrap:balance]">
           {CHAIN_COPY.title}
         </Heading>
@@ -845,17 +844,17 @@ export function IndustryChainSection() {
 }
 
 /**
- * The map at the top of the landing page, opening at the overview.
+ * The map on the landing page, opening at the overview.
  *
- * Nothing precedes it — there is no hero and no argument block above it any
- * more — so its title carries the page's main heading.
+ * The Weave Hero above it carries the page's main heading (2026-10-29), so
+ * the map's title is an h2.
  */
 export function IndustryChainPreview() {
-  if (__WORLD_KAWASAN__) return <WorldSlot variant="preview" heading="h1" Schematic={ChainPlate} />;
+  if (__WORLD_KAWASAN__) return <WorldSlot variant="preview" heading="h2" Schematic={ChainPlate} />;
   return (
     <section id="industry-chain" className="border-b border-border py-12">
       <div className="container">
-        <ChainPlate variant="preview" heading="h1" />
+        <ChainPlate variant="preview" heading="h2" />
       </div>
     </section>
   );

@@ -397,16 +397,17 @@ test('/ at 1280px opens at the overview, with the map first on the page and the 
   await expect(page.locator('svg.cp-svg--compact')).toHaveCount(1);
   await expect(page.locator('svg.cp-svg--wide')).toHaveCount(0);
 
-  // NOTHING PRECEDES THE MAP. The hero, its artwork, the argument block and
-  // the reading path are gone from the entrance by owner decision, so the
-  // map's own title is the page's main heading and the first heading in the
-  // document. The argument and the reading path moved under the glimpse,
-  // and were then removed from the homepage by owner decision (2026-10-11).
+  // THE HERO, THEN THE MAP. The Weave Hero (2026-10-29) carries the page's
+  // main heading, so the map's own title is an h2 and the second heading in
+  // the document. The argument and the reading path, which once stood at the
+  // entrance, moved under the glimpse and were then removed from the
+  // homepage by owner decision (2026-10-11).
   const title = page.getByRole('heading', { name: TITLE, exact: true });
   await expect(title).toHaveRole('heading');
-  expect(await title.evaluate((el) => el.tagName)).toBe('H1');
+  expect(await title.evaluate((el) => el.tagName)).toBe('H2');
   const headings = page.locator('main :is(h1, h2, h3)');
-  expect(await headings.first().textContent()).toBe(TITLE);
+  expect(await headings.first().evaluate((el) => el.tagName)).toBe('H1');
+  expect(await headings.nth(1).textContent()).toBe(TITLE);
   await expect(page.getByRole('heading', { name: /insanely, damn good at numbers/ })).toHaveCount(0);
 
   const button = page.getByRole('button', { name: 'Show the detail' }).first();

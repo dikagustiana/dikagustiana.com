@@ -1,10 +1,11 @@
 /**
- * The homepage: the map first, then the glimpse, and nothing after it. The
- * two sections About left under the glimpse (owner decision D4(a),
- * 2026-10-10), the argument and the revision of judgment, were removed by
- * owner decision on 2026-10-11. A fragment that names a section of the page
- * is still gone to once the page has drawn. The map is stubbed here (its own
- * suites cover it); everything under it is the real thing.
+ * The homepage: the Weave Hero (2026-10-29), then the map, then the glimpse,
+ * and nothing after it. The two sections About left under the glimpse (owner
+ * decision D4(a), 2026-10-10), the argument and the revision of judgment,
+ * were removed by owner decision on 2026-10-11. A fragment that names a
+ * section of the page is still gone to once the page has drawn. The map is
+ * stubbed here (its own suites cover it, and the hero has its own in
+ * weaveHero.test.tsx); everything else is the real thing.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { act, configure, render, screen, waitFor, within } from '@testing-library/react';
@@ -23,7 +24,7 @@ vi.mock('@/components/SEO', () => ({ SEO: () => null }));
 vi.mock('@/components/industry-chain', () => ({
   IndustryChainPreview: () => (
     <section id="industry-chain">
-      <h1>The industry chain</h1>
+      <h2>The industry chain</h2>
     </section>
   ),
 }));
@@ -50,18 +51,25 @@ const follows = (a: Element, b: Element) => (a.compareDocumentPosition(b) & Node
 beforeEach(() => fromMock.mockReset());
 
 describe('the homepage', () => {
-  it('ends with the glimpse: the map first, then the row, and no argument or revision of judgment after it', async () => {
+  it('ends with the glimpse: the hero first, then the map, then the row, and no argument or revision of judgment after it', async () => {
     fromMock.mockImplementation(essaysTable([essayRow(1, { is_selected: true, selected_rank: 1 }), essayRow(2)]).from);
     const { container } = mount();
     const glimpse = await screen.findByRole('list', { name: 'Glimpse' });
     await waitFor(() => expect(within(glimpse).getAllByRole('listitem')).toHaveLength(2));
 
+    const hero = container.querySelector('main > section.weave-hero')!;
     const map = container.querySelector('#industry-chain')!;
     const glimpseSection = glimpse.closest('section')!;
+    expect(hero).toBe(container.querySelector('main > section'));
+    expect(follows(hero, map)).toBe(true);
     expect(follows(map, glimpse)).toBe(true);
     // the page's last section
     expect(glimpseSection.nextElementSibling).toBeNull();
-    expect(container.querySelector('main :is(h1, h2, h3)')!.textContent).toBe('The industry chain');
+    // the hero's headline is the page's one h1, and the first heading on it
+    const first = container.querySelector('main :is(h1, h2, h3)')!;
+    expect(first.tagName).toBe('H1');
+    expect(first.textContent).toBe('Spreading intelligence. Rebuilding manufacturing.');
+    expect(container.querySelectorAll('main h1')).toHaveLength(1);
     expect(container.querySelector('#the-argument')).toBeNull();
     expect(screen.queryByText('The argument')).toBeNull();
     expect(container.querySelector('#changed-my-mind')).toBeNull();
@@ -155,11 +163,13 @@ describe('the homepage', () => {
     expect(scrollTo).not.toHaveBeenCalled();
   });
 
-  it('is the map alone when nothing is published: the glimpse is absent, not empty', async () => {
+  it('is the hero and the map alone when nothing is published: the glimpse is absent, not empty', async () => {
     fromMock.mockImplementation(essaysTable([essayRow(1, { published: false, is_selected: true, selected_rank: 1 })]).from);
     const { container } = mount();
     await waitFor(() => expect(screen.queryByRole('heading', { name: 'Glimpse' })).toBeNull());
-    expect(container.querySelectorAll('main > section')).toHaveLength(1);
-    expect(document.getElementById('industry-chain')).not.toBeNull();
+    const sections = container.querySelectorAll('main > section');
+    expect(sections).toHaveLength(2);
+    expect(sections[0].classList.contains('weave-hero')).toBe(true);
+    expect(sections[1].id).toBe('industry-chain');
   });
 });

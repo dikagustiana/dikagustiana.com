@@ -11,6 +11,11 @@
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
+    <!-- The homepage hero's headline face, the one weight it uses
+         (src/index.css, docs/hero-weave-prd.md §3). Vite rewrites the path
+         to the same hashed file the @font-face names. -->
+    <link rel="preload" href="/node_modules/@fontsource/source-serif-4/files/source-serif-4-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin />
+
     <!-- The feed (dist/rss.xml, written by scripts/prerender.mjs). -->
     <link rel="alternate" type="application/rss+xml" title="Dika Gustiana" href="/rss.xml" />
 
@@ -31,6 +36,16 @@
   </head>
 
   <body>
+    <!-- The app draws every page with JavaScript; without it, the homepage
+         hero's headline is still real text (docs/hero-weave-prd.md §1,
+         criterion 1). This shell serves every route, so it shows wherever
+         a reader arrives with JavaScript off. -->
+    <noscript>
+      <section class="weave-hero-static" aria-labelledby="weave-hero-static-title">
+        <h1 id="weave-hero-static-title">Spreading intelligence. Rebuilding manufacturing.</h1>
+        <p>Exploring how to accelerate both.</p>
+      </section>
+    </noscript>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
