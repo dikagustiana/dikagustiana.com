@@ -139,24 +139,24 @@ test.beforeEach(async ({ page }) => seed(page));
  * Thirty seconds, after the owner deleted the entrance that used to run them.
  *
  * The old hero, its artwork and the argument block are gone from the top of
- * the landing page. Since 2026-10-29 the Weave Hero states the thesis in two
- * lines and the map follows it directly; the reader goes deeper into a
- * relation through the essays. So the thirty-second journey is: read the
- * thesis, meet the structure, pick something, land on a written piece. The
- * argument block, moved under the glimpse when About went (owner decision
- * D4(a), 2026-10-10), was removed from the homepage by owner decision on
- * 2026-10-11.
+ * the landing page, and the industry chain map that followed the Weave Hero
+ * was removed by owner decision on 2026-10-29. The hero states the thesis in
+ * two lines and the glimpse follows it, so the thirty-second journey is: read
+ * the thesis, pick a piece, land on it. The argument block, moved under the
+ * glimpse when About went (owner decision D4(a), 2026-10-10), was removed from
+ * the homepage by owner decision on 2026-10-11.
  */
-test('thirty seconds: the thesis, then the map, and a completed piece is one click away', async ({ page }) => {
+test('thirty seconds: the thesis, then the glimpse, and a completed piece is one click away', async ({ page }) => {
   await page.goto('/');
 
-  // The hero's headline, then the map; no call to action stands between them.
+  // The hero's headline, then the glimpse; no map and no call to action between them.
   await expect(page.getByRole('heading', { name: 'Spreading intelligence. Rebuilding manufacturing.', level: 1 })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'The industry chain', exact: true })).toBeAttached();
+  await expect(page.getByRole('heading', { name: 'The industry chain', exact: true })).toHaveCount(0);
+  await expect(page.locator('.chain-plate')).toHaveCount(0);
   await expect(page.getByRole('link', { name: /Start with the argument/i })).toHaveCount(0);
   const headings = page.locator('main :is(h1, h2, h3)');
   expect(await headings.first().textContent()).toBe('Spreading intelligence. Rebuilding manufacturing.');
-  expect(await headings.nth(1).textContent()).toBe('The industry chain');
+  expect(await headings.nth(1).getAttribute('id')).toBe('glimpse-heading');
 
   const flagship = page
     .getByRole('link', { name: /Indonesia.s Reindustrialization Bet/i })
@@ -170,33 +170,25 @@ test('thirty seconds: the thesis, then the map, and a completed piece is one cli
 /**
  * About was removed by owner decision on 10 October 2026 (what it carried
  * moved to the homepage, and was removed from it on 11 October 2026). A link
- * written before that still lands: on Home, with the map's address and the
- * fragment it carried.
+ * written before that still lands on Home, with the address and the fragment
+ * it carried. The map those named was removed from Home on 29 October 2026,
+ * so the page opens at its top.
  */
-test('an old About link lands on the homepage, with the address and the fragment it carried', async ({ page }) => {
+test('an old About link lands on the homepage, with the address and the fragment it carried, at the top', async ({ page }) => {
   await page.goto('/about');
   await expect.poll(() => new URL(page.url()).pathname).toBe('/');
-  await expect(page.getByRole('heading', { name: 'The industry chain', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Spreading intelligence. Rebuilding manufacturing.', level: 1 })).toBeVisible();
 
   await page.goto('/about?lens=green&distance=finance&node=energy');
   await expect.poll(() => new URL(page.url()).pathname).toBe('/');
   expect(Object.fromEntries(new URL(page.url()).searchParams)).toEqual({ lens: 'green', distance: 'finance', node: 'energy' });
-  await expect(page.getByRole('region', { name: 'Energy' })).toBeVisible();
-  await expect(page.locator('.chain-plate')).toHaveAttribute('data-shift', 'green');
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
 
-  // The fragment is kept, and the section it names is in view, clear of the
-  // sticky header. (Changed my mind, which old About links named, was removed
-  // from Home on 11 October 2026; such a link now opens Home at its top.)
   await page.goto('/about#industry-chain');
   await expect.poll(() => new URL(page.url()).pathname).toBe('/');
   expect(new URL(page.url()).hash).toBe('#industry-chain');
-  // The map's title is an h2 under the hero's h1 (2026-10-29); the jump
-  // passes the hero and lands on the map.
-  const heading = page.locator('#industry-chain h2').first();
-  await expect(heading).toBeInViewport();
-  await expect
-    .poll(() => page.evaluate(() => document.querySelector('#industry-chain h2')!.getBoundingClientRect().top - document.querySelector('header')!.getBoundingClientRect().bottom))
-    .toBeGreaterThanOrEqual(0);
+  await expect(page.getByRole('heading', { level: 1 })).toBeInViewport();
+  expect(await page.evaluate(() => window.scrollY)).toBe(0);
 });
 
 test('one substantial reading: the completed argument carries its own objection', async ({ page }) => {
@@ -205,90 +197,6 @@ test('one substantial reading: the completed argument carries its own objection'
   await expect(main).toContainText(/Reindustrialization Bet/i);
   await expect(main).toContainText(/option value of delay/i);
   await expect(main).toContainText(/The bet fails if/i);
-});
-
-test('map reading: the basis is declared, distance changes the work, and the state can be sent', async ({ page, context }) => {
-  await page.setViewportSize({ width: 1280, height: 1000 });
-  await page.goto('/');
-  await page.getByRole('button', { name: 'green transition', exact: true }).click();
-  await page.getByRole('button', { name: /Green transition · Energy · Moving$/ }).first().click();
-
-  const panel = page.getByRole('region', { name: 'Energy' });
-  // A mark is a promise of a diagnosis; this one is the single assessed
-  // reading, and it says so before it says anything else. Basis and status
-  // are on the CARD, never behind its fold.
-  await expect(panel.locator('[data-basis="assessed"]')).toBeVisible();
-  // And the card leads where the depth actually is: the essay, checked
-  // against the index this fixture seeds as published, at its canonical
-  // address, labelled as the evidence behind this reading.
-  await expect(panel.locator('[data-chain-lead]')).toBeVisible();
-  const link = panel.getByRole('link', { name: /Reindustrialization Bet/i });
-  await expect(link).toBeVisible();
-  await expect(link).toHaveAttribute('href', '/the-next-big-thing/economy/indonesias-reindustrialization-bet');
-  await expect(panel.locator('[data-essay="indonesias-reindustrialization-bet"]')).toHaveAttribute('data-essay-state', 'published');
-  await expect(panel.locator('[data-essay="indonesias-reindustrialization-bet"]')).toHaveAttribute('data-essay-evidence', 'true');
-
-  // The map can only draw a repricing. What moves this element is a contract
-  // — said inside the reading the card offers, not dumped in front of it.
-  await panel.getByText('The reading in full').click();
-  await expect(panel.locator('[data-mechanism="contract"]')).toBeVisible();
-
-  const atEconomy = await panel.innerText();
-  await page.getByRole('button', { name: 'finance', exact: true }).click();
-  const atFinance = await page.getByRole('region', { name: 'Energy' }).innerText();
-  // Moving the distance control has to change the explanatory work, not the
-  // label over the same words.
-  expect(atFinance).not.toEqual(atEconomy);
-
-  const shared = page.url();
-  expect(shared).toContain('lens=green');
-  expect(shared).toContain('distance=finance');
-  expect(shared).toContain('node=energy');
-
-  const fresh = await context.newPage();
-  await seed(fresh);
-  await fresh.goto(shared);
-  await expect(fresh.getByRole('region', { name: 'Energy' })).toBeVisible();
-  await expect(fresh.locator('.chain-plate')).toHaveAttribute('data-lens', 'finance');
-  await fresh.close();
-});
-
-test('a reading opened from the landing page can be sent, from the overview, without expanding anything', async ({ page }) => {
-  await page.setViewportSize({ width: 1280, height: 1000 });
-  await page.goto('/');
-  await page.getByRole('button', { name: 'green transition', exact: true }).click();
-  await expect.poll(() => page.url()).toContain('lens=green');
-  await expect(page.locator('.chain-plate')).toHaveAttribute('data-level', 'overview');
-});
-
-/**
- * THE DEFAULT PATH INTO WRITING, with no overlay on. V5 took a card's essays
- * from the active shift's target, so Energy at rest said "No essay reads this
- * yet" while the site's one completed argument is about it. The association
- * lives on the element now, with the context it was read in kept beside it.
- */
-test('Energy leads to its essay with no overlay on, at the overview, with its context kept and its publication checked', async ({ page }) => {
-  await page.setViewportSize({ width: 1280, height: 1000 });
-  await page.goto('/');
-  await page.locator('.cp-hit[data-id="band-energy"]').click();
-  const panel = page.getByRole('region', { name: 'Energy' });
-  await expect(panel).toBeVisible();
-  await expect(panel).toHaveAttribute('data-panel', 'anatomy');
-  await expect(panel.getByText('No essay reads this yet.')).toHaveCount(0);
-  const essay = panel.locator('[data-essay="indonesias-reindustrialization-bet"]');
-  await expect(essay).toBeVisible();
-  // Related writing with its context, not evidence for a reading that is not open.
-  await expect(essay).not.toHaveAttribute('data-essay-evidence', 'true');
-  await expect(essay).toContainText(/Reads this under the green transition/i);
-  await expect(essay).toHaveAttribute('data-essay-state', 'published');
-  await expect(essay.getByRole('link')).toHaveAttribute('href', '/the-next-big-thing/economy/indonesias-reindustrialization-bet');
-  // Changing the distance does not erase it.
-  await page.getByRole('button', { name: 'finance', exact: true }).click();
-  await expect(page.getByRole('region', { name: 'Energy' }).locator('[data-essay="indonesias-reindustrialization-bet"]')).toBeVisible();
-  // A genuinely empty card says so.
-  await page.keyboard.press('Escape');
-  await page.locator('.cp-hit[data-id="band-credit"]').click();
-  await expect(page.getByRole('region', { name: 'Working capital and trade credit' }).getByText('No essay reads this yet.')).toBeVisible();
 });
 
 test('curriculum: the syllabus says what it is, and promises no dates', async ({ page }) => {

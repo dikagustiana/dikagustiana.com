@@ -136,8 +136,9 @@ const CapitalConditionLegacyRedirect = () => {
 // About was removed by owner decision on 10 October 2026; the two sections it
 // left on the homepage, the argument and the revision of judgment, were removed
 // on 11 October 2026. An old link keeps what it carried: the map's address
-// (?lens=&distance=&node=, the contract in useChainUrl.ts, which the homepage's
-// map reads too) and its fragment.
+// (?lens=&distance=&node=, the contract in useChainUrl.ts) and its fragment.
+// The homepage's map, which read that address, was removed on 29 October 2026,
+// so such a link now opens the homepage at its top.
 const AboutRedirect = () => {
   const { search, hash } = useLocation();
   return <Navigate to={{ pathname: '/', search, hash }} replace />;

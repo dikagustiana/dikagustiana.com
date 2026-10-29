@@ -3,6 +3,11 @@
 Version 5 · 14 September 2026. For the author, when writing an essay that argues from a
 particular part of the chain.
 
+> **Retired, 29 October 2026.** The owner removed the map from the homepage, and no public page
+> carries it now (docs/DECISIONS.md, 2026-10-29). An address written against this guide still
+> opens the homepage, at its top, and draws nothing from its parameters. Do not write new links
+> into the map.
+
 ## The address
 
     /?lens=<shift>&distance=<distance>&node=<slug>

@@ -106,12 +106,13 @@ describe('the preview index, lens off', () => {
     expect(within(region).getByRole('link', { name: /Recovery/ })).toHaveTextContent(COPY.noModels);
   });
 
-  it('shows the Connections switch off, the chain map link and the status legend with glyph and word', async () => {
+  it('shows the Connections switch off and the status legend with glyph and word, and no link to the removed chain map', async () => {
     renderIndex();
     const toggle = await screen.findByRole('switch');
     expect(toggle).toHaveAttribute('aria-checked', 'false');
     expect(screen.getByText(COPY.connectionsOff)).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: COPY.openChainMap })).toHaveAttribute('href', '/?distance=finance');
+    // the homepage map it opened was removed on 2026-10-29
+    expect(screen.queryByRole('link', { name: /chain map/i })).toBeNull();
     const legend = screen.getByRole('group', { name: COPY.statusLegend });
     for (const s of STATUSES) expect(within(legend).getByText(s.label)).toBeInTheDocument();
     expect(legend.querySelectorAll('svg')).toHaveLength(STATUSES.length);

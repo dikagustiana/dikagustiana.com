@@ -411,7 +411,7 @@ export function FiaModelPage({ pkg, reg }: { pkg: ModelPackage; reg: Registry })
         </AdminOnly>
 
         {/* After the last section, before the footer (item 9). */}
-        <ConditionPanel pkg={pkg} subIndustry={sub} />
+        <ConditionPanel pkg={pkg} />
       </div>
     </PageLayout>
   );

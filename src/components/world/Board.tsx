@@ -83,7 +83,6 @@ function Published({ pkg, data, related, bindings, onStation }: { pkg: ModelPack
   const noVolume = useMemo(() => noVolumeAnywhere(view.wb, view.values), [view.wb, view.values]);
   const decorate = (key: string) => decoration({ mark: null, change: undefined, edited: false, flashing: false, flashToken: 0, row: view.rowOf(key) });
   const sub = subIndustryByCode(pkg.meta.subIndustry);
-  const fiaSub = reg.subIndustry(pkg.meta.subIndustry);
   const treePeriod = pkg.meta.asOf.fullStatementsTo;
   const peers = worldPeerBand(pkg, reg.packages);
   const assumptions = pkg.sheets.flatMap((s) => s.rows.flatMap((r) => r.cells.map((c, i) => ({ c, i, r, s })).filter(({ c }) => c.kind === 'assumption')));
@@ -125,7 +124,7 @@ function Published({ pkg, data, related, bindings, onStation }: { pkg: ModelPack
       </section>
       <section aria-label={SECTION_ORDER[6]}>{sectionTitle(6)}
         {sub && <Chain sub={sub} data={data} />}
-        <ConditionPanel pkg={pkg} subIndustry={fiaSub} />
+        <ConditionPanel pkg={pkg} />
       </section>
       <section aria-label={SECTION_ORDER[7]}>{sectionTitle(7)}<Related related={related} /></section>
       <Inspector view={view}><UELineDetail view={view} ue={ue} /></Inspector>
