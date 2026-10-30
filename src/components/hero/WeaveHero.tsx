@@ -62,10 +62,11 @@ const MOBILE_QUERY = '(max-width: 767.98px)';
  * (navy warp) and industry (terracotta weft) becoming one.
  *
  * From 768px the text sits 130px down, clear of the navy band, in at most
- * 52% of the width, and the weave fills the hero behind it. Under 768px the
- * text comes first and the weave is a fully woven block in the hero's
- * bottom 38%; if the text needs more room, the hero grows rather than let
- * them meet.
+ * 52% of the width, and the weave fills the hero behind it; no thread runs
+ * under a line of text. Under 768px the text comes first and the weave is a
+ * block in the hero's bottom 38%, woven but for a short fringe of warp at
+ * its top where the nodes run; if the text needs more room, the hero grows
+ * rather than let them meet.
  */
 export function WeaveHero() {
   const mobile = useMediaQuery(MOBILE_QUERY);

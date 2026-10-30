@@ -3,12 +3,13 @@
  * docs/home-hero-v2.md §3 "Rendering"), on a context that records what is
  * asked of it: warps, then wefts with their dashed fibre, then the warps'
  * segments over the wefts at exactly the crossings where the warp is on
- * top, then the nodes, a hollow one clearing its disc first; the faded and
- * tapering wefts; nothing drawn before the intro begins and the full weave
- * when still.
+ * top, then the nodes, a hollow one clearing its disc first and each faded
+ * along its run; each weft tapering in from its own free end; nothing drawn
+ * before the intro begins and the full weave when still.
  */
 import { describe, expect, it } from 'vitest';
-import { SAMPLE_STEP, STROKE, UNDER_TEXT, WEFT_TAPER } from '@/components/hero/weave/constants';
+import { SAMPLE_STEP, STROKE, WEFT_TAPER } from '@/components/hero/weave/constants';
+import { idleAmplitude, INTRO_END, nodeFlowAlpha, nodeY, warpX } from '@/components/hero/weave/animate';
 import { buildWeave } from '@/components/hero/weave/geometry';
 import { drawWeave, preparePaint, weftAlpha, withAlpha } from '@/components/hero/weave/render';
 
@@ -60,8 +61,11 @@ function recorder() {
 }
 
 const palette = { ink: '#1E2761', accent: '#C2694A', fibre: '#D98B6E' };
-const TEXT = { left: 82, top: 130, right: 792, bottom: 410 };
-const model = buildWeave({ width: 1366, height: 440, viewportWidth: 1366, mobile: false, text: TEXT });
+const LINES = [
+  { left: 82, top: 130, right: 660, bottom: 200 },
+  { left: 82, top: 200, right: 610, bottom: 270 },
+];
+const model = buildWeave({ width: 1366, height: 440, viewportWidth: 1366, mobile: false, lines: LINES });
 
 function draw(t: number, still = false, m = model) {
   const ctx = recorder();
@@ -111,22 +115,49 @@ describe('the drawing order', () => {
     }
   });
 
-  it('clears a hollow node’s disc before ringing it, and fills a solid one', () => {
-    const ctx = draw(0, true);
-    const arcs = ctx.log.filter((o) => o.op === 'arc').length;
-    expect(arcs).toBe(model.nodes.length);
-    const cleared = ctx.log.filter((o) => o.op === 'fill' && o.state.globalCompositeOperation === 'destination-out').length;
-    expect(cleared).toBe(model.nodes.filter((n) => n.hollow).length);
-    const solid = ctx.log.filter((o) => o.op === 'fill' && o.state.globalCompositeOperation === 'source-over' && o.state.fillStyle === palette.ink).length;
-    expect(solid).toBe(model.nodes.filter((n) => !n.hollow).length);
+  it('clears the hollow nodes’ discs before ringing them, and fills the solid ones, leaving out those faded to nothing', () => {
+    const t = INTRO_END + 4.2;
+    const ctx = draw(t);
+    const shown = model.nodes.filter((n) => nodeFlowAlpha(n, t) > 0.002);
+    const full = shown.filter((n) => nodeFlowAlpha(n, t) >= 0.999);
+    const fading = shown.filter((n) => nodeFlowAlpha(n, t) < 0.999);
+    // many nodes in view, most at full strength, some fading
+    expect(shown.length).toBeGreaterThan(model.warps.length);
+    expect(full.length).toBeGreaterThan(fading.length);
+    expect(fading.length).toBeGreaterThan(0);
+    expect(ctx.log.filter((o) => o.op === 'arc')).toHaveLength(shown.length);
+    // the ones at full strength in one path of each kind, the fading ones one by one
+    const cleared = ctx.log.filter((o) => o.op === 'fill' && o.state.globalCompositeOperation === 'destination-out');
+    expect(cleared).toHaveLength(1 + fading.filter((n) => n.hollow).length);
+    const solid = ctx.log.filter((o) => o.op === 'fill' && o.state.globalCompositeOperation === 'source-over' && o.state.fillStyle === palette.ink);
+    expect(solid).toHaveLength(1 + fading.filter((n) => !n.hollow).length);
+    // each clear is followed by its ring
+    for (const fill of cleared) {
+      const next = ctx.log[ctx.log.indexOf(fill) + 1];
+      expect(next).toMatchObject({ op: 'stroke', state: { strokeStyle: palette.ink, lineWidth: 1.5, globalCompositeOperation: 'source-over' } });
+    }
   });
 
-  it('fades the weave out over the bottom edge', () => {
+  it('draws each node where its run has brought it, at its flow’s opacity', () => {
+    const t = INTRO_END + 4.2;
+    const arcs = draw(t).log.filter((o) => o.op === 'arc');
+    for (const n of model.nodes.filter((m) => nodeFlowAlpha(m, t) > 0.002)) {
+      const y = nodeY(n, t);
+      const x = warpX(model.warps[n.warp], y, t, idleAmplitude(model, t));
+      // on its warp as the warp lies this frame, rest wave and idle motion and all
+      const arc = arcs.find((a) => Math.abs((a.args[0] as number) - x) < 1e-3 && Math.abs((a.args[1] as number) - y) < 1e-3)!;
+      expect(arc).toBeDefined();
+      expect(arc.args[2]).toBeCloseTo(n.r, 5);
+      expect(arc.state.globalAlpha).toBeCloseTo(nodeFlowAlpha(n, t), 2);
+    }
+  });
+
+  it('fades the weave out over the bottom edge, clearing a pixel past it for a buffer rounded up', () => {
     const ctx = draw(0, true);
     const fade = ctx.log.filter((o) => o.op === 'fillRect');
     expect(fade).toHaveLength(1);
     expect(fade[0].state.globalCompositeOperation).toBe('destination-out');
-    expect(fade[0].args).toEqual([0, 400, 1366, 40]);
+    expect(fade[0].args).toEqual([0, 400, 1366, 41]);
   });
 });
 
@@ -148,31 +179,36 @@ describe('the intro and still frames', () => {
   });
 });
 
-describe('the wefts under the headline', () => {
-  it('fade in from the free end, and sit at 35% under the block, rising to full over its last 120px', () => {
-    const start = Math.min(...model.wefts.map((w) => w.left));
-    expect(weftAlpha(model, start, false)).toBe(0);
-    expect(weftAlpha(model, start + WEFT_TAPER, false)).toBe(1);
-    expect(weftAlpha(model, 500, true)).toBeCloseTo(UNDER_TEXT.alpha, 9);
-    expect(weftAlpha(model, TEXT.right - UNDER_TEXT.fade, true)).toBeCloseTo(UNDER_TEXT.alpha, 9);
-    expect(weftAlpha(model, TEXT.right - UNDER_TEXT.fade / 2, true)).toBeCloseTo((UNDER_TEXT.alpha + 1) / 2, 9);
-    expect(weftAlpha(model, TEXT.right, true)).toBe(1);
-    expect(weftAlpha(model, 1200, true)).toBe(1);
+describe('the wefts', () => {
+  it('fade in from each one’s own free end over its first 80px, or over its loose part if shorter', () => {
+    for (const weft of model.wefts) {
+      const taper = Math.min(WEFT_TAPER, weft.wovenFrom - weft.left);
+      if (taper <= 0) {
+        expect(weftAlpha(weft, weft.left)).toBe(1);
+        continue;
+      }
+      expect(weftAlpha(weft, weft.left)).toBe(0);
+      expect(weftAlpha(weft, weft.left + taper / 2)).toBeCloseTo(0.5, 9);
+      expect(weftAlpha(weft, weft.left + taper)).toBe(1);
+      expect(weftAlpha(weft, 1200)).toBe(1);
+    }
   });
 
-  it('are stroked with the faded gradient, the others with the plain taper', () => {
-    // a shorter block, so some wefts pass below it
-    const short = buildWeave({ width: 1366, height: 440, viewportWidth: 1366, mobile: false, text: { ...TEXT, bottom: 260 } });
-    const paint = preparePaint(recorder() as unknown as CanvasRenderingContext2D, short, palette);
-    const faded = short.wefts.find((w) => w.underText)!;
-    const plain = short.wefts.find((w) => !w.underText)!;
-    const stopsOf = (g: unknown) => (g as { stops: [number, string][] }).stops;
-    expect(stopsOf(paint.weft[faded.j]).some(([, c]) => c.endsWith(`, ${UNDER_TEXT.alpha})`))).toBe(true);
-    expect(stopsOf(paint.weft[plain.j]).some(([, c]) => c.endsWith(`, ${UNDER_TEXT.alpha})`))).toBe(false);
+  it('are stroked with that taper as a gradient from the free end', () => {
+    const paint = preparePaint(recorder() as unknown as CanvasRenderingContext2D, model, palette);
+    const weft = model.wefts[0];
+    const g = paint.weft[weft.j] as unknown as { args: number[]; stops: [number, string][] };
+    expect(g.args).toEqual([weft.left, 0, weft.left + WEFT_TAPER, 0]);
+    expect(g.stops).toEqual([
+      [0, 'rgba(194, 105, 74, 0)'],
+      [1, 'rgba(194, 105, 74, 1)'],
+    ]);
+    // a weft stopped right of the headline still tapers in from where it starts
+    expect(weft.left).toBeGreaterThan(LINES[0].right);
   });
 
-  it('are plain colours on a phone, where nothing is loose and nothing lies under text', () => {
-    const phone = buildWeave({ width: 390, height: 205, viewportWidth: 390, mobile: true, text: null });
+  it('are plain colours on a phone, where nothing is loose', () => {
+    const phone = buildWeave({ width: 390, height: 205, viewportWidth: 390, mobile: true, lines: [] });
     const paint = preparePaint(recorder() as unknown as CanvasRenderingContext2D, phone, palette);
     expect(paint.weft.every((s) => s === palette.accent)).toBe(true);
     expect(paint.topFade).not.toBeNull();

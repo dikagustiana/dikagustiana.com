@@ -14,6 +14,8 @@ export const PITCH = { min: 52, perViewportWidth: 0.034, max: 68 } as const;
 export const MOBILE_PITCH = 40;
 /** On a phone the weave fills this share of the hero, at its bottom. */
 export const MOBILE_WEAVE_SHARE = 0.38;
+/** On a phone the warps hang loose over the block's top this far, carrying the nodes, before the weave. */
+export const MOBILE_WARP_FREE = 80;
 
 /** The woven region starts at this share of the hero's width and runs to its right edge. */
 export const WOVEN_LEFT = 0.6;
@@ -32,19 +34,30 @@ export const WAVE = {
 
 export const STROKE = { warp: 2, weft: 5, fibre: 1.5, fibreDash: [4, 5] } as const;
 
-/** A weft under the headline block: this opacity, reached over this many px leftward from its right edge. */
-export const UNDER_TEXT = { alpha: 0.35, fade: 120 } as const;
+/**
+ * No weft passes under the text (owner, 30 October 2026): a weft level with a
+ * line of the headline or the subtitle starts this far right of that line.
+ */
+export const TEXT_CLEARANCE = 28;
 
+/**
+ * The nodes flow (owner, 30 October 2026): several on each warp at once,
+ * travelling down its free zone at their own pace, out of the navy band and
+ * into the cloth, fading in at the top and out just before the weave.
+ */
 export const NODES = {
-  perWarp: [1, 2],
+  perWarp: 3,
+  mobilePerWarp: 2,
   radius: [5, 7],
   hollowStroke: 1.5,
-  /** px per second, along the warp, back and forth. */
-  speed: [4, 8],
-  /** The highest a node goes: below the darkest part of the band. */
-  top: 60,
-  /** Kept this far above the woven region. */
-  clearance: 10,
+  /** px per second, down the warp. */
+  speed: [18, 30],
+  /** Where a node starts, inside the band, and how far above the woven region it ends. */
+  top: 36,
+  mobileTop: 4,
+  clearance: 6,
+  /** It fades in over its first px of travel and out over its last (a third of a short run at most). */
+  fade: 26,
 } as const;
 
 export const INTRO = {

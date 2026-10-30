@@ -6,9 +6,9 @@ import { drawWeave, preparePaint, type Paint, type Palette } from './weave/rende
 import { REDUCED_MOTION, useAnimationGate } from './weave/useAnimationGate';
 
 interface HeroWeaveProps {
-  /** The stacked layout's fully woven block, or the desktop weave behind the text. */
+  /** The stacked layout's woven block, or the desktop weave behind the text. */
   mobile: boolean;
-  /** The headline block, for the wefts that pass under it. */
+  /** The headline block: no weft runs under any of its lines. */
   textRef: RefObject<HTMLElement>;
   className?: string;
 }
@@ -17,6 +17,20 @@ interface Scene {
   ctx: CanvasRenderingContext2D;
   model: WeaveModel;
   paint: Paint;
+}
+
+/** Every line box of the text block's headline and paragraphs, relative to `origin`. */
+function lineBoxes(block: HTMLElement | null, origin: DOMRect): Rect[] {
+  if (!block) return [];
+  const out: Rect[] = [];
+  for (const el of block.querySelectorAll('h1 > span, p')) {
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    for (const r of range.getClientRects()) {
+      if (r.width > 0) out.push({ left: r.left - origin.left, top: r.top - origin.top, right: r.right - origin.left, bottom: r.bottom - origin.top });
+    }
+  }
+  return out;
 }
 
 /** The hero's thread colours, read from its tokens (WeaveHero). */
@@ -35,7 +49,7 @@ function readPalette(el: Element): Palette {
  *
  * One <canvas>, decorative (aria-hidden, takes no pointer, never focused),
  * at the device's pixel ratio capped at 2. The model is built from the
- * canvas's size and the headline block's rectangle, and built again 150 ms
+ * canvas's size and the text's line boxes, and built again 150 ms
  * after the last resize, and once the headline's face has loaded. One
  * requestAnimationFrame loop draws while useAnimationGate allows it; the
  * clock advances only while it runs, so the intro and the idle motion go on
@@ -77,9 +91,8 @@ export function HeroWeave({ mobile, textRef, className }: HeroWeaveProps) {
       el.width = Math.round(box.width * dpr);
       el.height = Math.round(box.height * dpr);
       context.setTransform(dpr, 0, 0, dpr, 0, 0);
-      const t = mobile ? null : textRef.current?.getBoundingClientRect();
-      const text: Rect | null = t ? { left: t.left - box.left, top: t.top - box.top, right: t.right - box.left, bottom: t.bottom - box.top } : null;
-      const model = buildWeave({ width: box.width, height: box.height, viewportWidth: window.innerWidth, mobile, text });
+      const lines = mobile ? [] : lineBoxes(textRef.current, box);
+      const model = buildWeave({ width: box.width, height: box.height, viewportWidth: window.innerWidth, mobile, lines });
       scene.current = { ctx: context, model, paint: preparePaint(context, model, readPalette(el)) };
       el.dataset.pitch = String(model.pitch);
       el.dataset.warps = String(model.warps.length);

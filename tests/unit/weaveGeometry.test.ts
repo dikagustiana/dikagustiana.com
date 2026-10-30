@@ -3,20 +3,26 @@
  * docs/home-hero-v2.md §2): a square grid whose pitch is clamp(52px, 3.4vw,
  * 68px) on a desktop and 40px on a phone, counts that follow from the region
  * (floor(wovenW/P) + 1 warps, floor(wovenH/P) wefts), the woven region from
- * 60% of the width and from band + P down, wefts loose from 22%, nodes in the
- * warps' free zone only, half solid and half hollow, plain-weave parity, and
- * the wefts that pass under the headline marked to be faded.
+ * 60% of the width and from band + P down, wefts loose from 22% but never
+ * under a line of text, three nodes flowing on each warp's free zone (two on
+ * a phone's fringe), half solid and half hollow, and plain-weave parity.
  */
 import { describe, expect, it } from 'vitest';
-import { BAND, NODES, STROKE, WAVE, WEFT_FREE_JITTER } from '@/components/hero/weave/constants';
-import { buildWeave, desktopPitch, restOffset, warpIsOver, type WeaveInput } from '@/components/hero/weave/geometry';
+import { BAND, MOBILE_WARP_FREE, NODES, STROKE, TEXT_CLEARANCE, WAVE, WEFT_FREE_JITTER } from '@/components/hero/weave/constants';
+import { buildWeave, desktopPitch, restOffset, warpIsOver, weftReach, type WeaveInput, type WeaveModel } from '@/components/hero/weave/geometry';
 import { mulberry32 } from '@/components/hero/weave/rng';
 
-const TEXT = { left: 82, top: 130, right: 792, bottom: 410 };
+/** The headline's two lines and the subtitle's two, at 1366 × 440. */
+const LINES = [
+  { left: 82, top: 130, right: 660, bottom: 200 },
+  { left: 82, top: 200, right: 610, bottom: 270 },
+  { left: 82, top: 294, right: 520, bottom: 326 },
+  { left: 82, top: 326, right: 470, bottom: 358 },
+];
 const desktop = (over: Partial<WeaveInput> = {}) =>
-  buildWeave({ width: 1366, height: 440, viewportWidth: 1366, mobile: false, text: TEXT, ...over });
+  buildWeave({ width: 1366, height: 440, viewportWidth: 1366, mobile: false, lines: LINES, ...over });
 const mobile = (over: Partial<WeaveInput> = {}) =>
-  buildWeave({ width: 390, height: 205, viewportWidth: 390, mobile: true, text: null, ...over });
+  buildWeave({ width: 390, height: 205, viewportWidth: 390, mobile: true, lines: [], ...over });
 const diffs = (xs: number[]) => xs.slice(1).map((x, k) => x - xs[k]);
 
 describe('the seeded generator', () => {
@@ -67,7 +73,7 @@ describe('the desktop layout', () => {
   });
 
   it('hangs the warps loose above the woven region and runs the wefts loose from 22% of the width', () => {
-    const model = desktop();
+    const model = desktop({ lines: [] });
     for (const warp of model.warps) {
       expect(warp.top).toBe(0);
       expect(warp.wovenFrom).toBe(model.wovenTop);
@@ -80,57 +86,88 @@ describe('the desktop layout', () => {
     }
   });
 
-  it('carries one or two nodes on each warp, radius 5–7px, half solid and half hollow, inside the free zone', () => {
+  it('carries three nodes on each warp, radius 5–7px, half solid and half hollow, inside the free zone', () => {
     const model = desktop({ width: 1920, height: 655, viewportWidth: 1920 });
-    for (const warp of model.warps) {
-      const n = model.nodes.filter((x) => x.warp === warp.i).length;
-      expect(n).toBeGreaterThanOrEqual(1);
-      expect(n).toBeLessThanOrEqual(2);
-    }
-    const hollow = model.nodes.filter((n) => n.hollow).length;
-    expect(Math.abs(hollow - (model.nodes.length - hollow))).toBeLessThanOrEqual(1);
-    for (const n of model.nodes) {
-      expect(n.r).toBeGreaterThanOrEqual(5);
-      expect(n.r).toBeLessThanOrEqual(7);
-      expect(n.speed).toBeGreaterThanOrEqual(4);
-      expect(n.speed).toBeLessThanOrEqual(8);
-      expect(n.yMin - n.r).toBeGreaterThanOrEqual(NODES.top);
-      // never reaching the woven region
-      expect(n.yMax + n.r).toBeLessThanOrEqual(model.wovenTop);
-      expect(n.y0).toBeGreaterThanOrEqual(n.yMin);
-      expect(n.y0).toBeLessThanOrEqual(n.yMax);
-    }
-  });
-
-  it('marks the wefts that pass under the headline block, and only those', () => {
-    const model = desktop();
-    const under = model.wefts.filter((w) => w.underText);
-    expect(under.length).toBeGreaterThan(0);
-    // a weft's reach across itself: half its stroke, its waviness at most, and the idle amplitude
-    const reach = STROKE.weft / 2 + WAVE.weft.amplitude * 1.3 + 3;
-    for (const w of model.wefts) expect(w.underText).toBe(w.y - reach < TEXT.bottom && w.y + reach > TEXT.top);
-    expect(desktop({ text: null }).wefts.some((w) => w.underText)).toBe(false);
+    expectNodes(model, NODES.perWarp, NODES.top);
   });
 });
 
+describe('the text', () => {
+  it('has no weft under any of its lines: a weft level with a line starts just right of it', () => {
+    const model = desktop();
+    const free = desktop({ lines: [] });
+    const reach = weftReach(model.amplitude);
+    expect(reach).toBe(STROKE.weft / 2 + WAVE.weft.amplitude * 1.3 + 3);
+    for (const weft of model.wefts) {
+      const level = LINES.filter((l) => l.bottom > weft.y - reach && l.top < weft.y + reach);
+      const expected = Math.min(weft.wovenFrom, Math.max(free.wefts[weft.j].left, ...level.map((l) => l.right + TEXT_CLEARANCE)));
+      expect(weft.left).toBeCloseTo(expected, 9);
+      for (const l of level) expect(weft.left).toBeGreaterThanOrEqual(l.right + TEXT_CLEARANCE);
+    }
+    // the headline's first line and its second both stop the top weft; each subtitle line stops one; the last weft runs free
+    expect(model.wefts.map((w) => Math.round(w.left))).toEqual([688, 638, 548, 498, Math.round(free.wefts[4].left)]);
+  });
+
+  it('leaves a weft no loose part where a line reaches the cloth', () => {
+    const model = desktop({ lines: [{ left: 82, top: 380, right: 900, bottom: 410 }] });
+    const last = model.wefts.at(-1)!;
+    expect(last.left).toBe(last.wovenFrom);
+  });
+});
+
+/** Every warp with a run carries `perWarp` nodes, flowing from `top` to just above the cloth. */
+function expectNodes(model: WeaveModel, perWarp: number, top: number) {
+  for (const warp of model.warps) {
+    const own = model.nodes.filter((x) => x.warp === warp.i);
+    expect(own).toHaveLength(perWarp);
+    // all at the warp's own pace, spread evenly along its run, so they never meet
+    expect(new Set(own.map((n) => n.speed)).size).toBe(1);
+    const phases = own.map((n) => n.phase).sort((a, b) => a - b);
+    const gaps = phases.map((p, k) => (k === 0 ? p + 1 - phases.at(-1)! : p - phases[k - 1]));
+    for (const g of gaps) expect(g).toBeGreaterThan(0.8 / perWarp);
+  }
+  const hollow = model.nodes.filter((n) => n.hollow).length;
+  expect(Math.abs(hollow - (model.nodes.length - hollow))).toBeLessThanOrEqual(1);
+  for (const n of model.nodes) {
+    expect(n.r).toBeGreaterThanOrEqual(NODES.radius[0]);
+    expect(n.r).toBeLessThanOrEqual(NODES.radius[1]);
+    expect(n.speed).toBeGreaterThanOrEqual(NODES.speed[0]);
+    expect(n.speed).toBeLessThanOrEqual(NODES.speed[1]);
+    expect(n.phase).toBeGreaterThanOrEqual(0);
+    expect(n.phase).toBeLessThan(1);
+    expect(n.yStart).toBe(top);
+    // never reaching the woven region
+    expect(n.yEnd + n.r + NODES.clearance).toBeLessThanOrEqual(model.wovenTop);
+  }
+}
+
 describe('the phone layout', () => {
-  it('is fully woven edge to edge: no free zones, no nodes', () => {
+  it('is woven edge to edge under a short fringe of loose warp, with no loose weft', () => {
     const model = mobile();
+    const fringe = Math.min(MOBILE_WARP_FREE, 205 / 3);
+    expect(model.wovenTop).toBeCloseTo(fringe, 9);
     expect(model.warps).toHaveLength(Math.floor(390 / 40) + 1);
-    expect(model.wefts).toHaveLength(Math.floor(205 / 40));
+    expect(model.wefts).toHaveLength(Math.floor((205 - fringe) / 40));
     for (const warp of model.warps) {
-      expect(warp.wovenFrom).toBe(warp.top);
-      expect(warp.waves).toEqual([]);
+      expect(warp.top).toBe(0);
+      expect(warp.wovenFrom).toBeCloseTo(fringe, 9);
+      for (const wave of warp.waves) expect(wave.amp).toBeLessThanOrEqual(WAVE.warp.amplitude * 0.6);
     }
     for (const weft of model.wefts) {
       expect(weft.left).toBe(0);
       expect(weft.wovenFrom).toBe(0);
       expect(weft.right).toBe(390);
-      expect(weft.underText).toBe(false);
+      expect(weft.waves).toEqual([]);
+      expect(weft.y).toBeGreaterThan(fringe);
     }
-    expect(model.nodes).toEqual([]);
-    // the grid is centred
+    // the grid is centred across, and in the block under the fringe
     expect(model.warps[0].x).toBeCloseTo(390 - model.warps.at(-1)!.x, 9);
+    expect(model.wefts[0].y - fringe).toBeCloseTo(205 - model.wefts.at(-1)!.y, 9);
+  });
+
+  it('carries two nodes on each warp of the fringe', () => {
+    expectNodes(mobile(), NODES.mobilePerWarp, NODES.mobileTop);
+    expect(mobile().nodes.length).toBe(2 * mobile().warps.length);
   });
 
   it('halves the idle amplitude', () => {

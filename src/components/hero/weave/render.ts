@@ -7,16 +7,17 @@
  * drawn whole and redrawn: a line stroked twice comes out bolder at its
  * anti-aliased edges, and every patch would show as a darker dash. A hollow
  * node first clears its disc, so the hero's background shows through it and
- * the warp does not. Last, the weave fades out over the hero's bottom edge
+ * the warp does not; a node fades in and out along its run. Each weft fades in
+ * from its free end. Last, the weave fades out over the hero's bottom edge
  * into the Glimpse's background (and, on a phone, in over its top edge).
  *
  * Everything that does not change from frame to frame (gradients, colours,
  * the point buffers) is made once per layout in preparePaint, so a frame
  * allocates nothing.
  */
-import { BOTTOM_FADE, MOBILE_TOP_FADE, NODES, STROKE, UNDER_TEXT, WEFT_TAPER } from './constants';
-import { idleAmplitude, INTRO_END, nodeProgress, nodeScale, nodeY, sampleSpan, sampleWeft, warpProgress, warpX, weftProgress } from './animate';
-import type { WeaveModel } from './geometry';
+import { BOTTOM_FADE, MOBILE_TOP_FADE, NODES, STROKE, WEFT_TAPER } from './constants';
+import { idleAmplitude, INTRO_END, nodeFlowAlpha, nodeProgress, nodeScale, nodeY, sampleSpan, sampleWeft, warpProgress, warpX, weftProgress } from './animate';
+import type { WeaveModel, Weft } from './geometry';
 
 export interface Palette {
   ink: string;
@@ -36,6 +37,8 @@ export interface Paint {
   noDash: number[];
   xs: Float32Array;
   ys: Float32Array;
+  /** Per node, this frame: x, y and opacity. */
+  nodeAt: Float32Array;
   palette: Palette;
 }
 
@@ -59,35 +62,23 @@ export function withAlpha(color: string, alpha: number): string {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
-/**
- * A weft's opacity at x: it fades in from its free end over WEFT_TAPER, and
- * under the headline block it is UNDER_TEXT.alpha, rising to full over the
- * last UNDER_TEXT.fade px before the block's right edge.
- */
-export function weftAlpha(model: WeaveModel, x: number, underText: boolean): number {
-  if (model.mobile) return 1;
-  const start = Math.min(...model.wefts.map((w) => w.left));
-  const taper = Math.min(1, Math.max(0, (x - start) / WEFT_TAPER));
-  if (!underText || !model.text) return taper;
-  const right = model.text.right;
-  const fade = x >= right ? 1 : x <= right - UNDER_TEXT.fade ? UNDER_TEXT.alpha : UNDER_TEXT.alpha + ((1 - UNDER_TEXT.alpha) * (x - (right - UNDER_TEXT.fade))) / UNDER_TEXT.fade;
-  return taper * fade;
+/** A weft's opacity at x: it fades in from its free end over WEFT_TAPER (or its loose length, if shorter). */
+export function weftAlpha(weft: Weft, x: number): number {
+  const taper = Math.min(WEFT_TAPER, weft.wovenFrom - weft.left);
+  if (taper <= 0) return 1;
+  return Math.min(1, Math.max(0, (x - weft.left) / taper));
 }
 
-function weftGradient(ctx: CanvasRenderingContext2D, model: WeaveModel, color: string, underText: boolean): Style {
-  if (model.mobile || model.wefts.length === 0) return color;
-  const start = Math.min(...model.wefts.map((w) => w.left));
-  const stops = [start, start + WEFT_TAPER];
-  if (underText && model.text) stops.push(model.text.right - UNDER_TEXT.fade, model.text.right);
-  const xs = [...new Set(stops.map((x) => Math.min(model.width, Math.max(0, x))))].sort((a, b) => a - b);
-  const g = ctx.createLinearGradient(0, 0, model.width, 0);
-  for (const x of xs) g.addColorStop(x / model.width, withAlpha(color, weftAlpha(model, x, underText)));
+function weftGradient(ctx: CanvasRenderingContext2D, model: WeaveModel, weft: Weft, color: string): Style {
+  const taper = Math.min(WEFT_TAPER, weft.wovenFrom - weft.left);
+  if (model.mobile || taper <= 0) return color;
+  const g = ctx.createLinearGradient(weft.left, 0, weft.left + taper, 0);
+  g.addColorStop(0, withAlpha(color, 0));
+  g.addColorStop(1, withAlpha(color, 1));
   return g;
 }
 
 export function preparePaint(ctx: CanvasRenderingContext2D, model: WeaveModel, palette: Palette): Paint {
-  const normal = { weft: weftGradient(ctx, model, palette.accent, false), fibre: weftGradient(ctx, model, palette.fibre, false) };
-  const faded = { weft: weftGradient(ctx, model, palette.accent, true), fibre: weftGradient(ctx, model, palette.fibre, true) };
   let bottomFade: CanvasGradient | null = null;
   if (model.height > BOTTOM_FADE) {
     bottomFade = ctx.createLinearGradient(0, model.height - BOTTOM_FADE, 0, model.height);
@@ -101,16 +92,51 @@ export function preparePaint(ctx: CanvasRenderingContext2D, model: WeaveModel, p
     topFade.addColorStop(1, 'rgba(0, 0, 0, 0)');
   }
   return {
-    weft: model.wefts.map((w) => (w.underText ? faded.weft : normal.weft)),
-    fibre: model.wefts.map((w) => (w.underText ? faded.fibre : normal.fibre)),
+    weft: model.wefts.map((w) => weftGradient(ctx, model, w, palette.accent)),
+    fibre: model.wefts.map((w) => weftGradient(ctx, model, w, palette.fibre)),
     bottomFade,
     topFade,
     dash: [...STROKE.fibreDash],
     noDash: [],
     xs: new Float32Array(model.maxSamples),
     ys: new Float32Array(model.maxSamples),
+    nodeAt: new Float32Array(model.nodes.length * 3),
     palette,
   };
+}
+
+/** A node this close to opaque is drawn opaque, with the others at full strength. */
+const FULL = 0.999;
+
+/** Node k's disc, added to the path, from this frame's x, y and opacity in `at`. */
+function disc(ctx: CanvasRenderingContext2D, model: WeaveModel, at: Float32Array, k: number, scale: number) {
+  const x = at[3 * k];
+  const y = at[3 * k + 1];
+  const r = model.nodes[k].r * scale;
+  ctx.moveTo(x + r, y);
+  ctx.arc(x, y, r, 0, Math.PI * 2);
+}
+
+/** A new path of the discs of every node at full strength, hollow or solid. Returns whether there were any. */
+function fullNodes(ctx: CanvasRenderingContext2D, model: WeaveModel, at: Float32Array, scale: number, hollow: boolean): boolean {
+  let any = false;
+  ctx.beginPath();
+  for (let k = 0; k < model.nodes.length; k++) {
+    if (model.nodes[k].hollow !== hollow || at[3 * k + 2] < FULL) continue;
+    disc(ctx, model, at, k, scale);
+    any = true;
+  }
+  return any;
+}
+
+/** The path's discs cleared, so the hero's background shows through and the warp does not, then ringed. */
+function ring(ctx: CanvasRenderingContext2D, ink: string) {
+  ctx.globalCompositeOperation = 'destination-out';
+  ctx.fill();
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.strokeStyle = ink;
+  ctx.lineWidth = NODES.hollowStroke;
+  ctx.stroke();
 }
 
 function polyline(ctx: CanvasRenderingContext2D, xs: Float32Array, ys: Float32Array, n: number) {
@@ -180,25 +206,34 @@ export function drawWeave(ctx: CanvasRenderingContext2D, model: WeaveModel, pain
   ctx.lineCap = 'round';
   ctx.stroke();
 
-  // 4. The nodes.
-  const alpha = still ? 1 : nodeProgress(time);
-  const scale = nodeScale(alpha);
-  if (alpha > 0) {
-    ctx.globalAlpha = alpha;
-    for (const node of model.nodes) {
-      const warp = model.warps[node.warp];
-      const y = still ? node.y0 : nodeY(node, time);
-      const x = warpX(warp, y, time, A);
-      const r = node.r * scale;
+  // 4. The nodes, each faded by the intro and by where it is on its run. Those
+  // at full strength, most of them, go in one path of each kind: they never
+  // overlap, so this draws what a call apiece would, for a fraction of the
+  // calls. The few fading in or out go one by one.
+  const appear = still ? 1 : nodeProgress(time);
+  if (appear > 0) {
+    const scale = nodeScale(appear);
+    const at = paint.nodeAt;
+    for (let k = 0; k < model.nodes.length; k++) {
+      const node = model.nodes[k];
+      const y = nodeY(node, time);
+      at[3 * k] = warpX(model.warps[node.warp], y, time, A);
+      at[3 * k + 1] = y;
+      at[3 * k + 2] = appear * nodeFlowAlpha(node, time);
+    }
+    if (fullNodes(ctx, model, at, scale, true)) ring(ctx, palette.ink);
+    if (fullNodes(ctx, model, at, scale, false)) {
+      ctx.fillStyle = palette.ink;
+      ctx.fill();
+    }
+    for (let k = 0; k < model.nodes.length; k++) {
+      const alpha = at[3 * k + 2];
+      if (alpha <= 0.002 || alpha >= FULL) continue;
+      ctx.globalAlpha = alpha;
       ctx.beginPath();
-      ctx.arc(x, y, r, 0, Math.PI * 2);
-      if (node.hollow) {
-        ctx.globalCompositeOperation = 'destination-out';
-        ctx.fill();
-        ctx.globalCompositeOperation = 'source-over';
-        ctx.strokeStyle = palette.ink;
-        ctx.lineWidth = NODES.hollowStroke;
-        ctx.stroke();
+      disc(ctx, model, at, k, scale);
+      if (model.nodes[k].hollow) {
+        ring(ctx, palette.ink);
       } else {
         ctx.fillStyle = palette.ink;
         ctx.fill();
@@ -208,11 +243,13 @@ export function drawWeave(ctx: CanvasRenderingContext2D, model: WeaveModel, pain
   }
 
   // 5. Fade out over the bottom edge, into the background below (and in over a phone block's top).
+  // The bottom fade runs a pixel past the edge: the buffer is rounded up from
+  // a fractional height, and its last row must be cleared whole, not in part.
   if (paint.bottomFade || paint.topFade) {
     ctx.globalCompositeOperation = 'destination-out';
     if (paint.bottomFade) {
       ctx.fillStyle = paint.bottomFade;
-      ctx.fillRect(0, model.height - BOTTOM_FADE, model.width, BOTTOM_FADE);
+      ctx.fillRect(0, model.height - BOTTOM_FADE, model.width, BOTTOM_FADE + 1);
     }
     if (paint.topFade) {
       ctx.fillStyle = paint.topFade;

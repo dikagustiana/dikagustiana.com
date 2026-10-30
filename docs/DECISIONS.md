@@ -39,9 +39,8 @@ Spec: `docs/home-hero-v2.md` (owner, 30 October 2026). Verification against R1â€
   - Hollow nodes clear their disc, so the hero's background shows through them.
   - The weave fades out over the hero's last 40px, so no thread is cut at the Glimpse.
   - The phone's block fades in over its first 28px.
-  - The phone's block is fully woven, both ways, and carries no nodes: the spec gives it no free zone, and
-    nodes live only in one.
-  - Nodes keep below the band's darkest part (y â‰¥ 60px).
+  - The phone's block was first fully woven, with no nodes. The owner's feedback below gives it a fringe.
+  - Nodes come to full strength below the band's darkest part: they fade in from y = 36 over 26px.
 - **Motion.**
   - The intro runs on the component's own clock, which advances only while the loop runs, so it plays once
     per page load and resumes where it stopped.
@@ -59,12 +58,37 @@ Spec: `docs/home-hero-v2.md` (owner, 30 October 2026). Verification against R1â€
   of scope.
 - **The preloads are in the shell, so every route fetches them.** The three fonts total about 66KB. Spectral
   is the site's heading and essay face, so other routes use it too.
+- **Owner feedback, the same day: keep "Spreading intelligence." clear, and make the nodes many and moving.**
+  This replaces two parts of the spec: the wefts fading to 35% under the headline block, and one or two
+  nodes drifting on each warp.
+  - **No weft passes under the text.** The weave reads every line box of the headline and the subtitle
+    (`Range.getClientRects`), not the block's one rectangle.
+    - A weft whose band meets a line starts 28px right of that line. The band is half the weft's stroke,
+      plus its waviness and the idle amplitude: 15.9px each side on a desktop.
+    - A weft that would start past the cloth's edge gets no loose part.
+    - The others still run loose from 22%, and each weft tapers in from its own free end.
+    - Measured on the build: no painted pixel of the canvas inside any line box, at six widths from 768 to
+      1920 and four moments each.
+  - **The nodes flow.** Each warp carries three nodes. They travel down its free zone at 18â€“30 px/s:
+    - one pace per warp, evenly spaced, so they never meet;
+    - from inside the navy band (y = 36) to 13px above the cloth;
+    - fading in over their first 26px and out over their last, so the jump back to the top is never seen.
 
-Tests: `weaveGeometry.test.ts` (12), `weaveAnimate.test.ts` (13), `weaveRender.test.ts` (10) and
-`weaveHero.test.tsx` (10) replace the v1 hero's 30. `homePage.test.tsx` and `journeys.spec.ts` carry the
+    Half are hollow and half solid, as before. They rest where they are through the intro, and a
+    reduced-motion visitor sees them still.
+  - **The phone gets them too.** Its warps hang loose over the woven block for a short fringe: 80px, or a
+    third of the block if that is less. Two nodes run on each warp there, and the wefts are centred in the
+    block under it.
+  - **Nodes at full strength share one path of each kind.** Measured side by side, the frame costs what
+    the committed version's did, with twice the nodes. See the verification's frame cost.
+  - **The bottom fade runs a pixel past the canvas's edge.** The phone's canvas is 204.81px tall and its
+    buffer 205 rows. The last row was only 81% cleared, which left a 13/255 step at the Glimpse.
+
+Tests: `weaveGeometry.test.ts` (14), `weaveAnimate.test.ts` (15), `weaveRender.test.ts` (11) and
+`weaveHero.test.tsx` (12) replace the v1 hero's 30. `homePage.test.tsx` and `journeys.spec.ts` carry the
 new headline. Two `glimpse.spec.ts` tests scroll the row into view, not just its heading: the hero now
-leaves the heading on screen with the row's foot a pixel under the fold. `MIN_TESTS` goes from 1691 to
-1706.
+leaves the heading on screen with the row's foot a pixel under the fold. The test setup gives jsdom's
+`Range` the empty `getClientRects` its elements have. `MIN_TESTS` goes from 1691 to 1713.
 
 ---
 

@@ -4,12 +4,19 @@
  * and paragraph; the weave as one decorative canvas, at the device's pixel
  * ratio capped at 2; the full still frame and no animation frames for
  * reduced motion; a loop that stops when the canvas is wholly off screen or
- * the tab is hidden and goes on from where it stopped; the stacked layout's
- * fully woven block under 768px.
+ * the tab is hidden and goes on from where it stopped; the text's line boxes
+ * handed to the weave, so no weft runs under them; the stacked layout's woven
+ * block under 768px.
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, render, screen } from '@testing-library/react';
 import { WeaveHero } from '@/components/hero/WeaveHero';
+import { buildWeave } from '@/components/hero/weave/geometry';
+
+vi.mock('@/components/hero/weave/geometry', async (importOriginal) => {
+  const real = await importOriginal<typeof import('@/components/hero/weave/geometry')>();
+  return { ...real, buildWeave: vi.fn(real.buildWeave) };
+});
 
 type IOCallback = (entries: Array<Partial<IntersectionObserverEntry>>) => void;
 
@@ -111,6 +118,40 @@ describe('the canvas', () => {
   });
 });
 
+describe('the text', () => {
+  it('hands the weave every line box of the headline and the subtitle, relative to the canvas', () => {
+    const box = (top: number, right: number) => ({ left: 82, top, right, bottom: top + 40, width: right - 82, height: 40 });
+    const rects = new Map<string, ReturnType<typeof box>>([
+      ['Spreading intelligence.', box(130, 660)],
+      ['Rebuilding industry.', box(170, 610)],
+    ]);
+    vi.spyOn(Range.prototype, 'getClientRects').mockImplementation(function (this: Range) {
+      const text = this.startContainer.textContent ?? '';
+      // the subtitle wraps onto two lines
+      const list = rects.get(text) ? [rects.get(text)!] : [box(234, 520), box(266, 470)];
+      return Object.assign(list, { item: (k: number) => list[k] }) as unknown as DOMRectList;
+    });
+    render(<WeaveHero />);
+    expect(vi.mocked(buildWeave)).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        mobile: false,
+        lines: [
+          { left: 82, top: 130, right: 660, bottom: 170 },
+          { left: 82, top: 170, right: 610, bottom: 210 },
+          { left: 82, top: 234, right: 520, bottom: 274 },
+          { left: 82, top: 266, right: 470, bottom: 306 },
+        ],
+      }),
+    );
+  });
+
+  it('hands it none on a phone, where the text sits above the weave', () => {
+    media['(max-width: 767.98px)'] = true;
+    render(<WeaveHero />);
+    expect(vi.mocked(buildWeave)).toHaveBeenLastCalledWith(expect.objectContaining({ mobile: true, lines: [] }));
+  });
+});
+
 describe('the motion', () => {
   it('runs one frame loop that draws every frame', () => {
     render(<WeaveHero />);
@@ -165,7 +206,7 @@ describe('the motion', () => {
 });
 
 describe('the breakpoints', () => {
-  it('stacks under 768px: the text first, then a fully woven block', () => {
+  it('stacks under 768px: the text first, then the woven block', () => {
     media['(max-width: 767.98px)'] = true;
     render(<WeaveHero />);
     expect(hero()).toHaveAttribute('data-layout', 'stacked');

@@ -10,10 +10,11 @@
  *
  *   warp x-offset = A·sin(2π·t/T + φᵢ + k·y),  weft y-offset = A·sin(2π·t/T' + φⱼ + k·x)
  *
- * and the nodes drift up and down their warp inside its free zone. Still
- * (reduced motion), it is the intro's last frame with no idle motion.
+ * and the nodes flow down their warps through the free zone, fading in out of
+ * the band and out just before the cloth, then starting again at the top.
+ * Still (reduced motion), it is the intro's last frame with no motion.
  */
-import { IDLE, INTRO, SAMPLE_STEP } from './constants';
+import { IDLE, INTRO, NODES, SAMPLE_STEP } from './constants';
 import { restOffset, smoothstep, warpTaper, weftTaper, type Warp, type WeaveModel, type WeaveNode, type Weft } from './geometry';
 
 const TAU = Math.PI * 2;
@@ -105,11 +106,21 @@ export function sampleWeft(weft: Weft, t: number, A: number, progress: number, x
   return n + 1;
 }
 
-/** Where a node stands at time t: back and forth between its bounds, from its rest point, once the intro is over. */
-export function nodeY(node: WeaveNode, t: number): number {
-  const span = node.yMax - node.yMin;
-  if (span <= 0) return node.y0;
-  const travelled = node.y0 - node.yMin + node.speed * Math.max(0, t - INTRO_END);
-  const s = travelled % (2 * span);
-  return node.yMin + (s <= span ? s : 2 * span - s);
+/** How far along its run a node is at time t, 0 to 1: it flows down its warp once the intro is over, and starts again at the top. */
+export function nodeRun(node: WeaveNode, t: number): number {
+  const span = node.yEnd - node.yStart;
+  if (span <= 0) return 0;
+  const travelled = node.phase * span + node.speed * Math.max(0, t - INTRO_END);
+  return (travelled % span) / span;
+}
+
+/** Where a node stands at time t. */
+export const nodeY = (node: WeaveNode, t: number) => node.yStart + nodeRun(node, t) * (node.yEnd - node.yStart);
+
+/** Its opacity along the run: in over the first NODES.fade px, out over the last, so its return to the top is never seen. */
+export function nodeFlowAlpha(node: WeaveNode, t: number): number {
+  const span = node.yEnd - node.yStart;
+  const fade = Math.min(NODES.fade, span / 3);
+  const d = nodeRun(node, t) * span;
+  return smoothstep(0, fade, d) * (1 - smoothstep(span - fade, span, d));
 }

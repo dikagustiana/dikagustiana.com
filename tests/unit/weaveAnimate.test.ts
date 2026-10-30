@@ -2,17 +2,19 @@
  * The Home Hero v2 weave's motion (src/components/hero/weave/animate.ts,
  * docs/home-hero-v2.md §2 "Motion", R7): the intro's three phases with their
  * staggers and easeOutCubic, the idle field growing in after it with the
- * PRD's formula, period range and k, and the nodes drifting back and forth
- * inside their bounds.
+ * PRD's formula, period range and k, and the nodes flowing down their warps
+ * at their own pace, fading in at the top and out before the cloth.
  */
 import { describe, expect, it } from 'vitest';
-import { IDLE, INTRO, SAMPLE_STEP } from '@/components/hero/weave/constants';
+import { IDLE, INTRO, NODES, SAMPLE_STEP } from '@/components/hero/weave/constants';
 import {
   drawDuration,
   easeOutCubic,
   idleAmplitude,
   INTRO_END,
+  nodeFlowAlpha,
   nodeProgress,
+  nodeRun,
   nodeScale,
   nodeY,
   sampleSpan,
@@ -25,7 +27,7 @@ import {
 } from '@/components/hero/weave/animate';
 import { buildWeave } from '@/components/hero/weave/geometry';
 
-const model = buildWeave({ width: 1366, height: 440, viewportWidth: 1366, mobile: false, text: { left: 82, top: 130, right: 792, bottom: 410 } });
+const model = buildWeave({ width: 1366, height: 440, viewportWidth: 1366, mobile: false, lines: [{ left: 82, top: 130, right: 660, bottom: 270 }] });
 const buf = () => [new Float32Array(model.maxSamples), new Float32Array(model.maxSamples)] as const;
 
 describe('easing', () => {
@@ -142,27 +144,48 @@ describe('sampling', () => {
 });
 
 describe('the nodes', () => {
-  it('drift back and forth along their warp inside their bounds, from where they rest, once the intro is over', () => {
+  it('rest where they start through the intro', () => {
     for (const node of model.nodes) {
-      expect(nodeY(node, 0)).toBeCloseTo(node.y0, 9);
-      expect(nodeY(node, INTRO_END)).toBeCloseTo(node.y0, 9);
-      const step = node.speed * 0.25;
+      expect(nodeRun(node, 0)).toBeCloseTo(node.phase, 9);
+      expect(nodeY(node, INTRO_END)).toBeCloseTo(node.yStart + node.phase * (node.yEnd - node.yStart), 9);
+    }
+  });
+
+  it('flow down their warp at their own pace once the intro is over, and start again at the top', () => {
+    for (const node of model.nodes) {
+      const span = node.yEnd - node.yStart;
+      const dt = 0.25;
       let last = nodeY(node, INTRO_END);
-      let lo = last;
-      let hi = last;
-      for (let t = INTRO_END; t < INTRO_END + 120; t += 0.25) {
+      let wraps = 0;
+      for (let t = INTRO_END + dt; t < INTRO_END + 60; t += dt) {
         const y = nodeY(node, t);
-        expect(y).toBeGreaterThanOrEqual(node.yMin - 1e-9);
-        expect(y).toBeLessThanOrEqual(node.yMax + 1e-9);
-        // at its own pace: never more than speed × 0.25 s in a step
-        expect(Math.abs(y - last)).toBeLessThanOrEqual(step + 1e-9);
-        lo = Math.min(lo, y);
-        hi = Math.max(hi, y);
+        expect(y).toBeGreaterThanOrEqual(node.yStart);
+        expect(y).toBeLessThan(node.yEnd);
+        if (y < last) {
+          // back at the top: it went past the end by what it had left to travel
+          wraps++;
+          expect(last + node.speed * dt - span).toBeCloseTo(y, 6);
+        } else {
+          expect(y - last).toBeCloseTo(node.speed * dt, 6);
+        }
         last = y;
       }
-      // it reaches both ends and turns back
-      expect(lo).toBeLessThanOrEqual(node.yMin + step);
-      expect(hi).toBeGreaterThanOrEqual(node.yMax - step);
+      // 60 s at 18–30 px/s over a run of about a hundred px: round several times
+      expect(wraps).toBeGreaterThanOrEqual(Math.floor((node.speed * 60) / span) - 1);
     }
+  });
+
+  it('fade in over the top of their run and out over its foot, so their return is never seen', () => {
+    const node = model.nodes[0];
+    const span = node.yEnd - node.yStart;
+    const fade = Math.min(NODES.fade, span / 3);
+    // the time at which the node stands d px down its run, on its first pass
+    const at = (d: number) => INTRO_END + (((d / span - node.phase + 1) % 1) * span) / node.speed;
+    expect(nodeFlowAlpha(node, at(0))).toBeCloseTo(0, 9);
+    expect(nodeFlowAlpha(node, at(fade / 2))).toBeCloseTo(0.5, 6);
+    expect(nodeFlowAlpha(node, at(span / 2))).toBe(1);
+    expect(nodeFlowAlpha(node, at(span - fade / 2))).toBeCloseTo(0.5, 6);
+    expect(nodeFlowAlpha(node, at(span - 0.01))).toBeLessThan(1e-3);
+    expect(nodeFlowAlpha(node, at(0.01))).toBeLessThan(1e-3);
   });
 });

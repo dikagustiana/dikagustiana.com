@@ -1,328 +1,457 @@
 {
-  "viewport 1920x960": {
-    "heroTop": 65,
-    "heroHeight": 655,
-    "h1Top": 130,
-    "h1Size": 84,
-    "h1LineHeight": 1.05,
-    "h1Font": "\"Source Serif 4\"",
-    "lines": [
-      {
-        "text": "Spreading intelligence.",
-        "boxes": 1,
-        "right": 993.171875
-      },
-      {
-        "text": "Rebuilding industry.",
-        "boxes": 1,
-        "right": 993.171875
-      }
+ "viewport 1920x960": {
+  "heroTop": 65,
+  "heroHeight": 655,
+  "h1Top": 130,
+  "h1Size": 84,
+  "h1LineHeight": 1.05,
+  "h1Font": "\"Source Serif 4\"",
+  "lines": [
+   {
+    "text": "Spreading intelligence.",
+    "boxes": 1,
+    "right": 993.171875
+   },
+   {
+    "text": "Rebuilding industry.",
+    "boxes": 1,
+    "right": 993.171875
+   }
+  ],
+  "h1Lines": 4,
+  "blockWidthShare": 0.4572835286458333,
+  "blockLeft": 115.1875,
+  "blockRight": 993.171875,
+  "subline": "Exploring how to accelerate both \u2014 and what it takes for Indonesia to industrialise again.",
+  "sublineSize": 24,
+  "sublineOpacity": "0.7",
+  "sublineMaxWidth": "632.446px",
+  "sublineMarginTop": "24px",
+  "glimpseHeadingBottom": 804,
+  "cardsInView": 7,
+  "eyebrowsBottom": 844.5,
+  "eyebrowsInView": 7,
+  "titlesFullyInView": 5,
+  "titlesInView": 5,
+  "canvas": {
+   "aria": "true",
+   "tabindexAttr": null,
+   "pointer": "none",
+   "pitch": 65.28,
+   "warps": 12,
+   "wefts": 7,
+   "cssW": 1920,
+   "w": 1920,
+   "h": 655
+  },
+  "headlineMinContrast": 12.26,
+  "seams": {
+   "navToHeroMaxRowStep": 3,
+   "heroToGlimpseMaxRowStep": 1,
+   "colorsAtBoundaries": {
+    "aboveHero": [
+     31,
+     41,
+     55
     ],
-    "h1Lines": 4,
-    "blockWidthShare": 0.4572835286458333,
-    "blockLeft": 115.1875,
-    "blockRight": 993.171875,
-    "subline": "Exploring how to accelerate both — and what it takes for Indonesia to industrialise again.",
-    "sublineSize": 24,
-    "sublineOpacity": "0.7",
-    "sublineMaxWidth": "632.446px",
-    "sublineMarginTop": "24px",
-    "glimpseHeadingBottom": 804,
-    "cardsInView": 7,
-    "eyebrowsBottom": 844.5,
-    "eyebrowsInView": 7,
-    "titlesFullyInView": 5,
-    "titlesInView": 5,
-    "canvas": {
-      "aria": "true",
-      "tabindexAttr": null,
-      "pointer": "none",
-      "pitch": 65.28,
-      "warps": 12,
-      "wefts": 7,
-      "cssW": 1920,
-      "w": 1920,
-      "h": 655
-    },
-    "headlineMinContrast": 12.26,
-    "seams": {
-      "navToHeroMaxRowStep": 3,
-      "heroToGlimpseMaxRowStep": 1,
-      "colorsAtBoundaries": {
-        "aboveHero": [
-          31,
-          41,
-          55
-        ],
-        "heroTop": [
-          32,
-          42,
-          56
-        ],
-        "heroBottom": [
-          250,
-          250,
-          250
-        ],
-        "belowHero": [
-          250,
-          250,
-          250
-        ]
-      }
-    }
-  },
-  "R11 1920x960": {
-    "canvasReachedByTab": false,
-    "focusableByScript": false
-  },
-  "viewport 1366x657": {
-    "heroTop": 65,
-    "heroHeight": 440,
-    "h1Top": 130,
-    "h1Size": 67.0113,
-    "h1LineHeight": 1.0500005222999702,
-    "h1Font": "\"Source Serif 4\"",
-    "lines": [
-      {
-        "text": "Spreading intelligence.",
-        "boxes": 1,
-        "right": 782.234375
-      },
-      {
-        "text": "Rebuilding industry.",
-        "boxes": 1,
-        "right": 782.234375
-      }
+    "heroTop": [
+     32,
+     42,
+     56
     ],
-    "h1Lines": 4,
-    "blockWidthShare": 0.5126509882869692,
-    "blockLeft": 81.953125,
-    "blockRight": 782.234375,
-    "subline": "Exploring how to accelerate both — and what it takes for Indonesia to industrialise again.",
-    "sublineSize": 19.124,
-    "sublineOpacity": "0.7",
-    "sublineMaxWidth": "503.573px",
-    "sublineMarginTop": "24px",
-    "glimpseHeadingBottom": 589,
-    "cardsInView": 5,
-    "eyebrowsBottom": 629.5,
-    "eyebrowsInView": 5,
-    "titlesFullyInView": 0,
-    "titlesInView": 3,
-    "canvas": {
-      "aria": "true",
-      "tabindexAttr": null,
-      "pointer": "none",
-      "pitch": 52,
-      "warps": 11,
-      "wefts": 5,
-      "cssW": 1366,
-      "w": 1366,
-      "h": 440
-    },
-    "headlineMinContrast": 12.26,
-    "seams": {
-      "navToHeroMaxRowStep": 3,
-      "heroToGlimpseMaxRowStep": 1,
-      "colorsAtBoundaries": {
-        "aboveHero": [
-          31,
-          41,
-          55
-        ],
-        "heroTop": [
-          32,
-          42,
-          56
-        ],
-        "heroBottom": [
-          250,
-          250,
-          249
-        ],
-        "belowHero": [
-          250,
-          250,
-          250
-        ]
-      }
-    }
-  },
-  "R11 1366x657": {
-    "canvasReachedByTab": false,
-    "focusableByScript": false
-  },
-  "viewport 390x844": {
-    "heroTop": 65,
-    "heroHeight": 539,
-    "h1Top": 130,
-    "h1Size": 30.7547,
-    "h1LineHeight": 1.0500021134980995,
-    "h1Font": "\"Source Serif 4\"",
-    "lines": [
-      {
-        "text": "Spreading intelligence.",
-        "boxes": 1,
-        "right": 358
-      },
-      {
-        "text": "Rebuilding industry.",
-        "boxes": 1,
-        "right": 358
-      }
+    "heroBottom": [
+     250,
+     250,
+     250
     ],
-    "h1Lines": 4,
-    "blockWidthShare": 1,
-    "blockLeft": 0,
-    "blockRight": 390,
-    "subline": "Exploring how to accelerate both — and what it takes for Indonesia to industrialise again.",
-    "sublineSize": 18,
-    "sublineOpacity": "0.7",
-    "sublineMaxWidth": "474.333px",
-    "sublineMarginTop": "24px",
-    "glimpseHeadingBottom": 688,
-    "cardsInView": 2,
-    "eyebrowsBottom": 728.5,
-    "eyebrowsInView": 2,
-    "titlesFullyInView": 0,
-    "titlesInView": 0,
-    "canvas": {
-      "aria": "true",
-      "tabindexAttr": null,
-      "pointer": "none",
-      "pitch": 40,
-      "warps": 10,
-      "wefts": 5,
-      "cssW": 390,
-      "w": 390,
-      "h": 205
-    },
-    "headlineMinContrast": 12.26,
-    "seams": {
-      "navToHeroMaxRowStep": 3,
-      "heroToGlimpseMaxRowStep": 1,
-      "colorsAtBoundaries": {
-        "aboveHero": [
-          31,
-          41,
-          55
-        ],
-        "heroTop": [
-          32,
-          42,
-          56
-        ],
-        "heroBottom": [
-          250,
-          250,
-          250
-        ],
-        "belowHero": [
-          250,
-          250,
-          250
-        ]
-      }
-    }
-  },
-  "R11 390x844": {
-    "canvasReachedByTab": false,
-    "focusableByScript": false
-  },
-  "R6 1920x960": {
-    "pitch": 65.28,
-    "warpGapsPx": [
-      65.25,
-      65.25,
-      65.5,
-      65,
-      65.5,
-      65,
-      65.5,
-      65.25,
-      65.25,
-      65.5,
-      65
-    ],
-    "weftGapsPx": [
-      65.25,
-      65.25,
-      65.25,
-      65.25,
-      65.5,
-      65
+    "belowHero": [
+     250,
+     250,
+     250
     ]
-  },
-  "R6 1366x657": {
-    "pitch": 52,
-    "warpGapsPx": [
-      52,
-      52,
-      52,
-      52,
-      52,
-      52,
-      52,
-      52,
-      52,
-      52
-    ],
-    "weftGapsPx": [
-      52,
-      52,
-      52
-    ]
-  },
-  "R6 390x844": {
-    "pitch": 40,
-    "warpGapsPx": [
-      40,
-      40,
-      40,
-      40,
-      40,
-      40,
-      40,
-      40,
-      40
-    ],
-    "weftGapsPx": [
-      40,
-      40,
-      40
-    ]
-  },
-  "R8": {
-    "identicalAfter3s": true,
-    "paintedShare": 0.078,
-    "shownAt300ms": true
-  },
-  "R7": {
-    "introChangesFrameToFrame": true,
-    "idleStillMovingAfterIntro": true
-  },
-  "R9": {
-    "offscreenStill": true,
-    "backInViewMoving": true,
-    "hiddenTabStill": true,
-    "visibleAgainMoving": true
-  },
-  "frame cost, CPU 1x": {
-    "frames": 482,
-    "fps": 120.5,
-    "meanMs": 0.144,
-    "p95Ms": 0.3,
-    "maxMs": 0.4
-  },
-  "frame cost, CPU 4x": {
-    "frames": 248,
-    "fps": 62,
-    "meanMs": 0.654,
-    "p95Ms": 1.5,
-    "maxMs": 2.6
-  },
-  "recording": {
-    "file": "/tmp/claude-0/-home-user-dikagustiana-com/12bf6a12-51c0-577a-9fb9-8509fe969248/scratchpad/v2/verify/video/page@052c8a843ba960cbc1dd05cc8d951409.webm"
+   }
   }
+ },
+ "R11 1920x960": {
+  "canvasReachedByTab": false,
+  "focusableByScript": false
+ },
+ "viewport 1366x657": {
+  "heroTop": 65,
+  "heroHeight": 440,
+  "h1Top": 130,
+  "h1Size": 67.0113,
+  "h1LineHeight": 1.0500005222999702,
+  "h1Font": "\"Source Serif 4\"",
+  "lines": [
+   {
+    "text": "Spreading intelligence.",
+    "boxes": 1,
+    "right": 782.234375
+   },
+   {
+    "text": "Rebuilding industry.",
+    "boxes": 1,
+    "right": 782.234375
+   }
+  ],
+  "h1Lines": 4,
+  "blockWidthShare": 0.5126509882869692,
+  "blockLeft": 81.953125,
+  "blockRight": 782.234375,
+  "subline": "Exploring how to accelerate both \u2014 and what it takes for Indonesia to industrialise again.",
+  "sublineSize": 19.124,
+  "sublineOpacity": "0.7",
+  "sublineMaxWidth": "503.573px",
+  "sublineMarginTop": "24px",
+  "glimpseHeadingBottom": 589,
+  "cardsInView": 5,
+  "eyebrowsBottom": 629.5,
+  "eyebrowsInView": 5,
+  "titlesFullyInView": 0,
+  "titlesInView": 3,
+  "canvas": {
+   "aria": "true",
+   "tabindexAttr": null,
+   "pointer": "none",
+   "pitch": 52,
+   "warps": 11,
+   "wefts": 5,
+   "cssW": 1366,
+   "w": 1366,
+   "h": 440
+  },
+  "headlineMinContrast": 12.26,
+  "seams": {
+   "navToHeroMaxRowStep": 3,
+   "heroToGlimpseMaxRowStep": 1,
+   "colorsAtBoundaries": {
+    "aboveHero": [
+     31,
+     41,
+     55
+    ],
+    "heroTop": [
+     32,
+     42,
+     56
+    ],
+    "heroBottom": [
+     250,
+     250,
+     249
+    ],
+    "belowHero": [
+     250,
+     250,
+     250
+    ]
+   }
+  }
+ },
+ "R11 1366x657": {
+  "canvasReachedByTab": false,
+  "focusableByScript": false
+ },
+ "viewport 390x844": {
+  "heroTop": 65,
+  "heroHeight": 539,
+  "h1Top": 130,
+  "h1Size": 30.7547,
+  "h1LineHeight": 1.0500021134980995,
+  "h1Font": "\"Source Serif 4\"",
+  "lines": [
+   {
+    "text": "Spreading intelligence.",
+    "boxes": 1,
+    "right": 358
+   },
+   {
+    "text": "Rebuilding industry.",
+    "boxes": 1,
+    "right": 358
+   }
+  ],
+  "h1Lines": 4,
+  "blockWidthShare": 1,
+  "blockLeft": 0,
+  "blockRight": 390,
+  "subline": "Exploring how to accelerate both \u2014 and what it takes for Indonesia to industrialise again.",
+  "sublineSize": 18,
+  "sublineOpacity": "0.7",
+  "sublineMaxWidth": "474.333px",
+  "sublineMarginTop": "24px",
+  "glimpseHeadingBottom": 688,
+  "cardsInView": 2,
+  "eyebrowsBottom": 728.5,
+  "eyebrowsInView": 2,
+  "titlesFullyInView": 0,
+  "titlesInView": 0,
+  "canvas": {
+   "aria": "true",
+   "tabindexAttr": null,
+   "pointer": "none",
+   "pitch": 40,
+   "warps": 10,
+   "wefts": 3,
+   "cssW": 390,
+   "w": 390,
+   "h": 205
+  },
+  "headlineMinContrast": 12.26,
+  "seams": {
+   "navToHeroMaxRowStep": 3,
+   "heroToGlimpseMaxRowStep": 3,
+   "colorsAtBoundaries": {
+    "aboveHero": [
+     31,
+     41,
+     55
+    ],
+    "heroTop": [
+     32,
+     42,
+     56
+    ],
+    "heroBottom": [
+     249,
+     249,
+     249
+    ],
+    "belowHero": [
+     250,
+     250,
+     250
+    ]
+   }
+  }
+ },
+ "R11 390x844": {
+  "canvasReachedByTab": false,
+  "focusableByScript": false
+ },
+ "R6 1920x960": {
+  "pitch": 65.28,
+  "warpGapsPx": [
+   65.25,
+   65.25,
+   65.5,
+   65,
+   65.5,
+   65,
+   65.5,
+   65.25,
+   65.25,
+   65.5,
+   65
+  ],
+  "weftGapsPx": [
+   65.25,
+   65.25,
+   65.25,
+   65.25,
+   65.5,
+   65
+  ]
+ },
+ "R6 1366x657": {
+  "pitch": 52,
+  "warpGapsPx": [
+   52,
+   52,
+   52,
+   52,
+   52,
+   52,
+   52,
+   52,
+   52,
+   52
+  ],
+  "weftGapsPx": [
+   52,
+   52,
+   52
+  ]
+ },
+ "R6 390x844": {
+  "pitch": 40,
+  "warpGapsPx": [
+   40,
+   40,
+   40,
+   40,
+   40,
+   40,
+   40,
+   40,
+   40
+  ],
+  "weftGapsPx": [
+   40
+  ]
+ },
+ "R8": {
+  "identicalAfter3s": true,
+  "paintedShare": 0.0654,
+  "shownAt300ms": true
+ },
+ "R7": {
+  "introChangesFrameToFrame": true,
+  "idleStillMovingAfterIntro": true
+ },
+ "R9": {
+  "offscreenStill": true,
+  "backInViewMoving": true,
+  "hiddenTabStill": true,
+  "visibleAgainMoving": true
+ },
+ "frame cost, CPU 1x": {
+  "frames": 480,
+  "fps": 120,
+  "meanMs": 0.273,
+  "p95Ms": 0.5,
+  "maxMs": 5
+ },
+ "frame cost, CPU 4x": {
+  "frames": 290,
+  "fps": 72.5,
+  "meanMs": 0.724,
+  "p95Ms": 2.2,
+  "maxMs": 4.5
+ },
+ "text clear: canvas pixels inside each line box (4 moments a size)": {
+  "1920x960": [
+   {
+    "lines": 4,
+    "painted": 0,
+    "maxAlpha": 0
+   },
+   {
+    "lines": 4,
+    "painted": 0,
+    "maxAlpha": 0
+   },
+   {
+    "lines": 4,
+    "painted": 0,
+    "maxAlpha": 0
+   },
+   {
+    "lines": 4,
+    "painted": 0,
+    "maxAlpha": 0
+   }
+  ],
+  "1440x900": [
+   {
+    "lines": 4,
+    "painted": 0,
+    "maxAlpha": 0
+   },
+   {
+    "lines": 4,
+    "painted": 0,
+    "maxAlpha": 0
+   },
+   {
+    "lines": 4,
+    "painted": 0,
+    "maxAlpha": 0
+   },
+   {
+    "lines": 4,
+    "painted": 0,
+    "maxAlpha": 0
+   }
+  ],
+  "1366x657": [
+   {
+    "lines": 4,
+    "painted": 0,
+    "maxAlpha": 0
+   },
+   {
+    "lines": 4,
+    "painted": 0,
+    "maxAlpha": 0
+   },
+   {
+    "lines": 4,
+    "painted": 0,
+    "maxAlpha": 0
+   },
+   {
+    "lines": 4,
+    "painted": 0,
+    "maxAlpha": 0
+   }
+  ],
+  "1280x720": [
+   {
+    "lines": 4,
+    "painted": 0,
+    "maxAlpha": 0
+   },
+   {
+    "lines": 4,
+    "painted": 0,
+    "maxAlpha": 0
+   },
+   {
+    "lines": 4,
+    "painted": 0,
+    "maxAlpha": 0
+   },
+   {
+    "lines": 4,
+    "painted": 0,
+    "maxAlpha": 0
+   }
+  ],
+  "1024x768": [
+   {
+    "lines": 4,
+    "painted": 0,
+    "maxAlpha": 0
+   },
+   {
+    "lines": 4,
+    "painted": 0,
+    "maxAlpha": 0
+   },
+   {
+    "lines": 4,
+    "painted": 0,
+    "maxAlpha": 0
+   },
+   {
+    "lines": 4,
+    "painted": 0,
+    "maxAlpha": 0
+   }
+  ],
+  "768x1024": [
+   {
+    "lines": 4,
+    "painted": 0,
+    "maxAlpha": 0
+   },
+   {
+    "lines": 4,
+    "painted": 0,
+    "maxAlpha": 0
+   },
+   {
+    "lines": 4,
+    "painted": 0,
+    "maxAlpha": 0
+   },
+   {
+    "lines": 4,
+    "painted": 0,
+    "maxAlpha": 0
+   }
+  ]
+ }
 }
