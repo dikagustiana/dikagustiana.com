@@ -5,8 +5,8 @@ import { BAND } from './weave/constants';
 
 /** The hero's copy (docs/home-hero-v2.md R1, R2). */
 const HERO_COPY = {
-  title: ['Spreading intelligence.', 'Rebuilding industry.'],
-  subline: 'Exploring how to accelerate both — and what it takes for Indonesia to industrialise again.',
+  title: ['Democratising knowledge.', 'Rebuilding industry.'],
+  subline: 'Exploring how to accelerate both, and how every Indonesian can share in them.',
 } as const;
 
 /**
