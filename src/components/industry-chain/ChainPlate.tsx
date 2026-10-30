@@ -844,10 +844,10 @@ export function IndustryChainSection() {
 }
 
 /**
- * The map on the landing page, opening at the overview.
- *
- * The Weave Hero above it carries the page's main heading (2026-10-29), so
- * the map's title is an h2.
+ * The map as the landing page carried it, opening at the overview, its title
+ * an h2 under the Weave Hero's h1. The owner removed it from the homepage on
+ * 2026-10-29 and no page mounts it now; kept, with its world slot, because
+ * the world shell's suite still renders it, as IndustryChainSection is.
  */
 export function IndustryChainPreview() {
   if (__WORLD_KAWASAN__) return <WorldSlot variant="preview" heading="h2" Schematic={ChainPlate} />;

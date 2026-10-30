@@ -26,7 +26,7 @@ import { linksFrom, linksTo, placeLinks } from '@/lib/finance-in-action/links';
 import type { IndustryLink } from '@/lib/finance-in-action/contract/links';
 import type { Registry } from '@/lib/finance-in-action/registry';
 import { COPY } from '@/lib/finance-in-action/copy';
-import { chainMapHref, positionAnchor, subIndustryAnchor, type ChainPosition } from '@/lib/finance-in-action/chain';
+import { positionAnchor, subIndustryAnchor, type ChainPosition } from '@/lib/finance-in-action/chain';
 import { conditionsUsed } from '@/lib/finance-in-action/conditions';
 import { groupAlongChain, type CompanyEntry, type PositionGroup } from '@/lib/finance-in-action/registry';
 import type { RegistryHook } from '@/lib/finance-in-action/registryState';
@@ -115,12 +115,7 @@ export function FiaIndex({ useRegistry }: { useRegistry: RegistryHook }) {
               {COPY.alongTheChain}
             </h2>
             <div className="flex flex-wrap items-center gap-4">
-              <Link
-                to={chainMapHref()}
-                className="inline-flex min-h-11 items-center text-sm text-accent underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                {COPY.openChainMap}
-              </Link>
+              {/* "Open the chain map" went with the homepage map (2026-10-29). */}
               <ConnectionsToggle on={lens} onChange={(on) => update({ [PARAM.lens]: on ? 'on' : null, [PARAM.link]: null })} />
             </div>
           </div>

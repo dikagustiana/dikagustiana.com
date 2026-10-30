@@ -2,11 +2,9 @@
  * The chain, as Finance in Action reads it: nothing but the chain map's own
  * data (constraint 6). Stages come from STAGES in the reading order of
  * COLUMNS; the distribution and retail nodes from NODES and RETAIL, in the
- * same order; the two spanning layers from BANDS; addresses on the map from
- * SLUGS through the map's own URL contract (useChainUrl.ts).
+ * same order; the two spanning layers from BANDS.
  */
-import { BANDS, COLUMNS, NODES, RETAIL, RETAIL_GROUP, STAGES, slugOf } from '@/data/industryChain';
-import { CHAIN_PARAM } from '@/components/industry-chain/useChainUrl';
+import { BANDS, COLUMNS, NODES, RETAIL, RETAIL_GROUP, STAGES } from '@/data/industryChain';
 import { CHAIN_NODE_IDS, SPANNING_LAYER_IDS } from './contract/validate';
 
 export interface ChainPosition {
@@ -48,21 +46,6 @@ export const ALONG_THE_CHAIN: ChainPosition[] = [...CHAIN_STAGES, ...CHAIN_NODES
 export const CHAIN_POSITIONS: ChainPosition[] = [...ALONG_THE_CHAIN, ...SPANNING_LAYERS];
 
 export const positionOf = (id: string): ChainPosition | undefined => CHAIN_POSITIONS.find((p) => p.id === id);
-
-/**
- * The element on the chain map, read at the finance distance. The map lives
- * on the homepage since About was removed (owner decision, 2026-10-10). A
- * spanning layer is a door, so its reading opens. A stage is not a door
- * unless an overlay marks it, and this address names no overlay, so the map
- * drops the stage (ChainPlate's canOpen) and opens at the finance distance
- * with nothing selected, as it did on About.
- */
-export function chainMapHref(positionId?: string): string {
-  const params = new URLSearchParams();
-  params.set(CHAIN_PARAM.lens, 'finance');
-  if (positionId) params.set(CHAIN_PARAM.node, slugOf(positionId));
-  return `/?${params.toString()}`;
-}
 
 /**
  * The index anchor of a chain position, and of a sub-industry. Chain view

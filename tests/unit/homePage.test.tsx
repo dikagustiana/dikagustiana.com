@@ -1,11 +1,11 @@
 /**
- * The homepage: the Weave Hero (2026-10-29), then the map, then the glimpse,
- * and nothing after it. The two sections About left under the glimpse (owner
- * decision D4(a), 2026-10-10), the argument and the revision of judgment,
- * were removed by owner decision on 2026-10-11. A fragment that names a
- * section of the page is still gone to once the page has drawn. The map is
- * stubbed here (its own suites cover it, and the hero has its own in
- * weaveHero.test.tsx); everything else is the real thing.
+ * The homepage: the Weave Hero (2026-10-29), then the glimpse, and nothing
+ * after it. The industry chain map that stood between them was removed by
+ * owner decision on 2026-10-29; the two sections About left under the glimpse
+ * (owner decision D4(a), 2026-10-10), the argument and the revision of
+ * judgment, on 2026-10-11. A fragment that names a section of the page is
+ * still gone to once the page has drawn. Everything here is the real thing
+ * (the hero has its own suite, weaveHero.test.tsx).
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { act, configure, render, screen, waitFor, within } from '@testing-library/react';
@@ -21,13 +21,6 @@ vi.mock('@/components/layouts/PageLayout', () => ({
   PageLayout: ({ children }: { children: React.ReactNode }) => <main>{children}</main>,
 }));
 vi.mock('@/components/SEO', () => ({ SEO: () => null }));
-vi.mock('@/components/industry-chain', () => ({
-  IndustryChainPreview: () => (
-    <section id="industry-chain">
-      <h2>The industry chain</h2>
-    </section>
-  ),
-}));
 
 import Index from '@/pages/Index';
 import { essayRow, essaysTable } from './helpers/essaysTable';
@@ -51,18 +44,20 @@ const follows = (a: Element, b: Element) => (a.compareDocumentPosition(b) & Node
 beforeEach(() => fromMock.mockReset());
 
 describe('the homepage', () => {
-  it('ends with the glimpse: the hero first, then the map, then the row, and no argument or revision of judgment after it', async () => {
+  it('ends with the glimpse: the hero first, then the row, and no map, argument or revision of judgment', async () => {
     fromMock.mockImplementation(essaysTable([essayRow(1, { is_selected: true, selected_rank: 1 }), essayRow(2)]).from);
     const { container } = mount();
     const glimpse = await screen.findByRole('list', { name: 'Glimpse' });
     await waitFor(() => expect(within(glimpse).getAllByRole('listitem')).toHaveLength(2));
 
     const hero = container.querySelector('main > section.weave-hero')!;
-    const map = container.querySelector('#industry-chain')!;
     const glimpseSection = glimpse.closest('section')!;
     expect(hero).toBe(container.querySelector('main > section'));
-    expect(follows(hero, map)).toBe(true);
-    expect(follows(map, glimpse)).toBe(true);
+    // the glimpse follows the hero directly: the map is gone
+    expect(hero.nextElementSibling).toBe(glimpseSection);
+    expect(follows(hero, glimpse)).toBe(true);
+    expect(container.querySelector('#industry-chain')).toBeNull();
+    expect(screen.queryByText('The industry chain')).toBeNull();
     // the page's last section
     expect(glimpseSection.nextElementSibling).toBeNull();
     // the hero's headline is the page's one h1, and the first heading on it
@@ -89,7 +84,7 @@ describe('the homepage', () => {
         </MemoryRouter>,
       );
 
-    const first = at('/#industry-chain');
+    const first = at('/#glimpse-heading');
     await waitFor(() => expect(scrollTo).toHaveBeenCalledTimes(1));
     expect(scrollTo.mock.calls[0][0]).toMatchObject({ behavior: 'smooth' });
     first.unmount();
@@ -104,7 +99,7 @@ describe('the homepage', () => {
 
     // a reader already on their way down is not pulled back
     Object.defineProperty(window, 'scrollY', { configurable: true, value: 400 });
-    at('/#industry-chain');
+    at('/#glimpse-heading');
     await screen.findByRole('list', { name: 'Glimpse' });
     await new Promise((r) => requestAnimationFrame(r));
     expect(scrollTo).not.toHaveBeenCalled();
@@ -158,18 +153,17 @@ describe('the homepage', () => {
     await new Promise((r) => requestAnimationFrame(r));
 
     // the skip link, or any in-page move, after arrival
-    act(() => go('/#industry-chain'));
+    act(() => go('/#glimpse-heading'));
     await new Promise((r) => requestAnimationFrame(r));
     expect(scrollTo).not.toHaveBeenCalled();
   });
 
-  it('is the hero and the map alone when nothing is published: the glimpse is absent, not empty', async () => {
+  it('is the hero alone when nothing is published: the glimpse is absent, not empty', async () => {
     fromMock.mockImplementation(essaysTable([essayRow(1, { published: false, is_selected: true, selected_rank: 1 })]).from);
     const { container } = mount();
     await waitFor(() => expect(screen.queryByRole('heading', { name: 'Glimpse' })).toBeNull());
     const sections = container.querySelectorAll('main > section');
-    expect(sections).toHaveLength(2);
+    expect(sections).toHaveLength(1);
     expect(sections[0].classList.contains('weave-hero')).toBe(true);
-    expect(sections[1].id).toBe('industry-chain');
   });
 });

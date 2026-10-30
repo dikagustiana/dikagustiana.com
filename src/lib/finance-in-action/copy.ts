@@ -14,7 +14,6 @@ export const COPY = {
   seoTitle: 'Finance in Action',
   seoDescription: "Company models of IDX-listed companies, rebuilt from their own filings and ordered along the industry chain.",
   alongTheChain: 'Models along the chain',
-  openChainMap: 'Open the chain map',
   connectionsOn: 'Connections on',
   connectionsOff: 'Connections off',
   noModels: 'No models yet.',

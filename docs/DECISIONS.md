@@ -5,6 +5,35 @@ alternatives. Newest first.
 
 ---
 
+# 2026-10-29 — The industry chain map leaves the homepage
+
+Owner request, the same day as the Weave Hero: the map under the hero goes. The homepage is now the
+hero, then the glimpse, then the footer.
+
+- **Unmounted, not deleted.** `src/pages/Index.tsx` no longer renders `IndustryChainPreview`.
+  `ChainPlate` and its modules stay. The Kawasan world's Skema mode draws `ChainPlate`
+  (`WorldFrame`, behind `VITE_WORLD_KAWASAN`), and its unit suites stay with it.
+  `IndustryChainPreview` is kept as `IndustryChainSection` already was: no page mounts it, and the
+  world shell's suite renders it. With the world flag on, the homepage no longer shows the world,
+  since it stood in the map's slot; `/finance/kawasan` is unchanged.
+- **No public page carries the map now.** An address into it (`/?lens=&distance=&node=`, the
+  contract in `useChainUrl.ts`) opens the homepage at its top and draws nothing from its
+  parameters. That includes old About links (App.tsx keeps their address and fragment) and any
+  link an essay was written with from `docs/response-2026-09-14-v5/linking-into-the-map.md`, now
+  marked retired. Essays in the database were not searched for such links from this session.
+- **Finance in Action's two links into the map are removed**, so they do not land on a page without
+  it: "Open the chain map" on the index and "Show … on the chain map" in Related reading
+  (`chainMapHref` and `COPY.openChainMap` gone). Related reading now draws nothing for a model that
+  informs no condition, rather than an empty block.
+- **Tests.** `tests/e2e/chain.spec.ts` and `tests/e2e/mapLinks.spec.ts` are deleted: they tested the
+  map on the homepage, and no page carries it. Three map journeys go from `journeys.spec.ts`; its
+  thirty-second journey and old About links are rewritten for the hero and the glimpse.
+  `homePage.test.tsx` checks the glimpse follows the hero directly, and its fragment tests aim at
+  `#glimpse-heading`. `fiaIndex` and `fiaModelPage` check the two links are absent. No unit test is
+  deleted.
+
+---
+
 # 2026-10-29 — The Weave Hero, Phase 1
 
 Spec: `docs/hero-weave-prd.md` (owner, 29 October 2026; Design and Architecture binding). The homepage now

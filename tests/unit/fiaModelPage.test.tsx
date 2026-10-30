@@ -121,14 +121,15 @@ describe('the peer band (docs/prd/2026-10-fia-fixes item 6)', () => {
 });
 
 describe('Related reading (docs/prd/2026-10-fia-fixes item 9)', () => {
-  it('names each condition in one line, links it, keeps the chain map link, and drops the rule and the note', async () => {
+  it('names each condition in one line, links it, and drops the rule, the note and the chain map link', async () => {
     at('xcoa');
     const condition = getConditionByNumber(3)!;
     await screen.findByRole('heading', { level: 2, name: COPY.howItMakesMoney });
     const related = document.querySelector('[data-fia-related]') as HTMLElement;
     expect(related).toHaveTextContent(`Related reading: Capital in Motion 03 · ${condition.title}`);
     expect(within(related).getByRole('link', { name: `Capital in Motion 03 · ${condition.title}` })).toHaveAttribute('href', `/finance/capital-allocation/${condition.id}`);
-    expect(within(related).getByRole('link', { name: /Show coal on the chain map/ })).toHaveAttribute('href', '/?distance=finance&node=extraction');
+    // the homepage map it pointed into was removed on 2026-10-29
+    expect(within(related).queryByRole('link', { name: /on the chain map/ })).toBeNull();
     expect(document.body).not.toHaveTextContent(condition.rule);
     expect(document.body).not.toHaveTextContent('This model supplies the per-tonne economics');
     expect(screen.queryByRole('heading', { name: 'Why this link matters' })).toBeNull();
