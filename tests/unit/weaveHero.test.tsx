@@ -96,6 +96,16 @@ describe('the copy', () => {
     expect(screen.getByText('Exploring how to accelerate both, and how every Indonesian can share in them.').tagName).toBe('P');
     expect(hero()).toHaveAttribute('aria-labelledby', h1.id);
   });
+
+  it('rings each letter of the headline with the hero’s background, only where paint-order reaches text', () => {
+    render(<WeaveHero />);
+    const classes = screen.getByRole('heading', { level: 1 }).className.split(' ');
+    const guard = 'supports-[(paint-order:stroke)and(color:light-dark(#000,#fff))]';
+    expect(classes).toContain(`${guard}:[paint-order:stroke_fill]`);
+    expect(classes).toContain(`${guard}:[-webkit-text-stroke:12px_var(--hero-bg)]`);
+    // never unguarded: an older browser would paint the stroke over the letters
+    expect(classes.filter((c) => c.includes('paint-order') || c.includes('text-stroke')).every((c) => c.startsWith(guard))).toBe(true);
+  });
 });
 
 describe('the canvas', () => {
@@ -213,6 +223,8 @@ describe('the breakpoints', () => {
     expect(canvas()).toHaveAttribute('data-weave', 'mobile');
     expect(canvas().dataset.pitch).toBe('40');
     const h1 = screen.getByRole('heading', { level: 1 });
+    // the first line, 12.19em long, fits the width less the container's padding
+    expect(h1.className).toContain('calc((100cqi_-_4rem)_/_12.35)');
     expect(h1.compareDocumentPosition(canvas()) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 

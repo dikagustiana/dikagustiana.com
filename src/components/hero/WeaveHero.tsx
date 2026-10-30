@@ -42,17 +42,31 @@ const BACKGROUND: CSSProperties = {
 
 /**
  * The headline's size (§2 "Typography", R1): clamp(2.75rem, 5.2vw, 5.25rem),
- * but never wider than its block lets one sentence sit on one line. The
- * longer sentence, "Spreading intelligence.", is 10.45em in Source Serif 4
- * at the headings' tracking; 10.6 leaves a hair. On a desktop the block is
- * 52% of the hero; on a phone it is the width less the container's 2rem
- * each side, so at 390px the two sentences still take a line each.
+ * capped by the width it has. On a desktop the cap is 52% of the hero over
+ * 10.6em, the size the headline had with its first line 10.45em long. The
+ * longer sentence now, "Democratising knowledge.", is 12.19em in Source
+ * Serif 4 at the headings' tracking, so it runs past that block and over the
+ * first warps, which pass behind it (H1_HALO). On a phone the cap is the width
+ * less the container's 2rem each side over 12.35em, so at 390px each sentence
+ * still fits its line.
  */
 const H1_SIZE = 'text-[length:clamp(2.75rem,5.2vw,5.25rem)]';
 const H1_FIT = {
   desktop: 'supports-[width:1cqi]:text-[length:min(clamp(2.75rem,5.2vw,5.25rem),calc(52cqi_/_10.6))]',
-  mobile: 'supports-[width:1cqi]:text-[length:min(clamp(2.75rem,5.2vw,5.25rem),calc((100cqi_-_4rem)_/_10.6))]',
+  mobile: 'supports-[width:1cqi]:text-[length:min(clamp(2.75rem,5.2vw,5.25rem),calc((100cqi_-_4rem)_/_12.35))]',
 } as const;
+
+/**
+ * A halo of the hero's background round every letter of the headline (owner,
+ * 30 October 2026): where a thread meets a letter, it seems to pass behind it.
+ * The 12px stroke is painted under the fill, so 6px of it shows outside each
+ * glyph, unseen on the cream but where a thread runs. Chrome paints HTML text
+ * in that order only from version 123; before that the stroke would cover the
+ * letters. @supports cannot ask about text, so the halo waits for light-dark(),
+ * which came in the same Chrome release.
+ */
+const H1_HALO =
+  'supports-[(paint-order:stroke)and(color:light-dark(#000,#fff))]:[paint-order:stroke_fill] supports-[(paint-order:stroke)and(color:light-dark(#000,#fff))]:[-webkit-text-stroke:12px_var(--hero-bg)]';
 
 const MOBILE_QUERY = '(max-width: 767.98px)';
 
@@ -87,7 +101,7 @@ export function WeaveHero() {
       >
         <h1
           id="weave-hero-title"
-          className={`font-hero font-medium leading-[1.05] text-[color:var(--hero-ink)] ${H1_SIZE} ${mobile ? H1_FIT.mobile : H1_FIT.desktop}`}
+          className={`font-hero font-medium leading-[1.05] text-[color:var(--hero-ink)] ${H1_SIZE} ${mobile ? H1_FIT.mobile : H1_FIT.desktop} ${H1_HALO}`}
         >
           {/* One sentence a line; the space keeps the accessible name and a
               copied selection two sentences, not one run-on word. */}
