@@ -1,0 +1,17 @@
+# The hero's own frame callback, timed (perf.cjs), after the owner's feedback (three nodes a warp, flowing). Two rounds.
+{"cpu":"1x","viewport":"1920x960","heroFrames":240,"fps":60,"meanMs":0.307,"p95Ms":0.4,"maxMs":0.6}
+{"cpu":"1x","viewport":"1366x657","heroFrames":240,"fps":60,"meanMs":0.213,"p95Ms":0.3,"maxMs":0.6}
+{"cpu":"4x","viewport":"1920x960","heroFrames":129,"fps":32.3,"meanMs":1.481,"p95Ms":2.8,"maxMs":5.9}
+{"cpu":"4x","viewport":"1366x657","heroFrames":229,"fps":57.3,"meanMs":0.891,"p95Ms":1.7,"maxMs":3.2}
+{"cpu":"1x","viewport":"1920x960","heroFrames":240,"fps":60,"meanMs":0.332,"p95Ms":0.5,"maxMs":0.6}
+{"cpu":"1x","viewport":"1366x657","heroFrames":241,"fps":60.3,"meanMs":0.226,"p95Ms":0.3,"maxMs":1.3}
+{"cpu":"4x","viewport":"1920x960","heroFrames":138,"fps":34.5,"meanMs":1.23,"p95Ms":1.9,"maxMs":4.3}
+{"cpu":"4x","viewport":"1366x657","heroFrames":234,"fps":58.5,"meanMs":0.774,"p95Ms":1.5,"maxMs":4.3}
+# Side by side at 1920x960, 4x, four alternating rounds of 5 s each (perf4x.cjs): the version before the feedback (eafd55f) and this one.
+{"build":"eafd55f","frames":499,"meanMs":1.514,"p50Ms":1.4,"p95Ms":2.5}
+{"build":"this","frames":623,"meanMs":1.467,"p50Ms":1.4,"p95Ms":2.5}
+# The first measurement, at eafd55f, on a quieter container:
+{"cpu":"1x","viewport":"1920x960","heroFrames":240,"fps":60,"meanMs":0.243,"p95Ms":0.4,"maxMs":0.5}
+{"cpu":"1x","viewport":"1366x657","heroFrames":241,"fps":60.3,"meanMs":0.185,"p95Ms":0.3,"maxMs":0.5}
+{"cpu":"4x","viewport":"1920x960","heroFrames":119,"fps":29.8,"meanMs":1.128,"p95Ms":1.7,"maxMs":2.3}
+{"cpu":"4x","viewport":"1366x657","heroFrames":208,"fps":52,"meanMs":0.772,"p95Ms":1.5,"maxMs":3.2}

@@ -7,4 +7,12 @@ import { cleanup } from '@testing-library/react';
 process.env.VITE_SUPABASE_URL ??= 'http://127.0.0.1:54321';
 process.env.VITE_SUPABASE_PUBLISHABLE_KEY ??= 'test-anon-key';
 
+// jsdom lays nothing out, and its Range has no getClientRects at all: give it
+// the empty list its elements give (the Home hero reads the text's line boxes).
+if (typeof Range !== 'undefined' && !Range.prototype.getClientRects) {
+  Range.prototype.getClientRects = function getClientRects() {
+    return Object.assign([], { item: () => null }) as unknown as DOMRectList;
+  };
+}
+
 afterEach(() => cleanup());

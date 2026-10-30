@@ -354,6 +354,9 @@ test('1440: the row stops under the pointer and for keyboard focus, which brings
   await page.setViewportSize({ width: 1440, height: 900 });
   const { row, errors } = await open(page);
   await page.locator('#glimpse-heading').scrollIntoViewIfNeeded();
+  // The homepage hero leaves the heading in view on load, the row's foot a
+  // pixel under the fold (docs/home-hero-v2.md R3): bring the whole row in.
+  await page.locator('.glimpse__frame').scrollIntoViewIfNeeded();
   const frame = page.locator('.glimpse__frame');
 
   // the pointer over it stops it; it runs again three seconds after it leaves
@@ -411,6 +414,8 @@ for (const reduced of [false, true]) {
     await page.setViewportSize({ width: 1440, height: 900 });
     const { row, errors } = await open(page);
     await page.locator('#glimpse-heading').scrollIntoViewIfNeeded();
+    // as above: the whole row, not only its heading (home-hero-v2 R3)
+    await page.locator('.glimpse__frame').scrollIntoViewIfNeeded();
     await page.mouse.move(0, 0);
     const left = await margin(page);
     const atMargin = async () => (await inView(page)).find((c) => Math.abs(c.left - left) < 1)?.n;

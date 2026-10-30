@@ -15,6 +15,12 @@
          (src/index.css, docs/hero-weave-prd.md §3). Vite rewrites the path
          to the same hashed file the @font-face names. -->
     <link rel="preload" href="/node_modules/@fontsource/source-serif-4/files/source-serif-4-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <!-- The editorial serif, Spectral, at the two weights the glimpse's cards
+         use (src/index.css): its titles and decks are in view on load under
+         the homepage hero, and must not reflow when the face arrives
+         (docs/home-hero-v2.md R10). -->
+    <link rel="preload" href="/fonts/spectral-normal-700-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/spectral-normal-400-latin.woff2" as="font" type="font/woff2" crossorigin />
 
     <!-- The feed (dist/rss.xml, written by scripts/prerender.mjs). -->
     <link rel="alternate" type="application/rss+xml" title="Dika Gustiana" href="/rss.xml" />
@@ -42,8 +48,8 @@
          a reader arrives with JavaScript off. -->
     <noscript>
       <section class="weave-hero-static" aria-labelledby="weave-hero-static-title">
-        <h1 id="weave-hero-static-title">Spreading intelligence. Rebuilding manufacturing.</h1>
-        <p>Exploring how to accelerate both.</p>
+        <h1 id="weave-hero-static-title">Spreading intelligence. Rebuilding industry.</h1>
+        <p>Exploring how to accelerate both — and what it takes for Indonesia to industrialise again.</p>
       </section>
     </noscript>
     <div id="root"></div>
