@@ -5,6 +5,35 @@ alternatives. Newest first.
 
 ---
 
+# 2026-10-30 — Glimpse: three pinned columns beside the running row
+
+Owner request, 30 October 2026.
+
+- **Layout.** From lg up the Glimpse is a grid of five equal columns. Columns 1–3 are three pinned essays,
+  which stand still. Columns 4–5 are the running row, two columns in view. Its arrows and pause button sit
+  above it and work it alone, and only its right edge fades. A 1px rule in `--border` stands halfway
+  through the gap between columns 3 and 4. Below lg the pinned columns come first, in a row that scrolls
+  sideways, then the running row, one column in view. The cards themselves are unchanged.
+- **Timing.** The row still runs continuously at 30 px/s and resumes 3 s after a reader lets go. The arrows
+  and arrow keys move it one column at a time. "Advancing one card per step with the existing timing" was
+  read as that rather than as a new step-and-dwell autoplay. The existing row never had a step interval to
+  keep.
+- **Data.** `essays.featured_rank` (migration `20261030100000_essay_featured_rank`) is 1–3, unique when not
+  null, and allowed only on a published essay. A trigger clears it on unpublish or archive. The homepage
+  read puts pinned essays first, so the read's limit can never cut one. `glimpseZones` fills an empty slot
+  with the newest published essay that is not pinned. Pinned and fill essays are both left out of the row.
+  The row keeps its order: starred by `selected_rank`, then newest first. `is_selected` / `selected_rank`
+  and the Homepage order panel are unchanged.
+- **Admin.** Admin → Content → Homepage Glimpse (`#homepage-glimpse`; the Glimpse links there as "Edit
+  pins" for an admin). It has three slots, each a searchable picker of published essays plus Clear, with
+  up/down to swap slots and a live preview. Save calls `set_featured_essays(uuid[])`, which runs in one
+  transaction: old pins are cleared, then new ones are written. It is SECURITY INVOKER, so the admin-only
+  essays UPDATE policy gates it.
+- **Before the migration is applied** the column is unknown (42703). The homepage then pins the three
+  newest essays, and the panel is read-only and says why. `types.ts` is to be regenerated once it is live.
+
+---
+
 # 2026-10-30 — Home Hero v2: a shorter hero, a gradient, a canvas weave that moves
 
 Spec: `docs/home-hero-v2.md` (owner, 30 October 2026). Verification against R1–R11:

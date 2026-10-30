@@ -3,8 +3,10 @@ import { mkdirSync } from 'node:fs';
 import { mockSupabase } from './mockSupabase';
 
 /**
- * The glimpse with a full row: every published essay from the mocked
- * backend, the three starred first in the owner's order and the eighteen
+ * The glimpse with a full row: three essays pinned beside it, which stand
+ * still in the first three of five equal columns (below lg, a row of their
+ * own above it), and every other published essay from the mocked backend in
+ * the running row in the last two, the three starred first in the owner's order and the eighteen
  * others newest first (owner decision D3(a), 2026-10-10), one column each,
  * and never wider than the viewport. The row runs (owner decision,
  * 2026-10-11): right to left at 30 px/s, looping with the last column
@@ -39,6 +41,12 @@ const STARRED = [
   { n: 2, rank: 2, created: '2026-06-03' },
   { n: 3, rank: 3, created: '2026-06-02' },
 ];
+/** Pinned to the glimpse's three slots; by age they would stand 2, 1, 3. */
+const PINNED = [
+  { slot: 1, created: '2026-05-02' },
+  { slot: 2, created: '2026-05-03' },
+  { slot: 3, created: '2026-05-01' },
+];
 const essay = (n: number, over: Record<string, unknown>) => ({
   id: `00000000-0000-0000-0000-0000000000${String(n).padStart(2, '0')}`,
   slug: `glimpse-essay-${n}`,
@@ -51,6 +59,7 @@ const essay = (n: number, over: Record<string, unknown>) => ({
   date: `2026-0${1 + ((n - 1) % 9)}-15`,
   is_selected: false,
   selected_rank: null,
+  featured_rank: null,
   published: true,
   status: 'published',
   finance_section: null,
@@ -64,6 +73,9 @@ const essays: Record<string, unknown>[] = [
   ...STARRED.map(({ n, rank, created }) => essay(n, { is_selected: true, selected_rank: rank, created_at: `${created}T00:00:00Z` })),
   // a starred draft: placed first by rank, and still nowhere on the page
   essay(99, { is_selected: true, selected_rank: 0, published: false, status: 'draft', created_at: '2026-09-30T00:00:00Z' }),
+  // the three pinned to the glimpse's left zone, which stand still and are
+  // never in the row: the oldest of all, so only their pin puts them there
+  ...PINNED.map(({ slot, created }) => essay(80 + slot, { title: `Pinned ${slot}`, featured_rank: slot, created_at: `${created}T00:00:00Z` })),
 ].reverse();
 
 const TITLES = Array.from({ length: 21 }, (_, i) => `Essay ${i + 1}: a title long enough to wrap onto a second line`);
@@ -148,8 +160,15 @@ const inView = (page: Page) =>
       .map(({ n, box }) => ({ n, left: box.left, width: box.width }));
   });
 
-/** The page's margin: where the heading, and a column brought into view, stand. */
-const margin = (page: Page) => page.locator('#glimpse-heading').evaluate((h) => h.getBoundingClientRect().left);
+/**
+ * A column drawn whole. The frame's left edge, by the rule, falls on a
+ * fraction of a pixel, which Embla's whole-pixel measures can leave a column
+ * up to half a pixel over: clipped by that much, and no more.
+ */
+const WHOLE = 0.995;
+
+/** The running zone's left edge, by the rule: where a column brought into view stands. */
+const margin = (page: Page) => page.locator('.glimpse__zone').evaluate((z) => z.getBoundingClientRect().left);
 
 /** The row's speed, in px/s, from samples a second apart. */
 async function speed(page: Page, lapWidth: number) {
@@ -195,6 +214,9 @@ test('every published essay, the three starred first in the owner\'s order and t
   const { row, errors } = await open(page);
   await expect(row.getByRole('heading', { level: 3 })).toHaveText(TITLES);
   await expect(row).not.toContainText('Essay 99:');
+  // the pinned three stand still in their slots, and are not in the row
+  await expect(page.getByRole('list', { name: 'Pinned essays' }).getByRole('heading', { level: 3 })).toHaveText(['Pinned 1', 'Pinned 2', 'Pinned 3']);
+  await expect(row).not.toContainText('Pinned');
 
   const first = row.getByRole('listitem').first();
   await expect(first).toContainText('Finance');
@@ -205,6 +227,78 @@ test('every published essay, the three starred first in the owner\'s order and t
   await expect(first.getByRole('link')).toHaveAttribute('href', '/essays/glimpse-essay-1');
   // the green-transition essay links through its phase
   await expect(row.getByRole('link', { name: /Essay 3:/ })).toHaveAttribute('href', '/green-transition/now/glimpse-essay-3');
+  expect(errors).toEqual([]);
+});
+
+test('1440: five equal columns, three pinned and two running, a rule between them, the buttons over the row and its right edge faded', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  const { errors } = await open(page);
+  await page.locator('.glimpse__frame').evaluate((f) => f.scrollIntoView({ block: 'center', behavior: 'instant' }));
+  await page.getByRole('button', { name: 'Pause the row' }).click();
+  await page.mouse.move(0, 0);
+
+  const pins = await page.locator('.glimpse__pin a').evaluateAll((as) => as.map((a) => a.getBoundingClientRect()).map(({ left, width, top }) => ({ left, width, top })));
+  const zone = (await page.locator('.glimpse__zone').boundingBox())!;
+  const pinsList = (await page.getByRole('list', { name: 'Pinned essays' }).boundingBox())!;
+  expect(pins).toHaveLength(3);
+  // the three pinned and the two in view are one width, and each two a gap apart
+  const running = (await inView(page)).filter((c) => c.left < zone.x + zone.width - 1).slice(0, 2);
+  const textWidth = await page.locator('.glimpse__item a').first().evaluate((a) => a.getBoundingClientRect().width);
+  expect(running).toHaveLength(2);
+  for (const pin of pins) expect(Math.abs(pin.width - textWidth)).toBeLessThan(1);
+  const gap = pins[1].left - pins[0].left - pins[0].width;
+  expect(Math.abs(zone.x - (pins[2].left + pins[2].width) - gap)).toBeLessThan(1);
+  expect(Math.abs(running[1].left - running[0].left - (textWidth + gap))).toBeLessThan(1);
+  // side by side, the pinned with the row's top
+  expect(Math.abs(pinsList.y - zone.y)).toBeLessThan(1);
+  // the rule: one pixel of the border colour, halfway through the gap
+  const rule = await page.locator('.glimpse__zone').evaluate((z) => {
+    const after = getComputedStyle(z, '::before');
+    return { content: after.content, width: after.width, left: after.left, color: after.backgroundColor, border: getComputedStyle(document.querySelector('section[aria-labelledby="glimpse-heading"]')!).borderBottomColor };
+  });
+  expect(rule.content).not.toBe('none');
+  expect(rule.width).toBe('1px');
+  expect(Math.abs(parseFloat(rule.left) + gap / 2)).toBeLessThan(1);
+  expect(rule.color).toBe(rule.border);
+  // the buttons stand over the running zone, at its right
+  for (const name of ['Earlier in the row', 'Further along the row', 'Resume the row']) {
+    const box = (await page.getByRole('button', { name }).boundingBox())!;
+    expect(box.x).toBeGreaterThanOrEqual(zone.x);
+    expect(box.x + box.width).toBeLessThanOrEqual(zone.x + zone.width + 0.5);
+    expect(box.y + box.height).toBeLessThanOrEqual(zone.y);
+  }
+  // one fade, at the right; nothing over the pinned columns
+  const mask = await page.locator('.glimpse__frame').evaluate((f) => getComputedStyle(f).maskImage || getComputedStyle(f).webkitMaskImage);
+  expect(mask.match(/transparent|rgba\(0, 0, 0, 0\)/g)).toHaveLength(1);
+  expect(mask).toMatch(/to right|90deg/);
+  expect(await page.getByRole('list', { name: 'Pinned essays' }).evaluate((l) => getComputedStyle(l).maskImage)).toBe('none');
+  await page.locator('section[aria-labelledby="glimpse-heading"]').screenshot({ path: `${SHOTS}/glimpse-1440.png` });
+  expect(errors).toEqual([]);
+});
+
+test('390: the pinned columns first, in a row that scrolls sideways, then the running row one column at a time', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const { errors } = await open(page);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+  const pinned = page.getByRole('list', { name: 'Pinned essays' });
+  const pins = (await pinned.boundingBox())!;
+  const zone = (await page.locator('.glimpse__zone').boundingBox())!;
+  const buttons = (await page.getByRole('button', { name: 'Pause the row' }).boundingBox())!;
+  // one after another: the pinned, the buttons, the row
+  expect(pins.y + pins.height).toBeLessThanOrEqual(buttons.y);
+  expect(buttons.y + buttons.height).toBeLessThanOrEqual(zone.y);
+  // the pinned row is wider than the page, and scrolls
+  expect(await pinned.evaluate((l) => l.scrollWidth > l.clientWidth)).toBe(true);
+  await pinned.evaluate((l) => l.scrollTo({ left: l.scrollWidth }));
+  await expect(pinned.getByRole('link', { name: /Pinned 3/ })).toBeInViewport();
+  // one running column in view, as wide as the zone
+  await page.getByRole('button', { name: 'Pause the row' }).click();
+  const textWidth = await page.locator('.glimpse__item a').first().evaluate((a) => a.getBoundingClientRect().width);
+  expect(Math.abs(textWidth - zone.width)).toBeLessThan(1);
+  // and no rule below lg
+  expect(await page.locator('.glimpse__zone').evaluate((z) => getComputedStyle(z, '::before').content)).toBe('none');
+  await page.locator('.glimpse__frame').evaluate((f) => f.scrollIntoView({ block: 'end', behavior: 'instant' }));
+  await page.locator('section[aria-labelledby="glimpse-heading"]').screenshot({ path: `${SHOTS}/glimpse-390.png` });
   expect(errors).toEqual([]);
 });
 
@@ -237,24 +331,27 @@ for (const width of [1440, 1280, 390]) {
     expect(Math.abs((await speed(page, lapWidth)) - 30)).toBeLessThan(2);
     await page.screenshot({ path: `${SHOTS}/home-${width}.png` });
 
-    // where the loop joins: the last column, then the first, one gap apart
-    if (width >= 768) {
-      await page.getByRole('button', { name: 'Earlier in the row' }).click();
-      await page.mouse.move(0, 0);
-    } else {
-      const box = (await page.locator('.glimpse__frame').boundingBox())!;
-      await drag(page, { x: 40, y: box.y + 100 }, 300);
-      await page.mouse.move(0, 0);
-    }
-    await page.waitForTimeout(600);
+    // where the loop joins: back by the arrow until the last column stands
+    // at the zone's edge, and the first directly after it, one gap apart
     await page.getByRole('button', { name: 'Pause the row' }).click();
+    const left = await margin(page);
+    for (let i = 0; i < 4 && (await inView(page)).find((c) => Math.abs(c.left - left) < 1)?.n !== 21; i++) {
+      await page.getByRole('button', { name: 'Earlier in the row' }).click();
+      await page.waitForTimeout(1500);
+    }
+    expect((await inView(page))[0].n).toBe(21);
+    const frame = (await page.locator('.glimpse__frame').boundingBox())!;
+    // one column in view below lg: drag the row a third of the way on, so
+    // the first column shows behind the last
+    if (width < 1024) await drag(page, { x: frame.x + frame.width - 40, y: frame.y + 100 }, -frame.width / 3);
+    await page.mouse.move(0, 0);
+    await page.waitForTimeout(300);
     const columns = await inView(page);
-    expect(columns.map((c) => c.n)).toContain(21);
-    expect(columns.map((c) => c.n)).toContain(1);
+    expect(columns.map((c) => c.n).slice(0, 2)).toEqual([21, 1]);
     seamless(columns, 21);
     // and the columns cover the frame from edge to edge
-    expect(columns[0].left).toBeLessThanOrEqual(0);
-    expect(columns.at(-1)!.left + columns.at(-1)!.width).toBeGreaterThanOrEqual(width);
+    expect(columns[0].left).toBeLessThanOrEqual(frame.x + 0.5);
+    expect(columns.at(-1)!.left + columns.at(-1)!.width).toBeGreaterThanOrEqual(frame.x + frame.width - 0.5);
     await page.locator('.glimpse__frame').screenshot({ path: `${SHOTS}/home-${width}-seam.png` });
     expect(errors).toEqual([]);
   });
@@ -266,7 +363,8 @@ test('1440: a mouse drag moves the row with the pointer, leaves it there, opens 
   await page.locator('#glimpse-heading').scrollIntoViewIfNeeded();
   const lapWidth = await lap(page);
   const box = (await page.locator('.glimpse__frame').boundingBox())!;
-  const start = { x: box.x + 700, y: box.y + 100 };
+  // far enough right that the 300px drag ends over the row, not the pinned columns
+  const start = { x: box.x + box.width * 0.75, y: box.y + 100 };
   // the drag starts on a column's link
   expect(await page.evaluate(([x, y]) => !!document.elementFromPoint(x, y)?.closest('.glimpse__item a'), [start.x, start.y])).toBe(true);
 
@@ -313,7 +411,7 @@ test('1440: a sideways trackpad scroll and Shift with the wheel move the row; th
   await page.locator('#glimpse-heading').scrollIntoViewIfNeeded();
   const lapWidth = await lap(page);
   const box = (await page.locator('.glimpse__frame').boundingBox())!;
-  await page.mouse.move(box.x + 700, box.y + 100);
+  await page.mouse.move(box.x + box.width / 2, box.y + 100);
   await page.waitForTimeout(100);
 
   // a trackpad's sideways swipe
@@ -354,9 +452,9 @@ test('1440: the row stops under the pointer and for keyboard focus, which brings
   await page.setViewportSize({ width: 1440, height: 900 });
   const { row, errors } = await open(page);
   await page.locator('#glimpse-heading').scrollIntoViewIfNeeded();
-  // The homepage hero leaves the heading in view on load, the row's foot a
-  // pixel under the fold (docs/home-hero-v2.md R3): bring the whole row in.
-  await page.locator('.glimpse__frame').scrollIntoViewIfNeeded();
+  // The homepage hero leaves the heading in view on load, the row's foot
+  // under the fold (docs/home-hero-v2.md R3): bring the whole row in.
+  await page.locator('.glimpse__frame').evaluate((f) => f.scrollIntoView({ block: 'center', behavior: 'instant' }));
   const frame = page.locator('.glimpse__frame');
 
   // the pointer over it stops it; it runs again three seconds after it leaves
@@ -370,14 +468,19 @@ test('1440: the row stops under the pointer and for keyboard focus, which brings
   expect(await holds(page, 500)).toBe(false);
 
   // Tab into the row: it stops, and each column the focus lands on stands
-  // at the page's margin, under the heading, whole
+  // at the running zone's edge, by the rule, whole
   const left = await margin(page);
   await page.locator('#glimpse-heading').evaluate((h: HTMLElement) => {
     h.tabIndex = -1;
     h.focus();
     h.removeAttribute('tabindex');
   });
-  // the arrows and the pause button come first, then the row, then its first column
+  // the pinned three come first, then the arrows and the pause button, then
+  // the row, then its first column
+  for (const slot of [1, 2, 3]) {
+    await page.keyboard.press('Tab');
+    await expect(page.getByRole('link', { name: new RegExp(`Pinned ${slot}`) })).toBeFocused();
+  }
   await page.keyboard.press('Tab');
   await expect(page.getByRole('button', { name: 'Earlier in the row' })).toBeFocused();
   await page.keyboard.press('Tab');
@@ -392,7 +495,7 @@ test('1440: the row stops under the pointer and for keyboard focus, which brings
     const link = row.getByRole('link').nth(n - 1);
     await expect(link).toContainText(`Essay ${n}:`);
     await expect.poll(() => link.evaluate((a) => a.getBoundingClientRect().left)).toBeCloseTo(left, 0);
-    await expect(link).toBeInViewport({ ratio: 1 });
+    await expect(link).toBeInViewport({ ratio: WHOLE });
     expect(await holds(page, 500)).toBe(true);
   }
   await page.screenshot({ path: `${SHOTS}/home-1440-focus.png` });
@@ -415,7 +518,7 @@ for (const reduced of [false, true]) {
     const { row, errors } = await open(page);
     await page.locator('#glimpse-heading').scrollIntoViewIfNeeded();
     // as above: the whole row, not only its heading (home-hero-v2 R3)
-    await page.locator('.glimpse__frame').scrollIntoViewIfNeeded();
+    await page.locator('.glimpse__frame').evaluate((f) => f.scrollIntoView({ block: 'center', behavior: 'instant' }));
     await page.mouse.move(0, 0);
     const left = await margin(page);
     const atMargin = async () => (await inView(page)).find((c) => Math.abs(c.left - left) < 1)?.n;
@@ -449,7 +552,7 @@ for (const reduced of [false, true]) {
       await settle();
       expect(await focused()).toBe(expected);
       expect(await atMargin()).toBe(expected);
-      await expect(page.locator(':focus')).toBeInViewport({ ratio: 1 });
+      await expect(page.locator(':focus')).toBeInViewport({ ratio: WHOLE });
     }
     // and the page did not scroll sideways on the way
     expect(await page.evaluate(() => window.scrollX)).toBe(0);
@@ -469,7 +572,7 @@ test('1440: the pause button holds the row through a drag, a hover and a sideway
 
   const box = (await page.locator('.glimpse__frame').boundingBox())!;
   const before = await offset(page);
-  await drag(page, { x: box.x + 700, y: box.y + 100 }, -200);
+  await drag(page, { x: box.x + box.width / 2, y: box.y + 100 }, -200);
   for (let i = 0; i < 5; i++) {
     await page.mouse.wheel(30, 0);
     await page.waitForTimeout(16);
@@ -545,6 +648,8 @@ test.describe('390, a touchscreen', () => {
     await page.locator('#glimpse-heading').scrollIntoViewIfNeeded();
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
     const lapWidth = await lap(page);
+    // below lg the pinned columns stand above the row: bring the row in
+    await page.locator('.glimpse__frame').evaluate((f) => f.scrollIntoView({ block: 'center', behavior: 'instant' }));
     const box = (await page.locator('.glimpse__frame').boundingBox())!;
     const y = box.y + 120;
 
@@ -570,7 +675,7 @@ test.describe('390, a touchscreen', () => {
     expect(Math.abs(moved(across, await offset(page), lapWidth))).toBeLessThan(5);
 
     // the pause button, then the arrows by tap: a column at a time, to the margin
-    await page.locator('#glimpse-heading').scrollIntoViewIfNeeded();
+    await page.locator('.glimpse__frame').evaluate((f) => f.scrollIntoView({ block: 'center', behavior: 'instant' }));
     await page.getByRole('button', { name: 'Pause the row' }).tap();
     const left = await margin(page);
     await page.getByRole('button', { name: 'Further along the row' }).tap();
@@ -605,7 +710,7 @@ for (const width of [1440, 390]) {
     await expect(page.getByRole('button', { name: /Pause the row|Resume the row/ })).toHaveCount(0);
     expect(await page.locator('.glimpse__row').count()).toBe(1);
 
-    // still, its first column at the page's margin
+    // still, its first column at the running zone's edge
     expect(await holds(page, 2000)).toBe(true);
     const left = await margin(page);
     expect(Math.abs((await inView(page))[0].left - left)).toBeLessThan(1);
@@ -629,13 +734,14 @@ for (const width of [1440, 390]) {
     while (await back.isEnabled()) await back.click();
     await expect.poll(() => offset(page)).toBeCloseTo(0, 0);
     await expect(back).toBeDisabled();
-    // and to the end: the last column ends at the page's right margin
+    // and to the end: the last column ends at the running zone's right edge
     while (await forward.isEnabled()) await forward.click();
     await expect(forward).toBeDisabled();
     const last = row.getByRole('listitem').last();
     await expect(last).toBeInViewport();
     const lastLink = await last.getByRole('link').evaluate((a) => a.getBoundingClientRect().right);
-    expect(Math.abs(lastLink - (width - left))).toBeLessThan(1);
+    const zoneRight = await page.locator('.glimpse__zone').evaluate((z) => z.getBoundingClientRect().right);
+    expect(Math.abs(lastLink - zoneRight)).toBeLessThan(1);
     await page.screenshot({ path: `${SHOTS}/home-${width}-still-end.png` });
     expect(errors).toEqual([]);
   });

@@ -135,10 +135,17 @@ function essay(i: number, over: Partial<SelectedEssay> = {}): SelectedEssay {
   };
 }
 
-const mount = (essays: SelectedEssay[] | undefined, isLoading = false) =>
+/** Three essays pinned to slots 1 to 3: they stand beside the running row, never in it. */
+const PINS = [1, 2, 3].map((slot) => essay(100 + slot, { featured_rank: slot }));
+
+/**
+ * The glimpse with `essays` as its running row: the three pins are added in
+ * front (the order the homepage read gives them), unless `pins` is false.
+ */
+const mount = (essays: SelectedEssay[] | undefined, isLoading = false, { pins = true } = {}) =>
   render(
     <MemoryRouter>
-      <Glimpse essays={essays} isLoading={isLoading} />
+      <Glimpse essays={essays && essays.length > 0 && pins ? [...PINS, ...essays] : essays} isLoading={isLoading} />
     </MemoryRouter>,
   );
 
@@ -181,9 +188,10 @@ describe('Glimpse', () => {
     expect(first).not.toHaveTextContent('7 min');
     expect(first).not.toHaveTextContent('01');
     expect(within(first).getByRole('link')).toHaveAttribute('href', '/the-next-big-thing/essay-1');
-    // the list once, for a screen reader and for Tab: the row itself takes
-    // focus, so the arrow keys reach it, and its links are the stops after it
-    expect(screen.getAllByRole('list')).toHaveLength(1);
+    // each essay once, for a screen reader and for Tab: the pinned list and
+    // the row; the row itself takes focus, so the arrow keys reach it, and
+    // its links are the stops after it
+    expect(screen.getAllByRole('list')).toHaveLength(2);
     expect(document.querySelectorAll('[aria-hidden="true"] a')).toHaveLength(0);
     for (const link of within(row).getAllByRole('link')) expect(link).not.toHaveAttribute('tabindex');
     expect(row).toHaveAttribute('tabindex', '0');
@@ -191,7 +199,7 @@ describe('Glimpse', () => {
 
   it('dates an undated essay by its creation month', () => {
     mount([essay(1, { date: null })]);
-    expect(screen.getByRole('listitem')).toHaveTextContent('Jul 2026');
+    expect(within(screen.getByRole('list', { name: 'Glimpse' })).getByRole('listitem')).toHaveTextContent('Jul 2026');
   });
 
   it('keeps the heading and draws placeholders while loading', () => {
@@ -295,8 +303,8 @@ describe('the running row', () => {
   it('runs when the columns can loop: once round, right to left at 30 px/s, from where a reader leaves it', () => {
     mount(twelve());
     expect(embla.options).toMatchObject({ loop: true, dragFree: true });
-    // every column stops at the page's margin, under the heading
-    expect((embla.options.align as () => number)()).toBe(32);
+    // every column stops at the running zone's left edge, by the rule
+    expect(embla.options.align).toBe('start');
     expect(embla.plugins.map((p) => p.name)).toEqual(['autoScroll', 'wheelGestures']);
     // 30 px/s is half a pixel in each of Embla's 1/60 s steps; the row
     // starts and stops by the glimpse alone
@@ -434,7 +442,7 @@ describe('the running row', () => {
     mount([essay(1), essay(2), essay(3)]);
     expect(embla.options.loop).toBe(false);
     expect(embla.auto.play).not.toHaveBeenCalled();
-    expect(screen.getByRole('list', { name: 'Glimpse' })).toHaveClass('glimpse__row--still');
+    expect(frame()).not.toHaveClass('glimpse__frame--running');
     expect(screen.queryByRole('button', { name: 'Pause the row' })).toBeNull();
   });
 
@@ -487,7 +495,9 @@ const mountHomepageRow = () =>
 describe('the homepage row', () => {
   beforeEach(() => fromMock.mockReset());
 
-  it('holds every published essay: the three starred in the owner\'s order, then the eighteen others newest first', async () => {
+  const titlesIn = (list: HTMLElement) => within(list).getAllByRole('heading', { level: 3 }).map((h) => h.textContent);
+
+  it('holds every published essay once: nothing pinned, the three newest stand still, then the starred in the owner\'s order and the rest newest first', async () => {
     const starred = [
       essayRow(1, { is_selected: true, selected_rank: 3 }),
       essayRow(2, { is_selected: true, selected_rank: 1 }),
@@ -498,11 +508,45 @@ describe('the homepage row', () => {
     mountHomepageRow();
 
     const row = await screen.findByRole('list', { name: 'Glimpse' });
-    await waitFor(() => expect(within(row).getAllByRole('listitem')).toHaveLength(21));
-    const titles = within(row).getAllByRole('heading', { level: 3 }).map((h) => h.textContent);
+    await waitFor(() => expect(within(row).getAllByRole('listitem')).toHaveLength(18));
+    expect(titlesIn(screen.getByRole('list', { name: 'Pinned essays' }))).toEqual(['Essay 21', 'Essay 20', 'Essay 19']);
+    const titles = titlesIn(row);
     expect(titles.slice(0, 3)).toEqual(['Essay 2', 'Essay 3', 'Essay 1']);
-    expect(titles.slice(3)).toEqual(Array.from({ length: 18 }, (_, i) => `Essay ${21 - i}`));
+    expect(titles.slice(3)).toEqual(Array.from({ length: 15 }, (_, i) => `Essay ${18 - i}`));
     expect(titles).not.toContain('Essay 99');
+  });
+
+  it('stands the pinned essays in their slots, fills an empty one with the newest, and runs everything else', async () => {
+    fromMock.mockImplementation(
+      essaysTable([
+        essayRow(1, { featured_rank: 3 }),
+        essayRow(2, { featured_rank: 1, is_selected: true, selected_rank: 1 }),
+        essayRow(3, { is_selected: true, selected_rank: 2 }),
+        ...Array.from({ length: 6 }, (_, i) => essayRow(i + 4)),
+      ]).from,
+    );
+    mountHomepageRow();
+
+    const pinned = await screen.findByRole('list', { name: 'Pinned essays' });
+    await waitFor(() => expect(titlesIn(pinned)).toEqual(['Essay 2', 'Essay 9', 'Essay 1']));
+    expect(titlesIn(screen.getByRole('list', { name: 'Glimpse' }))).toEqual(['Essay 3', 'Essay 8', 'Essay 7', 'Essay 6', 'Essay 5', 'Essay 4']);
+  });
+
+  it('is the pinned columns alone with three essays or fewer: no row, and no buttons', async () => {
+    fromMock.mockImplementation(essaysTable([essayRow(1), essayRow(2, { featured_rank: 2 })]).from);
+    mountHomepageRow();
+    const pinned = await screen.findByRole('list', { name: 'Pinned essays' });
+    await waitFor(() => expect(titlesIn(pinned)).toEqual(['Essay 1', 'Essay 2']));
+    expect(screen.queryByRole('list', { name: 'Glimpse' })).toBeNull();
+    expect(screen.queryByRole('button')).toBeNull();
+  });
+
+  it('pins the three newest before the pin migration is applied', async () => {
+    fromMock.mockImplementation(essaysTable(Array.from({ length: 5 }, (_, i) => essayRow(i + 1)), { featuredColumn: false }).from);
+    mountHomepageRow();
+    const pinned = await screen.findByRole('list', { name: 'Pinned essays' });
+    await waitFor(() => expect(titlesIn(pinned)).toEqual(['Essay 5', 'Essay 4', 'Essay 3']));
+    expect(titlesIn(screen.getByRole('list', { name: 'Glimpse' }))).toEqual(['Essay 2', 'Essay 1']);
   });
 
   it('is absent when nothing is published, starred or not', async () => {

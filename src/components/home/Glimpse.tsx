@@ -1,5 +1,15 @@
 /**
- * The glimpse: the homepage's one row of essays.
+ * The glimpse: the homepage's essays, in two zones.
+ *
+ * On the left, three pinned columns that stand still: the essays the owner
+ * pinned to slots 1 to 3 (essays.featured_rank, Admin → Content → Homepage
+ * Glimpse), and in a slot nobody is pinned to the newest published essay
+ * (glimpseZones). On the right, behind a thin rule, the running row: every
+ * other published essay, two columns in view from lg up, one below, its
+ * arrows and pause button above it and its right edge faded. From lg up the
+ * section is a grid of five equal columns, three pinned and two running;
+ * below lg the pinned columns come first, in a row that scrolls sideways,
+ * and the running row under them. Everything below is about the running row.
  *
  * Every published essay: the starred ones (essays.is_selected) first in the
  * owner's order (essays.selected_rank, Admin → Content → Homepage order),
@@ -24,13 +34,13 @@
  * and by its pause button, which is the one way to stop it on a touchscreen
  * and which nothing else undoes. Otherwise it starts again RESUME_AFTER after
  * the reader is done, from where they left it. A drag never opens an essay;
- * a click does. The edges fade.
+ * a click does. Its right edge fades.
  *
  * It stands still, a row that still moves by swipe, drag, trackpad, the
  * buttons and the arrow keys, for a reader who asked for reduced motion, and whenever the
- * columns are too few to loop, where the row's empty end would show: its
- * first column at the page's margin and its last at the other. With nothing
- * published the section is absent, not empty.
+ * columns are too few to loop, where the row's empty end would show. With
+ * nothing published the section is absent, not empty; with three or fewer it
+ * is the pinned columns alone.
  */
 import { useCallback, useEffect, useMemo, useRef, useState, type FocusEvent, type KeyboardEvent, type PointerEvent } from 'react';
 import useEmblaCarousel from 'embla-carousel-react';
@@ -38,7 +48,7 @@ import AutoScroll, { type AutoScrollType } from 'embla-carousel-auto-scroll';
 import { WheelGesturesPlugin } from 'embla-carousel-wheel-gestures';
 import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
 import { EssayCardLink } from '@/components/EssayCardLink';
-import type { SelectedEssay } from '@/hooks/queries/useSelectedEssays';
+import { glimpseZones, PINNED_SLOTS, type SelectedEssay } from '@/hooks/queries/useSelectedEssays';
 import { useCanLoop } from '@/hooks/useCanLoop';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { monthYear } from '@/lib/formatDate';
@@ -71,10 +81,10 @@ interface GlimpseProps {
   isLoading: boolean;
 }
 
-/** One essay's column. */
-function Column({ essay }: { essay: SelectedEssay }) {
+/** One essay's column: a pinned one, or one in the running row. Admin → Homepage Glimpse previews the pins with it. */
+export function GlimpseColumn({ essay, className = 'glimpse__item' }: { essay: SelectedEssay; className?: string }) {
   return (
-    <li className="glimpse__item">
+    <li className={className}>
       <EssayCardLink essay={essay} className="group flex h-full flex-col">
         <p className="eyebrow mb-3">
           {sectionLabel(essay.section)}
@@ -126,22 +136,20 @@ interface Holds {
 export function Glimpse({ essays, isLoading }: GlimpseProps) {
   const frame = useRef<HTMLDivElement | null>(null);
   const track = useRef<HTMLUListElement>(null);
-  const heading = useRef<HTMLHeadingElement>(null);
   // Stopped by the reader's own button; the pointer and focus stop it too.
   const [paused, setPaused] = useState(false);
 
-  const still = useMediaQuery(REDUCED_MOTION_QUERY);
-  const loops = useCanLoop(frame, track, essays);
-  const loopable = !still && !isLoading && !!essays?.length && loops;
+  // The pinned columns and the running row; an essay is in one of them only.
+  const { pinned, row } = useMemo(() => glimpseZones(essays ?? []), [essays]);
+  const hasRow = isLoading || row.length > 0;
 
-  // Every column stops at the page's margin, under the heading, wherever
-  // the page is: the arrows and keyboard focus bring a column there, and
-  // the running row starts with its first column there.
-  const atMargin = useCallback(() => {
-    if (!heading.current || !frame.current) return 0;
-    return heading.current.getBoundingClientRect().left - frame.current.getBoundingClientRect().left;
-  }, []);
-  const options = useMemo(() => ({ loop: loopable, dragFree: true, align: atMargin }), [loopable, atMargin]);
+  const still = useMediaQuery(REDUCED_MOTION_QUERY);
+  const loops = useCanLoop(frame, track, row);
+  const loopable = !still && !isLoading && row.length > 0 && loops;
+
+  // Every column stops at the running zone's left edge, by the rule: the
+  // arrows and keyboard focus bring a column there, and the row starts there.
+  const options = useMemo(() => ({ loop: loopable, dragFree: true, align: 'start' as const }), [loopable]);
   const plugins = useMemo(
     () => [
       // Started and stopped by the holds below, never by the plugin itself,
@@ -328,14 +336,13 @@ export function Glimpse({ essays, isLoading }: GlimpseProps) {
 
   return (
     <section aria-labelledby="glimpse-heading" className="border-b border-border py-12">
-      <div className="container">
-        {/* As tall as its buttons from the first paint: they arrive once the
-            carousel has measured the row, and the row must not grow then,
-            now that the homepage hero leaves the glimpse in view on load
-            (docs/home-hero-v2.md R3, R10). */}
-        <div className="mb-6 flex min-h-9 items-end justify-between gap-4">
+      {/* Five equal columns from lg up: the heading and the pinned columns
+          over the first three, the running row's buttons and the row over
+          the last two. Below lg, one after another in that order. */}
+      <div className="container flex flex-col gap-6 lg:grid lg:grid-cols-5 lg:gap-x-8">
+        <div className="flex min-h-9 items-end lg:col-span-3 lg:row-start-1">
           <div className="flex items-baseline gap-3">
-            <h2 ref={heading} id="glimpse-heading" className="text-xl font-display font-semibold text-foreground">
+            <h2 id="glimpse-heading" className="text-xl font-display font-semibold text-foreground">
               Glimpse
             </h2>
             {/* The order is set in Admin → Content (docs/prd/2026-10-fia-fixes item 11); an admin reaches it from here. */}
@@ -344,8 +351,32 @@ export function Glimpse({ essays, isLoading }: GlimpseProps) {
                 Edit order
               </Link>
             </AdminOnly>
+            <AdminOnly>
+              <Link to="/admin/content#homepage-glimpse" className="text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline" data-glimpse-edit-pins>
+                Edit pins
+              </Link>
+            </AdminOnly>
           </div>
-          <div className="flex shrink-0 gap-2">
+        </div>
+
+        {/* The pinned columns: three from lg up, side by side under the
+            heading; below lg a row of their own that scrolls sideways. */}
+        <ul aria-label="Pinned essays" className="glimpse__pins lg:col-span-3 lg:row-start-2">
+          {isLoading
+            ? Array.from({ length: PINNED_SLOTS }, (_, i) => (
+                <li key={i} className="glimpse__pin" aria-hidden="true">
+                  <div className="h-48 animate-pulse rounded-md bg-muted/40" />
+                </li>
+              ))
+            : pinned.map((essay) => <GlimpseColumn key={essay.id} essay={essay} className="glimpse__pin" />)}
+        </ul>
+
+        {/* As tall as its buttons from the first paint: they arrive once the
+            carousel has measured the row, and the row must not grow then,
+            now that the homepage hero leaves the glimpse in view on load
+            (docs/home-hero-v2.md R3, R10). They work the running row only. */}
+        {hasRow && (
+          <div className="flex min-h-9 shrink-0 items-end justify-end gap-2 lg:col-span-2 lg:col-start-4 lg:row-start-1">
             {/* At every width: a phone has the swipe as well. */}
             {(canPrev || canNext) && (
               <>
@@ -382,39 +413,45 @@ export function Glimpse({ essays, isLoading }: GlimpseProps) {
               </button>
             )}
           </div>
-        </div>
-      </div>
+        )}
 
-      {/* The frame is Embla's viewport and the list its container: one tree
-          whether the row runs or stands still, so the list is the same
-          element when it starts or stops. The list is a Tab stop, named by
-          the heading, whenever it has somewhere to go, so the arrow keys
-          reach it; the links are the stops after it. The list moves under
-          the frame, so the frame draws its focus ring (glimpse.css). */}
-      <div
-        ref={setFrame}
-        className={cn('glimpse__frame', running && 'glimpse__frame--running')}
-        data-paused={running && paused ? '' : undefined}
-        onPointerEnter={hover(true)}
-        onPointerLeave={hover(false)}
-        onFocus={focusIn}
-        onBlur={focusOut}
-        onKeyDown={arrowKeys}
-      >
-        <ul
-          ref={track}
-          tabIndex={canPrev || canNext ? 0 : undefined}
-          aria-labelledby="glimpse-heading"
-          className={cn('glimpse__row', loopable ? 'glimpse__row--loop' : 'glimpse__row--still', 'focus-visible:outline-none')}
-        >
-          {isLoading
-            ? Array.from({ length: 4 }, (_, i) => (
-                <li key={i} className="glimpse__item" aria-hidden="true">
-                  <div className="h-48 animate-pulse rounded-md bg-muted/40" />
-                </li>
-              ))
-            : essays!.map((essay) => <Column key={essay.id} essay={essay} />)}
-        </ul>
+        {/* The running zone, behind a rule in the gap after the third
+            column. The frame is Embla's viewport and the list its
+            container: one tree whether the row runs or stands still, so the
+            list is the same element when it starts or stops. The list is a
+            Tab stop, named by the heading, whenever it has somewhere to go,
+            so the arrow keys reach it; the links are the stops after it. The
+            list moves under the frame, so the frame draws its focus ring
+            (glimpse.css). */}
+        {hasRow && (
+          <div className="glimpse__zone lg:col-span-2 lg:col-start-4 lg:row-start-2">
+            <div
+              ref={setFrame}
+              className={cn('glimpse__frame', running && 'glimpse__frame--running')}
+              data-paused={running && paused ? '' : undefined}
+              onPointerEnter={hover(true)}
+              onPointerLeave={hover(false)}
+              onFocus={focusIn}
+              onBlur={focusOut}
+              onKeyDown={arrowKeys}
+            >
+              <ul
+                ref={track}
+                tabIndex={canPrev || canNext ? 0 : undefined}
+                aria-labelledby="glimpse-heading"
+                className="glimpse__row focus-visible:outline-none"
+              >
+                {isLoading
+                  ? Array.from({ length: 2 }, (_, i) => (
+                      <li key={i} className="glimpse__item" aria-hidden="true">
+                        <div className="h-48 animate-pulse rounded-md bg-muted/40" />
+                      </li>
+                    ))
+                  : row.map((essay) => <GlimpseColumn key={essay.id} essay={essay} />)}
+              </ul>
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );

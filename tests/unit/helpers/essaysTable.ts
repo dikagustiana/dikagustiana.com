@@ -4,7 +4,10 @@
  * PostgREST does: ascending puts NULL last, descending first) and `limit`,
  * applied when the query is awaited. With `rankColumn: false` a query that
  * names `selected_rank` fails with 42703, as production did before migration
- * 20261009140000_essay_selected_rank. `afterRead(n)` runs the moment the nth
+ * 20261009140000_essay_selected_rank; with `featuredColumn: false` a query
+ * that selects or orders by `featured_rank` fails the same way, as
+ * production does before migration 20261030100000_essay_featured_rank.
+ * `afterRead(n)` runs the moment the nth
  * query is answered, before any other is: a write landing between two reads.
  * Each answer holds copies of the rows, so a later write does not reach it.
  * Plug it into a mocked `supabase.from`.
@@ -14,6 +17,7 @@ export interface EssayRow {
   is_selected: boolean;
   published: boolean;
   selected_rank: number | null;
+  featured_rank: number | null;
   created_at: string;
   [column: string]: unknown;
 }
@@ -24,10 +28,15 @@ export interface Call {
 }
 
 export const MISSING_RANK = { code: '42703', message: 'column essays.selected_rank does not exist' };
+export const MISSING_FEATURED = { code: '42703', message: 'column essays.featured_rank does not exist' };
 
 export function essaysTable(
   rows: EssayRow[],
-  { rankColumn = true, afterRead }: { rankColumn?: boolean; afterRead?: (read: number) => void } = {},
+  {
+    rankColumn = true,
+    featuredColumn = true,
+    afterRead,
+  }: { rankColumn?: boolean; featuredColumn?: boolean; afterRead?: (read: number) => void } = {},
 ) {
   const chains: Call[][] = [];
   let reads = 0;
@@ -35,6 +44,10 @@ export function essaysTable(
   const answer = (calls: Call[]) => {
     const orders = calls.filter((c) => c.method === 'order');
     if (!rankColumn && orders.some((c) => c.args[0] === 'selected_rank')) return { data: null, error: MISSING_RANK };
+    const namesFeatured = calls.some(
+      (c) => (c.method === 'order' && c.args[0] === 'featured_rank') || (c.method === 'select' && String(c.args[0]).includes('featured_rank')),
+    );
+    if (!featuredColumn && namesFeatured) return { data: null, error: MISSING_FEATURED };
 
     const matched = rows.filter((row) =>
       calls.every(({ method, args: [column, value] }) => {
@@ -107,6 +120,7 @@ export function essayRow(n: number, over: Partial<EssayRow> & { day?: number } =
     is_selected: false,
     published: true,
     selected_rank: null,
+    featured_rank: null,
     ...rest,
   };
 }

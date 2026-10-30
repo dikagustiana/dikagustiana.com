@@ -1,38 +1,91 @@
-/* The glimpse's row (Glimpse.tsx): a frame the width of the page, which is
-   Embla's viewport, and in it the list, which Embla moves (a transform on
-   the list, and on a column it shifts to the other end of a looping row).
+/* The glimpse (Glimpse.tsx): the pinned columns, and beside them the
+   running row, whose frame is Embla's viewport and whose list Embla moves (a
+   transform on the list, and on a column it shifts to the other end of a
+   looping row).
 
-   The frame clips sideways only, and never scrolls, not even when a link in
+   From lg up the section is the container's five-column grid: the pinned
+   columns fill the first three, the running zone the last two.
+
+   The pinned columns. Below lg a row of their own that scrolls sideways,
+   each column as wide as a running row's column used to be, and the row
+   held to the page's margins; from lg up the three grid columns, side by
+   side, still. */
+.glimpse__pins {
+  display: flex;
+  gap: 2rem;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scrollbar-width: thin;
+  padding-bottom: 0.5rem;
+}
+
+.glimpse__pin {
+  flex: 0 0 auto;
+  min-width: 0;
+  width: 16rem;
+  scroll-snap-align: start;
+}
+
+@media (min-width: 640px) {
+  .glimpse__pin {
+    width: 18rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .glimpse__pins {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    overflow: visible;
+    padding-bottom: 0;
+  }
+
+  .glimpse__pin {
+    width: auto;
+  }
+}
+
+/* The running zone. From lg up a thin rule stands in the gap before it,
+   halfway between the third column and the fourth, as tall as the zone. */
+.glimpse__zone {
+  position: relative;
+  min-width: 0;
+}
+
+@media (min-width: 1024px) {
+  .glimpse__zone::before {
+    content: '';
+    position: absolute;
+    inset-block: 0;
+    left: -1rem;
+    width: 1px;
+    background: hsl(var(--border));
+  }
+}
+
+/* The frame clips sideways only, and never scrolls, not even when a link in
    it takes focus (clip; hidden where clip is unknown, and Embla sets the
    scroll back): the row is placed by the carousel alone, so the page never
    scrolls sideways. Its block padding is room for a focus ring, and its
-   negative margin gives that room back, so the section's rhythm is the same
-   as every other section's.
+   negative margin gives that room back.
 
-   The inset is the container's own margin: centred, 2rem of padding, at
-   most 1400px wide (tailwind.config.ts). Percentages, not 100vw, because the
-   row is as wide as the page and 100vw also counts a vertical scrollbar the
-   page is not using. */
+   It reaches one gap (2rem) past the zone's right edge, into the
+   container's padding, so that each column, its text and the gap after it,
+   is exactly a grid column and a gap: the two in view are as wide as the
+   pinned three. */
 .glimpse__frame {
-  --glimpse-inset: calc((100% - min(100%, 1400px)) / 2 + 2rem);
   overflow-x: hidden;
   overflow-x: clip;
   padding-block: 0.5rem;
   margin-block: -0.5rem;
+  margin-right: -2rem;
 }
 
-/* The running row's edges fade over the page's margin, so a column is at
-   full strength wherever the page's content runs: the mask is alpha only,
-   nothing is painted. */
+/* The running row's right edge fades, over the gap past the zone and a
+   little of the column under it: the mask is alpha only, nothing is
+   painted. The left edge, by the rule, stays sharp. */
 .glimpse__frame--running {
-  --glimpse-fade: clamp(2rem, var(--glimpse-inset), 6rem);
-  mask-image: linear-gradient(
-    to right,
-    transparent,
-    black var(--glimpse-fade),
-    black calc(100% - var(--glimpse-fade)),
-    transparent
-  );
+  mask-image: linear-gradient(to right, black calc(100% - 3rem), transparent);
 }
 
 /* A column a reader has tabbed to is drawn whole, its focus ring with it;
@@ -56,37 +109,18 @@
   touch-action: pan-y pinch-zoom;
 }
 
-/* A column and the gap after it: 16rem of text and 2rem of gap (18rem and
-   2rem from 640px). The gap is inside the column's box so that every column
-   is its text and one gap, and a looping row's seam, last column to first,
-   falls on a gap like any other. */
+/* A column and the gap after it: one in view below lg, two from lg up. The
+   gap is inside the column's box so that every column is its text and one
+   gap, and a looping row's seam, last column to first, falls on a gap like
+   any other. */
 .glimpse__item {
-  flex: 0 0 auto;
+  flex: 0 0 100%;
   min-width: 0;
-  width: 18rem;
   padding-right: 2rem;
 }
 
-@media (min-width: 640px) {
+@media (min-width: 1024px) {
   .glimpse__item {
-    width: 20rem;
+    flex-basis: 50%;
   }
-}
-
-/* A looping row starts with its first column at the page's margin. Embla
-   sets the list's transform when it starts; this is the same place, so the
-   frames before it starts are already right. */
-.glimpse__row--loop {
-  transform: translate3d(var(--glimpse-inset), 0, 0);
-}
-
-/* A still row runs to the frame's edges, its first column at the page's
-   left margin and its last column ending at the right one (Embla counts the
-   first column's margin and the last's as the row's ends). */
-.glimpse__row--still > .glimpse__item:first-child {
-  margin-left: var(--glimpse-inset);
-}
-
-.glimpse__row--still > .glimpse__item:last-child {
-  margin-right: calc(var(--glimpse-inset) - 2rem);
 }

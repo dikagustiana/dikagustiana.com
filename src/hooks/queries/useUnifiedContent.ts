@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { logAuditEvent } from '@/lib/auditLog';
-import { isMissingColumn } from '@/hooks/queries/useSelectedEssays';
+import { isMissingColumn, PINNED_SLOTS, SELECTED_COLUMNS, type SelectedEssay } from '@/hooks/queries/useSelectedEssays';
 
 export type ContentType = 'essay' | 'fsli';
 
@@ -499,6 +499,69 @@ export function useSaveSelectedOrder() {
       queryClient.invalidateQueries({ queryKey: ['essays'] });
       queryClient.invalidateQueries({ queryKey: ['unified-content'] });
       queryClient.invalidateQueries({ queryKey: ['finance-featured-essay'] });
+    },
+  });
+}
+
+export interface GlimpsePins {
+  /** Every published essay, newest first, as the homepage reads it. */
+  essays: SelectedEssay[];
+  /** Slot i (0-based) holds the id pinned to slot i + 1, or null. */
+  slots: (string | null)[];
+  /** True until migration 20261030100000_essay_featured_rank is applied: the pins cannot be saved yet. */
+  missingColumn: boolean;
+}
+
+/**
+ * The homepage glimpse's pins, for Admin → Content → Homepage Glimpse: every
+ * published essay (only a published essay can be pinned; the database clears
+ * the pin of one that is unpublished), and which of them holds each slot.
+ */
+export function useGlimpsePins() {
+  return useQuery({
+    queryKey: ['essays', 'glimpse-pins'],
+    queryFn: async (): Promise<GlimpsePins> => {
+      const base = (columns: string) =>
+        supabase.from('essays').select(columns).eq('published', true).order('created_at', { ascending: false });
+
+      let read = await base(`${SELECTED_COLUMNS}, featured_rank`);
+      const missingColumn = isMissingColumn(read.error);
+      if (missingColumn) read = await base(SELECTED_COLUMNS);
+      if (read.error) throw read.error;
+
+      const essays = (read.data ?? []) as unknown as SelectedEssay[];
+      const slots = Array.from({ length: PINNED_SLOTS }, (_, i) => essays.find((e) => e.featured_rank === i + 1)?.id ?? null);
+      return { essays, slots, missingColumn };
+    },
+  });
+}
+
+type SetFeaturedEssays = (fn: 'set_featured_essays', args: { p_ids: (string | null)[] }) => PromiseLike<{ error: { code?: string; message: string } | null }>;
+
+/**
+ * Writes all three slots at once through set_featured_essays (migration
+ * 20261030100000_essay_featured_rank): one call, one transaction, the old
+ * pins cleared before the new ones are written, so no two essays ever hold
+ * one slot. Cast because types.ts is regenerated from the live schema only
+ * once the migration is applied.
+ */
+export function useSaveGlimpsePins() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (slots: (string | null)[]) => {
+      const rpc = supabase.rpc.bind(supabase) as unknown as SetFeaturedEssays;
+      const { error } = await rpc('set_featured_essays', { p_ids: slots });
+      if (error) throw error;
+
+      await logAuditEvent({
+        action: 'pin_glimpse',
+        table_name: 'essays',
+        record_title: `Homepage glimpse pins (${slots.filter(Boolean).length})`,
+        metadata: { slots },
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['essays'] });
     },
   });
 }

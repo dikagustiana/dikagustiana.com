@@ -45,10 +45,13 @@ beforeEach(() => fromMock.mockReset());
 
 describe('the homepage', () => {
   it('ends with the glimpse: the hero first, then the row, and no map, argument or revision of judgment', async () => {
-    fromMock.mockImplementation(essaysTable([essayRow(1, { is_selected: true, selected_rank: 1 }), essayRow(2)]).from);
+    fromMock.mockImplementation(
+      essaysTable([essayRow(1, { is_selected: true, selected_rank: 1 }), essayRow(2, { featured_rank: 1 }), essayRow(3), essayRow(4), essayRow(5)]).from,
+    );
     const { container } = mount();
     const glimpse = await screen.findByRole('list', { name: 'Glimpse' });
     await waitFor(() => expect(within(glimpse).getAllByRole('listitem')).toHaveLength(2));
+    expect(within(screen.getByRole('list', { name: 'Pinned essays' })).getAllByRole('listitem')).toHaveLength(3);
 
     const hero = container.querySelector('main > section.weave-hero')!;
     const glimpseSection = glimpse.closest('section')!;

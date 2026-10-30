@@ -8,6 +8,7 @@ import { useUnifiedContent, useContentStats, useBulkPublishContent, useDeleteCon
 import { useSections } from '@/hooks/queries/useSections';
 import { BriefQueue } from '@/components/admin/BriefQueue';
 import { HomepageOrder } from '@/components/admin/HomepageOrder';
+import { HomepageGlimpse } from '@/components/admin/HomepageGlimpse';
 import { LoadingState, ErrorState, EmptyState } from '@/components/states';
 import {
   Card,
@@ -316,6 +317,10 @@ export default function AdminContent() {
             shows them. The star below decides who leads; this decides in
             what order. Every other published essay follows, newest first. */}
         {!authLoading && isAdmin && <HomepageOrder />}
+
+        {/* The homepage glimpse's pins: the three essays that stand still
+            beside the running row. Owner-only, as the order above. */}
+        {!authLoading && isAdmin && <HomepageGlimpse />}
 
         {/* Filters bar */}
         <div className="flex flex-col sm:flex-row gap-3 mb-6">
