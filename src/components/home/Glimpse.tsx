@@ -329,7 +329,11 @@ export function Glimpse({ essays, isLoading }: GlimpseProps) {
   return (
     <section aria-labelledby="glimpse-heading" className="border-b border-border py-12">
       <div className="container">
-        <div className="mb-6 flex items-end justify-between gap-4">
+        {/* As tall as its buttons from the first paint: they arrive once the
+            carousel has measured the row, and the row must not grow then,
+            now that the homepage hero leaves the glimpse in view on load
+            (docs/home-hero-v2.md R3, R10). */}
+        <div className="mb-6 flex min-h-9 items-end justify-between gap-4">
           <div className="flex items-baseline gap-3">
             <h2 ref={heading} id="glimpse-heading" className="text-xl font-display font-semibold text-foreground">
               Glimpse

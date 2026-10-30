@@ -5,6 +5,69 @@ alternatives. Newest first.
 
 ---
 
+# 2026-10-30 — Home Hero v2: a shorter hero, a gradient, a canvas weave that moves
+
+Spec: `docs/home-hero-v2.md` (owner, 30 October 2026). Verification against R1–R11:
+`docs/home-hero-v2/verification.md`. Supersedes the 2026-10-29 Weave Hero entry below where they differ.
+
+- **Copy.** "Spreading intelligence." / "Rebuilding industry.", and "Exploring how to accelerate both — and
+  what it takes for Indonesia to industrialise again." The `<noscript>` copy in `index.html` follows.
+- **Height.** `clamp(440px, calc(100svh - var(--nav-h) - 240px), 760px)`, with `--nav-h` 65px: the header's
+  64px plus its 1px rule. It falls back to `vh` where `svh` is unknown. On a phone the hero grows rather
+  than let its text meet the weave.
+- **Background.** The header's navy melts into the cream over 110px, and the cream into the page's own
+  background over the last fifth. These are the existing tokens: `--header-bg`, the hero's `--hero-bg`, and
+  `--background`, which is the Glimpse's background since the Glimpse section has none of its own. The
+  header's 1px rule is already the header colour to within 1/255, so the header is untouched.
+- **The headline's size fits its line.** `clamp(2.75rem, 5.2vw, 5.25rem)` as specified, but capped (with
+  container query units) so "Spreading intelligence." still fits one line: in 52% of the hero on a
+  desktop, and in the width less the container's padding on a phone. At 1366 the cap gives 67px instead of
+  71px. At 390 it gives 31px instead of 44px: R1 asks for one sentence a line at 390×844, and 44px cannot
+  do that. The text block starts 6% in, so its right edge stays clear of the first warp at 60%.
+- **The weave is a canvas now.** `src/components/hero/HeroWeave.tsx` hosts it, with pure
+  `weave/geometry.ts` and `weave/animate.ts`, plus `weave/render.ts` and `weave/constants.ts`. `WeaveSvg.tsx`,
+  `motion.ts` and `config.ts` are gone. The files keep the `hero/` folder rather than the spec's `home/`, as
+  its "adapt names" allows.
+  - The grid is square: one pitch, `clamp(52px, 3.4vw, 68px)`, or 40px on a phone.
+  - Thread counts follow from the region.
+  - Plain weave, warp on top where `i + j` is even.
+- **Warps are split, not redrawn.** Drawing each warp whole and then again ±P/3 over its crossings left a
+  bolder dash at every patch, because anti-aliased edges stroked twice come out darker. Each warp is split
+  instead: under the wefts everywhere else, over them on those spans.
+- **Decisions the spec left open:**
+  - The weft's free ends fade in over 80px.
+  - Hollow nodes clear their disc, so the hero's background shows through them.
+  - The weave fades out over the hero's last 40px, so no thread is cut at the Glimpse.
+  - The phone's block fades in over its first 28px.
+  - The phone's block is fully woven, both ways, and carries no nodes: the spec gives it no free zone, and
+    nodes live only in one.
+  - Nodes keep below the band's darkest part (y ≥ 60px).
+- **Motion.**
+  - The intro runs on the component's own clock, which advances only while the loop runs, so it plays once
+    per page load and resumes where it stopped.
+  - The idle field grows in over the second after the intro, so nothing jumps.
+  - The gate's IntersectionObserver uses threshold 0, as the spec says (v1 used 10%).
+  - Resize rebuilds are debounced by 150ms, and the build reruns once the headline's face has loaded.
+- **The Glimpse, now in view on load (R3), has its existing load shifts counted (R10).** Two are fixed
+  without a visual change:
+  - The heading row is as tall as its buttons from the first paint (`min-h-9`, `Glimpse.tsx`).
+  - Spectral 400 and 700 are preloaded beside the hero's face (`index.html`), so card titles and decks do
+    not reflow.
+
+  One remains on mobile, 0.001 in Lighthouse. The carousel shows its arrows first, then re-initialises as a
+  loop and adds the pause button to their right. Fixing that changes the carousel, which the spec puts out
+  of scope.
+- **The preloads are in the shell, so every route fetches them.** The three fonts total about 66KB. Spectral
+  is the site's heading and essay face, so other routes use it too.
+
+Tests: `weaveGeometry.test.ts` (12), `weaveAnimate.test.ts` (13), `weaveRender.test.ts` (10) and
+`weaveHero.test.tsx` (10) replace the v1 hero's 30. `homePage.test.tsx` and `journeys.spec.ts` carry the
+new headline. Two `glimpse.spec.ts` tests scroll the row into view, not just its heading: the hero now
+leaves the heading on screen with the row's foot a pixel under the fold. `MIN_TESTS` goes from 1691 to
+1706.
+
+---
+
 # 2026-10-29 — The industry chain map leaves the homepage
 
 Owner request, the same day as the Weave Hero: the map under the hero goes. The homepage is now the

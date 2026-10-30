@@ -1,170 +1,110 @@
-import { useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
+import { useRef, type CSSProperties } from 'react';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
-import { DESKTOP, MOBILE } from './weave/config';
-import { buildWeave, fitComposition, type Fit } from './weave/geometry';
-import { useAnimationGate } from './weave/useAnimationGate';
-import { WeaveSvg } from './weave/WeaveSvg';
+import { HeroWeave } from './HeroWeave';
+import { BAND } from './weave/constants';
 
-/** The hero's copy, exactly as the PRD gives it (docs/hero-weave-prd.md §1). */
+/** The hero's copy (docs/home-hero-v2.md R1, R2). */
 const HERO_COPY = {
-  title: ['Spreading intelligence.', 'Rebuilding manufacturing.'],
-  subline: 'Exploring how to accelerate both.',
+  title: ['Spreading intelligence.', 'Rebuilding industry.'],
+  subline: 'Exploring how to accelerate both — and what it takes for Indonesia to industrialise again.',
 } as const;
 
 /**
- * The palette (PRD §2), defined on the hero's root. Dark values follow the
- * site's own dark-mode mechanism, Tailwind's `dark:` variant on the `dark`
- * class (tailwind.config.ts). The site is light only (docs/DECISIONS.md,
- * 2026-10-09) and nothing sets that class yet, so the dark values wait for it.
+ * The palette (docs/hero-weave-prd.md §2), defined on the hero's root. Dark
+ * values follow the site's own dark-mode mechanism, Tailwind's `dark:`
+ * variant on the `dark` class (tailwind.config.ts). The site is light only
+ * (docs/DECISIONS.md, 2026-10-09) and nothing sets that class yet, so the dark
+ * values wait for it.
  */
 const TOKENS =
   '[--hero-bg:#F4F1EA] [--hero-ink:#1E2761] [--hero-accent:#C2694A] [--hero-accent-fiber:#D98B6E] [--hero-link:#0070C0] ' +
   'dark:[--hero-bg:#12162B] dark:[--hero-ink:#E8E4DA] dark:[--hero-accent:#D27C5C] dark:[--hero-accent-fiber:#E39A7E] dark:[--hero-link:#4FA3E0]';
 
-const MOBILE_QUERY = '(max-width: 639.98px)';
-const DESKTOP_QUERY = '(min-width: 1024px)';
-
-/** Clear space between the headline and the nearest thread, in CSS pixels. */
-const GAP = { desktop: 40, tablet: 28 } as const;
 /**
- * The share of the woven width that may run past the right edge before the
- * composition is scaled down instead: the cloth bleeds off the edge anyway,
- * and a little more of it bleeding keeps it large beside a wide headline.
+ * The hero's height (§2 "Hero sizing"): what is left of the screen under the
+ * header once the Glimpse has its 240px, between 440 and 760px. --nav-h is
+ * the header's own height, 64px and its 1px rule (Header.tsx). Small
+ * viewport units where the browser has them, so a phone's toolbar never
+ * pushes the Glimpse out of view; plain vh where it does not.
  */
-const MAX_CROP = 0.1;
-
-/** Not yet measured (the first render, or no layout at all, as in jsdom). */
-const UNMEASURED = 'unmeasured' as const;
+const SIZING =
+  '[--nav-h:65px] [--hero-h:clamp(440px,calc(100vh_-_var(--nav-h)_-_240px),760px)] ' +
+  'supports-[height:100svh]:[--hero-h:clamp(440px,calc(100svh_-_var(--nav-h)_-_240px),760px)]';
 
 /**
- * The homepage hero (docs/hero-weave-prd.md): the thesis on the left, a woven
- * cloth on the right, intelligence (navy warp) and manufacturing (terracotta
- * weft) as two equal forces that become one cloth.
+ * The background (§2 "Background gradient"): the header's navy melts into
+ * the hero's cream over the top 110px, and the cream into the Glimpse's
+ * background, the page's own, over the last fifth. No rule at either edge.
+ */
+const BACKGROUND: CSSProperties = {
+  backgroundImage: `linear-gradient(180deg, hsl(var(--header-bg)) 0px, var(--hero-bg) ${BAND}px, var(--hero-bg) 80%, hsl(var(--background)) 100%)`,
+};
+
+/**
+ * The headline's size (§2 "Typography", R1): clamp(2.75rem, 5.2vw, 5.25rem),
+ * but never wider than its block lets one sentence sit on one line. The
+ * longer sentence, "Spreading intelligence.", is 10.45em in Source Serif 4
+ * at the headings' tracking; 10.6 leaves a hair. On a desktop the block is
+ * 52% of the hero; on a phone it is the width less the container's 2rem
+ * each side, so at 390px the two sentences still take a line each.
+ */
+const H1_SIZE = 'text-[length:clamp(2.75rem,5.2vw,5.25rem)]';
+const H1_FIT = {
+  desktop: 'supports-[width:1cqi]:text-[length:min(clamp(2.75rem,5.2vw,5.25rem),calc(52cqi_/_10.6))]',
+  mobile: 'supports-[width:1cqi]:text-[length:min(clamp(2.75rem,5.2vw,5.25rem),calc((100cqi_-_4rem)_/_10.6))]',
+} as const;
+
+const MOBILE_QUERY = '(max-width: 767.98px)';
+
+/**
+ * The homepage hero, v2 (docs/home-hero-v2.md): the thesis in two lines and
+ * one sentence of scope, over a woven cloth drawn on a canvas, intelligence
+ * (navy warp) and industry (terracotta weft) becoming one.
  *
- * From 640px the 1600 × 900 composition sits behind the headline, anchored
- * bottom-right. The PRD places the headline in 45% of the width (60% on a
- * tablet), but at its specified size its second line alone is about 13em,
- * some 58% of the width at 4.5vw, so the block is as wide as its two lines
- * and the composition is fitted to it instead: as large as the hero allows,
- * running a little past the right edge if it must, and scaled down before
- * any thread reaches the text (fitComposition). The warps are drawn on above
- * the canvas, so they still enter from the hero's top edge when the
- * composition is smaller than the hero. Under 640px the text sits at the top
- * and a separate 900 × 900 composition, the woven corner and short loose
- * ends, sits below it.
+ * From 768px the text sits 130px down, clear of the navy band, in at most
+ * 52% of the width, and the weave fills the hero behind it. Under 768px the
+ * text comes first and the weave is a fully woven block in the hero's
+ * bottom 38%; if the text needs more room, the hero grows rather than let
+ * them meet.
  */
 export function WeaveHero() {
   const mobile = useMediaQuery(MOBILE_QUERY);
-  const desktop = useMediaQuery(DESKTOP_QUERY, true);
-  const root = useRef<HTMLElement>(null);
   const text = useRef<HTMLDivElement>(null);
-  const running = useAnimationGate(root);
-  const [placed, setPlaced] = useState<Placement | typeof UNMEASURED>(UNMEASURED);
-
-  const composition = mobile ? MOBILE : DESKTOP;
-  // Drawn with the full extension, the weave's keep-out is the strictest one,
-  // so the fit made from it holds for any shorter extension.
-  const full = useMemo(() => buildWeave(composition), [composition]);
-
-  useLayoutEffect(() => {
-    const hero = root.current;
-    const block = text.current;
-    if (mobile || !hero || !block) return;
-    let live = true;
-    const measure = () => {
-      if (!live) return;
-      const h = hero.getBoundingClientRect();
-      const b = block.getBoundingClientRect();
-      if (h.width === 0 || h.height === 0) return;
-      const next = fitComposition(full, {
-        width: h.width,
-        height: h.height,
-        textRight: b.right - h.left,
-        textBottom: b.bottom - h.top,
-        gap: desktop ? GAP.desktop : GAP.tablet,
-        maxCrop: MAX_CROP,
-      });
-      setPlaced((prev) => (samePlacement(prev, next, h.height) ? prev : { fit: next, height: h.height }));
-    };
-    measure();
-    const ro = typeof ResizeObserver === 'function' ? new ResizeObserver(measure) : null;
-    ro?.observe(hero);
-    ro?.observe(block);
-    // The headline's face arriving after the first paint changes its width.
-    document.fonts?.ready.then(measure);
-    return () => {
-      live = false;
-      ro?.disconnect();
-    };
-  }, [mobile, desktop, full]);
-
-  // The warps are drawn up to the hero's top edge (with a little to spare), and no further.
-  const fit = mobile || placed === UNMEASURED ? UNMEASURED : placed.fit;
-  const extendAbove =
-    fit !== UNMEASURED && fit && placed !== UNMEASURED
-      ? Math.ceil((placed.height / fit.scale - DESKTOP.height + 40) / 100) * 100
-      : composition.warp.extendAbove;
-  const weave = useMemo(
-    () => (extendAbove === composition.warp.extendAbove ? full : buildWeave(composition, { extendAbove })),
-    [composition, extendAbove, full],
-  );
-
-  const side = !mobile;
-  let svgStyle: CSSProperties | undefined;
-  if (side && fit !== UNMEASURED) {
-    svgStyle = fit
-      ? { right: -fit.shift, width: DESKTOP.width * fit.scale, height: DESKTOP.height * fit.scale }
-      : { display: 'none' };
-  }
 
   return (
     <section
-      ref={root}
       aria-labelledby="weave-hero-title"
-      data-layout={side ? 'side' : 'stacked'}
-      data-motion={running ? 'running' : 'still'}
-      className={`weave-hero relative isolate overflow-hidden bg-[var(--hero-bg)] text-[color:var(--hero-ink)] ${TOKENS} ${
-        side ? 'h-[min(90vh,900px)]' : 'flex min-h-[min(90vh,900px)] flex-col'
+      data-layout={mobile ? 'stacked' : 'side'}
+      style={BACKGROUND}
+      className={`weave-hero relative isolate overflow-hidden text-[color:var(--hero-ink)] [container-type:inline-size] ${TOKENS} ${SIZING} ${
+        mobile ? 'flex min-h-[var(--hero-h)] flex-col' : 'h-[var(--hero-h)]'
       }`}
     >
       <div
         ref={text}
-        className={side ? 'absolute left-[8%] top-[22%] z-10 w-max' : 'container relative z-10 pb-8 pt-12'}
+        className={mobile ? 'container relative z-10 pb-6 pt-[130px]' : 'absolute left-[6%] top-[130px] z-10 max-w-[52%]'}
       >
         <h1
           id="weave-hero-title"
-          className="font-hero text-[clamp(2.25rem,4.5vw,4rem)] font-medium leading-[1.1] text-[color:var(--hero-ink)]"
+          className={`font-hero font-medium leading-[1.05] text-[color:var(--hero-ink)] ${H1_SIZE} ${mobile ? H1_FIT.mobile : H1_FIT.desktop}`}
         >
-          {/* Two lines, broken after the first full stop; the space keeps the
-              accessible name and a copied selection one sentence apart. */}
-          <span className={side ? 'block whitespace-nowrap' : 'block'}>{HERO_COPY.title[0]}</span>{' '}
-          <span className={side ? 'block whitespace-nowrap' : 'block'}>{HERO_COPY.title[1]}</span>
+          {/* One sentence a line; the space keeps the accessible name and a
+              copied selection two sentences, not one run-on word. */}
+          <span className="block whitespace-nowrap">{HERO_COPY.title[0]}</span>{' '}
+          <span className="block whitespace-nowrap">{HERO_COPY.title[1]}</span>
         </h1>
-        <p className="mt-6 font-sans text-[clamp(1rem,1.4vw,1.25rem)] leading-normal opacity-70">{HERO_COPY.subline}</p>
+        <p className="mt-6 max-w-[36ch] font-sans text-[length:clamp(1.125rem,1.4vw,1.5rem)] leading-normal opacity-70">
+          {HERO_COPY.subline}
+        </p>
       </div>
 
-      <WeaveSvg
-        weave={weave}
-        running={running}
-        className={
-          side
-            ? 'pointer-events-none absolute bottom-0 right-0 h-full w-full overflow-visible'
-            : 'pointer-events-none mt-auto block aspect-square w-full'
-        }
-        style={svgStyle}
-      />
+      {mobile ? (
+        <div className="relative mt-auto h-[calc(var(--hero-h)*0.38)] shrink-0">
+          <HeroWeave mobile textRef={text} className="pointer-events-none absolute inset-0 block h-full w-full" />
+        </div>
+      ) : (
+        <HeroWeave mobile={false} textRef={text} className="pointer-events-none absolute inset-0 block h-full w-full" />
+      )}
     </section>
   );
-}
-
-/** Where the composition sits, and the hero height it was fitted to. */
-interface Placement {
-  fit: Fit | null;
-  height: number;
-}
-
-function samePlacement(a: Placement | typeof UNMEASURED, b: Fit | null, height: number): boolean {
-  if (a === UNMEASURED || Math.abs(a.height - height) >= 0.5) return false;
-  if (a.fit === null || b === null) return a.fit === b;
-  return Math.abs(a.fit.scale - b.scale) < 1e-4 && Math.abs(a.fit.shift - b.shift) < 0.5;
 }

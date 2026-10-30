@@ -656,19 +656,20 @@
    @layer on purpose: Tailwind drops layered rules whose class it does not
    find in its content files, and index.html is not one of them. */
 .weave-hero-static {
-  background: #f4f1ea;
+  background: linear-gradient(180deg, hsl(var(--header-bg)) 0px, #f4f1ea 110px, #f4f1ea 80%, hsl(var(--background)) 100%);
   color: #1e2761;
-  padding: 22vh 8% 12vh;
+  padding: 130px 6% 12vh;
 }
 .weave-hero-static h1 {
   font-family: var(--font-hero);
-  font-size: clamp(2.25rem, 4.5vw, 4rem);
+  font-size: min(clamp(2.75rem, 5.2vw, 5.25rem), calc(88vw / 10.6));
   font-weight: 500;
-  line-height: 1.1;
-  max-width: 14em;
+  line-height: 1.05;
+  max-width: 11em;
 }
 .weave-hero-static p {
   margin-top: 1.5rem;
-  font-size: clamp(1rem, 1.4vw, 1.25rem);
+  max-width: 36ch;
+  font-size: clamp(1.125rem, 1.4vw, 1.5rem);
   opacity: 0.7;
 }

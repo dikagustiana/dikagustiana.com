@@ -1,0 +1,4 @@
+{"cpu":"1x","viewport":"1920x960","heroFrames":240,"fps":60,"meanMs":0.243,"p95Ms":0.4,"maxMs":0.5}
+{"cpu":"1x","viewport":"1366x657","heroFrames":241,"fps":60.3,"meanMs":0.185,"p95Ms":0.3,"maxMs":0.5}
+{"cpu":"4x","viewport":"1920x960","heroFrames":119,"fps":29.8,"meanMs":1.128,"p95Ms":1.7,"maxMs":2.3}
+{"cpu":"4x","viewport":"1366x657","heroFrames":208,"fps":52,"meanMs":0.772,"p95Ms":1.5,"maxMs":3.2}
