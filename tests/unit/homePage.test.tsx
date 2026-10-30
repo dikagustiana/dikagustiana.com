@@ -63,7 +63,7 @@ describe('the homepage', () => {
     // the hero's headline is the page's one h1, and the first heading on it
     const first = container.querySelector('main :is(h1, h2, h3)')!;
     expect(first.tagName).toBe('H1');
-    expect(first.textContent).toBe('Spreading intelligence. Rebuilding industry.');
+    expect(first.textContent).toBe('Democratising knowledge. Rebuilding industry.');
     expect(container.querySelectorAll('main h1')).toHaveLength(1);
     expect(container.querySelector('#the-argument')).toBeNull();
     expect(screen.queryByText('The argument')).toBeNull();

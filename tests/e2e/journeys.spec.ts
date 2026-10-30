@@ -150,12 +150,12 @@ test('thirty seconds: the thesis, then the glimpse, and a completed piece is one
   await page.goto('/');
 
   // The hero's headline, then the glimpse; no map and no call to action between them.
-  await expect(page.getByRole('heading', { name: 'Spreading intelligence. Rebuilding industry.', level: 1 })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Democratising knowledge. Rebuilding industry.', level: 1 })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'The industry chain', exact: true })).toHaveCount(0);
   await expect(page.locator('.chain-plate')).toHaveCount(0);
   await expect(page.getByRole('link', { name: /Start with the argument/i })).toHaveCount(0);
   const headings = page.locator('main :is(h1, h2, h3)');
-  expect(await headings.first().textContent()).toBe('Spreading intelligence. Rebuilding industry.');
+  expect(await headings.first().textContent()).toBe('Democratising knowledge. Rebuilding industry.');
   expect(await headings.nth(1).getAttribute('id')).toBe('glimpse-heading');
 
   const flagship = page
@@ -177,7 +177,7 @@ test('thirty seconds: the thesis, then the glimpse, and a completed piece is one
 test('an old About link lands on the homepage, with the address and the fragment it carried, at the top', async ({ page }) => {
   await page.goto('/about');
   await expect.poll(() => new URL(page.url()).pathname).toBe('/');
-  await expect(page.getByRole('heading', { name: 'Spreading intelligence. Rebuilding industry.', level: 1 })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Democratising knowledge. Rebuilding industry.', level: 1 })).toBeVisible();
 
   await page.goto('/about?lens=green&distance=finance&node=energy');
   await expect.poll(() => new URL(page.url()).pathname).toBe('/');

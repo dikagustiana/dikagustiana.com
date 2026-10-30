@@ -90,11 +90,21 @@ describe('the copy', () => {
   it('is a real h1, one sentence a line, and the subline, exactly as the PRD gives them', () => {
     render(<WeaveHero />);
     const h1 = screen.getByRole('heading', { level: 1 });
-    expect(h1).toHaveAccessibleName('Spreading intelligence. Rebuilding industry.');
-    expect(Array.from(h1.querySelectorAll('span'), (s) => s.textContent)).toEqual(['Spreading intelligence.', 'Rebuilding industry.']);
+    expect(h1).toHaveAccessibleName('Democratising knowledge. Rebuilding industry.');
+    expect(Array.from(h1.querySelectorAll('span'), (s) => s.textContent)).toEqual(['Democratising knowledge.', 'Rebuilding industry.']);
     for (const line of h1.querySelectorAll('span')) expect(line.className).toContain('whitespace-nowrap');
-    expect(screen.getByText('Exploring how to accelerate both — and what it takes for Indonesia to industrialise again.').tagName).toBe('P');
+    expect(screen.getByText('Exploring how to accelerate both, and how every Indonesian can share in them.').tagName).toBe('P');
     expect(hero()).toHaveAttribute('aria-labelledby', h1.id);
+  });
+
+  it('rings each letter of the headline with the hero’s background, only where paint-order reaches text', () => {
+    render(<WeaveHero />);
+    const classes = screen.getByRole('heading', { level: 1 }).className.split(' ');
+    const guard = 'supports-[(paint-order:stroke)and(color:light-dark(#000,#fff))]';
+    expect(classes).toContain(`${guard}:[paint-order:stroke_fill]`);
+    expect(classes).toContain(`${guard}:[-webkit-text-stroke:12px_var(--hero-bg)]`);
+    // never unguarded: an older browser would paint the stroke over the letters
+    expect(classes.filter((c) => c.includes('paint-order') || c.includes('text-stroke')).every((c) => c.startsWith(guard))).toBe(true);
   });
 });
 
@@ -122,7 +132,7 @@ describe('the text', () => {
   it('hands the weave every line box of the headline and the subtitle, relative to the canvas', () => {
     const box = (top: number, right: number) => ({ left: 82, top, right, bottom: top + 40, width: right - 82, height: 40 });
     const rects = new Map<string, ReturnType<typeof box>>([
-      ['Spreading intelligence.', box(130, 660)],
+      ['Democratising knowledge.', box(130, 660)],
       ['Rebuilding industry.', box(170, 610)],
     ]);
     vi.spyOn(Range.prototype, 'getClientRects').mockImplementation(function (this: Range) {
@@ -213,6 +223,8 @@ describe('the breakpoints', () => {
     expect(canvas()).toHaveAttribute('data-weave', 'mobile');
     expect(canvas().dataset.pitch).toBe('40');
     const h1 = screen.getByRole('heading', { level: 1 });
+    // the first line, 12.19em long, fits the width less the container's padding
+    expect(h1.className).toContain('calc((100cqi_-_4rem)_/_12.35)');
     expect(h1.compareDocumentPosition(canvas()) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
