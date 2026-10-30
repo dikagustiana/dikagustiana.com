@@ -14,14 +14,14 @@ import { configure, renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 
-const { fromMock } = vi.hoisted(() => ({ fromMock: vi.fn() }));
+const { fromMock, rpcMock } = vi.hoisted(() => ({ fromMock: vi.fn(), rpcMock: vi.fn() }));
 vi.mock('@/integrations/supabase/client', () => ({
-  supabase: { from: (...a: unknown[]) => fromMock(...a) },
+  supabase: { from: (...a: unknown[]) => fromMock(...a), rpc: (...a: unknown[]) => rpcMock(...a) },
 }));
 vi.mock('@/lib/auditLog', () => ({ logAuditEvent: vi.fn(async () => undefined) }));
 
-import { useSelectedEssays } from '@/hooks/queries/useSelectedEssays';
-import { useSaveSelectedOrder, useSelectedOrder, useToggleSelectContent } from '@/hooks/queries/useUnifiedContent';
+import { glimpseZones, useSelectedEssays, type SelectedEssay } from '@/hooks/queries/useSelectedEssays';
+import { useGlimpsePins, useSaveGlimpsePins, useSaveSelectedOrder, useSelectedOrder, useToggleSelectContent } from '@/hooks/queries/useUnifiedContent';
 import { useFeaturedFinanceEssay } from '@/hooks/queries/useFinance';
 import { essayRow, essaysTable, type EssayRow } from './helpers/essaysTable';
 
@@ -56,7 +56,10 @@ function wrapper({ children }: { children: ReactNode }) {
   return <QueryClientProvider client={qc}>{children}</QueryClientProvider>;
 }
 
-beforeEach(() => fromMock.mockReset());
+beforeEach(() => {
+  fromMock.mockReset();
+  rpcMock.mockReset();
+});
 
 describe('the homepage order', () => {
   const filters = (chain: Call[]) => chain.filter((c) => c.method === 'eq').map((c) => c.args);
@@ -75,8 +78,9 @@ describe('the homepage order', () => {
     await waitFor(() => expect(result.current.data).toEqual([a, b]));
     expect(chains).toHaveLength(1);
     expect(filters(chains[0])).toEqual([['published', true]]);
-    expect(orderedBy(chains[0])).toEqual(['is_selected', 'selected_rank', 'created_at']);
+    expect(orderedBy(chains[0])).toEqual(['featured_rank', 'is_selected', 'selected_rank', 'created_at']);
     expect(chains[0].filter((c) => c.method === 'order').map((c) => c.args[1])).toEqual([
+      { ascending: true, nullsFirst: false },
       { ascending: false },
       { ascending: true, nullsFirst: false },
       { ascending: false },
@@ -144,14 +148,14 @@ describe('the homepage order', () => {
         essayRow(3),
         essayRow(4),
       ],
-      { rankColumn: false },
+      { rankColumn: false, featuredColumn: false },
     );
     const { result } = renderHook(() => useSelectedEssays(8), { wrapper });
     await waitFor(() => expect(result.current.data).toBeDefined());
     // The rank is not there, so the starred lead newest first; the rest follow as before.
     expect(slugs(result.current.data)).toEqual(['essay-2', 'essay-1', 'essay-4', 'essay-3']);
-    expect(chains).toHaveLength(2);
-    const retry = chains[1];
+    expect(chains).toHaveLength(3);
+    const retry = chains[2];
     expect(orderedBy(retry)).toEqual(['is_selected', 'created_at']);
     expect(filters(retry)).toEqual(filters(chains[0]));
     expect(filters(retry)).toEqual([['published', true]]);
@@ -188,9 +192,65 @@ describe('the homepage order', () => {
     const { result } = renderHook(() => useSelectedEssays(8), { wrapper });
     await waitFor(() => expect(result.current.isError).toBe(true));
     expect(chains).toHaveLength(1);
-    expect(chains.map(orderedBy)).toEqual([['is_selected', 'selected_rank', 'created_at']]);
+    expect(chains.map(orderedBy)).toEqual([['featured_rank', 'is_selected', 'selected_rank', 'created_at']]);
   });
 
+  it('puts the pinned first in slot order, ahead of the starred, so the read never cuts a pin', async () => {
+    serve([
+      essayRow(1, { featured_rank: 2 }),
+      essayRow(2, { is_selected: true, selected_rank: 1 }),
+      essayRow(3, { featured_rank: 1, is_selected: true, selected_rank: 2 }),
+      ...Array.from({ length: 10 }, (_, i) => essayRow(i + 4)),
+    ]);
+    const { result } = renderHook(() => useSelectedEssays(2), { wrapper });
+    await waitFor(() => expect(result.current.data).toBeDefined());
+    expect(slugs(result.current.data)).toEqual(['essay-3', 'essay-1']);
+  });
+
+  it('reads without the pins before their migration, and keeps the owner\'s order', async () => {
+    const chains = serve(
+      [essayRow(1, { is_selected: true, selected_rank: 1 }), essayRow(2), essayRow(3)],
+      { featuredColumn: false },
+    );
+    const { result } = renderHook(() => useSelectedEssays(8), { wrapper });
+    await waitFor(() => expect(result.current.data).toBeDefined());
+    expect(slugs(result.current.data)).toEqual(['essay-1', 'essay-3', 'essay-2']);
+    expect(chains).toHaveLength(2);
+    expect(orderedBy(chains[1])).toEqual(['is_selected', 'selected_rank', 'created_at']);
+    expect(String(chains[1].find((c) => c.method === 'select')!.args[0])).not.toContain('featured_rank');
+  });
+
+  it('lists every published essay for the pins panel, and which holds each slot', async () => {
+    serve([essayRow(1, { featured_rank: 3 }), essayRow(2), essayRow(3, { featured_rank: 1 }), essayRow(4, { published: false })]);
+    const { result } = renderHook(() => useGlimpsePins(), { wrapper });
+    await waitFor(() => expect(result.current.data).toBeDefined());
+    expect(slugs(result.current.data!.essays)).toEqual(['essay-3', 'essay-2', 'essay-1']);
+    expect(result.current.data!.slots).toEqual(['e3', null, 'e1']);
+    expect(result.current.data!.missingColumn).toBe(false);
+  });
+
+  it('tells the pins panel the pins cannot be saved yet', async () => {
+    serve([essayRow(1), essayRow(2)], { featuredColumn: false });
+    const { result } = renderHook(() => useGlimpsePins(), { wrapper });
+    await waitFor(() => expect(result.current.data).toBeDefined());
+    expect(result.current.data!.slots).toEqual([null, null, null]);
+    expect(result.current.data!.missingColumn).toBe(true);
+  });
+
+  it('saves all three pins in one call, empty slots as null', async () => {
+    rpcMock.mockResolvedValue({ error: null });
+    const { result } = renderHook(() => useSaveGlimpsePins(), { wrapper });
+    await result.current.mutateAsync(['b', null, 'a']);
+    expect(rpcMock).toHaveBeenCalledTimes(1);
+    expect(rpcMock).toHaveBeenCalledWith('set_featured_essays', { p_ids: ['b', null, 'a'] });
+    expect(fromMock).not.toHaveBeenCalled();
+  });
+
+  it('throws when the pins are not saved', async () => {
+    rpcMock.mockResolvedValue({ error: { code: '22023', message: 'essay x is not published' } });
+    const { result } = renderHook(() => useSaveGlimpsePins(), { wrapper });
+    await expect(result.current.mutateAsync(['x', null, null])).rejects.toMatchObject({ code: '22023' });
+  });
   it('tells the admin panel the order cannot be saved yet', async () => {
     const chains = queries([{ data: null, error: MISSING }, { data: [{ id: 'a', title: 'A', section: 'finance', published: null }], error: null }]);
     const { result } = renderHook(() => useSelectedOrder(), { wrapper });
@@ -232,5 +292,28 @@ describe('the homepage order', () => {
     const { result } = renderHook(() => useToggleSelectContent(), { wrapper });
     await result.current.mutateAsync({ id: 'a', currentlySelected: false });
     expect(chains[0].find((c) => c.method === 'update')!.args).toEqual([{ is_selected: true }]);
+  });
+});
+
+describe('the glimpse\'s two zones', () => {
+  const e = (n: number, over: Partial<SelectedEssay> = {}) => essayRow(n, over) as unknown as SelectedEssay;
+  const ids = (list: SelectedEssay[]) => list.map((x) => x.id);
+
+  it('pins each essay to its slot and leaves it out of the row', () => {
+    const { pinned, row } = glimpseZones([e(5, { featured_rank: 2 }), e(6, { featured_rank: 1 }), e(7, { featured_rank: 3 }), e(1), e(9), e(2)]);
+    expect(ids(pinned)).toEqual(['e6', 'e5', 'e7']);
+    expect(ids(row)).toEqual(['e1', 'e9', 'e2']);
+  });
+
+  it('fills an empty slot with the newest published essay, in that slot, and leaves it out of the row too', () => {
+    const { pinned, row } = glimpseZones([e(1, { featured_rank: 3 }), e(2), e(8), e(4), e(6)]);
+    expect(ids(pinned)).toEqual(['e8', 'e6', 'e1']);
+    expect(ids(row)).toEqual(['e2', 'e4']);
+  });
+
+  it('pins the three newest when nothing is pinned, and is the pins alone with three or fewer', () => {
+    expect(ids(glimpseZones([e(1), e(3), e(2), e(4)]).pinned)).toEqual(['e4', 'e3', 'e2']);
+    expect(glimpseZones([e(1), e(2)])).toEqual({ pinned: [e(2), e(1)], row: [] });
+    expect(glimpseZones([])).toEqual({ pinned: [], row: [] });
   });
 });

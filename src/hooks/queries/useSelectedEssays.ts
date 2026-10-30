@@ -28,6 +28,11 @@ import { supabase } from '@/integrations/supabase/client';
  * starred (useSaveSelectedOrder). Production had none on 10 October 2026;
  * only a hand edit in the database could add one.
  *
+ * The pinned essays (`essays.featured_rank`, 1 to 3, set in Admin → Content →
+ * Homepage Glimpse) come before all of them, in slot order, so the read can
+ * never cut a pin off; glimpseZones splits the list into the glimpse's
+ * pinned columns and its running row.
+ *
  * `essays.is_selected` is still THE featuring flag. The Finance landing reads
  * it on its own (useFeaturedFinanceEssay) and is not widened by this rule.
  * The two mechanisms it replaced: `useFeaturedEssays` (created_at recency,
@@ -51,6 +56,8 @@ export interface SelectedEssay {
   fsli_slug: string | null;
   topic: string | null;
   finance_modules: { slug: string; track_slug: string } | null;
+  /** The glimpse slot it is pinned to, 1 to 3; NULL (or absent, before migration 20261030100000_essay_featured_rank) when not pinned. */
+  featured_rank?: number | null;
 }
 
 /**
@@ -65,7 +72,7 @@ export const MISSING_COLUMN = '42703';
 export const isMissingColumn = (error: { code?: string } | null | undefined): boolean =>
   error?.code === MISSING_COLUMN;
 
-const SELECTED_COLUMNS = `
+export const SELECTED_COLUMNS = `
   id, slug, title, snippet, section, phase, author, read_time,
   date, created_at, finance_section, fsli_slug, topic, is_selected,
   finance_modules!essays_module_id_fkey ( slug, track_slug )
@@ -73,27 +80,61 @@ const SELECTED_COLUMNS = `
 
 const newestFirst = (a: SelectedEssay, b: SelectedEssay) => Date.parse(b.created_at) - Date.parse(a.created_at);
 
+/** How many essays the glimpse pins beside its running row. */
+export const PINNED_SLOTS = 3;
+
+const isPinned = (essay: SelectedEssay) => essay.featured_rank != null;
+
 export const useSelectedEssays = (limit = 8) => {
   return useQuery({
     queryKey: ['essays', 'selected', limit],
     queryFn: async () => {
-      const base = () =>
-        supabase.from('essays').select(SELECTED_COLUMNS).eq('published', true).order('is_selected', { ascending: false });
+      const base = (columns: string) => supabase.from('essays').select(columns).eq('published', true);
+      const byStar = <Q extends { order: (column: string, options: { ascending: boolean; nullsFirst?: boolean }) => Q }>(query: Q) =>
+        query.order('is_selected', { ascending: false });
 
-      let read = await base()
+      // The pins first, then the starred in the owner's order, then the rest.
+      let read = await byStar(base(`${SELECTED_COLUMNS}, featured_rank`).order('featured_rank', { ascending: true, nullsFirst: false }))
         .order('selected_rank', { ascending: true, nullsFirst: false })
         .order('created_at', { ascending: false })
         .limit(limit * 2);
       if (isMissingColumn(read.error)) {
+        // Before the pin migration: nothing is pinned.
+        read = await byStar(base(SELECTED_COLUMNS))
+          .order('selected_rank', { ascending: true, nullsFirst: false })
+          .order('created_at', { ascending: false })
+          .limit(limit * 2);
+      }
+      if (isMissingColumn(read.error)) {
         // Before the rank migration: the same read, the starred newest first.
-        read = await base().order('created_at', { ascending: false }).limit(limit * 2);
+        read = await byStar(base(SELECTED_COLUMNS)).order('created_at', { ascending: false }).limit(limit * 2);
       }
       if (read.error) throw read.error;
 
       const rows = read.data as unknown as (SelectedEssay & { is_selected: boolean })[];
-      const starred = rows.filter((essay) => essay.is_selected);
-      const rest = rows.filter((essay) => !essay.is_selected).sort(newestFirst);
-      return [...starred, ...rest].slice(0, limit);
+      const pinned = rows.filter(isPinned).sort((a, b) => a.featured_rank! - b.featured_rank!);
+      const unpinned = rows.filter((essay) => !isPinned(essay));
+      const starred = unpinned.filter((essay) => essay.is_selected);
+      const rest = unpinned.filter((essay) => !essay.is_selected).sort(newestFirst);
+      return [...pinned, ...starred, ...rest].slice(0, limit);
     },
   });
 };
+
+/**
+ * The glimpse's two zones, from the homepage row. Slot n holds the essay
+ * pinned to it (featured_rank n); a slot nobody is pinned to holds the newest
+ * published essay not already in a slot, so the zone is three columns while
+ * three essays are published. Everything else is the running row, in the
+ * order given. An essay is in one zone only.
+ */
+export function glimpseZones(essays: SelectedEssay[]): { pinned: SelectedEssay[]; row: SelectedEssay[] } {
+  const slots: (SelectedEssay | undefined)[] = Array.from({ length: PINNED_SLOTS }, (_, i) =>
+    essays.find((essay) => essay.featured_rank === i + 1),
+  );
+  const fill = essays.filter((essay) => !slots.includes(essay)).sort(newestFirst);
+  const pinned = slots
+    .map((essay) => essay ?? fill.shift())
+    .filter((essay): essay is SelectedEssay => !!essay);
+  return { pinned, row: essays.filter((essay) => !pinned.includes(essay)) };
+}
