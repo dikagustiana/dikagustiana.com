@@ -73,7 +73,7 @@ const DEFAULT_AUTHOR = 'Dika Gustiana';
 
 const PHASE_OPTIONS: Record<string, { id: string; label: string }[]> = {
   'next-big-thing': [...NEXT_BIG_THING_THEMES],
-  // Foundations of Knowing: the ten parts, named as the category rows are.
+  // Foundations of Knowing: its eleven parts, named as the category rows are.
   [FOUNDATIONS_SECTION]: FOUNDATIONS_PARTS.map((p) => ({ id: p.id, label: foundationsPartName(p) })),
   'green-transition': [
     { id: 'where-we-are-now', label: 'Where We Are Now' },
@@ -156,8 +156,8 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
   // The Next Big Thing offers only the themes the site lists (nextBigThingThemes.ts): a retired theme's
   // category row (Society, Governance; docs/prd/2026-10-fia-fixes item 13) stays in the database but is
   // not offered, unless it is the essay's own, so an old essay still opens and saves.
-  // Foundations of Knowing offers its ten parts the same way (foundationsOfKnowing.ts): the part picker
-  // is the category select, and nothing outside the ten is offered unless the essay already carries it.
+  // Foundations of Knowing offers its eleven parts the same way (foundationsOfKnowing.ts): the part picker
+  // is the category select, and nothing outside the eleven is offered unless the essay already carries it.
   const categories = useMemo(() => {
     const liveSlugs =
       section === 'next-big-thing'

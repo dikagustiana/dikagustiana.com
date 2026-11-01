@@ -151,7 +151,7 @@ export default function CriticalThinkingEssay() {
             )}
           </header>
 
-          <div className="prose prose-neutral max-w-none">
+          <div className="prose prose-neutral max-w-none break-words">
             {essay?.content ? (
               <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(contentToHtml(essay.content)) }} />
             ) : (
