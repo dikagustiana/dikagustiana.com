@@ -84,7 +84,7 @@ export const navSections: NavSection[] = [
   { label: 'Home', path: '/' },
   /**
    * Foundations of Knowing sits right of Home, before the disciplines: the
-   * section argues that the foundations come first. A plain link — the ten
+   * section argues that the foundations come first. A plain link — the eleven
    * parts are on its page. basePath only, so every page under it marks it
    * active, in the drawer as on the row.
    */

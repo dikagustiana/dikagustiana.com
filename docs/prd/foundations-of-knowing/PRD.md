@@ -211,8 +211,8 @@ FASE 4 - VERIFIKASI DAN PR
 GERBANG 4: laporan delapan kriteria (LOLOS / BELUM + bukti). BERHENTI.
 
 SEED (sort_order | phase | slug | title)
-1 | before-we-go-far | why-a-finance-site-needs-epistemology | Why a Finance Site Needs Epistemology
-2 | before-we-go-far | sequence-matters | Sequence Matters: Foundations Before Disciplines
+1 | before-we-go-far | why-a-finance-site-needs-epistemology | Cutting at the Joints: Why Epistemology Comes First
+2 | before-we-go-far | sequence-matters | Sequence Matters: Which Cut Comes First
 101 | knowing | what-does-it-mean-to-know-something | What Does It Mean to Know Something?
 102 | knowing | descartes-doubt | Descartes' Doubt: Tearing Down to Rebuild
 103 | knowing | hume-and-the-problem-of-induction | Hume and the Problem of Induction

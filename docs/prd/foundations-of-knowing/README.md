@@ -84,3 +84,18 @@ straight through without stopping at each one.
   save. A category from another section is refused by `validate_essay_placement`. No rows were
   left behind.
 - Screenshots: [shots/](shots/).
+
+## 2026-10-26: Mathematization becomes Part 3
+
+The owner added a part: mathematics is not formulas but the way a problem is taken apart and
+translated into a model, and the result translated back. It sits between Logic and Argument, so
+the section now has **eleven parts (0–10)**.
+
+| Area | Change |
+|---|---|
+| Parts | `FOUNDATIONS_PARTS` gains `mathematization` as Part 3. Argument..Strategic Finance move up one number (Strategic Finance is Part 10). Phase ids are unchanged, so no URL moves. |
+| Database | Migration `20261026120000_foundations_of_knowing_mathematization` renames and re-sorts the part categories 3..9 → 4..10, adds `critical-thinking-mathematization` (sort_order 3), moves every critical-thinking essay with sort_order ≥ 300 up 100, and seeds six drafts 301–306. It fails closed and asserts the eleven names, the six stubs, and that every essay's sort_order / 100 is its part's number. **Not applied yet**: it waits for the owner's go-ahead. |
+| Stubs | `mathematics-is-not-formulas`, `dissecting-a-problem`, `from-words-to-variables`, `assumptions-are-the-model`, `proofs-and-refutations`, `unreasonable-effectiveness-and-its-limits`. Per part: 2/6/5/6/6/7/5/7/6/6/6 (62). |
+| Part 0 | 001 and 002 are retitled "Cutting at the Joints: Why Epistemology Comes First" and "Sequence Matters: Which Cut Comes First" (migration `20261031120000_foundations_of_knowing_part0_titles`; slugs unchanged). Part 0's thesis follows 001: people understand a problem differently because they know how to cut it at its joints. |
+| Tests | `foundationsOfKnowing.test.ts` replays the 2026-10-24 seed through this migration's shift and compares the result with the constant. |
+| Sources | Knowledge-bank cards for Russell 1919 and 1918, Whitehead 1911, Poincaré 1913, Wigner 1960 and Hamming 1980 (`D:\dikagustiana.com\Critical Thinking\_knowledge-bank`). |

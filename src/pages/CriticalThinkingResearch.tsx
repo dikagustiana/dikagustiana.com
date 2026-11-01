@@ -25,7 +25,7 @@ import {
 
 /**
  * Foundations of Knowing — the section page, laid out as a Finance track is
- * (FinanceTrackIndex): the ten parts as collapsible rows, each with its
+ * (FinanceTrackIndex): the eleven parts as collapsible rows, each with its
  * number, name, thesis and essay count, and its essays inside in reading
  * order (sort_order). The file keeps its Critical Thinking name: the
  * section's slug is still `critical-thinking`, and only its display name moved.
@@ -97,7 +97,7 @@ function SectionContent({ partId }: { partId?: string }) {
     >
       <SEO
         title={FOUNDATIONS_LABEL}
-        description="Ten parts, from what it means to know something to strategic finance as applied judgment."
+        description="Eleven parts, from what it means to know something to strategic finance as applied judgment."
       />
 
       <div className="py-8 container max-w-3xl">
