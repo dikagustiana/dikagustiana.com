@@ -9,6 +9,7 @@ import { CONSOLIDATION_TOPIC_MAP } from '@/config/consolidationTopics';
 import { contentToHtml } from '@/lib/tiptap/serialize';
 import { resolvePresentation } from '@/lib/presentation';
 import { essayUrl } from '@/lib/essayUrl';
+import { useEssayTranslationState } from '@/hooks/queries/useEssayTranslation';
 
 const SERIES_HOME = '/accounting/consolidated-reporting';
 
@@ -32,6 +33,9 @@ const seriesEssayUrl = (slug: string) =>
  * FSLI page, which renders the batch's other essays, shows none either.
  */
 function ConsolidationSeriesEssay({ essay }: { essay: TopicEssay }) {
+  // The Indonesian version, if one is published (docs/prd/essay-language). Called
+  // before any early return; the shell shows EN · ID only when it exists.
+  const translation = useEssayTranslationState(essay.id);
   const { data: series = [] } = useConsolidationSeries();
   const index = series.findIndex((part) => part.slug === essay.slug);
   const previous = index > 0 ? series[index - 1] : null;
@@ -60,6 +64,7 @@ function ConsolidationSeriesEssay({ essay }: { essay: TopicEssay }) {
       content={essay.content || ''}
       htmlContent={contentToHtml(essay.content || '')}
       brief={essay.brief_json}
+      translation={translation}
       references={presentation.references}
       authorBio={presentation.author_bio}
       genre={presentation.genre}

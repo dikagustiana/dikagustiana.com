@@ -10,6 +10,7 @@ import { ArticleShell, ArticleLayout } from '@/components/editorial';
 import { contentToHtml } from '@/lib/tiptap/serialize';
 import { essayUrl, universalEssayUrl } from '@/lib/essayUrl';
 import { isPublished } from '@/lib/publication';
+import { useEssayTranslationState } from '@/hooks/queries/useEssayTranslation';
 
 interface Essay {
   id: string;
@@ -105,6 +106,10 @@ export default function GreenTransitionEssayPage() {
       setLoading(false);
     }
   };
+
+  // The Indonesian version, if one is published (docs/prd/essay-language). Called
+  // before any early return; the shell shows EN · ID only when it exists.
+  const translation = useEssayTranslationState(essay?.id);
 
   // Siblings are the essay's own phase, read the way the phase page reads it
   // (section + phase, newest first). They used to come from category_id, but
@@ -238,6 +243,7 @@ export default function GreenTransitionEssayPage() {
       content={essay.content || ''}
       htmlContent={htmlContent}
       brief={essay.brief_json}
+      translation={translation}
       keyTakeaways={presentation.key_takeaways}
       references={presentation.references}
       authorBio={presentation.author_bio}

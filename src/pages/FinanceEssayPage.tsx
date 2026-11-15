@@ -22,6 +22,7 @@ import { ArticleShell, ArticleLayout } from '@/components/editorial';
 import { LongformArticleShell } from '@/components/editorial/LongformArticleShell';
 import { contentToHtml } from '@/lib/tiptap/serialize';
 import { isPublished } from '@/lib/publication';
+import { useEssayTranslationState } from '@/hooks/queries/useEssayTranslation';
 
 interface Essay {
   id: string;
@@ -124,6 +125,10 @@ export default function FinanceEssayPage() {
       setLoading(false);
     }
   };
+
+  // The Indonesian version, if one is published (docs/prd/essay-language). Called
+  // before any early return; the shell shows EN · ID only when it exists.
+  const translation = useEssayTranslationState(essay?.id);
 
   // Fetch siblings via module_id FK
   const { data: siblings } = useQuery({
@@ -228,6 +233,7 @@ export default function FinanceEssayPage() {
     content: essay.content || '',
     htmlContent,
     brief: essay.brief_json,
+    translation,
     keyTakeaways: presentation.key_takeaways,
     references: presentation.references,
     authorBio: presentation.author_bio,

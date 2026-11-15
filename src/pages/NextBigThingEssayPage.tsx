@@ -11,6 +11,7 @@ import { contentToHtml } from '@/lib/tiptap/serialize';
 import { isPublished } from '@/lib/publication';
 import { essayUrl } from '@/lib/essayUrl';
 import { NEXT_BIG_THING_THEMES, nextBigThingThemePath } from '@/config/nextBigThingThemes';
+import { useEssayTranslationState } from '@/hooks/queries/useEssayTranslation';
 
 interface Essay {
   id: string;
@@ -92,6 +93,10 @@ export default function NextBigThingEssayPage() {
       setLoading(false);
     }
   };
+
+  // The Indonesian version, if one is published (docs/prd/essay-language). Called
+  // before any early return; the shell shows EN · ID only when it exists.
+  const translation = useEssayTranslationState(essay?.id);
 
   // Fetch sibling essays via category_id FK
   const { data: siblings } = useQuery({
@@ -202,6 +207,7 @@ export default function NextBigThingEssayPage() {
       content={essay.content || ''}
       htmlContent={htmlContent}
       brief={essay.brief_json}
+      translation={translation}
       keyTakeaways={presentation.key_takeaways}
       references={presentation.references}
       authorBio={presentation.author_bio}

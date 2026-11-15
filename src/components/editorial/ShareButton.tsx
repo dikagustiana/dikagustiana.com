@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Share2, Check, Link2 } from 'lucide-react';
 import { SITE_ORIGIN } from '@/lib/siteOrigin';
+import { languageQuery } from '@/lib/essayLanguage';
 
 interface ShareButtonProps {
   title: string;
@@ -16,7 +17,8 @@ export function ShareButton({ title, className }: ShareButtonProps) {
   const [copied, setCopied] = useState(false);
 
   const share = async () => {
-    const url = `${SITE_ORIGIN}${window.location.pathname}`;
+    // `?lang=id` survives, so an Indonesian reader shares the Indonesian version.
+    const url = `${SITE_ORIGIN}${window.location.pathname}${languageQuery(window.location.search)}`;
     if (navigator.share) {
       try {
         await navigator.share({ title, url });
