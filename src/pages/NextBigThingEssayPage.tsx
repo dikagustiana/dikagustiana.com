@@ -1,6 +1,6 @@
 import NotFound from './NotFound';
 import { resolvePresentation, type EssayPresentation } from '@/lib/presentation';
-import { Navigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -11,6 +11,8 @@ import { contentToHtml } from '@/lib/tiptap/serialize';
 import { isPublished } from '@/lib/publication';
 import { essayUrl } from '@/lib/essayUrl';
 import { NEXT_BIG_THING_THEMES, nextBigThingThemePath } from '@/config/nextBigThingThemes';
+import { useEssayTranslationState } from '@/hooks/queries/useEssayTranslation';
+import { EssayRedirect } from '@/components/editorial/EssayRedirect';
 
 interface Essay {
   id: string;
@@ -93,6 +95,10 @@ export default function NextBigThingEssayPage() {
     }
   };
 
+  // The Indonesian version, if one is published (docs/prd/essay-language). Called
+  // before any early return; the shell shows EN · ID only when it exists.
+  const translation = useEssayTranslationState(essay?.id);
+
   // Fetch sibling essays via category_id FK
   const { data: siblings } = useQuery({
     queryKey: ['nbt-siblings', essay?.category_id],
@@ -158,7 +164,7 @@ export default function NextBigThingEssayPage() {
     ? `/the-next-big-thing/${theme}/${slug}`
     : `/the-next-big-thing/${slug}`;
   if (canonical && canonical !== currentPath) {
-    return <Navigate to={canonical} replace />;
+    return <EssayRedirect to={canonical} />;
   }
 
   const currentIndex = siblings?.findIndex((e) => e.slug === slug) ?? -1;
@@ -202,6 +208,7 @@ export default function NextBigThingEssayPage() {
       content={essay.content || ''}
       htmlContent={htmlContent}
       brief={essay.brief_json}
+      translation={translation}
       keyTakeaways={presentation.key_takeaways}
       references={presentation.references}
       authorBio={presentation.author_bio}

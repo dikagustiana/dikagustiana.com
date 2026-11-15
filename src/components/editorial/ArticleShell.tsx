@@ -12,7 +12,7 @@
  * This component replaces per-section layouts.
  */
 
-import { ReactNode, useEffect, useMemo, useState } from 'react';
+import { ReactNode, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { genreOf } from '@/data/genres';
@@ -25,7 +25,10 @@ import { ShareButton } from './ShareButton';
 import { ArticleHeader } from './ArticleHeader';
 import { ArticleToc } from './ArticleToc';
 import { ArticleBody } from './ArticleBody';
-import { BriefToggle, type EssayView } from './BriefToggle';
+import { BriefToggle } from './BriefToggle';
+import { LanguageToggle } from './LanguageToggle';
+import { LangScope } from './LangScope';
+import { useEssayLanguageView, type TranslationState } from './useEssayLanguageView';
 import { KeyTakeaways } from './KeyTakeaways';
 import { References } from './References';
 import { AuthorBox } from './AuthorBox';
@@ -33,7 +36,6 @@ import { EssayNavigation } from './EssayNavigation';
 import { RelatedEssays } from './RelatedEssays';
 import { SEO } from '@/components/SEO';
 import { essayShareImage } from '@/lib/shareImage.mjs';
-import { parseBriefDoc, isEmptyBrief } from '@/lib/brief';
 import { cn } from '@/lib/utils';
 import { citedIndexes, publicReferencesHtml } from '@/lib/editorial/referenceAnnotations';
 
@@ -75,6 +77,13 @@ export interface ArticleShellProps {
    * empty: no toggle, no placeholder, no disabled state.
    */
   brief?: unknown;
+  /**
+   * The essay's Indonesian version (`essay_translations`), from
+   * useEssayTranslation. When given, `EN · ID` renders beside `Full · Brief`
+   * once a published translation exists, and `?lang=id` selects it. Not
+   * given: the shell behaves exactly as it did before translations existed.
+   */
+  translation?: TranslationState;
 
   /** End matter */
   keyTakeaways?: string[];
@@ -139,6 +148,7 @@ export function ArticleShell({
   content: storedContent,
   htmlContent: storedHtml,
   brief,
+  translation,
   keyTakeaways,
   references,
   hideReferenceAnnotations = false,
@@ -156,23 +166,37 @@ export function ArticleShell({
   // Item 10: a reader's body and reference list carry no annotations; an admin's carry everything.
   const content = useMemo(() => (hideReferenceAnnotations ? publicReferencesHtml(storedContent) : storedContent), [storedContent, hideReferenceAnnotations]);
   const htmlContent = useMemo(() => (hideReferenceAnnotations && storedHtml ? publicReferencesHtml(storedHtml) : storedHtml), [storedHtml, hideReferenceAnnotations]);
-  const cited = useMemo(() => citedIndexes(content), [content]);
   const declaredGenre = genreOf(genre);
   const { fontSize, changeFontSize, fontSizeClass } = useFontSize();
 
-  // The Brief view. A real Brief must exist for the toggle to render at all;
-  // Full is the resting state, and navigating to a different essay (this
-  // shell instance survives prev/next navigation) resets to it — an arriving
-  // reader always gets the long essay.
-  const briefContent = useMemo(() => {
-    const doc = parseBriefDoc(brief);
-    return doc && !isEmptyBrief(doc) ? JSON.stringify(doc) : null;
-  }, [brief]);
-  const [view, setView] = useState<EssayView>('full');
-  useEffect(() => {
-    setView('full');
-  }, [content]);
-  const showBrief = view === 'brief' && briefContent != null;
+  // Language × view (useEssayLanguageView). A real Brief must exist for the
+  // `Full · Brief` toggle to render at all, a published translation for
+  // `EN · ID`; Full is the resting state, and navigating to a different essay
+  // (this shell instance survives prev/next navigation) resets to it — an
+  // arriving reader always gets the long essay.
+  const englishFields = useMemo(
+    () => ({ title, seoTitle, seoDescription, deck, keyTakeaways, heroCaption, revisionNote, readTime }),
+    [title, seoTitle, seoDescription, deck, keyTakeaways, heroCaption, revisionNote, readTime],
+  );
+  const englishToc = useMemo(() => htmlContent || content, [htmlContent, content]);
+  const lv = useEssayLanguageView({ content, tocHtml: englishToc, brief, english: englishFields, translation });
+  const f = lv.fields;
+  const showBrief = lv.isBrief;
+  // Which references the body cites: always the long body of the language
+  // shown (the Brief cites nothing), as before translations existed.
+  const cited = useMemo(() => citedIndexes(lv.lang === 'id' ? lv.tocHtml : content), [lv.lang, lv.tocHtml, content]);
+
+  // `?lang=id` and the translation still loading: hold the body rather than
+  // flash the English essay and swap it a moment later.
+  if (lv.pending) {
+    return (
+      <div className="min-h-screen flex flex-col bg-background">
+        <Header />
+        <main className="flex-1" aria-busy="true" />
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -192,7 +216,7 @@ export function ArticleShell({
         {/* Reader controls bar */}
         <div className="sticky top-16 z-30 bg-background/95 backdrop-blur border-b border-border">
           <div className="container max-w-3xl lg:max-w-[64rem] py-2 flex items-center justify-end gap-2">
-            <ShareButton title={title} />
+            <ShareButton title={f.title} />
             <FontSizeToggle fontSize={fontSize} onChange={changeFontSize} />
           </div>
         </div>
@@ -207,8 +231,9 @@ export function ArticleShell({
             {/* image + dates were missing here, so per-essay share cards
                 (once pre-rendered) would have had no picture and no dates. */}
             <SEO
-              title={seoTitle}
-              description={seoDescription}
+              title={f.seoTitle}
+              description={f.seoDescription}
+              {...lv.seo}
               type="article"
               author={seoAuthor || author || 'Dika Gustiana'}
               // The og:image the prerender wrote into this page's raw HTML
@@ -228,31 +253,43 @@ export function ArticleShell({
               {backLink.label}
             </Link>
 
-            {/* Header block */}
-            <ArticleHeader
-              title={title}
-              deck={deck}
-              author={author}
-              publishedAt={publishedAt}
-              updatedAt={updatedAt}
-              createdAt={createdAt}
-              readTime={readTime}
-              topic={topic}
-              heroImage={heroImage}
-              heroCaption={heroCaption}
-            />
+            {/* Header block. `lang` marks an Indonesian title and deck for
+                screen readers and hyphenation. */}
+            <LangScope lang={lv.lang}>
+              <ArticleHeader
+                title={f.title}
+                deck={f.deck}
+                author={author}
+                publishedAt={publishedAt}
+                updatedAt={updatedAt}
+                createdAt={createdAt}
+                readTime={f.readTime}
+                topic={topic}
+                heroImage={heroImage}
+                heroCaption={f.heroCaption}
+              />
+            </LangScope>
 
-            {/* `Full · Brief` — only when a Brief exists. Sits directly under
-                the header block, near the title. */}
-            {briefContent != null && (
-              <BriefToggle view={view} onChange={setView} className="-mt-4 mb-8" />
+            {/* `Full · Brief` and `EN · ID` — each only when there is a
+                choice to make. Directly under the header block, near the
+                title. */}
+            {lv.showLanguageToggle ? (
+              <div className="-mt-4 mb-8 flex flex-wrap items-center gap-x-6 gap-y-2">
+                {lv.showViewToggle && <BriefToggle view={lv.selection.view} onChange={lv.setView} />}
+                <LanguageToggle language={lv.selection.language} onChange={lv.setLanguage} />
+              </div>
+            ) : (
+              // English only: the markup the Brief toggle always had.
+              lv.showViewToggle && (
+                <BriefToggle view={lv.selection.view} onChange={lv.setView} className="-mt-4 mb-8" />
+              )
             )}
 
             {/* Table of contents — inline collapsible below lg: only; the
                 sticky sidebar takes over at lg:+. Hidden in the Brief view:
                 it navigates the long essay's headings, which a Brief has
                 none of (flowing prose only). */}
-            {!showBrief && <ArticleToc className="lg:hidden" content={htmlContent || content} />}
+            {!showBrief && <ArticleToc className="lg:hidden" content={lv.tocHtml} />}
 
             {/* What kind of piece this is, and what it owes the reader. A
                 reader calibrates against an evidential contract, and the only
@@ -270,12 +307,12 @@ export function ArticleShell({
             )}
 
             {/* What changed since this was first published. */}
-            {revisionNote?.trim() && !showBrief && (
+            {f.revisionNote?.trim() && !showBrief && (
               <div className="mb-8 border-l-2 border-foreground bg-muted/40 py-3 pl-4 pr-4" data-revision-note>
                 <p className="eyebrow text-foreground">
                   {updatedAt ? `Revised ${fullDate(updatedAt)}` : 'Revised'}
                 </p>
-                <p className="mt-1 text-[15px] leading-relaxed text-foreground">{revisionNote}</p>
+                <p lang={lv.lang} className="mt-1 text-[15px] leading-relaxed text-foreground">{f.revisionNote}</p>
               </div>
             )}
 
@@ -284,14 +321,18 @@ export function ArticleShell({
 
             {/* Article body — the ONE thing the toggle switches. Header,
                 end matter and navigation belong to the essay, not the view. */}
-            <ArticleBody
-              content={showBrief ? briefContent : content}
-              fontSizeClass={fontSizeClass}
-            />
+            <LangScope lang={lv.lang}>
+              <ArticleBody
+                content={lv.body}
+                fontSizeClass={fontSizeClass}
+              />
+            </LangScope>
 
             {/* End matter */}
-            {keyTakeaways && keyTakeaways.length > 0 && (
-              <KeyTakeaways takeaways={keyTakeaways} />
+            {f.keyTakeaways && f.keyTakeaways.length > 0 && (
+              <LangScope lang={lv.lang}>
+                <KeyTakeaways takeaways={f.keyTakeaways} />
+              </LangScope>
             )}
 
             {references && references.length > 0 && (
@@ -328,7 +369,7 @@ export function ArticleShell({
             <aside className="hidden lg:block">
               {!showBrief && (
                 <div className="sticky top-32">
-                  <ArticleToc variant="sidebar" content={htmlContent || content} />
+                  <ArticleToc variant="sidebar" content={lv.tocHtml} />
                 </div>
               )}
             </aside>

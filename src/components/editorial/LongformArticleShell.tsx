@@ -5,7 +5,7 @@
  * Single-column, wide paragraphs, minimal chrome, intellectual essay feel.
  */
 
-import { ReactNode, useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { Header } from '@/components/Header';
@@ -13,8 +13,10 @@ import { Footer } from '@/components/Footer';
 import { ReadingProgress } from './ReadingProgress';
 import { ArticleToc } from './ArticleToc';
 import { ArticleBody } from './ArticleBody';
-import { BriefToggle, type EssayView } from './BriefToggle';
-import { parseBriefDoc, isEmptyBrief } from '@/lib/brief';
+import { BriefToggle } from './BriefToggle';
+import { LanguageToggle } from './LanguageToggle';
+import { LangScope } from './LangScope';
+import { useEssayLanguageView, type TranslationState } from './useEssayLanguageView';
 import { contentToHtml } from '@/lib/tiptap/serialize';
 import { citedIndexes, publicReferencesHtml } from '@/lib/editorial/referenceAnnotations';
 import { KeyTakeaways } from './KeyTakeaways';
@@ -46,6 +48,8 @@ export interface LongformArticleShellProps {
   htmlContent?: string;
   /** The essay's optional Brief companion — see ArticleShell's prop of the same name. */
   brief?: unknown;
+  /** The essay's Indonesian version — see ArticleShell's prop of the same name. */
+  translation?: TranslationState;
   keyTakeaways?: string[];
   references?: (string | { label: string; url?: string })[];
   /**
@@ -93,6 +97,7 @@ export function LongformArticleShell({
   content: storedContent,
   htmlContent: storedHtml,
   brief,
+  translation,
   keyTakeaways,
   references,
   hideReferenceAnnotations = false,
@@ -106,7 +111,6 @@ export function LongformArticleShell({
   // Item 10: a reader's body and reference list carry no annotations; an admin's carry everything.
   const content = useMemo(() => (hideReferenceAnnotations ? publicReferencesHtml(storedContent) : storedContent), [storedContent, hideReferenceAnnotations]);
   const htmlContent = useMemo(() => (hideReferenceAnnotations && storedHtml ? publicReferencesHtml(storedHtml) : storedHtml), [storedHtml, hideReferenceAnnotations]);
-  const cited = useMemo(() => citedIndexes(content), [content]);
   const showUpdated = useMemo(() => {
     if (!updatedAt || !createdAt) return false;
     const diffDays =
@@ -118,17 +122,29 @@ export function LongformArticleShell({
   // ToC heading extraction parses HTML; the body may be stored as TipTap JSON.
   const tocHtml = useMemo(() => contentToHtml(content), [content]);
 
-  // Brief view — same rules as ArticleShell: toggle only when a real Brief
-  // exists, Full the default, reset on essay change.
-  const briefContent = useMemo(() => {
-    const doc = parseBriefDoc(brief);
-    return doc && !isEmptyBrief(doc) ? JSON.stringify(doc) : null;
-  }, [brief]);
-  const [view, setView] = useState<EssayView>('full');
-  useEffect(() => {
-    setView('full');
-  }, [content]);
-  const showBrief = view === 'brief' && briefContent != null;
+  // Language × view — same rules as ArticleShell (useEssayLanguageView):
+  // each toggle only when there is a choice, Full the default, reset on essay
+  // change. htmlContent is the caller's precomputed HTML; tocHtml the
+  // internal fallback so heading extraction works from TipTap JSON too.
+  const englishFields = useMemo(
+    () => ({ title, seoTitle, seoDescription, deck, keyTakeaways, heroCaption, readTime }),
+    [title, seoTitle, seoDescription, deck, keyTakeaways, heroCaption, readTime],
+  );
+  const englishToc = useMemo(() => htmlContent || tocHtml, [htmlContent, tocHtml]);
+  const lv = useEssayLanguageView({ content, tocHtml: englishToc, brief, english: englishFields, translation });
+  const f = lv.fields;
+  const showBrief = lv.isBrief;
+  const cited = useMemo(() => citedIndexes(lv.lang === 'id' ? lv.tocHtml : content), [lv.lang, lv.tocHtml, content]);
+
+  if (lv.pending) {
+    return (
+      <div className="min-h-screen flex flex-col bg-background">
+        <Header />
+        <main className="flex-1" aria-busy="true" />
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -143,8 +159,9 @@ export function LongformArticleShell({
         <div className="mx-auto max-w-[780px] lg:max-w-none lg:grid lg:grid-cols-[minmax(0,48rem)_13rem] lg:justify-center lg:gap-12 lg:px-8">
           <article className="min-w-0 px-6 lg:px-0 py-16 space-y-8">
           <SEO
-            title={seoTitle}
-            description={seoDescription}
+            title={f.seoTitle}
+            description={f.seoDescription}
+            {...lv.seo}
             type="article"
             author={seoAuthor || author || 'Dika Gustiana'}
             // The og:image the prerender wrote into this page's raw HTML
@@ -166,23 +183,23 @@ export function LongformArticleShell({
             {/* .editorial-title, the class ArticleShell and the writer's title
                 input share; this shell used text-5xl font-black, a third
                 title spec for the same kind of page. */}
-            <h1 className="editorial-title">
-              {title}
+            <h1 lang={lv.lang} className="editorial-title">
+              {f.title}
             </h1>
 
-            {deck && (
-              <p className="text-xl text-muted-foreground font-medium">
-                {deck}
+            {f.deck && (
+              <p lang={lv.lang} className="text-xl text-muted-foreground font-medium">
+                {f.deck}
               </p>
             )}
 
             {/* Metadata line */}
             <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1 text-sm text-muted-foreground">
-              {(author || publishedAt || readTime) && (
+              {(author || publishedAt || f.readTime) && (
                 <span>
                   {author && <span className="font-medium text-foreground">{author}</span>}
-                  {author && (publishedAt || readTime) && ' · '}
-                  {[publishedAt && formatDate(publishedAt), readTime].filter(Boolean).join(' · ')}
+                  {author && (publishedAt || f.readTime) && ' · '}
+                  {[publishedAt && formatDate(publishedAt), f.readTime].filter(Boolean).join(' · ')}
                 </span>
               )}
               {showUpdated && updatedAt && (
@@ -198,20 +215,28 @@ export function LongformArticleShell({
             <figure>
               <img
                 src={heroImage}
-                alt={title}
+                alt={f.title}
                 loading="lazy"
                 className="w-full rounded-lg"
               />
-              {heroCaption && (
-                <figcaption className="text-sm text-muted-foreground mt-3 text-center italic">
-                  {heroCaption}
+              {f.heroCaption && (
+                <figcaption lang={lv.lang} className="text-sm text-muted-foreground mt-3 text-center italic">
+                  {f.heroCaption}
                 </figcaption>
               )}
             </figure>
           )}
 
-          {/* `Full · Brief` — only when a Brief exists, near the title. */}
-          {briefContent != null && <BriefToggle view={view} onChange={setView} />}
+          {/* `Full · Brief` and `EN · ID` — each only when there is a choice, near the title. */}
+          {lv.showLanguageToggle ? (
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+              {lv.showViewToggle && <BriefToggle view={lv.selection.view} onChange={lv.setView} />}
+              <LanguageToggle language={lv.selection.language} onChange={lv.setLanguage} />
+            </div>
+          ) : (
+            // English only: the markup the Brief toggle always had.
+            lv.showViewToggle && <BriefToggle view={lv.selection.view} onChange={lv.setView} />
+          )}
 
           {/* Table of contents — inline collapsible below lg: only; the
               sticky sidebar takes over at lg:+. htmlContent is the caller's
@@ -219,16 +244,18 @@ export function LongformArticleShell({
               extraction works even when only TipTap JSON was passed.
               Hidden in the Brief view — it navigates headings the Brief
               does not have. */}
-          {!showBrief && <ArticleToc className="lg:hidden" content={htmlContent || tocHtml} />}
+          {!showBrief && <ArticleToc className="lg:hidden" content={lv.tocHtml} />}
 
-          {/* ── Body — the one thing the toggle switches. ── */}
-          <div className="longform-body">
-            <ArticleBody content={showBrief ? briefContent : content} />
+          {/* ── Body — the one thing the toggles switch. ── */}
+          <div lang={lv.lang} className="longform-body">
+            <ArticleBody content={lv.body} />
           </div>
 
           {/* End matter */}
-          {keyTakeaways && keyTakeaways.length > 0 && (
-            <KeyTakeaways takeaways={keyTakeaways} />
+          {f.keyTakeaways && f.keyTakeaways.length > 0 && (
+            <LangScope lang={lv.lang}>
+              <KeyTakeaways takeaways={f.keyTakeaways} />
+            </LangScope>
           )}
 
           {references && references.length > 0 && (
@@ -257,7 +284,7 @@ export function LongformArticleShell({
           <aside className="hidden lg:block py-16">
             {!showBrief && (
               <div className="sticky top-24">
-                <ArticleToc variant="sidebar" content={htmlContent || tocHtml} />
+                <ArticleToc variant="sidebar" content={lv.tocHtml} />
               </div>
             )}
           </aside>

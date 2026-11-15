@@ -37,12 +37,29 @@ export function publishedAt(value) {
 export function buildSitemap(pages, { origin }) {
   const home = `${origin}/`;
   const newest = pages.map(p => dayOf(p.updated)).filter(Boolean).sort().at(-1);
-  const url = (loc, lastmod) => `  <url><loc>${xml(loc)}</loc>${lastmod ? `<lastmod>${lastmod}</lastmod>` : ''}</url>`;
+  const url = (loc, lastmod, links = '') =>
+    `  <url><loc>${xml(loc)}</loc>${lastmod ? `<lastmod>${lastmod}</lastmod>` : ''}${links}</url>`;
+  // An essay with an Indonesian version (docs/prd/essay-language) is two
+  // pages, each naming both: Google's hreflang-in-sitemap form. With none,
+  // the bytes are exactly what they were before translations existed.
+  const bilingual = pages.some(p => p.idUrl);
+  const pair = p =>
+    `<xhtml:link rel="alternate" hreflang="en" href="${xml(p.url)}"/>` +
+    `<xhtml:link rel="alternate" hreflang="id" href="${xml(p.idUrl)}"/>` +
+    `<xhtml:link rel="alternate" hreflang="x-default" href="${xml(p.url)}"/>`;
   return [
     '<?xml version="1.0" encoding="UTF-8"?>',
-    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+    bilingual
+      ? '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">'
+      : '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
     url(home, newest),
-    ...[...pages].sort((a, b) => a.url.localeCompare(b.url)).map(p => url(p.url, dayOf(p.updated))),
+    ...[...pages]
+      .sort((a, b) => a.url.localeCompare(b.url))
+      .flatMap(p =>
+        p.idUrl
+          ? [url(p.url, dayOf(p.updated), pair(p)), url(p.idUrl, dayOf(p.updated), pair(p))]
+          : [url(p.url, dayOf(p.updated))],
+      ),
     '</urlset>',
     '',
   ].join('\n');

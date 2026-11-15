@@ -24,6 +24,8 @@ import { supabase } from '@/integrations/supabase/client';
 import {
   AUTOSAVE_DEBOUNCE_MS,
   autosaveTypeForBody,
+  bodyForChangeType,
+  bodyMayPersistRow,
   canAutosave,
   changeTypesForBody,
   docsDiffer,
@@ -125,10 +127,7 @@ export async function writeRevision(
   ownRevisionId: string | null,
 ): Promise<string> {
   const doc = input.doc as unknown as null;
-  const body: RevisionBody =
-    input.changeType === 'brief_autosave' || input.changeType === 'brief_manual_save'
-      ? 'brief'
-      : 'long';
+  const body: RevisionBody = bodyForChangeType(input.changeType);
 
   // Rollup candidacy is judged against the newest revision OF THIS BODY —
   // a Brief backup appending between two long autosaves must not stop the
@@ -278,8 +277,9 @@ export function useEssayAutosave({
   // The promise of the write currently in flight, so flush() can settle it
   // before a manual save guards on the row's updated_at.
   const inFlightPromise = useRef<Promise<void> | null>(null);
-  // A Brief autosave never writes the essays row, whatever the caller says.
-  const persistRow = body === 'brief' ? false : persistToEssay;
+  // A Brief or translation autosave never writes the essays row, whatever the
+  // caller says: only the never-published English long body may.
+  const persistRow = bodyMayPersistRow(body) ? persistToEssay : false;
 
   // Latest values, so the debounced callback never closes over stale state.
   const latestArgs = useRef({

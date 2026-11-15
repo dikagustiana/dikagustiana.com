@@ -13,7 +13,7 @@
  * Slug is globally unique, so the lookup needs nothing else.
  */
 
-import { useParams, Navigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { LoadingState, ErrorState } from '@/components/states';
@@ -23,6 +23,8 @@ import { resolvePresentation, type EssayPresentation } from '@/lib/presentation'
 import { essayUrl, universalEssayUrl } from '@/lib/essayUrl';
 import { sectionLabel } from '@/lib/sectionLabels';
 import NotFound from './NotFound';
+import { useEssayTranslationState } from '@/hooks/queries/useEssayTranslation';
+import { EssayRedirect } from '@/components/editorial/EssayRedirect';
 
 interface Row {
   id: string;
@@ -86,6 +88,9 @@ export default function EssayBySlug() {
   const essay = data?.row ?? null;
   const foundByCode = data?.byCode ?? false;
 
+  // The Indonesian version, if one is published (docs/prd/essay-language). Called
+  // before any early return; the shell shows EN · ID only when it exists.
+  const translation = useEssayTranslationState(essay?.id);
   if (isLoading) return <LoadingState />;
   // A failed fetch is not a missing essay — an outage rendered as 404 tells
   // the reader (and the owner) the essay is gone when it is fine.
@@ -118,10 +123,10 @@ export default function EssayBySlug() {
   // old curriculum code redirects even without placement — /essays/<code> is
   // never an address, /essays/<slug> is.
   if (canonical && canonical !== universalEssayUrl(essay.slug)) {
-    return <Navigate to={canonical} replace />;
+    return <EssayRedirect to={canonical} />;
   }
   if (foundByCode) {
-    return <Navigate to={universalEssayUrl(essay.slug)} replace />;
+    return <EssayRedirect to={universalEssayUrl(essay.slug)} />;
   }
 
   const presentation = resolvePresentation(essay);
@@ -146,6 +151,7 @@ export default function EssayBySlug() {
       content={essay.content || ''}
       htmlContent={contentToHtml(essay.content || '')}
       brief={essay.brief_json}
+      translation={translation}
       keyTakeaways={presentation.key_takeaways}
       references={presentation.references}
       authorBio={presentation.author_bio}

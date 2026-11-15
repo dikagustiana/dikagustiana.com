@@ -2,6 +2,8 @@ import { describe, it, expect } from 'vitest';
 import {
   REVISION_ROLLUP_MS,
   autosaveTypeForBody,
+  bodyForChangeType,
+  bodyMayPersistRow,
   canAutosave,
   canonicalJson,
   changeTypesForBody,
@@ -10,6 +12,7 @@ import {
   isEmptyDoc,
   nextRevisionNo,
   shouldRollUpRevision,
+  type RevisionBody,
   type RevisionSummary,
 } from '@/lib/revisions';
 
@@ -226,4 +229,61 @@ describe('cross-body fences', () => {
     const ours = revision({ change_type: 'brief_manual_save' });
     expect(shouldRollUpRevision(ours, 'r1', NOW, 'brief_autosave')).toBe(false);
   });
+});
+
+// ── The Indonesian translation's two bodies (docs/prd/essay-language
+//    04-PENULIS.md §D4): four bodies now share the table, and each recovery
+//    probe and rollup must see only its own. ──
+
+describe('four bodies', () => {
+  const BODIES: RevisionBody[] = ['long', 'brief', 'id_long', 'id_brief'];
+  const doc = { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'x' }] }] };
+
+  it('partitions every change type into exactly one body', () => {
+    const seen = new Map<string, RevisionBody>();
+    for (const body of BODIES) {
+      for (const t of changeTypesForBody(body)) {
+        expect(seen.get(t), `${t} in two bodies`).toBeUndefined();
+        seen.set(t, body);
+        expect(bodyForChangeType(t)).toBe(body);
+      }
+    }
+    expect(changeTypesForBody('id_long')).toEqual(['id_autosave', 'id_manual_save', 'id_publish', 'id_unpublish', 'id_rollback']);
+    expect(changeTypesForBody('id_brief')).toEqual(['id_brief_autosave', 'id_brief_manual_save']);
+  });
+
+  it('each body autosaves under its own type, which belongs to it', () => {
+    for (const body of BODIES) expect(bodyForChangeType(autosaveTypeForBody(body))).toBe(body);
+  });
+
+  it('the existing bodies keep their types unchanged', () => {
+    expect(changeTypesForBody('long')).toEqual(['create', 'autosave', 'manual_save', 'publish', 'unpublish', 'rollback', 'migration']);
+    expect(changeTypesForBody('brief')).toEqual(['brief_autosave', 'brief_manual_save']);
+  });
+
+  it('an unknown type falls to long, and still cannot roll up another body', () => {
+    expect(bodyForChangeType('nonsense')).toBe('long');
+  });
+
+  it('only the English long body may write its own row on autosave', () => {
+    expect(BODIES.filter(bodyMayPersistRow)).toEqual(['long']);
+  });
+
+  // Every body's backup, offered to every other body's recovery probe: only
+  // the diagonal is ever a candidate.
+  for (const backupBody of BODIES) {
+    for (const probeBody of BODIES) {
+      const same = backupBody === probeBody;
+      it(`a ${backupBody} backup ${same ? 'IS' : 'is never'} a ${probeBody} recovery candidate`, () => {
+        const backup = revision({ change_type: autosaveTypeForBody(backupBody), content_json: doc });
+        const got = findRecoveryCandidate(backup, null, autosaveTypeForBody(probeBody));
+        if (same) expect(got).not.toBeNull();
+        else expect(got).toBeNull();
+      });
+      it(`a ${probeBody} autosave ${same ? 'rolls up' : 'never rolls up'} our own recent ${backupBody} row`, () => {
+        const ours = revision({ change_type: autosaveTypeForBody(backupBody) });
+        expect(shouldRollUpRevision(ours, 'r1', NOW, autosaveTypeForBody(probeBody))).toBe(same);
+      });
+    }
+  }
 });

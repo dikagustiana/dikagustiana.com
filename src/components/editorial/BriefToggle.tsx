@@ -10,8 +10,11 @@
  */
 
 import { cn } from '@/lib/utils';
+import type { EssayView } from '@/lib/essayLanguage';
 
-export type EssayView = 'full' | 'brief';
+// The view type lives with the language rules now (src/lib/essayLanguage.ts);
+// re-exported so existing imports keep working.
+export type { EssayView };
 
 interface BriefToggleProps {
   view: EssayView;

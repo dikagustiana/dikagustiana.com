@@ -1,6 +1,6 @@
 import NotFound from './NotFound';
 import { resolvePresentation, type EssayPresentation } from '@/lib/presentation';
-import { Navigate, useLocation, useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -10,6 +10,8 @@ import { ArticleShell, ArticleLayout } from '@/components/editorial';
 import { contentToHtml } from '@/lib/tiptap/serialize';
 import { essayUrl, universalEssayUrl } from '@/lib/essayUrl';
 import { isPublished } from '@/lib/publication';
+import { useEssayTranslationState } from '@/hooks/queries/useEssayTranslation';
+import { EssayRedirect } from '@/components/editorial/EssayRedirect';
 
 interface Essay {
   id: string;
@@ -106,6 +108,10 @@ export default function GreenTransitionEssayPage() {
     }
   };
 
+  // The Indonesian version, if one is published (docs/prd/essay-language). Called
+  // before any early return; the shell shows EN · ID only when it exists.
+  const translation = useEssayTranslationState(essay?.id);
+
   // Siblings are the essay's own phase, read the way the phase page reads it
   // (section + phase, newest first). They used to come from category_id, but
   // Green Transition has no categories of its own: its essays carry the
@@ -183,10 +189,10 @@ export default function GreenTransitionEssayPage() {
     phase: essay.phase,
   });
   if (canonical && canonical !== pathname) {
-    return <Navigate to={canonical} replace />;
+    return <EssayRedirect to={canonical} />;
   }
   if (!canonical) {
-    return <Navigate to={universalEssayUrl(essay.slug)} replace />;
+    return <EssayRedirect to={universalEssayUrl(essay.slug)} />;
   }
 
   // From here on, placement comes from the row. `phase` (the URL param) is
@@ -238,6 +244,7 @@ export default function GreenTransitionEssayPage() {
       content={essay.content || ''}
       htmlContent={htmlContent}
       brief={essay.brief_json}
+      translation={translation}
       keyTakeaways={presentation.key_takeaways}
       references={presentation.references}
       authorBio={presentation.author_bio}

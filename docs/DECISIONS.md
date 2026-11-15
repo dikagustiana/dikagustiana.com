@@ -5,6 +5,41 @@ alternatives. Newest first.
 
 ---
 
+# 2026-11-15 — An Indonesian version per essay (EN · ID)
+
+Owner request, 15 November 2026: a language choice on each essay, beside Full · Brief, because
+the owner also writes brief and long versions. Not a translated site: menus, lists and cards stay
+English. Work packages and the build report: docs/prd/essay-language/.
+
+- **A table, not columns.** `essay_translations`, one row per essay per locale ('id' only). The
+  Brief is a column because saving a Brief is publishing it; a translation has a draft life while
+  its essay is live, and RLS is per row. A draft in a column of a published essays row would be
+  readable through the API. Anon reads a translation only when it and its essay are published.
+- **Revisions by change_type.** `id_autosave … id_rollback`, `id_brief_autosave`,
+  `id_brief_manual_save`, beside the Brief's. Every reader already filters by change_type, so the
+  English recovery probes cannot see them. `bodyForChangeType` now maps all four bodies; before it,
+  writeRevision would have judged an `id_autosave` burst against the English long body and never
+  rolled it up.
+- **Translation autosave is backup-only, always.** The package proposed writing the row while a
+  draft, as the English long body does. Rejected for the Brief's reason: one uniform rule beats two,
+  and recovery already covers a dead tab.
+- **The language lives in the address, `?lang=id`;** the view (Full · Brief) stays client state as
+  before. Canonical keeps `?lang=id` and nothing else; hreflang names both versions; the sitemap
+  lists a `?lang=id` twin. Canonical redirects keep `?lang=id` (`EssayRedirect`).
+- **English-only essays render byte-identical markup.** Checked against main's shells for all eight
+  combinations of Brief / translation prop / `?lang=id`. Wrappers that exist only to carry
+  `lang="id"` render nothing in English (`LangScope`).
+- **`<html lang>` by effect, not Helmet.** Helmet removes an attribute it managed on unmount, which
+  would strip index.html's `lang="en"` from every page after an Indonesian essay.
+- **A missing table warns the build instead of failing it,** so code merged before the migration
+  cannot break deploys. Any other read failure still fails the build.
+- **Known limits.** A shared `?lang=id` link's WhatsApp card is English (static HTML cannot vary by
+  query). Foundations of Knowing essays have no toggle (own page, no shared shell). Shell labels
+  (Key takeaways, References, Full, Brief) stay English. The reference-annotation filter matches an
+  English "References" heading only.
+
+---
+
 # 2026-10-30 — Glimpse: three pinned columns beside the running row
 
 Owner request, 30 October 2026.

@@ -28,6 +28,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
+import { useTranslationStatuses } from '@/hooks/queries/useEssayTranslation';
 import {
   Eye,
   EyeOff,
@@ -104,6 +105,8 @@ export default function AdminContent() {
     search: searchQuery,
   });
   const { data: stats, refetch: refetchStats, isError: statsError } = useContentStats();
+  // Each essay's Indonesian version, for the badge beside its title (docs/prd/essay-language).
+  const { data: translationStatus } = useTranslationStatuses();
   const togglePublish = useTogglePublishContent();
   const toggleSelect = useToggleSelectContent();
   const deleteContent = useDeleteContent();
@@ -397,6 +400,28 @@ export default function AdminContent() {
                           FSLI
                         </Badge>
                       )}
+                      {/* The Indonesian version: its state when one exists,
+                          else an "add" link that appears on hover like the
+                          row's other actions. Either opens its editor. */}
+                      {isEssay && (() => {
+                        const tr = translationStatus?.get(item.id);
+                        return (
+                          <Link
+                            to={`/admin/writer/${item.section}/${item.slug}/id`}
+                            data-translation-badge={tr ? (tr.published ? 'live' : 'draft') : 'none'}
+                            title={tr ? 'Edit the Indonesian version' : 'Write an Indonesian version'}
+                            className={
+                              tr
+                                ? 'shrink-0'
+                                : 'shrink-0 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity'
+                            }
+                          >
+                            <Badge variant={tr?.published ? 'default' : 'outline'} className="text-xs">
+                              {tr ? (tr.published ? 'ID live' : 'ID draft') : '+ ID'}
+                            </Badge>
+                          </Link>
+                        );
+                      })()}
                     </div>
                     <div className="flex items-center gap-3 text-xs text-muted-foreground">
                       <span className="capitalize">{sectionLabel}</span>

@@ -35,30 +35,62 @@ export type RevisionChangeType =
   | 'rollback'
   | 'migration'
   | 'brief_autosave'
-  | 'brief_manual_save';
+  | 'brief_manual_save'
+  // The Indonesian translation (essay_translations), long body and Brief.
+  | 'id_autosave'
+  | 'id_manual_save'
+  | 'id_publish'
+  | 'id_unpublish'
+  | 'id_rollback'
+  | 'id_brief_autosave'
+  | 'id_brief_manual_save';
 
 /**
- * Which body a revision row describes. Brief revisions share the table and
- * the content_json column with long-body revisions, namespaced by
- * change_type (docs/DECISIONS.md, "Brief revisions coexist…"). Every reader
- * MUST scope to one body: a long-body recovery probe that picked up a
- * `brief_autosave` row would offer to replace the 26,000-character essay
- * with its 600-word Brief.
+ * Which body a revision row describes. Brief and translation revisions share
+ * the table and the content_json column with long-body revisions, namespaced
+ * by change_type (docs/DECISIONS.md, "Brief revisions coexist…";
+ * docs/prd/essay-language/01-DATA.md §A3). Every reader MUST scope to one
+ * body: a long-body recovery probe that picked up a `brief_autosave` or an
+ * `id_autosave` row would offer to replace the 26,000-character English essay
+ * with its Brief or its translation.
  */
-export type RevisionBody = 'long' | 'brief';
+export type RevisionBody = 'long' | 'brief' | 'id_long' | 'id_brief';
 
 export const BRIEF_CHANGE_TYPES: readonly string[] = ['brief_autosave', 'brief_manual_save'];
 
+const CHANGE_TYPES: Record<RevisionBody, readonly RevisionChangeType[]> = {
+  long: ['create', 'autosave', 'manual_save', 'publish', 'unpublish', 'rollback', 'migration'],
+  brief: ['brief_autosave', 'brief_manual_save'],
+  id_long: ['id_autosave', 'id_manual_save', 'id_publish', 'id_unpublish', 'id_rollback'],
+  id_brief: ['id_brief_autosave', 'id_brief_manual_save'],
+};
+
 /** The change types belonging to a body — the filter every reader applies. */
 export function changeTypesForBody(body: RevisionBody): readonly string[] {
-  return body === 'brief'
-    ? BRIEF_CHANGE_TYPES
-    : ['create', 'autosave', 'manual_save', 'publish', 'unpublish', 'rollback', 'migration'];
+  return CHANGE_TYPES[body];
 }
 
 /** The autosave change type for a body (rollup compares against this). */
 export function autosaveTypeForBody(body: RevisionBody): RevisionChangeType {
-  return body === 'brief' ? 'brief_autosave' : 'autosave';
+  return ({ long: 'autosave', brief: 'brief_autosave', id_long: 'id_autosave', id_brief: 'id_brief_autosave' } as const)[body];
+}
+
+/**
+ * The body a change type belongs to. writeRevision judges rollup against the
+ * newest revision OF THIS BODY, so the mapping must be total: an unknown type
+ * falls to 'long', which can never roll up into another body's row because
+ * rollup also compares the exact autosave type.
+ */
+export function bodyForChangeType(changeType: string): RevisionBody {
+  for (const body of Object.keys(CHANGE_TYPES) as RevisionBody[]) {
+    if ((CHANGE_TYPES[body] as readonly string[]).includes(changeType)) return body;
+  }
+  return 'long';
+}
+
+/** True for the bodies whose autosave may write their own row (only the never-published long essay). */
+export function bodyMayPersistRow(body: RevisionBody): boolean {
+  return body === 'long';
 }
 
 /** The subset of an `essay_revisions` row the decision logic needs. */

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link2, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { languageQuery } from '@/lib/essayLanguage';
 
 export type LinkableHeadingLevel = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
 
@@ -23,7 +24,7 @@ export function LinkableHeading({ id, level, children, className, textAlign }: L
   const [copied, setCopied] = useState(false);
 
   const handleCopyLink = async () => {
-    const url = `${window.location.origin}${window.location.pathname}#${id}`;
+    const url = `${window.location.origin}${window.location.pathname}${languageQuery(window.location.search)}#${id}`;
     try {
       await navigator.clipboard.writeText(url);
       setCopied(true);
