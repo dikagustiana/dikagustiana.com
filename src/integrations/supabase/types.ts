@@ -755,6 +755,69 @@ export type Database = {
         }
         Relationships: []
       }
+      essay_translations: {
+        Row: {
+          brief_json: Json | null
+          content_json: Json | null
+          created_at: string
+          essay_id: string
+          id: string
+          locale: string
+          presentation: Json | null
+          published: boolean
+          published_at: string | null
+          read_time: string | null
+          snippet: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          brief_json?: Json | null
+          content_json?: Json | null
+          created_at?: string
+          essay_id: string
+          id?: string
+          locale: string
+          presentation?: Json | null
+          published?: boolean
+          published_at?: string | null
+          read_time?: string | null
+          snippet?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          brief_json?: Json | null
+          content_json?: Json | null
+          created_at?: string
+          essay_id?: string
+          id?: string
+          locale?: string
+          presentation?: Json | null
+          published?: boolean
+          published_at?: string | null
+          read_time?: string | null
+          snippet?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "essay_translations_essay_id_fkey"
+            columns: ["essay_id"]
+            isOneToOne: false
+            referencedRelation: "essay_structure"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "essay_translations_essay_id_fkey"
+            columns: ["essay_id"]
+            isOneToOne: false
+            referencedRelation: "essays"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       essay_revisions: {
         Row: {
           change_summary: string | null
