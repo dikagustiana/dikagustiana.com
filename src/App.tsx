@@ -95,6 +95,7 @@ const AdminEditorRedirect = lazy(() => import("./pages/AdminEditorRedirect"));
 const WriterEditorPage = lazy(() => import("./pages/WriterEditorPage"));
 const WriterListPage = lazy(() => import("./pages/WriterListPage"));
 const BriefEditorPage = lazy(() => import("./pages/BriefEditorPage"));
+const TranslationEditorPage = lazy(() => import("./pages/TranslationEditorPage"));
 
 // Canonical Writer Studio (lazy-loaded)
 const WriterStudio = lazy(() => import("./domains/writing/WriterStudio"));
@@ -330,6 +331,7 @@ const App = () => (
             {/* The Brief companion's own surface — a separate component by
                 design: it never mounts an editable long body. */}
             <Route path="/admin/writer/:section/:slug/brief" element={<RequireAdmin><BriefEditorPage /></RequireAdmin>} />
+            <Route path="/admin/writer/:section/:slug/id" element={<RequireAdmin><TranslationEditorPage /></RequireAdmin>} />
 
             {/* Legacy admin editor routes → redirect to Writer Studio */}
             <Route path="/admin/content/:id" element={<RequireAdmin><AdminEditorRedirect /></RequireAdmin>} />

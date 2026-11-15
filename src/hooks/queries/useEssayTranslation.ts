@@ -49,3 +49,26 @@ export const useEssayTranslationState = (essayId: string | null | undefined): Tr
   const q = useEssayTranslation(essayId);
   return { data: q.data ?? null, loading: q.isLoading };
 };
+
+/**
+ * Admin: every essay's Indonesian status, for the Writer's Desk badges.
+ * Two small columns, no bodies. A failed read (e.g. before the table exists)
+ * is an empty map, so the desk renders as it always did.
+ */
+export const useTranslationStatuses = (enabled = true) => {
+  return useQuery({
+    queryKey: ['translation-status'],
+    queryFn: async (): Promise<Map<string, { published: boolean }>> => {
+      const { data, error } = await supabase
+        .from('essay_translations')
+        .select('essay_id, published')
+        .eq('locale', 'id');
+      if (error) {
+        console.warn('[essay-translation] status read failed', error.message);
+        return new Map();
+      }
+      return new Map((data ?? []).map((r) => [r.essay_id, { published: r.published }]));
+    },
+    enabled,
+  });
+};

@@ -731,6 +731,21 @@ export function WriterEditor({ section, essayId, initialSlug }: WriterEditorProp
           </span>
 
           <div className="flex shrink-0 items-center gap-1">
+            {/* The Indonesian version (docs/prd/essay-language), once the
+                essay row exists. A new tab, so leaving never strands unsaved
+                English text in this one. */}
+            {essayDbId && slug && (
+              <Button
+                asChild
+                variant="ghost"
+                size="sm"
+                className="hidden px-2 text-muted-foreground hover:text-foreground sm:inline-flex sm:px-3"
+              >
+                <a href={`/admin/writer/${section}/${slug}/id`} target="_blank" rel="noopener noreferrer" title="Write or edit the Indonesian version">
+                  Indonesian
+                </a>
+              </Button>
+            )}
             <Button
               variant="ghost"
               size="sm"
