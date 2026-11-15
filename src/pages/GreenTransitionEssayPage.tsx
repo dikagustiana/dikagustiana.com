@@ -1,6 +1,6 @@
 import NotFound from './NotFound';
 import { resolvePresentation, type EssayPresentation } from '@/lib/presentation';
-import { Navigate, useLocation, useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -11,6 +11,7 @@ import { contentToHtml } from '@/lib/tiptap/serialize';
 import { essayUrl, universalEssayUrl } from '@/lib/essayUrl';
 import { isPublished } from '@/lib/publication';
 import { useEssayTranslationState } from '@/hooks/queries/useEssayTranslation';
+import { EssayRedirect } from '@/components/editorial/EssayRedirect';
 
 interface Essay {
   id: string;
@@ -188,10 +189,10 @@ export default function GreenTransitionEssayPage() {
     phase: essay.phase,
   });
   if (canonical && canonical !== pathname) {
-    return <Navigate to={canonical} replace />;
+    return <EssayRedirect to={canonical} />;
   }
   if (!canonical) {
-    return <Navigate to={universalEssayUrl(essay.slug)} replace />;
+    return <EssayRedirect to={universalEssayUrl(essay.slug)} />;
   }
 
   // From here on, placement comes from the row. `phase` (the URL param) is

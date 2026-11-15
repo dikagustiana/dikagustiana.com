@@ -13,7 +13,7 @@
  * Slug is globally unique, so the lookup needs nothing else.
  */
 
-import { useParams, Navigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { LoadingState, ErrorState } from '@/components/states';
@@ -24,6 +24,7 @@ import { essayUrl, universalEssayUrl } from '@/lib/essayUrl';
 import { sectionLabel } from '@/lib/sectionLabels';
 import NotFound from './NotFound';
 import { useEssayTranslationState } from '@/hooks/queries/useEssayTranslation';
+import { EssayRedirect } from '@/components/editorial/EssayRedirect';
 
 interface Row {
   id: string;
@@ -122,10 +123,10 @@ export default function EssayBySlug() {
   // old curriculum code redirects even without placement — /essays/<code> is
   // never an address, /essays/<slug> is.
   if (canonical && canonical !== universalEssayUrl(essay.slug)) {
-    return <Navigate to={canonical} replace />;
+    return <EssayRedirect to={canonical} />;
   }
   if (foundByCode) {
-    return <Navigate to={universalEssayUrl(essay.slug)} replace />;
+    return <EssayRedirect to={universalEssayUrl(essay.slug)} />;
   }
 
   const presentation = resolvePresentation(essay);

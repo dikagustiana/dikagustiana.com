@@ -12,7 +12,7 @@
 import NotFound from './NotFound';
 import { resolvePresentation, type EssayPresentation } from '@/lib/presentation';
 import { universalEssayUrl } from '@/lib/essayUrl';
-import { useParams, Navigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -23,6 +23,7 @@ import { LongformArticleShell } from '@/components/editorial/LongformArticleShel
 import { contentToHtml } from '@/lib/tiptap/serialize';
 import { isPublished } from '@/lib/publication';
 import { useEssayTranslationState } from '@/hooks/queries/useEssayTranslation';
+import { EssayRedirect } from '@/components/editorial/EssayRedirect';
 
 interface Essay {
   id: string;
@@ -192,10 +193,10 @@ export default function FinanceEssayPage() {
   if (!canonicalTrack) {
     // No track placement means no /finance home — the universal route
     // renders unplaced essays.
-    return <Navigate to={universalEssayUrl(essay.slug)} replace />;
+    return <EssayRedirect to={universalEssayUrl(essay.slug)} />;
   }
   if (canonicalTrack !== track || foundByCode) {
-    return <Navigate to={`/finance/${canonicalTrack}/${essay.slug}`} replace />;
+    return <EssayRedirect to={`/finance/${canonicalTrack}/${essay.slug}`} />;
   }
 
   const currentIndex = siblings?.findIndex((e) => e.slug === essay.slug) ?? -1;
