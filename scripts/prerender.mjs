@@ -23,7 +23,7 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
-import { fetchPublishedEssays } from './lib/publishedEssays.mjs';
+import { fetchPublishedEssays, fetchTranslatedSlugs } from './lib/publishedEssays.mjs';
 import { essayShareImage } from '../src/lib/shareImage.mjs';
 import { FEED_SIZE, buildFeed, buildSitemap } from './lib/siteFeeds.mjs';
 
@@ -97,6 +97,21 @@ if (!Array.isArray(essays) || essays.length === 0) {
   process.exit(1);
 }
 
+// Essays with a published Indonesian version (docs/prd/essay-language): their
+// page gets hreflang tags and the sitemap a second, ?lang=id entry. Loud on
+// failure, except a table that does not exist yet (see fetchTranslatedSlugs).
+let translated;
+try {
+  const r = await fetchTranslatedSlugs({ supabaseUrl: SUPABASE_URL, key: KEY });
+  if (r.tableMissing) {
+    console.warn('prerender: WARNING essay_translations does not exist yet — no Indonesian versions listed (apply 20261115120000_essay_translations)');
+  }
+  translated = r.slugs;
+} catch (error) {
+  console.error(`prerender: ${error.message}`);
+  process.exit(1);
+}
+
 const template = fs.readFileSync(path.join(DIST, 'index.html'), 'utf8');
 
 // Loaded only now, past the skip above: a keyless CI build never loads the
@@ -131,6 +146,16 @@ for (const essay of essays) {
     continue;
   }
   const url = `${SITE_ORIGIN}${p}`;
+  const idUrl = translated.has(essay.slug) ? `${url}?lang=id` : null;
+  // The same three tags SEO.tsx writes after hydration, so the raw HTML and
+  // the hydrated head agree. None for an English-only essay.
+  const hreflangTags = idUrl
+    ? [
+        `<link rel="alternate" hreflang="en" href="${esc(url)}" />`,
+        `<link rel="alternate" hreflang="id" href="${esc(idUrl)}" />`,
+        `<link rel="alternate" hreflang="x-default" href="${esc(url)}" />`,
+      ]
+    : [];
   // Collapse whitespace before truncating. A deck typed with a trailing
   // newline ends up INSIDE the content attribute of four meta tags and the
   // canonical description, which is visible in the production HTML today:
@@ -198,6 +223,7 @@ for (const essay of essays) {
   html = html.replace(
     '<meta name="twitter:card" content="summary_large_image" />',
     `<meta name="twitter:card" content="summary_large_image" />\n    <link rel="canonical" href="${esc(url)}" />` +
+      hreflangTags.map(t => `\n    ${t}`).join('') +
       (essay.date || essay.created_at
         ? `\n    <meta property="article:published_time" content="${esc(essay.date || essay.created_at)}" />`
         : '') +
@@ -217,9 +243,10 @@ for (const essay of essays) {
       `<meta name="twitter:image" content="${esc(image)}" />`,
       ...imageTags,
       `<link rel="canonical" href="${esc(url)}" />`,
+      ...hreflangTags,
     ],
   });
-  listed.push({ url, title: essay.title, deck, published: essay.date || essay.created_at, updated: essay.updated_at });
+  listed.push({ url, idUrl, title: essay.title, deck, published: essay.date || essay.created_at, updated: essay.updated_at });
   console.log(`prerender: ${p}`);
 }
 
@@ -274,7 +301,9 @@ fs.writeFileSync(path.join(DIST, 'rss.xml'), buildFeed(listed, { origin: SITE_OR
 // <item> per written page up to the feed's size.
 const urlCount = (fs.readFileSync(path.join(DIST, 'sitemap.xml'), 'utf8').match(/<url>/g) ?? []).length;
 const itemCount = (fs.readFileSync(path.join(DIST, 'rss.xml'), 'utf8').match(/<item>/g) ?? []).length;
-if (urlCount !== written + 1 || itemCount !== Math.min(FEED_SIZE, written)) {
+// An essay with an Indonesian version is two <url>s (its ?lang=id twin).
+const twins = listed.filter(p => p.idUrl).length;
+if (urlCount !== written + 1 + twins || itemCount !== Math.min(FEED_SIZE, written)) {
   console.error(`prerender: sitemap has ${urlCount} url(s) and the feed ${itemCount} item(s) for ${written} written page(s)`);
   process.exit(1);
 }

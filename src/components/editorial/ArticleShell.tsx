@@ -233,6 +233,7 @@ export function ArticleShell({
             <SEO
               title={f.seoTitle}
               description={f.seoDescription}
+              {...lv.seo}
               type="article"
               author={seoAuthor || author || 'Dika Gustiana'}
               // The og:image the prerender wrote into this page's raw HTML

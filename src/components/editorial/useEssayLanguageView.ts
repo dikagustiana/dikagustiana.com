@@ -15,6 +15,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { parseBriefDoc, isEmptyBrief } from '@/lib/brief';
 import { contentToHtml } from '@/lib/tiptap/serialize';
+import { SITE_ORIGIN } from '@/lib/siteOrigin';
 import {
   essayCells,
   localizeShellFields,
@@ -103,8 +104,16 @@ export function useEssayLanguageView({ content, tocHtml, brief, english, transla
 
   const fields = useMemo(() => localizeShellFields(english, data, selection.language), [english, data, selection.language]);
 
+  // hreflang pair, for an essay that has both versions. Production origin,
+  // path only, as the canonical URL is built (SEO.tsx).
+  const alternates = cells.id
+    ? { en: `${SITE_ORIGIN}${location.pathname}`, id: `${SITE_ORIGIN}${location.pathname}?lang=id` }
+    : undefined;
+
   return {
     selection,
+    /** SEO props: set only when the essay has an Indonesian version, so English-only pages keep their head unchanged. */
+    seo: cells.id ? { lang: selection.language, alternates } : {},
     setView,
     setLanguage,
     fields,

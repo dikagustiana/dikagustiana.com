@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { SITE_ORIGIN, absoluteUrl } from '@/lib/siteOrigin';
 
@@ -13,6 +14,15 @@ interface SEOProps {
   modifiedTime?: string;
   /** When true, ask crawlers not to index this page (admin/utility surfaces). */
   noindex?: boolean;
+  /**
+   * The language this page is shown in (docs/prd/essay-language/05-SEO-BUILD.md).
+   * 'id' sets <html lang="id">, og:locale id_ID, and a canonical URL that
+   * keeps `?lang=id`, so the two versions are two pages to a crawler.
+   * Omitted: exactly the tags this component always wrote.
+   */
+  lang?: 'en' | 'id';
+  /** Both versions' absolute URLs, for hreflang. Only for an essay that has both. */
+  alternates?: { en: string; id: string };
 }
 
 const SITE_NAME = "Dika Gustiana";
@@ -31,6 +41,8 @@ export function SEO({
   publishedTime,
   modifiedTime,
   noindex = false,
+  lang,
+  alternates,
 }: SEOProps) {
   const fullTitle = `${title} | ${SITE_NAME}`;
   // Whitespace collapsed before truncating, for the same reason the prerender
@@ -45,8 +57,27 @@ export function SEO({
   const absoluteImage = absoluteUrl(image);
   // Canonicalise to the PRODUCTION origin + path (no query/hash) — using
   // window.location.origin baked preview hostnames into canonical/og:url.
+  // The one query a canonical keeps is ?lang=id: the Indonesian version is its
+  // own page, not a duplicate of the English one.
   const canonicalUrl =
-    url ?? (typeof window !== 'undefined' ? SITE_ORIGIN + window.location.pathname : undefined);
+    url ??
+    (typeof window !== 'undefined'
+      ? SITE_ORIGIN + window.location.pathname + (lang === 'id' ? '?lang=id' : '')
+      : undefined);
+
+  // <html lang>, set directly and restored on the way out. Not through
+  // Helmet: on unmount it REMOVES an attribute it managed, which would strip
+  // index.html's lang="en" from every page after an Indonesian essay.
+  useEffect(() => {
+    if (!lang || typeof document === 'undefined') return;
+    const root = document.documentElement;
+    const before = root.getAttribute('lang');
+    root.setAttribute('lang', lang);
+    return () => {
+      if (before == null) root.removeAttribute('lang');
+      else root.setAttribute('lang', before);
+    };
+  }, [lang]);
 
   const jsonLd = type === 'article' ? {
     '@context': 'https://schema.org',
@@ -78,6 +109,12 @@ export function SEO({
       <meta name="description" content={truncatedDescription} />
       {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
       {noindex && <meta name="robots" content="noindex, nofollow" />}
+
+      {/* Language versions (hreflang) — only for an essay that has both. */}
+      {alternates && <link rel="alternate" hrefLang="en" href={alternates.en} />}
+      {alternates && <link rel="alternate" hrefLang="id" href={alternates.id} />}
+      {alternates && <link rel="alternate" hrefLang="x-default" href={alternates.en} />}
+      {lang && <meta property="og:locale" content={lang === 'id' ? 'id_ID' : 'en_US'} />}
 
       {/* Open Graph */}
       <meta property="og:type" content={type} />

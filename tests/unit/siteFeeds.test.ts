@@ -88,3 +88,35 @@ describe('rss.xml', () => {
     expect(feedItems([page(1, { published: null }), page(2)]).map(p => p.url)).toEqual([`${ORIGIN}/essays/essay-02`]);
   });
 });
+
+// docs/prd/essay-language/05-SEO-BUILD.md §E2: an essay with an Indonesian
+// version is two <url>s that name each other; an English-only sitemap is
+// byte-for-byte what it was.
+describe('sitemap.xml — Indonesian versions', () => {
+  it('without any translation the output is unchanged (no xhtml namespace, no links)', () => {
+    const out = buildSitemap([page(1), page(2)], { origin: ORIGIN });
+    expect(out).not.toContain('xhtml');
+    expect(out).toContain('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">');
+  });
+
+  it('a bilingual essay is two entries, each with the en / id / x-default triple', () => {
+    const idUrl = `${ORIGIN}/essays/essay-01?lang=id`;
+    const doc = parse(buildSitemap([page(1, { idUrl }), page(2)], { origin: ORIGIN }));
+    expect(text(doc, 'url > loc')).toEqual([`${ORIGIN}/`, `${ORIGIN}/essays/essay-01`, idUrl, `${ORIGIN}/essays/essay-02`]);
+    const urls = [...doc.getElementsByTagName('url')];
+    for (const u of urls.slice(1, 3)) {
+      const links = [...u.getElementsByTagNameNS('http://www.w3.org/1999/xhtml', 'link')].map(l => [l.getAttribute('hreflang'), l.getAttribute('href')]);
+      expect(links).toEqual([
+        ['en', `${ORIGIN}/essays/essay-01`],
+        ['id', idUrl],
+        ['x-default', `${ORIGIN}/essays/essay-01`],
+      ]);
+    }
+    expect(urls[3].getElementsByTagNameNS('http://www.w3.org/1999/xhtml', 'link')).toHaveLength(0);
+  });
+
+  it('escapes the ? and & of an Indonesian URL for XML', () => {
+    const out = buildSitemap([page(1, { idUrl: `${ORIGIN}/x?a=1&lang=id` })], { origin: ORIGIN });
+    expect(out).toContain('x?a=1&amp;lang=id');
+  });
+});
